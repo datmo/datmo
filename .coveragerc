@@ -1,0 +1,6 @@
+[report]
+omit =
+    */python?.?/*
+    */site-packages/pytest/*
+    *__init__*
+    *test*
