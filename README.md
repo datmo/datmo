@@ -1,7 +1,16 @@
-# datmo
+# Datmo
+[![Build Status](https://travis-ci.org/datmo/datmo.svg?branch=master)](https://travis-ci.org/datmo/datmo)
+[![Coverage Status](https://coveralls.io/repos/github/datmo/datmo/badge.svg?branch=master)](https://coveralls.io/github/datmo/datmo?branch=master)
+
+
 Open source model tracking tool for developers
 
-Coming March 2018 :) 
+### Table of Contents
+* [Introduction](#introduction)
+* [Requirements](#requirements)
+* [Installation](#installation)
+* [Documentation](#documentation)
+* [Testing](#testing)
 
 ## Introduction
 
@@ -17,7 +26,18 @@ In order to solve this challenge, we figured there were a few components we need
 
 We realized that we likely won't come up with the best solution on our own and thought it would make most sense to gather feedback from a community of like-minded individuals facing the same issue and develop an open protocol everyone can benefit from. 
 
-## Generate Docs
+## Requirements
+
+* [openssl](https://github.com/openssl/openssl/blob/master/INSTALL)
+* [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
+* [docker](https://docs.docker.com/engine/installation/)
+
+## Installation
+```
+$ python setup.py clean --all install
+```
+
+## Documentation
 ```
 $ pip install sphinx-argparse
 $ cd docs
@@ -29,12 +49,7 @@ $ pip install sphinx-rtd-theme
 $ pip install recommonmark
 ```
 
-## Installation from Source
-```
-$ python setup.py clean --all install
-```
-
-## Test out CLI
+## Testing
 ```
 $ pytest
 ```
