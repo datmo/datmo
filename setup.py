@@ -12,7 +12,7 @@ setup(
     author_email='developer@datmo.com',
     packages=find_packages(exclude=["templates.*", "*.tests",
                                     "*.tests.*", "tests.*", "tests"]),
-    url="https://datmo.com",
+    url="https://github.com/datmo/datmo",
     license='See LICENSE.txt',
     description='Open source model tracking tool for developers',
     classifiers=[
@@ -35,8 +35,6 @@ setup(
         "rsfile==2.1",
         "humanfriendly==3.6.1",
         "python-slugify==1.2.4",
-        "click-spinner==0.1.7",
-        "click-didyoumean==0.0.3",
         "giturlparse.py==0.0.5",
         "blitzdb==0.2.12",
         "kids.cache==0.0.7",

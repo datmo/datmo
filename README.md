@@ -34,6 +34,10 @@ We realized that we likely won't come up with the best solution on our own and t
 
 ## Installation
 ```
+# Clean up pycache and pyc libraries
+$ find . | grep -E "(__pycache__|\.pyc$)" | xargs rm -rf
+
+# Install the package and clean up all builds
 $ python setup.py clean --all install
 ```
 
@@ -51,7 +55,9 @@ $ pip install recommonmark
 
 ## Testing
 ```
-$ pytest
+$ pip install pytest pytest-cov
+$ pip install coveralls
+$ pytest --cov-config .coveragerc --cov=datmo
 ```
 
 
