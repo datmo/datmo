@@ -41,9 +41,10 @@ class TestGitManager():
         result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git", mode="http")
         assert result and os.path.exists(os.path.join(self.temp_dir, "hello-world", ".git"))
         shutil.rmtree(os.path.join(self.temp_dir, "hello-world"))
-        result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git", mode="ssh")
-        assert result and os.path.exists(os.path.join(self.temp_dir, "hello-world", ".git"))
-        shutil.rmtree(os.path.join(self.temp_dir, "hello-world"))
+        if self.git_code_manager.git_host_manager.ssh_enabled:
+            result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git", mode="ssh")
+            assert result and os.path.exists(os.path.join(self.temp_dir, "hello-world", ".git"))
+            shutil.rmtree(os.path.join(self.temp_dir, "hello-world"))
 
     def test_parse_git_url(self):
         parsed = self.git_code_manager._parse_git_url("https://github.com/datmo/hello-world.git", mode="ssh")
@@ -301,13 +302,13 @@ class TestGitHostManager():
     def test_ssh_git(self):
         hostm = GitHostManager(self.ssh_temp_dir)
         assert hostm.ssh_enabled == False
-        # If id_rsa is already present and used in remote git
-        if os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"):
-            shutil.copytree(
-                os.path.join(os.path.expanduser("~"), ".ssh"),
-                os.path.join(self.ssh_temp_dir,".ssh"))
-            assert os.path.exists(os.path.join(self.ssh_temp_dir, ".ssh", "id_rsa"))
-            hostm = GitHostManager(self.ssh_temp_dir)
-            assert hostm.ssh_enabled == True
+        # If id_rsa already synced with remote account
+        # if os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"):
+        #     shutil.copytree(
+        #         os.path.join(os.path.expanduser("~"), ".ssh"),
+        #         os.path.join(self.ssh_temp_dir,".ssh"))
+        #     assert os.path.exists(os.path.join(self.ssh_temp_dir, ".ssh", "id_rsa"))
+        #     hostm = GitHostManager(self.ssh_temp_dir)
+        #     assert hostm.ssh_enabled == True
 
 
