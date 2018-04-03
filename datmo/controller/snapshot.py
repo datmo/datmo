@@ -6,8 +6,8 @@ from datmo.util.exceptions import RequiredArgumentMissing, \
     FileIOException
 
 class SnapshotController(BaseController):
-    def __init__(self, home, cli_helper=CLIHelper()):
-        super(SnapshotController, self).__init__(home, cli_helper)
+    def __init__(self, home, cli_helper=CLIHelper(), dal_driver=None):
+        super(SnapshotController, self).__init__(home, cli_helper, dal_driver)
 
     def create(self, dictionary):
         """

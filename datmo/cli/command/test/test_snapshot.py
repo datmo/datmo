@@ -12,7 +12,6 @@ from __future__ import unicode_literals
 #     # Python 3
 #     import builtins as __builtin__
 
-import os
 import shutil
 import tempfile
 from datmo.cli.driver.cli_helper import CLIHelper
@@ -22,20 +21,20 @@ from datmo.cli.command.snapshot import Snapshot
 class TestSnapshot():
     def setup_class(self):
         self.temp_dir = tempfile.mkdtemp()
-        self.cli = CLIHelper()
-        self.init = Init(self.cli)
-        self.snapshot = Snapshot(self.cli)
+        self.cli_helper = CLIHelper()
+        self.init = Init(self.temp_dir, self.cli_helper)
+        self.init.parse([
+            "init",
+            "--name", "foobar",
+            "--description", "test model"])
+        self.init.execute()
+        self.snapshot = Snapshot(self.temp_dir, self.cli_helper,
+                                 self.init.controller.dal.driver)
 
     def teardown_class(self):
         shutil.rmtree(self.temp_dir)
 
     def test_datmo_snapshot_create(self):
-        self.init.parse([
-          "init",
-          "--name","foobar",
-          "--path",self.temp_dir,
-          "--description","test model"])
-        self.init.execute()
 
         test_message = "this is a test message"
         test_label = "test label"
@@ -62,7 +61,7 @@ class TestSnapshot():
             "--config-filepath", test_config_filepath,
             "--stats-filename", test_stats_filename,
             "--stats-filepath", test_stats_filepath,
-            "--filepaths", test_filepaths
+            "--filepaths", test_filepaths[0], test_filepaths[1]
         ])
 
         # test for desired side effects
@@ -80,12 +79,12 @@ class TestSnapshot():
 
 
     def test_datmo_snapshot_create_invalid_arg(self):
-        datmo_init = Init(self.cli)
         exception_thrown = False
         try:
-          datmo_init.parse([
-            "init",
+          self.snapshot.parse([
+            "snapshot",
+            "create"
             "--foobar","foobar"])
-        except Exception as ex:
+        except Exception:
             exception_thrown = True
         assert exception_thrown

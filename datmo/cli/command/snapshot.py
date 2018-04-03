@@ -1,7 +1,5 @@
-import os
 from datmo.cli.driver.cli_base_command import CLIBaseCommand
 from datmo.cli.driver.cli_argument_parser import CLIArgumentParser
-from datmo.controller.project import ProjectController
 from datmo.controller.snapshot import SnapshotController
 
 from datmo.util.exceptions import ProjectNotInitializedException
@@ -16,7 +14,7 @@ def get_parser():
     create = subcommand_parsers.add_parser("create", help="Create snapshot")
     create.add_argument("--message", "-m", dest="message", default="", help="Message to describe snapshot")
     create.add_argument("--label", "-l", dest="label", default="", help="Label snapshots with a category (e.g. best)")
-    create.add_argument("--session-id", dest="user_given_session_id", default="", help="User given session id")
+    create.add_argument("--session-id", dest="session_id", default="", help="User given session id")
 
     create.add_argument("--task-id", dest="task_id", default=None,
                         help="Specify task id to pull information from")
@@ -28,8 +26,8 @@ def get_parser():
     create.add_argument("--config-filename", dest="config_filename", default=None, help="Filename to use to search for configuration JSON")
     create.add_argument("--config-filepath", dest="config_filepath", default=None, help="Absolute filepath to use to search for configuration JSON")
 
-    create.add_argument("--stats-filename", dest="stats", default=None, help="Filename to use to search for metrics JSON")
-    create.add_argument("--stats-filepath", dest="stats", default=None, help="Absolute filepath to use to search for metrics JSON")
+    create.add_argument("--stats-filename", dest="stats_filename", default=None, help="Filename to use to search for metrics JSON")
+    create.add_argument("--stats-filepath", dest="stats_filepath", default=None, help="Absolute filepath to use to search for metrics JSON")
 
     create.add_argument("--filepaths", dest="filepaths", default=None, nargs="*",
                         help="Absolute paths to files or folders to include within the files of the snapshot")
@@ -76,20 +74,19 @@ def get_parser():
     return snapshot_parser
 
 class Snapshot(CLIBaseCommand):
-    def __init__(self, cli_helper):
-        self.project = ProjectController(home=os.getcwd(),
-                                         cli_helper=cli_helper)
-        if not self.project.is_initialized:
+    def __init__(self, home, cli_helper, dal_driver=None):
+        self.cli_helper = cli_helper
+        self.controller = SnapshotController(home=home,
+                                             cli_helper=cli_helper,
+                                             dal_driver=dal_driver)
+        if not self.controller.is_initialized:
             raise ProjectNotInitializedException("exception.cli.snapshot", {
                 "exception": "No project found in the current directory"
             })
 
-        self.controller = SnapshotController(home=self.project.home,
-                                             cli_helper=cli_helper)
-        super(Snapshot, self).__init__(cli_helper, get_parser())
+        super(Snapshot, self).__init__(self.cli_helper, get_parser())
 
     def create(self, **kwargs):
-        import pdb; pdb.set_trace()
         self.controller.create(**kwargs)
 
 

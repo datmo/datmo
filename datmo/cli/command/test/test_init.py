@@ -22,7 +22,7 @@ class TestInit():
     def setup_class(self):
         self.temp_dir = tempfile.mkdtemp()
         self.cli = CLIHelper()
-        self.init = Init(self.cli)
+        self.init = Init(self.temp_dir, self.cli)
 
     def teardown_class(self):
         shutil.rmtree(self.temp_dir)
@@ -31,7 +31,6 @@ class TestInit():
         self.init.parse([
           "init",
           "--name","foobar",
-          "--path",self.temp_dir,
           "--description","test model"])
         self.init.execute()
         # test for desired side effects

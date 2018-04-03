@@ -6,9 +6,9 @@ from datmo.cli.driver.cli_helper import CLIHelper
 from datmo.util.exceptions import TaskRunException
 
 class TaskController(BaseController):
-    def __init__(self, home, cli_helper=CLIHelper()):
-        self.snapshot = SnapshotController(home, cli_helper)
-        super(TaskController, self).__init__(home, cli_helper)
+    def __init__(self, home, cli_helper=CLIHelper(), dal_driver=None):
+        self.snapshot = SnapshotController(home, cli_helper, dal_driver)
+        super(TaskController, self).__init__(home, cli_helper, dal_driver)
 
     def create(self, dictionary):
         """ Create Task object

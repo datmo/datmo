@@ -1,13 +1,13 @@
 import datetime
-from .base import BaseController
+from datmo.controller.base import BaseController
 from datmo.cli.driver.cli_helper import CLIHelper
 from datmo.util.i18n import get as _
 from datmo.util.exceptions import SessionDoesNotExistException
 
 
 class ProjectController(BaseController):
-    def __init__(self, home, cli_helper=CLIHelper()):
-        super(ProjectController, self).__init__(home, cli_helper)
+    def __init__(self, home, cli_helper=CLIHelper(),  dal_driver=None):
+        super(ProjectController, self).__init__(home, cli_helper, dal_driver)
 
     def init(self, name, description):
         # Create the Model, is it new or update?

@@ -9,10 +9,11 @@ from datmo.util.exceptions import InvalidProjectPathException, \
 
 class BaseController(object):
 
-    def __init__(self, home, cli_helper=CLIHelper()):
+    def __init__(self, home, cli_helper=CLIHelper(), dal_driver=None):
         self.home = home
         self.cli_helper = cli_helper
-        # property caches and inital values
+        self.dal_driver = dal_driver
+        # property caches and initial values
         self._dal = None
         self._model = None
         self._current_session = None
@@ -29,7 +30,6 @@ class BaseController(object):
 
         self.settings = ProjectSettings(self.home)
         # TODO: is_initialized properties should be functions
-
 
     @property
     # TODO: Currently local for differnet controller objects do NOT sync within one session.
@@ -88,14 +88,15 @@ class BaseController(object):
 
     def dal_instantiate(self):
         # first load driver, then create DAL using driver
-        dal_driver_dict = self.config_loader("storage.local.driver")
-        if type(dal_driver_dict["options"]["driver_type"]) == str or \
-            type(dal_driver_dict["options"]["driver_type"]) == unicode:
-            dal_driver_dict["options"]["driver_type"] = DriverType[dal_driver_dict["options"]["driver_type"]]
-        dal_driver = dal_driver_dict["constructor"](**dal_driver_dict["options"])
+        if not self.dal_driver:
+            dal_driver_dict = self.config_loader("storage.local.driver")
+            if type(dal_driver_dict["options"]["driver_type"]) == str or \
+                type(dal_driver_dict["options"]["driver_type"]) == unicode:
+                dal_driver_dict["options"]["driver_type"] = DriverType[dal_driver_dict["options"]["driver_type"]]
+            self.dal_driver = dal_driver_dict["constructor"](**dal_driver_dict["options"])
         # Get DAL, set driver,
         dal_dict = self.config_loader("storage.local")
-        dal_dict["options"]["driver"] = dal_driver
+        dal_dict["options"]["driver"] = self.dal_driver
         return dal_dict["constructor"](**dal_dict["options"])
 
     def get_or_set_default(self, key, default_value):
