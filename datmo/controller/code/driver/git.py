@@ -103,8 +103,8 @@ class GitCodeManager(object):
             })
         return True
 
-    def clone(self, original_git_url, repo_name=None, unsecure=False):
-        clone_git_url = self._parse_git_url(original_git_url, unsecure)
+    def clone(self, original_git_url, repo_name=None, mode="https"):
+        clone_git_url = self._parse_git_url(original_git_url, mode=mode)
 
         if not repo_name:
             repo_name = clone_git_url.split('/')[-1][:-4]
@@ -119,28 +119,29 @@ class GitCodeManager(object):
             })
         return True
 
-    def _parse_git_url(self, original_git_url, unsecure=False):
+    def _parse_git_url(self, original_git_url, mode="https"):
         if original_git_url[-4:] != ".git":
             original_git_url = original_git_url + ".git"
         p = parse(original_git_url)
 
         if not p.valid:
-            raise GitUrlArgumentException("exception.code_driver.git._parse_git_url.not_valid", {
-                "original_git_url": original_git_url
+            raise GitUrlArgumentException("exception.code_driver.git._parse_git_url", {
+                "original_git_url": original_git_url,
+                "exception": "Url is not valid"
             })
 
-        if self.git_host_manager.ssh_enabled:
+        if mode=="ssh":
             clone_git_url = p.url2ssh
-        elif self.git_host_manager.https_enabled:
+        elif mode=="https":
             clone_git_url = p.url2https
-        else:
-            raise GitUrlArgumentException("exception.code_driver.git._parse_git_url.mode_unrecognized", {
-                "original_git_url": original_git_url
-            })
-
-        if unsecure:
+        elif mode=="http":
             # If unsecured specified http connection used instead
             clone_git_url = '://'.join(['http', p.url2https.split('://')[1]])
+        else:
+            raise GitUrlArgumentException("exception.code_driver.git._parse_git_url", {
+                "original_git_url": original_git_url,
+                "exception": "Remote access not configured for https or ssh"
+            })
 
         return clone_git_url
 

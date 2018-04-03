@@ -35,24 +35,31 @@ class TestGitManager():
         assert result == True
 
     def test_clone(self):
-        result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git")
-        assert os.path.exists(os.path.join(self.temp_dir, "hello-world",'.git'))
+        result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git", mode="https")
+        assert result and os.path.exists(os.path.join(self.temp_dir, "hello-world",".git"))
+        shutil.rmtree(os.path.join(self.temp_dir, "hello-world"))
+        result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git", mode="http")
+        assert result and os.path.exists(os.path.join(self.temp_dir, "hello-world", ".git"))
+        shutil.rmtree(os.path.join(self.temp_dir, "hello-world"))
+        result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git", mode="ssh")
+        assert result and os.path.exists(os.path.join(self.temp_dir, "hello-world", ".git"))
         shutil.rmtree(os.path.join(self.temp_dir, "hello-world"))
 
-
-    def test_clone_unsecure(self):
-        result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git", unsecure=True)
-        assert os.path.exists(os.path.join(self.temp_dir, "hello-world",'.git'))
-        shutil.rmtree(os.path.join(self.temp_dir, "hello-world"))
-
-
-    def test_giturl_parse(self):
-        parsed = self.git_code_manager._parse_git_url("https://github.com/datmo/hello-world.git")
+    def test_parse_git_url(self):
+        parsed = self.git_code_manager._parse_git_url("https://github.com/datmo/hello-world.git", mode="ssh")
         assert parsed == "git@github.com:datmo/hello-world.git"
+        parsed = self.git_code_manager._parse_git_url("https://github.com/datmo/hello-world.git", mode="https")
+        assert parsed == "https://github.com/datmo/hello-world.git"
+        parsed = self.git_code_manager._parse_git_url("https://github.com/datmo/hello-world.git", mode="http")
+        assert parsed == "http://github.com/datmo/hello-world.git"
         # git@github.com:gitpython-developers/GitPython.git
         # https://github.com/gitpython-developers/GitPython.git
-        parsed = self.git_code_manager._parse_git_url("git://github.com/datmo/hello-world.git")
+        parsed = self.git_code_manager._parse_git_url("git://github.com/datmo/hello-world.git", mode="ssh")
         assert parsed == "git@github.com:datmo/hello-world.git"
+        parsed = self.git_code_manager._parse_git_url("git://github.com/datmo/hello-world.git", mode="https")
+        assert parsed == "https://github.com/datmo/hello-world.git"
+        parsed = self.git_code_manager._parse_git_url("git://github.com/datmo/hello-world.git", mode="http")
+        assert parsed == "http://github.com/datmo/hello-world.git"
 
     def test_commit(self):
         # TODO: try out more options
@@ -63,7 +70,7 @@ class TestGitManager():
         with open(test_filepath, "wb") as f:
             f.write(str("test"))
         self.git_code_manager.add(test_filepath)
-        result = self.git_code_manager.commit(['-m', 'test'])
+        result = self.git_code_manager.commit(["-m", "test"])
         commit_id = self.git_code_manager.latest_commit()
         assert result == True and commit_id
 
@@ -93,7 +100,7 @@ class TestGitManager():
     #
     def test_reset(self):
         self.git_code_manager.init()
-        self.git_code_manager.commit(options=['-m', 'test'])
+        self.git_code_manager.commit(options=["-m", "test"])
         commit_id = self.git_code_manager.latest_commit()
         result = self.git_code_manager.reset(git_commit=commit_id)
         assert result == True
@@ -141,7 +148,7 @@ class TestGitManager():
     #     with open(test_filepath, "wb") as f:
     #         f.write(str("test"))
     #     self.git_code_manager.add(test_filepath)
-    #     self.git_code_manager.commit(['-m', 'test'])
+    #     self.git_code_manager.commit(["-m", "test"])
     #     if self.git_code_manager.git_host_manager.host == "github":
     #         self.git_code_manager.remote("add", "origin",
     #                                      "https://github.com/datmo/test.git")
@@ -205,7 +212,7 @@ class TestGitManager():
             f.write(str("test"))
         code_id = self.git_code_manager.create_code_ref()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
-                                   '.git/refs/datmo/',
+                                   ".git/refs/datmo/",
                                      code_id)
         assert code_id and \
             os.path.isfile(code_ref_path)
@@ -218,7 +225,7 @@ class TestGitManager():
             f.write(str("test"))
         code_id = self.git_code_manager.create_code_ref()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
-                                     '.git/refs/datmo/',
+                                     ".git/refs/datmo/",
                                      code_id)
         result = self.git_code_manager.exists_code_ref(code_id)
         assert result == True and \
@@ -232,7 +239,7 @@ class TestGitManager():
             f.write(str("test"))
         code_id = self.git_code_manager.create_code_ref()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
-                                     '.git/refs/datmo/',
+                                     ".git/refs/datmo/",
                                      code_id)
         result  = self.git_code_manager.delete_code_ref(code_id)
         assert result == True and \
@@ -286,7 +293,7 @@ class TestGitHostManager():
 
     def test_netrc(self):
         hostm = GitHostManager(self.netrc_temp_dir)
-        assert hostm.create_git_netrc('foobar','foo')
+        assert hostm.create_git_netrc("foobar","foo")
         hostm = GitHostManager(self.netrc_temp_dir)
         assert os.path.exists(os.path.join(self.netrc_temp_dir, ".netrc"))
         assert hostm.https_enabled
@@ -294,11 +301,13 @@ class TestGitHostManager():
     def test_ssh_git(self):
         hostm = GitHostManager(self.ssh_temp_dir)
         assert hostm.ssh_enabled == False
-        shutil.copytree(
-            os.path.join(os.path.expanduser('~'), '.ssh'),
-            os.path.join(self.ssh_temp_dir,'.ssh'))
-        assert os.path.exists(os.path.join(self.ssh_temp_dir, ".ssh", 'id_rsa'))
-        hostm = GitHostManager(self.ssh_temp_dir)
-        assert hostm.ssh_enabled == True
+        # If id_rsa is already present and used in remote git
+        if os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"):
+            shutil.copytree(
+                os.path.join(os.path.expanduser("~"), ".ssh"),
+                os.path.join(self.ssh_temp_dir,".ssh"))
+            assert os.path.exists(os.path.join(self.ssh_temp_dir, ".ssh", "id_rsa"))
+            hostm = GitHostManager(self.ssh_temp_dir)
+            assert hostm.ssh_enabled == True
 
 
