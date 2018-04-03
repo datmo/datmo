@@ -14,7 +14,7 @@ from datmo.storage.local.driver.driver_type import DriverType
 from ...local.dal import LocalDAL
 from datmo.util.exceptions import EntityNotFound, EntityCollectionNotFound
 
-class TestDatmoDAL():
+class TestLocalDAL():
     def setup_class(self):
         self.temp_dir = tempfile.mkdtemp()
         self.datadriver = BlitzDBDataDriver(DriverType.FILE, self.temp_dir)
@@ -63,17 +63,21 @@ class TestDatmoDAL():
         result = dal.model.get_by_id(model.id)
         assert model.id == result.id
 
-    def test_get_by_id_model_new_instance_fail(self):
+    def test_get_by_id_model_new_driver_instance(self):
         dal = LocalDAL(self.datadriver)
         model_name = 'model_3'
         model = dal.model.create({'name': model_name})
-        # testing different object issue
+        # create new dal with new driver instance (fails)
         new_driver_instance = BlitzDBDataDriver(DriverType.FILE, self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.model.get_by_id(model.id)
         except:
             assert True
+        # create new dal instance with same driver (success)
+        new_dal_instance = LocalDAL(self.datadriver)
+        new_model = new_dal_instance.model.get_by_id(model.id)
+        assert new_model.id == model.id
 
     def test_update_model(self):
         dal = LocalDAL(self.datadriver)
@@ -151,7 +155,7 @@ class TestDatmoDAL():
         result = dal.code.get_by_id(code.id)
         assert code.id == result.id
 
-    def test_get_by_id_code_new_instance_fail(self):
+    def test_get_by_id_code_new_driver_instance(self):
         dal = LocalDAL(self.datadriver)
         model_name = 'model_1'
         model = dal.model.create({'name': model_name})
@@ -164,13 +168,17 @@ class TestDatmoDAL():
             'driver_type': code_driver_type
         })
 
-        # testing different object issue
+        # create new dal with new driver instance (fails)
         new_driver_instance = BlitzDBDataDriver(DriverType.FILE, self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.code.get_by_id(code.id)
         except:
             assert True
+        # create new dal instance with same driver (success)
+        new_dal_instance = LocalDAL(self.datadriver)
+        new_code = new_dal_instance.code.get_by_id(code.id)
+        assert new_code.id == code.id
 
     def test_update_code(self):
         dal = LocalDAL(self.datadriver)
@@ -281,7 +289,7 @@ class TestDatmoDAL():
         result = dal.environment.get_by_id(environment.id)
         assert environment.id == result.id
 
-    def test_get_by_id_environment_new_instance_fail(self):
+    def test_get_by_id_environment_new_driver_instance(self):
         dal = LocalDAL(self.datadriver)
         model_name = 'model_1'
         model = dal.model.create({'name': model_name})
@@ -298,13 +306,17 @@ class TestDatmoDAL():
             'definition_filename': environment_definition_filename
         })
 
-        # testing different object issue
+        # create new dal with new driver instance (fails)
         new_driver_instance = BlitzDBDataDriver(DriverType.FILE, self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.environment.get_by_id(environment.id)
         except:
             assert True
+        # create new dal instance with same driver (success)
+        new_dal_instance = LocalDAL(self.datadriver)
+        new_environment = new_dal_instance.environment.get_by_id(environment.id)
+        assert new_environment.id == environment.id
 
     def test_update_environment(self):
         dal = LocalDAL(self.datadriver)
@@ -417,7 +429,7 @@ class TestDatmoDAL():
         result = dal.file_collection.get_by_id(file_collection.id)
         assert file_collection.id == result.id
 
-    def test_get_by_id_file_collection_new_instance_fail(self):
+    def test_get_by_id_file_collection_new_driver_instance(self):
         dal = LocalDAL(self.datadriver)
         model_name = 'model_1'
         model = dal.model.create({'name': model_name})
@@ -430,13 +442,17 @@ class TestDatmoDAL():
             'driver_type': file_collection_driver_type
         })
 
-        # testing different object issue
+        # create new dal with new driver instance (fails)
         new_driver_instance = BlitzDBDataDriver(DriverType.FILE, self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.file_collection.get_by_id(file_collection.id)
         except:
             assert True
+        # create new dal instance with same driver (success)
+        new_dal_instance = LocalDAL(self.datadriver)
+        new_file_collection = new_dal_instance.file_collection.get_by_id(file_collection.id)
+        assert new_file_collection.id == file_collection.id
 
     def test_update_file_collection(self):
         dal = LocalDAL(self.datadriver)
@@ -531,7 +547,7 @@ class TestDatmoDAL():
         result = dal.session.get_by_id(session.id)
         assert session.id == result.id
 
-    def test_get_by_id_session_new_instance_fail(self):
+    def test_get_by_id_session_new_driver_instance(self):
         dal = LocalDAL(self.datadriver)
         model_name = 'model_1'
         model = dal.model.create({'name': model_name})
@@ -542,13 +558,17 @@ class TestDatmoDAL():
             'model_id': model.id
         })
 
-        # testing different object issue
+        # create new dal with new driver instance (fails)
         new_driver_instance = BlitzDBDataDriver(DriverType.FILE, self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.session.get_by_id(session.id)
         except:
             assert True
+        # create new dal instance with same driver (success)
+        new_dal_instance = LocalDAL(self.datadriver)
+        new_session = new_dal_instance.session.get_by_id(session.id)
+        assert new_session.id == session.id
 
     def test_update_session(self):
         dal = LocalDAL(self.datadriver)
@@ -662,7 +682,7 @@ class TestDatmoDAL():
         result = dal.task.get_by_id(task.id)
         assert task.id == result.id
 
-    def test_get_by_id_task_new_instance_fail(self):
+    def test_get_by_id_task_new_driver_instance(self):
         dal = LocalDAL(self.datadriver)
         model_name = 'model_1'
         model = dal.model.create({'name': model_name})
@@ -685,13 +705,17 @@ class TestDatmoDAL():
             'file_collection_id': task_file_collection_id
         })
 
-        # testing different object issue
+        # create new dal with new driver instance (fails)
         new_driver_instance = BlitzDBDataDriver(DriverType.FILE, self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.task.get_by_id(task.id)
         except:
             assert True
+        # create new dal instance with same driver (success)
+        new_dal_instance = LocalDAL(self.datadriver)
+        new_task = new_dal_instance.task.get_by_id(task.id)
+        assert new_task.id == task.id
 
     def test_update_task(self):
         dal = LocalDAL(self.datadriver)
@@ -835,7 +859,7 @@ class TestDatmoDAL():
         result = dal.snapshot.get_by_id(snapshot.id)
         assert snapshot.id == result.id
 
-    def test_get_by_id_snapshot_new_instance_fail(self):
+    def test_get_by_id_snapshot_new_driver_instance(self):
         dal = LocalDAL(self.datadriver)
         model_name = 'model_1'
         model = dal.model.create({'name': model_name})
@@ -855,13 +879,17 @@ class TestDatmoDAL():
             'stats': snapshot_stats
         })
 
-        # testing different object issue
+        # create new dal with new driver instance (fails)
         new_driver_instance = BlitzDBDataDriver(DriverType.FILE, self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.snapshot.get_by_id(snapshot.id)
         except:
             assert True
+        # create new dal instance with same driver (success)
+        new_dal_instance = LocalDAL(self.datadriver)
+        new_snapshot = new_dal_instance.snapshot.get_by_id(snapshot.id)
+        assert new_snapshot.id == snapshot.id
 
     def test_update_snapshot(self):
         dal = LocalDAL(self.datadriver)
@@ -981,7 +1009,7 @@ class TestDatmoDAL():
         result = dal.user.get_by_id(user.id)
         assert user.id == result.id
 
-    def test_get_by_id_user_new_instance_fail(self):
+    def test_get_by_id_user_new_driver_instance(self):
         dal = LocalDAL(self.datadriver)
 
         user_name = 'user_3'
@@ -992,13 +1020,17 @@ class TestDatmoDAL():
             'email': user_email,
         })
 
-        # testing different object issue
+        # create new dal with new driver instance (fails)
         new_driver_instance = BlitzDBDataDriver(DriverType.FILE, self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.user.get_by_id(user.id)
         except:
             assert True
+        # create new dal instance with same driver (success)
+        new_dal_instance = LocalDAL(self.datadriver)
+        new_user = new_dal_instance.user.get_by_id(user.id)
+        assert new_user.id == user.id
 
     def test_update_user(self):
         dal = LocalDAL(self.datadriver)
