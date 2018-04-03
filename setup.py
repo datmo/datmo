@@ -1,7 +1,4 @@
-from pkg_resources import get_distribution
 
-# __version__ = get_distribution('datmo').version
-# DATMO_VERSION = __version__
 
 from setuptools import setup, find_packages
 
@@ -39,7 +36,8 @@ setup(
         "blitzdb==0.2.12",
         "kids.cache==0.0.7",
         "pymongo==3.6.0",
-        "checksumdir==1.1.4"
+        "checksumdir==1.1.4",
+        "semver==2.7.8"
     ],
     tests_require=[
         "pytest==3.0.4"

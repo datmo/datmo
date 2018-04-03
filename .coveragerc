@@ -4,3 +4,4 @@ omit =
     */site-packages/pytest/*
     *__init__*
     *test*
+    *templates*
