@@ -1,4 +1,5 @@
 import os
+import sys
 import shutil
 import glob
 import hashlib
@@ -333,7 +334,13 @@ class LocalFileManager(object):
 
         # Change permissions to read only for collection_path. File collection is immutable
         # TODO: chmod format only is for Python 2.X (doesn't work for Python 3.X)
-        mode = 0755
+        if (sys.version_info > (3, 0)):
+            # Python 3 code in this block
+            mode = 0o755
+        else:
+            # Python 2 code in this block
+            mode = 0755
+
         for root, dirs, files in os.walk(collection_path, topdown=False):
             for dir in [os.path.join(root, d) for d in dirs]:
                 os.chmod(dir, mode)
