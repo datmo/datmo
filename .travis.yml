@@ -8,8 +8,10 @@ install:
 - pip install pytest pytest-cov
 - pip install coveralls
 - python setup.py install
+before_script:
+-
 script:
 - pytest --cov-config .coveragerc --cov=datmo
-after_success:
+after_script:
 - echo $TRAVIS_SECURE_ENV_VARS
 - coveralls
