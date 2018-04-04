@@ -13,7 +13,7 @@ class GitCodeManager(object):
     """
     TODO: Reimplement functions with robust library: https://github.com/gitpython-developers/GitPython
 
-    Git Code Manager for Project Code
+    Git Code Manager for ProjectCommand Code
     """
 
     def __init__(self, filepath, execpath, remote_url=None):

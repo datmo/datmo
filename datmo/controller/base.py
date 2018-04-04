@@ -1,5 +1,4 @@
 import os
-from datmo.cli.driver.cli_helper import CLIHelper
 from datmo.storage.local.driver.driver_type import DriverType
 from datmo.util import get_class_contructor
 from datmo.util.project_settings import ProjectSettings
@@ -9,9 +8,8 @@ from datmo.util.exceptions import InvalidProjectPathException, \
 
 class BaseController(object):
 
-    def __init__(self, home, cli_helper=CLIHelper(), dal_driver=None):
+    def __init__(self, home, dal_driver=None):
         self.home = home
-        self.cli_helper = cli_helper
         self.dal_driver = dal_driver
         # property caches and initial values
         self._dal = None
@@ -25,13 +23,14 @@ class BaseController(object):
         if not os.path.isdir(self.home):
             raise InvalidProjectPathException("exception.datmo.project", {
                 "home": home,
-                "exception": "Project path does not exist"
+                "exception": "ProjectCommand path does not exist"
             })
 
         self.settings = ProjectSettings(self.home)
         # TODO: is_initialized properties should be functions
 
     @property
+    # Controller objects are only in sync if the data drivers are the same between objects
     # TODO: Currently local for differnet controller objects do NOT sync within one session.
     # TODO: Fix local such that it syncs within one session between controller objects
     def dal(self):

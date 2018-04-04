@@ -128,7 +128,7 @@ class TestSnapshotController():
         # Checkout to latest snapshot
         result = self.snapshot.checkout(snapshot_obj_1.id)
 
-        # Snapshot directory in user directory
+        # SnapshotCommand directory in user directory
         snapshot_obj_1_path = os.path.join(self.snapshot.home, "datmo_snapshots",
                                            snapshot_obj_1.id)
 

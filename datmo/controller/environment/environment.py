@@ -1,12 +1,12 @@
 import os
 import hashlib
 from datmo.controller.base import BaseController
-from datmo.cli.driver.cli_helper import CLIHelper
+from datmo.cli.driver.helper import Helper
 from datmo.util.exceptions import RequiredArgumentMissing, \
     DoesNotExistException
 
 class EnvironmentController(BaseController):
-    def __init__(self, home, cli_helper=CLIHelper()):
+    def __init__(self, home, cli_helper=Helper()):
         super(EnvironmentController, self).__init__(home, cli_helper)
 
     def _get_filehash(self, filepath):

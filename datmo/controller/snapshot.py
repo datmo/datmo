@@ -1,13 +1,12 @@
 import os
-from .base import BaseController
-from datmo.cli.driver.cli_helper import CLIHelper
+from datmo.controller.base import BaseController
 from datmo.util.file_storage import JSONKeyValueStore
 from datmo.util.exceptions import RequiredArgumentMissing, \
     FileIOException
 
 class SnapshotController(BaseController):
-    def __init__(self, home, cli_helper=CLIHelper(), dal_driver=None):
-        super(SnapshotController, self).__init__(home, cli_helper, dal_driver)
+    def __init__(self, home, dal_driver=None):
+        super(SnapshotController, self).__init__(home, dal_driver)
 
     def create(self, dictionary):
         """
@@ -28,8 +27,8 @@ class SnapshotController(BaseController):
 
         Returns
         -------
-        Snapshot
-            Snapshot object as specified in datmo.entity.snapshot
+        SnapshotCommand
+            SnapshotCommand object as specified in datmo.entity.snapshot
 
         Raises
         ------

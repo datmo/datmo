@@ -1,14 +1,13 @@
 import os
 import platform
-from .base import BaseController
-from .snapshot import SnapshotController
-from datmo.cli.driver.cli_helper import CLIHelper
+from datmo.controller.base import BaseController
+from datmo.controller.snapshot import SnapshotController
 from datmo.util.exceptions import TaskRunException
 
 class TaskController(BaseController):
-    def __init__(self, home, cli_helper=CLIHelper(), dal_driver=None):
-        self.snapshot = SnapshotController(home, cli_helper, dal_driver)
-        super(TaskController, self).__init__(home, cli_helper, dal_driver)
+    def __init__(self, home, dal_driver=None):
+        self.snapshot = SnapshotController(home, dal_driver)
+        super(TaskController, self).__init__(home, dal_driver)
 
     def create(self, dictionary):
         """ Create Task object

@@ -11,7 +11,7 @@ from datmo.util.exceptions import DoesNotExistException, \
 
 class DockerEnvironmentManager(object):
     """
-    This Environment Manager handles Environment management in the Datmo Project using Docker
+    This Environment Manager handles Environment management in the Datmo ProjectCommand using Docker
     """
 
     def __init__(self, filepath="", docker_execpath="docker", docker_socket="unix:///var/run/docker.sock"):
