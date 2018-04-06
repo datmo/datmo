@@ -23,7 +23,7 @@ class BaseController(object):
         if not os.path.isdir(self.home):
             raise InvalidProjectPathException("exception.datmo.project", {
                 "home": home,
-                "exception": "ProjectCommand path does not exist"
+                "exception": "Project path does not exist"
             })
 
         self.settings = ProjectSettings(self.home)
