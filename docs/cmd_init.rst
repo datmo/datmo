@@ -1,4 +1,4 @@
-Datmo Init Commands
+Datmo ProjectCommand Commands
 *******************
 .. argparse::
    :module: datmo.cli.command.init

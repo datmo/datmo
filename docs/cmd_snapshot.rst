@@ -1,4 +1,4 @@
-Datmo Snapshot Commands
+Datmo SnapshotCommand Commands
 ***********************
 .. argparse::
    :module: datmo.cli.command.snapshot
