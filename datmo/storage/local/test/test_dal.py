@@ -11,7 +11,7 @@ from datetime import datetime
 
 from datmo.storage.local.driver.blitzdb_driver import BlitzDBDataDriver
 from datmo.storage.local.driver.driver_type import DriverType
-from ...local.dal import LocalDAL
+from datmo.storage.local.dal import LocalDAL
 from datmo.util.exceptions import EntityNotFound, EntityCollectionNotFound
 
 class TestLocalDAL():
@@ -62,6 +62,32 @@ class TestLocalDAL():
         model = dal.model.create({'name': model_name})
         result = dal.model.get_by_id(model.id)
         assert model.id == result.id
+
+    def test_get_by_id_model_same_dir(self):
+        test_dir = 'test-dir'
+        datadriver = BlitzDBDataDriver(DriverType.FILE, test_dir)
+        dal = LocalDAL(datadriver)
+        model1 = dal.model.create({'name': "test"})
+        del datadriver
+        del dal
+        datadriver = BlitzDBDataDriver(DriverType.FILE, test_dir)
+        dal = LocalDAL(datadriver)
+        model2 = dal.model.create({'name': "test"})
+        del datadriver
+        del dal
+        datadriver = BlitzDBDataDriver(DriverType.FILE, test_dir)
+        dal = LocalDAL(datadriver)
+        model3 = dal.model.create({'name': "test"})
+
+        model1 = dal.model.get_by_id(model1.id)
+        model2 = dal.model.get_by_id(model2.id)
+        model3 = dal.model.get_by_id(model3.id)
+
+        assert model1
+        assert model2
+        assert model3
+
+        shutil.rmtree(test_dir)
 
     def test_get_by_id_model_new_driver_instance(self):
         dal = LocalDAL(self.datadriver)
