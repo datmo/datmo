@@ -15,14 +15,14 @@ from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
-from datmo.cli.driver.cli_helper import CLIHelper
-from datmo.cli.command.init import Init
+from datmo.cli.driver.helper import Helper
+from datmo.cli.command.project import ProjectCommand
 
 class TestInit():
     def setup_class(self):
         self.temp_dir = tempfile.mkdtemp()
-        self.cli = CLIHelper()
-        self.init = Init(self.temp_dir, self.cli)
+        self.cli = Helper()
+        self.init = ProjectCommand(self.temp_dir, self.cli)
 
     def teardown_class(self):
         shutil.rmtree(self.temp_dir)

@@ -1,9 +1,10 @@
 import sys
 import importlib
 import inspect
+from datmo.util.i18n import get as _
 from datmo.util.exceptions import ArgumentException
 
-class CLIHelper():
+class Helper():
     def __init__(self):
         pass
 
@@ -47,3 +48,6 @@ class CLIHelper():
 
         # command_class[1] == concrete class constructor
         return command_class[1]
+
+    def get_command_choices(self):
+        return ["init", "snapshot", "task"]

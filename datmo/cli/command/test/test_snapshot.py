@@ -14,22 +14,22 @@ from __future__ import unicode_literals
 
 import shutil
 import tempfile
-from datmo.cli.driver.cli_helper import CLIHelper
-from datmo.cli.command.init import Init
-from datmo.cli.command.snapshot import Snapshot
+from datmo.cli.driver.helper import Helper
+from datmo.cli.command.project import ProjectCommand
+from datmo.cli.command.snapshot import SnapshotCommand
 
 class TestSnapshot():
     def setup_class(self):
         self.temp_dir = tempfile.mkdtemp()
-        self.cli_helper = CLIHelper()
-        self.init = Init(self.temp_dir, self.cli_helper)
+        self.cli_helper = Helper()
+        self.init = ProjectCommand(self.temp_dir, self.cli_helper)
         self.init.parse([
             "init",
             "--name", "foobar",
             "--description", "test model"])
         self.init.execute()
-        self.snapshot = Snapshot(self.temp_dir, self.cli_helper,
-                                 self.init.controller.dal.driver)
+        self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper,
+                                        self.init.controller.dal.driver)
 
     def teardown_class(self):
         shutil.rmtree(self.temp_dir)

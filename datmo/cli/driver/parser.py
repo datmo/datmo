@@ -2,7 +2,7 @@ import argparse
 import sys
 from datmo.util.exceptions import UnrecognizedCLIArgument
 
-class CLIArgumentParser(argparse.ArgumentParser):
+class Parser(argparse.ArgumentParser):
     """
     Overwrite the original ArgumentParser
 
@@ -42,4 +42,4 @@ class CLIArgumentParser(argparse.ArgumentParser):
         if exc:
             exc.argument = self._get_action_from_name(exc.argument_name)
             raise exc
-        super(CLIArgumentParser, self).error(message)
+        super(Parser, self).error(message)
