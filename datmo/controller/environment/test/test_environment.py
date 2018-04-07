@@ -32,7 +32,7 @@ class TestEnvironmentController():
         # Create environment definition
         definition_filepath = os.path.join(self.environment.home,
                                     "Dockerfile")
-        with open(definition_filepath, "wb") as f:
+        with open(definition_filepath, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
 
         input_dict = {
@@ -54,7 +54,7 @@ class TestEnvironmentController():
         # Create environment definition
         definition_filepath = os.path.join(self.environment.home,
                                            "Dockerfile")
-        with open(definition_filepath, "wb") as f:
+        with open(definition_filepath, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
 
         input_dict = {
@@ -76,7 +76,7 @@ class TestEnvironmentController():
         # Create environment definition for object 1
         definition_path_1 = os.path.join(self.environment.home,
                                     "Dockerfile")
-        with open(definition_path_1, "wb") as f:
+        with open(definition_path_1, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
 
         input_dict_1 = {
@@ -90,7 +90,7 @@ class TestEnvironmentController():
         # Create environment definition for object 2
         definition_path_2 = os.path.join(self.environment.home,
                                          "Dockerfile2")
-        with open(definition_path_2, "wb") as f:
+        with open(definition_path_2, "w") as f:
             f.write(str("FROM datmo/scikit-opencv"))
 
         input_dict_2 = {
@@ -114,7 +114,7 @@ class TestEnvironmentController():
         # Create environment definition
         definition_filepath = os.path.join(self.environment.home,
                                            "Dockerfile")
-        with open(definition_filepath, "wb") as f:
+        with open(definition_filepath, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
 
         input_dict = {

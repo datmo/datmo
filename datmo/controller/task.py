@@ -20,7 +20,7 @@ class TaskController(BaseController):
         Returns
         -------
         Task
-            Errors out if unsuccessful
+            Object entity for Task
 
         """
 

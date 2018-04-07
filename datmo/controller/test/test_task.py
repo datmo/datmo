@@ -6,12 +6,14 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
+import random
+import string
 import shutil
 import tempfile
 
-from ..project import ProjectController
-from ..environment.environment import EnvironmentController
-from ..task import TaskController
+from datmo.controller.project import ProjectController
+from datmo.controller.environment.environment import EnvironmentController
+from datmo.controller.task import TaskController
 
 
 class TestTaskController():
@@ -47,7 +49,7 @@ class TestTaskController():
         # Create environment_driver id
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
-        with open(env_def_path, "wb") as f:
+        with open(env_def_path, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
 
         environment_obj = self.environment.create({
@@ -64,11 +66,13 @@ class TestTaskController():
         os.makedirs(temp_test_dirpath)
 
         # Test option set 1
+        random_name = ''.join([random.choice(string.ascii_letters + string.digits)
+                               for _ in range(32)])
         options_dict = {
             "command": ["sh", "-c", "echo yo"],
             "ports": [],
             "gpu": False,
-            "name": "test_run_environment",
+            "name": random_name,
             "volumes": {
                 temp_test_dirpath: {
                     'bind': '/task/',
@@ -91,14 +95,16 @@ class TestTaskController():
         assert hardware_info
         assert logs and \
                os.path.exists(log_filepath)
-        self.task.environment_driver.stop_remove_containers_by_term(term="test_run_environment")
+        self.task.environment_driver.stop_remove_containers_by_term(term=random_name)
 
         # Test option set 2
+        random_name_2 = ''.join([random.choice(string.ascii_letters + string.digits)
+                               for _ in range(32)])
         options_dict = {
             "command": ["sh", "-c", "echo yo"],
             "ports": [],
             "gpu": False,
-            "name": "test_run_environment2",
+            "name": random_name_2 ,
             "volumes": {
                 temp_test_dirpath: {
                     'bind': '/task/',
@@ -121,7 +127,7 @@ class TestTaskController():
         assert hardware_info
         assert logs and \
                os.path.exists(log_filepath)
-        self.task.environment_driver.stop_remove_containers_by_term(term="test_run_environment")
+        self.task.environment_driver.stop_remove_containers_by_term(term=random_name_2)
 
     def test_run(self):
         self.project.init("test5", "test description")
@@ -137,7 +143,7 @@ class TestTaskController():
         # Create environment_driver definition
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
-        with open(env_def_path, "wb") as f:
+        with open(env_def_path, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
 
         environment_obj = self.environment.create({

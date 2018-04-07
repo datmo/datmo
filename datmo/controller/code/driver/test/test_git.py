@@ -7,7 +7,8 @@ from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
-from ..git import GitCodeManager, GitHostManager
+from datmo.controller.code.driver.git import GitCodeManager, \
+    GitHostManager
 
 class TestGitManager():
     """
@@ -68,7 +69,7 @@ class TestGitManager():
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
 
-        with open(test_filepath, "wb") as f:
+        with open(test_filepath, "w") as f:
             f.write(str("test"))
         self.git_code_manager.add(test_filepath)
         result = self.git_code_manager.commit(["-m", "test"])
@@ -146,7 +147,7 @@ class TestGitManager():
     #     test_filepath = os.path.join(self.git_code_manager.filepath,
     #                                  "test.txt")
     #
-    #     with open(test_filepath, "wb") as f:
+    #     with open(test_filepath, "w") as f:
     #         f.write(str("test"))
     #     self.git_code_manager.add(test_filepath)
     #     self.git_code_manager.commit(["-m", "test"])
@@ -209,7 +210,7 @@ class TestGitManager():
         self.git_code_manager.init()
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
-        with open(test_filepath, "wb") as f:
+        with open(test_filepath, "w") as f:
             f.write(str("test"))
         code_id = self.git_code_manager.create_code_ref()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
@@ -222,7 +223,7 @@ class TestGitManager():
         self.git_code_manager.init()
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
-        with open(test_filepath, "wb") as f:
+        with open(test_filepath, "w") as f:
             f.write(str("test"))
         code_id = self.git_code_manager.create_code_ref()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
@@ -236,7 +237,7 @@ class TestGitManager():
         self.git_code_manager.init()
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
-        with open(test_filepath, "wb") as f:
+        with open(test_filepath, "w") as f:
             f.write(str("test"))
         code_id = self.git_code_manager.create_code_ref()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
@@ -250,7 +251,7 @@ class TestGitManager():
         self.git_code_manager.init()
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
-        with open(test_filepath, "wb") as f:
+        with open(test_filepath, "w") as f:
             f.write(str("test"))
         code_id = self.git_code_manager.create_code_ref()
         code_refs = self.git_code_manager.list_code_refs()
@@ -268,10 +269,10 @@ class TestGitManager():
         self.git_code_manager.init()
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
-        with open(test_filepath, "wb") as f:
+        with open(test_filepath, "w") as f:
             f.write(str("test1"))
         code_id_1 = self.git_code_manager.create_code_ref()
-        with open(test_filepath, "wb") as f:
+        with open(test_filepath, "w") as f:
             f.write(str("test2"))
         _ = self.git_code_manager.create_code_ref()
         result = self.git_code_manager.checkout_code_ref(code_id_1)

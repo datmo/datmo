@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from datmo.util.i18n import get as _
 from datmo.cli.command.project import ProjectCommand
 from datmo.controller.snapshot import SnapshotController

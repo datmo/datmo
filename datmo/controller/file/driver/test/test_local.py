@@ -9,7 +9,7 @@ import os
 import shutil
 import tempfile
 
-from ..local import LocalFileManager
+from datmo.controller.file.driver.local import LocalFileManager
 
 
 class TestLocalFileManager():
@@ -299,16 +299,22 @@ class TestLocalFileManager():
         assert os.path.isdir(collection_path)
         assert os.path.isdir(os.path.join(collection_path,
                                        "dirpath1")) and \
-               oct(os.stat(os.path.join(collection_path,
-                                       "dirpath1")).st_mode & 0o777) == '0755'
+               (oct(os.stat(os.path.join(collection_path,
+                                        "dirpath1")).st_mode & 0o777) == '0o755' or
+                oct(os.stat(os.path.join(collection_path,
+                                         "dirpath1")).st_mode & 0o777) == '0755')
         assert os.path.isdir(os.path.join(collection_path,
                                        "dirpath2")) and \
-               oct(os.stat(os.path.join(collection_path,
-                                        "dirpath2")).st_mode & 0o777) == '0755'
+               (oct(os.stat(os.path.join(collection_path,
+                                        "dirpath2")).st_mode & 0o777) == '0o755' or
+                oct(os.stat(os.path.join(collection_path,
+                                         "dirpath2")).st_mode & 0o777) == '0755')
         assert os.path.isfile(os.path.join(collection_path,
                                         "filepath1")) and \
-               oct(os.stat(os.path.join(collection_path,
-                                        "filepath1")).st_mode & 0o777) == '0755'
+               (oct(os.stat(os.path.join(collection_path,
+                                        "filepath1")).st_mode & 0o777) == '0o755' or
+                oct(os.stat(os.path.join(collection_path,
+                                         "filepath1")).st_mode & 0o777) == '0755')
         self.local_file_manager.delete_collection(collection_id)
 
     def test_get_collection_path(self):

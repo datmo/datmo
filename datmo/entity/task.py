@@ -34,6 +34,6 @@ class Task():
     def toDictionary(self):
         attr_dict = self.__dict__
         pruned_attr_dict = { attr: val
-                    for attr, val in attr_dict.iteritems() if not callable(getattr(self, attr)) and not attr.startswith("__")
+                    for attr, val in attr_dict.items() if not callable(getattr(self, attr)) and not attr.startswith("__")
         }
         return pruned_attr_dict

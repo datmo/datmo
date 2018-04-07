@@ -1,13 +1,12 @@
 import os
 import hashlib
 from datmo.controller.base import BaseController
-from datmo.cli.driver.helper import Helper
 from datmo.util.exceptions import RequiredArgumentMissing, \
     DoesNotExistException
 
 class EnvironmentController(BaseController):
-    def __init__(self, home, cli_helper=Helper()):
-        super(EnvironmentController, self).__init__(home, cli_helper)
+    def __init__(self, home, dal_driver=None):
+        super(EnvironmentController, self).__init__(home, dal_driver)
 
     def _get_filehash(self, filepath):
         if not os.path.isfile(filepath):
@@ -16,7 +15,7 @@ class EnvironmentController(BaseController):
             })
         BUFF_SIZE = 65536
         sha1 = hashlib.md5()
-        with open(filepath, 'rb') as f:
+        with open(filepath, "rb") as f:
             while True:
                 data = f.read(BUFF_SIZE)
                 if not data:

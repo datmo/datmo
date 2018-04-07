@@ -118,12 +118,12 @@ def normalize_entity(in_dict):
         [dictionary] -- [normal dictionary of values, output of toDictionary function]
     """
     out_dict = in_dict.copy()
-    if 'pk' in in_dict.keys():
+    if 'pk' in list(in_dict):
         out_dict['id'] = in_dict['pk']
         del out_dict['pk']
-    if 'created_at' in in_dict.keys():
+    if 'created_at' in list(in_dict):
         out_dict['created_at'] = datetime.strptime(in_dict['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
-    if 'updated_at' in in_dict.keys():
+    if 'updated_at' in list(in_dict):
         out_dict['updated_at'] = datetime.strptime(in_dict['updated_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
     return out_dict
 
@@ -137,15 +137,15 @@ def denormalize_entity(in_dict):
         [dictionary] -- [BlitzDB Document-compatible dictionary of values]
     """
     out_dict = in_dict.copy()
-    if 'id' in in_dict.keys():
+    if 'id' in list(in_dict):
         out_dict['pk'] = in_dict['id']
         del out_dict['id']
-    if 'created_at' in in_dict.keys():
+    if 'created_at' in list(in_dict):
         # if not a datetime object, throw error
         if type(in_dict['created_at']) != datetime:
             raise IncorrectTypeException()
         out_dict['created_at'] = in_dict['created_at'].strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-    if 'updated_at' in in_dict.keys():
+    if 'updated_at' in list(in_dict):
         # if not a datetime object, throw error
         if type(in_dict['updated_at']) != datetime:
             raise IncorrectTypeException()

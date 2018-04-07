@@ -82,7 +82,7 @@ class EntityMethodsCRUD(object):
         if hasattr(datmo_entity, 'toDictionary'):
             dict_obj = datmo_entity.toDictionary()
         else:
-            if 'id' not in datmo_entity.keys() or not datmo_entity['id']:
+            if 'id' not in list(datmo_entity) or not datmo_entity['id']:
                 raise InputException("exception.local.update", {
                     "exception": "Entity id not provided in the input for update"
                 })
@@ -90,8 +90,8 @@ class EntityMethodsCRUD(object):
             new_dict_obj = datmo_entity
             original_datmo_entity = self.get_by_id(datmo_entity['id'])
             dict_obj = {}
-            for key, value in original_datmo_entity.toDictionary().iteritems():
-                if key in new_dict_obj.keys():
+            for key, value in original_datmo_entity.toDictionary().items():
+                if key in list(new_dict_obj):
                     dict_obj[key] = new_dict_obj[key]
                 else:
                     dict_obj[key] = getattr(original_datmo_entity, key)

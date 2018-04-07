@@ -63,7 +63,7 @@ class ProjectController(BaseController):
 
         # Update the settings in the ProjectCommand
         update_dict = {}
-        for k, v in update_dict.iteritems():
+        for k, v in update_dict.items():
             self.settings.set(k, v)
 
         return True

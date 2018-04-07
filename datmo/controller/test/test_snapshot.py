@@ -33,7 +33,7 @@ class TestSnapshotController():
         # Create environment_driver definition
         env_def_path = os.path.join(self.snapshot.home,
                                     "Dockerfile")
-        with open(env_def_path, "wb") as f:
+        with open(env_def_path, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
 
         environment_obj = self.environment.create({
@@ -49,13 +49,13 @@ class TestSnapshotController():
         # Create config
         config_filepath = os.path.join(self.snapshot.home,
                                      "config.json")
-        with open(config_filepath, "wb") as f:
+        with open(config_filepath, "w") as f:
             f.write(str("{}"))
 
         # Create stats
         stats_filepath = os.path.join(self.snapshot.home,
                                        "stats.json")
-        with open(stats_filepath, "wb") as f:
+        with open(stats_filepath, "w") as f:
             f.write(str("{}"))
 
         input_dict = {
@@ -85,7 +85,7 @@ class TestSnapshotController():
         # Create environment_driver definition
         env_def_path = os.path.join(self.snapshot.home,
                                     "Dockerfile")
-        with open(env_def_path, "wb") as f:
+        with open(env_def_path, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
 
         environment_obj = self.environment.create({
@@ -101,13 +101,13 @@ class TestSnapshotController():
         # Create config
         config_filepath = os.path.join(self.snapshot.home,
                                        "config.json")
-        with open(config_filepath, "wb") as f:
+        with open(config_filepath, "w") as f:
             f.write(str("{}"))
 
         # Create stats
         stats_filepath = os.path.join(self.snapshot.home,
                                       "stats.json")
-        with open(stats_filepath, "wb") as f:
+        with open(stats_filepath, "w") as f:
             f.write(str("{}"))
 
         input_dict = {
@@ -143,7 +143,7 @@ class TestSnapshotController():
         # Create environment_driver definition
         env_def_path = os.path.join(self.snapshot.home,
                                     "Dockerfile")
-        with open(env_def_path, "wb") as f:
+        with open(env_def_path, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
 
         environment_obj = self.environment.create({
@@ -159,13 +159,13 @@ class TestSnapshotController():
         # Create config
         config_filepath = os.path.join(self.snapshot.home,
                                        "config.json")
-        with open(config_filepath, "wb") as f:
+        with open(config_filepath, "w") as f:
             f.write(str("{}"))
 
         # Create stats
         stats_filepath = os.path.join(self.snapshot.home,
                                       "stats.json")
-        with open(stats_filepath, "wb") as f:
+        with open(stats_filepath, "w") as f:
             f.write(str("{}"))
 
         input_dict = {
@@ -180,7 +180,7 @@ class TestSnapshotController():
         # Create file to add to snapshot
         test_filepath_1 = os.path.join(self.snapshot.home,
                                      "test.txt")
-        with open(test_filepath_1, "wb") as f:
+        with open(test_filepath_1, "w") as f:
             f.write(str("test"))
 
         # Create snapshot in the project
@@ -189,7 +189,7 @@ class TestSnapshotController():
         # Create file to add to second snapshot
         test_filepath_2 = os.path.join(self.snapshot.home,
                                      "test.txt")
-        with open(test_filepath_2, "wb") as f:
+        with open(test_filepath_2, "w") as f:
             f.write(str("test"))
 
         # Create second snapshot in the project
@@ -208,7 +208,7 @@ class TestSnapshotController():
         # Create environment_driver definition
         env_def_path = os.path.join(self.snapshot.home,
                                     "Dockerfile")
-        with open(env_def_path, "wb") as f:
+        with open(env_def_path, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
 
         environment_obj = self.environment.create({
@@ -224,13 +224,13 @@ class TestSnapshotController():
         # Create config
         config_filepath = os.path.join(self.snapshot.home,
                                        "config.json")
-        with open(config_filepath, "wb") as f:
+        with open(config_filepath, "w") as f:
             f.write(str("{}"))
 
         # Create stats
         stats_filepath = os.path.join(self.snapshot.home,
                                       "stats.json")
-        with open(stats_filepath, "wb") as f:
+        with open(stats_filepath, "w") as f:
             f.write(str("{}"))
 
         input_dict = {

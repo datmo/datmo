@@ -74,7 +74,8 @@ class DockerEnvironmentManager(object):
         :return: list of tags available for that docker repo
         """
         docker_repository_tag_cmd = 'wget -q https://registry.hub.docker.com/v1/repositories/' + repo_name + '/tags -O -'
-        string_repository_tags = subprocess.check_output(docker_repository_tag_cmd, shell=True).strip()
+        string_repository_tags = subprocess.check_output(docker_repository_tag_cmd, shell=True)
+        string_repository_tags = string_repository_tags.decode().strip()
         repository_tags = ast.literal_eval(string_repository_tags)
         list_tag_names = []
         for repository_tag in repository_tags:
@@ -126,7 +127,7 @@ class DockerEnvironmentManager(object):
             else:
                 docker_image_remove_cmd = list(self.cpu_prefix)
                 docker_image_remove_cmd.extend(["rmi", image_id_or_name])
-            subprocess.check_output(docker_image_remove_cmd).strip()
+            subprocess.check_output(docker_image_remove_cmd).decode().strip()
         except Exception as e:
             raise EnvironmentExecutionException("exception.environment_driver.docker.remove_image", {
                 "exception": e
@@ -153,21 +154,54 @@ class DockerEnvironmentManager(object):
         """
         Run Docker container with parameters given as defined below
 
-        :param image_name: Docker image name
-        :param command: list with complete user-given command
-        :param ports: dict w/ format { "port/tcp": int(port), ... }
-        :param name: string to name container
-        :param volumes: dict with format { outsidepath1 : {'bind', containerpath2, 'mode', MODE} }
-        :param detach: bool to specify if container is to be detached
-        :param stdin_open: bool to specify if stdin is open
-        :param tty: bool connect pseudo-terminal with stdin / stdout
-        :param gpu: bool if GPU should be enabled
-        :param api: bool if Docker python client should be used
-        :return:
-            if api=False: (return_code, container_id)
-            if api=True:
-                if detach=True: container_obj
-                if detach=False: container logs as string
+        Parameters
+        ----------
+        image_name: str
+            Docker image name
+        command: list 
+            List with complete user-given command (e.g. ['python', 'cool.py'])
+        ports: dict 
+            Includes the ports to open and map (e.g. { "port/tcp": int(port), ... })
+        name: str
+            User given name for container
+        volumes: dict 
+            Includes storage volumes for docker 
+            (e.g. { outsidepath1 : {'bind', containerpath2, 'mode', MODE} })
+        detach: bool 
+            True if container is to be detached else False
+        stdin_open: bool 
+            True if stdin is open else False
+        tty: bool 
+            True to connect pseudo-terminal with stdin / stdout else False
+        gpu: bool 
+            True if GPU should be enabled else False
+        api: bool 
+            True if Docker python client should be used else use subprocess
+        
+        Returns
+        -------
+        if api=False: 
+        
+        return_code: int
+            Integer success code of command
+        container_id: str
+            Output container id 
+        
+        
+        if api=True & if detach=True:
+        
+        container_obj: Container
+            Object from Docker python api with details about container
+            
+        if api=True & if detach=False: 
+        
+        logs: str
+            Output logs for the run function
+
+        Raises
+        ------
+        EnvironmentExecutionException
+            If there is anything wrong in running the environment command
         """
         try:
             container_id = None
@@ -184,7 +218,7 @@ class DockerEnvironmentManager(object):
                     logs = self.client.containers.run(image_name, command, ports=ports,
                                                       name=name, volumes=volumes,
                                                       detach=detach, stdin_open=stdin_open)
-                    return logs
+                    return logs.decode()
             else: # if calling run function with the shell commands
                 if gpu:
                     docker_shell_cmd_list = list(self.cpu_prefix)
@@ -208,7 +242,7 @@ class DockerEnvironmentManager(object):
                 # Volume
                 if volumes:
                     # Mounting volumes
-                    for key in volumes.keys():
+                    for key in list(volumes):
                         docker_shell_cmd_list.append('-v')
                         volume_mount = key + ':' + volumes[key]['bind'] + ':' + \
                                        volumes[key]['mode']
@@ -216,7 +250,7 @@ class DockerEnvironmentManager(object):
 
                 if ports:
                     # Mapping ports
-                    for key in ports.keys():
+                    for key in list(ports):
                         docker_shell_cmd_list.append('-p')
                         port_mapping = str(ports[key]) + ':' + key
                         docker_shell_cmd_list.append(port_mapping)
@@ -233,7 +267,8 @@ class DockerEnvironmentManager(object):
                     })
                 list_process_cmd = list(self.cpu_prefix)
                 list_process_cmd.extend(['ps','-q', '-l'])
-                container_id = subprocess.check_output(list_process_cmd).strip()
+                container_id = subprocess.check_output(list_process_cmd)
+                container_id = container_id.decode().strip()
 
         except Exception as e:
             raise EnvironmentExecutionException("exception.environment_driver.docker.run_container", {
@@ -253,7 +288,7 @@ class DockerEnvironmentManager(object):
         try:
             docker_container_stop_cmd = list(self.cpu_prefix)
             docker_container_stop_cmd.extend(["stop", container_id])
-            subprocess.check_output(docker_container_stop_cmd).strip()
+            subprocess.check_output(docker_container_stop_cmd).decode().strip()
         except Exception as e:
             raise EnvironmentExecutionException("exception.environment_driver.docker.stop_container", {
                 "exception": e
@@ -267,7 +302,7 @@ class DockerEnvironmentManager(object):
                 docker_container_remove_cmd_list.extend(["rm", "-f", container_id])
             else:
                 docker_container_remove_cmd_list.extend(["rm", container_id])
-            subprocess.check_output(docker_container_remove_cmd_list).strip()
+            subprocess.check_output(docker_container_remove_cmd_list).decode().strip()
         except Exception as e:
             raise EnvironmentExecutionException("exception.environment_driver.docker.remove_container", {
                 "exception": e
@@ -287,7 +322,7 @@ class DockerEnvironmentManager(object):
         """
         # TODO: Fix function to better accomodate all logs in the same way
         if api: # calling the docker client via the API
-            with open(filepath, 'wb') as log_file:
+            with open(filepath, "w") as log_file:
                 for line in self.client.containers.get(container_id).logs(stream=True):
                     log_file.write(line.strip() + "\n")
         else:
@@ -298,7 +333,7 @@ class DockerEnvironmentManager(object):
                 command.extend(['logs', str(container_id)])
             process = subprocess.Popen(command, stdout=subprocess.PIPE,
                                        universal_newlines=True)
-            with open(filepath, 'wb') as log_file:
+            with open(filepath, "w") as log_file:
                 while True:
                     output = process.stdout.readline()
                     if output == '' and process.poll() is not None:
@@ -307,7 +342,7 @@ class DockerEnvironmentManager(object):
                         printable_output = output.strip().replace('\x08', ' ')
                         log_file.write(printable_output + "\n")
             return_code = process.poll()
-            with open(filepath, 'rb') as log_file:
+            with open(filepath, "r") as log_file:
                 logs = log_file.read()
             return return_code, logs
 
@@ -321,10 +356,10 @@ class DockerEnvironmentManager(object):
             running_docker_container_cmd_str = str(" ".join(running_docker_container_cmd_list))
             output = subprocess.Popen(running_docker_container_cmd_str,
                                       shell=True, stdout=subprocess.PIPE)
-            output_running_docker_container_cmd = output.communicate()[0]
+            out_list_cmd, err_list_cmd = output.communicate()
 
             # checking for running container id before stopping any
-            if output_running_docker_container_cmd:
+            if out_list_cmd:
                 docker_container_stop_cmd_list = list(self.cpu_prefix)
                 docker_container_stop_cmd_list = docker_container_stop_cmd_list + \
                                                  ["stop", "$("] + running_docker_container_cmd_list + \
@@ -332,12 +367,12 @@ class DockerEnvironmentManager(object):
                 docker_container_stop_cmd_str = str(" ".join(docker_container_stop_cmd_list))
                 output = subprocess.Popen(docker_container_stop_cmd_str,
                                   shell=True, stdout=subprocess.PIPE)
-                output_docker_container_stop_cmd = output.communicate()[0]
+                out_stop_cmd, err_stop_cmd = output.communicate()
                 # rechecking for container id after stopping them to ensure no errors
                 output = subprocess.Popen(running_docker_container_cmd_str,
                                           shell=True, stdout=subprocess.PIPE)
-                output_running_docker_container_cmd = output.communicate()[0]
-                if output_running_docker_container_cmd:
+                out_list_cmd, err_list_cmd = output.communicate()
+                if out_list_cmd:
                     docker_container_remove_cmd_list = list(self.cpu_prefix)
                     if force:
                         docker_container_remove_cmd_list = docker_container_remove_cmd_list + \
@@ -350,7 +385,7 @@ class DockerEnvironmentManager(object):
                     docker_container_remove_cmd_str = str(" ".join(docker_container_remove_cmd_list))
                     output = subprocess.Popen(docker_container_remove_cmd_str,
                                               shell=True, stdout=subprocess.PIPE)
-                    output_docker_container_remove_cmd = output.communicate()[0]
+                    out_remove_cmd, err_remove_cmd = output.communicate()
         except Exception as e:
             raise EnvironmentExecutionException("exception.environment_driver.docker.stop_remove_containers_by_term", {
                 "exception": e
@@ -366,9 +401,9 @@ class DockerEnvironmentManager(object):
                                                     "templates", "baseDockerfile")
 
         # Combine dockerfiles
-        destination = open(os.path.join(self.filepath, output_definition_path), 'wb')
-        shutil.copyfileobj(open(input_definition_path, 'rb'), destination)
-        shutil.copyfileobj(open(base_dockerfile_filepath, 'rb'), destination)
+        destination = open(os.path.join(self.filepath, output_definition_path), "w")
+        shutil.copyfileobj(open(input_definition_path, "r"), destination)
+        shutil.copyfileobj(open(base_dockerfile_filepath, "r"), destination)
         destination.close()
 
         return True

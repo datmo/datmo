@@ -28,8 +28,7 @@ class TestSnapshot():
             "--name", "foobar",
             "--description", "test model"])
         self.init.execute()
-        self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper,
-                                        self.init.controller.dal.driver)
+        self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
 
     def teardown_class(self):
         shutil.rmtree(self.temp_dir)

@@ -1,5 +1,4 @@
 import os
-import sys
 import shutil
 import glob
 import hashlib
@@ -32,7 +31,7 @@ class LocalFileManager(object):
             })
         BUFF_SIZE = 65536
         sha1 = hashlib.md5()
-        with open(filepath, 'rb') as f:
+        with open(filepath, "r") as f:
             while True:
                 data = f.read(BUFF_SIZE)
                 if not data:
@@ -333,16 +332,10 @@ class LocalFileManager(object):
         shutil.rmtree(temp_collection_path)
 
         # Change permissions to read only for collection_path. File collection is immutable
-        # TODO: chmod format only is for Python 2.X (doesn't work for Python 3.X)
-        if (sys.version_info > (3, 0)):
-            # Python 3 code in this block
-            mode = 0o755
-        else:
-            # Python 2 code in this block
-            mode = 0755
+        mode = 0o755
 
         for root, dirs, files in os.walk(collection_path, topdown=False):
-            for dir in [os.path.join(root, d) for d in dirs]:
+            for dir in  [os.path.join(root, d) for d in dirs]:
                 os.chmod(dir, mode)
             for file in [os.path.join(root, f) for f in files]:
                 os.chmod(file, mode)

@@ -31,11 +31,12 @@ class GitCodeManager(object):
                              stderr=subprocess.PIPE,
                              cwd=self.filepath)
         out, err = p.communicate()
+        out, err = out.decode(), err.decode()
         if err:
             raise GitExecutionException("exception.code_driver.git", {
                 "exception": err
             })
-        if not semver.match(out.split()[2], ">=1.9.7"):
+        if not semver.match(str(out.split()[2]), ">=1.9.7"):
             raise GitExecutionException("exception.code_driver.git", {
                 "git version": out.split()[2],
                 "exception": "Git version must be later than 1.9.7"
@@ -161,11 +162,21 @@ class GitCodeManager(object):
         """
         Git commit wrapper
 
-        Args:
-            options: list of options, e.g. ["-m", "hello"]
+        Parameters
+        ----------
+        options: list 
+            List of strings for the command (e.g. ["-m", "hello"])
 
-        Returns:
-            True for success
+        Returns
+        -------
+        bool
+            True if success else False
+
+        Raises
+        ------
+        GitExecutionException
+            If any errors occur in running git
+
         """
         try:
             p = subprocess.Popen([self.execpath, "commit"] + options,
@@ -173,6 +184,7 @@ class GitCodeManager(object):
                                  stderr=subprocess.PIPE,
                                  cwd=self.filepath)
             out, err = p.communicate()
+            out, err = out.decode(), err.decode()
             if err:
                 raise GitExecutionException("exception.code_driver.git.commit", {
                     "options": options,
@@ -235,7 +247,8 @@ class GitCodeManager(object):
         try:
             git_stash_list = subprocess.check_output([self.execpath, "stash", "list", "|",
                                                       "grep", """ + regex + """],
-                                                     cwd=self.filepath).strip()
+                                                     cwd=self.filepath)
+            git_stash_list = git_stash_list.decode().strip()
         except Exception as e:
             raise GitExecutionException("exception.code_driver.git.stash_list", {
                 "exception": e
@@ -247,10 +260,12 @@ class GitCodeManager(object):
         try:
             if regex:
                 git_stash_pop = subprocess.check_output([self.execpath, "stash", "pop", "stash^{/"+regex+"}"],
-                                                        cwd=self.filepath).strip()
+                                                        cwd=self.filepath)
+                git_stash_pop = git_stash_pop.decode().strip()
             else:
                 git_stash_pop = subprocess.check_output([self.execpath, "stash", "pop"],
-                                                        cwd=self.filepath).strip()
+                                                        cwd=self.filepath)
+                git_stash_pop = git_stash_pop.decode().strip()
         except Exception as e:
             raise GitExecutionException("exception.code_driver.git.stash_pop", {
                 "exception": e
@@ -262,10 +277,12 @@ class GitCodeManager(object):
         try:
             if regex:
                 git_stash_apply = subprocess.check_output([self.execpath,"stash", "apply", "stash^{/"+regex+"}"],
-                                                          cwd=self.filepath).strip()
+                                                          cwd=self.filepath)
+                git_stash_apply = git_stash_apply.decode().strip()
             else:
                 git_stash_apply = subprocess.check_output([self.execpath,"stash", "apply", "stash^{0}"],
-                                                          cwd=self.filepath).strip()
+                                                          cwd=self.filepath)
+                git_stash_apply = git_stash_apply.decode().strip()
         except Exception as e:
             raise GitExecutionException("exception.code_driver.git.stash_apply", {
                 "exception": e
@@ -275,7 +292,8 @@ class GitCodeManager(object):
     def hash(self, command, branch):
         try:
             result = subprocess.check_output([self.execpath, command, branch],
-                                             cwd=self.filepath).strip()
+                                             cwd=self.filepath)
+            result = result.decode().strip()
         except Exception as e:
             raise GitExecutionException("exception.code_driver.git.hash", {
                 "command": command,
@@ -287,7 +305,8 @@ class GitCodeManager(object):
     def latest_commit(self):
         try:
             git_commit = subprocess.check_output([self.execpath, "log", "--format=%H", "-n" , "1"],
-                                                 cwd=self.filepath).strip()
+                                                 cwd=self.filepath)
+            git_commit = git_commit.decode().strip()
         except Exception as e:
             raise GitExecutionException("exception.code_driver.git.latest_commit", {
                 "exception": e
@@ -307,7 +326,8 @@ class GitCodeManager(object):
     def get_absolute_git_dir(self):
         try:
             git_dir = subprocess.check_output([self.execpath,"rev-parse", "--absolute-git-dir"],
-                                                           cwd=self.filepath).strip()
+                                                           cwd=self.filepath)
+            git_dir = git_dir.decode().strip()
         except Exception as e:
             raise GitExecutionException("exception.code_driver.git.get_git_dir", {
                 "exception": e
@@ -317,7 +337,8 @@ class GitCodeManager(object):
     def check_git_work_tree(self):
         try:
             git_work_tree_exists = subprocess.check_output([self.execpath,"rev-parse", "--is-inside-work-tree"],
-                                                           cwd=self.filepath).strip()
+                                                           cwd=self.filepath)
+            git_work_tree_exists = git_work_tree_exists.decode().strip()
         except Exception as e:
             raise GitExecutionException("exception.code_driver.git.check_git_work_tree", {
                 "exception": e
@@ -333,12 +354,14 @@ class GitCodeManager(object):
                                      stderr=subprocess.PIPE,
                                      cwd=self.filepath)
                 out, err = p.communicate()
+                out, err = out.decode(), err.decode()
             elif mode == "add":
                 p = subprocess.Popen([self.execpath, "remote", "add", origin, git_url],
                                      stdout=subprocess.PIPE,
                                      stderr=subprocess.PIPE,
                                      cwd=self.filepath)
                 out, err = p.communicate()
+                out, err = out.decode(), err.decode()
             else:
                 raise GitExecutionException("exception.code_driver.git.remote", {
                     "mode": mode,
@@ -366,7 +389,8 @@ class GitCodeManager(object):
         try:
             # TODO: handle multiple remote urls
             git_url = subprocess.check_output([self.execpath, "config", "--get", "remote.origin.url"],
-                                              cwd=self.filepath).strip()
+                                              cwd=self.filepath)
+            git_url = git_url.decode().strip()
         except Exception as e:
             raise GitExecutionException("exception.code_driver.git.get_remote_url", {
                     "exception": e
@@ -398,12 +422,14 @@ class GitCodeManager(object):
                                          stderr=subprocess.PIPE,
                                          cwd=self.filepath)
                     out, err = p.communicate()
+                    out, err = out.decode(), err.decode()
                 else:
                     p = subprocess.Popen([self.execpath, "push", option, origin],
                                          stdout=subprocess.PIPE,
                                          stderr=subprocess.PIPE,
                                          cwd=self.filepath)
                     out, err = p.communicate()
+                    out, err = out.decode(), err.decode()
             else:
                 if name:
                     p = subprocess.Popen([self.execpath,"push", origin, name],
@@ -411,12 +437,14 @@ class GitCodeManager(object):
                                          stderr=subprocess.PIPE,
                                          cwd=self.filepath)
                     out, err = p.communicate()
+                    out, err = out.decode(), err.decode()
                 else:
                     p = subprocess.Popen([self.execpath, "push", origin],
                                          stdout=subprocess.PIPE,
                                          stderr=subprocess.PIPE,
                                          cwd=self.filepath)
                     out, err = p.communicate()
+                    out, err = out.decode(), err.decode()
             if err:
                 raise GitExecutionException("exception.code_driver.git.push", {
                     "origin": origin,
@@ -442,7 +470,7 @@ class GitCodeManager(object):
         def __create_filehash(single_filepath):
             BUFF_SIZE = 65536
             sha1 = hashlib.md5()
-            with open(single_filepath, "rb") as f:
+            with open(single_filepath, "r") as f:
                 while True:
                     data = f.read(BUFF_SIZE)
                     if not data:
@@ -462,9 +490,9 @@ class GitCodeManager(object):
                 current_filehash = __create_filehash(current_gitignore_filepath)
                 template_filehash = __create_filehash(template_gitignore_filepath)
                 if current_filehash != template_filehash:
-                    with open(os.path.join(self.filepath, ".tempgitignore"), "wb") as f:
-                        shutil.copyfileobj(open(current_gitignore_filepath, "rb"), f)
-                        shutil.copyfileobj(open(template_gitignore_filepath, "rb"), f)
+                    with open(os.path.join(self.filepath, ".tempgitignore"), "w") as f:
+                        shutil.copyfileobj(open(current_gitignore_filepath, "r"), f)
+                        shutil.copyfileobj(open(template_gitignore_filepath, "r"), f)
                     shutil.move(os.path.join(self.filepath, ".tempgitignore"),
                                 current_gitignore_filepath)
         except Exception as e:
@@ -630,15 +658,17 @@ class GitHostManager(object):
                              stderr=subprocess.PIPE,
                              cwd=self.home)
         out, err = p.communicate()
+        out, err = out.decode(), err.decode()
         if "Error" in out or "Error" in err or "denied" in err:
             self._ssh_enabled = False
         cmd = "ssh -i %s/.ssh/id_rsa -T git@%s" % (self.home, self.host)
-        p = subprocess.Popen(cmd,
+        p = subprocess.Popen(str(cmd),
                              shell=True,
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE,
                              cwd=self.home)
         out, err = p.communicate()
+        out, err = out.decode(), err.decode()
         error_strings = [
             "Error",
             "denied",

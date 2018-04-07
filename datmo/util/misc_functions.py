@@ -6,7 +6,7 @@ from glob import glob
 def printable_dict(input_dictionary):
     printable_output = ""
     if input_dictionary:
-        for key, value in input_dictionary.iteritems():
+        for key, value in input_dictionary.items():
             printable_output = printable_output + key + ": " + str(value) + "\n"
     return printable_output
 

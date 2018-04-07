@@ -9,7 +9,7 @@ class S3RemoteFileManager(object):
     def upload(src_filepath, s3_presigned_url):
         if not os.path.isfile(src_filepath):
             raise Exception("Can't upload file: %s, validation failed." % src_filepath)
-        with open(src_filepath, 'rb') as f:
+        with open(src_filepath, "r") as f:
             data = f.read()
             res = requests.put(s3_presigned_url, data=data)
             if res.status_code == 200:
@@ -24,6 +24,6 @@ class S3RemoteFileManager(object):
             pass
         else:
             raise Exception("Upload failed: %s" % res.text)
-        with open(dst_filepath, 'wb') as handle:
+        with open(dst_filepath, "w") as handle:
             for block in res.iter_content(1024):
                 handle.write(block)

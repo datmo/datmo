@@ -1,8 +1,14 @@
+from __future__ import print_function
+from future import standard_library
+standard_library.install_aliases()
+from builtins import input
+
 import sys
 import importlib
 import inspect
 from datmo.util.i18n import get as _
 from datmo.util.exceptions import ArgumentException
+
 
 class Helper():
     def __init__(self):
@@ -12,16 +18,19 @@ class Helper():
         print(message)
 
     def prompt(self, msg):
-        return raw_input(msg)
+        try:
+            return input(msg)
+        except EOFError:
+            pass
 
     def prompt_bool(self, msg):
-        val = raw_input(msg).lower()
+        val = input(msg).lower()
         return val in ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh']
 
     def prompt_validator(self, msg, validate_function, tries=5, error_message="Invalid input"):
         if not callable(validate_function):
             raise ArgumentException('validate_function argument must be function')
-        val = raw_input(msg).lower()
+        val = input(msg).lower()
         if not validate_function(val) and tries >= 0:
             tries -= 1
             return self.prompt_validator(msg, validate_function, tries, error_message)
