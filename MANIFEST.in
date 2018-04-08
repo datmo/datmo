@@ -1,0 +1,3 @@
+include datmo/controller/code/driver/templates/gitignore
+include datmo/controller/environment/driver/templates/baseDockerfile
+recursive-include templates *

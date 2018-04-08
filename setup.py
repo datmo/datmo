@@ -48,10 +48,4 @@ setup(
         ]
     },
     include_package_data=True,
-    data_files=[("datmo/controller/code/driver/templates",
-                ["datmo/controller/code/driver/templates/gitignore"]),
-                ("datmo/controller/environment/driver/templates",
-                 ["datmo/controller/environment/driver/templates/baseDockerfile",
-                  "datmo/controller/file/driver/templates/sampleDockerfile"])
-                ]
 )
