@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import shutil
 import tempfile
 
-from ..project import ProjectController
+from datmo.controller.project import ProjectController
 
 class TestProjectController():
     def setup_method(self):
@@ -31,9 +31,10 @@ class TestProjectController():
         assert result and self.project.is_initialized
 
         # Changeable by user, not tested in is_initialized
-        assert self.project.file_driver.exists_api_file()
-        assert self.project.file_driver.exists_script_file()
         assert self.project.current_session.name == "default"
+
+        # Check Project template if user specified template
+        # TODO: Add in Project template if user specifies
 
     def test_cleanup(self):
         self.project.init("test2", "test description")

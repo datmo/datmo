@@ -14,5 +14,5 @@ class ProjectCommand(BaseCommand):
         self.project_controller = ProjectController(home=home)
 
     def init(self, name, description):
-        self.cli_helper.echo(_('setup.init_project', {"name":name, "path": self.home}))
+        self.cli_helper.echo(_("info", "cli.project.init", {"name":name, "path": self.home}))
         self.project_controller.init(name, description)

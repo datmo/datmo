@@ -1,6 +1,10 @@
+import os
+import hashlib
 import logging
 import textwrap
 from glob import glob
+from datmo.util.i18n import get as _
+from datmo.util.exceptions import DoesNotExistException
 
 
 def printable_dict(input_dictionary):
@@ -47,3 +51,18 @@ def get_nvidia_devices():
     for device in nvidia_devices:
         devices.append(device + ':' + device + ':rwm')
     return devices
+
+def get_filehash(filepath):
+    if not os.path.isfile(filepath):
+        raise DoesNotExistException(_("error",
+                                      "util.misc_functions.get_filehash",
+                                      filepath))
+    BUFF_SIZE = 65536
+    sha1 = hashlib.md5()
+    with open(filepath, "rb") as f:
+        while True:
+            data = f.read(BUFF_SIZE)
+            if not data:
+                break
+            sha1.update(data)
+    return sha1.hexdigest()

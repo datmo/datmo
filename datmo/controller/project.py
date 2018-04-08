@@ -1,4 +1,6 @@
 import datetime
+
+from datmo.util.i18n import get as _
 from datmo.controller.base import BaseController
 from datmo.util.exceptions import SessionDoesNotExistException
 
@@ -35,9 +37,8 @@ class ProjectController(BaseController):
         # self.environment_driver.build_image(tag="datmo-" + \
         #                                  self.model.name)
 
-        # Add template files to the DatmoProject
-        self.file_driver.ensure_api_file()
-        self.file_driver.ensure_script_file()
+        # Add in Project template files if specified
+        # TODO: Add in project template files
 
         # Create and set current Session
         if is_new_model:
@@ -55,9 +56,8 @@ class ProjectController(BaseController):
                     "model_id": self.model.id
                 })
                 if not session_obj:
-                    raise SessionDoesNotExistException("exception.datmo.project.init", {
-                        "exception": "Session does not exist"
-                    })
+                    raise SessionDoesNotExistException(_("error",
+                                                         "controller.project.init"))
                 # Set current Session
                 self.settings.set('current_session_id', session_obj.id)
 

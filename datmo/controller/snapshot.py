@@ -1,5 +1,7 @@
 import os
+
 from datmo.controller.base import BaseController
+from datmo.util.i18n import get as _
 from datmo.util.file_storage import JSONKeyValueStore
 from datmo.util.exceptions import RequiredArgumentMissing, \
     FileIOException
@@ -61,51 +63,49 @@ class SnapshotController(BaseController):
                 elif required_arg == "file_collection_id":
                     # transform file paths to file_collection_id
                     if "filepaths" not in dictionary:
-                        raise RequiredArgumentMissing("exception.project.snapshot_create", {
-                            "exception": "Required argument filepaths missing to create snapshot"
-                        })
+                        raise RequiredArgumentMissing(_("error",
+                                                        "controller.snapshot.create.arg",
+                                                        required_arg))
                     create_dict['file_collection_id'] = self.file_driver.\
                         create_collection(dictionary['filepaths'])
                 # Config setup
                 elif required_arg == "config":
                     # transform file to config dict
                     if "config_filename" not in dictionary:
-                        raise RequiredArgumentMissing("exception.project.snapshot_create", {
-                            "exception": "Required argument config_filename missing to create snapshot"
-                        })
+                        raise RequiredArgumentMissing(_("error",
+                                                        "controller.snapshot.create.arg",
+                                                        required_arg))
                     possible_paths = [os.path.join(self.home, dictionary['config_filename'])] + \
                         [os.path.join(self.home, filepath, dictionary['config_filename'])
                          for filepath in dictionary['filepaths'] if os.path.isdir(filepath)]
                     existing_possible_paths = [possible_path for possible_path in possible_paths
                                                if os.path.isfile(possible_path)]
                     if not existing_possible_paths:
-                        raise FileIOException("exception.project.snapshot_create", {
-                            "exception": "Config file does not exist"
-                        })
+                        raise FileIOException(_("error",
+                                                "controller.snapshot.create.file_config"))
                     config_json_driver = JSONKeyValueStore(existing_possible_paths[0])
                     create_dict['config'] = config_json_driver.to_dict()
                 # Stats setup
                 elif required_arg == "stats":
                     # transform stats file to stats dict
                     if "stats_filename" not in dictionary:
-                        raise RequiredArgumentMissing("exception.project.snapshot_create", {
-                            "exception": "Required argument stats_filename missing to create snapshot"
-                        })
+                        raise RequiredArgumentMissing(_("error",
+                                                        "controller.snapshot.create.arg",
+                                                        required_arg))
                     possible_paths = [os.path.join(self.home, dictionary['stats_filename'])] + \
                                      [os.path.join(self.home, filepath, dictionary['stats_filename'])
                                       for filepath in dictionary['filepaths'] if os.path.isdir(filepath)]
                     existing_possible_paths = [possible_path for possible_path in possible_paths
                                                if os.path.isfile(possible_path)]
                     if not existing_possible_paths:
-                        raise FileIOException("exception.project.snapshot_create", {
-                            "exception": "Stats file does not exist"
-                        })
+                        raise FileIOException(_("error",
+                                                "controller.snapshot.create.file_stat"))
                     stats_json_driver = JSONKeyValueStore(existing_possible_paths[0])
                     create_dict['stats'] = stats_json_driver.to_dict()
                 else:
-                    raise RequiredArgumentMissing("exception.project.snapshot_create", {
-                        "exception": "Required argument missing to create snapshot"
-                    })
+                    raise RequiredArgumentMissing(_("error",
+                                                    "controller.snapshot.create.arg",
+                                                    required_arg))
 
         ## Optional args
         optional_args = ["session_id", "task_id", "message", "label"]

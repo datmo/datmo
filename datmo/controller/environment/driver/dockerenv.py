@@ -3,6 +3,7 @@ import os
 import shutil
 import subprocess
 
+from datmo.util.i18n import get as _
 from docker import DockerClient
 
 from datmo.util.exceptions import DoesNotExistException, \
@@ -11,17 +12,16 @@ from datmo.util.exceptions import DoesNotExistException, \
 
 class DockerEnvironmentManager(object):
     """
-    This Environment Manager handles Environment management in the Datmo ProjectCommand using Docker
+    This Environment Manager handles Environment management in the Datmo Project using Docker
     """
 
     def __init__(self, filepath="", docker_execpath="docker", docker_socket="unix:///var/run/docker.sock"):
         self.filepath = filepath
         # Check if filepath exists
         if not os.path.exists(self.filepath):
-            raise DoesNotExistException("exception.environment_driver.docker", {
-                "filepath": filepath,
-                "exception": "File path does not exist"
-            })
+            raise DoesNotExistException(_("error",
+                                          "controller.environment.driver.docker.__init__.dne",
+                                          filepath))
 
         # TODO: separate methods for instantiation into init function below
 
@@ -32,7 +32,9 @@ class DockerEnvironmentManager(object):
             self.client = DockerClient(base_url=self.docker_socket)
             self.info = self.client.info()
         except Exception:
-            raise EnvironmentInitFailed(self.docker_socket)
+            raise EnvironmentInitFailed(_("error",
+                                          "controller.environment.driver.docker.__init__",
+                                          self.docker_socket))
 
         self.is_connected = True if self.info["Images"] != None else False
         self.cpu_prefix = [self.docker_execpath, '-H', self.docker_socket]
@@ -61,17 +63,25 @@ class DockerEnvironmentManager(object):
             # Startup Docker
             pass
         except Exception as e:
-            raise EnvironmentExecutionException("exception.environment_driver.docker.init", {
-                "exception": e
-            })
+            raise EnvironmentExecutionException(_("error",
+                                                  "controller.environment.driver.docker.init",
+                                                  e))
         return True
 
 
     def get_tags_for_docker_repository(self, repo_name):
         """
         Method to get tags for docker repositories
-        :param repo_name: the docker repository name
-        :return: list of tags available for that docker repo
+
+        Parameters
+        ----------
+        repo_name: str
+            Docker repository name
+
+        Returns
+        -------
+        list
+            List of tags available for that docker repo
         """
         docker_repository_tag_cmd = 'wget -q https://registry.hub.docker.com/v1/repositories/' + repo_name + '/tags -O -'
         string_repository_tags = subprocess.check_output(docker_repository_tag_cmd, shell=True)
@@ -102,13 +112,13 @@ class DockerEnvironmentManager(object):
             if process_returncode == 0:
                 return True
             elif process_returncode == 1:
-                raise EnvironmentExecutionException("exception.environment_driver.docker.build_image", {
-                    "exception": "Build subprocess failed"
-                })
+                raise EnvironmentExecutionException(_("error",
+                                                      "controller.environment.driver.docker.build_image",
+                                                      "Docker subprocess failed"))
         except Exception as e:
-            raise EnvironmentExecutionException("exception.environment_driver.docker.build_image", {
-                "exception": e
-            })
+            raise EnvironmentExecutionException(_("error",
+                                                  "controller.environment.driver.docker.build_image",
+                                                  e))
 
     def get_image(self, image_name):
         return self.client.images.get(image_name)
@@ -129,9 +139,9 @@ class DockerEnvironmentManager(object):
                 docker_image_remove_cmd.extend(["rmi", image_id_or_name])
             subprocess.check_output(docker_image_remove_cmd).decode().strip()
         except Exception as e:
-            raise EnvironmentExecutionException("exception.environment_driver.docker.remove_image", {
-                "exception": e
-            })
+            raise EnvironmentExecutionException(_("error",
+                                                  "controller.environment.driver.docker.remove_image",
+                                                  e))
         return True
 
     def remove_images(self, name=None, all=False, filters=None,
@@ -144,9 +154,9 @@ class DockerEnvironmentManager(object):
             for image in images:
                 self.remove_image(image.id, force=force)
         except Exception as e:
-            raise EnvironmentExecutionException("exception.environment_driver.docker.remove_images", {
-                "exception": e
-            })
+            raise EnvironmentExecutionException(_("error",
+                                                  "controller.environment.driver.docker.remove_images",
+                                                  e))
         return True
 
     def run_container(self, image_name, command=None, ports=None, name=None, volumes=None,
@@ -262,18 +272,18 @@ class DockerEnvironmentManager(object):
                     docker_shell_cmd_list.extend(command)
                 return_code = subprocess.call(docker_shell_cmd_list)
                 if return_code != 0:
-                    raise EnvironmentExecutionException("exception.environment_driver.docker.run_container", {
-                        "exception": "Docker command failed: %s" % docker_shell_cmd_list
-                    })
+                    raise EnvironmentExecutionException(_("error",
+                                                          "controller.environment.driver.docker.run_container",
+                                                          docker_shell_cmd_list))
                 list_process_cmd = list(self.cpu_prefix)
                 list_process_cmd.extend(['ps','-q', '-l'])
                 container_id = subprocess.check_output(list_process_cmd)
                 container_id = container_id.decode().strip()
 
         except Exception as e:
-            raise EnvironmentExecutionException("exception.environment_driver.docker.run_container", {
-                "exception": e
-            })
+            raise EnvironmentExecutionException(_("error",
+                                                  "controller.environment.driver.docker.run_container",
+                                                  e))
         return return_code, container_id
 
     def get_container(self, container_id):
@@ -290,9 +300,9 @@ class DockerEnvironmentManager(object):
             docker_container_stop_cmd.extend(["stop", container_id])
             subprocess.check_output(docker_container_stop_cmd).decode().strip()
         except Exception as e:
-            raise EnvironmentExecutionException("exception.environment_driver.docker.stop_container", {
-                "exception": e
-            })
+            raise EnvironmentExecutionException(_("error",
+                                                  "controller.environment.driver.docker.stop_container",
+                                                  e))
         return True
 
     def remove_container(self, container_id, force=False):
@@ -304,9 +314,9 @@ class DockerEnvironmentManager(object):
                 docker_container_remove_cmd_list.extend(["rm", container_id])
             subprocess.check_output(docker_container_remove_cmd_list).decode().strip()
         except Exception as e:
-            raise EnvironmentExecutionException("exception.environment_driver.docker.remove_container", {
-                "exception": e
-            })
+            raise EnvironmentExecutionException(_("error",
+                                                  "controller.environment.driver.docker.remove_container",
+                                                  e))
         return True
 
     def log_container(self, container_id, filepath, api=False,
@@ -314,11 +324,24 @@ class DockerEnvironmentManager(object):
         """
         Log capture at a particular point `docker logs`. Can also use `--follow` for real time logs
 
-        :param container_id: docker container id
-        :param filepath: filepath to store log file
-        :param api: use the docker python api
-        :param follow: tail the output
-        :return: return code_driver of the docker log command
+        Parameters
+        ----------
+        container_id : str
+            Docker container id
+        filepath : str
+            Filepath to store log file
+        api : bool
+            True to use the docker python api
+        follow : bool
+            Tail the output
+
+        Returns
+        -------
+        return_code : str
+            Process return code for the container
+        logs : str
+            Output logs read into a string format
+
         """
         # TODO: Fix function to better accomodate all logs in the same way
         if api: # calling the docker client via the API
@@ -387,9 +410,9 @@ class DockerEnvironmentManager(object):
                                               shell=True, stdout=subprocess.PIPE)
                     out_remove_cmd, err_remove_cmd = output.communicate()
         except Exception as e:
-            raise EnvironmentExecutionException("exception.environment_driver.docker.stop_remove_containers_by_term", {
-                "exception": e
-            })
+            raise EnvironmentExecutionException(_("error",
+                                                  "controller.environment.driver.docker.stop_remove_containers_by_term",
+                                                  e))
         return True
 
     def form_datmo_definition_file(self, input_definition_path="Dockerfile",

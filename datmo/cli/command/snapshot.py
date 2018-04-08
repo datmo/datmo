@@ -83,7 +83,7 @@ class SnapshotCommand(ProjectCommand):
             })
 
     def create(self, **kwargs):
-        self.cli_helper.echo(_('snapshot.create'))
+        self.cli_helper.echo(_("info", "cli.snapshot.create"))
         self.snapshot_controller.create(**kwargs)
 
     def delete(self, snapshot_id):

@@ -29,14 +29,6 @@ class TestLocalFileManager():
 
     # Static Method Tests
 
-    def test_get_filehash(self):
-        relative_filepath = "test.json"
-        self.local_file_manager.create(relative_filepath)
-        filepath = os.path.join(self.local_file_manager.filepath,
-                                relative_filepath)
-        result = self.local_file_manager.get_filehash(filepath)
-        assert result == "d41d8cd98f00b204e9800998ecf8427e"
-
     def test_get_safe_dst_filepath(self):
         # Create first file to copy
         relative_filepath = "test.json"
@@ -186,53 +178,8 @@ class TestLocalFileManager():
             not os.path.isdir(hidden_datmo_dir_filepath)
 
     # Template tests
-    def test_ensure_dockerfile(self):
-        result = self.local_file_manager.ensure_dockerfile()
-        assert result == True and \
-            os.path.isfile(os.path.join(
-                self.local_file_manager.filepath,
-                "Dockerfile"
-            ))
 
-    def test_exists_dockerfile(self):
-        self.local_file_manager.ensure_dockerfile()
-        result = self.local_file_manager.exists_dockerfile()
-        assert result == True
-        os.remove(os.path.join(self.local_file_manager.filepath, "Dockerfile"))
-        result = self.local_file_manager.exists_dockerfile()
-        assert result == False
-
-    def test_check_api_file_exists(self):
-        self.local_file_manager.ensure_api_file()
-        result = self.local_file_manager.exists_api_file()
-        assert result == True
-        os.remove(os.path.join(self.local_file_manager.filepath, "api.py"))
-        result = self.local_file_manager.exists_api_file()
-        assert result == False
-
-    def test_ensure_api_file_exists(self):
-        result = self.local_file_manager.ensure_api_file()
-        assert result == True and \
-            os.path.isfile(os.path.join(
-                self.local_file_manager.filepath,
-                "api.py")
-            )
-
-    def test_check_script_file_exists(self):
-        self.local_file_manager.ensure_script_file()
-        result = self.local_file_manager.exists_script_file()
-        assert result == True
-        os.remove(os.path.join(self.local_file_manager.filepath, "script.py"))
-        result = self.local_file_manager.exists_script_file()
-        assert result == False
-
-    def test_ensure_script_file_exists(self):
-        result = self.local_file_manager.ensure_script_file()
-        assert result == True and \
-            os.path.isfile(os.path.join(
-                self.local_file_manager.filepath,
-                "script.py")
-            )
+    # TODO : Add tests for code that handles various project templates
 
     # Collection Tests
     def test_create_collections_dir(self):

@@ -10,17 +10,17 @@ from datmo.util.i18n import get
 class Testi18n():
 
     def test_get(self):
-        msg = get('general.line')
+        msg = get("info", "cli.general.line")
         assert msg == '=============================================================='
 
     def test_get_dict(self):
-        msg = get('test.dict.replacements', {"foo":"hello", "bar":"world"})
+        msg = get("info", "cli.general.dict.test", {"foo":"hello", "bar":"world"})
         assert msg == "hello - world"
 
     def test_get_string(self):
-        msg = get('general.echo.input', "disco")
-        assert msg == "You entered: disco"
+        msg = get("info", "cli.general.str.test", "disco")
+        assert msg == "disco"
 
     def test_get_tuple(self):
-        msg = get('test.tuple.replacements', ("disco", "inferno"))
+        msg = get("info", "cli.general.tuple.test", ("disco", "inferno"))
         assert msg == "disco, inferno"

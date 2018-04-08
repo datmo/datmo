@@ -1,5 +1,6 @@
 import os
 from datmo.storage.local.driver.driver_type import DriverType
+from datmo.util.i18n import get as _
 from datmo.util import get_class_contructor
 from datmo.util.project_settings import ProjectSettings
 from datmo.util.exceptions import InvalidProjectPathException, \
@@ -21,11 +22,9 @@ class BaseController(object):
         self._is_initialized = False
 
         if not os.path.isdir(self.home):
-            raise InvalidProjectPathException("exception.datmo.project", {
-                "home": home,
-                "exception": "Project path does not exist"
-            })
-
+            raise InvalidProjectPathException(_("error",
+                                                "controller.base.__init__",
+                                                home))
         self.settings = ProjectSettings(self.home)
         # TODO: is_initialized properties should be functions
 
@@ -48,7 +47,8 @@ class BaseController(object):
     @property
     def current_session(self):
         if not self.model:
-            raise DatmoModelNotInitializedException()
+            raise DatmoModelNotInitializedException(_("error",
+                                                      "controller.base.current_session"))
         if self._current_session == None:
           session_id = self.settings.get('current_session_id')
           self._current_session = self.dal.session.get_by_id(session_id) if session_id else None

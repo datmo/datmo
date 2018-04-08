@@ -1,5 +1,7 @@
 from kids.cache import cache
 from datetime import datetime
+
+from datmo.util.i18n import get as _
 from datmo.entity.model import Model
 from datmo.entity.session import Session
 from datmo.entity.code import Code
@@ -83,9 +85,8 @@ class EntityMethodsCRUD(object):
             dict_obj = datmo_entity.toDictionary()
         else:
             if 'id' not in list(datmo_entity) or not datmo_entity['id']:
-                raise InputException("exception.local.update", {
-                    "exception": "Entity id not provided in the input for update"
-                })
+                raise InputException(_("error",
+                                       "storage.local.dal.update"))
             # Aggregate original object and new object into dict_obj var
             new_dict_obj = datmo_entity
             original_datmo_entity = self.get_by_id(datmo_entity['id'])

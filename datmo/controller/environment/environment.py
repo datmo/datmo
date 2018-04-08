@@ -1,5 +1,7 @@
 import os
-import hashlib
+
+from datmo.util.i18n import get as _
+from datmo.util.misc_functions import get_filehash
 from datmo.controller.base import BaseController
 from datmo.util.exceptions import RequiredArgumentMissing, \
     DoesNotExistException
@@ -7,21 +9,6 @@ from datmo.util.exceptions import RequiredArgumentMissing, \
 class EnvironmentController(BaseController):
     def __init__(self, home, dal_driver=None):
         super(EnvironmentController, self).__init__(home, dal_driver)
-
-    def _get_filehash(self, filepath):
-        if not os.path.isfile(filepath):
-            raise DoesNotExistException("exception.environment_driver.docker.create_environment", {
-                "exception": "filepath is not a file."
-            })
-        BUFF_SIZE = 65536
-        sha1 = hashlib.md5()
-        with open(filepath, "rb") as f:
-            while True:
-                data = f.read(BUFF_SIZE)
-                if not data:
-                    break
-                sha1.update(data)
-        return sha1.hexdigest()
 
     def create(self, dictionary):
         """ Create an Environment
@@ -61,13 +48,12 @@ class EnvironmentController(BaseController):
                 # Id creation from filehash
                 if required_arg == "id":
                     create_dict[required_arg] = \
-                        self._get_filehash(dictionary["definition_filepath"])
+                        get_filehash(dictionary["definition_filepath"])
                 # File setup
                 elif required_arg == "file_collection_id":
                     if "definition_filepath" not in dictionary:
-                        raise RequiredArgumentMissing("exception.controller.environment_driver.create", {
-                            "exception": "Required argument definition_filepath missing to create environment_driver"
-                        })
+                        raise RequiredArgumentMissing(_("error",
+                                                        "controller.environment.create"))
                     #  Create datmo definition file
                     definition_path, definition_filename = os.path.split(dictionary['definition_filepath'])
                     datmo_definition_filepath = os.path.join(definition_path, "datmo" + definition_filename)
@@ -110,9 +96,9 @@ class EnvironmentController(BaseController):
         """
         environment_obj = self.dal.environment.get_by_id(id)
         if not environment_obj:
-            raise DoesNotExistException("exception.controller.environment.build", {
-                "exception": "Environment does not exist"
-            })
+            raise DoesNotExistException(_("error",
+                                          "controller.environment.build",
+                                          id))
         # Build the Environment with the driver
         datmo_definition_filepath = os.path.join(self.file_driver.
                                                  get_collection_path(
@@ -145,9 +131,9 @@ class EnvironmentController(BaseController):
         """
         environment_obj = self.dal.environment.get_by_id(id)
         if not environment_obj:
-            raise DoesNotExistException("exception.environment_driver.docker.delete_environment", {
-                "exception": "environment_driver directory does not exist"
-            })
+            raise DoesNotExistException(_("error",
+                                          "controller.environment.delete",
+                                          id))
         # Remove file collection
         file_collection_deleted = self.file_driver.delete_collection(environment_obj.file_collection_id)
         # Remove images associated with the environment_driver
@@ -160,4 +146,3 @@ class EnvironmentController(BaseController):
 
         return file_collection_deleted and image_removed and \
                containers_stopped_and_removed and delete_success
-

@@ -30,7 +30,7 @@ class TestSnapshotController():
     def test_create(self):
         self.project.init("test3", "test description")
 
-        # Create environment_driver definition
+        # Create environment definition
         env_def_path = os.path.join(self.snapshot.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:

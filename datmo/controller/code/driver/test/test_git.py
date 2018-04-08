@@ -14,11 +14,11 @@ class TestGitManager():
     """
     Checks all functions of the GitCodeManager
     """
-    def setup_class(self):
+    def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir="/tmp/")
         self.git_code_manager = GitCodeManager(filepath=self.temp_dir, execpath="git")
 
-    def teardown_class(self):
+    def teardown_method(self):
         shutil.rmtree(self.temp_dir)
 
     def test_instantiation(self):
@@ -64,11 +64,14 @@ class TestGitManager():
         assert parsed == "http://github.com/datmo/hello-world.git"
 
     def test_commit(self):
-        # TODO: try out more options
+        # TODO: try out more options (for failed execution)
         self.git_code_manager.init()
+        # Test False case if no new commit created
+        result = self.git_code_manager.commit(["-m", "test"])
+        assert result == False
+        # Test True case for new commit
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
-
         with open(test_filepath, "w") as f:
             f.write(str("test"))
         self.git_code_manager.add(test_filepath)
@@ -94,18 +97,40 @@ class TestGitManager():
     # def test_stash_apply(self):
     #     pass
     #
-    # def test_hash(self):
-    #     pass
-    #
-    # def test_latest_commit(self):
-    #     pass
-    #
+    def test_latest_commit(self):
+        self.git_code_manager.init()
+        # Check if properly returns error without commit
+        try:
+            self.git_code_manager.latest_commit()
+        except:
+            assert True
+        # Check if properly returns latest commit
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test.txt")
+        with open(test_filepath, "w") as f:
+            f.write(str("test"))
+        self.git_code_manager.add(test_filepath)
+        self.git_code_manager.commit(["-m", "test"])
+        latest_commit = self.git_code_manager.latest_commit()
+        assert latest_commit
+
     def test_reset(self):
         self.git_code_manager.init()
-        self.git_code_manager.commit(options=["-m", "test"])
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test.txt")
+        with open(test_filepath, "w") as f:
+            f.write(str("test"))
+        self.git_code_manager.add(test_filepath)
+        self.git_code_manager.commit(["-m", "test"])
         commit_id = self.git_code_manager.latest_commit()
         result = self.git_code_manager.reset(git_commit=commit_id)
         assert result == True
+
+    def test_get_absolute_git_dir(self):
+        self.git_code_manager.init()
+        result = self.git_code_manager.get_absolute_git_dir()
+        assert os.path.join(self.git_code_manager.filepath,
+                            ".git") in result
 
     def test_check_git_work_tree(self):
         self.git_code_manager.init()
@@ -131,7 +156,13 @@ class TestGitManager():
 
     def test_get_remote_url(self):
         self.git_code_manager.init()
+        # Check if properly returns None
+        remote_url = self.git_code_manager.get_remote_url()
+        assert remote_url == None
+        # Check if properly returns value set
         if self.git_code_manager.git_host_manager.host == "github.com":
+            self.git_code_manager.remote("add", "origin",
+                                         "https://github.com/datmo/test.git")
             self.git_code_manager.remote("set-url", "origin",
                                          "https://github.com/datmo/test.git")
             remote_url = self.git_code_manager.get_remote_url()

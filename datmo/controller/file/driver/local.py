@@ -5,6 +5,7 @@ import hashlib
 import uuid
 import checksumdir
 
+from datmo.util.i18n import get as _
 from datmo.util.exceptions import DoesNotExistException, \
     FileIOException, FileStructureException
 
@@ -17,38 +18,21 @@ class LocalFileManager(object):
         self.filepath = filepath
         # Check if filepath exists
         if not os.path.exists(self.filepath):
-            raise DoesNotExistException("exception.file.local", {
-                "filepath": filepath,
-                "exception": "File path does not exist"
-            })
+            raise DoesNotExistException(_("error",
+                                          "controller.file.driver.local.__init__",
+                                          filepath))
         self._is_initialized = self.is_initialized
-
-    @staticmethod
-    def get_filehash(filepath):
-        if not os.path.isfile(filepath):
-            raise DoesNotExistException("exception.file.local.get_filehash",{
-                "exception": "filepath is not a file."
-            })
-        BUFF_SIZE = 65536
-        sha1 = hashlib.md5()
-        with open(filepath, "r") as f:
-            while True:
-                data = f.read(BUFF_SIZE)
-                if not data:
-                    break
-                sha1.update(data)
-        return sha1.hexdigest()
 
     @staticmethod
     def get_safe_dst_filepath(filepath, dst_dirpath):
         if not os.path.isfile(filepath):
-            raise DoesNotExistException("exception.file.local.get_safe_dst_filepath",{
-                "exception": "filepath is not a file."
-            })
+            raise DoesNotExistException(_("error",
+                                          "controller.file.driver.local.get_safe_dst_filepath.src",
+                                          filepath))
         if not os.path.isdir(dst_dirpath):
-            raise DoesNotExistException("exception.file.local.get_safe_dst_filepath", {
-                "exception": "dst_dirpath is not a dir."
-            })
+            raise DoesNotExistException(_("error",
+                                          "controller.file.driver.local.get_safe_dst_filepath.dst",
+                                          dst_dirpath))
         _, filename = os.path.split(filepath)
         dst_filepath = os.path.join(dst_dirpath, filename)
         number_of_items = glob.glob(dst_filepath)
@@ -66,13 +50,13 @@ class LocalFileManager(object):
     def copytree(src_dirpath, dst_dirpath,
                  symlinks=False, ignore=None):
         if not os.path.isdir(src_dirpath):
-            raise DoesNotExistException("exception.file.local.copytree",{
-                "exception": "src_dirpath is not a dir."
-            })
+            raise DoesNotExistException(_("error",
+                                          "controller.file.driver.local.copytree.src",
+                                          src_dirpath))
         if not os.path.isdir(dst_dirpath):
-            raise DoesNotExistException("exception.file.local.copytree",{
-                "exception": "dst_dirpath is not a dir."
-            })
+            raise DoesNotExistException(_("error",
+                                          "controller.file.driver.local.copytree.dst",
+                                          dst_dirpath))
         for item in os.listdir(src_dirpath):
             src_filepath = os.path.join(src_dirpath, item)
             dst_filepath = os.path.join(dst_dirpath, item)
@@ -90,13 +74,13 @@ class LocalFileManager(object):
     @staticmethod
     def copyfile(filepath, dst_dirpath):
         if not os.path.isfile(filepath):
-            raise DoesNotExistException("exception.file.local.copyfile",{
-                "exception": "filepath is not a file."
-            })
+            raise DoesNotExistException(_("error",
+                                          "controller.file.driver.local.copyfile.src",
+                                          filepath))
         if not os.path.isdir(dst_dirpath):
-            raise DoesNotExistException("exception.file.local.copyfile", {
-                "exception": "dst_dirpath is not a dir."
-            })
+            raise DoesNotExistException(_("error",
+                                          "controller.file.driver.local.copyfile.dst",
+                                          dst_dirpath))
         dst_filepath = LocalFileManager.get_safe_dst_filepath(filepath, dst_dirpath)
         shutil.copy2(filepath, dst_filepath)
         return True
@@ -114,11 +98,10 @@ class LocalFileManager(object):
             # Ensure the Datmo file structure exists
             self.ensure_datmo_file_structure()
         except Exception as e:
-            raise FileIOException("exception.file.local.init", {
-                "exception": e
-            })
+            raise FileIOException(_("error",
+                                    "controller.file.driver.local.init",
+                                    e))
         return True
-
 
     def create(self, relative_filepath, dir=False):
         filepath = os.path.join(self.filepath,
@@ -130,7 +113,7 @@ class LocalFileManager(object):
                 os.makedirs(filepath)
             else:
                 with open(os.path.join(self.filepath,
-                                  relative_filepath), 'a'):
+                                  relative_filepath), "a"):
                     os.utime(filepath, None)
         return filepath
 
@@ -154,10 +137,9 @@ class LocalFileManager(object):
     def delete(self, relative_filepath, dir=False):
         if not os.path.exists(os.path.join(self.filepath,
                                        relative_filepath)):
-            raise DoesNotExistException("exception.file.local.delete", {
-                "filepath": os.path.join(self.filepath, relative_filepath),
-                "exception": "File does not exist"
-            })
+            raise DoesNotExistException(_("error",
+                                          "controller.file.driver.local.delete",
+                                          os.path.join(self.filepath, relative_filepath)))
         if dir:
             shutil.rmtree(relative_filepath)
         else:
@@ -203,67 +185,45 @@ class LocalFileManager(object):
         return self.delete_hidden_datmo_dir()
 
     # Template files handling
-    def exists_dockerfile(self):
-        if not os.path.isfile(os.path.join(self.filepath, "Dockerfile")):
-            return False
-        return True
 
-    def ensure_dockerfile(self):
-        try:
-            template_dockerfile_filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                                        "templates", "sampleDockerfile")
-            current_dockerfile_filepath = os.path.join(self.filepath, "Dockerfile")
-            # Copy the template Dockerfile if none exists
-            if not self.exists_dockerfile():
-                shutil.copyfile(template_dockerfile_filepath, current_dockerfile_filepath)
-        except Exception as e:
-            raise FileIOException("exception.environment_driver.docker.ensure_dockerfile", {
-                "exception": e
-            })
-        return True
-
-    def exists_api_file(self):
-        if not os.path.isfile(os.path.join(self.filepath, "api.py")):
-            return False
-        return True
-
-    def ensure_api_file(self):
-        try:
-            template_api_filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                                       "templates", "api.py")
-            current_api_filepath = os.path.join(self.filepath, "api.py")
-            if not self.exists_api_file():
-                shutil.copyfile(template_api_filepath, current_api_filepath)
-        except Exception as e:
-            raise FileIOException("exception.file.local.ensure_api_file", {
-                "exception": e
-            })
-        return True
-
-    def exists_script_file(self):
-        if not os.path.isfile(os.path.join(self.filepath, "script.py")):
-            return False
-        return True
-
-    def ensure_script_file(self):
-        try:
-            template_script_filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                                    "templates", "script.py")
-            current_script_filepath = os.path.join(self.filepath, "script.py")
-            if not self.exists_script_file():
-                shutil.copyfile(template_script_filepath, current_script_filepath)
-        except Exception as e:
-            raise FileIOException("exception.file.local.ensure_script_file", {
-                "exception": e
-            })
-        return True
+    # TODO: Add code to handle and fill in templates from `templates/` folder in root
+    # @staticmethod
+    # def create_readme(directory, filename, model_name, model_description, model_url, echo_prefix=""):
+    #     filepath = os.path.join(directory, filename)
+    #     badge_text = "[![Datmo Model]" \
+    #                  "(" + model_url + "/badge.svg)]" \
+    #                  "(" + model_url + ")"
+    #     if not os.path.exists(filepath):
+    #         click.echo(echo_prefix + "Creating a stub %s." % filename)
+    #         with open(filepath, 'a') as f:
+    #             f.write('# ' + str(model_name) + '\n')
+    #             f.write('\n')
+    #             f.write(badge_text.rstrip('\r\n') + '\n')
+    #             f.write('\n')
+    #             f.write('\n')
+    #             f.write(str(model_description) + '\n')
+    #         click.echo(echo_prefix + "%s present in the model" % filename)
+    #
+    # @staticmethod
+    # def add_badge_to_readme(directory, filename, model_url):
+    #     filepath = os.path.join(directory, filename)
+    #     badge_text = "[![Datmo Model]" \
+    #                  "(" + model_url + "/badge.svg)]" \
+    #                  "(" + model_url + ")"
+    #     # Check if badge_text already exists. If so mention it and do not add
+    #     if badge_text in open(filepath).read():
+    #         return False
+    #     with open(filepath, 'r+') as f:
+    #         content = f.read()
+    #         f.seek(0, 0)
+    #         f.write(badge_text.rstrip('\r\n') + '\n\n\n' + content)
+    #     return True
 
     # Collections
     def create_collections_dir(self):
         if not self.is_initialized:
-            raise FileStructureException("exception.file.local.create_collections_dir", {
-                "exception": "FileManager is not properly initialized"
-            })
+            raise FileStructureException(_("error",
+                                           "controller.file.driver.local.create_collections_dir"))
         collections_path = os.path.join(self.filepath, ".datmo",
                                              "collections")
         if not os.path.isdir(collections_path):
@@ -288,9 +248,16 @@ class LocalFileManager(object):
 
     def create_collection(self, filepaths):
         if not self.is_initialized:
-            raise FileStructureException("exception.file.local.create_file_collection", {
-                "exception": "FileManager is not properly initialized"
-            })
+            raise FileStructureException(_("error",
+                                           "controller.file.driver.local.create_collection.structure"))
+
+        # Ensure all filepaths are valid before proceeding
+        for filepath in filepaths:
+            if not os.path.isdir(filepath) and \
+                not os.path.isfile(filepath):
+                raise DoesNotExistException(_("error",
+                                              "controller.file.driver.local.create_collection.filepath",
+                                              filepath))
 
         # Create temp hash and folder to move all contents from filepaths
         temp_hash = hashlib.sha1(str(uuid.uuid4()).\
@@ -311,10 +278,7 @@ class LocalFileManager(object):
             elif os.path.isfile(filepath):
                 # File is copied into the collection_path
                 self.copyfile(filepath, temp_collection_path)
-            else:
-                raise DoesNotExistException("exception.file.local.create_file_collection", {
-                    "exception": "Filepath %s does not exist." % filepath
-                })
+
 
         # Hash the files to find collection_id
         collection_id = checksumdir.dirhash(temp_collection_path)
@@ -358,57 +322,22 @@ class LocalFileManager(object):
 
     def transfer_collection(self, collection_id, dst_dirpath):
         if not self.exists_collection(collection_id):
-            raise DoesNotExistException("exception.file.local.transfer_collection", {
-                "exception": "Collection does not currently exist"
-            })
+            raise DoesNotExistException(_("error",
+                                          "controller.file.driver.local.transfer_collection",
+                                          collection_id))
+        if not os.path.isdir(dst_dirpath):
+            raise DoesNotExistException(_("error",
+                                          "controller.file.driver.local.transfer_collection.dst",
+                                          dst_dirpath))
         collection_path = os.path.join(self.filepath, ".datmo",
                                        "collections", collection_id)
         return self.copytree(collection_path, dst_dirpath)
 
     def list_file_collections(self):
         if not self.is_initialized:
-            raise FileStructureException("exception.file.local.list_file_collections", {
-                "exception": "FileManager is not properly initialized"
-            })
+            raise FileStructureException(_("error",
+                                           "controller.file.driver.local.list_file_collections"))
         collections_path = os.path.join(self.filepath, ".datmo",
                                         "collections")
         collections_list = os.listdir(collections_path)
         return collections_list
-
-
-    # @staticmethod
-    # def create_readme(directory, filename, model_name, model_description, model_url, echo_prefix=""):
-    #     filepath = os.path.join(directory, filename)
-    #     badge_text = "[![Datmo Model]" \
-    #                  "(" + model_url + "/badge.svg)]" \
-    #                  "(" + model_url + ")"
-    #     if not os.path.exists(filepath):
-    #         click.echo(echo_prefix + "Creating a stub %s." % filename)
-    #         with open(filepath, 'a') as f:
-    #             f.write('# ' + str(model_name) + '\n')
-    #             f.write('\n')
-    #             f.write(badge_text.rstrip('\r\n') + '\n')
-    #             f.write('\n')
-    #             f.write('\n')
-    #             f.write(str(model_description) + '\n')
-    #         click.echo(echo_prefix + "%s present in the model" % filename)
-    #
-    # @staticmethod
-    # def add_badge_to_readme(directory, filename, model_url):
-    #     filepath = os.path.join(directory, filename)
-    #     badge_text = "[![Datmo Model]" \
-    #                  "(" + model_url + "/badge.svg)]" \
-    #                  "(" + model_url + ")"
-    #     # Check if badge_text already exists. If so mention it and do not add
-    #     if badge_text in open(filepath).read():
-    #         return False
-    #     with open(filepath, 'r+') as f:
-    #         content = f.read()
-    #         f.seek(0, 0)
-    #         f.write(badge_text.rstrip('\r\n') + '\n\n\n' + content)
-    #     return True
-
-
-
-
-

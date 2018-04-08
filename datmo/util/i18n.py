@@ -3,12 +3,12 @@ from datmo.util.lang import get_lang
 
 MESSAGES = get_lang()
 
-def get(key, values=None):
+def get(type, key, values=None):
     if isinstance(values, dict) and len(values) > 0:
-        return MESSAGES[key].format(*values, **values)
+        return MESSAGES[type][key].format(*values, **values)
     elif isinstance(values, basestring):
-        return MESSAGES[key] % str(values)
+        return MESSAGES[type][key] % str(values)
     elif isinstance(values, tuple):
-        return MESSAGES[key] % values
+        return MESSAGES[type][key] % values
     else:
-        return MESSAGES[key]
+        return MESSAGES[type][key]

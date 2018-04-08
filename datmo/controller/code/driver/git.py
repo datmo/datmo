@@ -5,6 +5,7 @@ import semver
 import hashlib
 from giturlparse import parse
 
+from datmo.util.i18n import get as _
 from datmo.util.exceptions import DoesNotExistException,\
     GitUrlArgumentException, GitExecutionException, \
     FileIOException
@@ -20,10 +21,9 @@ class GitCodeManager(object):
         self.filepath = filepath
         # Check if filepath exists
         if not os.path.exists(self.filepath):
-            raise DoesNotExistException("exception.code_driver.git", {
-                "filepath": filepath,
-                "exception": "File path does not exist"
-            })
+            raise DoesNotExistException(_("error",
+                                          "controller.code.driver.git.__init__.dne",
+                                          filepath))
         self.execpath = execpath
         # Check the execpath and the version
         p = subprocess.Popen([self.execpath, "version"],
@@ -33,14 +33,13 @@ class GitCodeManager(object):
         out, err = p.communicate()
         out, err = out.decode(), err.decode()
         if err:
-            raise GitExecutionException("exception.code_driver.git", {
-                "exception": err
-            })
+            raise GitExecutionException(_("error",
+                                          "controller.code.driver.git.__init__.giterror",
+                                          err))
         if not semver.match(str(out.split()[2]), ">=1.9.7"):
-            raise GitExecutionException("exception.code_driver.git", {
-                "git version": out.split()[2],
-                "exception": "Git version must be later than 1.9.7"
-            })
+            raise GitExecutionException(_("error",
+                                          "controller.code.driver.git.__init__.gitversion",
+                                          out.split()[2]))
 
         # TODO: handle multiple remote urls
         self.git_host_manager = GitHostManager()
@@ -92,16 +91,16 @@ class GitCodeManager(object):
         try:
             subprocess.check_output([self.execpath, "init", str(self.filepath)]).strip()
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.init", {
-                "exception": e
-            })
+            raise GitExecutionException(_("error",
+                                          "controller.code.driver.git.init",
+                                          str(e)))
         try:
             self.ensure_code_refs_dir()
             self.ensure_gitignore_exists()
         except Exception as e:
-            raise FileIOException("exception.code_driver.git.init", {
-                "exception": e
-            })
+            raise FileIOException(_("error",
+                                    "controller.code.driver.git.init.file",
+                                    str(e)))
         return True
 
     def clone(self, original_git_url, repo_name=None, mode="https"):
@@ -114,10 +113,9 @@ class GitCodeManager(object):
             subprocess.check_output([self.execpath, "clone", str(clone_git_url),
                                      os.path.join(self.filepath, repo_name)]).strip()
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.clone", {
-                "original_git_url": original_git_url,
-                "exception": e
-            })
+            raise GitExecutionException(_("error",
+                                          "controller.code.driver.git.clone",
+                                          (original_git_url, str(e))))
         return True
 
     def _parse_git_url(self, original_git_url, mode="https"):
@@ -126,11 +124,9 @@ class GitCodeManager(object):
         p = parse(original_git_url)
 
         if not p.valid:
-            raise GitUrlArgumentException("exception.code_driver.git._parse_git_url", {
-                "original_git_url": original_git_url,
-                "exception": "Url is not valid"
-            })
-
+            raise GitUrlArgumentException(_("error",
+                                            "controller.code.driver.git._parse_git_url.url",
+                                            original_git_url))
         if mode=="ssh":
             clone_git_url = p.url2ssh
         elif mode=="https":
@@ -139,11 +135,9 @@ class GitCodeManager(object):
             # If unsecured specified http connection used instead
             clone_git_url = "://".join(["http", p.url2https.split("://")[1]])
         else:
-            raise GitUrlArgumentException("exception.code_driver.git._parse_git_url", {
-                "original_git_url": original_git_url,
-                "exception": "Remote access not configured for https or ssh"
-            })
-
+            raise GitUrlArgumentException(_("error",
+                                            "controller.code.driver.git._parse_git_url.access",
+                                            original_git_url))
         return clone_git_url
 
     def add(self, filepath):
@@ -151,11 +145,9 @@ class GitCodeManager(object):
             subprocess.check_output([self.execpath, "add", filepath],
                                 cwd=self.filepath).strip()
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.add", {
-                "filepath": filepath,
-                "execpath": self.execpath,
-                "exception": e
-            })
+            raise GitExecutionException(_("error",
+                                          "controller.code.driver.git.add",
+                                          (filepath, str(e))))
         return True
 
     def commit(self, options):
@@ -170,7 +162,7 @@ class GitCodeManager(object):
         Returns
         -------
         bool
-            True if success else False
+            True if new commit was created, False if no commit was created
 
         Raises
         ------
@@ -186,15 +178,15 @@ class GitCodeManager(object):
             out, err = p.communicate()
             out, err = out.decode(), err.decode()
             if err:
-                raise GitExecutionException("exception.code_driver.git.commit", {
-                    "options": options,
-                    "exception": err
-                })
+                raise GitExecutionException(_("error",
+                                              "controller.code.driver.git.commit",
+                                              (options, err)))
+            elif "nothing" in out:
+                return False
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.commit", {
-                "options": options,
-                "exception": e
-            })
+            raise GitExecutionException(_("error",
+                                          "controller.code.driver.git.commit",
+                                          (options, str(e))))
         return True
 
     def branch(self, name, option=None):
@@ -206,10 +198,9 @@ class GitCodeManager(object):
                 subprocess.check_output([self.execpath, "branch", name],
                                                 cwd=self.filepath).strip()
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.branch", {
-                "name": name,
-                "exception": e
-            })
+            raise GitExecutionException(_("error",
+                                            "controller.code.driver.git.branch",
+                                            (name, str(e))))
         return True
 
     def checkout(self, name, option=None):
@@ -221,10 +212,9 @@ class GitCodeManager(object):
                 subprocess.check_output([self.execpath, "checkout", name],
                                             cwd=self.filepath).strip()
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.checkout", {
-                "name": name,
-                "exception": e
-            })
+            raise GitExecutionException(_("error",
+                                            "controller.code.driver.git.checkout",
+                                            (name, str(e))))
         return True
 
     def stash_save(self, message=None):
@@ -237,9 +227,9 @@ class GitCodeManager(object):
                 subprocess.check_output([self.execpath, "stash"],
                                         cwd=self.filepath).strip()
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.stash_save", {
-                "exception": e
-            })
+            raise GitExecutionException(_("error",
+                                            "controller.code.driver.git.stash_save",
+                                            str(e)))
         return True
 
     def stash_list(self, regex="datmo"):
@@ -250,9 +240,9 @@ class GitCodeManager(object):
                                                      cwd=self.filepath)
             git_stash_list = git_stash_list.decode().strip()
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.stash_list", {
-                "exception": e
-            })
+            raise GitExecutionException(_("error",
+                                            "controller.code.driver.git.stash_list",
+                                            str(e)))
         return git_stash_list
 
     def stash_pop(self, regex=None):
@@ -267,9 +257,9 @@ class GitCodeManager(object):
                                                         cwd=self.filepath)
                 git_stash_pop = git_stash_pop.decode().strip()
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.stash_pop", {
-                "exception": e
-            })
+            raise GitExecutionException(_("error",
+                                            "controller.code.driver.git.stash_pop",
+                                            str(e)))
         return git_stash_pop
 
     def stash_apply(self, regex=None):
@@ -284,23 +274,10 @@ class GitCodeManager(object):
                                                           cwd=self.filepath)
                 git_stash_apply = git_stash_apply.decode().strip()
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.stash_apply", {
-                "exception": e
-            })
+            raise GitExecutionException(_("error",
+                                            "controller.code.driver.git.stash_apply",
+                                            str(e)))
         return git_stash_apply
-
-    def hash(self, command, branch):
-        try:
-            result = subprocess.check_output([self.execpath, command, branch],
-                                             cwd=self.filepath)
-            result = result.decode().strip()
-        except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.hash", {
-                "command": command,
-                "branch": branch,
-                "exception": e
-            })
-        return result
 
     def latest_commit(self):
         try:
@@ -308,9 +285,9 @@ class GitCodeManager(object):
                                                  cwd=self.filepath)
             git_commit = git_commit.decode().strip()
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.latest_commit", {
-                "exception": e
-            })
+            raise GitExecutionException(_("error",
+                                          "controller.code.driver.git.latest_commit",
+                                          str(e)))
         return git_commit
 
     def reset(self, git_commit):
@@ -318,9 +295,9 @@ class GitCodeManager(object):
             subprocess.check_output([self.execpath,"reset", git_commit],
                                     cwd=self.filepath).strip()
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.reset", {
-                "exception": e
-            })
+            raise GitExecutionException(_("error",
+                                            "controller.code.driver.git.reset",
+                                            str(e)))
         return True
 
     def get_absolute_git_dir(self):
@@ -329,9 +306,9 @@ class GitCodeManager(object):
                                                            cwd=self.filepath)
             git_dir = git_dir.decode().strip()
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.get_git_dir", {
-                "exception": e
-            })
+            raise GitExecutionException(_("error",
+                                            "controller.code.driver.git.get_absolute_git_dir",
+                                            str(e)))
         return git_dir
 
     def check_git_work_tree(self):
@@ -340,9 +317,9 @@ class GitCodeManager(object):
                                                            cwd=self.filepath)
             git_work_tree_exists = git_work_tree_exists.decode().strip()
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.check_git_work_tree", {
-                "exception": e
-            })
+            raise GitExecutionException(_("error",
+                                            "controller.code.driver.git.check_git_work_tree",
+                                            str(e)))
         return True if git_work_tree_exists == "true" else False
 
     def remote(self, mode, origin, git_url):
@@ -363,26 +340,17 @@ class GitCodeManager(object):
                 out, err = p.communicate()
                 out, err = out.decode(), err.decode()
             else:
-                raise GitExecutionException("exception.code_driver.git.remote", {
-                    "mode": mode,
-                    "origin": origin,
-                    "git_url": git_url,
-                    "exception": "Incorrect mode specified"
-                })
+                raise GitExecutionException(_("error",
+                                                "controller.code.driver.git.remote",
+                                                (mode, origin, git_url, "Incorrect mode specified")))
             if err:
-                raise GitExecutionException("exception.code_driver.git.remote", {
-                    "mode": mode,
-                    "origin": origin,
-                    "git_url": git_url,
-                    "exception": err
-                })
+                raise GitExecutionException(_("error",
+                                                "controller.code.driver.git.remote",
+                                                (mode, origin, git_url, err)))
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.remote", {
-                    "mode": mode,
-                    "origin": origin,
-                    "git_url": git_url,
-                    "exception": e
-                })
+            raise GitExecutionException(_("error",
+                                            "controller.code.driver.git.remote",
+                                            (mode, origin, git_url, str(e))))
         return True
 
     def get_remote_url(self):
@@ -392,9 +360,11 @@ class GitCodeManager(object):
                                               cwd=self.filepath)
             git_url = git_url.decode().strip()
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.get_remote_url", {
-                    "exception": e
-                })
+            # TODO: handle error vs. empty response properly
+            return None
+            # raise GitExecutionException(_("error",
+            #                                 "controller.code.driver.git.get_remote_url",
+            #                                 str(e)))
         return git_url
 
     def fetch(self, origin, name, option=None):
@@ -406,11 +376,9 @@ class GitCodeManager(object):
                 subprocess.check_output([self.execpath, "fetch", origin, name],
                                      cwd=self.filepath).strip()
         except Exception as e:
-            raise Exception("exception.code_driver.git.fetch", {
-                    "origin": origin,
-                    "name": name,
-                    "exception": e
-                })
+            raise GitExecutionException(_("error",
+                                            "controller.code.driver.git.fetch",
+                                            (origin, name, str(e))))
         return True
 
     def push(self, origin, option=None, name=None):
@@ -446,15 +414,13 @@ class GitCodeManager(object):
                     out, err = p.communicate()
                     out, err = out.decode(), err.decode()
             if err:
-                raise GitExecutionException("exception.code_driver.git.push", {
-                    "origin": origin,
-                    "exception": err
-                })
+                raise GitExecutionException(_("error",
+                                                "controller.code.driver.git.push",
+                                                (origin, err)))
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.push", {
-                    "origin": origin,
-                    "exception": e
-                })
+            raise GitExecutionException(_("error",
+                                            "controller.code.driver.git.push",
+                                            (origin, str(e))))
         return True
 
     def pull(self):
@@ -496,9 +462,9 @@ class GitCodeManager(object):
                     shutil.move(os.path.join(self.filepath, ".tempgitignore"),
                                 current_gitignore_filepath)
         except Exception as e:
-            raise FileIOException("exception.code_driver.git.ensure_gitignore_exists", {
-                "exception": e
-            })
+            raise FileIOException(_("error",
+                                    "controller.code.driver.git.ensure_gitignore_exists",
+                                    str(e)))
         return True
 
     # Datmo Code Refs
@@ -515,9 +481,9 @@ class GitCodeManager(object):
             if not os.path.isdir(os.path.join(self.filepath,dir)):
                 os.makedirs(os.path.join(self.filepath, dir))
         except Exception as e:
-            raise FileIOException("exception.code_driver.git.ensure_code_refs_dir", {
-                "exception": e
-            })
+            raise FileIOException(_("error",
+                                    "controller.code.driver.git.ensure_code_refs_dir",
+                                    str(e)))
         return True
 
     def delete_code_refs_dir(self):
@@ -527,21 +493,36 @@ class GitCodeManager(object):
             if os.path.isdir(dir_path):
                 shutil.rmtree(dir_path)
         except Exception as e:
-            raise FileIOException("exception.code_driver.git.delete_code_refs_dir", {
-                "exception": e
-            })
+            raise FileIOException(_("error",
+                                    "controller.code.driver.git.delete_code_refs_dir",
+                                    str(e)))
         return True
 
     def create_code_ref(self, code_id=None):
+        """
+        Add remaining files, make a commit and add it to a datmo code ref
+
+        Parameters
+        ----------
+        code_id : str, optional
+            If code_id is given, it will not add files and not create a commit
+
+        Returns
+        -------
+        code_id : str
+            The latest code id for the ref created
+
+        """
+
         self.ensure_code_refs_dir()
         if not code_id:
             # add files and commit changes on current branch
             self.add("-A")
-            commit_success = self.commit(options=["-m",
-                                                  "auto commit by datmo"])
+            new_commit_bool = self.commit(options=["-m",
+                                                   "auto commit by datmo"])
             code_id = self.latest_commit()
             # revert back to the original commit
-            if commit_success:
+            if new_commit_bool:
                 self.reset(code_id)
         # writing git commit into ref
         code_ref_path = os.path.join(self.filepath,
@@ -565,9 +546,8 @@ class GitCodeManager(object):
                                      ".git/refs/datmo/",
                                      code_id)
         if not self.exists_code_ref(code_id):
-            raise FileIOException("exception.code_driver.git.delete_code_ref", {
-                "exception": "Code ref file does not exist"
-            })
+            raise FileIOException(_("error",
+                                    "controller.code.driver.git.delete_code_ref"))
         os.remove(code_ref_path)
         return True
 
@@ -585,9 +565,9 @@ class GitCodeManager(object):
         try:
             self.push("origin", name=datmo_ref_map)
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.push_code_ref", {
-                    "exception": e
-                })
+            raise GitExecutionException(_("error",
+                                            "controller.code.driver.git.push_code_ref",
+                                            str(e)))
 
     def fetch_code_ref(self, code_id):
         try:
@@ -595,15 +575,13 @@ class GitCodeManager(object):
             datmo_ref_map = "+" + datmo_ref + ":" + datmo_ref
             success, err = self.fetch("origin", datmo_ref_map, option="-fup")
             if not success:
-                raise GitExecutionException("exception.code_driver.git.fetch_code_ref", {
-                    "code_id": code_id,
-                    "exception": err
-                })
+                raise GitExecutionException(_("error",
+                                                "controller.code.driver.git.fetch_code_ref",
+                                                (code_id, err)))
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.fetch_code_ref", {
-                    "code_id": code_id,
-                    "exception": e
-                })
+            raise GitExecutionException(_("error",
+                                            "controller.code.driver.git.fetch_code_ref",
+                                            (code_id, str(e))))
         return True
 
     def checkout_code_ref(self, code_id, remote=False):
@@ -613,10 +591,9 @@ class GitCodeManager(object):
             datmo_ref = "refs/datmo/" + code_id
             return self.checkout(datmo_ref)
         except Exception as e:
-            raise GitExecutionException("exception.code_driver.git.checkout_code_ref", {
-                    "code_id": code_id,
-                    "exception": e
-                })
+            raise GitExecutionException(_("error",
+                                            "controller.code.driver.git.checkout_code_ref",
+                                            (code_id, str(e))))
 
 
 class GitHostManager(object):

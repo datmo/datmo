@@ -1,5 +1,7 @@
 import os
 import platform
+
+from datmo.util.i18n import get as _
 from datmo.controller.base import BaseController
 from datmo.controller.snapshot import SnapshotController
 from datmo.util.exceptions import TaskRunException
@@ -81,9 +83,10 @@ class TaskController(BaseController):
         # try:
         #     environment_obj = self.local.environment_driver.get_by_id(environment_id)
         # except:
-        #     raise DoesNotExistException("exception.environment_driver.docker.build_environment", {
-        #         "exception": "Environment specified does not exist."
-        #     })
+        #     raise DoesNotExistException(_("error",
+        #                                   "controller.task._run_helper.env_dne",
+        #                                   environment_id))
+
 
         # Extract hardware info of the container (currently taking from system platform)
         # TODO: extract hardware information directly from the container
@@ -150,7 +153,7 @@ class TaskController(BaseController):
             Returns the Task object which completed its run with updated parameters
 
         Raises
-        ______
+        ------
         TaskRunException
             If there is any error in creating files for the task or downstream errors
 
@@ -159,14 +162,16 @@ class TaskController(BaseController):
         task_obj = self.dal.task.get_by_id(task_id)
 
         # Create Task directory for user during run
+        task_dirpath = os.path.join("datmo_tasks",
+                                    task_obj.id)
         try:
             task_dirpath = self.file_driver.create(
                 os.path.join("datmo_tasks",
                              task_obj.id), dir=True)
         except:
-            raise TaskRunException("exception.project.run",  {
-                "exception": "Error creating task directory"
-            })
+            raise TaskRunException(_("error",
+                                     "controller.task.run",
+                                     task_dirpath))
 
         # Create the before snapshot prior to execution
         before_snapshot_obj = self.snapshot.create(dictionary)

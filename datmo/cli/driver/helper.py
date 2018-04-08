@@ -44,7 +44,7 @@ class Helper():
         try:
             command_class = importlib.import_module(command_path)
         except ImportError as ex:
-            self.echo(_("cli.exception", ex.message))
+            self.echo(_("error", "cli.general",  ex.message))
             sys.exit()
 
         all_members = inspect.getmembers(command_class)

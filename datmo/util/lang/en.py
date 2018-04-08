@@ -1,35 +1,109 @@
-class bcolors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
-    FAIL = '\033[91m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-    UNDERLINE = '\033[4m'
-
 MESSAGES = {
-    "general.line": "==============================================================",
-    "setup.init_project": bcolors.OKGREEN + bcolors.BOLD + "Initializing project {name} @ ({path}) " + bcolors.ENDC,
-    "setup.pulling_datmo_project" : bcolors.HEADER + "Pulling information from the Datmo project url and adding it to local..." + bcolors.ENDC,
-    "setup.internet_required": bcolors.WARNING + "warning: internet connectivity doesn't exist" + bcolors.ENDC,
-    "setup.git_installed": bcolors.WARNING + "warning: git isn't setup. please install git" + bcolors.ENDC,
-    "setup.logged_in_status": bcolors.WARNING + "warning: user is not logged into datmo. use `datmo setup` or `datmo login` to login" + bcolors.ENDC,
-    "setup.datmo_token_missing": bcolors.WARNING + "warning: user is not logged into datmo. use `datmo setup` or `datmo login` to login" + bcolors.ENDC,
-    "setup.datmo_pulling_project": bcolors.HEADER + "Pulling information from the Datmo project url and adding it to local..." + bcolors.ENDC,
-    "setup.datmo_project_update": bcolors.HEADER + "Update Datmo project" + bcolors.ENDC,
-    "setup.datmo_project_name": bcolors.BOLD + "---> Enter name for the Datmo project" + bcolors.ENDC,
-    "setup.datmo_project_description": bcolors.BOLD + "---> Enter name for the Datmo project" + bcolors.ENDC,
-    "setup.datmo_project_git_url": bcolors.BOLD + "---> Enter remote git url for the Datmo project" + bcolors.ENDC,
-    "setup.datmo_project_update_confirm": bcolors.BOLD + "---> Is it okay?" + bcolors.ENDC,
-    "setup.datmo_project_update_abort": u'\u274c' + "  Your changes have been aborted!",
-    "setup.datmo_project_update_success": bcolors.OKGREEN + bcolors.BOLD + u'\u2713' + " You have successfully re-initialized your local Datmo project here %s" + bcolors.ENDC,
-    "setup.datmo_project_create": bcolors.HEADER + "Creating a new Datmo project" + bcolors.ENDC,
-    "setup.datmo_project_repo_setup": bcolors.WARNING + " Creating public repository on GitHub. Please change repo settings if you would like to." + bcolors.ENDC,
-    "general.echo.input" : "You entered: %s",
-    "test.dict.replacements" : "{foo} - {bar}",
-    "test.tuple.replacements" : "%s, %s",
-    "cli.exception": "An exception occured: %s"
+    "info": {
+        "cli.general.line": "==============================================================",
+        "cli.project.init":  "Initializing project {name} @ ({path}) " ,
+        "cli.project.pull" : "Pulling information from the Datmo project url and adding it to local...",
+        "cli.project.update": "Update Datmo project",
+        "cli.general.abort": u'\u274c' + "  Your changes have been aborted!",
+        "cli.general.success": u'\u2713' + " You have successfully re-initialized your local Datmo project here %s",
+        "cli.general.project.create": "Creating a new Datmo project",
+        "cli.general.str.test" : "%s",
+        "cli.general.dict.test" : "{foo} - {bar}",
+        "cli.general.tuple.test" : "%s, %s",
+        "cli.snapshot.create": "Creating a new snapshot"
+    },
+    "warn": {
+        "cli.general.internet": "Internet connectivity doesn't exist",
+        "cli.general.git": "git isn't setup. please install git",
+        "cli.general.login": "user is not logged into datmo. use `datmo setup` or `datmo login` to login" ,
+    },
+    "error": {
+        "cli.general": "An exception occured: %s",
+        "util.misc_functions.get_filehash": "Filepath does not point to a valid file: %s",
+        "controller.code.driver.git.__init__.dne": "File path does not exist: %s",
+        "controller.code.driver.git.__init__.giterror": "Error in git: %s",
+        "controller.code.driver.git.__init__.gitversion": "Git version must be later than 1.9.7. Current version: %s",
+        "controller.code.driver.git.init": "Error in git: %s",
+        "controller.code.driver.git.init.file": "Error inadding datmo refs and files: %s",
+        "controller.code.driver.git._parse_git_url.url": "Url not valid: %s",
+        "controller.code.driver.git._parse_git_url.access": "Remote access not configured for https or ssh: %s",
+        "controller.code.driver.git.clone": "Error in git clone with url %s: %s",
+        "controller.code.driver.git.add": "Error in git add for filepath %s: %s",
+        "controller.code.driver.git.commit": "Error in git commit with options %s: %s",
+        "controller.code.driver.git.branch": "Error in git branch with name %s: %s",
+        "controller.code.driver.git.checkout": "Error in git checkout with name %s: %s",
+        "controller.code.driver.git.stash_save": "Error in git stash save: %s",
+        "controller.code.driver.git.stash_list": "Error in git stash list: %s",
+        "controller.code.driver.git.stash_pop": "Error in git stash pop: %s",
+        "controller.code.driver.git.stash_apply": "Error in git stash_apply: %s",
+        "controller.code.driver.git.latest_commit": "Error in git latest commit: %s",
+        "controller.code.driver.git.reset": "Error in git reset: %s",
+        "controller.code.driver.git.get_absolute_git_dir": "Error in git getting git dir: %s",
+        "controller.code.driver.git.check_git_work_tree": "Error in git check work tree: %s",
+        "controller.code.driver.git.remote": "Error in git remote -- mode: %s, origin: %s, git_url: %s -- %s",
+        "controller.code.driver.git.get_remote_url": "Error in git get remote url: %s",
+        "controller.code.driver.git.fetch": "Error in git fetch -- origin: %s, name: %s -- %s",
+        "controller.code.driver.git.push": "Error in git push -- origin: %s -- %s",
+        "controller.code.driver.git.ensure_gitignore_exists": "Error in ensuring gitignore: %s",
+        "controller.code.driver.git.ensure_code_refs_dir": "Error in ensuring datmo code refs dir: %s",
+        "controller.code.driver.git.delete_code_refs_dir": "Error in deleting datmo code refs dir: %s",
+        "controller.code.driver.git.delete_code_ref": "Code ref does not exist",
+        "controller.code.driver.git.push_code_ref": "Error in git push code ref: %s",
+        "controller.code.driver.git.fetch_code_ref": "Error in git fetch code ref with id %s: %s",
+        "controller.code.driver.git.checkout_code_ref": "Error in git checkout code ref with id %s: %s",
+        "controller.environment.driver.docker.__init__.dne": "File path does not exist: %s",
+        "controller.environment.driver.docker.__init__": "Docker environment management initialization failed. Socket: %s",
+        "controller.environment.driver.docker.init": "Error in docker initialization: %s",
+        "controller.environment.driver.docker.build_image": "Error in docker build: %s",
+        "controller.environment.driver.docker.remove_image": "Error in docker rmi: %s",
+        "controller.environment.driver.docker.remove_images": "Error in running multiple rmi commands: %s",
+        "controller.environment.driver.docker.run_container": "Error running docker container. Failed command: %s",
+        "controller.environment.driver.docker.stop_container": "Error stopping docker container: %s",
+        "controller.environment.driver.docker.remove_container": "Error removing docker container: %s",
+        "controller.environment.driver.docker.stop_remove_containers_by_term": "Error stopping and removing containers by term: %s",
+        "controller.environment.create": "Required argument definition_filepath not present in input",
+        "controller.environment.build": "Environment with id %s does NOT exist",
+        "controller.environment.delete": "Environment with id %s does NOT exist",
+        "controller.file.driver.local.__init__": "File path does not exist: %s",
+        "controller.file.driver.local.get_safe_dst_filepath.src": "Source filepath is not a valid file: %s",
+        "controller.file.driver.local.get_safe_dst_filepath.dst": "Destination directory path is not a valid directory: %s",
+        "controller.file.driver.local.copytree.src": "Source directory path is not a valid directory: %s",
+        "controller.file.driver.local.copytree.dst": "Destination directory path is not a valid directory: %s",
+        "controller.file.driver.local.copyfile.src": "Source filepath is not a valid file: %s",
+        "controller.file.driver.local.copyfile.dst": "Destination directory path is not a valid directory: %s",
+        "controller.file.driver.local.init": "Failed to ensure datmo file structure: %s",
+        "controller.file.driver.local.delete": "File specified does not exist: %s",
+        "controller.file.driver.local.create_collections_dir": "Project file structure is not properly initialized",
+        "controller.file.driver.local.create_collection.structure": "Project file structure is not properly initialized",
+        "controller.file.driver.local.create_collection.filepath": "Filepath %s given does not exist; aborting create collection",
+        "controller.file.driver.local.transfer_collection": "Collection with id %s does not currently exist",
+        "controller.file.driver.local.transfer_collection.dst": "Destination directory path is not a valid directory: %s",
+        "controller.file.driver.local.list_file_collections": "Project file structure is not properly initialized",
+        "controller.base.__init__": "Project path does not exist: %s",
+        "controller.base.current_session": "Model object does not exist within project",
+        "controller.project.init": "Session does not exist",
+        "controller.snapshot.create.arg": "Required argument missing to create snapshot: %s",
+        "controller.snapshot.create.file_config": "Config file does not exist",
+        "controller.snapshot.create.file_stat": "Stats file does not exist",
+        "controller.task._run_helper.env_dne": "Environment specified does not exist: %s",
+        "controller.task.run": "Error creating task directory for run: %s",
+        "storage.local.dal.update": "Entity id not provided in the input for update"
+    },
+    "debug": {
+
+    },
+    "trace": {
+
+    },
+    "fatal": {
+
+    },
+    "prompt": {
+        "cli.project.init.name": "---> Enter name for the Datmo project",
+        "cli.project.init.description": "---> Enter name for the Datmo project",
+        "cli.project.init.git": "---> Enter remote git url for the Datmo project",
+        "cli.general.confirm": "---> Is it okay?",
+    }
 }
 
 def get_messages():
