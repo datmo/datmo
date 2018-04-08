@@ -1,5 +1,6 @@
 from blitzdb import Document
 from datetime import datetime
+
 from datmo.util.exceptions import EntityNotFound, \
     EntityCollectionNotFound, IncorrectTypeException
 from datmo.storage.local.driver.driver_type import DriverType

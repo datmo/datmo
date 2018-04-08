@@ -1,5 +1,7 @@
 import os
+
 from datmo.util.file_storage import JSONKeyValueStore
+
 
 class UserSettings():
     def __init__(self, home):

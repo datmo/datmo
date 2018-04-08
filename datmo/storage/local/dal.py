@@ -12,6 +12,7 @@ from datmo.entity.snapshot import Snapshot
 from datmo.entity.user import User
 from datmo.util.exceptions import InputException
 
+
 class LocalDAL():
     """
     LocalDAL is a local DAL object that stores info locally. DAL stands for 'data access layer' and serves as a storage for

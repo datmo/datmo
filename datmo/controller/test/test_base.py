@@ -8,11 +8,11 @@ from __future__ import unicode_literals
 import shutil
 import tempfile
 
-from ..base import BaseController
+from datmo.controller.base import BaseController
 from datmo.controller.code.driver.git import GitCodeDriver
-
 from datmo.util.exceptions import  \
     DatmoModelNotInitializedException
+
 
 class TestBaseController():
     def setup_method(self):

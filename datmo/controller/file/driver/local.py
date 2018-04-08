@@ -9,6 +9,7 @@ from datmo.util.i18n import get as _
 from datmo.util.exceptions import DoesNotExistException, \
     FileIOException, FileStructureException
 
+
 class LocalFileDriver(object):
     """
     This FileDriver handles the datmo file tree on the local system

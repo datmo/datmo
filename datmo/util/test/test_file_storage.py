@@ -9,7 +9,8 @@ import shutil
 import tempfile
 import os
 
-from ..file_storage import JSONKeyValueStore
+from datmo.util.file_storage import JSONKeyValueStore
+
 
 class TestDatmoDAL():
     def setup_class(self):

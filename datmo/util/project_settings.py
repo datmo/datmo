@@ -1,5 +1,7 @@
 import os
+
 from datmo.util.file_storage import JSONKeyValueStore
+
 
 class ProjectSettings():
     def __init__(self, home):

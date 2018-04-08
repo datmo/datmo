@@ -9,8 +9,8 @@ import os
 import tempfile
 import shutil
 import uuid
-from ..dockerenv import DockerEnvironmentDriver
 
+from datmo.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.util.exceptions import EnvironmentInitFailed
 
 

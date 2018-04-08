@@ -6,6 +6,7 @@ from builtins import input
 import sys
 import importlib
 import inspect
+
 from datmo.util.i18n import get as _
 from datmo.util.exceptions import ArgumentException
 

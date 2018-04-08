@@ -6,6 +6,7 @@ from datmo.util.file_storage import JSONKeyValueStore
 from datmo.util.exceptions import RequiredArgumentMissing, \
     FileIOException
 
+
 class SnapshotController(BaseController):
     """
     SnapshotController inherits from BaseController and manages business logic related to snapshots
