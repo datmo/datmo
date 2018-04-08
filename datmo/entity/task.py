@@ -2,6 +2,32 @@ from datetime import datetime
 
 
 class Task():
+    """
+    Task is an entity object to represent an experiment run. A snapshot is taken before and after the task
+    to capture the relevant components. These snapshots are flagged as temporary unless otherwise specified
+    by the user but are stored as ids within the task object for reference.
+
+    Attributes
+    ----------
+    id : str
+    model_id : str
+    session_id : str
+    command : str
+    before_snapshot_id : str
+    ports : list
+    gpu : bool
+    interactive : bool
+    task_dirpath : str
+    log_filepath : str
+    after_snapshot_id : str
+    hardware_info : str
+    container_id : str
+    logs : str
+    status : str
+    created_at : datetime
+    updated_at : datetime
+
+    """
     def __init__(self, dictionary):
         self.id = dictionary['id']
         self.model_id = dictionary['model_id']

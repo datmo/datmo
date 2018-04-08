@@ -10,11 +10,12 @@ from datmo.util.exceptions import DoesNotExistException,\
     GitUrlArgumentException, GitExecutionException, \
     FileIOException
 
-class GitCodeManager(object):
+
+class GitCodeDriver(object):
     """
     TODO: Reimplement functions with robust library: https://github.com/gitpython-developers/GitPython
 
-    Git Code Manager for ProjectCommand Code
+    This CodeDriver manages source control management for the project using git
     """
 
     def __init__(self, filepath, execpath, remote_url=None):
@@ -42,7 +43,7 @@ class GitCodeManager(object):
                                           out.split()[2]))
 
         # TODO: handle multiple remote urls
-        self.git_host_manager = GitHostManager()
+        self.git_host_manager = GitHostDriver()
 
         self._is_initialized = self.is_initialized
 
@@ -596,7 +597,7 @@ class GitCodeManager(object):
                                             (code_id, str(e))))
 
 
-class GitHostManager(object):
+class GitHostDriver(object):
 
     def __init__(self, home=os.path.expanduser("~"), host="github"):
         self.home = home

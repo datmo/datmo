@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import shutil
 import tempfile
 
-from ..blitzdb_driver import BlitzDBDataDriver
+from ..blitzdb_driver import BlitzDBDALDriver
 from ..driver_type import DriverType
 
 from datmo.util.exceptions import EntityNotFound
@@ -25,14 +25,14 @@ class TestBlitzDBInit():
 
     def test_file_db_init(self):
         temp_dir = tempfile.mkdtemp()
-        database = BlitzDBDataDriver(DriverType.FILE, temp_dir)
+        database = BlitzDBDALDriver(DriverType.FILE, temp_dir)
         assert database != None
         shutil.rmtree(temp_dir)
 
     def test_remote_db_init(self):
         mongo_connection = "mongodb://localhost:27017"
         # Make mongo db connection required for testing?
-        database = BlitzDBDataDriver(DriverType.SERVICE, mongo_connection)
+        database = BlitzDBDALDriver(DriverType.SERVICE, mongo_connection)
         assert database != None
 
 
@@ -47,7 +47,7 @@ class TestBlitzDB():
         # For now, use one of pre-defined collections:
         # model, datmo_session, datmo_task, datmo_snapshot, datmo_user
         self.collection = 'model'
-        self.database = BlitzDBDataDriver(DriverType.FILE, self.temp_dir)
+        self.database = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
 
     def teardown_class(self):
         shutil.rmtree(self.temp_dir)

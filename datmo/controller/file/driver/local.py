@@ -9,9 +9,9 @@ from datmo.util.i18n import get as _
 from datmo.util.exceptions import DoesNotExistException, \
     FileIOException, FileStructureException
 
-class LocalFileManager(object):
+class LocalFileDriver(object):
     """
-    The File Manager handles the Datmo file tree.
+    This FileDriver handles the datmo file tree on the local system
     """
 
     def __init__(self, filepath):
@@ -81,7 +81,7 @@ class LocalFileManager(object):
             raise DoesNotExistException(_("error",
                                           "controller.file.driver.local.copyfile.dst",
                                           dst_dirpath))
-        dst_filepath = LocalFileManager.get_safe_dst_filepath(filepath, dst_dirpath)
+        dst_filepath = LocalFileDriver.get_safe_dst_filepath(filepath, dst_dirpath)
         shutil.copy2(filepath, dst_filepath)
         return True
 

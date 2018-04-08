@@ -1,6 +1,18 @@
 from datetime import datetime
 
 class Session():
+    """
+    Session is an entity object to represent a workspace to group tasks and snapshots
+
+    Attributes
+    ----------
+    id : str
+    name : str
+    model_id : str
+    created_at : datetime
+    updated_at : datetime
+
+    """
     def __init__(self, dictionary):
         self.id = dictionary['id']
         self.name = dictionary['name']

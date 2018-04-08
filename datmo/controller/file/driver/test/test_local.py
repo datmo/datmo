@@ -9,17 +9,17 @@ import os
 import shutil
 import tempfile
 
-from datmo.controller.file.driver.local import LocalFileManager
+from datmo.controller.file.driver.local import LocalFileDriver
 
 
 class TestLocalFileManager():
     # TODO: Add more cases for each test
     """
-    Checks all functions of the LocalFileManager
+    Checks all functions of the LocalFileDriver
     """
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir="/tmp/")
-        self.local_file_manager = LocalFileManager(filepath=self.temp_dir)
+        self.local_file_manager = LocalFileDriver(filepath=self.temp_dir)
 
     def teardown_method(self):
         shutil.rmtree(self.temp_dir)

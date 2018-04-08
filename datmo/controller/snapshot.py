@@ -7,6 +7,21 @@ from datmo.util.exceptions import RequiredArgumentMissing, \
     FileIOException
 
 class SnapshotController(BaseController):
+    """
+    SnapshotController inherits from BaseController and manages business logic related to snapshots
+
+    Methods
+    -------
+    create(dictionary)
+        Create a snapshot within the project
+    checkout(id)
+        Checkout to a specific snapshot within the project
+    list()
+        List all snapshots present within the project
+    delete(id)
+        Delete the snapshot specified from the project
+
+    """
     def __init__(self, home, dal_driver=None):
         super(SnapshotController, self).__init__(home, dal_driver)
 
