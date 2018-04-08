@@ -3,7 +3,8 @@
 [![Coverage Status](https://coveralls.io/repos/github/datmo/datmo/badge.svg?branch=master)](https://coveralls.io/github/datmo/datmo?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/datmo/badge/?version=latest)](http://datmo.readthedocs.io/en/latest/?badge=latest)
 
-Open source model tracking tool for developers
+Open source model tracking tool for developers. Use `datmo init` to turn any repository into a supercharged experiment tracking 
+powerhouse.
 
 ### Table of Contents
 * [Introduction](#introduction)
@@ -60,4 +61,17 @@ $ pip install coveralls
 $ pytest --cov-config .coveragerc --cov=datmo
 ```
 
+## Project Structure
+Datmo adds 2 things to existing repositories to keep track of the work, a `datmo.json` file with settings
+associated with the project and a `.datmo` directory which keeps track of all of the various entities. 
+
+## Project Templates
+In the `/templates` folder we have templates for those who will be starting their projects from scratch. 
+
+Each folder includes a set of files that are not required by datmo but that augment your project and may be useful
+as you start new projects. 
+
+## Project Examples
+In the `/examples` folder we have a few projects that have already been created and converted to datmo. You can 
+navigate to them and try datmo commands for yourself in order to get a feel for the tool.
 
