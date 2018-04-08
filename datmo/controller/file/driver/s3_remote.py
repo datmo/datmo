@@ -1,7 +1,7 @@
 import os
 import requests
 
-class S3RemoteFileManager(object):
+class S3RemoteFileDriver(object):
     def __init__(self):
         self.type = "remote-datmo"
 

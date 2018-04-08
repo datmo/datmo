@@ -10,6 +10,7 @@ import tempfile
 
 from datmo.controller.project import ProjectController
 
+
 class TestProjectController():
     def setup_method(self):
         # provide mountable tmp directory for docker

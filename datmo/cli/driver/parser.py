@@ -1,5 +1,6 @@
-import argparse
 import sys
+import argparse
+
 from datmo.util.exceptions import UnrecognizedCLIArgument
 
 class Parser(argparse.ArgumentParser):

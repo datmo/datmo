@@ -1,9 +1,40 @@
 import os
 from datetime import datetime
+
 from datmo.util.file_storage import JSONKeyValueStore
 
 
 class Snapshot():
+    """
+    Snapshot is an entity object to represent a version of the model. These snapshots
+    are the building blocks upon which models can be shared, deployed, and reproduced.
+
+    Snapshots consist of 5 main components which are represented as well in the attributes
+    listed below
+
+    1) Source code
+    2) Dependency environment
+    3) Large files not included in source code
+    4) Configurations of your model, features, data, etc
+    5) Performance metrics that evaluate your model
+
+    Attributes
+    ----------
+    id : str
+    model_id : str
+    code_id : str
+    environment_id : str
+    file_collection_id : str
+    config : dict
+    stats : dict
+    session_id : str
+    task_id : str
+    message : str
+    label : str
+    created_at : datetime
+    updated_at : datetime
+
+    """
     def __init__(self, dictionary):
         self.id = dictionary['id']
         self.model_id = dictionary['model_id']

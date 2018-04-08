@@ -8,11 +8,11 @@ from __future__ import unicode_literals
 import shutil
 import tempfile
 
-from ..base import BaseController
-from datmo.controller.code.driver.git import GitCodeManager
-
+from datmo.controller.base import BaseController
+from datmo.controller.code.driver.git import GitCodeDriver
 from datmo.util.exceptions import  \
     DatmoModelNotInitializedException
+
 
 class TestBaseController():
     def setup_method(self):
@@ -55,7 +55,7 @@ class TestBaseController():
     def test_config_loader(self):
         # TODO: Test all Datmo default settings
         assert self.base.config_loader("controller.code.driver")["constructor"] == \
-               GitCodeManager
+               GitCodeDriver
 
     def test_sanity_check_for_dal(self):
         model = self.base.dal.model.create({"name": "test"})

@@ -1,6 +1,19 @@
 from datetime import datetime
 
+
 class User():
+    """
+    User is an entity object to represent a given user
+
+    Attributes
+    ----------
+    id : str
+    name : str
+    email : str
+    created_at : datetime
+    updated_at : datetime
+
+    """
     def __init__(self, dictionary):
         self.id = dictionary['id']
         self.name = dictionary['name']

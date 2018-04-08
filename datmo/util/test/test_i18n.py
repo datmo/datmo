@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 
 from datmo.util.i18n import get
 
+
 class Testi18n():
 
     def test_get(self):

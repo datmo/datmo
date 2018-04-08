@@ -2,6 +2,20 @@ from datetime import datetime
 
 
 class Environment():
+    """
+    Environment is an entity object to represent a version of an environment
+
+    Attributes
+    ----------
+    id : str
+    model_id : str
+    driver_type : str
+    file_collection_id : str
+    definition_filename : str
+    created_at : datetime
+    updated_at : datetime
+
+    """
     def __init__(self, dictionary):
         self.id = dictionary['id']
         self.model_id = dictionary['model_id']

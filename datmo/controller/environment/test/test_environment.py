@@ -12,8 +12,8 @@ import tempfile
 from datmo.controller.project import ProjectController
 from datmo.controller.environment.environment import \
     EnvironmentController
-
 from datmo.util.exceptions import EntityNotFound
+
 
 class TestEnvironmentController():
     def setup_method(self):

@@ -2,6 +2,18 @@ from datetime import datetime
 
 
 class FileCollection():
+    """
+    FileCollection is an entity object to represent a collection of files
+
+    Attributes
+    ----------
+    id : str
+    model_id : str
+    driver_type : str
+    created_at : datetime
+    updated_at : datetime
+
+    """
     def __init__(self, dictionary):
         self.id = dictionary['id']
         self.model_id = dictionary['model_id']

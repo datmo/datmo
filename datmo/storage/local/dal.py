@@ -12,48 +12,139 @@ from datmo.entity.snapshot import Snapshot
 from datmo.entity.user import User
 from datmo.util.exceptions import InputException
 
+
 class LocalDAL():
+    """
+    LocalDAL is a local DAL object that stores info locally. DAL stands for 'data access layer' and serves as a storage for
+    all entities.
+
+    Attributes
+    ----------
+    driver : DALDriver
+        DAL driver which determines the backend used for entity storage
+    model
+    code
+    environment
+    file_collection
+    session
+    task
+    snapshot
+    user
+
+    """
     def __init__(self, driver):
         self.driver = driver
 
     @cache
     @property
     def model(self):
+        """
+        Model CRUD methods
+
+        Returns
+        -------
+        ModelMethods
+            Specific set of CRUD functions for model
+
+        """
         return  ModelMethods(self.driver)
 
     @cache
     @property
     def code(self):
+        """
+        Code CRUD methods
+
+        Returns
+        -------
+        CodeMethods
+            Specific set of CRUD functions for code
+
+        """
         return CodeMethods(self.driver)
 
     @cache
     @property
     def environment(self):
+        """
+        Environment CRUD methods
+
+        Returns
+        -------
+        EnvironmentMethods
+            Specific set of CRUD functions for environment
+
+        """
         return EnvironmentMethods(self.driver)
 
     @cache
     @property
     def file_collection(self):
+        """
+        FileCollection CRUD methods
+
+        Returns
+        -------
+        FileCollectionMethods
+            Specific set of CRUD functions for file collection
+
+        """
         return FileCollectionMethods(self.driver)
 
     @cache
     @property
     def session(self):
+        """
+        Session CRUD methods
+
+        Returns
+        -------
+        SessionMethods
+            Specific set of CRUD functions for session
+
+        """
         return SessionMethods(self.driver)
 
     @cache
     @property
     def task(self):
+        """
+        Task CRUD methods
+
+        Returns
+        -------
+        TaskMethods
+            Specific set of CRUD functions for task
+
+        """
         return  TaskMethods(self.driver)
 
     @cache
     @property
     def snapshot(self):
+        """
+        Snapshot CRUD methods
+
+        Returns
+        -------
+        SnapshotMethods
+            Specific set of CRUD functions for snapshot
+
+        """
         return  SnapshotMethods(self.driver)
 
     @cache
     @property
     def user(self):
+        """
+        User CRUD methods
+
+        Returns
+        -------
+        UserMethods
+            Specific set of CRUD functions for user
+
+        """
         return  UserMethods(self.driver)
 
 class EntityMethodsCRUD(object):

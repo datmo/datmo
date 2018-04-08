@@ -9,20 +9,20 @@ import os
 import tempfile
 import shutil
 import uuid
-from ..dockerenv import DockerEnvironmentManager
 
+from datmo.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.util.exceptions import EnvironmentInitFailed
 
 
 class TestDockerEnv():
     # TODO: Add more cases for each test
     """
-    Checks all functions of the DockerEnvironmentManager
+    Checks all functions of the DockerEnvironmentDriver
     """
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir="/tmp/")
         self.docker_environment_manager = \
-            DockerEnvironmentManager(self.temp_dir, 'docker',
+            DockerEnvironmentDriver(self.temp_dir, 'docker',
                                      'unix:///var/run/docker.sock')
         self.init_result = self.docker_environment_manager.init()
         random_text = str(uuid.uuid1())
@@ -41,7 +41,7 @@ class TestDockerEnv():
     def test_instantiation_not_connected(self):
         thrown = False
         try:
-          DockerEnvironmentManager(self.temp_dir, 'docker','unix:///var/run/fooo')
+          DockerEnvironmentDriver(self.temp_dir, 'docker', 'unix:///var/run/fooo')
         except EnvironmentInitFailed:
             thrown = True
         assert thrown

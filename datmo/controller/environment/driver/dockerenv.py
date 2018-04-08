@@ -2,17 +2,16 @@ import ast
 import os
 import shutil
 import subprocess
-
-from datmo.util.i18n import get as _
 from docker import DockerClient
 
+from datmo.util.i18n import get as _
 from datmo.util.exceptions import DoesNotExistException, \
     EnvironmentInitFailed, EnvironmentExecutionException
 
 
-class DockerEnvironmentManager(object):
+class DockerEnvironmentDriver(object):
     """
-    This Environment Manager handles Environment management in the Datmo Project using Docker
+    This EnvironmentDriver handles environment management in the project using docker
     """
 
     def __init__(self, filepath="", docker_execpath="docker", docker_socket="unix:///var/run/docker.sock"):

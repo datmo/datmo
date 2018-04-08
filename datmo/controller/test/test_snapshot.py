@@ -9,11 +9,11 @@ import os
 import shutil
 import tempfile
 
-from ..project import ProjectController
-from ..environment.environment import EnvironmentController
-from ..snapshot import SnapshotController
-
+from datmo.controller.project import ProjectController
+from datmo.controller.environment.environment import EnvironmentController
+from datmo.controller.snapshot import SnapshotController
 from datmo.util.exceptions import EntityNotFound
+
 
 class TestSnapshotController():
     def setup_method(self):

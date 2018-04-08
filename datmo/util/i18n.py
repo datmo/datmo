@@ -1,7 +1,9 @@
 from past.builtins import basestring
+
 from datmo.util.lang import get_lang
 
 MESSAGES = get_lang()
+
 
 def get(type, key, values=None):
     if isinstance(values, dict) and len(values) > 0:

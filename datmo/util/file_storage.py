@@ -2,13 +2,15 @@ import os
 import io
 import json
 import yaml
-from .exceptions import SaveSettingException, \
+
+from datmo.util.exceptions import SaveSettingException, \
     FileIOException
 
 try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+
 
 class JSONKeyValueStore():
     # TODO:  add file locking

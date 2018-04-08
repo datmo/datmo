@@ -6,7 +6,32 @@ from datmo.controller.base import BaseController
 from datmo.controller.snapshot import SnapshotController
 from datmo.util.exceptions import TaskRunException
 
+
 class TaskController(BaseController):
+    """
+    TaskController inherits from BaseController and manages business logic associated with tasks
+    within the project.
+
+    Attributes
+    ----------
+    snapshot : SnapshotController
+        Snapshot controller is used to create snapshots before and after tasks
+
+    Methods
+    -------
+    create(dictionary)
+        Create a Task object with the permanent parameters
+    _run_helper(environment_id, environment_file_collection_id,
+                    log_filepath, options_dict)
+        Helper for run to start environment and run with the appropriate parameters
+    run(self, task_id, dictionary=None)
+        Run the task and track the run, logs, inputs and outputs
+    TODO: list()
+        List all tasks within the project
+    TODO: delete(id)
+        Delete the specified task from the project
+
+    """
     def __init__(self, home, dal_driver=None):
         self.snapshot = SnapshotController(home, dal_driver)
         super(TaskController, self).__init__(home, dal_driver)
@@ -45,7 +70,8 @@ class TaskController(BaseController):
 
     def _run_helper(self, environment_id, environment_file_collection_id,
                     log_filepath, options_dict):
-        """  Run container with parameters
+        """
+        Run container with parameters
 
         Parameters
         ----------
@@ -60,6 +86,10 @@ class TaskController(BaseController):
 
             command : list
             ports : list
+                Here are some example ports used for common applications.
+                   *  'jupyter notebook' - 8888
+                   *  flask API - 5000
+                   *  tensorboard - 6006
             name : str
             volumes : dict
             detach : bool
@@ -131,8 +161,12 @@ class TaskController(BaseController):
         return final_return_code, container_id, hardware_info, logs
 
     def run(self, task_id, dictionary=None):
-        """ Run a task with parameters. If dictionary specified,
-        create a new task with new run parameters
+        """
+        Run a task with parameters. If dictionary specified, create a new task with new run parameters.
+        Snapshot objects are created before and after the task to keep track of the state. During the run,
+        you can access task outputs using environment variable DATMO_TASK_DIR or `/task` which points to
+        location of datmo_tasks/[task-id]. Create config.json, stats.json and any weights or any file such
+        as graphs and visualizations within that directory for quick access
 
         Parameters
         ----------
@@ -242,3 +276,9 @@ class TaskController(BaseController):
             "logs": logs,
             "status": "SUCCESS" if return_code==0 else "FAILED",
         })
+
+    def list(self):
+        pass
+
+    def delete(self, id):
+        pass

@@ -5,8 +5,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from datmo.util import get_class_contructor
 
-from ..util import get_class_contructor
 
 class TestModuleLoader():
     def test_loader(self):

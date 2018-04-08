@@ -1,11 +1,12 @@
 from blitzdb import Document
 from datetime import datetime
+
 from datmo.util.exceptions import EntityNotFound, \
     EntityCollectionNotFound, IncorrectTypeException
 from datmo.storage.local.driver.driver_type import DriverType
 
 
-class BlitzDBDataDriver():
+class BlitzDBDALDriver():
     def __init__(self, driver_type, connection_string):
         # super().__init__()
         self.database_name = 'datmo_db'

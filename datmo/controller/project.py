@@ -6,6 +6,20 @@ from datmo.util.exceptions import SessionDoesNotExistException
 
 
 class ProjectController(BaseController):
+    """
+    ProjectController inherits from BaseController and manages business logic related to the
+    project. One model is associated with each project currently.
+
+    Methods
+    -------
+    init(name, description)
+        Initialize the project repository as a new model or update the existing project
+    cleanup()
+        Remove all datmo references from the current repository. NOTE: THIS WILL DELETE ALL DATMO WORK
+    status()
+        Give the user a picture of the status of the project, snapshots, and tasks
+    """
+
     def __init__(self, home, dal_driver=None):
         super(ProjectController, self).__init__(home, dal_driver)
 

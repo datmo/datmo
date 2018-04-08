@@ -6,7 +6,24 @@ from datmo.controller.base import BaseController
 from datmo.util.exceptions import RequiredArgumentMissing, \
     DoesNotExistException
 
+
 class EnvironmentController(BaseController):
+    """
+    EnvironmentController inherits from BaseController and manages business logic related to the
+    environment.
+
+    Methods
+    -------
+    create(dictionary)
+        Create an environment within the project
+    build(id)
+        Build the environment for use within the project
+    list()
+        List all environments within the project
+    delete(id)
+        Delete the specified environment from the project
+
+    """
     def __init__(self, home, dal_driver=None):
         super(EnvironmentController, self).__init__(home, dal_driver)
 

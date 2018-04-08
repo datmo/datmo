@@ -7,16 +7,18 @@ from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
-from datmo.controller.code.driver.git import GitCodeManager, \
-    GitHostManager
 
-class TestGitManager():
+from datmo.controller.code.driver.git import GitCodeDriver, \
+    GitHostDriver
+
+
+class TestGitCodeDriver():
     """
-    Checks all functions of the GitCodeManager
+    Checks all functions of the GitCodeDriver
     """
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir="/tmp/")
-        self.git_code_manager = GitCodeManager(filepath=self.temp_dir, execpath="git")
+        self.git_code_manager = GitCodeDriver(filepath=self.temp_dir, execpath="git")
 
     def teardown_method(self):
         shutil.rmtree(self.temp_dir)
@@ -31,7 +33,7 @@ class TestGitManager():
 
     def test_init_then_instantiation(self):
         self.git_code_manager.init()
-        another_git_code_manager = GitCodeManager(filepath=self.temp_dir, execpath="git")
+        another_git_code_manager = GitCodeDriver(filepath=self.temp_dir, execpath="git")
         result = another_git_code_manager.is_initialized
         assert result == True
 
@@ -312,9 +314,9 @@ class TestGitManager():
 
 
 
-class TestGitHostManager():
+class TestGitHostDriver():
     """
-    Checks all functions of the GitHostManager
+    Checks all functions of the GitHostDriver
     """
     def setup_class(self):
         self.netrc_temp_dir = tempfile.mkdtemp("netrc_test")
@@ -325,14 +327,14 @@ class TestGitHostManager():
         shutil.rmtree(os.path.join(self.ssh_temp_dir))
 
     def test_netrc(self):
-        hostm = GitHostManager(self.netrc_temp_dir)
+        hostm = GitHostDriver(self.netrc_temp_dir)
         assert hostm.create_git_netrc("foobar","foo")
-        hostm = GitHostManager(self.netrc_temp_dir)
+        hostm = GitHostDriver(self.netrc_temp_dir)
         assert os.path.exists(os.path.join(self.netrc_temp_dir, ".netrc"))
         assert hostm.https_enabled
 
     def test_ssh_git(self):
-        hostm = GitHostManager(self.ssh_temp_dir)
+        hostm = GitHostDriver(self.ssh_temp_dir)
         assert hostm.ssh_enabled == False
         # If id_rsa already synced with remote account
         # if os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"):
@@ -340,7 +342,7 @@ class TestGitHostManager():
         #         os.path.join(os.path.expanduser("~"), ".ssh"),
         #         os.path.join(self.ssh_temp_dir,".ssh"))
         #     assert os.path.exists(os.path.join(self.ssh_temp_dir, ".ssh", "id_rsa"))
-        #     hostm = GitHostManager(self.ssh_temp_dir)
+        #     hostm = GitHostDriver(self.ssh_temp_dir)
         #     assert hostm.ssh_enabled == True
 
 
