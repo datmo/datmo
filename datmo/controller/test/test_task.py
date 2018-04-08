@@ -14,6 +14,7 @@ import tempfile
 from datmo.controller.project import ProjectController
 from datmo.controller.environment.environment import EnvironmentController
 from datmo.controller.task import TaskController
+from datmo.util.exceptions import EntityNotFound
 
 
 class TestTaskController():
@@ -185,3 +186,55 @@ class TestTaskController():
         assert updated_task_obj.container_id
         assert updated_task_obj.logs
         assert updated_task_obj.status == "SUCCESS"
+
+    def test_list(self):
+        self.project.init("test5", "test description")
+
+        task_command = ["sh", "-c", "echo yo"]
+        input_dict = {
+            "command": task_command
+        }
+
+        # Create tasks in the project
+        task_obj_1 = self.task.create(input_dict)
+        task_obj_2 = self.task.create(input_dict)
+
+        # List all tasks regardless of filters
+        result = self.task.list()
+
+        assert len(result) == 2 and \
+               task_obj_1 in result and \
+               task_obj_2 in result
+
+        # List all tasks and filter by session
+        result = self.task.list(session_id=
+                                self.project.current_session.id)
+
+        assert len(result) == 2 and \
+               task_obj_1 in result and \
+               task_obj_2 in result
+
+
+    def test_delete(self):
+        self.project.init("test5", "test description")
+
+        task_command = ["sh", "-c", "echo yo"]
+        input_dict = {
+            "command": task_command
+        }
+
+        # Create tasks in the project
+        task_obj = self.task.create(input_dict)
+
+        # Delete task from the project
+        result = self.task.delete(task_obj.id)
+
+        # Check if task retrieval throws error
+        thrown = False
+        try:
+            self.task.dal.snapshot.get_by_id(task_obj.id)
+        except EntityNotFound:
+            thrown = True
+
+        assert result == True and \
+               thrown == True

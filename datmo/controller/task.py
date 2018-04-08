@@ -26,9 +26,9 @@ class TaskController(BaseController):
         Helper for run to start environment and run with the appropriate parameters
     run(self, task_id, dictionary=None)
         Run the task and track the run, logs, inputs and outputs
-    TODO: list()
-        List all tasks within the project
-    TODO: delete(id)
+    list(session_id=None)
+        List all tasks within the project given filters
+    delete(id)
         Delete the specified task from the project
 
     """
@@ -277,8 +277,11 @@ class TaskController(BaseController):
             "status": "SUCCESS" if return_code==0 else "FAILED",
         })
 
-    def list(self):
-        pass
+    def list(self, session_id=None):
+        query = {}
+        if session_id:
+            query['session_id'] = session_id
+        return self.dal.task.query(query)
 
     def delete(self, id):
-        pass
+        return self.dal.task.delete(id)

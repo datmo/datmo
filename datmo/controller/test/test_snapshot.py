@@ -202,6 +202,14 @@ class TestSnapshotController():
             snapshot_obj_1 in result and \
             snapshot_obj_2 in result
 
+        # List all snapshots with session filter
+        result = self.snapshot.list(session_id=
+                                    self.project.current_session.id)
+
+        assert len(result) == 2 and \
+               snapshot_obj_1 in result and \
+               snapshot_obj_2 in result
+
     def test_delete(self):
         self.project.init("test5", "test description")
 

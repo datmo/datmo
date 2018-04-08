@@ -17,8 +17,8 @@ class SnapshotController(BaseController):
         Create a snapshot within the project
     checkout(id)
         Checkout to a specific snapshot within the project
-    list()
-        List all snapshots present within the project
+    list(session_id=None)
+        List all snapshots present within the project based on given filters
     delete(id)
         Delete the snapshot specified from the project
 
@@ -150,9 +150,11 @@ class SnapshotController(BaseController):
                                              dst_dirpath)
         return True
 
-    def list(self):
-        # Get all snapshot objects for this project
-        return self.dal.snapshot.query({})
+    def list(self, session_id=None):
+        query = {}
+        if session_id:
+            query['session_id'] = session_id
+        return self.dal.snapshot.query(query)
 
     def delete(self, id):
         return self.dal.snapshot.delete(id)
