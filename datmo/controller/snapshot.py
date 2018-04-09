@@ -1,6 +1,9 @@
 import os
 
 from datmo.controller.base import BaseController
+from datmo.controller.code.code import CodeController
+from datmo.controller.file.file_collection import FileCollectionController
+from datmo.controller.environment.environment import EnvironmentController
 from datmo.util.i18n import get as _
 from datmo.util.file_storage import JSONKeyValueStore
 from datmo.util.exceptions import RequiredArgumentMissing, \
@@ -9,6 +12,12 @@ from datmo.util.exceptions import RequiredArgumentMissing, \
 
 class SnapshotController(BaseController):
     """SnapshotController inherits from BaseController and manages business logic related to snapshots
+
+    Attributes
+    ----------
+    code : CodeController
+    file_collection : FileCollectionController
+    environment : EnvironmentController
 
     Methods
     -------
@@ -24,6 +33,9 @@ class SnapshotController(BaseController):
     """
     def __init__(self, home, dal_driver=None):
         super(SnapshotController, self).__init__(home, dal_driver)
+        self.code = CodeController(home, self.dal.driver)
+        self.file_collection = FileCollectionController(home, self.dal.driver)
+        self.environment = EnvironmentController(home, self.dal.driver)
 
     def create(self, dictionary):
         """Create snapshot object
@@ -33,13 +45,13 @@ class SnapshotController(BaseController):
         dictionary : dict
             Includes a set of keys defined below:
                 filepaths : list
-                    List of files or folder paths to include within the snapshot
+                    list of files or folder paths to include within the snapshot
+                environment_definition_filepath : str
+                    filepath for the environment definition file (e.g. Dockerfile path for Docker)
                 config_filename : str
-                    Name of file with configuration parameters
+                    name of file with configuration parameters
                 stats_filename : str
-                    Name of file with metrics and statistics
-        environment_def_path : str
-            Filepath for the environment definition file (e.g. Dockerfile path for Docker)
+                    name of file with metrics and statistics
 
         Returns
         -------
@@ -49,10 +61,9 @@ class SnapshotController(BaseController):
         Raises
         ------
         RequiredArgumentMissing
-            If required arguments are not given by the user
+            if required arguments are not given by the user
         FileIOException
-            If files are not present or there is an error in File IO
-
+            if files are not present or there is an error in File IO
         """
         # Validate Inputs
 
@@ -71,8 +82,8 @@ class SnapshotController(BaseController):
             else:
                 # Code setup
                 if required_arg == "code_id":
-                    create_dict['code_id'] = self.code_driver.\
-                        create_code()
+                    create_dict['code_id'] = self.code.\
+                        create().id
                 # File setup
                 elif required_arg == "file_collection_id":
                     # transform file paths to file_collection_id
@@ -80,8 +91,17 @@ class SnapshotController(BaseController):
                         raise RequiredArgumentMissing(_("error",
                                                         "controller.snapshot.create.arg",
                                                         required_arg))
-                    create_dict['file_collection_id'] = self.file_driver.\
-                        create_collection(dictionary['filepaths'])
+                    create_dict['file_collection_id'] = self.file_collection.\
+                        create(dictionary['filepaths']).id
+                # Environment setup
+                elif required_arg == "environment_id":
+                    if "environment_definition_filepath" not in dictionary:
+                        raise RequiredArgumentMissing(_("error",
+                                                        "controller.snapshot.create.arg",
+                                                        required_arg))
+                    create_dict['environment_id'] = self.environment.create({
+                        "definition_filepath": dictionary['environment_definition_filepath']
+                    }).id
                 # Config setup
                 elif required_arg == "config":
                     # transform file to config dict
@@ -136,7 +156,8 @@ class SnapshotController(BaseController):
         snapshot_obj = self.dal.snapshot.get_by_id(id)
 
         # Create new code_driver ref to revert back (if needed)
-        self.code_driver.create_code()
+        # TODO: Save this to be reverted to
+        current_code_obj = self.code.create()
 
         # Checkout code_driver to the relevant code_driver ref
         self.code_driver.checkout_code(snapshot_obj.code_id)

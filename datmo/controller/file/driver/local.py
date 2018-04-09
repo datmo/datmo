@@ -23,6 +23,7 @@ class LocalFileDriver(object):
                                           "controller.file.driver.local.__init__",
                                           filepath))
         self._is_initialized = self.is_initialized
+        self.type = "local"
 
     @staticmethod
     def get_safe_dst_filepath(filepath, dst_dirpath):

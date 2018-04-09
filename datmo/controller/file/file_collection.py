@@ -6,7 +6,7 @@ from datmo.util.exceptions import RequiredArgumentMissing, \
 
 class FileCollectionController(BaseController):
     """FileCollectionController inherits from BaseController and manages business logic related to the
-    code.
+    file system.
 
     Methods
     -------
@@ -58,7 +58,7 @@ class FileCollectionController(BaseController):
                     self.file_driver.get_collection_path(create_dict['id'])
                 traversed_args.append(required_arg)
             elif required_arg == "driver_type":
-                create_dict[required_arg] = self.code_driver.type
+                create_dict[required_arg] = self.file_driver.type
                 traversed_args.append(required_arg)
 
         # Error if required values not present
@@ -66,7 +66,7 @@ class FileCollectionController(BaseController):
             raise RequiredArgumentMissing(_("error",
                                             "controller.file_collection.create"))
 
-        # Create code and return
+        # Create file collection and return
         return self.dal.file_collection.create(create_dict)
 
     def list(self):

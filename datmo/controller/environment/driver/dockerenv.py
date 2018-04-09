@@ -39,6 +39,7 @@ class DockerEnvironmentDriver(object):
         self.cpu_prefix = [self.docker_execpath, '-H', self.docker_socket]
 
         self._is_initialized = self.is_initialized
+        self.type = "docker"
 
         # execute a docker info command
         # make sure it passed

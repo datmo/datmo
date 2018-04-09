@@ -1,16 +1,11 @@
 """
 Tests for SnapshotController
 """
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import os
 import shutil
 import tempfile
 
 from datmo.controller.project import ProjectController
-from datmo.controller.environment.environment import EnvironmentController
 from datmo.controller.snapshot import SnapshotController
 from datmo.util.exceptions import EntityNotFound
 
@@ -21,8 +16,8 @@ class TestSnapshotController():
         tempfile.tempdir = '/tmp'
         self.temp_dir = tempfile.mkdtemp('project')
         self.project = ProjectController(self.temp_dir)
-        self.environment = EnvironmentController(self.temp_dir)
-        self.snapshot = SnapshotController(self.temp_dir)
+        self.snapshot = SnapshotController(self.temp_dir,
+                                           dal_driver=self.project.dal.driver)
 
     def teardown_method(self):
         shutil.rmtree(self.temp_dir)
@@ -30,21 +25,16 @@ class TestSnapshotController():
     def test_create(self):
         self.project.init("test3", "test description")
 
+        # Create files to add
+        self.snapshot.file_driver.create("dirpath1", dir=True)
+        self.snapshot.file_driver.create("dirpath2", dir=True)
+        self.snapshot.file_driver.create("filepath1")
+
         # Create environment definition
         env_def_path = os.path.join(self.snapshot.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
-
-        environment_obj = self.environment.create({
-            "driver_type": "docker",
-            "definition_filepath": env_def_path
-        })
-
-        # Create files to add
-        self.snapshot.file_driver.create("dirpath1", dir=True)
-        self.snapshot.file_driver.create("dirpath2", dir=True)
-        self.snapshot.file_driver.create("filepath1")
 
         # Create config
         config_filepath = os.path.join(self.snapshot.home,
@@ -62,9 +52,9 @@ class TestSnapshotController():
             "filepaths": [os.path.join(self.snapshot.home, "dirpath1"),
                           os.path.join(self.snapshot.home, "dirpath2"),
                           os.path.join(self.snapshot.home, "filepath1")],
+            "environment_definition_filepath": env_def_path,
             "config_filename": config_filepath,
             "stats_filename": stats_filepath,
-            "environment_id": environment_obj.id
         }
 
         # Create snapshot in the project
@@ -82,21 +72,16 @@ class TestSnapshotController():
 
         # Create snapshot
 
+        # Create files to add
+        self.snapshot.file_driver.create("dirpath1", dir=True)
+        self.snapshot.file_driver.create("dirpath2", dir=True)
+        self.snapshot.file_driver.create("filepath1")
+
         # Create environment_driver definition
         env_def_path = os.path.join(self.snapshot.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
-
-        environment_obj = self.environment.create({
-            "driver_type": "docker",
-            "definition_filepath": env_def_path
-        })
-
-        # Create files to add
-        self.snapshot.file_driver.create("dirpath1", dir=True)
-        self.snapshot.file_driver.create("dirpath2", dir=True)
-        self.snapshot.file_driver.create("filepath1")
 
         # Create config
         config_filepath = os.path.join(self.snapshot.home,
@@ -114,9 +99,9 @@ class TestSnapshotController():
             "filepaths": [os.path.join(self.snapshot.home, "dirpath1"),
                           os.path.join(self.snapshot.home, "dirpath2"),
                           os.path.join(self.snapshot.home, "filepath1")],
+            "environment_definition_filepath": env_def_path,
             "config_filename": config_filepath,
             "stats_filename": stats_filepath,
-            "environment_id": environment_obj.id
         }
 
         # Create snapshot in the project
@@ -140,21 +125,16 @@ class TestSnapshotController():
     def test_list(self):
         self.project.init("test4", "test description")
 
+        # Create files to add
+        self.snapshot.file_driver.create("dirpath1", dir=True)
+        self.snapshot.file_driver.create("dirpath2", dir=True)
+        self.snapshot.file_driver.create("filepath1")
+
         # Create environment_driver definition
         env_def_path = os.path.join(self.snapshot.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
-
-        environment_obj = self.environment.create({
-            "driver_type": "docker",
-            "definition_filepath": env_def_path
-        })
-
-        # Create files to add
-        self.snapshot.file_driver.create("dirpath1", dir=True)
-        self.snapshot.file_driver.create("dirpath2", dir=True)
-        self.snapshot.file_driver.create("filepath1")
 
         # Create config
         config_filepath = os.path.join(self.snapshot.home,
@@ -172,9 +152,9 @@ class TestSnapshotController():
             "filepaths": [os.path.join(self.snapshot.home, "dirpath1"),
                           os.path.join(self.snapshot.home, "dirpath2"),
                           os.path.join(self.snapshot.home, "filepath1")],
+            "environment_definition_filepath": env_def_path,
             "config_filename": config_filepath,
             "stats_filename": stats_filepath,
-            "environment_id": environment_obj.id
         }
 
         # Create file to add to snapshot
@@ -213,21 +193,16 @@ class TestSnapshotController():
     def test_delete(self):
         self.project.init("test5", "test description")
 
+        # Create files to add
+        self.snapshot.file_driver.create("dirpath1", dir=True)
+        self.snapshot.file_driver.create("dirpath2", dir=True)
+        self.snapshot.file_driver.create("filepath1")
+
         # Create environment_driver definition
         env_def_path = os.path.join(self.snapshot.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
-
-        environment_obj = self.environment.create({
-            "driver_type": "docker",
-            "definition_filepath": env_def_path
-        })
-
-        # Create files to add
-        self.snapshot.file_driver.create("dirpath1", dir=True)
-        self.snapshot.file_driver.create("dirpath2", dir=True)
-        self.snapshot.file_driver.create("filepath1")
 
         # Create config
         config_filepath = os.path.join(self.snapshot.home,
@@ -245,9 +220,9 @@ class TestSnapshotController():
             "filepaths": [os.path.join(self.snapshot.home, "dirpath1"),
                           os.path.join(self.snapshot.home, "dirpath2"),
                           os.path.join(self.snapshot.home, "filepath1")],
+            "environment_definition_filepath": env_def_path,
             "config_filename": config_filepath,
             "stats_filename": stats_filepath,
-            "environment_id": environment_obj.id
         }
 
         # Create snapshot in the project

@@ -36,7 +36,6 @@ class TestEnvironmentController():
             f.write(str("FROM datmo/xgboost:cpu"))
 
         input_dict = {
-            "driver_type": "docker",
             "definition_filepath": definition_filepath,
         }
 
@@ -58,7 +57,6 @@ class TestEnvironmentController():
             f.write(str("FROM datmo/xgboost:cpu"))
 
         input_dict = {
-            "driver_type": "docker",
             "definition_filepath": definition_filepath,
         }
 
@@ -80,7 +78,6 @@ class TestEnvironmentController():
             f.write(str("FROM datmo/xgboost:cpu"))
 
         input_dict_1 = {
-            "driver_type": "docker",
             "definition_filepath": definition_path_1,
         }
 
@@ -94,7 +91,6 @@ class TestEnvironmentController():
             f.write(str("FROM datmo/scikit-opencv"))
 
         input_dict_2 = {
-            "driver_type": "docker",
             "definition_filepath": definition_path_2,
         }
 
@@ -118,7 +114,6 @@ class TestEnvironmentController():
             f.write(str("FROM datmo/xgboost:cpu"))
 
         input_dict = {
-            "driver_type": "docker",
             "definition_filepath": definition_filepath,
         }
 

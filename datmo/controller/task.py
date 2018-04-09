@@ -32,8 +32,8 @@ class TaskController(BaseController):
 
     """
     def __init__(self, home, dal_driver=None):
-        self.snapshot = SnapshotController(home, dal_driver)
         super(TaskController, self).__init__(home, dal_driver)
+        self.snapshot = SnapshotController(home, self.dal.driver)
 
     def create(self, dictionary):
         """Create Task object
