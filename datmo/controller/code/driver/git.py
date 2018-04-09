@@ -514,7 +514,7 @@ class GitCodeDriver(object):
                                     str(e)))
         return True
 
-    # Implemented functions for all Code drivers
+    # Implemented functions for every CodeDriver
 
     def create_code(self, code_id=None):
         """Add remaining files, make a commit and add it to a datmo code ref

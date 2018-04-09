@@ -46,13 +46,21 @@ class CodeController(BaseController):
 
         ## Required args
         required_args = ["id", "driver_type"]
+        traversed_args = []
         for required_arg in required_args:
             # Handle Id if provided or not
             if required_arg == "id":
                 create_dict[required_arg] = id if id else \
                     self.code_driver.create_code()
+                traversed_args.append(required_arg)
             elif required_arg == "driver_type":
                 create_dict[required_arg] = self.code_driver.type
+                traversed_args.append(required_arg)
+
+        # Error if required values not present
+        if not traversed_args == required_args:
+            raise RequiredArgumentMissing(_("error",
+                                            "controller.code.create"))
 
         # Create code and return
         return self.dal.code.create(create_dict)
