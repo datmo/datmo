@@ -9,8 +9,7 @@ from datmo.util.exceptions import InvalidProjectPathException, \
 
 
 class BaseController(object):
-    """
-    BaseController is used to setup the repository. It serves as the basis for all other Controller objects
+    """BaseController is used to setup the repository. It serves as the basis for all other Controller objects
 
     Attributes
     ----------

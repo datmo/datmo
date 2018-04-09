@@ -46,6 +46,9 @@ class GitUrlArgumentException(ArgumentException):
 class GitExecutionException(Exception):
     pass
 
+class GitCommitDoesNotExist(Exception):
+    pass
+
 class FileExecutionException(Exception):
     pass
 

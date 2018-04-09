@@ -8,8 +8,7 @@ from datmo.util.exceptions import RequiredArgumentMissing, \
 
 
 class EnvironmentController(BaseController):
-    """
-    EnvironmentController inherits from BaseController and manages business logic related to the
+    """EnvironmentController inherits from BaseController and manages business logic related to the
     environment.
 
     Methods
@@ -28,26 +27,23 @@ class EnvironmentController(BaseController):
         super(EnvironmentController, self).__init__(home, dal_driver)
 
     def create(self, dictionary):
-        """ Create an Environment
+        """Create an Environment
 
         Parameters
         ----------
         dictionary : dict
-            driver_type : str
-                Environment driver type to use
             definition_filepath : str
-                Absolute filepath to the Environment definition file
+                absolute filepath to the environment definition file (e.g. ./Dockerfile)
 
         Returns
         -------
         Environment
-            Returns an object representing the environment created
+            returns an object representing the environment created
 
         Raises
-        ______
+        ------
         RequiredArgumentMissing
-            If any arguments above are not provided.
-
+            if any arguments above are not provided.
         """
         # Validate Inputs
 
@@ -66,6 +62,9 @@ class EnvironmentController(BaseController):
                 if required_arg == "id":
                     create_dict[required_arg] = \
                         get_filehash(dictionary["definition_filepath"])
+                # Pull in driver type from base
+                elif required_arg == "driver_type":
+                    create_dict[required_arg] = self.environment_driver.type
                 # File setup
                 elif required_arg == "file_collection_id":
                     if "definition_filepath" not in dictionary:
@@ -89,27 +88,26 @@ class EnvironmentController(BaseController):
                 create_dict[optional_arg] = dictionary[optional_arg]
 
 
-        # Create snapshot and return
+        # Create environment and return
         return self.dal.environment.create(create_dict)
 
     def build(self, id):
-        """ Build Environment from definition file
+        """Build Environment from definition file
 
         Parameters
         ----------
         id : str
-            Environment object id to build
+            environment object id to build
 
         Returns
         -------
         bool
-            Returns True if success else False
+            returns True if success else False
 
         Raises
-        ______
+        ------
         DoesNotExistException
-            If the specified Environment does not exist.
-
+            if the specified Environment does not exist.
         """
         environment_obj = self.dal.environment.get_by_id(id)
         if not environment_obj:
@@ -124,27 +122,26 @@ class EnvironmentController(BaseController):
         return result
 
     def list(self):
-        # Get all environment_driver objects for this project
+        # TODO: Add time filters
         return self.dal.environment.query({})
 
     def delete(self, id):
-        """ Delete all traces of an Environment
+        """Delete all traces of an Environment
 
         Parameters
         ----------
         id : str
-            Environment object id to remove
+            environment object id to remove
 
         Returns
         -------
         bool
-            Returns True if success else False
+            returns True if success else False
 
         Raises
-        ______
+        ------
         DoesNotExistException
-            If the specified Environment does not exist.
-
+            if the specified Environment does not exist.
         """
         environment_obj = self.dal.environment.get_by_id(id)
         if not environment_obj:

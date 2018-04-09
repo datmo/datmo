@@ -1,8 +1,7 @@
 from datmo.controller.base import BaseController
 
 class ModelController(BaseController):
-    """
-    ModelController inherits from BaseController and manages business logic related to the
+    """ModelController inherits from BaseController and manages business logic related to the
     model.
 
     # TODO: Enable multiple models per project

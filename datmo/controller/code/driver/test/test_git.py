@@ -10,6 +10,7 @@ import tempfile
 
 from datmo.controller.code.driver.git import GitCodeDriver, \
     GitHostDriver
+from datmo.util.exceptions import GitCommitDoesNotExist
 
 
 class TestGitCodeDriver():
@@ -80,6 +81,22 @@ class TestGitCodeDriver():
         result = self.git_code_manager.commit(["-m", "test"])
         commit_id = self.git_code_manager.latest_commit()
         assert result == True and commit_id
+
+    def test_exists_commit(self):
+        self.git_code_manager.init()
+        random_code_id = "random"
+        result = \
+            self.git_code_manager.exists_commit(random_code_id)
+        assert result == False
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test.txt")
+        with open(test_filepath, "w") as f:
+            f.write(str("test"))
+        self.git_code_manager.add(test_filepath)
+        self.git_code_manager.commit(["-m", "test"])
+        commit_id = self.git_code_manager.latest_commit()
+        result = self.git_code_manager.exists_commit(commit_id)
+        assert result == True
 
     # def test_branch(self):
     #     pass
@@ -239,76 +256,90 @@ class TestGitCodeDriver():
                              ".git/refs/datmo")
             )
 
-    def test_create_code_ref(self):
+    def test_create_code(self):
         self.git_code_manager.init()
+        # Test failing case with no code_id and nothing to commit
+        try:
+            self.git_code_manager.create_code()
+        except GitCommitDoesNotExist:
+            assert True
+        # Test passing case with no code_id
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
             f.write(str("test"))
-        code_id = self.git_code_manager.create_code_ref()
+        code_id = self.git_code_manager.create_code()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
                                    ".git/refs/datmo/",
                                      code_id)
         assert code_id and \
             os.path.isfile(code_ref_path)
+        # Test error raised with code_id
+        random_code_id = "random"
+        try:
+            self.git_code_manager.\
+                create_code(code_id=random_code_id)
+        except GitCommitDoesNotExist:
+            assert True
 
-    def test_exists_code_ref(self):
+    def test_exists_code(self):
         self.git_code_manager.init()
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
             f.write(str("test"))
-        code_id = self.git_code_manager.create_code_ref()
+        code_id = self.git_code_manager.create_code()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
                                      ".git/refs/datmo/",
                                      code_id)
-        result = self.git_code_manager.exists_code_ref(code_id)
+        result = self.git_code_manager.exists_code(code_id)
         assert result == True and \
             os.path.isfile(code_ref_path)
 
-    def test_delete_code_ref(self):
+    def test_delete_code(self):
         self.git_code_manager.init()
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
             f.write(str("test"))
-        code_id = self.git_code_manager.create_code_ref()
+        code_id = self.git_code_manager.create_code()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
                                      ".git/refs/datmo/",
                                      code_id)
-        result  = self.git_code_manager.delete_code_ref(code_id)
+        result  = self.git_code_manager.delete_code(code_id)
         assert result == True and \
             not os.path.isfile(code_ref_path)
 
-    def test_list_code_refs(self):
+    def test_list_code(self):
         self.git_code_manager.init()
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
             f.write(str("test"))
-        code_id = self.git_code_manager.create_code_ref()
-        code_refs = self.git_code_manager.list_code_refs()
+        code_id = self.git_code_manager.create_code()
+        code_refs = self.git_code_manager.list_code()
         assert code_refs and \
             code_id in code_refs
 
 
-    # def test_push_code_ref(self):
+    # def test_push_code(self):
     #     pass
     #
-    # def test_fetch_code_ref(self):
+    # def test_fetch_code(self):
     #     pass
     #
-    def test_checkout_code_ref(self):
+    def test_checkout_code(self):
+        # TODO: Test remote checkout
         self.git_code_manager.init()
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
             f.write(str("test1"))
-        code_id_1 = self.git_code_manager.create_code_ref()
+        code_id_1 = self.git_code_manager.create_code()
         with open(test_filepath, "w") as f:
             f.write(str("test2"))
-        _ = self.git_code_manager.create_code_ref()
-        result = self.git_code_manager.checkout_code_ref(code_id_1)
+        _ = self.git_code_manager.create_code()
+        result = self.git_code_manager.checkout_code(code_id_1)
         assert result ==  True and \
             self.git_code_manager.latest_commit() == code_id_1
 

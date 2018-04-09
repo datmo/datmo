@@ -8,8 +8,7 @@ from datmo.util.exceptions import RequiredArgumentMissing, \
 
 
 class SnapshotController(BaseController):
-    """
-    SnapshotController inherits from BaseController and manages business logic related to snapshots
+    """SnapshotController inherits from BaseController and manages business logic related to snapshots
 
     Methods
     -------
@@ -27,8 +26,7 @@ class SnapshotController(BaseController):
         super(SnapshotController, self).__init__(home, dal_driver)
 
     def create(self, dictionary):
-        """
-        Create snapshot object
+        """Create snapshot object
 
         Parameters
         ----------
@@ -74,7 +72,7 @@ class SnapshotController(BaseController):
                 # Code setup
                 if required_arg == "code_id":
                     create_dict['code_id'] = self.code_driver.\
-                        create_code_ref()
+                        create_code()
                 # File setup
                 elif required_arg == "file_collection_id":
                     # transform file paths to file_collection_id
@@ -138,10 +136,10 @@ class SnapshotController(BaseController):
         snapshot_obj = self.dal.snapshot.get_by_id(id)
 
         # Create new code_driver ref to revert back (if needed)
-        self.code_driver.create_code_ref()
+        self.code_driver.create_code()
 
         # Checkout code_driver to the relevant code_driver ref
-        self.code_driver.checkout_code_ref(snapshot_obj.code_id)
+        self.code_driver.checkout_code(snapshot_obj.code_id)
 
         # Pull file collection to the project home
         dst_dirpath = os.path.join(self.home, "datmo_snapshots", id)

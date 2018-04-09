@@ -8,8 +8,7 @@ from datmo.util.exceptions import TaskRunException
 
 
 class TaskController(BaseController):
-    """
-    TaskController inherits from BaseController and manages business logic associated with tasks
+    """TaskController inherits from BaseController and manages business logic associated with tasks
     within the project.
 
     Attributes
@@ -37,7 +36,7 @@ class TaskController(BaseController):
         super(TaskController, self).__init__(home, dal_driver)
 
     def create(self, dictionary):
-        """ Create Task object
+        """Create Task object
 
         Parameters
         ----------
@@ -70,8 +69,7 @@ class TaskController(BaseController):
 
     def _run_helper(self, environment_id, environment_file_collection_id,
                     log_filepath, options_dict):
-        """
-        Run container with parameters
+        """Run container with parameters
 
         Parameters
         ----------
@@ -161,8 +159,7 @@ class TaskController(BaseController):
         return final_return_code, container_id, hardware_info, logs
 
     def run(self, task_id, dictionary=None):
-        """
-        Run a task with parameters. If dictionary specified, create a new task with new run parameters.
+        """Run a task with parameters. If dictionary specified, create a new task with new run parameters.
         Snapshot objects are created before and after the task to keep track of the state. During the run,
         you can access task outputs using environment variable DATMO_TASK_DIR or `/task` which points to
         location of datmo_tasks/[task-id]. Create config.json, stats.json and any weights or any file such
