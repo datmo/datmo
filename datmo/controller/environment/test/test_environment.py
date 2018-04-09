@@ -1,10 +1,6 @@
 """
 Tests for EnvironmentController
 """
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import os
 import shutil
 import tempfile
@@ -21,7 +17,7 @@ class TestEnvironmentController():
         tempfile.tempdir = '/tmp'
         self.temp_dir = tempfile.mkdtemp('project')
         self.project = ProjectController(self.temp_dir)
-        self.environment = EnvironmentController(self.temp_dir)
+        self.environment = EnvironmentController(self.temp_dir, self.project.dal.driver)
 
     def teardown_method(self):
         shutil.rmtree(self.temp_dir)

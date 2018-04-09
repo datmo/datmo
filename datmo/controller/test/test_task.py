@@ -1,10 +1,6 @@
 """
 Tests for TaskController
 """
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
 import os
 import random
 import string
@@ -23,8 +19,8 @@ class TestTaskController():
         tempfile.tempdir = '/tmp'
         self.temp_dir = tempfile.mkdtemp('project')
         self.project = ProjectController(self.temp_dir)
-        self.environment = EnvironmentController(self.temp_dir)
-        self.task = TaskController(self.temp_dir)
+        self.environment = EnvironmentController(self.temp_dir, self.project.dal.driver)
+        self.task = TaskController(self.temp_dir, self.project.dal.driver)
 
     def teardown_method(self):
         shutil.rmtree(self.temp_dir)
@@ -54,7 +50,6 @@ class TestTaskController():
             f.write(str("FROM datmo/xgboost:cpu"))
 
         environment_obj = self.environment.create({
-            "driver_type": "docker",
             "definition_filepath": env_def_path
         })
 
@@ -86,10 +81,9 @@ class TestTaskController():
             "api": False
         }
 
-        return_code, container_id, hardware_info, logs = \
+        hardware_info, return_code, container_id, logs = \
             self.task._run_helper(environment_obj.id,
-                                  environment_obj.file_collection_id,
-                                  log_filepath, options_dict)
+                                  options_dict, log_filepath)
         assert return_code == 0
         assert container_id and \
                self.task.environment_driver.get_container(container_id)
@@ -118,10 +112,9 @@ class TestTaskController():
             "api": True
         }
 
-        return_code, container_id, hardware_info, logs = \
+        hardware_info, return_code, container_id, logs = \
             self.task._run_helper(environment_obj.id,
-                                  environment_obj.file_collection_id,
-                                  log_filepath, options_dict)
+                                  options_dict, log_filepath)
         assert return_code == 0
         assert container_id and \
                self.task.environment_driver.get_container(container_id)

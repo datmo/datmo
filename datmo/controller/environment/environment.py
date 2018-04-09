@@ -3,6 +3,7 @@ import os
 from datmo.util.i18n import get as _
 from datmo.util.misc_functions import get_filehash
 from datmo.controller.base import BaseController
+from datmo.controller.file.file_collection import FileCollectionController
 from datmo.util.exceptions import RequiredArgumentMissing, \
     DoesNotExistException
 
@@ -25,6 +26,7 @@ class EnvironmentController(BaseController):
     """
     def __init__(self, home, dal_driver=None):
         super(EnvironmentController, self).__init__(home, dal_driver)
+        self.file_collection = FileCollectionController(home, self.dal.driver)
 
     def create(self, dictionary):
         """Create an Environment
@@ -77,8 +79,7 @@ class EnvironmentController(BaseController):
                                                                        output_definition_path=datmo_definition_filepath)
                     # Add definition_filepath and datmo_definition_filepath to file_collection
                     filepaths = [dictionary['definition_filepath'], datmo_definition_filepath]
-                    create_dict['file_collection_id'] = self.file_driver. \
-                        create_collection(filepaths)
+                    create_dict['file_collection_id'] = self.file_collection.create(filepaths).id
                     create_dict['definition_filename'] = definition_filename
 
         ## Optional args
@@ -114,12 +115,54 @@ class EnvironmentController(BaseController):
             raise DoesNotExistException(_("error",
                                           "controller.environment.build",
                                           id))
+        file_collection_obj = self.dal.file_collection.\
+            get_by_id(environment_obj.file_collection_id)
         # Build the Environment with the driver
-        datmo_definition_filepath = os.path.join(self.file_driver.
-                                                 get_collection_path(
-            environment_obj.file_collection_id), "datmo" + environment_obj.definition_filename)
+        datmo_definition_filepath = os.path.join(file_collection_obj.path,
+                                                 "datmo" + environment_obj.definition_filename)
         result = self.environment_driver.build_image(id, definition_path=datmo_definition_filepath)
         return result
+
+    def run(self, id, options, log_filepath):
+        """
+        Run and log an instance of the environment with the options given
+
+        Parameters
+        ----------
+        id : str
+        options : dict
+            can include the following values:
+
+            command : list
+            ports : list
+                Here are some example ports used for common applications.
+                   *  'jupyter notebook' - 8888
+                   *  flask API - 5000
+                   *  tensorboard - 6006
+            name : str
+            volumes : dict
+            detach : bool
+            stdin_open : bool
+            tty : bool
+            gpu : bool
+        log_filepath : str
+            filepath to the log file
+
+        Returns
+        -------
+        return_code : int
+            system return code for container and logs
+        container_id : str
+            identification for container run of the environment
+        logs : str
+            string version of output logs for the container
+        """
+        run_return_code, container_id = \
+            self.environment_driver.run_container(image_name=id, **options)
+        log_return_code, logs = self.environment_driver.log_container(container_id, filepath=log_filepath)
+        final_return_code = run_return_code and log_return_code
+
+        return final_return_code, container_id, logs
 
     def list(self):
         # TODO: Add time filters
@@ -149,7 +192,7 @@ class EnvironmentController(BaseController):
                                           "controller.environment.delete",
                                           id))
         # Remove file collection
-        file_collection_deleted = self.file_driver.delete_collection(environment_obj.file_collection_id)
+        file_collection_deleted = self.file_collection.delete(environment_obj.file_collection_id)
         # Remove images associated with the environment_driver
         image_removed = self.environment_driver.remove_image(id, force=True)
         # Remove running containers associated with environment_driver

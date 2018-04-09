@@ -3,6 +3,7 @@ import platform
 
 from datmo.util.i18n import get as _
 from datmo.controller.base import BaseController
+from datmo.controller.environment.environment import EnvironmentController
 from datmo.controller.snapshot import SnapshotController
 from datmo.util.exceptions import TaskRunException
 
@@ -14,25 +15,26 @@ class TaskController(BaseController):
     Attributes
     ----------
     snapshot : SnapshotController
-        Snapshot controller is used to create snapshots before and after tasks
+        used to create snapshots before and after tasks
 
     Methods
     -------
     create(dictionary)
-        Create a Task object with the permanent parameters
+        creates a Task object with the permanent parameters
     _run_helper(environment_id, environment_file_collection_id,
-                    log_filepath, options_dict)
-        Helper for run to start environment and run with the appropriate parameters
+                    log_filepath, options)
+        helper for run to start environment and run with the appropriate parameters
     run(self, task_id, dictionary=None)
-        Run the task and track the run, logs, inputs and outputs
+        runs the task and tracks the run, logs, inputs and outputs
     list(session_id=None)
-        List all tasks within the project given filters
+        lists all tasks within the project given filters
     delete(id)
-        Delete the specified task from the project
+        deletes the specified task from the project
 
     """
     def __init__(self, home, dal_driver=None):
         super(TaskController, self).__init__(home, dal_driver)
+        self.environment = EnvironmentController(home, self.dal.driver)
         self.snapshot = SnapshotController(home, self.dal.driver)
 
     def create(self, dictionary):
@@ -41,12 +43,14 @@ class TaskController(BaseController):
         Parameters
         ----------
         dictionary : dict
-            Options for task, command is required
+            options for Task object
+            command : str
+                full command used
 
         Returns
         -------
         Task
-            Object entity for Task
+            object entity for Task
 
         """
 
@@ -67,20 +71,16 @@ class TaskController(BaseController):
         # Create Task
         return self.dal.task.create(create_dict)
 
-    def _run_helper(self, environment_id, environment_file_collection_id,
-                    log_filepath, options_dict):
+    def _run_helper(self, environment_id,
+                    options, log_filepath):
         """Run container with parameters
 
         Parameters
         ----------
         environment_id : str
-            the environment_driver id for definition
-        environment_file_collection_id : str
-            the file_collection_id for the environment_driver
-        log_filepath : str
-            filepath to the log file
-        options_dict : dict
-            Can include the following values:
+            the environment id for definition
+        options : dict
+            can include the following values:
 
             command : list
             ports : list
@@ -94,17 +94,19 @@ class TaskController(BaseController):
             stdin_open : bool
             tty : bool
             gpu : bool
+        log_filepath : str
+            filepath to the log file
 
         Returns
         -------
-        return_code : int
-            Return code of the environment that was run
-        container_id : str
-            ID of the container environment that was run
         hardware_info : str
-            Information about the hardware of the device the environment was run on
+            hardware information of the device the environment was run on
+        return_code : int
+            system return code of the environment that was run
+        container_id : str
+            id of the container environment that was run
         logs : str
-            Output logs from the run
+            output logs from the run
 
         """
         # TODO: Fix DAL to keep objects in sync and remove "environment_file_collection_id" as passed param
@@ -129,34 +131,26 @@ class TaskController(BaseController):
         }
 
         # Run container with options provided
-        run_container_options = {
-            "command": options_dict.get('command', None),
-            "ports": options_dict.get('ports', None),
-            "name": options_dict.get('name', None),
-            "volumes": options_dict.get('volumes', None),
-            "detach": options_dict.get('detach', False),
-            "stdin_open": options_dict.get('stdin_open', False),
-            "tty": options_dict.get('tty', False),
-            "gpu": options_dict.get('gpu', False),
+        run_options = {
+            "command": options.get('command', None),
+            "ports": options.get('ports', None),
+            "name": options.get('name', None),
+            "volumes": options.get('volumes', None),
+            "detach": options.get('detach', False),
+            "stdin_open": options.get('stdin_open', False),
+            "tty": options.get('tty', False),
+            "gpu": options.get('gpu', False),
             "api": False
         }
 
-        # Build image for environment_driver
-        environment_file_collection_path = self.file_driver.\
-            get_collection_path(environment_file_collection_id)
-        self.environment_driver.build_image(
-            tag=environment_id,
-            definition_path=os.path.join(environment_file_collection_path, 'datmoDockerfile')
-        )
+        # Build image for environment
+        self.environment.build(environment_id)
 
-        # Run image with environment_driver
-        run_return_code, container_id = \
-            self.environment_driver.run_container(image_name=environment_id, **run_container_options)
-        log_return_code, logs = self.environment_driver.log_container(container_id, filepath=log_filepath)
+        # Run container with environment
+        return_code, container_id, logs = \
+            self.environment.run(environment_id, run_options, log_filepath)
 
-        final_return_code = run_return_code and log_return_code
-
-        return final_return_code, container_id, hardware_info, logs
+        return hardware_info, return_code, container_id, logs
 
     def run(self, task_id, dictionary=None):
         """Run a task with parameters. If dictionary specified, create a new task with new run parameters.
@@ -220,8 +214,9 @@ class TaskController(BaseController):
         })
 
         # Copy over files from the before_snapshot file collection to task dir
-        self.file_driver.copytree(self.file_driver.get_collection_path(
-            before_snapshot_obj.file_collection_id),
+        file_collection_obj =  \
+            self.dal.file_collection.get_by_id(before_snapshot_obj.file_collection_id)
+        self.file_driver.copytree(file_collection_obj.path,
             task_obj.task_dirpath
         )
 
@@ -248,10 +243,9 @@ class TaskController(BaseController):
         }
 
         # Run environment_driver
-        return_code, container_id, hardware_info, logs =  \
+        hardware_info, return_code, container_id, logs =  \
             self._run_helper(before_snapshot_obj.environment_id,
-                             dictionary['environment_file_collection_id'],
-                             task_obj.log_filepath, environment_run_options)
+                             environment_run_options, task_obj.log_filepath)
 
         # Create the after snapshot after execution is completed
         after_snapshot_create_dict = {

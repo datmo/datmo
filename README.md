@@ -58,7 +58,7 @@ $ pip install recommonmark
 ```
 $ pip install pytest pytest-cov
 $ pip install coveralls
-$ pytest --cov-config .coveragerc --cov=datmo
+$ python -m pytest --cov-config .coveragerc --cov=datmo
 ```
 
 ## Project Structure
