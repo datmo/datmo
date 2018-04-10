@@ -67,7 +67,7 @@ class Snapshot():
                           self.stats)
         return
 
-    def toDictionary(self):
+    def to_dictionary(self):
         attr_dict = self.__dict__
         pruned_attr_dict = { attr: val
                     for attr, val in attr_dict.items() if not callable(getattr(self, attr)) and not attr.startswith("__")

@@ -2,7 +2,6 @@
 Tests for BaseController
 """
 from __future__ import division
-from __future__ import print_function
 from __future__ import unicode_literals
 
 import shutil
@@ -17,8 +16,8 @@ from datmo.util.exceptions import  \
 class TestBaseController():
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
-        self.temp_dir = tempfile.mkdtemp('datmo_project')
+        tempfile.tempdir = "/tmp"
+        self.temp_dir = tempfile.mkdtemp("datmo_project")
         self.base = BaseController(self.temp_dir)
 
     def teardown_method(self):
@@ -38,7 +37,7 @@ class TestBaseController():
 
     def test_code_manager(self):
         assert self.base.code_driver != None
-        assert self.base.code_driver.type == 'git'
+        assert self.base.code_driver.type == "git"
 
     def test_file_tree(self):
         assert self.base.file_driver != None

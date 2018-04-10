@@ -159,8 +159,8 @@ class EntityMethodsCRUD(object):
 
     def create(self, datmo_entity):
         # translate datmo_entity to a standard dictionary (document) to be stored
-        if hasattr(datmo_entity,'toDictionary'):
-            dict_obj = datmo_entity.toDictionary()
+        if hasattr(datmo_entity,'to_dictionary'):
+            dict_obj = datmo_entity.to_dictionary()
         else:
             dict_obj = datmo_entity
             # set created_at if not present
@@ -172,8 +172,8 @@ class EntityMethodsCRUD(object):
 
     def update(self, datmo_entity):
         # translate datmo_entity to a standard dictionary (document) to be stored
-        if hasattr(datmo_entity, 'toDictionary'):
-            dict_obj = datmo_entity.toDictionary()
+        if hasattr(datmo_entity, 'to_dictionary'):
+            dict_obj = datmo_entity.to_dictionary()
         else:
             if 'id' not in list(datmo_entity) or not datmo_entity['id']:
                 raise InputException(_("error",
@@ -182,7 +182,7 @@ class EntityMethodsCRUD(object):
             new_dict_obj = datmo_entity
             original_datmo_entity = self.get_by_id(datmo_entity['id'])
             dict_obj = {}
-            for key, value in original_datmo_entity.toDictionary().items():
+            for key, value in original_datmo_entity.to_dictionary().items():
                 if key in list(new_dict_obj):
                     dict_obj[key] = new_dict_obj[key]
                 else:
