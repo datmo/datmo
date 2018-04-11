@@ -51,7 +51,7 @@ class TestTask():
             "--data", test_data,
             "--dockerfile", test_dockerfile,
             "--interactive",
-            "--cmd", test_command
+            test_command
         ])
 
         # test for desired side effects
