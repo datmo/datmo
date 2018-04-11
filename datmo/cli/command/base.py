@@ -22,8 +22,6 @@ class BaseCommand(object):
         
         command: 
         """)
-        # self.parser.add_argument("-v", "--verbose",  action="store_true",
-        #                          help="run in verbose mode")
         self.subparsers = self.parser.add_subparsers(title="commands", dest="command")
 
     def parse(self, args):

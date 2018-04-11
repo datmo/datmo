@@ -10,7 +10,8 @@ MESSAGES = {
         "cli.general.str.test" : "%s",
         "cli.general.dict.test" : "{foo} - {bar}",
         "cli.general.tuple.test" : "%s, %s",
-        "cli.snapshot.create": "Creating a new snapshot"
+        "cli.snapshot.create": "Creating a new snapshot",
+        "cli.task.run": "Running a new task"
     },
     "warn": {
         "cli.general.internet": "Internet connectivity doesn't exist",
