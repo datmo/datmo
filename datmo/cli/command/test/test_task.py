@@ -19,7 +19,7 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
 
-class TestSnapshot():
+class TestTask():
     def setup_class(self):
         self.temp_dir = tempfile.mkdtemp()
         self.cli_helper = Helper()
@@ -46,19 +46,19 @@ class TestSnapshot():
         self.task.parse([
             "task",
             "run",
-            "--command", test_command,
-            "--gpu", test_gpu,
+            "--gpu",
             "--ports", test_ports,
             "--data", test_data,
             "--dockerfile", test_dockerfile,
-            "--interactive", test_interactive
+            "--interactive",
+            "--cmd", test_command
         ])
 
         # test for desired side effects
         assert self.task.args.command == test_command
         assert self.task.args.gpu == test_gpu
-        assert self.task.args.ports == test_ports
-        assert self.task.args.data == test_data
+        assert self.task.args.ports == [test_ports]
+        assert self.task.args.data == [test_data]
         assert self.task.args.dockerfile == test_dockerfile
         assert self.task.args.interactive == test_interactive
 
@@ -81,8 +81,8 @@ class TestSnapshot():
         self.task.parse([
             "task",
             "ls",
-            "--running", test_running,
-            "--all", test_all
+            "--running",
+            "--all"
         ])
 
         # test for desired side effects
@@ -108,7 +108,7 @@ class TestSnapshot():
         self.task.parse([
             "task",
             "stop",
-            "--running", test_running,
+            "--running",
             "--id", test_id
         ])
 
