@@ -2,7 +2,7 @@ import os
 import hashlib
 import logging
 import textwrap
-import time
+import datetime
 from glob import glob
 
 from datmo.util.i18n import get as _
@@ -69,11 +69,15 @@ def get_filehash(filepath):
             sha1.update(data)
     return sha1.hexdigest()
 
-def create_unique_hash(base_hash=None):
+def create_unique_hash(base_hash=None, salt=None):
+    if not salt:
+        salt = os.urandom(16)
+    else:
+        salt = salt.encode('utf-8')
     if not base_hash:
         sha1 = hashlib.sha1()
     else:
         sha1 = hashlib.sha1(base_hash)
-    sha1.update(str(time.time()).encode('utf-8'))
-
+    timestamp_microsec = (datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds() * 100000
+    sha1.update(salt+str(timestamp_microsec).encode('utf-8'))
     return sha1.hexdigest()
