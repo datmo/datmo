@@ -20,8 +20,6 @@ setup(
     ],
     install_requires=[
         "future==0.16.0",
-        "six==1.11.0",
-        "Click==6.7",
         "enum34==1.1.6",
         "sh==1.12.11",
         "glob2==0.5",
