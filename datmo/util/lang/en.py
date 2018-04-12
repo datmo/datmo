@@ -10,7 +10,8 @@ MESSAGES = {
         "cli.general.str.test" : "%s",
         "cli.general.dict.test" : "{foo} - {bar}",
         "cli.general.tuple.test" : "%s, %s",
-        "cli.snapshot.create": "Creating a new snapshot"
+        "cli.snapshot.create": "Creating a new snapshot",
+        "cli.task.run": "Running a new task"
     },
     "warn": {
         "cli.general.internet": "Internet connectivity doesn't exist",
@@ -19,6 +20,8 @@ MESSAGES = {
     },
     "error": {
         "cli.general": "An exception occurred: %s",
+        "cli.general.method.not_found": "Method %s.%s not found",
+        "cli.project": "No project found in the current directory: %s",
         "util.misc_functions.get_filehash": "Filepath does not point to a valid file: %s",
         "controller.code.driver.git.__init__.dne": "File path does not exist: %s",
         "controller.code.driver.git.__init__.giterror": "Error in git: %s",
@@ -38,7 +41,6 @@ MESSAGES = {
         "controller.code.driver.git.stash_apply": "Error in git stash_apply: %s",
         "controller.code.driver.git.latest_commit": "Error in git latest commit: %s",
         "controller.code.driver.git.reset": "Error in git reset: %s",
-        "controller.code.driver.git.get_absolute_git_dir": "Error in git getting git dir: %s",
         "controller.code.driver.git.check_git_work_tree": "Error in git check work tree: %s",
         "controller.code.driver.git.remote": "Error in git remote -- mode: %s, origin: %s, git_url: %s -- %s",
         "controller.code.driver.git.get_remote_url": "Error in git get remote url: %s",

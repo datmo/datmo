@@ -9,10 +9,9 @@ from datmo.util.exceptions import ProjectNotInitializedException
 class SnapshotCommand(ProjectCommand):
     def __init__(self, home, cli_helper):
         super(SnapshotCommand, self).__init__(home, cli_helper)
-
-        snapshot_parser = self.subparsers.add_parser("snapshot", help="Snapshot module")
         # dest="subcommand" argument will populate a "subcommand" property with the subparsers name
         # example  "subcommand"="create"  or "subcommand"="ls"
+        snapshot_parser = self.subparsers.add_parser("snapshot", help="Snapshot module")
         subcommand_parsers = snapshot_parser.add_subparsers(title="subcommands", dest="subcommand")
 
         create = subcommand_parsers.add_parser("create", help="Create snapshot")
@@ -78,9 +77,9 @@ class SnapshotCommand(ProjectCommand):
         self.snapshot_controller = SnapshotController(home=home,
                                                       dal_driver=self.project_controller.dal_driver)
         if not self.project_controller.is_initialized:
-            raise ProjectNotInitializedException("exception.cli.snapshot", {
-                "exception": "No project found in the current directory"
-            })
+            raise ProjectNotInitializedException(_("error",
+                                                   "cli.project",
+                                                   self.home))
 
     def create(self, **kwargs):
         self.cli_helper.echo(_("info", "cli.snapshot.create"))

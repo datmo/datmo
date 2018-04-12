@@ -5,9 +5,6 @@ python:
 - '3.5'
 - '3.6'
 sudo: required
-dist:
-- precise
-- trusty
 install:
 - pip install pytest pytest-cov
 - pip install coveralls
