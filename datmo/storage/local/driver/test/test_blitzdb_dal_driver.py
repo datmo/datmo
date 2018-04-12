@@ -1,5 +1,5 @@
 """
-Tests for blitzdb_driver.py
+Tests for blitzdb_dal_driver.py
 """
 from __future__ import division
 from __future__ import print_function
@@ -8,13 +8,13 @@ from __future__ import unicode_literals
 import shutil
 import tempfile
 
-from ..blitzdb_driver import BlitzDBDALDriver
+from ..blitzdb_dal_driver import BlitzDBDALDriver
 from ..driver_type import DriverType
 
 from datmo.util.exceptions import EntityNotFound
 
 
-# pytest sofa/datadriver/test/test_blitzdb_driver.py
+# pytest sofa/datadriver/test/test_blitzdb_dal_driver.py
 
 class TestBlitzDBInit():
     """

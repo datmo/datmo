@@ -9,7 +9,7 @@ import shutil
 import tempfile
 from datetime import datetime
 
-from datmo.storage.local.driver.blitzdb_driver import BlitzDBDALDriver
+from datmo.storage.local.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.storage.local.driver.driver_type import DriverType
 from datmo.storage.local.dal import LocalDAL
 from datmo.util.exceptions import EntityNotFound, EntityCollectionNotFound

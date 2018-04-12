@@ -3,7 +3,7 @@ import os
 from datmo.storage.local.driver.driver_type import DriverType
 from datmo.util.i18n import get as _
 from datmo.util import get_class_contructor
-from datmo.util.project_settings import ProjectSettings
+from datmo.util.json_store import JSONStore
 from datmo.util.exceptions import InvalidProjectPathException, \
     DatmoModelNotInitializedException
 
@@ -17,6 +17,8 @@ class BaseController(object):
         Filepath for the location of the project
     dal_driver : DataDriver object
         This is an instance of a storage DAL driver
+    config : JSONStore
+        This is the set of configurations used to create a project
     dal
     model
     current_session
@@ -41,6 +43,13 @@ class BaseController(object):
     def __init__(self, home, dal_driver=None):
         self.home = home
         self.dal_driver = dal_driver
+        self.config = JSONStore(os.path.join(self.home,
+                                             ".datmo",
+                                             ".config"))
+        if not os.path.isdir(self.home):
+            raise InvalidProjectPathException(_("error",
+                                                "controller.base.__init__",
+                                                home))
         # property caches and initial values
         self._dal = None
         self._model = None
@@ -50,72 +59,57 @@ class BaseController(object):
         self._environment_driver = None
         self._is_initialized = False
 
-        if not os.path.isdir(self.home):
-            raise InvalidProjectPathException(_("error",
-                                                "controller.base.__init__",
-                                                home))
-        self.settings = ProjectSettings(self.home)
-        # TODO: is_initialized properties should be functions
-
     @property
     # Controller objects are only in sync if the data drivers are the same between objects
-    # TODO: Currently local for differnet controller objects do NOT sync within one session.
-    # TODO: Fix local such that it syncs within one session between controller objects
+    # Currently pass dal_driver down from controller to controller to ensure syncing dals
+    # TODO: To fix dal from different controllers so they sync within one session; they do NOT currently
     def dal(self):
-        """
-        Property that is maintained in memory
+        """Property that is maintained in memory
 
         Returns
         -------
         DAL
-
         """
         if self._dal == None:
-          self._dal = self.dal_instantiate()
+            self._dal = self.dal_instantiate()
         return self._dal
 
     @property
     def model(self):
-        """
-        Property that is maintained in memory
+        """Property that is maintained in memory
 
         Returns
         -------
         Model
-
         """
         if self._model == None:
-            model_id = self.settings.get('model_id')
-            self._model = self.dal.model.get_by_id(model_id) if model_id else None
+            models = self.dal.model.query({})
+            self._model = models[0] if models else None
         return self._model
 
     @property
     def current_session(self):
-        """
-        Property that is maintained in memory
+        """Property that is maintained in memory
 
         Returns
         -------
         Session
-
         """
         if not self.model:
             raise DatmoModelNotInitializedException(_("error",
                                                       "controller.base.current_session"))
         if self._current_session == None:
-          session_id = self.settings.get('current_session_id')
-          self._current_session = self.dal.session.get_by_id(session_id) if session_id else None
+            sessions = self.dal.session.query({"current": True})
+            self._current_session = sessions[0] if sessions else None
         return self._current_session
 
     @property
     def code_driver(self):
-        """
-        Property that is maintained in memory
+        """Property that is maintained in memory
 
         Returns
         -------
         CodeDriver
-
         """
         if self._code_driver == None:
             module_details = self.config_loader("controller.code.driver")
@@ -124,13 +118,11 @@ class BaseController(object):
 
     @property
     def file_driver(self):
-        """
-        Property that is maintained in memory
+        """Property that is maintained in memory
 
         Returns
         -------
         FileDriver
-
         """
         if self._file_driver == None:
             module_details = self.config_loader("controller.file.driver")
@@ -139,13 +131,11 @@ class BaseController(object):
 
     @property
     def environment_driver(self):
-        """
-        Property that is maintained in memory
+        """Property that is maintained in memory
 
         Returns
         -------
         EnvironmentDriver
-
         """
         if self._environment_driver == None:
             module_details = self.config_loader("controller.environment.driver")
@@ -154,14 +144,12 @@ class BaseController(object):
 
     @property
     def is_initialized(self):
-        """
-        Property that is maintained in memory
+        """Property that is maintained in memory
 
         Returns
         -------
         bool
             True if the project is property initialized else False
-
         """
         if not self._is_initialized:
           if self.code_driver.is_initialized and \
@@ -185,9 +173,9 @@ class BaseController(object):
         return dal_dict["constructor"](**dal_dict["options"])
 
     def get_or_set_default(self, key, default_value):
-        value = self.settings.get(key)
+        value = self.config.get(key)
         if value is None:
-            self.settings.set(key, default_value)
+            self.config.save(key, default_value)
             value = default_value
         return value
 
@@ -227,7 +215,7 @@ class BaseController(object):
                 }
             },
             "storage.local.driver": {
-                "class_constructor": "datmo.storage.local.driver.blitzdb_driver.BlitzDBDALDriver",
+                "class_constructor": "datmo.storage.local.driver.blitzdb_dal_driver.BlitzDBDALDriver",
                 "options": {
                     "driver_type": "FILE",
                     "connection_string": os.path.join(self.home, ".datmo/database")

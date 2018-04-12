@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from datmo.util.file_storage import JSONKeyValueStore
+from datmo.util.json_store import JSONStore
 
 
 class Snapshot():
@@ -58,13 +58,13 @@ class Snapshot():
         return self.id == other.id if other else False
 
     def save_config(self, filepath):
-        JSONKeyValueStore(os.path.join(filepath, 'config.json'),
-                          self.config)
+        JSONStore(os.path.join(filepath, 'config.json'),
+                  self.config)
         return
 
     def save_stats(self, filepath):
-        JSONKeyValueStore(os.path.join(filepath, 'stats.json'),
-                          self.stats)
+        JSONStore(os.path.join(filepath, 'stats.json'),
+                  self.stats)
         return
 
     def to_dictionary(self):

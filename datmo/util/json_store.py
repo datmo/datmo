@@ -12,7 +12,7 @@ except NameError:
     to_unicode = str
 
 
-class JSONKeyValueStore():
+class JSONStore():
     # TODO:  add file locking
     # https://stackoverflow.com/questions/186202/what-is-the-best-way-to-open-a-file-for-exclusive-access-in-python
     # Alternatives to JSON??
@@ -39,14 +39,14 @@ class JSONKeyValueStore():
             outfile.write(to_unicode(str_))
         return
 
-    def save(self, name, setting):
+    def save(self, key, value):
         self.in_memory_settings = False
         settings_dict = {}
         if not os.path.exists(self.filepath):
             io.open(self.filepath, 'w').close()
         else:
             settings_dict = json.load(io.open(self.filepath, 'r'))
-        settings_dict[name] = setting
+        settings_dict[key] = value
         with io.open(self.filepath, 'w', encoding='utf8') as outfile:
             str_ = json.dumps(settings_dict,
                               indent=4,

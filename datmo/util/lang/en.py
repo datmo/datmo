@@ -18,7 +18,7 @@ MESSAGES = {
         "cli.general.login": "user is not logged into datmo. use `datmo setup` or `datmo login` to login" ,
     },
     "error": {
-        "cli.general": "An exception occured: %s",
+        "cli.general": "An exception occurred: %s",
         "util.misc_functions.get_filehash": "Filepath does not point to a valid file: %s",
         "controller.code.driver.git.__init__.dne": "File path does not exist: %s",
         "controller.code.driver.git.__init__.giterror": "Error in git: %s",
@@ -86,6 +86,7 @@ MESSAGES = {
         "controller.file_collection.delete": "FileCollection with id %s does NOT exist",
         "controller.base.__init__": "Project path does not exist: %s",
         "controller.base.current_session": "Model object does not exist within project",
+        "controller.project.init.arg": "Required argument %s not present in input",
         "controller.project.init": "Session does not exist",
         "controller.snapshot.create.arg": "Required argument missing to create snapshot: %s",
         "controller.snapshot.create.file_config": "Config file does not exist",
@@ -104,10 +105,10 @@ MESSAGES = {
 
     },
     "prompt": {
-        "cli.project.init.name": "---> Enter name for the Datmo project",
-        "cli.project.init.description": "---> Enter name for the Datmo project",
-        "cli.project.init.git": "---> Enter remote git url for the Datmo project",
-        "cli.general.confirm": "---> Is it okay?",
+        "cli.project.init.name": "Enter name for the project",
+        "cli.project.init.description": "Enter description for the project",
+        "cli.project.init.git": "Enter remote git url for the Datmo project",
+        "cli.general.confirm": "Is it okay?",
     }
 }
 

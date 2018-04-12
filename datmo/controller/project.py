@@ -1,8 +1,9 @@
 import datetime
 
-from datmo.util.i18n import get as _
+from datmo.util.i18n import get as __
 from datmo.controller.base import BaseController
-from datmo.util.exceptions import SessionDoesNotExistException
+from datmo.util.exceptions import SessionDoesNotExistException, \
+    RequiredArgumentMissing
 
 
 class ProjectController(BaseController):
@@ -23,16 +24,26 @@ class ProjectController(BaseController):
         super(ProjectController, self).__init__(home, dal_driver)
 
     def init(self, name, description):
+        # Error if name is not given
+        if not name:
+            raise RequiredArgumentMissing(__("error",
+                                             "controller.project.init.arg",
+                                             "name"))
+
         # Create the Model, is it new or update?
         is_new_model = False
         if not self.model:
-            model_obj = self.dal.model.create({
+            _ = self.dal.model.create({
                 "name": name,
                 "description": description
             })
-
-            self.settings.set('model_id', model_obj.id)
             is_new_model = True
+        else:
+            self._model = self.dal.model.update({
+                "id": self.model.id,
+                "name": name,
+                "description": description
+            })
 
         # Initialize Code Manager if needed
         if not self.code_driver.is_initialized:
@@ -53,34 +64,29 @@ class ProjectController(BaseController):
         # Add in Project template files if specified
         # TODO: Add in project template files
 
-        # Create and set current Session
+        # Create and set current session
         if is_new_model:
-            # Create new Session
-            session_obj = self.dal.session.create({
+            # Create new default session
+            _ = self.dal.session.create({
                 "name": "default",
-                "model_id": self.model.id
+                "model_id": self.model.id,
+                "current": True
             })
-            # Set current Session
-            self.settings.set('current_session_id', session_obj.id)
         else:
             if not self.current_session:
-                session_obj = self.dal.session.query({
+                default_session_obj = self.dal.session.query({
                     "name":"default",
                     "model_id": self.model.id
                 })
-                if not session_obj:
-                    raise SessionDoesNotExistException(_("error",
-                                                         "controller.project.init"))
-                # Set current Session
-                self.settings.set('current_session_id', session_obj.id)
-
-        # Update the settings in the ProjectCommand
-        update_dict = {}
-        for k, v in update_dict.items():
-            self.settings.set(k, v)
-
+                if not default_session_obj:
+                    raise SessionDoesNotExistException(__("error",
+                                                          "controller.project.init"))
+                # Update default session to be current
+                self.dal.session.update({
+                    "id": default_session_obj.id,
+                    "current": True
+                })
         return True
-
 
     def cleanup(self):
         # Obtain image id before cleaning up if exists
@@ -106,7 +112,6 @@ class ProjectController(BaseController):
                                                                    force=True)
 
         return True
-
 
     def status(self):
         # TODO: Convert pseudocode 

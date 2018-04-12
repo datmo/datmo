@@ -27,13 +27,44 @@ class TestBaseController():
         assert self.base != None
 
     def test_datmo_model(self):
+        # Test failure case
         assert self.base.model == None
 
+        # Test success case
+        self.base.dal.model.create({
+            "name": "test",
+            "description": "test"
+        })
+        model = self.base.model
+
+        assert model.id
+        assert model.name == "test"
+        assert model.description == "test"
+
     def test_current_session(self):
+        # Test failure case
         try:
-            result = self.base.current_session
+            _ = self.base.current_session
         except DatmoModelNotInitializedException:
             assert True
+
+        # Test success case
+        self.base.dal.model.create({
+            "name": "test",
+            "description": "test"
+        })
+        _ = self.base.model
+        self.base.dal.session.create({
+            "name": "test",
+            "model_id": "test",
+            "current": True
+        })
+        session = self.base.current_session
+
+        assert session.id
+        assert session.name == "test"
+        assert session.model_id == "test"
+        assert session.current == True
 
     def test_code_manager(self):
         assert self.base.code_driver != None

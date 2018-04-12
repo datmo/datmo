@@ -10,6 +10,8 @@ class Session():
     id : str
     model_id : str
     name : str
+    current : bool
+        identifies if the session is the current session
     created_at : datetime
     updated_at : datetime
 
@@ -19,6 +21,8 @@ class Session():
         self.model_id = dictionary['model_id']
 
         self.name = dictionary['name']
+
+        self.current = dictionary.get('current', False)
 
         self.created_at = dictionary.get('created_at', datetime.utcnow())
         self.updated_at = dictionary.get('updated_at', self.created_at)

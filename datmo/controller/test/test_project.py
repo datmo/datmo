@@ -9,6 +9,7 @@ import shutil
 import tempfile
 
 from datmo.controller.project import ProjectController
+from datmo.util.exceptions import RequiredArgumentMissing
 
 
 class TestProjectController():
@@ -22,10 +23,17 @@ class TestProjectController():
         shutil.rmtree(self.temp_dir)
 
     def test_init(self):
+        # Test failed case
+        try:
+            self.project.init(None, None)
+        except RequiredArgumentMissing:
+            assert True
+
         result = self.project.init("test", "test description")
 
         # Tested with is_initialized
         assert self.project.model.name == "test"
+        assert self.project.model.description == "test description"
         assert self.project.code_driver.is_initialized
         assert self.project.file_driver.is_initialized
         assert self.project.environment_driver.is_initialized
@@ -36,6 +44,13 @@ class TestProjectController():
 
         # Check Project template if user specified template
         # TODO: Add in Project template if user specifies
+
+        # Test out functionality for re-initialize project
+        result = self.project.init("anything", "else")
+
+        assert self.project.model.name == "anything"
+        assert self.project.model.description == "else"
+        assert result == True
 
     def test_cleanup(self):
         self.project.init("test2", "test description")
