@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 
 import os
 import sys
+import tempfile
 
 # TODO: include builtin libraries for the appropriate Python
 # try:
@@ -22,6 +23,9 @@ class TestHelper():
     # https://stackoverflow.com/questions/35851323/pytest-how-to-test-a-function-with-input-call/36377194
 
     def setup_method(self):
+        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
+                                        tempfile.gettempdir())
+        self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.orig_stdin = sys.stdin
 
     def teardown_method(self):
@@ -34,10 +38,12 @@ class TestHelper():
     def test_prompt(self):
         cli = Helper()
         test_message = 'foobar'
-        with open("test.txt", "w") as f:
+        with open(os.path.join(self.temp_dir,
+                               "test.txt"), "w") as f:
             f.write(test_message)
 
-        with open("test.txt", "r") as f:
+        with open(os.path.join(self.temp_dir,
+                               "test.txt"), "r") as f:
             sys.stdin = f
             i = cli.prompt("what is this test?")
             assert i == test_message

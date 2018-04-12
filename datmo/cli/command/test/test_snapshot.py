@@ -1,5 +1,5 @@
 """
-Tests for Snapshot
+Tests for SnapshotCommand
 """
 from __future__ import division
 from __future__ import print_function
@@ -11,7 +11,7 @@ from __future__ import unicode_literals
 # except ImportError:
 #     # Python 3
 #     import builtins as __builtin__
-
+import os
 import shutil
 import tempfile
 
@@ -19,9 +19,12 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
 
+
 class TestSnapshot():
     def setup_class(self):
-        self.temp_dir = tempfile.mkdtemp()
+        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
+                                        tempfile.gettempdir())
+        self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
         self.init = ProjectCommand(self.temp_dir, self.cli_helper)
         self.init.parse([

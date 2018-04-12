@@ -1,5 +1,5 @@
 """
-Tests for Datmo Local
+Tests for file_storage.py
 """
 from __future__ import division
 from __future__ import print_function
@@ -12,9 +12,11 @@ import os
 from datmo.util.json_store import JSONStore
 
 
-class TestDatmoDAL():
+class TestFileStorage():
     def setup_class(self):
-        self.temp_dir = tempfile.mkdtemp()
+        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
+                                        tempfile.gettempdir())
+        self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.storage_file = os.path.join(self.temp_dir, 'testing.json')
 
     def teardown_class(self):

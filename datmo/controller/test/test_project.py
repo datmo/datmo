@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 import shutil
 import tempfile
 
@@ -16,7 +17,9 @@ class TestProjectController():
     def setup_method(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = '/tmp'
-        self.temp_dir = tempfile.mkdtemp('project')
+        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
+                                        tempfile.gettempdir())
+        self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.project = ProjectController(self.temp_dir)
 
     def teardown_method(self):

@@ -20,7 +20,9 @@ class TestDockerEnv():
     Checks all functions of the DockerEnvironmentDriver
     """
     def setup_method(self):
-        self.temp_dir = tempfile.mkdtemp(dir="/tmp/")
+        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
+                                        tempfile.gettempdir())
+        self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.docker_environment_manager = \
             DockerEnvironmentDriver(self.temp_dir, 'docker',
                                      'unix:///var/run/docker.sock')

@@ -1,5 +1,5 @@
 """
-Tests for Datmo Project
+Tests for __init__.py
 """
 from __future__ import division
 from __future__ import print_function

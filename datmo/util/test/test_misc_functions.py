@@ -9,7 +9,9 @@ from datmo.util.misc_functions import *
 class TestMiscFunctions():
     # TODO: Add more cases for each test
     def setup_method(self):
-        self.temp_dir = tempfile.mkdtemp(dir="/tmp/")
+        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
+                                        tempfile.gettempdir())
+        self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
 
     def test_get_filehash(self):
         filepath =  os.path.join(self.temp_dir, "test.txt")

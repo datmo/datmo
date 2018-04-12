@@ -59,6 +59,7 @@ $ pip install recommonmark
 ```
 $ pip install pytest pytest-cov
 $ pip install coveralls
+$ export TEST_DATMO_DIR="/mydir"
 $ python -m pytest --cov-config .coveragerc --cov=datmo
 ```
 

@@ -5,10 +5,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from ..driver_type import DriverType
-
-
-# pytest sofa/datadriver/test/test_driver_type.py
+from datmo.storage.local.driver.driver_type import DriverType
 
 
 class TestDataDriverTypes():

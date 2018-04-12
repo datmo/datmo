@@ -21,7 +21,9 @@ from datmo.cli.command.project import ProjectCommand
 
 class TestInit():
     def setup_class(self):
-        self.temp_dir = tempfile.mkdtemp()
+        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
+                                        tempfile.gettempdir())
+        self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli = Helper()
         self.init = ProjectCommand(self.temp_dir, self.cli)
 
