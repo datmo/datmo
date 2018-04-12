@@ -2,6 +2,7 @@ import os
 import hashlib
 import logging
 import textwrap
+import time
 from glob import glob
 
 from datmo.util.i18n import get as _
@@ -66,4 +67,13 @@ def get_filehash(filepath):
             if not data:
                 break
             sha1.update(data)
+    return sha1.hexdigest()
+
+def create_unique_hash(base_hash=None):
+    if not base_hash:
+        sha1 = hashlib.sha1()
+    else:
+        sha1 = hashlib.sha1(base_hash)
+    sha1.update(str(time.time()).encode('utf-8'))
+
     return sha1.hexdigest()
