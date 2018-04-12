@@ -47,7 +47,7 @@ class TestHelper():
             sys.stdin = f
             i = cli.prompt("what is this test?")
             assert i == test_message
-        os.remove("test.txt")
+        os.remove(os.path.join(self.temp_dir, "test.txt"))
 
         # TODO: figure out how to replace "print" with a testable function
         # https://stackoverflow.com/questions/4219717/how-to-assert-output-with-nosetest-unittest-in-python
