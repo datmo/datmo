@@ -19,3 +19,10 @@ class TestMiscFunctions():
             f.write("hello\n")
         result = get_filehash(filepath)
         assert result == "b1946ac92492d2347c6235b4d2611184"
+
+    def test_create_unique_hash(self):
+        result_hash_1 = create_unique_hash()
+        import time; time.sleep(0.000000000001)
+        result_hash_2 = create_unique_hash()
+
+        assert result_hash_1 != result_hash_2
