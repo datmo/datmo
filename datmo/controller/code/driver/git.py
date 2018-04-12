@@ -56,16 +56,11 @@ class GitCodeDriver(object):
 
     @property
     def is_initialized(self):
-        if os.path.isdir(os.path.join(self.filepath, ".git")):
-            try:
-                git_dir = self.get_absolute_git_dir()
-            except:
-                git_dir = ""
-            if os.path.join(self.filepath, ".git") in git_dir:
-                if self.exists_code_refs_dir():
-                    if self.check_gitignore_exists():
-                        self._is_initialized = True
-                        return self._is_initialized
+        if os.path.isdir(os.path.join(self.filepath, ".git")) and \
+                self.exists_code_refs_dir() and \
+                self.check_gitignore_exists():
+            self._is_initialized = True
+            return self._is_initialized
         self._is_initialized = False
         return self._is_initialized
 
@@ -315,17 +310,6 @@ class GitCodeDriver(object):
                                             "controller.code.driver.git.reset",
                                             str(e)))
         return True
-
-    def get_absolute_git_dir(self):
-        try:
-            git_dir = subprocess.check_output([self.execpath,"rev-parse", "--absolute-git-dir"],
-                                                           cwd=self.filepath)
-            git_dir = git_dir.decode().strip()
-        except Exception as e:
-            raise GitExecutionException(_("error",
-                                            "controller.code.driver.git.get_absolute_git_dir",
-                                            str(e)))
-        return git_dir
 
     def check_git_work_tree(self):
         try:

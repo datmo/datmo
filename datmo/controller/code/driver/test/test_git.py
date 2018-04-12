@@ -147,12 +147,6 @@ class TestGitCodeDriver():
         result = self.git_code_manager.reset(git_commit=commit_id)
         assert result == True
 
-    def test_get_absolute_git_dir(self):
-        self.git_code_manager.init()
-        result = self.git_code_manager.get_absolute_git_dir()
-        assert os.path.join(self.git_code_manager.filepath,
-                            ".git") in result
-
     def test_check_git_work_tree(self):
         self.git_code_manager.init()
         result = self.git_code_manager.check_git_work_tree()
