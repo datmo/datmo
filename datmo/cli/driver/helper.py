@@ -18,8 +18,11 @@ class Helper():
     def echo(self, message):
         print(message)
 
-    def prompt(self, msg):
+    def prompt(self, msg, default=None):
         try:
+            if default:
+                msg = msg + "[" + str(default) + "]"
+            msg = msg + ": "
             return input(msg)
         except EOFError:
             pass

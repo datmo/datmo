@@ -5,27 +5,38 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 import shutil
 import tempfile
 
 from datmo.controller.project import ProjectController
+from datmo.util.exceptions import RequiredArgumentMissing
 
 
 class TestProjectController():
     def setup_method(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = '/tmp'
-        self.temp_dir = tempfile.mkdtemp('project')
+        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
+                                        tempfile.gettempdir())
+        self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.project = ProjectController(self.temp_dir)
 
     def teardown_method(self):
         shutil.rmtree(self.temp_dir)
 
     def test_init(self):
+        # Test failed case
+        try:
+            self.project.init(None, None)
+        except RequiredArgumentMissing:
+            assert True
+
         result = self.project.init("test", "test description")
 
         # Tested with is_initialized
         assert self.project.model.name == "test"
+        assert self.project.model.description == "test description"
         assert self.project.code_driver.is_initialized
         assert self.project.file_driver.is_initialized
         assert self.project.environment_driver.is_initialized
@@ -36,6 +47,13 @@ class TestProjectController():
 
         # Check Project template if user specified template
         # TODO: Add in Project template if user specifies
+
+        # Test out functionality for re-initialize project
+        result = self.project.init("anything", "else")
+
+        assert self.project.model.name == "anything"
+        assert self.project.model.description == "else"
+        assert result == True
 
     def test_cleanup(self):
         self.project.init("test2", "test description")

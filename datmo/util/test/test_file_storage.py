@@ -1,5 +1,5 @@
 """
-Tests for Datmo Local
+Tests for file_storage.py
 """
 from __future__ import division
 from __future__ import print_function
@@ -9,23 +9,25 @@ import shutil
 import tempfile
 import os
 
-from datmo.util.file_storage import JSONKeyValueStore
+from datmo.util.json_store import JSONStore
 
 
-class TestDatmoDAL():
+class TestFileStorage():
     def setup_class(self):
-        self.temp_dir = tempfile.mkdtemp()
+        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
+                                        tempfile.gettempdir())
+        self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.storage_file = os.path.join(self.temp_dir, 'testing.json')
 
     def teardown_class(self):
         shutil.rmtree(self.temp_dir)
 
     def test_init(self):
-        storage = JSONKeyValueStore(self.storage_file)
+        storage = JSONStore(self.storage_file)
         assert storage.filepath == self.storage_file
 
     def test_save(self):
-        storage = JSONKeyValueStore(self.storage_file)
+        storage = JSONStore(self.storage_file)
         storage.save('foobar', 'yep')
         found_it = False
         if 'foobar' in open(self.storage_file).read():
@@ -33,7 +35,7 @@ class TestDatmoDAL():
         assert found_it
 
     def test_get_string(self):
-        storage = JSONKeyValueStore(self.storage_file)
+        storage = JSONStore(self.storage_file)
         key = 'foobar1'
         value = 'disco'
         storage.save(key, value)
@@ -41,7 +43,7 @@ class TestDatmoDAL():
         assert return_value == value
 
     def test_get_obj(self):
-        storage = JSONKeyValueStore(self.storage_file)
+        storage = JSONStore(self.storage_file)
         key = 'foobar1'
         value = {"does this work":"noway"}
         storage.save(key, value)

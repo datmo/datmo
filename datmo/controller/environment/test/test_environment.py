@@ -15,7 +15,9 @@ class TestEnvironmentController():
     def setup_method(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = '/tmp'
-        self.temp_dir = tempfile.mkdtemp('project')
+        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
+                                        tempfile.gettempdir())
+        self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.project = ProjectController(self.temp_dir)
         self.environment = EnvironmentController(self.temp_dir, self.project.dal.driver)
 

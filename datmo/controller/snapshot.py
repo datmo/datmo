@@ -5,7 +5,7 @@ from datmo.controller.code.code import CodeController
 from datmo.controller.file.file_collection import FileCollectionController
 from datmo.controller.environment.environment import EnvironmentController
 from datmo.util.i18n import get as _
-from datmo.util.file_storage import JSONKeyValueStore
+from datmo.util.json_store import JSONStore
 from datmo.util.exceptions import RequiredArgumentMissing, \
     FileIOException
 
@@ -117,7 +117,7 @@ class SnapshotController(BaseController):
                     if not existing_possible_paths:
                         raise FileIOException(_("error",
                                                 "controller.snapshot.create.file_config"))
-                    config_json_driver = JSONKeyValueStore(existing_possible_paths[0])
+                    config_json_driver = JSONStore(existing_possible_paths[0])
                     create_dict['config'] = config_json_driver.to_dict()
                 # Stats setup
                 elif required_arg == "stats":
@@ -134,7 +134,7 @@ class SnapshotController(BaseController):
                     if not existing_possible_paths:
                         raise FileIOException(_("error",
                                                 "controller.snapshot.create.file_stat"))
-                    stats_json_driver = JSONKeyValueStore(existing_possible_paths[0])
+                    stats_json_driver = JSONStore(existing_possible_paths[0])
                     create_dict['stats'] = stats_json_driver.to_dict()
                 else:
                     raise RequiredArgumentMissing(_("error",

@@ -116,7 +116,7 @@ def normalize_entity(in_dict):
         [dictionary] -- [BlitzDB Document-compatible dictionary of values]
 
     Returns:
-        [dictionary] -- [normal dictionary of values, output of toDictionary function]
+        [dictionary] -- [normal dictionary of values, output of to_dictionary function]
     """
     out_dict = in_dict.copy()
     if 'pk' in list(in_dict):
@@ -132,7 +132,7 @@ def denormalize_entity(in_dict):
     """ Converts standard dictionary to BlitzDB Document-compatible dictionary
 
     Arguments:
-        [dictionary] -- [normal dictionary of values, output of toDictionary function]
+        [dictionary] -- [normal dictionary of values, output of to_dictionary function]
 
     Returns:
         [dictionary] -- [BlitzDB Document-compatible dictionary of values]

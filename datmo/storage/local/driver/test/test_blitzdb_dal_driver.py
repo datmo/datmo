@@ -1,33 +1,34 @@
 """
-Tests for blitzdb_driver.py
+Tests for blitzdb_dal_driver.py
 """
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 import shutil
 import tempfile
 
-from ..blitzdb_driver import BlitzDBDALDriver
-from ..driver_type import DriverType
-
+from datmo.storage.local.driver.blitzdb_dal_driver import BlitzDBDALDriver
+from datmo.storage.local.driver.driver_type import DriverType
 from datmo.util.exceptions import EntityNotFound
 
-
-# pytest sofa/datadriver/test/test_blitzdb_driver.py
 
 class TestBlitzDBInit():
     """
     Checks init of TestBlitzDB
     """
     def setup_class(self):
-        pass
+        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
+                                        tempfile.gettempdir())
+        self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+
+    def teardown_class(self):
+        shutil.rmtree(self.temp_dir)
 
     def test_file_db_init(self):
-        temp_dir = tempfile.mkdtemp()
-        database = BlitzDBDALDriver(DriverType.FILE, temp_dir)
+        database = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
         assert database != None
-        shutil.rmtree(temp_dir)
 
     def test_remote_db_init(self):
         mongo_connection = "mongodb://localhost:27017"
@@ -42,7 +43,9 @@ class TestBlitzDB():
     """
 
     def setup_class(self):
-        self.temp_dir = tempfile.mkdtemp()
+        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
+                                        tempfile.gettempdir())
+        self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         # TODO: Automatically create Document class from collection
         # For now, use one of pre-defined collections:
         # model, datmo_session, datmo_task, datmo_snapshot, datmo_user

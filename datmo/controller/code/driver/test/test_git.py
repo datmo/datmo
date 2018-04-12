@@ -18,7 +18,9 @@ class TestGitCodeDriver():
     Checks all functions of the GitCodeDriver
     """
     def setup_method(self):
-        self.temp_dir = tempfile.mkdtemp(dir="/tmp/")
+        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
+                                        tempfile.gettempdir())
+        self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.git_code_manager = GitCodeDriver(filepath=self.temp_dir, execpath="git")
 
     def teardown_method(self):
@@ -144,12 +146,6 @@ class TestGitCodeDriver():
         commit_id = self.git_code_manager.latest_commit()
         result = self.git_code_manager.reset(git_commit=commit_id)
         assert result == True
-
-    def test_get_absolute_git_dir(self):
-        self.git_code_manager.init()
-        result = self.git_code_manager.get_absolute_git_dir()
-        assert os.path.join(self.git_code_manager.filepath,
-                            ".git") in result
 
     def test_check_git_work_tree(self):
         self.git_code_manager.init()

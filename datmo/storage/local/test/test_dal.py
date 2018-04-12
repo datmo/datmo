@@ -5,18 +5,21 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 import shutil
 import tempfile
 from datetime import datetime
 
-from datmo.storage.local.driver.blitzdb_driver import BlitzDBDALDriver
+from datmo.storage.local.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.storage.local.driver.driver_type import DriverType
 from datmo.storage.local.dal import LocalDAL
 from datmo.util.exceptions import EntityNotFound, EntityCollectionNotFound
 
 class TestLocalDAL():
     def setup_class(self):
-        self.temp_dir = tempfile.mkdtemp()
+        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
+                                        tempfile.gettempdir())
+        self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.datadriver = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
 
     def teardown_class(self):

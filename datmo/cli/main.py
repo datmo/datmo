@@ -27,19 +27,19 @@ def main():
     try:
         command_instance = command_class(os.getcwd(), cli_helper)
     except TypeError as ex:
-        cli_helper.echo(_("error", "cli.general", ex.message))
+        cli_helper.echo(_("error", "cli.general", str(ex)))
         sys.exit()
 
     try:
         command_instance.parse(sys.argv[1:])
     except CLIArgumentException as ex:
-        cli_helper.echo(_("error", "cli.general", ex.message))
+        cli_helper.echo(_("error", "cli.general", str(ex)))
         sys.exit()
 
     try:
         command_instance.execute()
     except Exception as ex:
-        cli_helper.echo(_("error", "cli.general", ex.message))
+        cli_helper.echo(_("error", "cli.general", str(ex)))
 
 if __name__ == "__main__":
     main()

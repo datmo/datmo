@@ -25,7 +25,7 @@ class User():
     def __eq__(self, other):
         return self.id == other.id if other else False
 
-    def toDictionary(self):
+    def to_dictionary(self):
         attr_dict = self.__dict__
         pruned_attr_dict = { attr: val
                     for attr, val in attr_dict.items() if not callable(getattr(self, attr)) and not attr.startswith("__")
