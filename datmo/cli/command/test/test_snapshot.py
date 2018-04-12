@@ -18,6 +18,7 @@ import tempfile
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
+from datmo.util.exceptions import ProjectNotInitializedException
 
 
 class TestSnapshot():
@@ -26,6 +27,11 @@ class TestSnapshot():
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
+
+    def teardown_class(self):
+        shutil.rmtree(self.temp_dir)
+
+    def __set_variables(self):
         self.init = ProjectCommand(self.temp_dir, self.cli_helper)
         self.init.parse([
             "init",
@@ -34,11 +40,14 @@ class TestSnapshot():
         self.init.execute()
         self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
 
-    def teardown_class(self):
-        shutil.rmtree(self.temp_dir)
+    def test_snapshot_project_not_init(self):
+        try:
+            self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
+        except ProjectNotInitializedException:
+            assert True
 
     def test_datmo_snapshot_create(self):
-
+        self.__set_variables()
         test_message = "this is a test message"
         test_label = "test label"
         test_session_id = "test_session_id"
@@ -82,6 +91,7 @@ class TestSnapshot():
 
 
     def test_datmo_snapshot_create_invalid_arg(self):
+        self.__set_variables()
         exception_thrown = False
         try:
           self.snapshot.parse([
