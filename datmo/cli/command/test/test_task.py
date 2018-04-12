@@ -1,5 +1,5 @@
 """
-Tests for Snapshot
+Tests for TaskCommand
 """
 from __future__ import division
 from __future__ import print_function
@@ -12,17 +12,27 @@ from __future__ import unicode_literals
 #     # Python 3
 #     import builtins as __builtin__
 
+import os
 import shutil
 import tempfile
 
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
+from datmo.util.exceptions import ProjectNotInitializedException
 
-class TestTask():
+
+class TestTaskCommand():
     def setup_class(self):
-        self.temp_dir = tempfile.mkdtemp()
+        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
+                                        tempfile.gettempdir())
+        self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
+
+    def teardown_class(self):
+        shutil.rmtree(self.temp_dir)
+
+    def __set_variables(self):
         self.init = ProjectCommand(self.temp_dir, self.cli_helper)
         self.init.parse([
             "init",
@@ -31,11 +41,14 @@ class TestTask():
         self.init.execute()
         self.task = TaskCommand(self.temp_dir, self.cli_helper)
 
-    def teardown_class(self):
-        shutil.rmtree(self.temp_dir)
+    def test_task_project_not_init(self):
+        try:
+            self.task = TaskCommand(self.temp_dir, self.cli_helper)
+        except ProjectNotInitializedException:
+            assert True
 
     def test_datmo_task_run(self):
-
+        self.__set_variables()
         test_command = "python test.py"
         test_gpu = True
         test_ports = "8888:8888"
@@ -63,6 +76,7 @@ class TestTask():
         assert self.task.args.interactive == test_interactive
 
     def test_datmo_task_run_invalid_arg(self):
+        self.__set_variables()
         exception_thrown = False
         try:
           self.task.parse([
@@ -74,7 +88,7 @@ class TestTask():
         assert exception_thrown
 
     def test_datmo_task_ls(self):
-
+        self.__set_variables()
         test_running = True
         test_all = True
 
@@ -90,6 +104,7 @@ class TestTask():
         assert self.task.args.all == test_all
 
     def test_datmo_task_ls_invalid_arg(self):
+        self.__set_variables()
         exception_thrown = False
         try:
           self.task.parse([
@@ -101,7 +116,7 @@ class TestTask():
         assert exception_thrown
 
     def test_datmo_task_stop(self):
-
+        self.__set_variables()
         test_running = True
         test_id = 'test_id'
 
@@ -117,6 +132,7 @@ class TestTask():
         assert self.task.args.id == test_id
 
     def test_datmo_task_stop_invalid_arg(self):
+        self.__set_variables()
         exception_thrown = False
         try:
           self.task.parse([

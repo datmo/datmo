@@ -76,10 +76,10 @@ class SnapshotCommand(ProjectCommand):
 
         self.snapshot_controller = SnapshotController(home=home,
                                                       dal_driver=self.project_controller.dal_driver)
-        # if not self.project_controller.is_initialized:
-        #     raise ProjectNotInitializedException("exception.cli.snapshot", {
-        #         "exception": "No project found in the current directory"
-        #     })
+        if not self.project_controller.is_initialized:
+            raise ProjectNotInitializedException(_("error",
+                                                   "cli.project",
+                                                   self.home))
 
     def create(self, **kwargs):
         self.cli_helper.echo(_("info", "cli.snapshot.create"))

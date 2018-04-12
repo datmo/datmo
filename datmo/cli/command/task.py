@@ -40,10 +40,10 @@ class TaskCommand(ProjectCommand):
 
         self.snapshot_controller = TaskController(home=home,
                                                   dal_driver=self.project_controller.dal_driver)
-        # if not self.project_controller.is_initialized:
-        #     raise ProjectNotInitializedException("exception.cli.task", {
-        #         "exception": "No project found in the current directory"
-        #     })
+        if not self.project_controller.is_initialized:
+            raise ProjectNotInitializedException(_("error",
+                                                   "cli.project",
+                                                   self.home))
 
     def run(self, **kwargs):
         self.cli_helper.echo(_("info", "cli.task.run"))

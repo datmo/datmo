@@ -1,3 +1,4 @@
+from datmo.util.i18n import get as _
 from datmo.cli.driver.parser import Parser
 from datmo.util.exceptions import ClassMethodNotFound
 
@@ -54,6 +55,8 @@ class BaseCommand(object):
             del command_args["subcommand"]
 
         if method is None:
-            raise ClassMethodNotFound("Method %s.%s not found" % (self.args.command, method))
+            raise ClassMethodNotFound(_("error",
+                                        "cli.general.method.not_found",
+                                        (self.args.command, method)))
 
         method(**command_args)
