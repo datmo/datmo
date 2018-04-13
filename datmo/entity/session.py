@@ -8,7 +8,9 @@ class Session():
     Attributes
     ----------
     id : str
+        the id of the entity
     model_id : str
+        the parent model id for the entity
     name : str
     current : bool
         identifies if the session is the current session

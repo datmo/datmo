@@ -270,11 +270,11 @@ class TestGitCodeDriver():
                                      code_id)
         assert code_id and \
             os.path.isfile(code_ref_path)
-        # Test error raised with code_id
-        random_code_id = "random"
+        # Test error raised with commit_id
+        random_commit_id = str("random")
         try:
             self.git_code_manager.\
-                create_code(code_id=random_code_id)
+                create_code(commit_id=random_commit_id)
         except GitCommitDoesNotExist:
             assert True
 

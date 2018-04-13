@@ -20,13 +20,13 @@ class CodeController(BaseController):
     def __init__(self, home, dal_driver=None):
         super(CodeController, self).__init__(home, dal_driver)
 
-    def create(self, id=None):
+    def create(self, commit_id=None):
         """Create a Code object
 
         Parameters
         ----------
-        id : str, optional
-            If id is already present, will not make a new reference
+        commit_id : str, optional
+            if commit_id is already present, will not make a new reference and commit
 
         Returns
         -------
@@ -45,12 +45,12 @@ class CodeController(BaseController):
         }
 
         ## Required args
-        required_args = ["id", "driver_type"]
+        required_args = ["driver_type", "commit_id"]
         traversed_args = []
         for required_arg in required_args:
             # Handle Id if provided or not
-            if required_arg == "id":
-                create_dict[required_arg] = id if id else \
+            if required_arg == "commit_id":
+                create_dict[required_arg] = commit_id if commit_id else \
                     self.code_driver.create_code()
                 traversed_args.append(required_arg)
             elif required_arg == "driver_type":
@@ -93,7 +93,7 @@ class CodeController(BaseController):
                                           "controller.code.delete",
                                           id))
         # Remove code reference
-        delete_code_success = self.code_driver.delete_code(id)
+        delete_code_success = self.code_driver.delete_code(code_obj.commit_id)
         # Delete code object
         delete_code_obj_success = self.dal.code.delete(code_obj.id)
 

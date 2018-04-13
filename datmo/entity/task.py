@@ -10,7 +10,9 @@ class Task():
     Attributes
     ----------
     id : str
+        the id of the entity
     model_id : str
+        the parent model id for the entity
     session_id : str
     command : str
     before_snapshot_id : str
@@ -18,7 +20,9 @@ class Task():
     gpu : bool
     interactive : bool
     task_dirpath : str
+        relative task directory path
     log_filepath : str
+        relative log filepath
     after_snapshot_id : str
     hardware_info : str
     container_id : str

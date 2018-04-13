@@ -8,8 +8,12 @@ class Code():
     Attributes
     ----------
     id : str
+        the id of the entity
     model_id : str
+        the parent model id for the entity
     driver_type : str
+        the driver class that created the entity
+    commit_id : str
     created_at : datetime
     updated_at : datetime
 
@@ -18,6 +22,8 @@ class Code():
         self.id = dictionary['id']
         self.model_id = dictionary['model_id']
         self.driver_type = dictionary['driver_type']
+
+        self.commit_id = dictionary['commit_id']
 
         self.created_at = dictionary.get('created_at', datetime.utcnow())
         self.updated_at = dictionary.get('updated_at', self.created_at)

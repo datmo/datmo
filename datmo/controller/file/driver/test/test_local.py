@@ -266,15 +266,25 @@ class TestLocalFileManager():
                                          "filepath1")).st_mode & 0o777) == '0755')
         self.local_file_manager.delete_collection(collection_id)
 
-    def test_get_collection_path(self):
+    def test_get_absolute_collection_path(self):
         self.local_file_manager.init()
         collection_id = self.local_file_manager. \
             create_collection([])
         collection_path = os.path.join(self.local_file_manager.filepath,
                                        ".datmo", "collections", collection_id)
         returned_collection_path = self.local_file_manager.\
-            get_collection_path(collection_id)
+            get_absolute_collection_path(collection_id)
         assert returned_collection_path == collection_path
+
+    def test_get_relative_collection_path(self):
+        self.local_file_manager.init()
+        collection_id = self.local_file_manager. \
+            create_collection([])
+        relative_collection_path = os.path.join(".datmo",
+                                                "collections", collection_id)
+        returned_relative_collection_path = self.local_file_manager.\
+            get_relative_collection_path(collection_id)
+        assert returned_relative_collection_path == relative_collection_path
 
     def test_exists_collection(self):
         self.local_file_manager.init()

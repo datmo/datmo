@@ -8,9 +8,15 @@ class FileCollection():
     Attributes
     ----------
     id : str
+        the id of the entity
     model_id : str
-    path : str
+        the parent model id for the entity
     driver_type : str
+        the driver class that created the entity
+    filehash : str
+        hash of file collection contents
+    path : str
+        path to collection relative to project root
     created_at : datetime
     updated_at : datetime
 
@@ -18,9 +24,10 @@ class FileCollection():
     def __init__(self, dictionary):
         self.id = dictionary['id']
         self.model_id = dictionary['model_id']
-
-        self.path = dictionary['path']
         self.driver_type = dictionary['driver_type']
+
+        self.filehash = dictionary['filehash']
+        self.path = dictionary['path']
 
         self.created_at = dictionary.get('created_at', datetime.utcnow())
         self.updated_at = dictionary.get('updated_at', self.created_at)

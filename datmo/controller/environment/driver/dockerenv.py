@@ -65,13 +65,12 @@ class DockerEnvironmentDriver(object):
         except Exception as e:
             raise EnvironmentExecutionException(_("error",
                                                   "controller.environment.driver.docker.init",
-                                                  e))
+                                                  str(e)))
         return True
 
 
     def get_tags_for_docker_repository(self, repo_name):
-        """
-        Method to get tags for docker repositories
+        """Method to get tags for docker repositories
 
         Parameters
         ----------
@@ -93,6 +92,25 @@ class DockerEnvironmentDriver(object):
         return list_tag_names
 
     def build_image(self, tag, definition_path='Dockerfile'):
+        """Builds docker image
+
+        Parameters
+        ----------
+        tag : str
+            name to tag image with
+        definition_path : str
+            absolute file path to the definition
+
+        Returns
+        -------
+        bool
+            True if success
+
+        Raises
+        ------
+        EnvironmentExecutionException
+
+        """
         try:
             docker_shell_cmd_list = list(self.cpu_prefix)
             docker_shell_cmd_list.append('build')
@@ -118,7 +136,7 @@ class DockerEnvironmentDriver(object):
         except Exception as e:
             raise EnvironmentExecutionException(_("error",
                                                   "controller.environment.driver.docker.build_image",
-                                                  e))
+                                                  str(e)))
 
     def get_image(self, image_name):
         return self.client.images.get(image_name)
@@ -141,13 +159,12 @@ class DockerEnvironmentDriver(object):
         except Exception as e:
             raise EnvironmentExecutionException(_("error",
                                                   "controller.environment.driver.docker.remove_image",
-                                                  e))
+                                                  str(e)))
         return True
 
     def remove_images(self, name=None, all=False, filters=None,
                           force=False):
-        """
-        Remove multiple images
+        """Remove multiple images
         """
         try:
             images = self.list_images(name=name, all=all, filters=filters)
@@ -156,13 +173,12 @@ class DockerEnvironmentDriver(object):
         except Exception as e:
             raise EnvironmentExecutionException(_("error",
                                                   "controller.environment.driver.docker.remove_images",
-                                                  e))
+                                                  str(e)))
         return True
 
     def run_container(self, image_name, command=None, ports=None, name=None, volumes=None,
                    detach=False, stdin_open=False, tty=False, gpu=False, api=False):
-        """
-        Run Docker container with parameters given as defined below
+        """Run Docker container with parameters given as defined below
 
         Parameters
         ----------
@@ -283,7 +299,7 @@ class DockerEnvironmentDriver(object):
         except Exception as e:
             raise EnvironmentExecutionException(_("error",
                                                   "controller.environment.driver.docker.run_container",
-                                                  e))
+                                                  str(e)))
         return return_code, container_id
 
     def get_container(self, container_id):
@@ -302,7 +318,7 @@ class DockerEnvironmentDriver(object):
         except Exception as e:
             raise EnvironmentExecutionException(_("error",
                                                   "controller.environment.driver.docker.stop_container",
-                                                  e))
+                                                  str(e)))
         return True
 
     def remove_container(self, container_id, force=False):
@@ -316,13 +332,12 @@ class DockerEnvironmentDriver(object):
         except Exception as e:
             raise EnvironmentExecutionException(_("error",
                                                   "controller.environment.driver.docker.remove_container",
-                                                  e))
+                                                  str(e)))
         return True
 
     def log_container(self, container_id, filepath, api=False,
                       follow=True):
-        """
-        Log capture at a particular point `docker logs`. Can also use `--follow` for real time logs
+        """Log capture at a particular point `docker logs`. Can also use `--follow` for real time logs
 
         Parameters
         ----------
@@ -370,8 +385,7 @@ class DockerEnvironmentDriver(object):
             return return_code, logs
 
     def stop_remove_containers_by_term(self, term, force=False):
-        """
-        Stops and removes containers by term
+        """Stops and removes containers by term
         """
         try:
             running_docker_container_cmd_list = list(self.cpu_prefix)
@@ -412,13 +426,13 @@ class DockerEnvironmentDriver(object):
         except Exception as e:
             raise EnvironmentExecutionException(_("error",
                                                   "controller.environment.driver.docker.stop_remove_containers_by_term",
-                                                  e))
+                                                  str(e)))
         return True
 
     def form_datmo_definition_file(self, input_definition_path="Dockerfile",
                                    output_definition_path="datmoDockerfile"):
         """
-        in order to create intermediate dockerfile to run
+        n order to create intermediate dockerfile to run
         """
         base_dockerfile_filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                                     "templates", "baseDockerfile")
