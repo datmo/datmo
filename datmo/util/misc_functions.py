@@ -34,7 +34,6 @@ def which(program):
             exe_file = os.path.join(path, program)
             if is_exe(exe_file):
                 return exe_file
-
     return None
 
 def create_logger(logfile_location):
@@ -78,6 +77,7 @@ def create_unique_hash(base_hash=None, salt=None):
         sha1 = hashlib.sha1()
     else:
         sha1 = hashlib.sha1(base_hash)
-    timestamp_microsec = (datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1)).total_seconds() * 100000
+    timestamp_microsec = (datetime.datetime.utcnow() -
+                          datetime.datetime(1970, 1, 1)).total_seconds() * 100000
     sha1.update(salt+str(timestamp_microsec).encode('utf-8'))
     return sha1.hexdigest()
