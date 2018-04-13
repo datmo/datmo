@@ -103,7 +103,7 @@ class EnvironmentController(BaseController):
         Returns
         -------
         bool
-            returns True if success else False
+            returns True if success
 
         Raises
         ------
@@ -120,12 +120,11 @@ class EnvironmentController(BaseController):
         # Build the Environment with the driver
         datmo_definition_filepath = os.path.join(file_collection_obj.path,
                                                  "datmo" + environment_obj.definition_filename)
-        result = self.environment_driver.build_image(id, definition_path=datmo_definition_filepath)
+        result = self.environment_driver.build(id, path=datmo_definition_filepath)
         return result
 
     def run(self, id, options, log_filepath):
-        """
-        Run and log an instance of the environment with the options given
+        """Run and log an instance of the environment with the options given
 
         Parameters
         ----------
@@ -152,17 +151,14 @@ class EnvironmentController(BaseController):
         -------
         return_code : int
             system return code for container and logs
-        container_id : str
-            identification for container run of the environment
+        run_id : str
+            identification for run of the environment
         logs : str
             string version of output logs for the container
         """
-        run_return_code, container_id = \
-            self.environment_driver.run_container(image_name=id, **options)
-        log_return_code, logs = self.environment_driver.log_container(container_id, filepath=log_filepath)
-        final_return_code = run_return_code and log_return_code
-
-        return final_return_code, container_id, logs
+        final_return_code, run_id, logs = \
+            self.environment_driver.run(id, options, log_filepath)
+        return final_return_code, run_id, logs
 
     def list(self):
         # TODO: Add time filters
@@ -179,7 +175,7 @@ class EnvironmentController(BaseController):
         Returns
         -------
         bool
-            returns True if success else False
+            True if success
 
         Raises
         ------
@@ -193,13 +189,10 @@ class EnvironmentController(BaseController):
                                           id))
         # Remove file collection
         file_collection_deleted = self.file_collection.delete(environment_obj.file_collection_id)
-        # Remove images associated with the environment_driver
-        image_removed = self.environment_driver.remove_image(id, force=True)
-        # Remove running containers associated with environment_driver
-        containers_stopped_and_removed = self.environment_driver.\
-            stop_remove_containers_by_term(id, force=True)
+        # Remove artifacts associated with the environment_driver
+        environment_artifacts_removed = self.environment_driver.remove(id, force=True)
         # Delete environment_driver object
         delete_success = self.dal.environment.delete(environment_obj.id)
 
-        return file_collection_deleted and image_removed and \
-               containers_stopped_and_removed and delete_success
+        return file_collection_deleted and environment_artifacts_removed and \
+               delete_success
