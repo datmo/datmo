@@ -48,9 +48,9 @@ class TestCodeController():
         assert code_obj.driver_type
 
         # Test failing with random id given
-        random_code_id = "random"
+        random_commit_id = "random"
         try:
-            self.code.create(id=random_code_id)
+            self.code.create(commit_id=random_commit_id)
         except GitCommitDoesNotExist:
             assert True
 

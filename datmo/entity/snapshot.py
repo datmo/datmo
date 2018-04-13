@@ -21,7 +21,9 @@ class Snapshot():
     Attributes
     ----------
     id : str
+        the id of the entity
     model_id : str
+        the parent model id for the entity
     code_id : str
     environment_id : str
     file_collection_id : str

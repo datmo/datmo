@@ -1,5 +1,5 @@
 """
-Tests for Datmo Local
+Tests for LocalDAL
 """
 from __future__ import division
 from __future__ import print_function
@@ -14,6 +14,7 @@ from datmo.storage.local.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.storage.local.driver.driver_type import DriverType
 from datmo.storage.local.dal import LocalDAL
 from datmo.util.exceptions import EntityNotFound, EntityCollectionNotFound
+
 
 class TestLocalDAL():
     def setup_class(self):
@@ -55,9 +56,19 @@ class TestLocalDAL():
         dal = LocalDAL(self.datadriver)
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
+        assert model.id
         assert model.name == model_name
         assert model.created_at
         assert model.updated_at
+
+        model_name = "model_1"
+        model_2 = dal.model.create({"name": model_name})
+        assert model.id != model_2.id
+
+        model_id = "cool"
+        model_name = "model_3"
+        model_3 = dal.model.create({"id": model_id, "name": model_name})
+        assert model_3.id == model_id
 
     def test_get_by_id_model(self):
         dal = LocalDAL(self.datadriver)
@@ -155,30 +166,52 @@ class TestLocalDAL():
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        code_id = "id_1"
+        code_commit_id = "commit_id"
         code_driver_type = "git"
         code = dal.code.create({
-            "id": code_id,
             "model_id": model.id,
-            "driver_type": code_driver_type
+            "driver_type": code_driver_type,
+            "commit_id": code_commit_id
         })
 
-        assert code.id == code_id
+        assert code.id
+        assert code.model_id == model.id
         assert code.driver_type == code_driver_type
+        assert code.commit_id == code_commit_id
         assert code.created_at
         assert code.updated_at
+
+        code_driver_type = "git"
+        code_2 = dal.code.create({
+            "model_id": model.id,
+            "driver_type": code_driver_type,
+            "commit_id": code_commit_id
+        })
+
+        assert code_2.id != code.id
+
+        code_id = "id_1"
+        code_driver_type = "git"
+        code_3 = dal.code.create({
+            "id": code_id,
+            "model_id": model.id,
+            "driver_type": code_driver_type,
+            "commit_id": code_commit_id
+        })
+
+        assert code_3.id == code_id
 
     def test_get_by_id_code(self):
         dal = LocalDAL(self.datadriver)
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        code_id = "id_2"
         code_driver_type = "git"
+        code_commit_id = "commit_id"
         code = dal.code.create({
-            "id": code_id,
             "model_id": model.id,
-            "driver_type": code_driver_type
+            "driver_type": code_driver_type,
+            "commit_id": code_commit_id
         })
 
         result = dal.code.get_by_id(code.id)
@@ -189,12 +222,12 @@ class TestLocalDAL():
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        code_id = "id_3"
         code_driver_type = "git"
+        code_commit_id = "commit_id"
         code = dal.code.create({
-            "id": code_id,
             "model_id": model.id,
-            "driver_type": code_driver_type
+            "driver_type": code_driver_type,
+            "commit_id": code_commit_id
         })
 
         # create new dal with new driver instance (fails)
@@ -214,12 +247,12 @@ class TestLocalDAL():
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        code_id = "id_4"
         code_driver_type = "git"
+        code_commit_id = "commit_id"
         code = dal.code.create({
-            "id": code_id,
             "model_id": model.id,
-            "driver_type": code_driver_type
+            "driver_type": code_driver_type,
+            "commit_id": code_commit_id
         })
 
         # Update required and optional parameters
@@ -240,12 +273,12 @@ class TestLocalDAL():
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        code_id = "id_5"
         code_driver_type = "git"
+        code_commit_id = "commit_id"
         code = dal.code.create({
-            "id": code_id,
             "model_id": model.id,
-            "driver_type": code_driver_type
+            "driver_type": code_driver_type,
+            "commit_id": code_commit_id
         })
 
         dal.code.delete(code.id)
@@ -261,12 +294,12 @@ class TestLocalDAL():
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        code_id = "id_5"
         code_driver_type = "git"
+        code_commit_id = "commit_id"
         code = dal.code.create({
-            "id": code_id,
             "model_id": model.id,
-            "driver_type": code_driver_type
+            "driver_type": code_driver_type,
+            "commit_id": code_commit_id
         })
 
         assert len(dal.code.query({"id": code.id})) == 1
@@ -279,11 +312,40 @@ class TestLocalDAL():
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        environment_id = "id_1"
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
         environment = dal.environment.create({
+            "model_id": model.id,
+            "driver_type": environment_driver_type,
+            "file_collection_id": environment_file_collection_id,
+            "definition_filename": environment_definition_filename
+        })
+
+        assert environment.id
+        assert environment.driver_type == environment_driver_type
+        assert environment.file_collection_id == environment_file_collection_id
+        assert environment.definition_filename == environment_definition_filename
+        assert environment.created_at
+        assert environment.updated_at
+
+        environment_driver_type = "docker"
+        environment_file_collection_id = "test_file_id"
+        environment_definition_filename = "Dockerfile"
+        environment_2 = dal.environment.create({
+            "model_id": model.id,
+            "driver_type": environment_driver_type,
+            "file_collection_id": environment_file_collection_id,
+            "definition_filename": environment_definition_filename
+        })
+
+        assert environment_2.id != environment.id
+
+        environment_id = "environment_id"
+        environment_driver_type = "docker"
+        environment_file_collection_id = "test_file_id"
+        environment_definition_filename = "Dockerfile"
+        environment_3 = dal.environment.create({
             "id": environment_id,
             "model_id": model.id,
             "driver_type": environment_driver_type,
@@ -291,24 +353,18 @@ class TestLocalDAL():
             "definition_filename": environment_definition_filename
         })
 
-        assert environment.id == environment_id
-        assert environment.driver_type == environment_driver_type
-        assert environment.file_collection_id == environment_file_collection_id
-        assert environment.definition_filename == environment_definition_filename
-        assert environment.created_at
-        assert environment.updated_at
+        assert environment_3.id
+
 
     def test_get_by_id_environment(self):
         dal = LocalDAL(self.datadriver)
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        environment_id = "id_2"
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
         environment = dal.environment.create({
-            "id": environment_id,
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
@@ -323,12 +379,10 @@ class TestLocalDAL():
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        environment_id = "id_3"
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
         environment = dal.environment.create({
-            "id": environment_id,
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
@@ -352,12 +406,10 @@ class TestLocalDAL():
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        environment_id = "id_4"
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
         environment = dal.environment.create({
-            "id": environment_id,
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
@@ -382,12 +434,10 @@ class TestLocalDAL():
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        environment_id = "id_5"
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
         environment = dal.environment.create({
-            "id": environment_id,
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
@@ -407,12 +457,10 @@ class TestLocalDAL():
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        environment_id = "id_5"
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
         environment = dal.environment.create({
-            "id": environment_id,
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
@@ -429,35 +477,55 @@ class TestLocalDAL():
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        file_collection_id = "id_1"
-        file_collection_path = "test_path"
         file_collection_driver_type = "local"
+        file_collection_filehash = "myhash"
+        file_collection_path = "test_path"
         file_collection = dal.file_collection.create({
-            "id": file_collection_id,
-            "path": file_collection_path,
             "model_id": model.id,
-            "driver_type": file_collection_driver_type
+            "driver_type": file_collection_driver_type,
+            "filehash": file_collection_filehash,
+            "path": file_collection_path,
         })
 
-        assert file_collection.id == file_collection_id
+        assert file_collection.id
         assert file_collection.path == file_collection_path
         assert file_collection.driver_type == file_collection_driver_type
         assert file_collection.created_at
         assert file_collection.updated_at
+
+        file_collection_2 = dal.file_collection.create({
+            "model_id": model.id,
+            "driver_type": file_collection_driver_type,
+            "filehash": file_collection_filehash,
+            "path": file_collection_path,
+        })
+
+        assert file_collection_2.id != file_collection.id
+
+        file_collection_id = "file_collection_id"
+        file_collection_3 = dal.file_collection.create({
+            "id": file_collection_id,
+            "model_id": model.id,
+            "driver_type": file_collection_driver_type,
+            "filehash": file_collection_filehash,
+            "path": file_collection_path,
+        })
+
+        assert file_collection_3.id == file_collection_id
 
     def test_get_by_id_file_collection(self):
         dal = LocalDAL(self.datadriver)
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        file_collection_id = "id_2"
-        file_collection_path = "test_path"
         file_collection_driver_type = "local"
+        file_collection_filehash = "myhash"
+        file_collection_path = "test_path"
         file_collection = dal.file_collection.create({
-            "id": file_collection_id,
-            "path": file_collection_path,
             "model_id": model.id,
-            "driver_type": file_collection_driver_type
+            "driver_type": file_collection_driver_type,
+            "filehash": file_collection_filehash,
+            "path": file_collection_path,
         })
 
         result = dal.file_collection.get_by_id(file_collection.id)
@@ -468,14 +536,14 @@ class TestLocalDAL():
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        file_collection_id = "id_3"
-        file_collection_path = "test_path"
         file_collection_driver_type = "local"
+        file_collection_filehash = "myhash"
+        file_collection_path = "test_path"
         file_collection = dal.file_collection.create({
-            "id": file_collection_id,
-            "path": file_collection_path,
             "model_id": model.id,
-            "driver_type": file_collection_driver_type
+            "driver_type": file_collection_driver_type,
+            "filehash": file_collection_filehash,
+            "path": file_collection_path,
         })
 
         # create new dal with new driver instance (fails)
@@ -495,14 +563,14 @@ class TestLocalDAL():
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        file_collection_id = "id_4"
-        file_collection_path = "test_path"
         file_collection_driver_type = "local"
+        file_collection_filehash = "myhash"
+        file_collection_path = "test_path"
         file_collection = dal.file_collection.create({
-            "id": file_collection_id,
-            "path": file_collection_path,
             "model_id": model.id,
-            "driver_type": file_collection_driver_type
+            "driver_type": file_collection_driver_type,
+            "filehash": file_collection_filehash,
+            "path": file_collection_path,
         })
 
         # Update required and optional parameters
@@ -523,14 +591,14 @@ class TestLocalDAL():
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        file_collection_id = "id_5"
-        file_collection_path = "test_path"
         file_collection_driver_type = "local"
+        file_collection_filehash = "myhash"
+        file_collection_path = "test_path"
         file_collection = dal.file_collection.create({
-            "id": file_collection_id,
-            "path": file_collection_path,
             "model_id": model.id,
-            "driver_type": file_collection_driver_type
+            "driver_type": file_collection_driver_type,
+            "filehash": file_collection_filehash,
+            "path": file_collection_path,
         })
 
         dal.file_collection.delete(file_collection.id)
@@ -546,14 +614,14 @@ class TestLocalDAL():
         model_name = "model_1"
         model = dal.model.create({"name": model_name})
 
-        file_collection_id = "id_5"
-        file_collection_path = "test_path"
         file_collection_driver_type = "local"
+        file_collection_filehash = "myhash"
+        file_collection_path = "test_path"
         file_collection = dal.file_collection.create({
-            "id": file_collection_id,
-            "path": file_collection_path,
             "model_id": model.id,
-            "driver_type": file_collection_driver_type
+            "driver_type": file_collection_driver_type,
+            "filehash": file_collection_filehash,
+            "path": file_collection_path,
         })
 
         assert len(dal.file_collection.query({"id": file_collection.id})) == 1
@@ -571,9 +639,28 @@ class TestLocalDAL():
             "model_id": model.id
         })
 
+        assert session.id
         assert session.name == session_name
         assert session.created_at
         assert session.updated_at
+
+        session_name = "session_1"
+        session_2 = dal.session.create({
+            "name": session_name,
+            "model_id": model.id
+        })
+
+        assert session_2.id != session.id
+
+        session_id = "session_id"
+        session_name = "session_1"
+        session_3 = dal.session.create({
+            "id": session_id,
+            "name": session_name,
+            "model_id": model.id
+        })
+
+        assert session_3.id == session_id
 
     def test_get_by_id_session(self):
         dal = LocalDAL(self.datadriver)
@@ -694,9 +781,35 @@ class TestLocalDAL():
             "file_collection_id": task_file_collection_id
         })
 
+        assert task.id
         assert task.command == task_command
         assert task.created_at
         assert task.updated_at
+
+        task_2 = dal.task.create({
+            "model_id": model.id,
+            "session_id": session.id,
+            "command": task_command,
+            "code_id": task_code_id,
+            "environment_id": task_environment_id,
+            "file_collection_id": task_file_collection_id
+        })
+
+        assert task_2.id != task.id
+
+        task_id = "task_id"
+        task_3 = dal.task.create({
+            "id": task_id,
+            "model_id": model.id,
+            "session_id": session.id,
+            "command": task_command,
+            "code_id": task_code_id,
+            "environment_id": task_environment_id,
+            "file_collection_id": task_file_collection_id
+        })
+
+        assert task_3.id == task_id
+
 
     def test_get_by_id_task(self):
         dal = LocalDAL(self.datadriver)
@@ -878,6 +991,30 @@ class TestLocalDAL():
         assert snapshot.created_at
         assert snapshot.updated_at
 
+        snapshot_2 = dal.snapshot.create({
+            "model_id": model.id,
+            "code_id": snapshot_code_id,
+            "environment_id": snapshot_enviroment_id,
+            "file_collection_id": snapshot_file_collection_id,
+            "config": snapshot_config,
+            "stats": snapshot_stats
+        })
+
+        assert snapshot_2.id != snapshot.id
+
+        snapshot_id = "snapshot_id"
+        snapshot_3 = dal.snapshot.create({
+            "id": snapshot_id,
+            "model_id": model.id,
+            "code_id": snapshot_code_id,
+            "environment_id": snapshot_enviroment_id,
+            "file_collection_id": snapshot_file_collection_id,
+            "config": snapshot_config,
+            "stats": snapshot_stats
+        })
+
+        assert snapshot_3.id == snapshot_id
+
     def test_get_by_id_snapshot(self):
         dal = LocalDAL(self.datadriver)
         model_name = "model_1"
@@ -1017,9 +1154,9 @@ class TestLocalDAL():
             "stats": snapshot_stats
         })
 
-        # All snapshots created are the same, 1 is deleted => 5
+        # All snapshots created are the same, 1 is deleted => 7
         assert len(dal.snapshot.query({"id": snapshot.id})) == 1
-        assert len(dal.snapshot.query({"code_id": snapshot_code_id})) == 5
+        assert len(dal.snapshot.query({"code_id": snapshot_code_id})) == 7
 
     # User
 
@@ -1033,9 +1170,24 @@ class TestLocalDAL():
             "name": user_name,
             "email": user_email,
         })
+        assert user.id
         assert user.name == user_name
         assert user.created_at
         assert user.updated_at
+
+        user_2 = dal.user.create({
+            "name": user_name,
+            "email": user_email,
+        })
+        assert user_2.id != user.id
+
+        user_id = "user_id"
+        user_3 = dal.user.create({
+            "id": user_id,
+            "name": user_name,
+            "email": user_email,
+        })
+        assert user_3.id == user_id
 
     def test_get_by_id_user(self):
         dal = LocalDAL(self.datadriver)

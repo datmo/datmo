@@ -154,19 +154,22 @@ class SnapshotController(BaseController):
     def checkout(self, id):
         # Get snapshot object
         snapshot_obj = self.dal.snapshot.get_by_id(id)
+        code_obj = self.dal.code.get_by_id(snapshot_obj.code_id)
+        file_collection_obj = self.dal.file_collection.\
+            get_by_id(snapshot_obj.file_collection_id)
 
         # Create new code_driver ref to revert back (if needed)
         # TODO: Save this to be reverted to
         current_code_obj = self.code.create()
 
-        # Checkout code_driver to the relevant code_driver ref
-        self.code_driver.checkout_code(snapshot_obj.code_id)
+        # Checkout code_driver to the relevant commit ref
+        self.code_driver.checkout_code(code_obj.commit_id)
 
         # Pull file collection to the project home
-        dst_dirpath = os.path.join(self.home, "datmo_snapshots", id)
-        self.file_driver.create(dst_dirpath, dir=True)
-        self.file_driver.transfer_collection(snapshot_obj.file_collection_id,
-                                             dst_dirpath)
+        dst_dirpath = os.path.join("datmo_snapshots", id)
+        abs_dst_dirpath = self.file_driver.create(dst_dirpath, dir=True)
+        self.file_driver.transfer_collection(file_collection_obj.filehash,
+                                             abs_dst_dirpath)
         return True
 
     def list(self, session_id=None):

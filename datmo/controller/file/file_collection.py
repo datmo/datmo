@@ -45,17 +45,17 @@ class FileCollectionController(BaseController):
         }
 
         ## Required args
-        required_args = ["id", "path", "driver_type"]
+        required_args = ["filehash", "path", "driver_type"]
         traversed_args = []
         for required_arg in required_args:
             # Handle Id if provided or not
-            if required_arg == "id":
+            if required_arg == "filehash":
                 create_dict[required_arg] = \
                     self.file_driver.create_collection(filepaths)
                 traversed_args.append(required_arg)
             elif required_arg == "path":
                 create_dict[required_arg] = \
-                    self.file_driver.get_collection_path(create_dict['id'])
+                    self.file_driver.get_relative_collection_path(create_dict['filehash'])
                 traversed_args.append(required_arg)
             elif required_arg == "driver_type":
                 create_dict[required_arg] = self.file_driver.type
@@ -97,7 +97,7 @@ class FileCollectionController(BaseController):
                                           "controller.file_collection.delete",
                                           id))
         # Remove file collection files
-        delete_file_collection_success = self.file_driver.delete_collection(id)
+        delete_file_collection_success = self.file_driver.delete_collection(file_collection_obj.filehash)
         # Delete FileCollection
         delete_file_collection_obj_success = self.dal.file_collection.delete(file_collection_obj.id)
 

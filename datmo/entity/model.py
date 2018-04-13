@@ -8,6 +8,7 @@ class Model():
     Attributes
     ----------
     id : str
+        the id of the entity
     name : str
     description : str
     created_at : datetime

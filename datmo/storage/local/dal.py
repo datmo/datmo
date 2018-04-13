@@ -11,6 +11,7 @@ from datmo.entity.task import Task
 from datmo.entity.snapshot import Snapshot
 from datmo.entity.user import User
 from datmo.util.exceptions import InputException
+from datmo.util.misc_functions import create_unique_hash
 
 
 class LocalDAL():
@@ -166,6 +167,12 @@ class EntityMethodsCRUD(object):
             # set created_at if not present
             dict_obj['created_at'] = dict_obj.get('created_at',
                                                   datetime.now()).utcnow()
+        # create a unique hash from misc_functions.py
+        # TODO: find efficient way to get previous hash for entity
+        # latest_entity = self.query({"id": latest})
+        # dict_obj['id'] = create_unique_hash(base_hash=latest_entity['id'])
+        dict_obj['id'] = dict_obj['id'] if 'id' in dict_obj.keys() else \
+            create_unique_hash()
         response = self.driver.set(self.collection, dict_obj)
         entity_instance = self.entity_class(response)
         return entity_instance

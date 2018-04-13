@@ -500,65 +500,65 @@ class GitCodeDriver(object):
 
     # Implemented functions for every CodeDriver
 
-    def create_code(self, code_id=None):
+    def create_code(self, commit_id=None):
         """Add remaining files, make a commit and add it to a datmo code ref
 
         Parameters
         ----------
-        code_id : str, optional
-            if code_id is given, it will not add files and not create a commit
+        commit_id : str, optional
+            if commit_id is given, it will not add files and not create a commit
 
         Returns
         -------
-        code_id : str
-            code id for the ref created
+        commit_id : str
+            commit id for the ref created
 
         Raises
         ------
         GitCommitDoesNotExist
-            Code id specified does not match a valid commit within the tree
+            commit id specified does not match a valid commit within the tree
         """
         self.ensure_code_refs_dir()
-        if not code_id:
+        if not commit_id:
             # add files and commit changes on current branch
             self.add("-A")
             new_commit_bool = self.commit(options=["-m",
                                                    "auto commit by datmo"])
             try:
-                code_id = self.latest_commit()
+                commit_id = self.latest_commit()
             except GitExecutionException as e:
                 raise GitCommitDoesNotExist(_("error",
                                               "controller.code.driver.git.create_code",
                                               e))
             # revert back to the original commit
             if new_commit_bool:
-                self.reset(code_id)
+                self.reset(commit_id)
         # writing git commit into ref if exists
-        if not self.exists_commit(code_id):
+        if not self.exists_commit(commit_id):
             raise GitCommitDoesNotExist(_("error",
                                           "controller.code.driver.git.create_code",
-                                          code_id))
+                                          commit_id))
         code_ref_path = os.path.join(self.filepath,
                                      ".git/refs/datmo/",
-                                     code_id)
+                                     commit_id)
         with open(code_ref_path, "w") as f:
-            f.write(code_id)
-        return code_id
+            f.write(commit_id)
+        return commit_id
 
-    def exists_code(self, code_id):
+    def exists_code(self, commit_id):
         code_ref_path = os.path.join(self.filepath,
                                      ".git/refs/datmo/",
-                                     code_id)
+                                     commit_id)
         if not os.path.isfile(code_ref_path):
             return False
         return True
 
-    def delete_code(self, code_id):
+    def delete_code(self, commit_id):
         self.ensure_code_refs_dir()
         code_ref_path = os.path.join(self.filepath,
                                      ".git/refs/datmo/",
-                                     code_id)
-        if not self.exists_code(code_id):
+                                     commit_id)
+        if not self.exists_code(commit_id):
             raise FileIOException(_("error",
                                     "controller.code.driver.git.delete_code"))
         os.remove(code_ref_path)
@@ -572,7 +572,7 @@ class GitCodeDriver(object):
         return code_refs_list
 
     # Datmo specific remote calls
-    def push_code(self, code_id="*"):
+    def push_code(self, commit_id="*"):
         datmo_ref = "refs/datmo/" + code_id
         datmo_ref_map = "+" + datmo_ref + ":" + datmo_ref
         try:
@@ -582,31 +582,31 @@ class GitCodeDriver(object):
                                           "controller.code.driver.git.push_code",
                                           str(e)))
 
-    def fetch_code(self, code_id):
+    def fetch_code(self, commit_id):
         try:
-            datmo_ref = "refs/datmo/" + code_id
+            datmo_ref = "refs/datmo/" + commit_id
             datmo_ref_map = "+" + datmo_ref + ":" + datmo_ref
             success, err = self.fetch("origin", datmo_ref_map, option="-fup")
             if not success:
                 raise GitExecutionException(_("error",
                                               "controller.code.driver.git.fetch_code",
-                                              (code_id, err)))
+                                              (commit_id, err)))
         except Exception as e:
             raise GitExecutionException(_("error",
                                           "controller.code.driver.git.fetch_code",
-                                          (code_id, str(e))))
+                                          (commit_id, str(e))))
         return True
 
-    def checkout_code(self, code_id, remote=False):
+    def checkout_code(self, commit_id, remote=False):
         try:
             if remote:
-                self.fetch_code(code_id)
-            datmo_ref = "refs/datmo/" + code_id
+                self.fetch_code(commit_id)
+            datmo_ref = "refs/datmo/" + commit_id
             return self.checkout(datmo_ref)
         except Exception as e:
             raise GitExecutionException(_("error",
                                           "controller.code.driver.git.checkout_code",
-                                          (code_id, str(e))))
+                                          (commit_id, str(e))))
 
 
 class GitHostDriver(object):

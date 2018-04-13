@@ -10,6 +10,7 @@ class TestCode():
             "id": "test",
             "model_id": "my_model",
             "driver_type": "git",
+            "commit_id": "mycommit"
         }
         code_entity = Code(input_dict)
 
@@ -23,6 +24,7 @@ class TestCode():
             "id": "test",
             "model_id": "my_model",
             "driver_type": "git",
+            "commit_id": "mycommit"
         }
         code_entity_1 = Code(input_dict)
         code_entity_2 = Code(input_dict)
@@ -33,6 +35,7 @@ class TestCode():
             "id": "test",
             "model_id": "my_model",
             "driver_type": "git",
+            "commit_id": "mycommit"
         }
         code_entity = Code(input_dict)
         output_dict = code_entity.to_dictionary()

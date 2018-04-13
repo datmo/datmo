@@ -1,7 +1,6 @@
 import os
 
 from datmo.util.i18n import get as _
-from datmo.util.misc_functions import get_filehash
 from datmo.controller.base import BaseController
 from datmo.controller.file.file_collection import FileCollectionController
 from datmo.util.exceptions import RequiredArgumentMissing, \
@@ -54,18 +53,14 @@ class EnvironmentController(BaseController):
         }
 
         ## Required args
-        required_args = ["id", "driver_type", "file_collection_id", "definition_filename"]
+        required_args = ["driver_type", "file_collection_id", "definition_filename"]
         for required_arg in required_args:
             # Add in any values that are
             if required_arg in dictionary:
                 create_dict[required_arg] = dictionary[required_arg]
             else:
-                # Id creation from filehash
-                if required_arg == "id":
-                    create_dict[required_arg] = \
-                        get_filehash(dictionary["definition_filepath"])
                 # Pull in driver type from base
-                elif required_arg == "driver_type":
+                if required_arg == "driver_type":
                     create_dict[required_arg] = self.environment_driver.type
                 # File setup
                 elif required_arg == "file_collection_id":
@@ -118,7 +113,7 @@ class EnvironmentController(BaseController):
         file_collection_obj = self.dal.file_collection.\
             get_by_id(environment_obj.file_collection_id)
         # Build the Environment with the driver
-        datmo_definition_filepath = os.path.join(file_collection_obj.path,
+        datmo_definition_filepath = os.path.join(self.home, file_collection_obj.path,
                                                  "datmo" + environment_obj.definition_filename)
         result = self.environment_driver.build_image(id, definition_path=datmo_definition_filepath)
         return result

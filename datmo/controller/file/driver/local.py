@@ -5,7 +5,7 @@ import hashlib
 import uuid
 import checksumdir
 
-from datmo.util.i18n import get as __
+from datmo.util.i18n import get as _
 from datmo.util.exceptions import DoesNotExistException, \
     FileIOException, FileStructureException
 
@@ -19,7 +19,7 @@ class LocalFileDriver(object):
         self.filepath = filepath
         # Check if filepath exists
         if not os.path.exists(self.filepath):
-            raise DoesNotExistException(__("error",
+            raise DoesNotExistException(_("error",
                                           "controller.file.driver.local.__init__",
                                           filepath))
         self._is_initialized = self.is_initialized
@@ -28,11 +28,11 @@ class LocalFileDriver(object):
     @staticmethod
     def get_safe_dst_filepath(filepath, dst_dirpath):
         if not os.path.isfile(filepath):
-            raise DoesNotExistException(__("error",
+            raise DoesNotExistException(_("error",
                                           "controller.file.driver.local.get_safe_dst_filepath.src",
                                           filepath))
         if not os.path.isdir(dst_dirpath):
-            raise DoesNotExistException(__("error",
+            raise DoesNotExistException(_("error",
                                           "controller.file.driver.local.get_safe_dst_filepath.dst",
                                           dst_dirpath))
         _, filename = os.path.split(filepath)
@@ -52,11 +52,11 @@ class LocalFileDriver(object):
     def copytree(src_dirpath, dst_dirpath,
                  symlinks=False, ignore=None):
         if not os.path.isdir(src_dirpath):
-            raise DoesNotExistException(__("error",
+            raise DoesNotExistException(_("error",
                                           "controller.file.driver.local.copytree.src",
                                           src_dirpath))
         if not os.path.isdir(dst_dirpath):
-            raise DoesNotExistException(__("error",
+            raise DoesNotExistException(_("error",
                                           "controller.file.driver.local.copytree.dst",
                                           dst_dirpath))
         for item in os.listdir(src_dirpath):
@@ -76,11 +76,11 @@ class LocalFileDriver(object):
     @staticmethod
     def copyfile(filepath, dst_dirpath):
         if not os.path.isfile(filepath):
-            raise DoesNotExistException(__("error",
+            raise DoesNotExistException(_("error",
                                           "controller.file.driver.local.copyfile.src",
                                           filepath))
         if not os.path.isdir(dst_dirpath):
-            raise DoesNotExistException(__("error",
+            raise DoesNotExistException(_("error",
                                           "controller.file.driver.local.copyfile.dst",
                                           dst_dirpath))
         dst_filepath = LocalFileDriver.get_safe_dst_filepath(filepath, dst_dirpath)
@@ -100,12 +100,27 @@ class LocalFileDriver(object):
             # Ensure the Datmo file structure exists
             self.ensure_datmo_file_structure()
         except Exception as e:
-            raise FileIOException(__("error",
+            raise FileIOException(_("error",
                                     "controller.file.driver.local.init",
                                     e))
         return True
 
     def create(self, relative_filepath, dir=False):
+        """
+        Create files or directories
+
+        Parameters
+        ----------
+        relative_filepath : str
+            relative filepath from base filepath
+        dir : bool
+            true for directory, false for file
+
+        Returns
+        -------
+        filepath : str
+            absolute filepath of created file or directory
+        """
         filepath = os.path.join(self.filepath,
                                 relative_filepath)
         if os.path.exists(filepath):
@@ -139,7 +154,7 @@ class LocalFileDriver(object):
     def delete(self, relative_filepath, dir=False):
         if not os.path.exists(os.path.join(self.filepath,
                                        relative_filepath)):
-            raise DoesNotExistException(__("error",
+            raise DoesNotExistException(_("error",
                                           "controller.file.driver.local.delete",
                                           os.path.join(self.filepath, relative_filepath)))
         if dir:
@@ -224,7 +239,7 @@ class LocalFileDriver(object):
     # Collections
     def create_collections_dir(self):
         if not self.is_initialized:
-            raise FileStructureException(__("error",
+            raise FileStructureException(_("error",
                                            "controller.file.driver.local.create_collections_dir"))
         collections_path = os.path.join(self.filepath, ".datmo",
                                              "collections")
@@ -244,21 +259,21 @@ class LocalFileDriver(object):
 
     def delete_collections_dir(self):
         collections_path = os.path.join(self.filepath, ".datmo",
-                                    "collections")
+                                        "collections")
         return self.delete(collections_path, dir=True)
 
     # Implemented functions for every FileDriver
 
     def create_collection(self, filepaths):
         if not self.is_initialized:
-            raise FileStructureException(__("error",
+            raise FileStructureException(_("error",
                                            "controller.file.driver.local.create_collection.structure"))
 
         # Ensure all filepaths are valid before proceeding
         for filepath in filepaths:
             if not os.path.isdir(filepath) and \
-                not os.path.isfile(filepath):
-                raise DoesNotExistException(__("error",
+                    not os.path.isfile(filepath):
+                raise DoesNotExistException(_("error",
                                               "controller.file.driver.local.create_collection.filepath",
                                               filepath))
 
@@ -309,9 +324,12 @@ class LocalFileDriver(object):
 
         return collection_id
 
-    def get_collection_path(self, collection_id):
+    def get_absolute_collection_path(self, collection_id):
         return os.path.join(self.filepath, ".datmo",
                             "collections", collection_id)
+
+    def get_relative_collection_path(self, collection_id):
+        return os.path.join(".datmo", "collections", collection_id)
 
     def exists_collection(self, collection_id):
         collection_path = os.path.join(self.filepath, ".datmo",
@@ -323,22 +341,37 @@ class LocalFileDriver(object):
                                        "collections", collection_id)
         return self.delete(collection_path, dir=True)
 
-    def transfer_collection(self, collection_id, dst_dirpath):
+    def transfer_collection(self, collection_id, abs_dst_dirpath):
+        """
+        transfer a collection to new absolute location
+
+        Parameters
+        ----------
+        collection_id : str
+            file collection id to transfer
+        abs_dst_dirpath : str
+            absolute destination path
+
+        Returns
+        -------
+        bool
+            True if successful else False
+        """
         if not self.exists_collection(collection_id):
-            raise DoesNotExistException(__("error",
+            raise DoesNotExistException(_("error",
                                           "controller.file.driver.local.transfer_collection",
                                           collection_id))
-        if not os.path.isdir(dst_dirpath):
-            raise DoesNotExistException(__("error",
+        if not os.path.isdir(abs_dst_dirpath):
+            raise DoesNotExistException(_("error",
                                           "controller.file.driver.local.transfer_collection.dst",
-                                          dst_dirpath))
+                                          abs_dst_dirpath))
         collection_path = os.path.join(self.filepath, ".datmo",
                                        "collections", collection_id)
-        return self.copytree(collection_path, dst_dirpath)
+        return self.copytree(collection_path, abs_dst_dirpath)
 
     def list_file_collections(self):
         if not self.is_initialized:
-            raise FileStructureException(__("error",
+            raise FileStructureException(_("error",
                                            "controller.file.driver.local.list_file_collections"))
         collections_path = os.path.join(self.filepath, ".datmo",
                                         "collections")
