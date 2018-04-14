@@ -3,6 +3,19 @@ from future.utils import with_metaclass
 
 
 class EnvironmentDriver(with_metaclass(ABCMeta, object)):
+    """EnvironmentDriver is the parent of all environment drivers. Any child must implement the methods below
+
+    Methods
+    -------
+    build(name, path)
+        build the environment
+    run(name, options, log_filepath)
+        run the built environment
+    stop(run_id, force=False)
+        stop the run created with the environment
+    remove(name, force=False)
+        remove the environment
+    """
 
     @abstractmethod
     def __init__(self):
