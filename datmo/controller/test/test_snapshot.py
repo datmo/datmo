@@ -108,11 +108,12 @@ class TestSnapshotController():
 
         # Create snapshot in the project
         snapshot_obj_1 = self.snapshot.create(input_dict)
+        code_obj_1 = self.snapshot.dal.code.get_by_id(snapshot_obj_1.code_id)
 
         # Create duplicate snapshot in project
         _ = self.snapshot.create(input_dict)
 
-        # Checkout to latest snapshot
+        # Checkout to snapshot 1 using snapshot id
         result = self.snapshot.checkout(snapshot_obj_1.id)
 
         # SnapshotCommand directory in user directory
@@ -120,7 +121,7 @@ class TestSnapshotController():
                                            snapshot_obj_1.id)
 
         assert result == True and \
-               self.snapshot.code_driver.latest_commit() == snapshot_obj_1.code_id and \
+               self.snapshot.code_driver.latest_commit() == code_obj_1.commit_id and \
                os.path.isdir(snapshot_obj_1_path)
 
 

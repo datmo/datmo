@@ -105,11 +105,26 @@ class LocalFileDriver(FileDriver):
             self.ensure_datmo_file_structure()
         except Exception as e:
             raise FileIOException(__("error",
-                                     "controller.file.driver.local.init",
-                                     e))
+                                    "controller.file.driver.local.init",
+                                    str(e)))
         return True
 
     def create(self, relative_path, dir=False):
+        """
+        Create files or directories
+
+        Parameters
+        ----------
+        relative_path : str
+            relative filepath from base filepath
+        dir : bool
+            true for directory, false for file
+
+        Returns
+        -------
+        filepath : str
+            absolute filepath of created file or directory
+        """
         filepath = os.path.join(self.filepath,
                                 relative_path)
         if os.path.exists(filepath):
@@ -212,9 +227,15 @@ class LocalFileDriver(FileDriver):
 
         return filehash
 
-    def get_collection_path(self, filehash):
+    def get_absolute_collection_path(self, filehash):
         return os.path.join(self.filepath, ".datmo",
                             "collections", filehash)
+
+    def get_relative_collection_path(self, filehash):
+        return os.path.join(".datmo", "collections", filehash)
+
+    def get_collection_path(self, filehash):
+        return self.get_absolute_collection_path(filehash)
 
     def exists_collection(self, filehash):
         collection_path = os.path.join(self.filepath, ".datmo",
@@ -334,7 +355,7 @@ class LocalFileDriver(FileDriver):
 
     def delete_collections_dir(self):
         collections_path = os.path.join(self.filepath, ".datmo",
-                                    "collections")
+                                        "collections")
         return self.delete(collections_path, dir=True)
 
     def list_file_collections(self):

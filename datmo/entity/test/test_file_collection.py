@@ -9,8 +9,9 @@ class TestFileCollection():
         input_dict = {
             "id": "test",
             "model_id": "my_model",
-            "path": "/path/to/file",
             "driver_type": "docker",
+            "filehash": "myhash",
+            "path": "/path/to/file",
         }
         file_collection_entity = FileCollection(input_dict)
 
@@ -23,8 +24,9 @@ class TestFileCollection():
         input_dict = {
             "id": "test",
             "model_id": "my_model",
-            "path": "/path/to/file",
             "driver_type": "docker",
+            "filehash": "myhash",
+            "path": "/path/to/file",
         }
         file_collection_entity_1 = FileCollection(input_dict)
         file_collection_entity_2 = FileCollection(input_dict)
@@ -34,8 +36,9 @@ class TestFileCollection():
         input_dict = {
             "id": "test",
             "model_id": "my_model",
-            "path": "/path/to/file",
             "driver_type": "docker",
+            "filehash": "myhash",
+            "path": "/path/to/file",
         }
         file_collection_entity = FileCollection(input_dict)
         output_dict = file_collection_entity.to_dictionary()

@@ -95,7 +95,7 @@ class TaskController(BaseController):
             tty : bool
             gpu : bool
         log_filepath : str
-            filepath to the log file
+            absolute filepath to the log file
 
         Returns
         -------
@@ -190,7 +190,7 @@ class TaskController(BaseController):
         task_dirpath = os.path.join("datmo_tasks",
                                     task_obj.id)
         try:
-            task_dirpath = self.file_driver.create(
+            _ = self.file_driver.create(
                 os.path.join("datmo_tasks",
                              task_obj.id), dir=True)
         except:
@@ -216,8 +216,8 @@ class TaskController(BaseController):
         # Copy over files from the before_snapshot file collection to task dir
         file_collection_obj =  \
             self.dal.file_collection.get_by_id(before_snapshot_obj.file_collection_id)
-        self.file_driver.copytree(file_collection_obj.path,
-            task_obj.task_dirpath
+        self.file_driver.copytree(os.path.join(self.home, file_collection_obj.path),
+            os.path.join(self.home, task_obj.task_dirpath)
         )
 
         # Set the parameters set in the task
@@ -227,7 +227,7 @@ class TaskController(BaseController):
             "gpu": task_obj.gpu,
             "name": "datmo-task-" + task_obj.id,
             "volumes": {
-                task_obj.task_dirpath: {
+                os.path.join(self.home, task_obj.task_dirpath): {
                     'bind': '/task/',
                     'mode': 'rw'
                 },
@@ -245,11 +245,12 @@ class TaskController(BaseController):
         # Run environment_driver
         hardware_info, return_code, container_id, logs =  \
             self._run_helper(before_snapshot_obj.environment_id,
-                             environment_run_options, task_obj.log_filepath)
+                             environment_run_options,
+                             os.path.join(self.home, task_obj.log_filepath))
 
         # Create the after snapshot after execution is completed
         after_snapshot_create_dict = {
-            "filepaths": [task_obj.task_dirpath],
+            "filepaths": [os.path.join(self.home, task_obj.task_dirpath)],
             "environment_id": before_snapshot_obj.environment_id,
             "config": dictionary['config'],
             "stats": dictionary['stats']

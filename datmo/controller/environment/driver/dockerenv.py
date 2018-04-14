@@ -117,6 +117,25 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         return list_tag_names
 
     def build_image(self, tag, definition_path='Dockerfile'):
+        """Builds docker image
+
+        Parameters
+        ----------
+        tag : str
+            name to tag image with
+        definition_path : str
+            absolute file path to the definition
+
+        Returns
+        -------
+        bool
+            True if success
+
+        Raises
+        ------
+        EnvironmentExecutionException
+
+        """
         try:
             docker_shell_cmd_list = list(self.cpu_prefix)
             docker_shell_cmd_list.append('build')
@@ -170,8 +189,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
     def remove_images(self, name=None, all=False, filters=None,
                           force=False):
-        """
-        Remove multiple images
+        """Remove multiple images
         """
         try:
             images = self.list_images(name=name, all=all, filters=filters)
@@ -185,8 +203,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
     def run_container(self, image_name, command=None, ports=None, name=None, volumes=None,
                    detach=False, stdin_open=False, tty=False, gpu=False, api=False):
-        """
-        Run Docker container with parameters given as defined below
+        """Run Docker container with parameters given as defined below
 
         Parameters
         ----------
@@ -345,8 +362,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
     def log_container(self, container_id, filepath, api=False,
                       follow=True):
-        """
-        Log capture at a particular point `docker logs`. Can also use `--follow` for real time logs
+        """Log capture at a particular point `docker logs`. Can also use `--follow` for real time logs
 
         Parameters
         ----------
@@ -394,8 +410,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             return return_code, logs
 
     def stop_remove_containers_by_term(self, term, force=False):
-        """
-        Stops and removes containers by term
+        """Stops and removes containers by term
         """
         try:
             running_docker_container_cmd_list = list(self.cpu_prefix)
@@ -442,7 +457,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
     def form_datmo_definition_file(self, input_definition_path="Dockerfile",
                                    output_definition_path="datmoDockerfile"):
         """
-        in order to create intermediate dockerfile to run
+        n order to create intermediate dockerfile to run
         """
         base_dockerfile_filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                                     "templates", "baseDockerfile")

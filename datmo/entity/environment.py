@@ -8,8 +8,11 @@ class Environment():
     Attributes
     ----------
     id : str
+        the id of the entity
     model_id : str
+        the parent model id for the entity
     driver_type : str
+        the driver class that created the entity
     file_collection_id : str
     definition_filename : str
     created_at : datetime

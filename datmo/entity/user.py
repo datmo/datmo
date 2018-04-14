@@ -8,6 +8,7 @@ class User():
     Attributes
     ----------
     id : str
+        the id of the entity
     name : str
     email : str
     created_at : datetime
