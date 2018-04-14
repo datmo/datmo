@@ -3,7 +3,6 @@ from datetime import datetime
 
 from datmo.util.exceptions import EntityNotFound, \
     EntityCollectionNotFound, IncorrectTypeException
-from datmo.storage.local.driver.driver_type import DriverType
 
 
 class BlitzDBDALDriver():
@@ -11,7 +10,7 @@ class BlitzDBDALDriver():
         # super().__init__()
         self.database_name = 'datmo_db'
 
-        if driver_type == DriverType.FILE:
+        if driver_type == "file":
             from blitzdb import FileBackend
             self.backend = FileBackend(connection_string)
         else:
