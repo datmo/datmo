@@ -43,10 +43,104 @@ class TestDockerEnv():
     def test_instantiation_not_connected(self):
         thrown = False
         try:
-          DockerEnvironmentDriver(self.temp_dir, 'docker', 'unix:///var/run/fooo')
+            DockerEnvironmentDriver(self.temp_dir, 'docker', 'unix:///var/run/fooo')
         except EnvironmentInitFailed:
             thrown = True
         assert thrown
+
+    def test_build(self):
+        name = str(uuid.uuid1())
+        path = os.path.join(self.docker_environment_manager.filepath,
+                                       "Dockerfile")
+        random_text = str(uuid.uuid1())
+        with open(path, "w") as f:
+            f.write("FROM datmo/xgboost:cpu" + "\n")
+            f.write(str("RUN echo " + random_text))
+        result = self.docker_environment_manager.build(name, path)
+        assert result == True
+        # teardown
+        self.docker_environment_manager.remove(name, force=True)
+
+    def test_run(self):
+        name = str(uuid.uuid1())
+        path = os.path.join(self.docker_environment_manager.filepath,
+                            "Dockerfile")
+        random_text = str(uuid.uuid1())
+        with open(path, "w") as f:
+            f.write("FROM datmo/xgboost:cpu" + "\n")
+            f.write(str("RUN echo " + random_text))
+        log_filepath = os.path.join(self.docker_environment_manager.filepath,
+                                    "test.log")
+        self.docker_environment_manager.build(name, path)
+
+        run_options = {
+            "command": ["sh", "-c", "echo yo"],
+            "ports": None,
+            "name": None,
+            "volumes": None,
+            "detach": False,
+            "stdin_open": False,
+            "tty": False,
+            "gpu": False,
+            "api": False
+        }
+        return_code, run_id, logs = \
+            self.docker_environment_manager.run(name, run_options, log_filepath)
+
+        assert return_code == 0
+        assert run_id
+        assert logs
+        # teardown
+        self.docker_environment_manager.stop(run_id, force=True)
+        self.docker_environment_manager.remove(name, force=True)
+
+    def test_stop(self):
+        name = str(uuid.uuid1())
+        path = os.path.join(self.docker_environment_manager.filepath,
+                            "Dockerfile")
+        random_text = str(uuid.uuid1())
+        with open(path, "w") as f:
+            f.write("FROM datmo/xgboost:cpu" + "\n")
+            f.write(str("RUN echo " + random_text))
+        log_filepath = os.path.join(self.docker_environment_manager.filepath,
+                                    "test.log")
+        self.docker_environment_manager.build(name, path)
+
+        run_options = {
+            "command": ["sh", "-c", "echo yo"],
+            "ports": None,
+            "name": "my_container_name_2",
+            "volumes": None,
+            "detach": False,
+            "stdin_open": False,
+            "tty": False,
+            "gpu": False,
+            "api": False
+        }
+        _, run_id, _ = \
+            self.docker_environment_manager.run(name, run_options, log_filepath)
+        result = self.docker_environment_manager.stop(run_id, force=True)
+        assert result
+        # teardown
+        self.docker_environment_manager.remove(name, force=True)
+
+    def test_remove(self):
+        name = str(uuid.uuid1())
+        path = os.path.join(self.docker_environment_manager.filepath,
+                                       "Dockerfile")
+        random_text = str(uuid.uuid1())
+        with open(path, "w") as f:
+            f.write("FROM datmo/xgboost:cpu" + "\n")
+            f.write(str("RUN echo " + random_text))
+        # Without force
+        self.docker_environment_manager.build(name, path)
+        result = self.docker_environment_manager.remove(name)
+        assert result == True
+        # With force
+        self.docker_environment_manager.build(name, path)
+        # teardown
+        result = self.docker_environment_manager.remove(name, force=True)
+        assert result == True
 
     def test_init(self):
         assert self.init_result and \

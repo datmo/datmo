@@ -1,6 +1,5 @@
 import os
 
-from datmo.storage.local.driver.driver_type import DriverType
 from datmo.util.i18n import get as _
 from datmo.util import get_class_contructor
 from datmo.util.json_store import JSONStore
@@ -15,7 +14,7 @@ class BaseController(object):
     ----------
     home : str
         Filepath for the location of the project
-    dal_driver : DataDriver object
+    dal_driver : DALDriver object
         This is an instance of a storage DAL driver
     config : JSONStore
         This is the set of configurations used to create a project
@@ -162,10 +161,7 @@ class BaseController(object):
     def dal_instantiate(self):
         # first load driver, then create DAL using driver
         if not self.dal_driver:
-            dal_driver_dict = self.config_loader("storage.local.driver")
-            if type(dal_driver_dict["options"]["driver_type"]) == str or \
-                type(dal_driver_dict["options"]["driver_type"]) == unicode:
-                dal_driver_dict["options"]["driver_type"] = DriverType[dal_driver_dict["options"]["driver_type"]]
+            dal_driver_dict = self.config_loader("storage.driver")
             self.dal_driver = dal_driver_dict["constructor"](**dal_driver_dict["options"])
         # Get DAL, set driver,
         dal_dict = self.config_loader("storage.local")
@@ -211,13 +207,13 @@ class BaseController(object):
             "storage.local": {
                 "class_constructor": "datmo.storage.local.dal.LocalDAL",
                 "options": {
-                    "driver": "storage.local.driver"
+                    "driver": "storage.driver"
                 }
             },
-            "storage.local.driver": {
-                "class_constructor": "datmo.storage.local.driver.blitzdb_dal_driver.BlitzDBDALDriver",
+            "storage.driver": {
+                "class_constructor": "datmo.storage.driver.blitzdb_dal_driver.BlitzDBDALDriver",
                 "options": {
-                    "driver_type": "FILE",
+                    "driver_type": "file",
                     "connection_string": os.path.join(self.home, ".datmo/database")
                 }
             },

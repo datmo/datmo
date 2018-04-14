@@ -10,8 +10,7 @@ import shutil
 import tempfile
 from datetime import datetime
 
-from datmo.storage.local.driver.blitzdb_dal_driver import BlitzDBDALDriver
-from datmo.storage.local.driver.driver_type import DriverType
+from datmo.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.storage.local.dal import LocalDAL
 from datmo.util.exceptions import EntityNotFound, EntityCollectionNotFound
 
@@ -21,7 +20,7 @@ class TestLocalDAL():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.datadriver = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        self.datadriver = BlitzDBDALDriver("file", self.temp_dir)
 
     def teardown_class(self):
         shutil.rmtree(self.temp_dir)
@@ -79,17 +78,17 @@ class TestLocalDAL():
 
     def test_get_by_id_model_same_dir(self):
         test_dir = "test-dir"
-        datadriver = BlitzDBDALDriver(DriverType.FILE, test_dir)
+        datadriver = BlitzDBDALDriver("file", test_dir)
         dal = LocalDAL(datadriver)
         model1 = dal.model.create({"name": "test"})
         del datadriver
         del dal
-        datadriver = BlitzDBDALDriver(DriverType.FILE, test_dir)
+        datadriver = BlitzDBDALDriver("file", test_dir)
         dal = LocalDAL(datadriver)
         model2 = dal.model.create({"name": "test"})
         del datadriver
         del dal
-        datadriver = BlitzDBDALDriver(DriverType.FILE, test_dir)
+        datadriver = BlitzDBDALDriver("file", test_dir)
         dal = LocalDAL(datadriver)
         model3 = dal.model.create({"name": "test"})
 
@@ -108,7 +107,7 @@ class TestLocalDAL():
         model_name = "model_3"
         model = dal.model.create({"name": model_name})
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.model.get_by_id(model.id)
@@ -231,7 +230,7 @@ class TestLocalDAL():
         })
 
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.code.get_by_id(code.id)
@@ -390,7 +389,7 @@ class TestLocalDAL():
         })
 
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.environment.get_by_id(environment.id)
@@ -547,7 +546,7 @@ class TestLocalDAL():
         })
 
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.file_collection.get_by_id(file_collection.id)
@@ -688,7 +687,7 @@ class TestLocalDAL():
         })
 
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.session.get_by_id(session.id)
@@ -861,7 +860,7 @@ class TestLocalDAL():
         })
 
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.task.get_by_id(task.id)
@@ -1059,7 +1058,7 @@ class TestLocalDAL():
         })
 
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.snapshot.get_by_id(snapshot.id)
@@ -1215,7 +1214,7 @@ class TestLocalDAL():
         })
 
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.user.get_by_id(user.id)

@@ -66,6 +66,60 @@ class TestEnvironmentController():
 
         assert result
 
+        # teardown
+        self.environment.delete(environment_obj.id)
+
+    def test_run(self):
+        self.project.init("test5", "test description")
+
+        # Create environment definition
+        definition_filepath = os.path.join(self.environment.home,
+                                           "Dockerfile")
+        with open(definition_filepath, "w") as f:
+            f.write(str("FROM datmo/xgboost:cpu"))
+
+        run_options = {
+            "command": ["sh", "-c", "echo yo"],
+            "ports": None,
+            "name": None,
+            "volumes": None,
+            "detach": False,
+            "stdin_open": False,
+            "tty": False,
+            "gpu": False,
+            "api": False
+        }
+
+
+        # Create environment_driver definition
+        env_def_path = os.path.join(self.project.home,
+                                    "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(str("FROM datmo/xgboost:cpu"))
+
+        input_dict = {
+            "definition_filepath": definition_filepath,
+        }
+
+        # Create environment in the project
+        environment_obj = self.environment.create(input_dict)
+
+        log_filepath = os.path.join(self.project.home,
+                                    "task.log")
+
+        # Build environment in the project
+        _ = self.environment.build(environment_obj.id)
+
+        # Run environment in the project
+        return_code, run_id, logs = \
+            self.environment.run(environment_obj.id, run_options, log_filepath)
+
+        assert return_code == 0
+        assert run_id
+        assert logs
+        # teardown
+        self.environment.delete(environment_obj.id)
+
     def test_list(self):
         self.project.init("test4", "test description")
 

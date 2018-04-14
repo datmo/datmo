@@ -7,14 +7,16 @@ from docker import DockerClient
 from datmo.util.i18n import get as _
 from datmo.util.exceptions import DoesNotExistException, \
     EnvironmentInitFailed, EnvironmentExecutionException
+from datmo.controller.environment.driver import EnvironmentDriver
 
 
-class DockerEnvironmentDriver(object):
+class DockerEnvironmentDriver(EnvironmentDriver):
     """
     This EnvironmentDriver handles environment management in the project using docker
     """
 
     def __init__(self, filepath="", docker_execpath="docker", docker_socket="unix:///var/run/docker.sock"):
+        super(DockerEnvironmentDriver, self).__init__()
         self.filepath = filepath
         # Check if filepath exists
         if not os.path.exists(self.filepath):
@@ -57,8 +59,31 @@ class DockerEnvironmentDriver(object):
         self._is_initialized = False
         return self._is_initialized
 
+    def build(self, name, path):
+        return self.build_image(name, path)
+
+    def run(self, name, options, log_filepath):
+        run_return_code, run_id = \
+            self.run_container(image_name=name, **options)
+        log_return_code, logs = self.log_container(run_id, filepath=log_filepath)
+        final_return_code = run_return_code and log_return_code
+
+        return final_return_code, run_id, logs
+
+    def stop(self, run_id, force=False):
+        stop_result = self.stop_container(run_id)
+        remove_run_result = self.remove_container(run_id, force=force)
+        return stop_result and remove_run_result
+
+    def remove(self, name, force=False):
+        stop_and_remove_containers_result = \
+            self.stop_remove_containers_by_term(name, force=force)
+        remove_image_result = self.remove_image(name, force=force)
+        return stop_and_remove_containers_result and \
+               remove_image_result
+
     def init(self):
-        # TODO: Fill in code_driver to start up Docker
+        # TODO: Fill in to start up Docker
         try:
             # Startup Docker
             pass
@@ -182,26 +207,26 @@ class DockerEnvironmentDriver(object):
 
         Parameters
         ----------
-        image_name: str
+        image_name : str
             Docker image name
-        command: list 
+        command : list
             List with complete user-given command (e.g. ['python', 'cool.py'])
-        ports: dict 
+        ports : dict
             Includes the ports to open and map (e.g. { "port/tcp": int(port), ... })
-        name: str
+        name : str
             User given name for container
-        volumes: dict 
+        volumes : dict
             Includes storage volumes for docker 
             (e.g. { outsidepath1 : {'bind', containerpath2, 'mode', MODE} })
-        detach: bool 
+        detach : bool
             True if container is to be detached else False
-        stdin_open: bool 
+        stdin_open : bool
             True if stdin is open else False
-        tty: bool 
+        tty : bool
             True to connect pseudo-terminal with stdin / stdout else False
-        gpu: bool 
+        gpu : bool
             True if GPU should be enabled else False
-        api: bool 
+        api : bool
             True if Docker python client should be used else use subprocess
         
         Returns
@@ -209,25 +234,25 @@ class DockerEnvironmentDriver(object):
         if api=False: 
         
         return_code: int
-            Integer success code of command
+            integer success code of command
         container_id: str
-            Output container id 
+            output container id
         
         
         if api=True & if detach=True:
         
         container_obj: Container
-            Object from Docker python api with details about container
+            object from Docker python api with details about container
             
         if api=True & if detach=False: 
         
         logs: str
-            Output logs for the run function
+            output logs for the run function
 
         Raises
         ------
         EnvironmentExecutionException
-            If there is anything wrong in running the environment command
+             error in running the environment command
         """
         try:
             container_id = None
