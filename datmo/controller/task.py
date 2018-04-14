@@ -5,7 +5,7 @@ from datmo.util.i18n import get as _
 from datmo.controller.base import BaseController
 from datmo.controller.environment.environment import EnvironmentController
 from datmo.controller.snapshot import SnapshotController
-from datmo.util.exceptions import TaskRunException
+from datmo.util.exceptions import TaskRunException, RequiredArgumentMissing
 
 
 class TaskController(BaseController):
@@ -67,6 +67,10 @@ class TaskController(BaseController):
             # Add in any values that are
             if required_arg in dictionary:
                 create_dict[required_arg] = dictionary[required_arg]
+            else:
+                raise RequiredArgumentMissing(_("error",
+                                                "controller.task.delete.arg",
+                                                required_arg))
 
         # Create Task
         return self.dal.task.create(create_dict)
@@ -275,5 +279,9 @@ class TaskController(BaseController):
             query['session_id'] = session_id
         return self.dal.task.query(query)
 
-    def delete(self, id):
+    def delete(self, id=None):
+        if not id:
+            raise RequiredArgumentMissing(_("error",
+                                            "controller.task.delete.arg",
+                                            "id"))
         return self.dal.task.delete(id)

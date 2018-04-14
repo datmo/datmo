@@ -27,18 +27,14 @@ class TaskCommand(ProjectCommand):
 
         # Task list arguments
         ls = subcommand_parsers.add_parser("ls", help="List tasks")
-        ls.add_argument('--running', dest='running', action='store_true',
-                         help='Boolean to filter for running Tasks')
-        ls.add_argument('--all', dest='all', action='store_true',
-                         help='Boolean to filter all running/stopped Tasks')
+        ls.add_argument('--session-id', dest='session_id', default=None, nargs='?', type=str,
+                         help='Pass in the session id to list the tasks in that session')
 
         # Task stop arguments
         stop = subcommand_parsers.add_parser("stop", help="Stop tasks")
-        stop.add_argument('--running', dest='running', action='store_true',
-                         help='Boolean to filter and stop running Tasks')
         stop.add_argument('--id', dest='id', default=None, type=str, help='Task ID to stop')
 
-        self.snapshot_controller = TaskController(home=home,
+        self.task_controller = TaskController(home=home,
                                                   dal_driver=self.project_controller.dal_driver)
         if not self.project_controller.is_initialized:
             raise ProjectNotInitializedException(_("error",
@@ -47,13 +43,18 @@ class TaskCommand(ProjectCommand):
 
     def run(self, **kwargs):
         self.cli_helper.echo(_("info", "cli.task.run"))
-        print("run", kwargs)
+        task_obj = self.task_controller.create(**kwargs)
+        self.task_controller.run(task_obj.id)
 
     def ls(self, **kwargs):
         print("ls", kwargs)
+        session_obj = self.task_controller.current_session
+        self.task_controller.list(session_obj.id)
 
     def stop(self, **kwargs):
         print("stop", kwargs)
+        self.task_controller.delete(**kwargs)
+
 
 
 

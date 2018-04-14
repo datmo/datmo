@@ -89,19 +89,16 @@ class TestTaskCommand():
 
     def test_datmo_task_ls(self):
         self.__set_variables()
-        test_running = True
-        test_all = True
+        test_session_id = 'test_session_id'
 
         self.task.parse([
             "task",
             "ls",
-            "--running",
-            "--all"
+            "--session-id", test_session_id
         ])
 
         # test for desired side effects
-        assert self.task.args.running == test_running
-        assert self.task.args.all == test_all
+        assert self.task.args.session_id == test_session_id
 
     def test_datmo_task_ls_invalid_arg(self):
         self.__set_variables()
@@ -117,18 +114,15 @@ class TestTaskCommand():
 
     def test_datmo_task_stop(self):
         self.__set_variables()
-        test_running = True
         test_id = 'test_id'
 
         self.task.parse([
             "task",
             "stop",
-            "--running",
             "--id", test_id
         ])
 
         # test for desired side effects
-        assert self.task.args.running == test_running
         assert self.task.args.id == test_id
 
     def test_datmo_task_stop_invalid_arg(self):
