@@ -71,7 +71,7 @@ class TestTaskController():
                                for _ in range(32)])
         options_dict = {
             "command": ["sh", "-c", "echo yo"],
-            "ports": [],
+            "ports": ["8888:8888"],
             "gpu": False,
             "name": random_name,
             "volumes": {
@@ -101,7 +101,7 @@ class TestTaskController():
                                for _ in range(32)])
         options_dict = {
             "command": ["sh", "-c", "echo yo"],
-            "ports": [],
+            "ports": ["8888:8888"],
             "gpu": False,
             "name": random_name_2 ,
             "volumes": {

@@ -21,6 +21,8 @@ class TestDockerEnv():
     Checks all functions of the DockerEnvironmentDriver
     """
     def setup_method(self):
+        # provide mountable tmp directory for docker
+        tempfile.tempdir = '/tmp'
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -113,7 +115,8 @@ class TestDockerEnv():
         self.docker_environment_manager.remove(name, force=True)
 
     def test_run(self):
-        name = str(uuid.uuid1())
+        # TODO: add more options for run w/ volumes etc
+        image_name = str(uuid.uuid1())
         path = os.path.join(self.docker_environment_manager.filepath,
                             "Dockerfile")
         random_text = str(uuid.uuid1())
@@ -122,28 +125,44 @@ class TestDockerEnv():
             f.write(str("RUN echo " + random_text))
         log_filepath = os.path.join(self.docker_environment_manager.filepath,
                                     "test.log")
-        self.docker_environment_manager.build(name, path)
+        self.docker_environment_manager.build(image_name, path)
 
         run_options = {
             "command": ["sh", "-c", "echo yo"],
             "ports": ["8888:9999", "5000:5001"],
-            "name": None,
-            "volumes": None,
-            "detach": False,
-            "stdin_open": False,
-            "tty": False,
-            "gpu": False,
+            "name": "cooltest",
+            "volumes": {
+                self.docker_environment_manager.filepath: {
+                    'bind': '/home/',
+                    'mode': 'rw'
+                }
+            },
+            "detach": True,
+            "stdin_open": True,
+            "tty": True,
+            "gpu": True,
             "api": False
         }
         return_code, run_id, logs = \
-            self.docker_environment_manager.run(name, run_options, log_filepath)
+            self.docker_environment_manager.run(image_name, run_options, log_filepath)
 
         assert return_code == 0
         assert run_id
         assert logs
         # teardown
         self.docker_environment_manager.stop(run_id, force=True)
-        self.docker_environment_manager.remove(name, force=True)
+
+        # Test default values for run options
+        run_options = {
+            "command": ["sh", "-c", "echo yo"]
+        }
+        return_code, run_id, logs = \
+            self.docker_environment_manager.run(image_name, run_options, log_filepath)
+        assert return_code == 0
+        assert run_id
+        assert logs
+        # teardown image
+        self.docker_environment_manager.remove(image_name, force=True)
 
     def test_stop(self):
         name = str(uuid.uuid1())
