@@ -39,7 +39,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                                           self.docker_socket))
 
         self.is_connected = True if self.info["Images"] != None else False
-        self.cpu_prefix = [self.docker_execpath, '-H', self.docker_socket]
+        self.cpu_prefix = [self.docker_execpath, "-H", self.docker_socket]
 
         self._is_initialized = self.is_initialized
         self.type = "docker"
@@ -49,7 +49,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         # if gpu_requested == True:
         #     pass
         # if gpu is requested then
-        # make sure docker info confirms that it's available
+        # make sure docker info confirms that it"s available
 
     @property
     def is_initialized(self):
@@ -129,16 +129,16 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         list
             List of tags available for that docker repo
         """
-        docker_repository_tag_cmd = 'wget -q https://registry.hub.docker.com/v1/repositories/' + repo_name + '/tags -O -'
+        docker_repository_tag_cmd = "wget -q https://registry.hub.docker.com/v1/repositories/" + repo_name + "/tags -O -"
         string_repository_tags = subprocess.check_output(docker_repository_tag_cmd, shell=True)
         string_repository_tags = string_repository_tags.decode().strip()
         repository_tags = ast.literal_eval(string_repository_tags)
         list_tag_names = []
         for repository_tag in repository_tags:
-            list_tag_names.append(repository_tag['name'])
+            list_tag_names.append(repository_tag["name"])
         return list_tag_names
 
-    def build_image(self, tag, definition_path='Dockerfile'):
+    def build_image(self, tag, definition_path="Dockerfile"):
         """Builds docker image
 
         Parameters
@@ -160,19 +160,19 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         """
         try:
             docker_shell_cmd_list = list(self.cpu_prefix)
-            docker_shell_cmd_list.append('build')
+            docker_shell_cmd_list.append("build")
 
             # Passing tag name for the image
-            docker_shell_cmd_list.append('-t')
+            docker_shell_cmd_list.append("-t")
             docker_shell_cmd_list.append(tag)
 
             # Passing path of Dockerfile
-            docker_shell_cmd_list.append('-f')
+            docker_shell_cmd_list.append("-f")
             docker_shell_cmd_list.append(definition_path)
             docker_shell_cmd_list.append(str(self.filepath))
 
             # Remove intermediate containers after a successful build
-            docker_shell_cmd_list.append('--rm')
+            docker_shell_cmd_list.append("--rm")
             process_returncode = subprocess.Popen(docker_shell_cmd_list).wait()
             if process_returncode == 0:
                 return True
@@ -231,43 +231,48 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         ----------
         image_name : str
             Docker image name
-        command : list
-            List with complete user-given command (e.g. ['python', 'cool.py'])
-        ports : dict
-            Includes the ports to open and map (e.g. { "port/tcp": int(port), ... })
-        name : str
+        command : list, optional
+            List with complete user-given command (e.g. ["python", "cool.py"])
+        ports : list, optional
+            Here are some example ports used for common applications.
+               *  "jupyter notebook" - 8888
+               *  flask API - 5000
+               *  tensorboard - 6006
+            An example input for the above would be ["8888:8888", "5000:5000", "6006:6006"]
+            which maps the running host port (right) to that of the environment (left)
+        name : str, optional
             User given name for container
-        volumes : dict
-            Includes storage volumes for docker 
-            (e.g. { outsidepath1 : {'bind', containerpath2, 'mode', MODE} })
-        detach : bool
+        volumes : dict, optional
+            Includes storage volumes for docker
+            (e.g. { outsidepath1 : {"bind", containerpath2, "mode", MODE} })
+        detach : bool, optional
             True if container is to be detached else False
-        stdin_open : bool
+        stdin_open : bool, optional
             True if stdin is open else False
-        tty : bool
+        tty : bool, optional
             True to connect pseudo-terminal with stdin / stdout else False
-        gpu : bool
+        gpu : bool, optional
             True if GPU should be enabled else False
-        api : bool
+        api : bool, optional
             True if Docker python client should be used else use subprocess
-        
+
         Returns
         -------
-        if api=False: 
-        
+        if api=False:
+
         return_code: int
             integer success code of command
         container_id: str
             output container id
-        
-        
+
+
         if api=True & if detach=True:
-        
+
         container_obj: Container
             object from Docker python api with details about container
-            
-        if api=True & if detach=False: 
-        
+
+        if api=True & if detach=False:
+
         logs: str
             output logs for the run function
 
@@ -279,6 +284,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         try:
             container_id = None
             if api: # calling the docker client via the API
+                # TODO: Test this out for the API (need to verify ports work)
                 if detach:
                     command = " ".join(command) if command else command
                     container = \
@@ -297,37 +303,35 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                     docker_shell_cmd_list = list(self.cpu_prefix)
                 else:
                     docker_shell_cmd_list = list(self.cpu_prefix)
-                docker_shell_cmd_list.append('run')
+                docker_shell_cmd_list.append("run")
 
                 if name:
-                    docker_shell_cmd_list.append('--name')
+                    docker_shell_cmd_list.append("--name")
                     docker_shell_cmd_list.append(name)
 
                 if stdin_open:
-                    docker_shell_cmd_list.append('-i')
+                    docker_shell_cmd_list.append("-i")
 
                 if tty:
-                    docker_shell_cmd_list.append('-t')
+                    docker_shell_cmd_list.append("-t")
 
                 if detach:
-                    docker_shell_cmd_list.append('-d')
+                    docker_shell_cmd_list.append("-d")
 
                 # Volume
                 if volumes:
                     # Mounting volumes
                     for key in list(volumes):
-                        docker_shell_cmd_list.append('-v')
-                        volume_mount = key + ':' + volumes[key]['bind'] + ':' + \
-                                       volumes[key]['mode']
+                        docker_shell_cmd_list.append("-v")
+                        volume_mount = key + ":" + volumes[key]["bind"] + ":" + \
+                                       volumes[key]["mode"]
                         docker_shell_cmd_list.append(volume_mount)
 
                 if ports:
                     # Mapping ports
-                    for key in list(ports):
-                        docker_shell_cmd_list.append('-p')
-                        port_mapping = str(ports[key]) + ':' + key
-                        docker_shell_cmd_list.append(port_mapping)
-
+                    for mapping in ports:
+                        docker_shell_cmd_list.append("-p")
+                        docker_shell_cmd_list.append(mapping)
 
                 docker_shell_cmd_list.append(image_name)
 
@@ -339,7 +343,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                                                           "controller.environment.driver.docker.run_container",
                                                           docker_shell_cmd_list))
                 list_process_cmd = list(self.cpu_prefix)
-                list_process_cmd.extend(['ps','-q', '-l'])
+                list_process_cmd.extend(["ps","-q", "-l"])
                 container_id = subprocess.check_output(list_process_cmd)
                 container_id = container_id.decode().strip()
 
@@ -413,18 +417,18 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         else:
             command = list(self.cpu_prefix)
             if follow:
-                command.extend(['logs', '--follow', str(container_id)])
+                command.extend(["logs", "--follow", str(container_id)])
             else:
-                command.extend(['logs', str(container_id)])
+                command.extend(["logs", str(container_id)])
             process = subprocess.Popen(command, stdout=subprocess.PIPE,
                                        universal_newlines=True)
             with open(filepath, "w") as log_file:
                 while True:
                     output = process.stdout.readline()
-                    if output == '' and process.poll() is not None:
+                    if output == "" and process.poll() is not None:
                         break
                     if output:
-                        printable_output = output.strip().replace('\x08', ' ')
+                        printable_output = output.strip().replace("\x08", " ")
                         log_file.write(printable_output + "\n")
             return_code = process.poll()
             with open(filepath, "r") as log_file:

@@ -126,7 +126,7 @@ class TestDockerEnv():
 
         run_options = {
             "command": ["sh", "-c", "echo yo"],
-            "ports": None,
+            "ports": ["8888:9999", "5000:5001"],
             "name": None,
             "volumes": None,
             "detach": False,
@@ -159,7 +159,7 @@ class TestDockerEnv():
 
         run_options = {
             "command": ["sh", "-c", "echo yo"],
-            "ports": None,
+            "ports": ["8888:9999", "5000:5001"],
             "name": "my_container_name_2",
             "volumes": None,
             "detach": False,
