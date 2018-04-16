@@ -59,8 +59,7 @@ class GitCodeDriver(CodeDriver):
     @property
     def is_initialized(self):
         if os.path.isdir(os.path.join(self.filepath, ".git")) and \
-                self.exists_code_refs_dir() and \
-                self.check_gitignore_exists():
+                self.exists_code_refs_dir():
             self._is_initialized = True
             return self._is_initialized
         self._is_initialized = False
@@ -204,7 +203,6 @@ class GitCodeDriver(CodeDriver):
                                           str(e)))
         try:
             self.ensure_code_refs_dir()
-            self.ensure_gitignore_exists()
         except Exception as e:
             raise FileIOException(_("error",
                                     "controller.code.driver.git.init.file",
@@ -537,47 +535,6 @@ class GitCodeDriver(CodeDriver):
 
     def pull(self):
         pass
-
-    # Gitignore file handling
-    def check_gitignore_exists(self):
-        if not os.path.isfile(os.path.join(self.filepath, ".gitignore")):
-            return False
-        return True
-
-    def ensure_gitignore_exists(self):
-        def __create_filehash(single_filepath):
-            BUFF_SIZE = 65536
-            sha1 = hashlib.md5()
-            with open(single_filepath, "r") as f:
-                while True:
-                    data = f.read(BUFF_SIZE)
-                    if not data:
-                        break
-                    sha1.update(data)
-            return sha1.hexdigest()
-
-        try:
-            template_gitignore_filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                                                       "templates", "gitignore")
-            current_gitignore_filepath = os.path.join(self.filepath, ".gitignore")
-            # Copy the .gitignore file if none exists
-            if not self.check_gitignore_exists():
-                shutil.copyfile(template_gitignore_filepath, current_gitignore_filepath)
-            # Append current .gitignore to .gitignore template
-            elif not "datmo" in open(current_gitignore_filepath).read():
-                current_filehash = __create_filehash(current_gitignore_filepath)
-                template_filehash = __create_filehash(template_gitignore_filepath)
-                if current_filehash != template_filehash:
-                    with open(os.path.join(self.filepath, ".tempgitignore"), "w") as f:
-                        shutil.copyfileobj(open(current_gitignore_filepath, "r"), f)
-                        shutil.copyfileobj(open(template_gitignore_filepath, "r"), f)
-                    shutil.move(os.path.join(self.filepath, ".tempgitignore"),
-                                current_gitignore_filepath)
-        except Exception as e:
-            raise FileIOException(_("error",
-                                    "controller.code.driver.git.ensure_gitignore_exists",
-                                    str(e)))
-        return True
 
     # Datmo Code Refs
 

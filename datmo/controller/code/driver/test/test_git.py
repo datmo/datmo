@@ -208,23 +208,6 @@ class TestGitCodeDriver():
     # def test_pull(self):
     #     pass
 
-    def test_check_gitignore_exists(self):
-        self.git_code_manager.init()
-        result = self.git_code_manager.check_gitignore_exists()
-        assert result == True
-        os.remove(os.path.join(self.git_code_manager.filepath, ".gitignore"))
-        result = self.git_code_manager.check_gitignore_exists()
-        assert result == False
-
-    def test_ensure_gitignore_exists(self):
-        self.git_code_manager.init()
-        result = self.git_code_manager.ensure_gitignore_exists()
-        assert result == True and \
-            os.path.isfile(os.path.join(
-                self.git_code_manager.filepath,
-                ".gitignore"
-            ))
-
     # Datmo refs
     def test_exist_code_refs_dir(self):
         self.git_code_manager.init()
