@@ -55,7 +55,7 @@ class TaskController(BaseController):
         """
 
         # Validate Inputs
-        
+
         create_dict = {
             "model_id": self.model.id,
             "session_id": self.current_session.id
