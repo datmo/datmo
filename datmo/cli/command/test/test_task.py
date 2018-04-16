@@ -19,7 +19,7 @@ import tempfile
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
-from datmo.util.exceptions import ProjectNotInitializedException
+from datmo.util.exceptions import ProjectNotInitializedException, EntityNotFound
 
 
 class TestTaskCommand():
@@ -49,11 +49,11 @@ class TestTaskCommand():
 
     def test_datmo_task_run(self):
         self.__set_variables()
-        test_command = "python test.py"
+        test_command = ["sh", "-c", "echo yo"]
         test_gpu = True
         test_ports = "8888:8888"
         test_data = "data"
-        test_dockerfile = "Dockerfile"
+        test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         test_interactive = True
 
         self.task.parse([
@@ -74,6 +74,9 @@ class TestTaskCommand():
         assert self.task.args.data == [test_data]
         assert self.task.args.dockerfile == test_dockerfile
         assert self.task.args.interactive == test_interactive
+
+        task_id = self.task.run()
+        assert type(task_id) == unicode
 
     def test_datmo_task_run_invalid_arg(self):
         self.__set_variables()
@@ -100,6 +103,9 @@ class TestTaskCommand():
         # test for desired side effects
         assert self.task.args.session_id == test_session_id
 
+        task_ls_command = self.task.ls()
+        assert task_ls_command == True
+
     def test_datmo_task_ls_invalid_arg(self):
         self.__set_variables()
         exception_thrown = False
@@ -114,16 +120,52 @@ class TestTaskCommand():
 
     def test_datmo_task_stop(self):
         self.__set_variables()
-        test_id = 'test_id'
+
+        test_command = ["sh", "-c", "echo yo"]
+        test_ports = "8888:8888"
+        test_data = "data"
+        test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
+
+        self.task.parse([
+            "task",
+            "run",
+            "--gpu",
+            "--ports", test_ports,
+            "--data", test_data,
+            "--dockerfile", test_dockerfile,
+            "--interactive",
+            test_command
+        ])
+
+        test_task_id = self.task.run()
 
         self.task.parse([
             "task",
             "stop",
-            "--id", test_id
+            "--id", test_task_id
         ])
 
         # test for desired side effects
-        assert self.task.args.id == test_id
+        assert self.task.args.id == test_task_id
+
+        # test when task id is passed to stop it
+        task_stop_command = self.task.stop()
+        assert task_stop_command == True
+
+        # Passing wrong task id
+        test_task_id = "task_id"
+        self.task.parse([
+            "task",
+            "stop",
+            "--id", test_task_id
+        ])
+
+        # test when wrong task id is passed to stop it
+        try:
+            self.task.stop()
+        except EntityNotFound:
+            assert True
+
 
     def test_datmo_task_stop_invalid_arg(self):
         self.__set_variables()

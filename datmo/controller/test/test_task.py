@@ -29,10 +29,11 @@ class TestTaskController():
 
     def test_create(self):
         self.project.init("test5", "test description")
-
         task_command = ["sh", "-c", "echo yo"]
+        task_gpu = False
         input_dict = {
-            "command": task_command
+            "command": task_command,
+            "gpu": task_gpu
         }
 
         # Create task in the project
@@ -40,6 +41,7 @@ class TestTaskController():
 
         assert task_obj
         assert task_obj.command == task_command
+        assert task_obj.gpu == task_gpu
 
     def test_run_helper(self):
         # TODO: Try out more options (see below)
