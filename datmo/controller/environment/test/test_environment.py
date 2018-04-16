@@ -56,6 +56,29 @@ class TestEnvironmentController():
         assert os.path.join(file_collection_dir, "datmoDockerfile")
         assert os.path.join(file_collection_dir, "hardware_info")
 
+        # Try ot create a duplicate environment
+        environment_obj_2 = self.environment.create(input_dict)
+
+        assert environment_obj.id == environment_obj_2.id
+
+        # Create an environment with a different Dockerfile
+
+        # Create environment definition
+        definition_filepath = os.path.join(self.environment.home,
+                                           "Dockerfile")
+        with open(definition_filepath, "w") as f:
+            f.write(str("FROM cloudgear/ubuntu:14.04"))
+
+        input_dict = {
+            "definition_filepath": definition_filepath,
+        }
+
+        # Create a new environment obj
+        environment_obj_3 = self.environment.create(input_dict)
+
+        assert environment_obj_3.id != environment_obj.id
+        assert environment_obj_3.id != environment_obj_2.id
+
     def test_build(self):
         self.project.init("test5", "test description")
 

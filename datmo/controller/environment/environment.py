@@ -112,6 +112,13 @@ class EnvironmentController(BaseController):
                     os.remove(hardware_info_filepath)
                 elif required_arg == "unique_hash":
                     create_dict['unique_hash'] = file_collection_obj.filehash
+                    # Check if unique hash is unique or not.
+                    # If not, DO NOT CREATE Environment and return existing Environment object
+                    results = self.dal.environment.query({
+                        "unique_hash": file_collection_obj.filehash
+                    })
+                    if results: return results[0];
+
 
         ## Optional args
         optional_args = ["description"]
