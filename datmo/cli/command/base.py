@@ -59,4 +59,4 @@ class BaseCommand(object):
                                         "cli.general.method.not_found",
                                         (self.args.command, method)))
 
-        method(**command_args)
+        return method(**command_args)

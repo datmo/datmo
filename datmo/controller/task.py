@@ -4,7 +4,7 @@ from datmo.util.i18n import get as __
 from datmo.controller.base import BaseController
 from datmo.controller.environment.environment import EnvironmentController
 from datmo.controller.snapshot import SnapshotController
-from datmo.util.exceptions import TaskRunException
+from datmo.util.exceptions import TaskRunException, RequiredArgumentMissing
 
 
 class TaskController(BaseController):
@@ -63,8 +63,12 @@ class TaskController(BaseController):
         required_args = ["command"]
         for required_arg in required_args:
             # Add in any values that are
-            if required_arg in dictionary:
+            if required_arg in dictionary and dictionary[required_arg] is not None:
                 create_dict[required_arg] = dictionary[required_arg]
+            else:
+                raise RequiredArgumentMissing(__("error",
+                                                "controller.task.create.arg",
+                                                required_arg))
 
         # Create Task
         return self.dal.task.create(create_dict)
@@ -86,6 +90,8 @@ class TaskController(BaseController):
                    *  'jupyter notebook' - 8888
                    *  flask API - 5000
                    *  tensorboard - 6006
+                An example input for the above would be ["8888:8888", "5000:5000", "6006:6006"]
+                which maps the running host port (right) to that of the environment (left)
             name : str
             volumes : dict
             detach : bool
@@ -141,7 +147,8 @@ class TaskController(BaseController):
             set of parameters to create a snapshot (see SnapshotController for details.
             default is dictionary with `visible` False to hide auto-generated snapshot)
         task_dict : dict
-            set of parameters to characterize the task run (default is empty dictionary)
+            set of parameters to characterize the task run (default is empty dictionary,
+            see datmo.entity.task for more details on inputs)
 
         Returns
         -------
@@ -244,4 +251,8 @@ class TaskController(BaseController):
         return self.dal.task.query(query)
 
     def delete(self, id):
+        if not id:
+            raise RequiredArgumentMissing(__("error",
+                                            "controller.task.delete.arg",
+                                            "id"))
         return self.dal.task.delete(id)

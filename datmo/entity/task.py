@@ -16,6 +16,8 @@ class Task():
     command : str
     before_snapshot_id : str, optional
     ports : list, optional
+        list of string mappings from host system (left) to environment (right)
+        (e.g. ["9999:9999", "8888:8888"])
     gpu : bool, optional
     interactive : bool, optional
     task_dirpath : str, optional
