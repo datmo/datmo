@@ -75,8 +75,9 @@ class TestTaskCommand():
         assert self.task.args.dockerfile == test_dockerfile
         assert self.task.args.interactive == test_interactive
 
-        task_id = self.task.run()
-        assert isinstance(task_id, unicode) or isinstance(task_id, str)
+        if self.task.run():
+            assert True
+
 
     def test_datmo_task_run_invalid_arg(self):
         self.__set_variables()
