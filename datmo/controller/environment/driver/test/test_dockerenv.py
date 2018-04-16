@@ -11,7 +11,8 @@ import shutil
 import uuid
 
 from datmo.controller.environment.driver.dockerenv import DockerEnvironmentDriver
-from datmo.util.exceptions import EnvironmentInitFailed
+from datmo.util.exceptions import EnvironmentInitFailed, \
+    DoesNotExistException, FileAlreadyExistsException
 
 
 class TestDockerEnv():
@@ -47,6 +48,56 @@ class TestDockerEnv():
         except EnvironmentInitFailed:
             thrown = True
         assert thrown
+
+    def test_create(self):
+        input_dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
+                                             "Dockerfile")
+        output_dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
+                                              "datmoDockerfile")
+        # Test both default values
+        success, path, output_path = \
+            self.docker_environment_manager.create()
+
+        assert success and \
+               os.path.isfile(output_dockerfile_path) and \
+               "datmo" in open(output_dockerfile_path, "r").read()
+        assert path == input_dockerfile_path
+        assert output_path == output_dockerfile_path
+        os.remove(output_dockerfile_path)
+
+        # Test default values for output
+        success, path, output_path = \
+            self.docker_environment_manager.create(input_dockerfile_path)
+
+        assert success and \
+               os.path.isfile(output_dockerfile_path) and \
+               "datmo" in open(output_dockerfile_path, "r").read()
+        assert path == input_dockerfile_path
+        assert output_path == output_dockerfile_path
+        os.remove(output_dockerfile_path)
+
+        # Test both values given
+        success, path, output_path = \
+            self.docker_environment_manager.create(input_dockerfile_path,
+                                                        output_dockerfile_path)
+        assert success and \
+               os.path.isfile(output_dockerfile_path) and \
+               "datmo" in open(output_dockerfile_path, "r").read()
+        assert path == input_dockerfile_path
+        assert output_path == output_dockerfile_path
+
+        # Test exception for path does not exist
+        try:
+            self.docker_environment_manager.create("nonexistant_path")
+        except DoesNotExistException:
+            assert True
+
+        # Test exception for output path already exists
+        try:
+            self.docker_environment_manager.create(
+                output_path=output_dockerfile_path)
+        except FileAlreadyExistsException:
+            assert True
 
     def test_build(self):
         name = str(uuid.uuid1())

@@ -24,8 +24,10 @@ class TestSnapshot():
         for k, v in input_dict.items():
             assert getattr(snapshot_entity, k) == v
         assert snapshot_entity.session_id == ""
+        assert snapshot_entity.task_id == ""
         assert snapshot_entity.message == ""
         assert snapshot_entity.label == ""
+        assert snapshot_entity.visible == True
         assert snapshot_entity.created_at
         assert snapshot_entity.updated_at
 

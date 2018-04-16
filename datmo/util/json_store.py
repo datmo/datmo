@@ -84,6 +84,6 @@ class JSONStore():
             try:
                 output_dict = json.loads(meta_data_string)
                 output_dict = yaml.safe_load(json.dumps(output_dict))
-            except:
-                raise FileIOException()
+            except Exception as err:
+                raise FileIOException(err)
         return output_dict

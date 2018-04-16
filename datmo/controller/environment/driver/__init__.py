@@ -7,6 +7,8 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
 
     Methods
     -------
+    create(path, output_path)
+        create datmo environment definition
     build(name, path)
         build the environment
     run(name, options, log_filepath)
@@ -20,6 +22,34 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
     @abstractmethod
     def __init__(self):
         pass
+
+    @abstractmethod
+    def create(self, path, output_path):
+        """
+        Create datmo environment definition
+
+        Parameters
+        ----------
+        path : str, optional
+            absolute input definition file path
+            (default is to search for standard filename in project root,
+            e.g. `Dockerfile` in project root for docker driver)
+        output_path : str, optional
+            absolute datmo output definition file path
+            (default is to create name of above file with `datmo` prefixed
+            in the same directory as `path`. e.g. `datmoDockerfile` in
+            the project root for the default above for docker driver)
+
+        Returns
+        -------
+        tuple
+            success : bool
+                True if success
+            path : str
+                absolute path for original definition
+            output_path : str
+                absolute path for datmo definition
+        """
 
     @abstractmethod
     def build(self, name, path):

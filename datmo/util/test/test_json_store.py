@@ -12,7 +12,7 @@ import os
 from datmo.util.json_store import JSONStore
 
 
-class TestFileStorage():
+class TestJSONStore():
     def setup_class(self):
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())

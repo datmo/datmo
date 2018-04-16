@@ -7,7 +7,8 @@ import tempfile
 
 from datmo.controller.project import ProjectController
 from datmo.controller.snapshot import SnapshotController
-from datmo.util.exceptions import EntityNotFound
+from datmo.util.exceptions import EntityNotFound, \
+    DoesNotExistException
 
 
 class TestSnapshotController():
@@ -27,10 +28,11 @@ class TestSnapshotController():
     def test_create(self):
         self.project.init("test3", "test description")
 
-        # Create files to add
-        self.snapshot.file_driver.create("dirpath1", dir=True)
-        self.snapshot.file_driver.create("dirpath2", dir=True)
-        self.snapshot.file_driver.create("filepath1")
+        # Test default values for snapshot, fail due to environment
+        try:
+            self.snapshot.create({})
+        except DoesNotExistException:
+            assert True
 
         # Create environment definition
         env_def_path = os.path.join(self.snapshot.home,
@@ -38,29 +40,8 @@ class TestSnapshotController():
         with open(env_def_path, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
 
-        # Create config
-        config_filepath = os.path.join(self.snapshot.home,
-                                     "config.json")
-        with open(config_filepath, "w") as f:
-            f.write(str("{}"))
-
-        # Create stats
-        stats_filepath = os.path.join(self.snapshot.home,
-                                       "stats.json")
-        with open(stats_filepath, "w") as f:
-            f.write(str("{}"))
-
-        input_dict = {
-            "filepaths": [os.path.join(self.snapshot.home, "dirpath1"),
-                          os.path.join(self.snapshot.home, "dirpath2"),
-                          os.path.join(self.snapshot.home, "filepath1")],
-            "environment_definition_filepath": env_def_path,
-            "config_filename": config_filepath,
-            "stats_filename": stats_filepath,
-        }
-
-        # Create snapshot in the project
-        snapshot_obj = self.snapshot.create(input_dict)
+        # Test default values for snapshot, success
+        snapshot_obj = self.snapshot.create({})
 
         assert snapshot_obj
         assert snapshot_obj.code_id
@@ -68,6 +49,93 @@ class TestSnapshotController():
         assert snapshot_obj.file_collection_id
         assert snapshot_obj.config == {}
         assert snapshot_obj.stats == {}
+
+        # Test 2 snapshots with same parameters
+        # Should return the same object back
+        snapshot_obj_3 = self.snapshot.create({})
+
+        assert snapshot_obj_3 == snapshot_obj
+        assert snapshot_obj_3.code_id == snapshot_obj.code_id
+        assert snapshot_obj_3.environment_id == \
+               snapshot_obj.environment_id
+        assert snapshot_obj_3.file_collection_id == \
+               snapshot_obj.file_collection_id
+        assert snapshot_obj_3.config == \
+               snapshot_obj.config
+        assert snapshot_obj_3.stats == \
+               snapshot_obj.stats
+
+        # Create files to add
+        self.snapshot.file_driver.create("dirpath1", dir=True)
+        self.snapshot.file_driver.create("dirpath2", dir=True)
+        self.snapshot.file_driver.create("filepath1")
+
+        # Create config
+        config_filepath = os.path.join(self.snapshot.home,
+                                     "config.json")
+        with open(config_filepath, "w") as f:
+            f.write(str('{"foo":"bar"}'))
+
+        # Create stats
+        stats_filepath = os.path.join(self.snapshot.home,
+                                       "stats.json")
+        with open(stats_filepath, "w") as f:
+            f.write(str('{"foo":"bar"}'))
+
+        input_dict = {
+            "filepaths": [os.path.join(self.snapshot.home, "dirpath1"),
+                          os.path.join(self.snapshot.home, "dirpath2"),
+                          os.path.join(self.snapshot.home, "filepath1")],
+            "environment_definition_filepath": env_def_path,
+            "config_filepath": config_filepath,
+            "stats_filepath": stats_filepath,
+        }
+
+        # Create snapshot in the project
+        snapshot_obj_2 = self.snapshot.create(input_dict)
+
+        assert snapshot_obj_2 != snapshot_obj
+        assert snapshot_obj_2.code_id != snapshot_obj.code_id
+        assert snapshot_obj_2.environment_id == \
+               snapshot_obj.environment_id
+        assert snapshot_obj_2.file_collection_id != \
+               snapshot_obj.file_collection_id
+        assert snapshot_obj_2.config == {"foo": "bar"}
+        assert snapshot_obj_2.stats == {"foo": "bar"}
+
+        # Test different config and stats inputs
+        input_dict = {
+            "filepaths": [os.path.join(self.snapshot.home, "dirpath1"),
+                          os.path.join(self.snapshot.home, "dirpath2"),
+                          os.path.join(self.snapshot.home, "filepath1")],
+            "environment_definition_filepath": env_def_path,
+            "config_filename": "different_name",
+            "stats_filename": "different_name",
+        }
+
+        # Create snapshot in the project
+        snapshot_obj_4 = self.snapshot.create(input_dict)
+
+        assert snapshot_obj_4 != snapshot_obj_2
+        assert snapshot_obj_4.config == {}
+        assert snapshot_obj_4.stats == {}
+
+        # Test different config and stats inputs
+        input_dict = {
+            "filepaths": [os.path.join(self.snapshot.home, "dirpath1"),
+                          os.path.join(self.snapshot.home, "dirpath2"),
+                          os.path.join(self.snapshot.home, "filepath1")],
+            "environment_definition_filepath": env_def_path,
+            "config": {"foo": "bar"},
+            "stats": {"foo": "bar"},
+        }
+
+        # Create snapshot in the project
+        snapshot_obj_5 = self.snapshot.create(input_dict)
+
+        assert snapshot_obj_5 != snapshot_obj_4
+        assert snapshot_obj_5.config == {"foo": "bar"}
+        assert snapshot_obj_5.stats == {"foo": "bar"}
 
     def test_checkout(self):
         self.project.init("test4", "test description")
@@ -171,9 +239,9 @@ class TestSnapshotController():
 
         # Create file to add to second snapshot
         test_filepath_2 = os.path.join(self.snapshot.home,
-                                     "test.txt")
+                                     "test2.txt")
         with open(test_filepath_2, "w") as f:
-            f.write(str("test"))
+            f.write(str("test2"))
 
         # Create second snapshot in the project
         snapshot_obj_2 = self.snapshot.create(input_dict)

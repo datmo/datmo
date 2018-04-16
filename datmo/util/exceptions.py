@@ -52,6 +52,9 @@ class GitCommitDoesNotExist(Exception):
 class FileExecutionException(Exception):
     pass
 
+class FileAlreadyExistsException(Exception):
+    pass
+
 class DoesNotExistException(FileExecutionException):
     pass
 

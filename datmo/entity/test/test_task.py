@@ -25,7 +25,6 @@ class TestTask():
 
         # Post-Execution
         assert task_entity.after_snapshot_id == ""
-        assert task_entity.hardware_info == ""
         assert task_entity.container_id == ""
         assert task_entity.logs == ""
         assert task_entity.status == ""
