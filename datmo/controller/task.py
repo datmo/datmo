@@ -55,7 +55,7 @@ class TaskController(BaseController):
         """
 
         # Validate Inputs
-
+        
         create_dict = {
             "model_id": self.model.id,
             "session_id": self.current_session.id
@@ -65,11 +65,11 @@ class TaskController(BaseController):
         required_args = ["command"]
         for required_arg in required_args:
             # Add in any values that are
-            if required_arg in dictionary:
+            if required_arg in dictionary and dictionary[required_arg] is not None:
                 create_dict[required_arg] = dictionary[required_arg]
             else:
                 raise RequiredArgumentMissing(_("error",
-                                                "controller.task.delete.arg",
+                                                "controller.task.create.arg",
                                                 required_arg))
 
         # Create Task
@@ -156,7 +156,7 @@ class TaskController(BaseController):
 
         return hardware_info, return_code, container_id, logs
 
-    def run(self, task_id, dictionary=None):
+    def run(self, task_id, dictionary):
         """Run a task with parameters. If dictionary specified, create a new task with new run parameters.
         Snapshot objects are created before and after the task to keep track of the state. During the run,
         you can access task outputs using environment variable DATMO_TASK_DIR or `/task` which points to
