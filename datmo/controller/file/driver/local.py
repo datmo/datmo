@@ -299,38 +299,7 @@ class LocalFileDriver(FileDriver):
 
     # Template files handling
 
-    # TODO: Add code to handle and fill in templates from `templates/` folder in root
-    # @staticmethod
-    # def create_readme(directory, filename, model_name, model_description, model_url, echo_prefix=""):
-    #     filepath = os.path.join(directory, filename)
-    #     badge_text = "[![Datmo Model]" \
-    #                  "(" + model_url + "/badge.svg)]" \
-    #                  "(" + model_url + ")"
-    #     if not os.path.exists(filepath):
-    #         click.echo(echo_prefix + "Creating a stub %s." % filename)
-    #         with open(filepath, 'a') as f:
-    #             f.write('# ' + str(model_name) + '\n')
-    #             f.write('\n')
-    #             f.write(badge_text.rstrip('\r\n') + '\n')
-    #             f.write('\n')
-    #             f.write('\n')
-    #             f.write(str(model_description) + '\n')
-    #         click.echo(echo_prefix + "%s present in the model" % filename)
-    #
-    # @staticmethod
-    # def add_badge_to_readme(directory, filename, model_url):
-    #     filepath = os.path.join(directory, filename)
-    #     badge_text = "[![Datmo Model]" \
-    #                  "(" + model_url + "/badge.svg)]" \
-    #                  "(" + model_url + ")"
-    #     # Check if badge_text already exists. If so mention it and do not add
-    #     if badge_text in open(filepath).read():
-    #         return False
-    #     with open(filepath, 'r+') as f:
-    #         content = f.read()
-    #         f.seek(0, 0)
-    #         f.write(badge_text.rstrip('\r\n') + '\n\n\n' + content)
-    #     return True
+    # TODO: Add code to handle and fill in templates from `templates/` folder in document
 
     # Other functions
     def create_collections_dir(self):
