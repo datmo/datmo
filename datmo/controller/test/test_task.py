@@ -10,7 +10,8 @@ import tempfile
 from datmo.controller.project import ProjectController
 from datmo.controller.environment.environment import EnvironmentController
 from datmo.controller.task import TaskController
-from datmo.util.exceptions import EntityNotFound
+from datmo.util.exceptions import EntityNotFound, \
+    EnvironmentExecutionException
 
 
 class TestTaskController():
@@ -140,30 +141,8 @@ class TestTaskController():
         with open(env_def_path, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
 
-        environment_obj = self.environment.create({
-            "driver_type": "docker",
-            "definition_filepath": env_def_path
-        })
-
-        # Create files to add
-        self.project.file_driver.create("dirpath1", dir=True)
-        self.project.file_driver.create("dirpath2", dir=True)
-        self.project.file_driver.create("filepath1")
-
-        # Task run dictionary
-        task_run_dict = {
-            "filepaths": [os.path.join(self.project.home, "dirpath1"),
-                          os.path.join(self.project.home, "dirpath2"),
-                          os.path.join(self.project.home, "filepath1")],
-            "environment_id": environment_obj.id,
-            "config": {},
-            "stats": {},
-            "environment_file_collection_id": environment_obj.file_collection_id
-        }
-
-        # Run a basic task in the project
-        updated_task_obj = self.task.run(task_obj.id,
-                                         task_run_dict)
+        # Test the default values
+        updated_task_obj = self.task.run(task_obj.id)
 
         assert task_obj.id == updated_task_obj.id
 
@@ -178,6 +157,54 @@ class TestTaskController():
         assert updated_task_obj.container_id
         assert updated_task_obj.logs
         assert updated_task_obj.status == "SUCCESS"
+
+        # Test running the same task again with different parameters
+        # THIS WILL UPDATE THE SAME TASK AND LOSE ORIGINAL TASK WORK
+        # This will fail because running the same task id (conflicting containers)
+
+        # Create files to add
+        self.project.file_driver.create("dirpath1", dir=True)
+        self.project.file_driver.create("dirpath2", dir=True)
+        self.project.file_driver.create("filepath1")
+
+        # Snapshot dictionary
+        snapshot_dict = {
+            "filepaths": [os.path.join(self.project.home, "dirpath1"),
+                          os.path.join(self.project.home, "dirpath2"),
+                          os.path.join(self.project.home, "filepath1")],
+        }
+
+        # Run a basic task in the project
+        try:
+            self.task.run(task_obj.id,
+                          snapshot_dict=snapshot_dict)
+        except EnvironmentExecutionException:
+            assert True
+
+        # Test running a different task again with different parameters
+        # THIS WILL UPDATE THE SAME TASK AND LOSE ORIGINAL TASK WORK
+        # This will fail because running the same task id (conflicting containers)
+
+        # Create a new task in the project
+        task_obj_1 = self.task.create(input_dict)
+
+        # Run another task in the project
+        updated_task_obj_1 = self.task.run(task_obj_1.id,
+                                           snapshot_dict=snapshot_dict)
+
+        assert task_obj_1.id == updated_task_obj_1.id
+
+        assert updated_task_obj_1.before_snapshot_id
+        assert updated_task_obj_1.ports == []
+        assert updated_task_obj_1.gpu == False
+        assert updated_task_obj_1.interactive == False
+        assert updated_task_obj_1.task_dirpath
+        assert updated_task_obj_1.log_filepath
+
+        assert updated_task_obj_1.after_snapshot_id
+        assert updated_task_obj_1.container_id
+        assert updated_task_obj_1.logs
+        assert updated_task_obj_1.status == "SUCCESS"
 
     def test_list(self):
         self.project.init("test5", "test description")

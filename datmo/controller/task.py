@@ -22,8 +22,7 @@ class TaskController(BaseController):
     -------
     create(dictionary)
         creates a Task object with the permanent parameters
-    _run_helper(environment_id, environment_file_collection_id,
-                    log_filepath, options)
+    _run_helper(environment_id, log_filepath, options)
         helper for run to start environment and run with the appropriate parameters
     run(self, task_id, dictionary=None)
         runs the task and tracks the run, logs, inputs and outputs
@@ -44,7 +43,6 @@ class TaskController(BaseController):
         Parameters
         ----------
         dictionary : dict
-            options for Task object
             command : str
                 full command used
 
@@ -73,7 +71,7 @@ class TaskController(BaseController):
 
     def _run_helper(self, environment_id,
                     options, log_filepath):
-        """Run container with parameters
+        """Run environment with parameters
 
         Parameters
         ----------
@@ -106,14 +104,6 @@ class TaskController(BaseController):
         logs : str
             output logs from the run
         """
-        # TODO: Fix DAL to keep objects in sync and remove "environment_file_collection_id" as passed param
-        # try:
-        #     environment_obj = self.local.environment_driver.get_by_id(environment_id)
-        # except:
-        #     raise DoesNotExistException(__("error",
-        #                                   "controller.task._run_helper.env_dne",
-        #                                   environment_id))
-
         # Run container with options provided
         run_options = {
             "command": options.get('command', None),
@@ -136,7 +126,7 @@ class TaskController(BaseController):
 
         return return_code, container_id, logs
 
-    def run(self, task_id, dictionary=None):
+    def run(self, task_id, snapshot_dict={"visible": False}, task_dict={}):
         """Run a task with parameters. If dictionary specified, create a new task with new run parameters.
         Snapshot objects are created before and after the task to keep track of the state. During the run,
         you can access task outputs using environment variable DATMO_TASK_DIR or `/task` which points to
@@ -147,19 +137,16 @@ class TaskController(BaseController):
         ----------
         task_id : str
             id for the task you would like to run
-        dictionary : dict
-            filepaths : list
-            config_filename : str
-            stats_filename : str
-            environment_id : str
-            environment_file_collection_id : str
-            ...
-            parameters for task run
+        snapshot_dict : dict
+            set of parameters to create a snapshot (see SnapshotController for details.
+            default is dictionary with `visible` False to hide auto-generated snapshot)
+        task_dict : dict
+            set of parameters to characterize the task run (default is empty dictionary)
 
         Returns
         -------
         Task
-            Returns the Task object which completed its run with updated parameters
+            the Task object which completed its run with updated parameters
 
         Raises
         ------
@@ -182,18 +169,18 @@ class TaskController(BaseController):
                                      task_dirpath))
 
         # Create the before snapshot prior to execution
-        before_snapshot_obj = self.snapshot.create(dictionary)
+        before_snapshot_obj = self.snapshot.create(snapshot_dict)
 
         # Update the task with pre-execution parameters
         task_obj = self.dal.task.update({
             "id": task_obj.id,
-            "before_snapshot_id": dictionary.get('before_snapshot_id',
+            "before_snapshot_id": task_dict.get('before_snapshot_id',
                                                  before_snapshot_obj.id),
-            "ports": dictionary.get('ports', task_obj.ports),
-            "gpu": dictionary.get('gpu', task_obj.gpu),
-            "interactive": dictionary.get('interactive', task_obj.interactive),
-            "task_dirpath": dictionary.get('task_dirpath', task_dirpath),
-            "log_filepath": dictionary.get('log_filepath', os.path.join(task_dirpath, "task.log"))
+            "ports": task_dict.get('ports', task_obj.ports),
+            "gpu": task_dict.get('gpu', task_obj.gpu),
+            "interactive": task_dict.get('interactive', task_obj.interactive),
+            "task_dirpath": task_dict.get('task_dirpath', task_dirpath),
+            "log_filepath": task_dict.get('log_filepath', os.path.join(task_dirpath, "task.log"))
         })
 
         # Copy over files from the before_snapshot file collection to task dir
@@ -225,20 +212,19 @@ class TaskController(BaseController):
             "api": not task_obj.interactive
         }
 
-        # Run environment_driver
+        # Run environment via the helper function
         return_code, container_id, logs =  \
             self._run_helper(before_snapshot_obj.environment_id,
                              environment_run_options,
                              os.path.join(self.home, task_obj.log_filepath))
 
-        # Create the after snapshot after execution is completed
-        after_snapshot_create_dict = {
+        # Create the after snapshot after execution is completed with new filepaths
+        after_snapshot_dict = snapshot_dict.copy()
+        after_snapshot_dict.update({
             "filepaths": [os.path.join(self.home, task_obj.task_dirpath)],
             "environment_id": before_snapshot_obj.environment_id,
-            "config": dictionary['config'],
-            "stats": dictionary['stats']
-        }
-        after_snapshot_obj = self.snapshot.create(after_snapshot_create_dict)
+        })
+        after_snapshot_obj = self.snapshot.create(after_snapshot_dict)
 
         # (optional) Remove temporary task directory path
 
