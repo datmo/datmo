@@ -17,8 +17,8 @@ class FileCollection():
         hash of file collection contents
     path : str
         path to collection relative to project root
-    created_at : datetime
-    updated_at : datetime
+    created_at : datetime, optional
+    updated_at : datetime, optional
 
     """
     def __init__(self, dictionary):

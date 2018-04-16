@@ -40,10 +40,21 @@ class TestEnvironmentController():
         # Create environment in the project
         environment_obj = self.environment.create(input_dict)
 
+        # Get file collection path
+        file_collection_obj = self.environment.dal.file_collection.\
+            get_by_id(environment_obj.file_collection_id)
+        file_collection_dir = self.environment.file_driver.\
+            get_collection_path(file_collection_obj.filehash)
+
         assert environment_obj
         assert environment_obj.id
         assert environment_obj.file_collection_id
         assert environment_obj.definition_filename
+        assert environment_obj.hardware_info
+        assert environment_obj.unique_hash == file_collection_obj.filehash
+        assert os.path.join(file_collection_dir, "Dockerfile")
+        assert os.path.join(file_collection_dir, "datmoDockerfile")
+        assert os.path.join(file_collection_dir, "hardware_info")
 
     def test_build(self):
         self.project.init("test5", "test description")

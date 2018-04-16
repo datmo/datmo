@@ -1,7 +1,6 @@
 import os
-import platform
 
-from datmo.util.i18n import get as _
+from datmo.util.i18n import get as __
 from datmo.controller.base import BaseController
 from datmo.controller.environment.environment import EnvironmentController
 from datmo.controller.snapshot import SnapshotController
@@ -14,6 +13,8 @@ class TaskController(BaseController):
 
     Attributes
     ----------
+    environment : EnvironmentController
+        used to create environment if new definition file
     snapshot : SnapshotController
         used to create snapshots before and after tasks
 
@@ -51,7 +52,6 @@ class TaskController(BaseController):
         -------
         Task
             object entity for Task
-
         """
 
         # Validate Inputs
@@ -99,36 +99,20 @@ class TaskController(BaseController):
 
         Returns
         -------
-        hardware_info : str
-            hardware information of the device the environment was run on
         return_code : int
             system return code of the environment that was run
         container_id : str
             id of the container environment that was run
         logs : str
             output logs from the run
-
         """
         # TODO: Fix DAL to keep objects in sync and remove "environment_file_collection_id" as passed param
         # try:
         #     environment_obj = self.local.environment_driver.get_by_id(environment_id)
         # except:
-        #     raise DoesNotExistException(_("error",
+        #     raise DoesNotExistException(__("error",
         #                                   "controller.task._run_helper.env_dne",
         #                                   environment_id))
-
-
-        # Extract hardware info of the container (currently taking from system platform)
-        # TODO: extract hardware information directly from the container
-        (system, node, release, version, machine, processor) = platform.uname()
-        hardware_info = {
-            'system': system,
-            'node': node,
-            'release': release,
-            'version': version,
-            'machine': machine,
-            'processor': processor
-        }
 
         # Run container with options provided
         run_options = {
@@ -150,7 +134,7 @@ class TaskController(BaseController):
         return_code, container_id, logs = \
             self.environment.run(environment_id, run_options, log_filepath)
 
-        return hardware_info, return_code, container_id, logs
+        return return_code, container_id, logs
 
     def run(self, task_id, dictionary=None):
         """Run a task with parameters. If dictionary specified, create a new task with new run parameters.
@@ -181,7 +165,6 @@ class TaskController(BaseController):
         ------
         TaskRunException
             If there is any error in creating files for the task or downstream errors
-
         """
         # Obtain Task to run
         task_obj = self.dal.task.get_by_id(task_id)
@@ -194,7 +177,7 @@ class TaskController(BaseController):
                 os.path.join("datmo_tasks",
                              task_obj.id), dir=True)
         except:
-            raise TaskRunException(_("error",
+            raise TaskRunException(__("error",
                                      "controller.task.run",
                                      task_dirpath))
 
@@ -243,7 +226,7 @@ class TaskController(BaseController):
         }
 
         # Run environment_driver
-        hardware_info, return_code, container_id, logs =  \
+        return_code, container_id, logs =  \
             self._run_helper(before_snapshot_obj.environment_id,
                              environment_run_options,
                              os.path.join(self.home, task_obj.log_filepath))
@@ -263,7 +246,6 @@ class TaskController(BaseController):
         return self.dal.task.update({
             "id": task_obj.id,
             "after_snapshot_id": after_snapshot_obj.id,
-            "hardware_info": hardware_info,
             "container_id": container_id,
             "logs": logs,
             "status": "SUCCESS" if return_code==0 else "FAILED",

@@ -10,8 +10,10 @@ class TestEnvironment():
             "id": "test",
             "model_id": "my_model",
             "driver_type": "docker",
+            "definition_filename": "Dockerfile",
+            "hardware_info": {"system": "test"},
             "file_collection_id": "my_collection",
-            "definition_filename": "Dockerfile"
+            "unique_hash": "sjfl39w"
         }
         environment_entity = Environment(input_dict)
 
@@ -26,8 +28,10 @@ class TestEnvironment():
             "id": "test",
             "model_id": "my_model",
             "driver_type": "docker",
+            "definition_filename": "Dockerfile",
+            "hardware_info": {"system": "test"},
             "file_collection_id": "my_collection",
-            "definition_filename": "Dockerfile"
+            "unique_hash": "sjfl39w"
         }
         environment_entity_1 = Environment(input_dict)
         environment_entity_2 = Environment(input_dict)
@@ -39,8 +43,10 @@ class TestEnvironment():
             "id": "test",
             "model_id": "my_model",
             "driver_type": "docker",
+            "definition_filename": "Dockerfile",
+            "hardware_info": {"system": "test"},
             "file_collection_id": "my_collection",
-            "definition_filename": "Dockerfile"
+            "unique_hash": "sjfl39w"
         }
         environment_entity = Environment(input_dict)
         output_dict = environment_entity.to_dictionary()

@@ -314,11 +314,15 @@ class TestLocalDAL():
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
+        environment_hardware_info = {"system": "macosx"}
+        environment_unique_hash = "slkdjfa23dk"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         assert environment.id
@@ -328,28 +332,26 @@ class TestLocalDAL():
         assert environment.created_at
         assert environment.updated_at
 
-        environment_driver_type = "docker"
-        environment_file_collection_id = "test_file_id"
-        environment_definition_filename = "Dockerfile"
         environment_2 = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         assert environment_2.id != environment.id
 
         environment_id = "environment_id"
-        environment_driver_type = "docker"
-        environment_file_collection_id = "test_file_id"
-        environment_definition_filename = "Dockerfile"
         environment_3 = dal.environment.create({
             "id": environment_id,
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         assert environment_3.id
@@ -363,11 +365,15 @@ class TestLocalDAL():
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
+        environment_hardware_info = {"system": "macosx"}
+        environment_unique_hash = "slkdjfa23dk"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         result = dal.environment.get_by_id(environment.id)
@@ -381,11 +387,15 @@ class TestLocalDAL():
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
+        environment_hardware_info = {"system": "macosx"}
+        environment_unique_hash = "slkdjfa23dk"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         # create new dal with new driver instance (fails)
@@ -408,11 +418,15 @@ class TestLocalDAL():
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
+        environment_hardware_info = {"system": "macosx"}
+        environment_unique_hash = "slkdjfa23dk"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         # Update required and optional parameters
@@ -436,11 +450,15 @@ class TestLocalDAL():
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
+        environment_hardware_info = {"system": "macosx"}
+        environment_unique_hash = "slkdjfa23dk"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         dal.environment.delete(environment.id)
@@ -459,11 +477,15 @@ class TestLocalDAL():
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
+        environment_hardware_info = {"system": "macosx"}
+        environment_unique_hash = "slkdjfa23dk"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         assert len(dal.environment.query({"id": environment.id})) == 1

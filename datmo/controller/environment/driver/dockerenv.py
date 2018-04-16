@@ -59,7 +59,12 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         self._is_initialized = False
         return self._is_initialized
 
+    def create(self, path, output_path):
+        return self.form_datmo_definition_file(input_definition_path=path,
+                                        output_definition_path=output_path)
+
     def build(self, name, path):
+
         return self.build_image(name, path)
 
     def run(self, name, options, log_filepath):

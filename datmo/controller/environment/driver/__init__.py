@@ -7,6 +7,8 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
 
     Methods
     -------
+    create(path, output_path)
+        create datmo environment definition
     build(name, path)
         build the environment
     run(name, options, log_filepath)
@@ -20,6 +22,24 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
     @abstractmethod
     def __init__(self):
         pass
+
+    @abstractmethod
+    def create(self, path, output_path):
+        """
+        Create datmo environment definition
+
+        Parameters
+        ----------
+        path : str
+            absolute input definition file path
+        output_path : str
+            absolute datmo output defintion file path
+
+        Returns
+        -------
+        bool
+            True if success
+        """
 
     @abstractmethod
     def build(self, name, path):

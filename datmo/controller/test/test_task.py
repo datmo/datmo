@@ -83,13 +83,12 @@ class TestTaskController():
             "api": False
         }
 
-        hardware_info, return_code, container_id, logs = \
+        return_code, container_id, logs = \
             self.task._run_helper(environment_obj.id,
                                   options_dict, log_filepath)
         assert return_code == 0
         assert container_id and \
                self.task.environment_driver.get_container(container_id)
-        assert hardware_info
         assert logs and \
                os.path.exists(log_filepath)
         self.task.environment_driver.stop_remove_containers_by_term(term=random_name)
@@ -114,13 +113,12 @@ class TestTaskController():
             "api": True
         }
 
-        hardware_info, return_code, container_id, logs = \
+        return_code, container_id, logs = \
             self.task._run_helper(environment_obj.id,
                                   options_dict, log_filepath)
         assert return_code == 0
         assert container_id and \
                self.task.environment_driver.get_container(container_id)
-        assert hardware_info
         assert logs and \
                os.path.exists(log_filepath)
         self.task.environment_driver.stop_remove_containers_by_term(term=random_name_2)
@@ -177,7 +175,6 @@ class TestTaskController():
         assert updated_task_obj.log_filepath
 
         assert updated_task_obj.after_snapshot_id
-        assert updated_task_obj.hardware_info
         assert updated_task_obj.container_id
         assert updated_task_obj.logs
         assert updated_task_obj.status == "SUCCESS"

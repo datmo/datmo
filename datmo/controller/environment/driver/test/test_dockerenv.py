@@ -48,6 +48,17 @@ class TestDockerEnv():
             thrown = True
         assert thrown
 
+    def test_create(self):
+        input_dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
+                                             "Dockerfile")
+        output_dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
+                                              "datmoDockerfile")
+        result = self.docker_environment_manager.create(input_dockerfile_path,
+                                                        output_dockerfile_path)
+        assert result and \
+               os.path.isfile(output_dockerfile_path) and \
+               "datmo" in open(output_dockerfile_path, "r").read()
+
     def test_build(self):
         name = str(uuid.uuid1())
         path = os.path.join(self.docker_environment_manager.filepath,

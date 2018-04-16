@@ -13,10 +13,17 @@ class Environment():
         the parent model id for the entity
     driver_type : str
         the driver class that created the entity
-    file_collection_id : str
     definition_filename : str
-    created_at : datetime
-    updated_at : datetime
+        definition filename to search for
+    hardware_info : dict
+        hardware information of the device
+    file_collection_id : str
+        file collection id to store environment files
+    unique_hash : str
+        unique hash created from hardware and software info
+    description : str, optional
+    created_at : datetime, optional
+    updated_at : datetime, optional
 
     """
     def __init__(self, dictionary):
@@ -24,8 +31,11 @@ class Environment():
         self.model_id = dictionary['model_id']
         self.driver_type = dictionary['driver_type']
 
-        self.file_collection_id = dictionary['file_collection_id']
         self.definition_filename = dictionary['definition_filename']
+        self.hardware_info = dictionary['hardware_info']
+
+        self.file_collection_id = dictionary['file_collection_id']
+        self.unique_hash = dictionary['unique_hash']
 
         self.description = dictionary.get('description', "")
         self.created_at = dictionary.get('created_at', datetime.utcnow())

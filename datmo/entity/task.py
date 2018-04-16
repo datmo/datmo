@@ -24,7 +24,6 @@ class Task():
     log_filepath : str
         relative log filepath
     after_snapshot_id : str
-    hardware_info : str
     container_id : str
     logs : str
     status : str
@@ -50,7 +49,6 @@ class Task():
 
         # Post-Execution
         self.after_snapshot_id = dictionary.get('after_snapshot_id', "")
-        self.hardware_info = dictionary.get('hardware_info', "")
         self.container_id = dictionary.get('container_id', "")
         self.logs = dictionary.get('logs', "")
         self.status = dictionary.get('status', "")
