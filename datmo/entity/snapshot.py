@@ -5,8 +5,7 @@ from datmo.util.json_store import JSONStore
 
 
 class Snapshot():
-    """
-    Snapshot is an entity object to represent a version of the model. These snapshots
+    """Snapshot is an entity object to represent a version of the model. These snapshots
     are the building blocks upon which models can be shared, deployed, and reproduced.
 
     Snapshots consist of 5 main components which are represented as well in the attributes
@@ -29,12 +28,12 @@ class Snapshot():
     file_collection_id : str
     config : dict
     stats : dict
-    session_id : str
-    task_id : str
-    message : str
-    label : str
-    created_at : datetime
-    updated_at : datetime
+    session_id : str, optional
+    task_id : str, optional
+    message : str, optional
+    label : str, optional
+    created_at : datetime, optional
+    updated_at : datetime, optional
 
     """
     def __init__(self, dictionary):

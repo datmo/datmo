@@ -2,8 +2,7 @@ from datetime import datetime
 
 
 class Task():
-    """
-    Task is an entity object to represent an experiment run. A snapshot is taken before and after the task
+    """Task is an entity object to represent an experiment run. A snapshot is taken before and after the task
     to capture the relevant components. These snapshots are flagged as temporary unless otherwise specified
     by the user but are stored as ids within the task object for reference.
 
@@ -15,20 +14,20 @@ class Task():
         the parent model id for the entity
     session_id : str
     command : str
-    before_snapshot_id : str
-    ports : list
-    gpu : bool
-    interactive : bool
-    task_dirpath : str
-        relative task directory path
-    log_filepath : str
-        relative log filepath
-    after_snapshot_id : str
-    container_id : str
-    logs : str
-    status : str
-    created_at : datetime
-    updated_at : datetime
+    before_snapshot_id : str, optional
+    ports : list, optional
+    gpu : bool, optional
+    interactive : bool, optional
+    task_dirpath : str, optional
+        task directory path relative to the project root
+    log_filepath : str, optional
+        log filepath relative to the project root
+    after_snapshot_id : str, optional
+    container_id : str, optional
+    logs : str, optional
+    status : str, optional
+    created_at : datetime, optional
+    updated_at : datetime, optional
 
     """
     def __init__(self, dictionary):
