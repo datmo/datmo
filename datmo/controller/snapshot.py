@@ -267,4 +267,8 @@ class SnapshotController(BaseController):
         return self.dal.snapshot.query(query)
 
     def delete(self, id):
+        if not id:
+            raise RequiredArgumentMissing(_("error",
+                                            "controller.snapshot.delete.arg",
+                                            "id"))
         return self.dal.snapshot.delete(id)

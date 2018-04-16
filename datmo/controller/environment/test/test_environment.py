@@ -138,7 +138,7 @@ class TestEnvironmentController():
 
         run_options = {
             "command": ["sh", "-c", "echo yo"],
-            "ports": None,
+            "ports": ["8888:8888"],
             "name": None,
             "volumes": None,
             "detach": False,

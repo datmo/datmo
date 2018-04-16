@@ -30,10 +30,11 @@ class TestTaskController():
 
     def test_create(self):
         self.project.init("test5", "test description")
-
         task_command = ["sh", "-c", "echo yo"]
+        task_gpu = False
         input_dict = {
-            "command": task_command
+            "command": task_command,
+            "gpu": task_gpu
         }
 
         # Create task in the project
@@ -41,6 +42,7 @@ class TestTaskController():
 
         assert task_obj
         assert task_obj.command == task_command
+        assert task_obj.gpu == task_gpu
 
     def test_run_helper(self):
         # TODO: Try out more options (see below)
@@ -69,7 +71,7 @@ class TestTaskController():
                                for _ in range(32)])
         options_dict = {
             "command": ["sh", "-c", "echo yo"],
-            "ports": [],
+            "ports": ["8888:8888"],
             "gpu": False,
             "name": random_name,
             "volumes": {
@@ -99,7 +101,7 @@ class TestTaskController():
                                for _ in range(32)])
         options_dict = {
             "command": ["sh", "-c", "echo yo"],
-            "ports": [],
+            "ports": ["8888:8888"],
             "gpu": False,
             "name": random_name_2 ,
             "volumes": {
@@ -125,6 +127,7 @@ class TestTaskController():
         self.task.environment_driver.stop_remove_containers_by_term(term=random_name_2)
 
     def test_run(self):
+        # TODO: look into log filepath randomness, sometimes logs are not written
         self.project.init("test5", "test description")
 
         task_command = ["sh", "-c", "echo yo"]

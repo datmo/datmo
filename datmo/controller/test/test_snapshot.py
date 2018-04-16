@@ -90,7 +90,6 @@ class TestSnapshotController():
             "config_filepath": config_filepath,
             "stats_filepath": stats_filepath,
         }
-
         # Create snapshot in the project
         snapshot_obj_2 = self.snapshot.create(input_dict)
 

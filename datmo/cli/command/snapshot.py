@@ -39,7 +39,7 @@ class SnapshotCommand(ProjectCommand):
         create.add_argument("--stats-filepath", dest="stats_filepath", default=None,
                             help="Absolute filepath to use to search for metrics JSON")
 
-        create.add_argument("--filepaths", dest="filepaths", default=None, nargs="*",
+        create.add_argument("--filepaths", dest="filepaths", default=[], nargs="*",
                             help="Absolute paths to files or folders to include within the files of the snapshot")
 
         delete = subcommand_parsers.add_parser("delete", help="Delete a snapshot by id")

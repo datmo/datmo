@@ -23,6 +23,8 @@ class TestHelper():
     # https://stackoverflow.com/questions/35851323/pytest-how-to-test-a-function-with-input-call/36377194
 
     def setup_method(self):
+        # provide mountable tmp directory for docker
+        tempfile.tempdir = '/tmp'
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)

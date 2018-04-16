@@ -22,6 +22,7 @@ MESSAGES = {
         "cli.general": "An exception occurred: %s",
         "cli.general.method.not_found": "Method %s.%s not found",
         "cli.project": "No project found in the current directory: %s",
+        "cli.task.delete": "Error while deleting the task",
         "util.misc_functions.get_filehash": "Filepath does not point to a valid file: %s",
         "controller.code.driver.git.__init__.dne": "File path does not exist: %s",
         "controller.code.driver.git.__init__.giterror": "Error in git: %s",
@@ -95,9 +96,11 @@ MESSAGES = {
         "controller.snapshot.create.arg": "Required argument missing to create snapshot: %s",
         "controller.snapshot.create.file_config": "Config file does not exist",
         "controller.snapshot.create.file_stat": "Stats file does not exist",
+        "controller.snapshot.delete.arg": "Delete argument %s not present in input",
         "controller.task._run_helper.env_dne": "Environment specified does not exist: %s",
         "controller.task.run": "Error creating task directory for run: %s",
-        "storage.local.dal.update": "Entity id not provided in the input for update"
+        "controller.task.delete.arg": "Delete argument %s not present in input",
+        "storage.local.dal.update": "Entity id not provided in the input for update",
     },
     "debug": {
 

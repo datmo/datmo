@@ -188,18 +188,20 @@ class EnvironmentController(BaseController):
         options : dict
             can include the following values:
 
-            command : list
-            ports : list
+            command : list, optional
+            ports : list, optional
                 Here are some example ports used for common applications.
                    *  'jupyter notebook' - 8888
                    *  flask API - 5000
                    *  tensorboard - 6006
-            name : str
-            volumes : dict
-            detach : bool
-            stdin_open : bool
-            tty : bool
-            gpu : bool
+                An example input for the above would be ["8888:8888", "5000:5000", "6006:6006"]
+                which maps the running host port (right) to that of the environment (left)
+            name : str, optional
+            volumes : dict, optional
+            detach : bool, optional
+            stdin_open : bool, optional
+            tty : bool, optional
+            gpu : bool, optional
         log_filepath : str
             filepath to the log file
 
