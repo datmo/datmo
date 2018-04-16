@@ -38,33 +38,30 @@ class FileCollectionController(BaseController):
         RequiredArgumentMissing
             if any arguments needed for FileCollection are not provided
         """
-        # Validate Inputs
+        # TODO: Validate Inputs
 
         create_dict = {
             "model_id": self.model.id,
         }
 
-        ## Required args
+        ## Required args for FileCollection entity
         required_args = ["filehash", "path", "driver_type"]
-        traversed_args = []
         for required_arg in required_args:
-            # Handle Id if provided or not
             if required_arg == "filehash":
                 create_dict[required_arg] = \
                     self.file_driver.create_collection(filepaths)
-                traversed_args.append(required_arg)
+                # If file collection with filehash exists, return it
+                results = self.dal.file_collection.query({
+                    "filehash": create_dict[required_arg]
+                })
+                if results: return results[0];
             elif required_arg == "path":
                 create_dict[required_arg] = \
                     self.file_driver.get_relative_collection_path(create_dict['filehash'])
-                traversed_args.append(required_arg)
             elif required_arg == "driver_type":
                 create_dict[required_arg] = self.file_driver.type
-                traversed_args.append(required_arg)
-
-        # Error if required values not present
-        if not traversed_args == required_args:
-            raise RequiredArgumentMissing(_("error",
-                                            "controller.file_collection.create"))
+            else:
+                raise NotImplementedError()
 
         # Create file collection and return
         return self.dal.file_collection.create(create_dict)

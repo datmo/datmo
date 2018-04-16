@@ -61,6 +61,8 @@ class CodeController(BaseController):
                     "commit_id": create_dict[required_arg]
                 })
                 if results: return results[0];
+            else:
+                raise NotImplementedError()
 
         # Create code and return
         return self.dal.code.create(create_dict)

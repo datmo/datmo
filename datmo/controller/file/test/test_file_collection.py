@@ -9,8 +9,6 @@ from datmo.controller.project import ProjectController
 from datmo.controller.file.file_collection import \
     FileCollectionController
 from datmo.util.exceptions import EntityNotFound
-from datmo.util.exceptions import RequiredArgumentMissing, \
-    DoesNotExistException
 
 
 class TestFileCollectionController():
@@ -51,6 +49,11 @@ class TestFileCollectionController():
         assert file_collection_obj.id
         assert file_collection_obj.path
         assert file_collection_obj.driver_type
+
+        # Test file collection with same filepaths/filehash returns same object
+        file_collection_obj_2 = self.file_collection.create(filepaths)
+
+        assert file_collection_obj_2 == file_collection_obj
 
     def test_list(self):
         self.project.init("test4", "test description")
