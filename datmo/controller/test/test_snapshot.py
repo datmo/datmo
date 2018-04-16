@@ -74,21 +74,21 @@ class TestSnapshotController():
         config_filepath = os.path.join(self.snapshot.home,
                                      "config.json")
         with open(config_filepath, "w") as f:
-            f.write(str("{}"))
+            f.write(str('{"foo":"bar"}'))
 
         # Create stats
         stats_filepath = os.path.join(self.snapshot.home,
                                        "stats.json")
         with open(stats_filepath, "w") as f:
-            f.write(str("{}"))
+            f.write(str('{"foo":"bar"}'))
 
         input_dict = {
             "filepaths": [os.path.join(self.snapshot.home, "dirpath1"),
                           os.path.join(self.snapshot.home, "dirpath2"),
                           os.path.join(self.snapshot.home, "filepath1")],
             "environment_definition_filepath": env_def_path,
-            "config_filename": config_filepath,
-            "stats_filename": stats_filepath,
+            "config_filepath": config_filepath,
+            "stats_filepath": stats_filepath,
         }
 
         # Create snapshot in the project
@@ -100,8 +100,42 @@ class TestSnapshotController():
                snapshot_obj.environment_id
         assert snapshot_obj_2.file_collection_id != \
                snapshot_obj.file_collection_id
-        assert snapshot_obj_2.config == {}
-        assert snapshot_obj_2.stats == {}
+        assert snapshot_obj_2.config == {"foo": "bar"}
+        assert snapshot_obj_2.stats == {"foo": "bar"}
+
+        # Test different config and stats inputs
+        input_dict = {
+            "filepaths": [os.path.join(self.snapshot.home, "dirpath1"),
+                          os.path.join(self.snapshot.home, "dirpath2"),
+                          os.path.join(self.snapshot.home, "filepath1")],
+            "environment_definition_filepath": env_def_path,
+            "config_filename": "different_name",
+            "stats_filename": "different_name",
+        }
+
+        # Create snapshot in the project
+        snapshot_obj_4 = self.snapshot.create(input_dict)
+
+        assert snapshot_obj_4 != snapshot_obj_2
+        assert snapshot_obj_4.config == {}
+        assert snapshot_obj_4.stats == {}
+
+        # Test different config and stats inputs
+        input_dict = {
+            "filepaths": [os.path.join(self.snapshot.home, "dirpath1"),
+                          os.path.join(self.snapshot.home, "dirpath2"),
+                          os.path.join(self.snapshot.home, "filepath1")],
+            "environment_definition_filepath": env_def_path,
+            "config": {"foo": "bar"},
+            "stats": {"foo": "bar"},
+        }
+
+        # Create snapshot in the project
+        snapshot_obj_5 = self.snapshot.create(input_dict)
+
+        assert snapshot_obj_5 != snapshot_obj_4
+        assert snapshot_obj_5.config == {"foo": "bar"}
+        assert snapshot_obj_5.stats == {"foo": "bar"}
 
     def test_checkout(self):
         self.project.init("test4", "test description")
