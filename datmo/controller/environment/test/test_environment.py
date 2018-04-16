@@ -8,7 +8,8 @@ import tempfile
 from datmo.controller.project import ProjectController
 from datmo.controller.environment.environment import \
     EnvironmentController
-from datmo.util.exceptions import EntityNotFound
+from datmo.util.exceptions import EntityNotFound, \
+    DoesNotExistException
 
 
 class TestEnvironmentController():
@@ -27,24 +28,47 @@ class TestEnvironmentController():
     def test_create(self):
         self.project.init("test3", "test description")
 
+        # Test failure if no default found
+        try:
+            _ = self.environment.create({})
+        except DoesNotExistException:
+            assert True
+
         # Create environment definition
         definition_filepath = os.path.join(self.environment.home,
                                     "Dockerfile")
         with open(definition_filepath, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
 
+        # Test no inputs but defaults work
+        environment_obj = self.environment.create({})
+
+        # Get file collection path
+        file_collection_obj = self.environment.dal.file_collection. \
+            get_by_id(environment_obj.file_collection_id)
+        file_collection_dir = self.environment.file_driver. \
+            get_collection_path(file_collection_obj.filehash)
+
+        assert environment_obj
+        assert environment_obj.id
+        assert environment_obj.file_collection_id
+        assert environment_obj.definition_filename
+        assert environment_obj.hardware_info
+        assert environment_obj.unique_hash == file_collection_obj.filehash
+        assert os.path.join(file_collection_dir, "Dockerfile")
+        assert os.path.join(file_collection_dir, "datmoDockerfile")
+        assert os.path.join(file_collection_dir, "hardware_info")
+
+        # Remove environment for further tests
+        self.environment.delete(environment_obj.id)
+
+        # Test user passing in absolute definition filepath
         input_dict = {
             "definition_filepath": definition_filepath,
         }
 
         # Create environment in the project
         environment_obj = self.environment.create(input_dict)
-
-        # Get file collection path
-        file_collection_obj = self.environment.dal.file_collection.\
-            get_by_id(environment_obj.file_collection_id)
-        file_collection_dir = self.environment.file_driver.\
-            get_collection_path(file_collection_obj.filehash)
 
         assert environment_obj
         assert environment_obj.id

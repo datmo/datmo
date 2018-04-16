@@ -35,12 +35,17 @@ class EnvironmentController(BaseController):
         Parameters
         ----------
         dictionary : dict
-            definition_filepath : str
-                absolute filepath to the environment definition file (e.g. ./Dockerfile)
-            hardware_info : dict, optional
-                information about the environment hardware
-            description : str, optional
-                description of the environment
+            optional values to populate required environment entity args
+                definition_filepath : str, optional
+                    absolute filepath to the environment definition file
+                    (default is to use driver default filepath)
+                hardware_info : dict, optional
+                    information about the environment hardware
+                    (default is to extract hardware from platform currently running)
+            optional values to populate optional  environment entity args
+                description : str, optional
+                    description of the environment
+                    (default is blank)
 
 
         Returns
@@ -59,19 +64,39 @@ class EnvironmentController(BaseController):
             "model_id": self.model.id,
         }
 
-        ## Required args
+        ## Required args for Environment entity
         required_args = ["driver_type", "definition_filename",
                          "hardware_info", "file_collection_id", "unique_hash"]
         for required_arg in required_args:
-            # Add in any values that are
-            if required_arg in dictionary:
-                create_dict[required_arg] = dictionary[required_arg]
-            else:
-                # Pull in driver type from base
-                if required_arg == "driver_type":
-                    create_dict[required_arg] = self.environment_driver.type
-                # Extract the hardware information
-                elif required_arg == "hardware_info":
+            # Pull in driver type from base
+            if required_arg == "driver_type":
+                create_dict[required_arg] = self.environment_driver.type
+            elif required_arg == "definition_filename":
+                if "definition_filepath" in dictionary:
+                    original_definition_filepath = dictionary['definition_filepath']
+                    # Split up the given path and save definition filename
+                    definition_path, definition_filename = \
+                        os.path.split(original_definition_filepath)
+                    create_dict['definition_filename'] = definition_filename
+                    # Create datmo environment definition in the same dir as definition filepath
+                    datmo_definition_filepath = \
+                        os.path.join(definition_path, "datmo" + definition_filename)
+                    self.environment_driver.create(path=dictionary['definition_filepath'],
+                                                   output_path=datmo_definition_filepath)
+                else:
+                    # Use the default create to find environment definition
+                    _, original_definition_filepath, datmo_definition_filepath = \
+                        self.environment_driver.create()
+                    # Split up the default path obtained to save the definition name
+                    definition_path, definition_filename = \
+                        os.path.split(original_definition_filepath)
+                    create_dict['definition_filename'] = definition_filename
+
+            # Extract the hardware information
+            elif required_arg == "hardware_info":
+                if "hardware_info" in dictionary:
+                    create_dict['hardware_info'] = dictionary['hardware_info']
+                else:
                     # Extract hardware info of the container (currently taking from system platform)
                     # TODO: extract hardware information directly from the container
                     (system, node, release, version, machine, processor) = platform.uname()
@@ -83,44 +108,36 @@ class EnvironmentController(BaseController):
                         'machine': machine,
                         'processor': processor
                     }
-                # File setup
-                elif required_arg == "file_collection_id":
-                    if "definition_filepath" not in dictionary:
-                        raise RequiredArgumentMissing(__("error",
-                                                        "controller.environment.create"))
-                    # Create environment files in the same dir as definition filepath
-                    definition_path, definition_filename = os.path.split(dictionary['definition_filepath'])
-                    # Create datmo environment definition in the same dir as definition filepath
-                    datmo_definition_filepath = os.path.join(definition_path, "datmo" + definition_filename)
-                    self.environment_driver.create(path=dictionary['definition_filepath'],
-                                                   output_path=datmo_definition_filepath)
-                    # Create hardware info file
-                    hardware_info_filepath = os.path.join(definition_path, "hardware_info")
-                    _ = JSONStore(hardware_info_filepath,
-                                  initial_dict=create_dict['hardware_info'])
+                # Create hardware info file in definition path
+                hardware_info_filepath = os.path.join(definition_path, "hardware_info")
+                _ = JSONStore(hardware_info_filepath,
+                              initial_dict=create_dict['hardware_info'])
+            # File collection setup using files created above
+            elif required_arg == "file_collection_id":
+                # Add all environment files to collection:
+                # definition path, datmo_definition_path, hardware_info
+                filepaths = [original_definition_filepath, datmo_definition_filepath,
+                             hardware_info_filepath]
+                file_collection_obj = self.file_collection.create(filepaths)
+                create_dict['file_collection_id'] = file_collection_obj.id
 
-                    # Add all environment files to collection:
-                    # definition path, datmo_definition_path, hardware_info
-                    filepaths = [dictionary['definition_filepath'], datmo_definition_filepath,
-                                 hardware_info_filepath]
-                    file_collection_obj = self.file_collection.create(filepaths)
-                    create_dict['file_collection_id'] = file_collection_obj.id
-                    create_dict['definition_filename'] = definition_filename
-
-                    # Delete temporary files created
-                    os.remove(datmo_definition_filepath)
-                    os.remove(hardware_info_filepath)
-                elif required_arg == "unique_hash":
-                    create_dict['unique_hash'] = file_collection_obj.filehash
-                    # Check if unique hash is unique or not.
-                    # If not, DO NOT CREATE Environment and return existing Environment object
-                    results = self.dal.environment.query({
-                        "unique_hash": file_collection_obj.filehash
-                    })
-                    if results: return results[0];
+                # Delete temporary files created once transfered into file collection
+                os.remove(datmo_definition_filepath)
+                os.remove(hardware_info_filepath)
+            # Create new unique hash or find existing from the file collection above
+            elif required_arg == "unique_hash":
+                create_dict['unique_hash'] = file_collection_obj.filehash
+                # Check if unique hash is unique or not.
+                # If not, DO NOT CREATE Environment and return existing Environment object
+                results = self.dal.environment.query({
+                    "unique_hash": file_collection_obj.filehash
+                })
+                if results: return results[0];
+            else:
+                NotImplementedError()
 
 
-        ## Optional args
+        ## Optional args for Environment entity
         optional_args = ["description"]
         for optional_arg in optional_args:
             if optional_arg in dictionary:
@@ -155,6 +172,7 @@ class EnvironmentController(BaseController):
                                           id))
         file_collection_obj = self.dal.file_collection.\
             get_by_id(environment_obj.file_collection_id)
+        # TODO: Check hardware info here if different from creation time
         # Build the Environment with the driver
         datmo_definition_filepath = os.path.join(self.home, file_collection_obj.path,
                                                  "datmo" + environment_obj.definition_filename)
@@ -194,6 +212,7 @@ class EnvironmentController(BaseController):
         logs : str
             string version of output logs for the container
         """
+        # TODO: Check hardware info here if different from creation time
         final_return_code, run_id, logs = \
             self.environment_driver.run(id, options, log_filepath)
         return final_return_code, run_id, logs

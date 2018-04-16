@@ -59,6 +59,8 @@ MESSAGES = {
         "controller.environment.driver.docker.__init__.dne": "File path does not exist: %s",
         "controller.environment.driver.docker.__init__": "Docker environment management initialization failed. Socket: %s",
         "controller.environment.driver.docker.init": "Error in docker initialization: %s",
+        "controller.environment.driver.docker.create.dne": "path does not exist: %s",
+        "controller.environment.driver.docker.create.exists": "output path already exists: %s",
         "controller.environment.driver.docker.build_image": "Error in docker build: %s",
         "controller.environment.driver.docker.remove_image": "Error in docker rmi: %s",
         "controller.environment.driver.docker.remove_images": "Error in running multiple rmi commands: %s",

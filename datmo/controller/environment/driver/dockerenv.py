@@ -6,7 +6,8 @@ from docker import DockerClient
 
 from datmo.util.i18n import get as _
 from datmo.util.exceptions import DoesNotExistException, \
-    EnvironmentInitFailed, EnvironmentExecutionException
+    EnvironmentInitFailed, EnvironmentExecutionException, \
+    FileAlreadyExistsException
 from datmo.controller.environment.driver import EnvironmentDriver
 
 
@@ -59,9 +60,25 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         self._is_initialized = False
         return self._is_initialized
 
-    def create(self, path, output_path):
-        return self.form_datmo_definition_file(input_definition_path=path,
+    def create(self, path=None, output_path=None):
+        if not path:
+            path = os.path.join(self.filepath,
+                                "Dockerfile")
+        if not output_path:
+            directory, filename = os.path.split(path)
+            output_path = os.path.join(directory,
+                                       "datmo" + filename)
+        if not os.path.isfile(path):
+            raise DoesNotExistException(_("error",
+                                          "controller.environment.driver.docker.create.dne",
+                                          path))
+        if os.path.isfile(output_path):
+            raise FileAlreadyExistsException(_("error",
+                                               "controller.environment.driver.docker.create.exists",
+                                               output_path))
+        success = self.form_datmo_definition_file(input_definition_path=path,
                                         output_definition_path=output_path)
+        return success, path, output_path
 
     def build(self, name, path):
 
