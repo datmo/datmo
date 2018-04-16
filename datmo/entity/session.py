@@ -2,8 +2,7 @@ from datetime import datetime
 
 
 class Session():
-    """
-    Session is an entity object to represent a workspace to group tasks and snapshots
+    """Session is an entity object to represent a workspace to group tasks and snapshots
 
     Attributes
     ----------
@@ -12,10 +11,10 @@ class Session():
     model_id : str
         the parent model id for the entity
     name : str
-    current : bool
+    current : bool, optional
         identifies if the session is the current session
-    created_at : datetime
-    updated_at : datetime
+    created_at : datetime, optional
+    updated_at : datetime, optional
 
     """
     def __init__(self, dictionary):

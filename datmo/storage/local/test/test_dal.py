@@ -10,8 +10,7 @@ import shutil
 import tempfile
 from datetime import datetime
 
-from datmo.storage.local.driver.blitzdb_dal_driver import BlitzDBDALDriver
-from datmo.storage.local.driver.driver_type import DriverType
+from datmo.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.storage.local.dal import LocalDAL
 from datmo.util.exceptions import EntityNotFound, EntityCollectionNotFound
 
@@ -21,7 +20,7 @@ class TestLocalDAL():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.datadriver = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        self.datadriver = BlitzDBDALDriver("file", self.temp_dir)
 
     def teardown_class(self):
         shutil.rmtree(self.temp_dir)
@@ -79,17 +78,17 @@ class TestLocalDAL():
 
     def test_get_by_id_model_same_dir(self):
         test_dir = "test-dir"
-        datadriver = BlitzDBDALDriver(DriverType.FILE, test_dir)
+        datadriver = BlitzDBDALDriver("file", test_dir)
         dal = LocalDAL(datadriver)
         model1 = dal.model.create({"name": "test"})
         del datadriver
         del dal
-        datadriver = BlitzDBDALDriver(DriverType.FILE, test_dir)
+        datadriver = BlitzDBDALDriver("file", test_dir)
         dal = LocalDAL(datadriver)
         model2 = dal.model.create({"name": "test"})
         del datadriver
         del dal
-        datadriver = BlitzDBDALDriver(DriverType.FILE, test_dir)
+        datadriver = BlitzDBDALDriver("file", test_dir)
         dal = LocalDAL(datadriver)
         model3 = dal.model.create({"name": "test"})
 
@@ -108,7 +107,7 @@ class TestLocalDAL():
         model_name = "model_3"
         model = dal.model.create({"name": model_name})
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.model.get_by_id(model.id)
@@ -231,7 +230,7 @@ class TestLocalDAL():
         })
 
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.code.get_by_id(code.id)
@@ -315,11 +314,15 @@ class TestLocalDAL():
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
+        environment_hardware_info = {"system": "macosx"}
+        environment_unique_hash = "slkdjfa23dk"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         assert environment.id
@@ -329,28 +332,26 @@ class TestLocalDAL():
         assert environment.created_at
         assert environment.updated_at
 
-        environment_driver_type = "docker"
-        environment_file_collection_id = "test_file_id"
-        environment_definition_filename = "Dockerfile"
         environment_2 = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         assert environment_2.id != environment.id
 
         environment_id = "environment_id"
-        environment_driver_type = "docker"
-        environment_file_collection_id = "test_file_id"
-        environment_definition_filename = "Dockerfile"
         environment_3 = dal.environment.create({
             "id": environment_id,
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         assert environment_3.id
@@ -364,11 +365,15 @@ class TestLocalDAL():
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
+        environment_hardware_info = {"system": "macosx"}
+        environment_unique_hash = "slkdjfa23dk"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         result = dal.environment.get_by_id(environment.id)
@@ -382,15 +387,19 @@ class TestLocalDAL():
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
+        environment_hardware_info = {"system": "macosx"}
+        environment_unique_hash = "slkdjfa23dk"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.environment.get_by_id(environment.id)
@@ -409,11 +418,15 @@ class TestLocalDAL():
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
+        environment_hardware_info = {"system": "macosx"}
+        environment_unique_hash = "slkdjfa23dk"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         # Update required and optional parameters
@@ -437,11 +450,15 @@ class TestLocalDAL():
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
+        environment_hardware_info = {"system": "macosx"}
+        environment_unique_hash = "slkdjfa23dk"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         dal.environment.delete(environment.id)
@@ -460,11 +477,15 @@ class TestLocalDAL():
         environment_driver_type = "docker"
         environment_file_collection_id = "test_file_id"
         environment_definition_filename = "Dockerfile"
+        environment_hardware_info = {"system": "macosx"}
+        environment_unique_hash = "slkdjfa23dk"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
-            "definition_filename": environment_definition_filename
+            "definition_filename": environment_definition_filename,
+            "hardware_info": environment_hardware_info,
+            "unique_hash": environment_unique_hash
         })
 
         assert len(dal.environment.query({"id": environment.id})) == 1
@@ -547,7 +568,7 @@ class TestLocalDAL():
         })
 
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.file_collection.get_by_id(file_collection.id)
@@ -688,7 +709,7 @@ class TestLocalDAL():
         })
 
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.session.get_by_id(session.id)
@@ -861,7 +882,7 @@ class TestLocalDAL():
         })
 
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.task.get_by_id(task.id)
@@ -1059,7 +1080,7 @@ class TestLocalDAL():
         })
 
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.snapshot.get_by_id(snapshot.id)
@@ -1215,7 +1236,7 @@ class TestLocalDAL():
         })
 
         # create new dal with new driver instance (fails)
-        new_driver_instance = BlitzDBDALDriver(DriverType.FILE, self.temp_dir)
+        new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
         try:
             new_dal_instance.user.get_by_id(user.id)

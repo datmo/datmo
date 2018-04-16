@@ -6,8 +6,7 @@ from datmo.controller.file.file_collection import FileCollectionController
 from datmo.controller.environment.environment import EnvironmentController
 from datmo.util.i18n import get as _
 from datmo.util.json_store import JSONStore
-from datmo.util.exceptions import RequiredArgumentMissing, \
-    FileIOException
+from datmo.util.exceptions import FileIOException
 
 
 class SnapshotController(BaseController):
@@ -43,20 +42,59 @@ class SnapshotController(BaseController):
         Parameters
         ----------
         dictionary : dict
-            Includes a set of keys defined below:
-                filepaths : list
-                    list of files or folder paths to include within the snapshot
-                environment_definition_filepath : str
-                    filepath for the environment definition file (e.g. Dockerfile path for Docker)
-                config_filename : str
-                    name of file with configuration parameters
-                stats_filename : str
-                    name of file with metrics and statistics
+            direct values to create snapshot
+                code_id : str, optional
+                    code reference associated with the snapshot; if not
+                    provided will look to inputs below for code creation
+                environment_id : str, optional
+                    id for environment used to create snapshot
+                file_collection_id : str, optional
+                    file collection associated with the snapshot
+                config : dict, optional
+                    key, value pairs of configurations
+                stats : dict, optional
+                    key, value pairs of metrics and statistics
+
+            alternatively you can provide inputs for creating snapshot components
+                code :
+                    commit_id : str, optional
+                environment :
+                    environment_definition_filepath : str, optional
+                        absolute filepath for the environment definition file
+                        (e.g. Dockerfile path for Docker)
+                file_collection :
+                    filepaths : list, optional
+                        list of files or folder paths to include within the snapshot
+                config :
+                    config_filepath : str, optional
+                        absolute filepath to configuration parameters file
+                    config_filename : str, optional
+                        name of file with configuration parameters
+                stats :
+                    stats_filepath : str, optional
+                        absolute filepath to stats parameters file
+                    stats_filename : str, optional
+                        name of file with metrics and statistics.
+
+            for the remaining optional arguments it will search for them
+            in the input dictionary
+                session_id : str, optional
+                    session id within which snapshot is created,
+                    will overwrite default
+                task_id : str, optional
+                    task id associated with snapshot
+                message : str, optional
+                    long description of snapshot
+                label : str, optional
+                    short description of snapshot
+                visible : bool, optional
+                    True if visible to user via list command else False
+
 
         Returns
         -------
-        SnapshotCommand
-            SnapshotCommand object as specified in datmo.entity.snapshot
+        Snapshot
+            Snapshot object as specified in datmo.entity.snapshot
 
         Raises
         ------
@@ -72,77 +110,127 @@ class SnapshotController(BaseController):
             "session_id": self.current_session.id
         }
 
-        ## Required args
+        ## Required args for Snapshot entity
         required_args = ["code_id", "environment_id", "file_collection_id",
                          "config", "stats"]
         for required_arg in required_args:
-            # Add in any values that are
-            if required_arg in dictionary:
-                create_dict[required_arg] = dictionary[required_arg]
-            else:
-                # Code setup
-                if required_arg == "code_id":
+            # Code setup
+            if required_arg == "code_id":
+                if "code_id" in dictionary:
+                    create_dict[required_arg] = dictionary[required_arg]
+                elif "commit_id" in dictionary:
                     create_dict['code_id'] = self.code.\
-                        create().id
-                # File setup
-                elif required_arg == "file_collection_id":
-                    # transform file paths to file_collection_id
-                    if "filepaths" not in dictionary:
-                        raise RequiredArgumentMissing(_("error",
-                                                        "controller.snapshot.create.arg",
-                                                        required_arg))
-                    create_dict['file_collection_id'] = self.file_collection.\
-                        create(dictionary['filepaths']).id
-                # Environment setup
-                elif required_arg == "environment_id":
-                    if "environment_definition_filepath" not in dictionary:
-                        raise RequiredArgumentMissing(_("error",
-                                                        "controller.snapshot.create.arg",
-                                                        required_arg))
+                        create(commit_id=dictionary['commit_id']).id
+                else:
+                    create_dict['code_id'] = self.code.create().id
+            # Environment setup
+            elif required_arg == "environment_id":
+                if "environment_id" in dictionary:
+                    create_dict[required_arg] = dictionary[required_arg]
+                elif "environment_definition_filepath" in dictionary:
                     create_dict['environment_id'] = self.environment.create({
                         "definition_filepath": dictionary['environment_definition_filepath']
                     }).id
-                # Config setup
-                elif required_arg == "config":
-                    # transform file to config dict
-                    if "config_filename" not in dictionary:
-                        raise RequiredArgumentMissing(_("error",
-                                                        "controller.snapshot.create.arg",
-                                                        required_arg))
-                    possible_paths = [os.path.join(self.home, dictionary['config_filename'])] + \
-                        [os.path.join(self.home, filepath, dictionary['config_filename'])
-                         for filepath in dictionary['filepaths'] if os.path.isdir(filepath)]
-                    existing_possible_paths = [possible_path for possible_path in possible_paths
-                                               if os.path.isfile(possible_path)]
-                    if not existing_possible_paths:
+                else:
+                    # create some default environment
+                    create_dict['environment_id'] = self.environment.\
+                        create({}).id
+            # File setup
+            elif required_arg == "file_collection_id":
+                if "file_collection_id" in dictionary:
+                    create_dict[required_arg] = dictionary[required_arg]
+                elif "filepaths" in dictionary:
+                    # transform file paths to file_collection_id
+                    create_dict['file_collection_id'] = self.file_collection. \
+                        create(dictionary['filepaths']).id
+                else:
+                    # create some default file collection
+                    create_dict['file_collection_id'] = self.file_collection.\
+                        create([]).id
+            # Config setup
+            elif required_arg == "config":
+                if "config" in dictionary:
+                    create_dict[required_arg] = dictionary[required_arg]
+                elif "config_filepath" in dictionary:
+                    if not os.path.isfile(dictionary['config_filepath']):
                         raise FileIOException(_("error",
                                                 "controller.snapshot.create.file_config"))
-                    config_json_driver = JSONStore(existing_possible_paths[0])
+                    # If path exists transform file to config dict
+                    config_json_driver = JSONStore(dictionary['config_filepath'])
                     create_dict['config'] = config_json_driver.to_dict()
-                # Stats setup
-                elif required_arg == "stats":
-                    # transform stats file to stats dict
-                    if "stats_filename" not in dictionary:
-                        raise RequiredArgumentMissing(_("error",
-                                                        "controller.snapshot.create.arg",
-                                                        required_arg))
-                    possible_paths = [os.path.join(self.home, dictionary['stats_filename'])] + \
-                                     [os.path.join(self.home, filepath, dictionary['stats_filename'])
-                                      for filepath in dictionary['filepaths'] if os.path.isdir(filepath)]
+                else:
+                    config_filename = dictionary['config_filename'] \
+                        if "config_filename" in dictionary else "config.json"
+                    # get all filepaths
+                    file_collection_obj = self.file_collection.dal.file_collection.\
+                        get_by_id(create_dict['file_collection_id'])
+                    file_collection_path = \
+                        self.file_collection.file_driver.get_collection_path(
+                            file_collection_obj.filehash)
+                    # find all of the possible paths it could exist
+                    possible_paths = [os.path.join(self.home, config_filename)] + \
+                                     [os.path.join(self.home, tuple[0], config_filename)
+                                       for tuple in os.walk(file_collection_path)]
                     existing_possible_paths = [possible_path for possible_path in possible_paths
                                                if os.path.isfile(possible_path)]
                     if not existing_possible_paths:
+                        # TODO: Add some info / warning that no file was found
+                        # create some default config
+                        create_dict['config'] = {}
+                        continue
+                    # If any such path exists, transform file to config dict
+                    config_json_driver = JSONStore(existing_possible_paths[0])
+                    create_dict['config'] = config_json_driver.to_dict()
+            # Stats setup
+            elif required_arg == "stats":
+                if "stats" in dictionary:
+                    create_dict[required_arg] = dictionary[required_arg]
+                elif "stats_filepath" in dictionary:
+                    if not os.path.isfile(dictionary['stats_filepath']):
                         raise FileIOException(_("error",
                                                 "controller.snapshot.create.file_stat"))
-                    stats_json_driver = JSONStore(existing_possible_paths[0])
+                    # If path exists transform file to config dict
+                    stats_json_driver = JSONStore(dictionary['stats_filepath'])
                     create_dict['stats'] = stats_json_driver.to_dict()
                 else:
-                    raise RequiredArgumentMissing(_("error",
-                                                    "controller.snapshot.create.arg",
-                                                    required_arg))
+                    stats_filename = dictionary['stats_filename'] \
+                        if "stats_filename" in dictionary else "stats.json"
+                    # get all filepaths
+                    file_collection_obj = self.file_collection.dal.file_collection. \
+                        get_by_id(create_dict['file_collection_id'])
+                    file_collection_path = \
+                        self.file_collection.file_driver.get_collection_path(
+                            file_collection_obj.filehash)
+                    # find all of the possible paths it could exist
+                    possible_paths = [os.path.join(self.home, stats_filename)] + \
+                                     [os.path.join(self.home, tuple[0], stats_filename)
+                                      for tuple in os.walk(file_collection_path)]
+                    existing_possible_paths = [possible_path for possible_path in possible_paths
+                                               if os.path.isfile(possible_path)]
+                    if not existing_possible_paths:
+                        # TODO: Add some info / warning that no file was found
+                        # create some default stats
+                        create_dict['stats'] = {}
+                        continue
+                    # If any such path exists, transform file to stats dict
+                    stats_json_driver = JSONStore(existing_possible_paths[0])
+                    create_dict['stats'] = stats_json_driver.to_dict()
+            else:
+                raise NotImplementedError()
 
-        ## Optional args
-        optional_args = ["session_id", "task_id", "message", "label"]
+        # If snapshot object with required args already exists, return it
+        # DO NOT create a new snapshot with the same required arguments
+        results = self.dal.snapshot.query({
+            "code_id": create_dict['code_id'],
+            "environment_id": create_dict['environment_id'],
+            "file_collection_id": create_dict['file_collection_id'],
+            "config": create_dict['config'],
+            "stats": create_dict['stats']
+        })
+        if results: return results[0];
+
+        ## Optional args for Snapshot entity
+        optional_args = ["session_id", "task_id", "message", "label", "visible"]
         for optional_arg in optional_args:
             if optional_arg in dictionary:
                 create_dict[optional_arg] = dictionary[optional_arg]

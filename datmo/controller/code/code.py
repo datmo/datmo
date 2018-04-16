@@ -44,23 +44,25 @@ class CodeController(BaseController):
             "model_id": self.model.id,
         }
 
-        ## Required args
+        ## Required args for Code entity
         required_args = ["driver_type", "commit_id"]
-        traversed_args = []
         for required_arg in required_args:
             # Handle Id if provided or not
-            if required_arg == "commit_id":
-                create_dict[required_arg] = commit_id if commit_id else \
-                    self.code_driver.create_code()
-                traversed_args.append(required_arg)
-            elif required_arg == "driver_type":
+            if required_arg == "driver_type":
                 create_dict[required_arg] = self.code_driver.type
-                traversed_args.append(required_arg)
-
-        # Error if required values not present
-        if not traversed_args == required_args:
-            raise RequiredArgumentMissing(_("error",
-                                            "controller.code.create"))
+            elif required_arg == "commit_id":
+                if commit_id:
+                    create_dict[required_arg] = commit_id
+                else:
+                    create_dict[required_arg] = \
+                        self.code_driver.create_code()
+                # If code object with commit id exists, return it
+                results = self.dal.code.query({
+                    "commit_id": create_dict[required_arg]
+                })
+                if results: return results[0];
+            else:
+                raise NotImplementedError()
 
         # Create code and return
         return self.dal.code.create(create_dict)

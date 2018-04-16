@@ -2,8 +2,7 @@ from datetime import datetime
 
 
 class User():
-    """
-    User is an entity object to represent a given user
+    """User is an entity object to represent a given user
 
     Attributes
     ----------
@@ -11,8 +10,8 @@ class User():
         the id of the entity
     name : str
     email : str
-    created_at : datetime
-    updated_at : datetime
+    created_at : datetime, optional
+    updated_at : datetime, optional
 
     """
     def __init__(self, dictionary):

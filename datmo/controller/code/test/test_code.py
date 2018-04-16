@@ -47,6 +47,11 @@ class TestCodeController():
         assert code_obj.id
         assert code_obj.driver_type
 
+        # Test should return same code_obj if same commit_id
+        code_obj_2 = self.code.create()
+
+        assert code_obj_2 == code_obj
+
         # Test failing with random id given
         random_commit_id = "random"
         try:

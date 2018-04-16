@@ -2,8 +2,7 @@ from datetime import datetime
 
 
 class Code():
-    """
-    Code is an entity object to represent a version of source code
+    """Code is an entity object to represent a version of source code
 
     Attributes
     ----------
@@ -14,8 +13,8 @@ class Code():
     driver_type : str
         the driver class that created the entity
     commit_id : str
-    created_at : datetime
-    updated_at : datetime
+    created_at : datetime, optional
+    updated_at : datetime, optional
 
     """
     def __init__(self, dictionary):

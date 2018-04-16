@@ -2,17 +2,16 @@ from datetime import datetime
 
 
 class Model():
-    """
-    Model is an entity object that encapsulates other entities
+    """Model is an entity object that encapsulates other entities
 
     Attributes
     ----------
     id : str
         the id of the entity
     name : str
-    description : str
-    created_at : datetime
-    updated_at : datetime
+    description : str, optional
+    created_at : datetime, optional
+    updated_at : datetime,
 
     """
     def __init__(self, dictionary):

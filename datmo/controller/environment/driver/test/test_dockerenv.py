@@ -11,7 +11,8 @@ import shutil
 import uuid
 
 from datmo.controller.environment.driver.dockerenv import DockerEnvironmentDriver
-from datmo.util.exceptions import EnvironmentInitFailed
+from datmo.util.exceptions import EnvironmentInitFailed, \
+    DoesNotExistException, FileAlreadyExistsException
 
 
 class TestDockerEnv():
@@ -43,10 +44,154 @@ class TestDockerEnv():
     def test_instantiation_not_connected(self):
         thrown = False
         try:
-          DockerEnvironmentDriver(self.temp_dir, 'docker', 'unix:///var/run/fooo')
+            DockerEnvironmentDriver(self.temp_dir, 'docker', 'unix:///var/run/fooo')
         except EnvironmentInitFailed:
             thrown = True
         assert thrown
+
+    def test_create(self):
+        input_dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
+                                             "Dockerfile")
+        output_dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
+                                              "datmoDockerfile")
+        # Test both default values
+        success, path, output_path = \
+            self.docker_environment_manager.create()
+
+        assert success and \
+               os.path.isfile(output_dockerfile_path) and \
+               "datmo" in open(output_dockerfile_path, "r").read()
+        assert path == input_dockerfile_path
+        assert output_path == output_dockerfile_path
+        os.remove(output_dockerfile_path)
+
+        # Test default values for output
+        success, path, output_path = \
+            self.docker_environment_manager.create(input_dockerfile_path)
+
+        assert success and \
+               os.path.isfile(output_dockerfile_path) and \
+               "datmo" in open(output_dockerfile_path, "r").read()
+        assert path == input_dockerfile_path
+        assert output_path == output_dockerfile_path
+        os.remove(output_dockerfile_path)
+
+        # Test both values given
+        success, path, output_path = \
+            self.docker_environment_manager.create(input_dockerfile_path,
+                                                        output_dockerfile_path)
+        assert success and \
+               os.path.isfile(output_dockerfile_path) and \
+               "datmo" in open(output_dockerfile_path, "r").read()
+        assert path == input_dockerfile_path
+        assert output_path == output_dockerfile_path
+
+        # Test exception for path does not exist
+        try:
+            self.docker_environment_manager.create("nonexistant_path")
+        except DoesNotExistException:
+            assert True
+
+        # Test exception for output path already exists
+        try:
+            self.docker_environment_manager.create(
+                output_path=output_dockerfile_path)
+        except FileAlreadyExistsException:
+            assert True
+
+    def test_build(self):
+        name = str(uuid.uuid1())
+        path = os.path.join(self.docker_environment_manager.filepath,
+                                       "Dockerfile")
+        random_text = str(uuid.uuid1())
+        with open(path, "w") as f:
+            f.write("FROM datmo/xgboost:cpu" + "\n")
+            f.write(str("RUN echo " + random_text))
+        result = self.docker_environment_manager.build(name, path)
+        assert result == True
+        # teardown
+        self.docker_environment_manager.remove(name, force=True)
+
+    def test_run(self):
+        name = str(uuid.uuid1())
+        path = os.path.join(self.docker_environment_manager.filepath,
+                            "Dockerfile")
+        random_text = str(uuid.uuid1())
+        with open(path, "w") as f:
+            f.write("FROM datmo/xgboost:cpu" + "\n")
+            f.write(str("RUN echo " + random_text))
+        log_filepath = os.path.join(self.docker_environment_manager.filepath,
+                                    "test.log")
+        self.docker_environment_manager.build(name, path)
+
+        run_options = {
+            "command": ["sh", "-c", "echo yo"],
+            "ports": None,
+            "name": None,
+            "volumes": None,
+            "detach": False,
+            "stdin_open": False,
+            "tty": False,
+            "gpu": False,
+            "api": False
+        }
+        return_code, run_id, logs = \
+            self.docker_environment_manager.run(name, run_options, log_filepath)
+
+        assert return_code == 0
+        assert run_id
+        assert logs
+        # teardown
+        self.docker_environment_manager.stop(run_id, force=True)
+        self.docker_environment_manager.remove(name, force=True)
+
+    def test_stop(self):
+        name = str(uuid.uuid1())
+        path = os.path.join(self.docker_environment_manager.filepath,
+                            "Dockerfile")
+        random_text = str(uuid.uuid1())
+        with open(path, "w") as f:
+            f.write("FROM datmo/xgboost:cpu" + "\n")
+            f.write(str("RUN echo " + random_text))
+        log_filepath = os.path.join(self.docker_environment_manager.filepath,
+                                    "test.log")
+        self.docker_environment_manager.build(name, path)
+
+        run_options = {
+            "command": ["sh", "-c", "echo yo"],
+            "ports": None,
+            "name": "my_container_name_2",
+            "volumes": None,
+            "detach": False,
+            "stdin_open": False,
+            "tty": False,
+            "gpu": False,
+            "api": False
+        }
+        _, run_id, _ = \
+            self.docker_environment_manager.run(name, run_options, log_filepath)
+        result = self.docker_environment_manager.stop(run_id, force=True)
+        assert result
+        # teardown
+        self.docker_environment_manager.remove(name, force=True)
+
+    def test_remove(self):
+        name = str(uuid.uuid1())
+        path = os.path.join(self.docker_environment_manager.filepath,
+                                       "Dockerfile")
+        random_text = str(uuid.uuid1())
+        with open(path, "w") as f:
+            f.write("FROM datmo/xgboost:cpu" + "\n")
+            f.write(str("RUN echo " + random_text))
+        # Without force
+        self.docker_environment_manager.build(name, path)
+        result = self.docker_environment_manager.remove(name)
+        assert result == True
+        # With force
+        self.docker_environment_manager.build(name, path)
+        # teardown
+        result = self.docker_environment_manager.remove(name, force=True)
+        assert result == True
 
     def test_init(self):
         assert self.init_result and \
