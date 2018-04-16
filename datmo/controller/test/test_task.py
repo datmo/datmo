@@ -127,6 +127,7 @@ class TestTaskController():
         self.task.environment_driver.stop_remove_containers_by_term(term=random_name_2)
 
     def test_run(self):
+        # TODO: look into log filepath randomness, sometimes logs are not written
         self.project.init("test5", "test description")
 
         task_command = ["sh", "-c", "echo yo"]
