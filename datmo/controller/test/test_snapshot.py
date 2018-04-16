@@ -7,7 +7,8 @@ import tempfile
 
 from datmo.controller.project import ProjectController
 from datmo.controller.snapshot import SnapshotController
-from datmo.util.exceptions import EntityNotFound
+from datmo.util.exceptions import EntityNotFound, \
+    DoesNotExistException
 
 
 class TestSnapshotController():
@@ -27,16 +28,47 @@ class TestSnapshotController():
     def test_create(self):
         self.project.init("test3", "test description")
 
-        # Create files to add
-        self.snapshot.file_driver.create("dirpath1", dir=True)
-        self.snapshot.file_driver.create("dirpath2", dir=True)
-        self.snapshot.file_driver.create("filepath1")
+        # Test default values for snapshot, fail due to environment
+        try:
+            self.snapshot.create({})
+        except DoesNotExistException:
+            assert True
 
         # Create environment definition
         env_def_path = os.path.join(self.snapshot.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(str("FROM datmo/xgboost:cpu"))
+
+        # Test default values for snapshot, success
+        snapshot_obj = self.snapshot.create({})
+
+        assert snapshot_obj
+        assert snapshot_obj.code_id
+        assert snapshot_obj.environment_id
+        assert snapshot_obj.file_collection_id
+        assert snapshot_obj.config == {}
+        assert snapshot_obj.stats == {}
+
+        # Test 2 snapshots with same parameters
+        # Should return the same object back
+        snapshot_obj_3 = self.snapshot.create({})
+
+        assert snapshot_obj_3 == snapshot_obj
+        assert snapshot_obj_3.code_id == snapshot_obj.code_id
+        assert snapshot_obj_3.environment_id == \
+               snapshot_obj.environment_id
+        assert snapshot_obj_3.file_collection_id == \
+               snapshot_obj.file_collection_id
+        assert snapshot_obj_3.config == \
+               snapshot_obj.config
+        assert snapshot_obj_3.stats == \
+               snapshot_obj.stats
+
+        # Create files to add
+        self.snapshot.file_driver.create("dirpath1", dir=True)
+        self.snapshot.file_driver.create("dirpath2", dir=True)
+        self.snapshot.file_driver.create("filepath1")
 
         # Create config
         config_filepath = os.path.join(self.snapshot.home,
@@ -60,14 +92,16 @@ class TestSnapshotController():
         }
 
         # Create snapshot in the project
-        snapshot_obj = self.snapshot.create(input_dict)
+        snapshot_obj_2 = self.snapshot.create(input_dict)
 
-        assert snapshot_obj
-        assert snapshot_obj.code_id
-        assert snapshot_obj.environment_id
-        assert snapshot_obj.file_collection_id
-        assert snapshot_obj.config == {}
-        assert snapshot_obj.stats == {}
+        assert snapshot_obj_2 != snapshot_obj
+        assert snapshot_obj_2.code_id != snapshot_obj.code_id
+        assert snapshot_obj_2.environment_id == \
+               snapshot_obj.environment_id
+        assert snapshot_obj_2.file_collection_id != \
+               snapshot_obj.file_collection_id
+        assert snapshot_obj_2.config == {}
+        assert snapshot_obj_2.stats == {}
 
     def test_checkout(self):
         self.project.init("test4", "test description")
@@ -171,9 +205,9 @@ class TestSnapshotController():
 
         # Create file to add to second snapshot
         test_filepath_2 = os.path.join(self.snapshot.home,
-                                     "test.txt")
+                                     "test2.txt")
         with open(test_filepath_2, "w") as f:
-            f.write(str("test"))
+            f.write(str("test2"))
 
         # Create second snapshot in the project
         snapshot_obj_2 = self.snapshot.create(input_dict)

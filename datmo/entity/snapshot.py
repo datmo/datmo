@@ -24,14 +24,26 @@ class Snapshot():
     model_id : str
         the parent model id for the entity
     code_id : str
+        code reference associated with the snapshot
     environment_id : str
+        id for environment used to create snapshot
     file_collection_id : str
+        file collection associated with the snapshot
     config : dict
+        key, value pairs of configurations
     stats : dict
+        key, value pairs of metrics and statistics
     session_id : str, optional
+        session id within which snapshot is created
     task_id : str, optional
+        task id associated with snapshot
     message : str, optional
+        long description of snapshot
     label : str, optional
+        short description of snapshot
+    visible : bool, optional
+        True if visible to user via list command else False
+        (the default is True to show users unless otherwise specified)
     created_at : datetime, optional
     updated_at : datetime, optional
 
@@ -47,10 +59,11 @@ class Snapshot():
         self.stats = dictionary['stats']
 
         self.session_id = dictionary.get('session_id', "")
-        # self.task_id = dictionary.get('task_id', None)
+        self.task_id = dictionary.get('task_id', "")
 
         self.message = dictionary.get('message', "")
         self.label = dictionary.get('label', "")
+        self.visible = dictionary.get('visible', True)
 
         self.created_at = dictionary.get('created_at', datetime.utcnow())
         self.updated_at = dictionary.get('updated_at', self.created_at)
