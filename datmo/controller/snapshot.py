@@ -6,7 +6,7 @@ from datmo.controller.file.file_collection import FileCollectionController
 from datmo.controller.environment.environment import EnvironmentController
 from datmo.util.i18n import get as _
 from datmo.util.json_store import JSONStore
-from datmo.util.exceptions import FileIOException
+from datmo.util.exceptions import FileIOException, RequiredArgumentMissing
 
 
 class SnapshotController(BaseController):
@@ -104,13 +104,12 @@ class SnapshotController(BaseController):
             if files are not present or there is an error in File IO
         """
         # Validate Inputs
-
         create_dict = {
             "model_id": self.model.id,
             "session_id": self.current_session.id
         }
 
-        ## Required args for Snapshot entity
+        # Required args for Snapshot entity
         required_args = ["code_id", "environment_id", "file_collection_id",
                          "config", "stats"]
         for required_arg in required_args:
@@ -229,12 +228,11 @@ class SnapshotController(BaseController):
         })
         if results: return results[0];
 
-        ## Optional args for Snapshot entity
+        # Optional args for Snapshot entity
         optional_args = ["session_id", "task_id", "message", "label", "visible"]
         for optional_arg in optional_args:
             if optional_arg in dictionary:
                 create_dict[optional_arg] = dictionary[optional_arg]
-
 
         # Create snapshot and return
         return self.dal.snapshot.create(create_dict)

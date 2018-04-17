@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import prettytable
+
 from datmo.util.i18n import get as _
 from datmo.cli.command.project import ProjectCommand
 from datmo.controller.snapshot import SnapshotController
@@ -20,7 +22,7 @@ class SnapshotCommand(ProjectCommand):
                             help="Label snapshots with a category (e.g. best)")
         create.add_argument("--session-id", dest="session_id", default="", help="User given session id")
 
-        create.add_argument("--task-id", dest="task_id", default=None,
+        create.add_argument("--task-id", dest="task_id", default="",
                             help="Specify task id to pull information from")
 
         create.add_argument("--code-id", dest="code_id", default="",
@@ -29,21 +31,24 @@ class SnapshotCommand(ProjectCommand):
         create.add_argument("--environment-def-path", dest="environment_def_path", default="",
                             help="Absolute filepath to environment definition file (e.g. /path/to/Dockerfile)")
 
-        create.add_argument("--config-filename", dest="config_filename", default=None,
+        create.add_argument("--config-filename", dest="config_filename", default="",
                             help="Filename to use to search for configuration JSON")
-        create.add_argument("--config-filepath", dest="config_filepath", default=None,
+        create.add_argument("--config-filepath", dest="config_filepath", default="",
                             help="Absolute filepath to use to search for configuration JSON")
 
-        create.add_argument("--stats-filename", dest="stats_filename", default=None,
+        create.add_argument("--stats-filename", dest="stats_filename", default="",
                             help="Filename to use to search for metrics JSON")
-        create.add_argument("--stats-filepath", dest="stats_filepath", default=None,
+        create.add_argument("--stats-filepath", dest="stats_filepath", default="",
                             help="Absolute filepath to use to search for metrics JSON")
 
         create.add_argument("--filepaths", dest="filepaths", default=[], nargs="*",
                             help="Absolute paths to files or folders to include within the files of the snapshot")
 
+        create.add_argument("--not-visible", dest="visible", action="store_false",
+                         help="Boolean if you want snapshot to not be visible")
+
         delete = subcommand_parsers.add_parser("delete", help="Delete a snapshot by id")
-        delete.add_argument("--id", dest="snapshot_id", help="snapshot id to delete")
+        delete.add_argument("--id", dest="id", help="snapshot id to delete")
 
         ls = subcommand_parsers.add_parser("ls", help="List snapshots")
         ls.add_argument("--session-id", dest="session_id", default=None, help="Session ID to filter")
@@ -51,28 +56,7 @@ class SnapshotCommand(ProjectCommand):
         ls.add_argument("-a", dest="details", default=True, help="Show detailed SnapshotCommand information")
 
         checkout = subcommand_parsers.add_parser("checkout", help="Checkout a snapshot by id")
-        checkout.add_argument("--id", dest="snapshot_id", default=None, help="SnapshotCommand ID")
-
-        # home = subcommand_parsers.add_parser("home", help="Checkout/Reset back to initial state")
-
-        update = subcommand_parsers.add_parser("update", help="Update SnapshotCommand with meta information ")
-        update.add_argument("--id", dest="snapshot_id", default=None, help="SnapshotCommand id to edit")
-        update.add_argument("--message", "-m", dest="message", default=None, help="Message to describe snapshot")
-        update.add_argument("--label", "-l", dest="label", default=None,
-                            help="Label snapshots with a category (e.g. best)")
-
-        update.add_argument("--config-filename", dest="config_filename", default=None,
-                            help="Filename to use to search for configuration JSON")
-        update.add_argument("--config-filepath", dest="config_filepath", default=None,
-                            help="Absolute filepath to use to search for configuration JSON")
-
-        update.add_argument("--stats-filename", dest="stats", default=None,
-                            help="Filename to use to search for metrics JSON")
-        update.add_argument("--stats-filepath", dest="stats", default=None,
-                            help="Absolute filepath to use to search for metrics JSON")
-
-        best = subcommand_parsers.add_parser("best", help="Sets the best snapshot for a model")
-        best.add_argument("--id", dest="snapshot_id", default=None, help="SnapshotCommand ID")
+        checkout.add_argument("--id", dest="id", default=None, help="SnapshotCommand ID")
 
         self.snapshot_controller = SnapshotController(home=home,
                                                       dal_driver=self.project_controller.dal_driver)
@@ -83,26 +67,61 @@ class SnapshotCommand(ProjectCommand):
 
     def create(self, **kwargs):
         self.cli_helper.echo(_("info", "cli.snapshot.create"))
-        self.snapshot_controller.create(**kwargs)
 
-    def delete(self, snapshot_id):
-        self.snapshot_controller.delete(snapshot_id)
+        def mutually_exclusive(dictionary, mutually_exclusive_args):
+            for arg in mutually_exclusive_args:
+                if arg in kwargs and kwargs[arg]:
+                    snapshot_dict[arg] = kwargs[arg]
+                    break
+            return dictionary
+
+        snapshot_dict = {}
+
+        # Code
+        mutually_exclusive_args = ["code_id", "commit_id"]
+        snapshot_dict = mutually_exclusive(snapshot_dict, mutually_exclusive_args)
+
+        # Environment
+        mutually_exclusive_args = ["environment_id", "environment_definition_filepath"]
+        snapshot_dict = mutually_exclusive(snapshot_dict, mutually_exclusive_args)
+
+        # File
+        mutually_exclusive_args = ["file_collection_id", "file_collection"]
+        snapshot_dict = mutually_exclusive(snapshot_dict, mutually_exclusive_args)
+
+        optional_args = ["config_filepath", "config_filepath", "config_filename", "config_filename", "session_id",
+                         "task_id", "message", "label", "visible"]
+
+        for arg in optional_args:
+            if arg in kwargs and kwargs[arg]:
+                snapshot_dict[arg] = kwargs[arg]
+
+        snapshot_obj = self.snapshot_controller.create(snapshot_dict)
+
+        return snapshot_obj.id
+
+    def delete(self, **kwargs):
+        self.cli_helper.echo(_("info", "cli.snapshot.delete"))
+        id = kwargs.get("id", None)
+        return self.snapshot_controller.delete(id)
 
     def ls(self, **kwargs):
-        print("ls", kwargs)
+        session_id = kwargs.get('session_id',
+                                self.snapshot_controller.current_session.id)
+        # Get all snapshot meta information
+        header_list = ["id", "config", "stats", "message", "label", "created at"]
+        t = prettytable.PrettyTable(header_list)
+        snapshot_objs = self.snapshot_controller.list(session_id)
+        for snapshot_obj in snapshot_objs:
+            t.add_row([snapshot_obj.id, snapshot_obj.config, snapshot_obj.stats,
+                       snapshot_obj.message, snapshot_obj.label,
+                       snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S")])
+        self.cli_helper.echo(t)
+        return True
 
     def checkout(self, **kwargs):
-        print("checkout", kwargs)
-
-    def home(self, **kwargs):
-        print("home", kwargs)
-
-    def update(self, **kwargs):
-        print("update", kwargs)
-
-    def best(self, **kwargs):
-        print("best", kwargs)
-
+        id = kwargs.get("id", None)
+        return self.snapshot_controller.checkout(id)
 
 
 

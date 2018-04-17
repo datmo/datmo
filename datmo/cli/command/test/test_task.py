@@ -44,6 +44,12 @@ class TestTaskCommand():
         self.init.execute()
         self.task = TaskCommand(self.temp_dir, self.cli_helper)
 
+        # Create environment_driver definition
+        env_def_path = os.path.join(self.temp_dir,
+                                    "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(str("FROM datmo/xgboost:cpu"))
+
     def test_task_project_not_init(self):
         try:
             self.task = TaskCommand(self.temp_dir, self.cli_helper)
@@ -52,11 +58,6 @@ class TestTaskCommand():
 
     def test_datmo_task_run(self):
         self.__set_variables()
-        # Create environment_driver definition
-        env_def_path = os.path.join(self.temp_dir,
-                                    "Dockerfile")
-        with open(env_def_path, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
 
         test_command = ["sh", "-c", "echo yo"]
         test_gpu = True
