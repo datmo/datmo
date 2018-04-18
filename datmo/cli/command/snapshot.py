@@ -2,10 +2,10 @@ from __future__ import print_function
 
 import prettytable
 
-from datmo.util.i18n import get as _
+from datmo.core.util.i18n import get as __
 from datmo.cli.command.project import ProjectCommand
-from datmo.controller.snapshot import SnapshotController
-from datmo.util.exceptions import ProjectNotInitializedException
+from datmo.core.controller.snapshot import SnapshotController
+from datmo.core.util.exceptions import ProjectNotInitializedException
 
 
 class SnapshotCommand(ProjectCommand):
@@ -62,12 +62,12 @@ class SnapshotCommand(ProjectCommand):
         self.snapshot_controller = SnapshotController(home=home,
                                                       dal_driver=self.project_controller.dal_driver)
         if not self.project_controller.is_initialized:
-            raise ProjectNotInitializedException(_("error",
+            raise ProjectNotInitializedException(__("error",
                                                    "cli.project",
                                                    self.home))
 
     def create(self, **kwargs):
-        self.cli_helper.echo(_("info", "cli.snapshot.create"))
+        self.cli_helper.echo(__("info", "cli.snapshot.create"))
 
         def mutually_exclusive(dictionary, mutually_exclusive_args):
             for arg in mutually_exclusive_args:
@@ -109,7 +109,7 @@ class SnapshotCommand(ProjectCommand):
         return snapshot_obj.id
 
     def delete(self, **kwargs):
-        self.cli_helper.echo(_("info", "cli.snapshot.delete"))
+        self.cli_helper.echo(__("info", "cli.snapshot.delete"))
         id = kwargs.get("id", None)
         return self.snapshot_controller.delete(id)
 

@@ -18,7 +18,7 @@ import tempfile
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
-from datmo.util.exceptions import ProjectNotInitializedException
+from datmo.core.util.exceptions import ProjectNotInitializedException
 
 
 class TestSnapshot():

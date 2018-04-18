@@ -3,10 +3,10 @@ from __future__ import print_function
 import shlex
 import prettytable
 
-from datmo.util.i18n import get as _
+from datmo.core.util.i18n import get as __
 from datmo.cli.command.project import ProjectCommand
-from datmo.controller.task import TaskController
-from datmo.util.exceptions import ProjectNotInitializedException
+from datmo.core.controller.task import TaskController
+from datmo.core.util.exceptions import ProjectNotInitializedException
 
 
 class TaskCommand(ProjectCommand):
@@ -44,12 +44,12 @@ class TaskCommand(ProjectCommand):
         self.task_controller = TaskController(home=home,
                                                   dal_driver=self.project_controller.dal_driver)
         if not self.project_controller.is_initialized:
-            raise ProjectNotInitializedException(_("error",
+            raise ProjectNotInitializedException(__("error",
                                                    "cli.project",
                                                    self.home))
 
     def run(self, **kwargs):
-        self.cli_helper.echo(_("info", "cli.task.run"))
+        self.cli_helper.echo(__("info", "cli.task.run"))
 
         # Create input dictionaries
         snapshot_dict = {
@@ -94,7 +94,7 @@ class TaskCommand(ProjectCommand):
             task_delete_dict = {"id": id}
             self.task_controller.delete(**task_delete_dict)
         except Exception:
-            self.cli_helper.echo(_("error",
+            self.cli_helper.echo(__("error",
                                    "cli.task.delete"))
             return False
         return True
