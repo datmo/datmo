@@ -1,7 +1,6 @@
 from datmo.util.i18n import get as _
 from datmo.controller.base import BaseController
-from datmo.util.exceptions import RequiredArgumentMissing, \
-    DoesNotExistException
+from datmo.util.exceptions import DoesNotExistException
 
 
 class CodeController(BaseController):
@@ -55,7 +54,7 @@ class CodeController(BaseController):
                     create_dict[required_arg] = commit_id
                 else:
                     create_dict[required_arg] = \
-                        self.code_driver.create_code()
+                        self.code_driver.create_ref()
                 # If code object with commit id exists, return it
                 results = self.dal.code.query({
                     "commit_id": create_dict[required_arg]
@@ -95,7 +94,7 @@ class CodeController(BaseController):
                                           "controller.code.delete",
                                           id))
         # Remove code reference
-        delete_code_success = self.code_driver.delete_code(code_obj.commit_id)
+        delete_code_success = self.code_driver.delete_ref(code_obj.commit_id)
         # Delete code object
         delete_code_obj_success = self.dal.code.delete(code_obj.id)
 
