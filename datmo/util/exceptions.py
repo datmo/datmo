@@ -75,3 +75,6 @@ class EnvironmentNotInitialized(EnvironmentExecutionException):
 
 class TaskRunException(Exception):
     pass
+
+class DatmoFolderInWorkTree(Exception):
+    pass

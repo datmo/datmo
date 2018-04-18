@@ -8,7 +8,7 @@ import tempfile
 from datmo.controller.project import ProjectController
 from datmo.controller.snapshot import SnapshotController
 from datmo.util.exceptions import EntityNotFound, \
-    DoesNotExistException
+    DoesNotExistException, GitCommitDoesNotExist
 
 
 class TestSnapshotController():
@@ -28,7 +28,14 @@ class TestSnapshotController():
     def test_create(self):
         self.project.init("test3", "test description")
 
+        # Test default values for snapshot, fail due to code
+        try:
+            self.snapshot.create({})
+        except GitCommitDoesNotExist:
+            assert True
+
         # Test default values for snapshot, fail due to environment
+        self.snapshot.file_driver.create("filepath1")
         try:
             self.snapshot.create({})
         except DoesNotExistException:

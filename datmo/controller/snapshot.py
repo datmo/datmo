@@ -251,7 +251,7 @@ class SnapshotController(BaseController):
         current_code_obj = self.code.create()
 
         # Checkout code_driver to the relevant commit ref
-        self.code_driver.checkout_code(code_obj.commit_id)
+        self.code_driver.checkout_ref(code_obj.commit_id)
 
         # Pull file collection to the project home
         dst_dirpath = os.path.join("datmo_snapshots", id)
