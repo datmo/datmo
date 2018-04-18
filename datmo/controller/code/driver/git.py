@@ -55,10 +55,12 @@ class GitCodeDriver(CodeDriver):
         self._is_initialized = self.is_initialized
 
         if self._is_initialized:
-            # If initialized ensure .datmo is not in working tree
+            # If initialized ensure .datmo is not in working tree else error
             if self.exists_datmo_files_in_worktree():
                 raise DatmoFolderInWorkTree(__("error",
                                                "controller.code.driver.git.__init__.datmo"))
+            # If initialized ensure .datmo is ignored (in .git/info/exclude)
+            self.ensure_datmo_files_ignored()
             # If initialized update remote information
             if remote_url:
                 self.remote("set-url", "origin", remote_url)
