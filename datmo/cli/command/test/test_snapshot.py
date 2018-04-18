@@ -42,6 +42,30 @@ class TestSnapshot():
         self.init.execute()
         self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
 
+        # Create environment_driver definition
+        self.env_def_path = os.path.join(self.temp_dir,
+                                         "Dockerfile")
+        with open(self.env_def_path, "w") as f:
+            f.write(str("FROM datmo/xgboost:cpu"))
+
+        # Create config
+        self.config_filepath = os.path.join(self.snapshot.home,
+                                       "config.json")
+        with open(self.config_filepath, "w") as f:
+            f.write(str("{}"))
+
+        # Create stats
+        self.stats_filepath = os.path.join(self.snapshot.home,
+                                      "stats.json")
+        with open(self.stats_filepath, "w") as f:
+            f.write(str("{}"))
+
+        # Create test file
+        self.filepath = os.path.join(self.snapshot.home,
+                                           "file.txt")
+        with open(self.filepath, "w") as f:
+            f.write(str("test"))
+
     def test_snapshot_project_not_init(self):
         try:
             self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
@@ -55,12 +79,13 @@ class TestSnapshot():
         test_session_id = "test_session_id"
         test_task_id = "test_task_id"
         test_code_id = "test_code_id"
-        test_environment_def_path = "/path/to/Dockerfile"
+        test_environment_def_path = self.env_def_path
         test_config_filename = "config.json"
-        test_config_filepath = "/path/to/config.json"
+        test_config_filepath = self.config_filepath
         test_stats_filename = "stats.json"
-        test_stats_filepath = "/path/to/stats.json"
-        test_filepaths = ["file.txt", "files/"]
+        test_stats_filepath = self.config_filepath
+        test_filepaths = [self.filepath]
+        test_visible = False
 
         self.snapshot.parse([
             "snapshot",
@@ -75,7 +100,8 @@ class TestSnapshot():
             "--config-filepath", test_config_filepath,
             "--stats-filename", test_stats_filename,
             "--stats-filepath", test_stats_filepath,
-            "--filepaths", test_filepaths[0], test_filepaths[1]
+            "--filepaths", test_filepaths[0],
+            "--not-visible"
         ])
 
         # test for desired side effects
@@ -90,7 +116,19 @@ class TestSnapshot():
         assert self.snapshot.args.stats_filename == test_stats_filename
         assert self.snapshot.args.stats_filepath == test_stats_filepath
         assert self.snapshot.args.filepaths == test_filepaths
+        assert self.snapshot.args.visible == test_visible
 
+        snapshot_id_1 = self.snapshot.execute()
+        assert snapshot_id_1
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot",
+            "create"
+        ])
+
+        snapshot_id_2 = self.snapshot.execute()
+        assert snapshot_id_2
 
     def test_datmo_snapshot_create_invalid_arg(self):
         self.__set_variables()
@@ -99,6 +137,115 @@ class TestSnapshot():
           self.snapshot.parse([
             "snapshot",
             "create"
+            "--foobar","foobar"])
+        except Exception:
+            exception_thrown = True
+        assert exception_thrown
+
+    def test_datmo_snapshot_delete(self):
+        self.__set_variables()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot",
+            "create"
+        ])
+
+        snapshot_id = self.snapshot.execute()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot",
+            "delete",
+            "--id", snapshot_id
+        ])
+
+        result = self.snapshot.execute()
+        assert result
+
+    def test_datmo_snapshot_delete_invalid_arg(self):
+        self.__set_variables()
+        exception_thrown = False
+        try:
+          self.snapshot.parse([
+            "snapshot",
+            "delete"
+            "--foobar","foobar"])
+        except Exception:
+            exception_thrown = True
+        assert exception_thrown
+
+    def test_datmo_snapshot_ls(self):
+        self.__set_variables()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot",
+            "create"
+        ])
+
+        self.snapshot.execute()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot",
+            "ls"
+        ])
+
+        result = self.snapshot.execute()
+
+        assert result
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot",
+            "ls", "-a"
+        ])
+
+        result = self.snapshot.execute()
+
+        assert result
+
+    def test_datmo_snapshot_checkout_invalid_arg(self):
+        self.__set_variables()
+        exception_thrown = False
+        try:
+          self.snapshot.parse([
+            "snapshot",
+            "checkout"
+            "--foobar","foobar"])
+        except Exception:
+            exception_thrown = True
+        assert exception_thrown
+
+    def test_datmo_snapshot_checkout(self):
+        self.__set_variables()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot",
+            "create"
+        ])
+
+        snapshot_id = self.snapshot.execute()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot",
+            "checkout",
+            "--id", snapshot_id
+        ])
+
+        result = self.snapshot.execute()
+        assert result
+
+    def test_datmo_snapshot_checkout_invalid_arg(self):
+        self.__set_variables()
+        exception_thrown = False
+        try:
+          self.snapshot.parse([
+            "snapshot",
+            "checkout"
             "--foobar","foobar"])
         except Exception:
             exception_thrown = True
