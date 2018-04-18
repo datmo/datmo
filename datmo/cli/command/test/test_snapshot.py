@@ -184,7 +184,7 @@ class TestSnapshot():
             "create"
         ])
 
-        snapshot_id = self.snapshot.execute()
+        self.snapshot.execute()
 
         # Test when optional parameters are not given
         self.snapshot.parse([
@@ -193,6 +193,17 @@ class TestSnapshot():
         ])
 
         result = self.snapshot.execute()
+
+        assert result
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot",
+            "ls", "-a"
+        ])
+
+        result = self.snapshot.execute()
+
         assert result
 
     def test_datmo_snapshot_checkout_invalid_arg(self):

@@ -53,7 +53,8 @@ class SnapshotCommand(ProjectCommand):
         ls = subcommand_parsers.add_parser("ls", help="List snapshots")
         ls.add_argument("--session-id", dest="session_id", default=None, help="Session ID to filter")
         ls.add_argument("--session-name", dest="session_name", default=None, help="Session name to filter")
-        ls.add_argument("-a", dest="details", default=True, help="Show detailed SnapshotCommand information")
+        ls.add_argument("--all", "-a", dest="details", action="store_true",
+                            help="Show detailed SnapshotCommand information")
 
         checkout = subcommand_parsers.add_parser("checkout", help="Checkout a snapshot by id")
         checkout.add_argument("--id", dest="id", default=None, help="SnapshotCommand ID")
@@ -89,8 +90,15 @@ class SnapshotCommand(ProjectCommand):
         mutually_exclusive_args = ["file_collection_id", "file_collection"]
         snapshot_dict = mutually_exclusive(snapshot_dict, mutually_exclusive_args)
 
-        optional_args = ["config_filepath", "config_filepath", "config_filename", "config_filename", "session_id",
-                         "task_id", "message", "label", "visible"]
+        # Config
+        mutually_exclusive_args = ["config_filepath", "config_filename"]
+        snapshot_dict = mutually_exclusive(snapshot_dict, mutually_exclusive_args)
+
+        # Stats
+        mutually_exclusive_args = ["stats_filepath", "stats_filename"]
+        snapshot_dict = mutually_exclusive(snapshot_dict, mutually_exclusive_args)
+
+        optional_args = ["session_id", "task_id", "message", "label", "visible"]
 
         for arg in optional_args:
             if arg in kwargs and kwargs[arg]:
@@ -109,13 +117,27 @@ class SnapshotCommand(ProjectCommand):
         session_id = kwargs.get('session_id',
                                 self.snapshot_controller.current_session.id)
         # Get all snapshot meta information
-        header_list = ["id", "config", "stats", "message", "label", "created at"]
-        t = prettytable.PrettyTable(header_list)
-        snapshot_objs = self.snapshot_controller.list(session_id)
-        for snapshot_obj in snapshot_objs:
-            t.add_row([snapshot_obj.id, snapshot_obj.config, snapshot_obj.stats,
-                       snapshot_obj.message, snapshot_obj.label,
-                       snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S")])
+        detailed_info = kwargs.get('details', None)
+        if detailed_info:
+            header_list = ["id", "created at", "config", "stats", "message", "label", "code id",
+                           "environment id", "file collection id"]
+            t = prettytable.PrettyTable(header_list)
+            snapshot_objs = self.snapshot_controller.list(session_id)
+            for snapshot_obj in snapshot_objs:
+                t.add_row([snapshot_obj.id, snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                           snapshot_obj.config, snapshot_obj.stats,
+                           snapshot_obj.message, snapshot_obj.label,
+                           snapshot_obj.code_id, snapshot_obj.environment_id,
+                           snapshot_obj.file_collection_id])
+        else:
+            header_list = ["id", "created at", "config", "stats", "message", "label"]
+            t = prettytable.PrettyTable(header_list)
+            snapshot_objs = self.snapshot_controller.list(session_id)
+            for snapshot_obj in snapshot_objs:
+                t.add_row([snapshot_obj.id, snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                           snapshot_obj.config, snapshot_obj.stats,
+                           snapshot_obj.message, snapshot_obj.label])
+
         self.cli_helper.echo(t)
         return True
 
