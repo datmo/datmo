@@ -77,3 +77,22 @@ as you start new projects.
 In the `/examples` folder we have a few projects that have already been created and converted to datmo. You can 
 navigate to them and try datmo commands for yourself in order to get a feel for the tool.
 
+## Sharing (Beta)
+Although datmo is made to track your changes locally, you can share a project with your
+friends by doing the following (this is shown only for git, if you are using another git 
+tracking tool, you can likely do something similar). NOTE: If your files are too big or 
+cannot be added to SCM then this may not work for you. 
+```
+$ git add -f .datmo/*
+$ git commit -m "my_message"
+$ git push 
+$ git push origin +refs/datmo/*:refs/datmo/*
+```
+The above will allow you to share datmo results and entities with yourself or others on 
+other machines. NOTE: you will have to remove .datmo/ from tracking to start using datmo
+on the other machine. To do that you can use the commands below
+```
+$ git rm -r --cached
+$ git add .
+$ git commit -m "removed .datmo from tracking"
+```
