@@ -198,7 +198,6 @@ class TestSnapshotController():
                self.snapshot.code_driver.latest_commit() == code_obj_1.commit_id and \
                os.path.isdir(snapshot_obj_1_path)
 
-
     def test_list(self):
         self.project.init("test4", "test description")
 

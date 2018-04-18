@@ -11,6 +11,7 @@ MESSAGES = {
         "cli.general.dict.test" : "{foo} - {bar}",
         "cli.general.tuple.test" : "%s, %s",
         "cli.snapshot.create": "Creating a new snapshot",
+        "cli.snapshot.delete": "Deleting a snapshot",
         "cli.task.run": "Running a new task"
     },
     "warn": {

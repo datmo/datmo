@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+import shlex
 import prettytable
 
 from datmo.util.i18n import get as _
@@ -56,6 +57,9 @@ class TaskCommand(ProjectCommand):
                 kwargs['environment_definition_filepath']
         }
 
+        if type(kwargs['cmd']) is not list:
+            kwargs['cmd'] = shlex.split(kwargs['cmd'])
+
         task_dict = {
             "gpu": kwargs['gpu'],
             "ports": kwargs['ports'],
@@ -75,7 +79,7 @@ class TaskCommand(ProjectCommand):
         session_id = kwargs.get('session_id',
                                 self.task_controller.current_session.id)
         # Get all snapshot meta information
-        header_list = ["id", "command", "status", "gpu", "created_at"]
+        header_list = ["id", "command", "status", "gpu", "created at"]
         t = prettytable.PrettyTable(header_list)
         task_objs = self.task_controller.list(session_id)
         for task_obj in task_objs:
