@@ -7,7 +7,7 @@ from docker import DockerClient
 from datmo.util.i18n import get as _
 from datmo.util.exceptions import DoesNotExistException, \
     EnvironmentInitFailed, EnvironmentExecutionException, \
-    FileAlreadyExistsException
+    FileAlreadyExistsException, EnvironmentRequirementsCreateException
 from datmo.controller.environment.driver import EnvironmentDriver
 
 
@@ -60,7 +60,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         self._is_initialized = False
         return self._is_initialized
 
-    def create(self, path=None, output_path=None):
+    def create(self, path=None, output_path=None, language=None):
         if not path:
             path = os.path.join(self.filepath,
                                 "Dockerfile")
@@ -68,17 +68,26 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             directory, filename = os.path.split(path)
             output_path = os.path.join(directory,
                                        "datmo" + filename)
+        requirements_filepath = None
         if not os.path.isfile(path):
-            raise DoesNotExistException(_("error",
-                                          "controller.environment.driver.docker.create.dne",
-                                          path))
+            if language == "python3":
+                # Create requirements txt file for python
+                requirements_filepath = self.create_requirements_file()
+                # Create Dockerfile for ubuntu
+                path = self.create_default_dockerfile(requirements_filpath=requirements_filepath,
+                                                      language=language)
+            else:
+                raise DoesNotExistException(_("error",
+                                              "controller.environment.driver.docker.create.dne",
+                                              path))
         if os.path.isfile(output_path):
             raise FileAlreadyExistsException(_("error",
                                                "controller.environment.driver.docker.create.exists",
                                                output_path))
         success = self.form_datmo_definition_file(input_definition_path=path,
                                         output_definition_path=output_path)
-        return success, path, output_path
+
+        return success, path, output_path, requirements_filepath
 
     def build(self, name, path):
 
@@ -114,7 +123,6 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                                                   "controller.environment.driver.docker.init",
                                                   str(e)))
         return True
-
 
     def get_tags_for_docker_repository(self, repo_name):
         """Method to get tags for docker repositories
@@ -232,7 +240,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         image_name : str
             Docker image name
         command : list, optional
-            List with complete user-given command (e.g. ["python", "cool.py"])
+            List with complete user-given command (e.g. ["python3", "cool.py"])
         ports : list, optional
             Here are some example ports used for common applications.
                *  "jupyter notebook" - 8888
@@ -480,10 +488,48 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                                                   str(e)))
         return True
 
+    def create_requirements_file(self, execpath="pipreqs"):
+        """
+        In order to create requirements txt file for the project
+        """
+        try:
+            subprocess.check_output([execpath, self.filepath, "--force"],
+                                    cwd=self.filepath).strip()
+            requirements_filepath = os.path.join(self.filepath, "requirements.txt")
+            return requirements_filepath
+        except Exception as e:
+            raise EnvironmentRequirementsCreateException(__("error",
+                                                         "controller.environment.requirements.create",
+                                                         str(e)))
+
+
+    def create_default_dockerfile(self, requirements_filpath, language):
+        """
+        Args:
+            requirements_filpath: Path for the requirements txt file
+            language:
+                 Currently supports python2 and python3
+
+        Returns: Path for the new Dockerfile using requirements txt file
+        """
+        language_dockerfile = "%sDockerfile" % language
+        base_dockerfile_filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                                "templates", language_dockerfile)
+
+        # Combine dockerfile
+        destination_dockerfile = os.path.join(self.filepath, "Dockerfile")
+        destination = open(destination_dockerfile, "w")
+        shutil.copyfileobj(open(base_dockerfile_filepath, "r"), destination)
+        destination.write(str("ADD %s /tmp/requirements.txt\n" %requirements_filpath))
+        destination.write(str("RUN pip install --no-cache-dir -r /tmp/requirements.txt\n"))
+        destination.close()
+
+        return destination_dockerfile
+
     def form_datmo_definition_file(self, input_definition_path="Dockerfile",
                                    output_definition_path="datmoDockerfile"):
         """
-        n order to create intermediate dockerfile to run
+        In order to create intermediate dockerfile to run
         """
         base_dockerfile_filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                                                     "templates", "baseDockerfile")
