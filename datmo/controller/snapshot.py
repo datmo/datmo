@@ -131,7 +131,7 @@ class SnapshotController(BaseController):
                     create_dict['environment_id'] = self.environment.create({
                         "definition_filepath": dictionary['environment_definition_filepath']
                     }).id
-                elif create_dict['language']:
+                elif language:
                     create_dict['environment_id'] = self.environment. \
                         create({"language": language}).id
                 else:
