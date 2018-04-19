@@ -73,6 +73,7 @@ MESSAGES = {
         "controller.environment.driver.docker.remove_container": "Error removing docker container: %s",
         "controller.environment.driver.docker.stop_remove_containers_by_term": "Error stopping and removing containers by term: %s",
         "controller.environment.create": "Required argument definition_filepath not present in input",
+        "controller.environment.requirements.create": "Error while creating requirements file for python",
         "controller.environment.build": "Environment with id %s does NOT exist",
         "controller.environment.delete": "Environment with id %s does NOT exist",
         "controller.file.driver.local.__init__": "File path does not exist: %s",
