@@ -10,6 +10,11 @@ class ProjectController(BaseController):
     """ProjectController inherits from BaseController and manages business logic related to the
     project. One model is associated with each project currently.
 
+    Parameters
+    ----------
+    home : str
+        home path of the project
+
     Methods
     -------
     init(name, description)
@@ -20,8 +25,8 @@ class ProjectController(BaseController):
         Give the user a picture of the status of the project, snapshots, and tasks
     """
 
-    def __init__(self, home, dal_driver=None):
-        super(ProjectController, self).__init__(home, dal_driver)
+    def __init__(self, home):
+        super(ProjectController, self).__init__(home)
 
     def init(self, name, description):
         # Error if name is not given

@@ -19,27 +19,29 @@ class TestSnapshotController():
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.project = ProjectController(self.temp_dir)
-        self.snapshot = SnapshotController(self.temp_dir,
-                                           dal_driver=self.project.dal.driver)
+        self.project.init("test", "test description")
+        self.snapshot = SnapshotController(self.temp_dir)
 
     def teardown_method(self):
         shutil.rmtree(self.temp_dir)
 
     def test_create(self):
-        self.project.init("test3", "test description")
-
         # Test default values for snapshot, fail due to code
+        failed = False
         try:
             self.snapshot.create({})
         except GitCommitDoesNotExist:
-            assert True
+            failed = True
+        assert failed
 
         # Test default values for snapshot, fail due to environment
         self.snapshot.file_driver.create("filepath1")
+        failed = False
         try:
             self.snapshot.create({})
         except DoesNotExistException:
-            assert True
+            failed = True
+        assert failed
 
         # Create environment definition
         env_def_path = os.path.join(self.snapshot.home,
@@ -144,8 +146,6 @@ class TestSnapshotController():
         assert snapshot_obj_5.stats == {"foo": "bar"}
 
     def test_checkout(self):
-        self.project.init("test4", "test description")
-
         # Create snapshot
 
         # Create files to add
@@ -199,8 +199,6 @@ class TestSnapshotController():
                os.path.isdir(snapshot_obj_1_path)
 
     def test_list(self):
-        self.project.init("test4", "test description")
-
         # Create files to add
         self.snapshot.file_driver.create("dirpath1", dir=True)
         self.snapshot.file_driver.create("dirpath2", dir=True)
@@ -267,8 +265,6 @@ class TestSnapshotController():
                snapshot_obj_2 in result
 
     def test_delete(self):
-        self.project.init("test5", "test description")
-
         # Create files to add
         self.snapshot.file_driver.create("dirpath1", dir=True)
         self.snapshot.file_driver.create("dirpath2", dir=True)

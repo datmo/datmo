@@ -46,10 +46,12 @@ class TestBaseController():
 
     def test_current_session(self):
         # Test failure case
+        failed = False
         try:
             _ = self.base.current_session
         except DatmoModelNotInitializedException:
-            assert True
+            failed = True
+        assert failed
 
         # Test success case
         self.base.dal.model.create({

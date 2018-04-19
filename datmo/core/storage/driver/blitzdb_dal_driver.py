@@ -53,7 +53,15 @@ class BlitzDBDALDriver(DALDriver):
         class Meta(Document.Meta):
             collection = 'user'
 
+    def __reload(self):
+        for _, nested_index in self.backend.indexes.items():
+            for index, _ in nested_index.items():
+                # Only load from store if storage exists
+                if nested_index[index]._store:
+                    nested_index[index].load_from_store()
+
     def get(self, collection, entity_id):
+        self.__reload()
         try:
             results = self.backend.filter(collection, {'pk': entity_id})
             if len(results) == 1:
@@ -65,6 +73,7 @@ class BlitzDBDALDriver(DALDriver):
             raise EntityCollectionNotFound(err.message)
 
     def set(self, collection, obj):
+        self.__reload()
         compatible_obj = denormalize_entity(obj)
         if collection == 'model':
             item = self.ModelDocument(compatible_obj)
@@ -89,10 +98,12 @@ class BlitzDBDALDriver(DALDriver):
         return self.get(collection, item.pk)
 
     def exists(self, collection, entity_id):
+        self.__reload()
         results = self.backend.filter(collection, {'pk': entity_id})
         return len(results) == 1
 
     def query(self, collection, query_params):
+        self.__reload()
         if query_params.get('id', None) != None:
             query_params['pk'] = query_params['id']
             del query_params['id']
@@ -100,6 +111,7 @@ class BlitzDBDALDriver(DALDriver):
                                            for item in self.backend.filter(collection, query_params)]))
 
     def delete(self, collection, entity_id):
+        self.__reload()
         results = self.backend.filter(collection, {'pk': entity_id})
         if len(results) == 1:
             document = results[0]

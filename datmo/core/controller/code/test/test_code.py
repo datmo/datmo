@@ -29,10 +29,12 @@ class TestCodeController():
         self.project.init("test3", "test description")
 
         # Test failing for nothing to commit, no id
+        failed = False
         try:
             self.code.create()
         except GitCommitDoesNotExist:
-            assert True
+            failed = True
+        assert failed
 
         # Create test file
         definition_filepath = os.path.join(self.code.home,

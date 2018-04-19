@@ -22,14 +22,14 @@ class TestTaskController():
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.project = ProjectController(self.temp_dir)
-        self.environment = EnvironmentController(self.temp_dir, self.project.dal.driver)
-        self.task = TaskController(self.temp_dir, self.project.dal.driver)
+        self.project.init("test", "test description")
+        self.environment = EnvironmentController(self.temp_dir)
+        self.task = TaskController(self.temp_dir)
 
     def teardown_method(self):
         shutil.rmtree(self.temp_dir)
 
     def test_create(self):
-        self.project.init("test5", "test description")
         task_command = ["sh", "-c", "echo yo"]
         task_gpu = False
         input_dict = {
@@ -46,8 +46,6 @@ class TestTaskController():
 
     def test_run_helper(self):
         # TODO: Try out more options (see below)
-        self.project.init("test5", "test description")
-
         # Create environment_driver id
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
@@ -128,8 +126,6 @@ class TestTaskController():
 
     def test_run(self):
         # TODO: look into log filepath randomness, sometimes logs are not written
-        self.project.init("test5", "test description")
-
         task_command = ["sh", "-c", "echo yo"]
         input_dict = {
             "command": task_command
@@ -178,11 +174,13 @@ class TestTaskController():
         }
 
         # Run a basic task in the project
+        failed = False
         try:
             self.task.run(task_obj.id,
                           snapshot_dict=snapshot_dict)
         except EnvironmentExecutionException:
-            assert True
+            failed = True
+        assert failed
 
         # Test running a different task again with different parameters
         # THIS WILL UPDATE THE SAME TASK AND LOSE ORIGINAL TASK WORK
@@ -210,8 +208,6 @@ class TestTaskController():
         assert updated_task_obj_1.status == "SUCCESS"
 
     def test_list(self):
-        self.project.init("test5", "test description")
-
         task_command = ["sh", "-c", "echo yo"]
         input_dict = {
             "command": task_command
@@ -238,8 +234,6 @@ class TestTaskController():
 
 
     def test_delete(self):
-        self.project.init("test5", "test description")
-
         task_command = ["sh", "-c", "echo yo"]
         input_dict = {
             "command": task_command

@@ -13,9 +13,9 @@ from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.util.exceptions import EntityNotFound
 
 
-class TestBlitzDBInit():
+class TestBlitzDBDALDriverInit():
     """
-    Checks init of TestBlitzDB
+    Checks init of BlitzDBDALDriver
     """
     def setup_class(self):
         # provide mountable tmp directory for docker
@@ -38,9 +38,9 @@ class TestBlitzDBInit():
         assert database != None
 
 
-class TestBlitzDB():
+class TestBlitzDBDALDriver():
     """
-    Checks all functions of the TestBlitzDB
+    Checks all functions of BlitzDBDALDriver
     """
 
     def setup_class(self):
@@ -104,7 +104,7 @@ class TestBlitzDB():
     def test_raise_entity_not_found(self):
         exp_thrown = False
         try:
-            result = self.database.get(self.collection, 'not_found')
+            _ = self.database.get(self.collection, 'not_found')
         except EntityNotFound:
             exp_thrown = True
         assert exp_thrown
@@ -134,5 +134,29 @@ class TestBlitzDB():
         except:
             thrown =True
         assert thrown
+
+    def test_multiple_blitzdb_objects(self):
+        database_2 = BlitzDBDALDriver("file", self.temp_dir)
+        test_obj_dict = {"foo": "bar"}
+        test_obj = database_2.set(self.collection, test_obj_dict)
+        # new_test_obj = database_2.get(self.collection, test_obj.get('id'))
+        results_2 = database_2.query(self.collection,{})
+        # Try a new data base
+        database_3 = BlitzDBDALDriver("file", self.temp_dir)
+        results_3 = database_3.query(self.collection, {})
+
+        assert len(results_2) == len(results_3)
+
+    def test_multiple_blitzdb_objects_intermediate_creation(self):
+        # Test to check failure for intermediate creation
+        database_2 = BlitzDBDALDriver("file", self.temp_dir)
+        database_3 = BlitzDBDALDriver("file", self.temp_dir)
+        test_obj_dict = {"foo": "bar"}
+        # Set value after instantiation of database_3
+        test_obj = database_2.set(self.collection, test_obj_dict)
+        # Try to retrieve value from database_3
+        test_obj_3 = database_3.get(self.collection, test_obj['id'])
+        # Test to ensure the intermediate object is found
+        assert test_obj_3['id'] == test_obj['id']
 
 

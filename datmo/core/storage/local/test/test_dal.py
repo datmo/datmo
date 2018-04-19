@@ -42,15 +42,6 @@ class TestLocalDAL():
             exp_thrown = True
         assert exp_thrown
 
-    def test_property_cache(self):
-        """
-        Ensures kids.cache caches all DatmoEntityMethod wrapped objects
-        """
-        dal = LocalDAL(self.datadriver)
-        model_methods_1 = dal.model
-        model_methods_2 = dal.model
-        assert model_methods_1 == model_methods_2
-
     # Model
 
     def test_create_model_by_dictionary(self):
@@ -108,17 +99,15 @@ class TestLocalDAL():
         dal = LocalDAL(self.datadriver)
         model_name = "model_3"
         model = dal.model.create({"name": model_name})
-        # create new dal with new driver instance (fails)
+        # create new dal with new driver instance (success)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
-        try:
-            new_dal_instance.model.get_by_id(model.id)
-        except:
-            assert True
+        new_model_1 = new_dal_instance.model.get_by_id(model.id)
+        assert new_model_1.id == model.id
         # create new dal instance with same driver (success)
         new_dal_instance = LocalDAL(self.datadriver)
-        new_model = new_dal_instance.model.get_by_id(model.id)
-        assert new_model.id == model.id
+        new_model_2 = new_dal_instance.model.get_by_id(model.id)
+        assert new_model_2.id == model.id
 
     def test_update_model(self):
         dal = LocalDAL(self.datadriver)
@@ -231,17 +220,15 @@ class TestLocalDAL():
             "commit_id": code_commit_id
         })
 
-        # create new dal with new driver instance (fails)
+        # create new dal with new driver instance (success)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
-        try:
-            new_dal_instance.code.get_by_id(code.id)
-        except:
-            assert True
+        new_code_1 = new_dal_instance.code.get_by_id(code.id)
+        assert new_code_1.id == code.id
         # create new dal instance with same driver (success)
         new_dal_instance = LocalDAL(self.datadriver)
-        new_code = new_dal_instance.code.get_by_id(code.id)
-        assert new_code.id == code.id
+        new_code_2 = new_dal_instance.code.get_by_id(code.id)
+        assert new_code_2.id == code.id
 
     def test_update_code(self):
         dal = LocalDAL(self.datadriver)
@@ -400,17 +387,15 @@ class TestLocalDAL():
             "unique_hash": environment_unique_hash
         })
 
-        # create new dal with new driver instance (fails)
+        # create new dal with new driver instance (success)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
-        try:
-            new_dal_instance.environment.get_by_id(environment.id)
-        except:
-            assert True
+        new_environment_1 = new_dal_instance.environment.get_by_id(environment.id)
+        assert new_environment_1.id == environment.id
         # create new dal instance with same driver (success)
         new_dal_instance = LocalDAL(self.datadriver)
-        new_environment = new_dal_instance.environment.get_by_id(environment.id)
-        assert new_environment.id == environment.id
+        new_environment_2 = new_dal_instance.environment.get_by_id(environment.id)
+        assert new_environment_2.id == environment.id
 
     def test_update_environment(self):
         dal = LocalDAL(self.datadriver)
@@ -569,17 +554,15 @@ class TestLocalDAL():
             "path": file_collection_path,
         })
 
-        # create new dal with new driver instance (fails)
+        # create new dal with new driver instance (success)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
-        try:
-            new_dal_instance.file_collection.get_by_id(file_collection.id)
-        except:
-            assert True
+        new_file_collection_1 = new_dal_instance.file_collection.get_by_id(file_collection.id)
+        assert new_file_collection_1.id == file_collection.id
         # create new dal instance with same driver (success)
         new_dal_instance = LocalDAL(self.datadriver)
-        new_file_collection = new_dal_instance.file_collection.get_by_id(file_collection.id)
-        assert new_file_collection.id == file_collection.id
+        new_file_collection_2 = new_dal_instance.file_collection.get_by_id(file_collection.id)
+        assert new_file_collection_2.id == file_collection.id
 
     def test_update_file_collection(self):
         dal = LocalDAL(self.datadriver)
@@ -713,14 +696,12 @@ class TestLocalDAL():
         # create new dal with new driver instance (fails)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
-        try:
-            new_dal_instance.session.get_by_id(session.id)
-        except:
-            assert True
+        new_session_1 = new_dal_instance.session.get_by_id(session.id)
+        assert new_session_1.id == session.id
         # create new dal instance with same driver (success)
         new_dal_instance = LocalDAL(self.datadriver)
-        new_session = new_dal_instance.session.get_by_id(session.id)
-        assert new_session.id == session.id
+        new_session_2 = new_dal_instance.session.get_by_id(session.id)
+        assert new_session_2.id == session.id
 
     def test_update_session(self):
         dal = LocalDAL(self.datadriver)
@@ -883,17 +864,15 @@ class TestLocalDAL():
             "file_collection_id": task_file_collection_id
         })
 
-        # create new dal with new driver instance (fails)
+        # create new dal with new driver instance (success)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
-        try:
-            new_dal_instance.task.get_by_id(task.id)
-        except:
-            assert True
+        new_task_1 = new_dal_instance.task.get_by_id(task.id)
+        assert new_task_1.id == task.id
         # create new dal instance with same driver (success)
         new_dal_instance = LocalDAL(self.datadriver)
-        new_task = new_dal_instance.task.get_by_id(task.id)
-        assert new_task.id == task.id
+        new_task_2 = new_dal_instance.task.get_by_id(task.id)
+        assert new_task_2.id == task.id
 
     def test_update_task(self):
         dal = LocalDAL(self.datadriver)
@@ -1084,14 +1063,12 @@ class TestLocalDAL():
         # create new dal with new driver instance (fails)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
-        try:
-            new_dal_instance.snapshot.get_by_id(snapshot.id)
-        except:
-            assert True
+        new_snapshot_1 = new_dal_instance.snapshot.get_by_id(snapshot.id)
+        assert new_snapshot_1.id == snapshot.id
         # create new dal instance with same driver (success)
         new_dal_instance = LocalDAL(self.datadriver)
-        new_snapshot = new_dal_instance.snapshot.get_by_id(snapshot.id)
-        assert new_snapshot.id == snapshot.id
+        new_snapshot_2 = new_dal_instance.snapshot.get_by_id(snapshot.id)
+        assert new_snapshot_2.id == snapshot.id
 
     def test_update_snapshot(self):
         dal = LocalDAL(self.datadriver)
@@ -1240,14 +1217,12 @@ class TestLocalDAL():
         # create new dal with new driver instance (fails)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
-        try:
-            new_dal_instance.user.get_by_id(user.id)
-        except:
-            assert True
+        new_user_1 = new_dal_instance.user.get_by_id(user.id)
+        assert new_user_1.id == user.id
         # create new dal instance with same driver (success)
         new_dal_instance = LocalDAL(self.datadriver)
-        new_user = new_dal_instance.user.get_by_id(user.id)
-        assert new_user.id == user.id
+        new_user_2 = new_dal_instance.user.get_by_id(user.id)
+        assert new_user_2.id == user.id
 
     def test_update_user(self):
         dal = LocalDAL(self.datadriver)

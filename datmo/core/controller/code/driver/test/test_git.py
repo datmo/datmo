@@ -34,16 +34,20 @@ class TestGitCodeDriver():
         assert self.git_code_manager != None
 
     def test_instantiation_fail_dne(self):
+        failed = False
         try:
             _ = GitCodeDriver(filepath="nonexistant_path", execpath="git")
         except DoesNotExistException:
-            assert True
+            failed = True
+        assert failed
 
     def test_instantiation_fail_git_does_not_exist(self):
+        failed = False
         try:
             _ = GitCodeDriver(filepath=self.temp_dir, execpath="nonexistant_execpath")
         except GitExecutionException:
-            assert True
+            failed = True
+        assert failed
 
     def test_instantiation_fail_git_version_out_of_date(self):
         pass
@@ -70,10 +74,12 @@ class TestGitCodeDriver():
         # Add files and commit then check they exist
         self.git_code_manager.add(".datmo", "-f")
         self.git_code_manager.commit(["-m", "test message"])
+        failed = False
         try:
             _ = GitCodeDriver(filepath=self.temp_dir, execpath="git")
         except DatmoFolderInWorkTree:
-            assert True
+            failed = True
+        assert failed
 
     def test_exists_datmo_files_ignored(self):
         self.git_code_manager.init()
@@ -231,10 +237,12 @@ class TestGitCodeDriver():
     def test_latest_commit(self):
         self.git_code_manager.init()
         # Check if properly returns error without commit
+        failed = False
         try:
             self.git_code_manager.latest_commit()
         except:
-            assert True
+            failed = True
+        assert failed
         # Check if properly returns latest commit
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
@@ -348,10 +356,12 @@ class TestGitCodeDriver():
     def test_create_ref(self):
         self.git_code_manager.init()
         # Test failing case with no code_id and nothing to commit
+        failed = False
         try:
             self.git_code_manager.create_ref()
         except GitCommitDoesNotExist:
-            assert True
+            failed = True
+        assert failed
         # Test passing case with no code_id
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
@@ -365,11 +375,13 @@ class TestGitCodeDriver():
             os.path.isfile(code_ref_path)
         # Test error raised with commit_id
         random_commit_id = str("random")
+        failed = False
         try:
             self.git_code_manager.\
                 create_ref(commit_id=random_commit_id)
         except GitCommitDoesNotExist:
-            assert True
+            failed = True
+        assert failed
 
     def test_exists_ref(self):
         self.git_code_manager.init()

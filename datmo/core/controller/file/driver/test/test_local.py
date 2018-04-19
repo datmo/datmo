@@ -189,9 +189,9 @@ class TestLocalFileManager():
     def test_create_collections_dir(self):
         collections_path = os.path.join(self.local_file_driver.filepath,
                                         ".datmo", "collections")
+        thrown = False
         try:
             self.local_file_driver.create_collections_dir()
-            thrown = False
         except:
             thrown = True
         assert thrown == True and \

@@ -6,11 +6,17 @@ from datmo.core.controller.file.file_collection import FileCollectionController
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.util.i18n import get as __
 from datmo.core.util.json_store import JSONStore
-from datmo.core.util.exceptions import FileIOException, RequiredArgumentMissing
+from datmo.core.util.exceptions import FileIOException, RequiredArgumentMissing, \
+    ProjectNotInitializedException
 
 
 class SnapshotController(BaseController):
     """SnapshotController inherits from BaseController and manages business logic related to snapshots
+
+    Parameters
+    ----------
+    home : str
+        home path of the project
 
     Attributes
     ----------
@@ -30,11 +36,14 @@ class SnapshotController(BaseController):
         Delete the snapshot specified from the project
 
     """
-    def __init__(self, home, dal_driver=None):
-        super(SnapshotController, self).__init__(home, dal_driver)
-        self.code = CodeController(home, self.dal.driver)
-        self.file_collection = FileCollectionController(home, self.dal.driver)
-        self.environment = EnvironmentController(home, self.dal.driver)
+    def __init__(self, home):
+        super(SnapshotController, self).__init__(home)
+        self.code = CodeController(home)
+        self.file_collection = FileCollectionController(home)
+        self.environment = EnvironmentController(home)
+        if not self.is_initialized:
+            raise ProjectNotInitializedException(__("error",
+                                                    "controller.snapshot.__init__"))
 
     def create(self, dictionary):
         """Create snapshot object
@@ -42,42 +51,74 @@ class SnapshotController(BaseController):
         Parameters
         ----------
         dictionary : dict
-            direct values to create snapshot
+
+            for each of the 5 key components, this function will search for
+            one of the variables below starting from the top. Default functionality
+            is described below for each component as well for reference if none
+            of the variables are given.
+
+            code :
                 code_id : str, optional
                     code reference associated with the snapshot; if not
                     provided will look to inputs below for code creation
+                commit_id : str, optional
+
+                Default
+                -------
+                commits will be taken and code created via the  CodeController
+                and are added to the snapshot at the time of snapshot creation
+
+            environment :
                 environment_id : str, optional
                     id for environment used to create snapshot
+                environment_definition_filepath : str, optional
+                    absolute filepath for the environment definition file
+                    (e.g. Dockerfile path for Docker)
+
+                Default
+                -------
+                default environment files will be searched and environment will
+                be created with the EnvironmentController and added to the snapshot
+                at the time of snapshot creation
+
+            file_collection :
                 file_collection_id : str, optional
                     file collection associated with the snapshot
+                filepaths : list, optional
+                    list of files or folder paths to include within the snapshot
+
+                Default
+                -------
+                filepaths will be considered empty ([]), and the FileCollectionController
+                will create a blank FileCollection that is empty.
+
+            config :
                 config : dict, optional
                     key, value pairs of configurations
+                config_filepath : str, optional
+                    absolute filepath to configuration parameters file
+                config_filename : str, optional
+                    name of file with configuration parameters
+
+                Default
+                -------
+                config will be considered empty ({}) and saved to the snapshot
+
+            stats :
                 stats : dict, optional
                     key, value pairs of metrics and statistics
+                stats_filepath : str, optional
+                    absolute filepath to stats parameters file
+                stats_filename : str, optional
+                    name of file with metrics and statistics.
 
-            alternatively you can provide inputs for creating snapshot components
-                code :
-                    commit_id : str, optional
-                environment :
-                    environment_definition_filepath : str, optional
-                        absolute filepath for the environment definition file
-                        (e.g. Dockerfile path for Docker)
-                file_collection :
-                    filepaths : list, optional
-                        list of files or folder paths to include within the snapshot
-                config :
-                    config_filepath : str, optional
-                        absolute filepath to configuration parameters file
-                    config_filename : str, optional
-                        name of file with configuration parameters
-                stats :
-                    stats_filepath : str, optional
-                        absolute filepath to stats parameters file
-                    stats_filename : str, optional
-                        name of file with metrics and statistics.
+                Default
+                -------
+                stats will be considered empty ({}) and saved to the snapshot
 
             for the remaining optional arguments it will search for them
             in the input dictionary
+
                 session_id : str, optional
                     session id within which snapshot is created,
                     will overwrite default
@@ -90,11 +131,10 @@ class SnapshotController(BaseController):
                 visible : bool, optional
                     True if visible to user via list command else False
 
-
         Returns
         -------
         Snapshot
-            Snapshot object as specified in datmo.entity.snapshot
+            Snapshot object as specified in datmo.src.entity.snapshot
 
         Raises
         ------

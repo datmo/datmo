@@ -19,6 +19,11 @@ class LocalDAL():
     LocalDAL is a local DAL object that stores info locally. DAL stands for 'data access layer' and serves as a storage for
     all entities.
 
+    Parameters
+    ----------
+    driver : DALDriver
+        backend driver to use to store entities
+
     Attributes
     ----------
     driver : DALDriver
@@ -36,67 +41,53 @@ class LocalDAL():
     def __init__(self, driver):
         self.driver = driver
 
-    @cache
     @property
     def model(self):
-        """
-        Model CRUD methods
+        """Model CRUD methods
 
         Returns
         -------
         ModelMethods
             Specific set of CRUD functions for model
-
         """
-        return  ModelMethods(self.driver)
+        return ModelMethods(self.driver)
 
-    @cache
     @property
     def code(self):
-        """
-        Code CRUD methods
+        """Code CRUD methods
 
         Returns
         -------
         CodeMethods
             Specific set of CRUD functions for code
-
         """
         return CodeMethods(self.driver)
 
-    @cache
     @property
     def environment(self):
-        """
-        Environment CRUD methods
+        """Environment CRUD methods
 
         Returns
         -------
         EnvironmentMethods
             Specific set of CRUD functions for environment
-
         """
         return EnvironmentMethods(self.driver)
 
-    @cache
     @property
     def file_collection(self):
-        """
-        FileCollection CRUD methods
+        """FileCollection CRUD methods
 
         Returns
         -------
         FileCollectionMethods
             Specific set of CRUD functions for file collection
-
         """
         return FileCollectionMethods(self.driver)
 
-    @cache
     @property
     def session(self):
-        """
-        Session CRUD methods
+        """Session CRUD methods
 
         Returns
         -------
@@ -109,44 +100,38 @@ class LocalDAL():
     @cache
     @property
     def task(self):
-        """
-        Task CRUD methods
+        """Task CRUD methods
 
         Returns
         -------
         TaskMethods
             Specific set of CRUD functions for task
-
         """
-        return  TaskMethods(self.driver)
+        return TaskMethods(self.driver)
 
     @cache
     @property
     def snapshot(self):
-        """
-        Snapshot CRUD methods
+        """Snapshot CRUD methods
 
         Returns
         -------
         SnapshotMethods
             Specific set of CRUD functions for snapshot
-
         """
-        return  SnapshotMethods(self.driver)
+        return SnapshotMethods(self.driver)
 
     @cache
     @property
     def user(self):
-        """
-        User CRUD methods
+        """User CRUD methods
 
         Returns
         -------
         UserMethods
             Specific set of CRUD functions for user
-
         """
-        return  UserMethods(self.driver)
+        return UserMethods(self.driver)
 
 class EntityMethodsCRUD(object):
     def __init__(self, collection, entity_class, driver):

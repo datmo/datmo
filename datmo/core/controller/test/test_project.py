@@ -27,10 +27,12 @@ class TestProjectController():
 
     def test_init(self):
         # Test failed case
+        failed = False
         try:
             self.project.init(None, None)
         except RequiredArgumentMissing:
-            assert True
+            failed = True
+        assert failed
 
         result = self.project.init("test", "test description")
 

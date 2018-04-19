@@ -10,6 +10,13 @@ from datmo.core.util.exceptions import InvalidProjectPathException, \
 class BaseController(object):
     """BaseController is used to setup the repository. It serves as the basis for all other Controller objects
 
+    Parameters
+    ----------
+    home : str
+        home path of the project
+    dal_driver : DALDriver
+        an instance of a DALDriver to use while accessing the DAL
+
     Attributes
     ----------
     home : str
@@ -39,9 +46,8 @@ class BaseController(object):
 
     """
 
-    def __init__(self, home, dal_driver=None):
+    def __init__(self, home):
         self.home = home
-        self.dal_driver = dal_driver
         self.config = JSONStore(os.path.join(self.home,
                                              ".datmo",
                                              ".config"))
@@ -160,12 +166,11 @@ class BaseController(object):
 
     def dal_instantiate(self):
         # first load driver, then create DAL using driver
-        if not self.dal_driver:
-            dal_driver_dict = self.config_loader("storage.driver")
-            self.dal_driver = dal_driver_dict["constructor"](**dal_driver_dict["options"])
+        dal_driver_dict = self.config_loader("storage.driver")
+        dal_driver = dal_driver_dict["constructor"](**dal_driver_dict["options"])
         # Get DAL, set driver,
         dal_dict = self.config_loader("storage.local")
-        dal_dict["options"]["driver"] = self.dal_driver
+        dal_dict["options"]["driver"] = dal_driver
         return dal_dict["constructor"](**dal_dict["options"])
 
     def get_or_set_default(self, key, default_value):

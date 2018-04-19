@@ -4,12 +4,18 @@ from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.snapshot import SnapshotController
-from datmo.core.util.exceptions import TaskRunException, RequiredArgumentMissing
+from datmo.core.util.exceptions import TaskRunException, RequiredArgumentMissing, \
+    ProjectNotInitializedException
 
 
 class TaskController(BaseController):
     """TaskController inherits from BaseController and manages business logic associated with tasks
     within the project.
+
+    Parameters
+    ----------
+    home : str
+        home path of the project
 
     Attributes
     ----------
@@ -32,10 +38,13 @@ class TaskController(BaseController):
         deletes the specified task from the project
 
     """
-    def __init__(self, home, dal_driver=None):
-        super(TaskController, self).__init__(home, dal_driver)
-        self.environment = EnvironmentController(home, self.dal.driver)
-        self.snapshot = SnapshotController(home, self.dal.driver)
+    def __init__(self, home):
+        super(TaskController, self).__init__(home)
+        self.environment = EnvironmentController(home)
+        self.snapshot = SnapshotController(home)
+        if not self.is_initialized:
+            raise ProjectNotInitializedException(__("error",
+                                                    "controller.task.__init__"))
 
     def create(self, dictionary):
         """Create Task object

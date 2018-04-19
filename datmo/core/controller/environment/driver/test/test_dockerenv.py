@@ -89,17 +89,21 @@ class TestDockerEnv():
         assert output_path == output_dockerfile_path
 
         # Test exception for path does not exist
+        failed = False
         try:
             self.docker_environment_manager.create("nonexistant_path")
         except DoesNotExistException:
-            assert True
+            failed = True
+        assert failed
 
         # Test exception for output path already exists
+        failed = False
         try:
             self.docker_environment_manager.create(
                 output_path=output_dockerfile_path)
         except FileAlreadyExistsException:
-            assert True
+            failed = True
+        assert failed
 
     def test_build(self):
         name = str(uuid.uuid1())

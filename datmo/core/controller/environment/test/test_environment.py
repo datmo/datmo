@@ -20,7 +20,7 @@ class TestEnvironmentController():
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.project = ProjectController(self.temp_dir)
-        self.environment = EnvironmentController(self.temp_dir, self.project.dal.driver)
+        self.environment = EnvironmentController(self.temp_dir)
 
     def teardown_method(self):
         shutil.rmtree(self.temp_dir)
@@ -29,10 +29,12 @@ class TestEnvironmentController():
         self.project.init("test3", "test description")
 
         # Test failure if no default found
+        failed = False
         try:
             _ = self.environment.create({})
         except DoesNotExistException:
-            assert True
+            failed = True
+        assert failed
 
         # Create environment definition
         definition_filepath = os.path.join(self.environment.home,

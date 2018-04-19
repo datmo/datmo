@@ -12,6 +12,11 @@ class EnvironmentController(BaseController):
     """EnvironmentController inherits from BaseController and manages business logic related to the
     environment.
 
+    Parameters
+    ----------
+    home : str
+        home path of the project
+
     Methods
     -------
     create(dictionary)
@@ -24,9 +29,9 @@ class EnvironmentController(BaseController):
         Delete the specified environment from the project
 
     """
-    def __init__(self, home, dal_driver=None):
-        super(EnvironmentController, self).__init__(home, dal_driver)
-        self.file_collection = FileCollectionController(home, self.dal.driver)
+    def __init__(self, home):
+        super(EnvironmentController, self).__init__(home)
+        self.file_collection = FileCollectionController(home)
 
     def create(self, dictionary):
         """Create an Environment

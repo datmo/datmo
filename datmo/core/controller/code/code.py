@@ -7,6 +7,11 @@ class CodeController(BaseController):
     """CodeController inherits from BaseController and manages business logic related to the
     code.
 
+    Parameters
+    ----------
+    home : str
+        home path of the project
+
     Methods
     -------
     create(code_id=None)
@@ -16,8 +21,8 @@ class CodeController(BaseController):
     delete(id)
         delete the specified code object from the project
     """
-    def __init__(self, home, dal_driver=None):
-        super(CodeController, self).__init__(home, dal_driver)
+    def __init__(self, home):
+        super(CodeController, self).__init__(home)
 
     def create(self, commit_id=None):
         """Create a Code object

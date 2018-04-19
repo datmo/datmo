@@ -28,10 +28,12 @@ class TestFileCollectionController():
         self.project.init("test3", "test description")
 
         # Test failure creation of collection
+        failed = False
         try:
             self.file_collection.create()
         except:
-            assert True
+            failed = True
+        assert failed
 
         # Test successful creation of collection
         self.file_collection.file_driver.create("dirpath1", dir=True)

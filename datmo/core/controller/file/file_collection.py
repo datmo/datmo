@@ -7,6 +7,11 @@ class FileCollectionController(BaseController):
     """FileCollectionController inherits from BaseController and manages business logic related to the
     file system.
 
+    Parameters
+    ----------
+    home : str
+        home path of the project
+
     Methods
     -------
     create(filepaths)
@@ -16,8 +21,8 @@ class FileCollectionController(BaseController):
     delete(id)
         delete the specified file collection from the project
     """
-    def __init__(self, home, dal_driver=None):
-        super(FileCollectionController, self).__init__(home, dal_driver)
+    def __init__(self, home):
+        super(FileCollectionController, self).__init__(home)
 
     def create(self, filepaths):
         """Create a FileCollection
