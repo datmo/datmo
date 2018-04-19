@@ -82,16 +82,17 @@ class TaskCommand(ProjectCommand):
         self.cli_helper.echo(t)
         return True
 
-    def stop(self, **kwargs):
-        id = kwargs.get('id', None)
-        try:
-            task_delete_dict = {"id": id}
-            self.task_controller.delete(**task_delete_dict)
-        except Exception:
-            self.cli_helper.echo(__("error",
-                                   "cli.task.delete"))
-            return False
-        return True
+    # TODO: implement with proper task controller function
+    # def stop(self, **kwargs):
+    #     id = kwargs.get('id', None)
+    #     try:
+    #         task_delete_dict = {"id": id}
+    #         self.task_controller.delete(**task_delete_dict)
+    #     except Exception:
+    #         self.cli_helper.echo(__("error",
+    #                                "cli.task.delete"))
+    #         return False
+    #     return True
 
 
 
