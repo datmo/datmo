@@ -13,7 +13,8 @@ class TestEnvironment():
             "definition_filename": "Dockerfile",
             "hardware_info": {"system": "test"},
             "file_collection_id": "my_collection",
-            "unique_hash": "sjfl39w"
+            "unique_hash": "sjfl39w",
+            "language": "python3"
         }
         environment_entity = Environment(input_dict)
 
@@ -22,6 +23,7 @@ class TestEnvironment():
         assert environment_entity.description == ""
         assert environment_entity.created_at
         assert environment_entity.updated_at
+        assert environment_entity.language
 
     def test_eq(self):
         input_dict = {
@@ -31,7 +33,8 @@ class TestEnvironment():
             "definition_filename": "Dockerfile",
             "hardware_info": {"system": "test"},
             "file_collection_id": "my_collection",
-            "unique_hash": "sjfl39w"
+            "unique_hash": "sjfl39w",
+            "language": "python3"
         }
         environment_entity_1 = Environment(input_dict)
         environment_entity_2 = Environment(input_dict)
@@ -46,7 +49,8 @@ class TestEnvironment():
             "definition_filename": "Dockerfile",
             "hardware_info": {"system": "test"},
             "file_collection_id": "my_collection",
-            "unique_hash": "sjfl39w"
+            "unique_hash": "sjfl39w",
+            "language": "python3"
         }
         environment_entity = Environment(input_dict)
         output_dict = environment_entity.to_dictionary()

@@ -64,7 +64,7 @@ class EnvironmentController(BaseController):
             "model_id": self.model.id,
         }
 
-        ## Required args for Environment entity
+        # Required args for Environment entity
         required_args = ["driver_type", "definition_filename",
                          "hardware_info", "file_collection_id", "unique_hash"]
         for required_arg in required_args:
@@ -72,6 +72,8 @@ class EnvironmentController(BaseController):
             if required_arg == "driver_type":
                 create_dict[required_arg] = self.environment_driver.type
             elif required_arg == "definition_filename":
+                language = dictionary.get("language", "python3")
+                create_dict['language'] = language
                 if "definition_filepath" in dictionary:
                     original_definition_filepath = dictionary['definition_filepath']
                     # Split up the given path and save definition filename
@@ -81,12 +83,12 @@ class EnvironmentController(BaseController):
                     # Create datmo environment definition in the same dir as definition filepath
                     datmo_definition_filepath = \
                         os.path.join(definition_path, "datmo" + definition_filename)
-                    self.environment_driver.create(path=dictionary['definition_filepath'],
+                    _, _, _, requirements_filepath = self.environment_driver.create(path=dictionary['definition_filepath'],
                                                    output_path=datmo_definition_filepath)
                 else:
                     # Use the default create to find environment definition
-                    _, original_definition_filepath, datmo_definition_filepath = \
-                        self.environment_driver.create()
+                    _, original_definition_filepath, datmo_definition_filepath, requirements_filepath = \
+                        self.environment_driver.create(language=language)
                     # Split up the default path obtained to save the definition name
                     definition_path, definition_filename = \
                         os.path.split(original_definition_filepath)
@@ -116,8 +118,12 @@ class EnvironmentController(BaseController):
             elif required_arg == "file_collection_id":
                 # Add all environment files to collection:
                 # definition path, datmo_definition_path, hardware_info
-                filepaths = [original_definition_filepath, datmo_definition_filepath,
-                             hardware_info_filepath]
+                if not requirements_filepath:
+                    filepaths = [original_definition_filepath, datmo_definition_filepath,
+                                 hardware_info_filepath]
+                else:
+                    filepaths = [original_definition_filepath, datmo_definition_filepath,
+                                 requirements_filepath, hardware_info_filepath]
                 file_collection_obj = self.file_collection.create(filepaths)
                 create_dict['file_collection_id'] = file_collection_obj.id
 
@@ -136,8 +142,7 @@ class EnvironmentController(BaseController):
             else:
                 NotImplementedError()
 
-
-        ## Optional args for Environment entity
+        # Optional args for Environment entity
         optional_args = ["description"]
         for optional_arg in optional_args:
             if optional_arg in dictionary:
