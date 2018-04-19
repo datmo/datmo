@@ -128,7 +128,7 @@ class GitCodeDriver(CodeDriver):
             except GitExecutionException as e:
                 raise GitCommitDoesNotExist(__("error",
                                               "controller.code.driver.git.create_ref.cannot_commit",
-                                              e))
+                                              str(e)))
             # revert back to the original commit
             if new_commit_bool:
                 self.reset(commit_id)
