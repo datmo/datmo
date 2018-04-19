@@ -318,19 +318,22 @@ class TestLocalDAL():
         environment_definition_filename = "Dockerfile"
         environment_hardware_info = {"system": "macosx"}
         environment_unique_hash = "slkdjfa23dk"
+        environment_language = "python3"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
             "definition_filename": environment_definition_filename,
             "hardware_info": environment_hardware_info,
-            "unique_hash": environment_unique_hash
+            "unique_hash": environment_unique_hash,
+            "language": environment_language
         })
 
         assert environment.id
         assert environment.driver_type == environment_driver_type
         assert environment.file_collection_id == environment_file_collection_id
         assert environment.definition_filename == environment_definition_filename
+        assert environment.language == environment_language
         assert environment.created_at
         assert environment.updated_at
 
@@ -340,7 +343,8 @@ class TestLocalDAL():
             "file_collection_id": environment_file_collection_id,
             "definition_filename": environment_definition_filename,
             "hardware_info": environment_hardware_info,
-            "unique_hash": environment_unique_hash
+            "unique_hash": environment_unique_hash,
+            "language": environment_language
         })
 
         assert environment_2.id != environment.id
@@ -353,7 +357,8 @@ class TestLocalDAL():
             "file_collection_id": environment_file_collection_id,
             "definition_filename": environment_definition_filename,
             "hardware_info": environment_hardware_info,
-            "unique_hash": environment_unique_hash
+            "unique_hash": environment_unique_hash,
+            "language": environment_language
         })
 
         assert environment_3.id
@@ -369,13 +374,15 @@ class TestLocalDAL():
         environment_definition_filename = "Dockerfile"
         environment_hardware_info = {"system": "macosx"}
         environment_unique_hash = "slkdjfa23dk"
+        environment_language = "python3"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
             "definition_filename": environment_definition_filename,
             "hardware_info": environment_hardware_info,
-            "unique_hash": environment_unique_hash
+            "unique_hash": environment_unique_hash,
+            "language": environment_language
         })
 
         result = dal.environment.get_by_id(environment.id)
@@ -391,13 +398,15 @@ class TestLocalDAL():
         environment_definition_filename = "Dockerfile"
         environment_hardware_info = {"system": "macosx"}
         environment_unique_hash = "slkdjfa23dk"
+        environment_language = "python3"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
             "definition_filename": environment_definition_filename,
             "hardware_info": environment_hardware_info,
-            "unique_hash": environment_unique_hash
+            "unique_hash": environment_unique_hash,
+            "language": environment_language
         })
 
         # create new dal with new driver instance (fails)
@@ -422,13 +431,15 @@ class TestLocalDAL():
         environment_definition_filename = "Dockerfile"
         environment_hardware_info = {"system": "macosx"}
         environment_unique_hash = "slkdjfa23dk"
+        environment_language = "python3"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
             "definition_filename": environment_definition_filename,
             "hardware_info": environment_hardware_info,
-            "unique_hash": environment_unique_hash
+            "unique_hash": environment_unique_hash,
+            "language": environment_language
         })
 
         # Update required and optional parameters
@@ -454,13 +465,15 @@ class TestLocalDAL():
         environment_definition_filename = "Dockerfile"
         environment_hardware_info = {"system": "macosx"}
         environment_unique_hash = "slkdjfa23dk"
+        environment_language = "python3"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
             "definition_filename": environment_definition_filename,
             "hardware_info": environment_hardware_info,
-            "unique_hash": environment_unique_hash
+            "unique_hash": environment_unique_hash,
+            "language": environment_language
         })
 
         dal.environment.delete(environment.id)
@@ -481,13 +494,15 @@ class TestLocalDAL():
         environment_definition_filename = "Dockerfile"
         environment_hardware_info = {"system": "macosx"}
         environment_unique_hash = "slkdjfa23dk"
+        environment_language = "python3"
         environment = dal.environment.create({
             "model_id": model.id,
             "driver_type": environment_driver_type,
             "file_collection_id": environment_file_collection_id,
             "definition_filename": environment_definition_filename,
             "hardware_info": environment_hardware_info,
-            "unique_hash": environment_unique_hash
+            "unique_hash": environment_unique_hash,
+            "language": environment_language
         })
 
         assert len(dal.environment.query({"id": environment.id})) == 1
