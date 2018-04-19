@@ -35,7 +35,8 @@ setup(
         "kids.cache==0.0.7",
         "pymongo==3.6.0",
         "checksumdir==1.1.4",
-        "semver==2.7.8"
+        "semver==2.7.8",
+        "pipreqs==0.4.9"
     ],
     tests_require=[
         "pytest==3.0.4"
