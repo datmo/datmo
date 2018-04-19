@@ -51,10 +51,12 @@ class TestTaskCommand():
             f.write(str("FROM datmo/xgboost:cpu"))
 
     def test_task_project_not_init(self):
+        failed = False
         try:
             self.task = TaskCommand(self.temp_dir, self.cli_helper)
         except ProjectNotInitializedException:
-            assert True
+            failed = True
+        assert failed
 
     def test_datmo_task_run(self):
         self.__set_variables()
@@ -167,10 +169,12 @@ class TestTaskCommand():
         ])
 
         # test when wrong task id is passed to stop it
+        failed = False
         try:
             self.task.execute()
         except EntityNotFound:
-            assert True
+            failed = True
+        assert failed
 
     def test_datmo_task_stop_invalid_arg(self):
         self.__set_variables()

@@ -6,7 +6,6 @@ import prettytable
 from datmo.core.util.i18n import get as __
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
-from datmo.core.util.exceptions import ProjectNotInitializedException
 
 
 class TaskCommand(ProjectCommand):
@@ -41,12 +40,7 @@ class TaskCommand(ProjectCommand):
         stop = subcommand_parsers.add_parser("stop", help="Stop tasks")
         stop.add_argument("--id", dest="id", default=None, type=str, help="Task ID to stop")
 
-        self.task_controller = TaskController(home=home,
-                                                  dal_driver=self.project_controller.dal_driver)
-        if not self.project_controller.is_initialized:
-            raise ProjectNotInitializedException(__("error",
-                                                   "cli.project",
-                                                   self.home))
+        self.task_controller = TaskController(home=home)
 
     def run(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.task.run"))

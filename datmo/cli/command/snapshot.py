@@ -59,12 +59,7 @@ class SnapshotCommand(ProjectCommand):
         checkout = subcommand_parsers.add_parser("checkout", help="Checkout a snapshot by id")
         checkout.add_argument("--id", dest="id", default=None, help="SnapshotCommand ID")
 
-        self.snapshot_controller = SnapshotController(home=home,
-                                                      dal_driver=self.project_controller.dal_driver)
-        if not self.project_controller.is_initialized:
-            raise ProjectNotInitializedException(__("error",
-                                                   "cli.project",
-                                                   self.home))
+        self.snapshot_controller = SnapshotController(home=home)
 
     def create(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.create"))
