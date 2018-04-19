@@ -103,6 +103,14 @@ class TestEnvironmentController():
         assert environment_obj_3.id != environment_obj.id
         assert environment_obj_3.id != environment_obj_2.id
 
+        # a definition file and no default definition found
+        # Create a new environment obj
+        os.remove(definition_filepath)
+        input_dict = {}
+        environment_obj_4 = self.environment.create(input_dict)
+        assert environment_obj_4.id
+        assert environment_obj_4.id != environment_obj_3.id
+
     def test_build(self):
         self.project.init("test5", "test description")
 

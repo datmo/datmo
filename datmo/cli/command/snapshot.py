@@ -54,10 +54,10 @@ class SnapshotCommand(ProjectCommand):
         ls.add_argument("--session-id", dest="session_id", default=None, help="Session ID to filter")
         ls.add_argument("--session-name", dest="session_name", default=None, help="Session name to filter")
         ls.add_argument("--all", "-a", dest="details", action="store_true",
-                            help="Show detailed SnapshotCommand information")
+                            help="Show detailed snapshot information")
 
         checkout = subcommand_parsers.add_parser("checkout", help="Checkout a snapshot by id")
-        checkout.add_argument("--id", dest="id", default=None, help="SnapshotCommand ID")
+        checkout.add_argument("--id", dest="id", default=None, help="Snapshot ID")
 
         self.snapshot_controller = SnapshotController(home=home,
                                                       dal_driver=self.project_controller.dal_driver)

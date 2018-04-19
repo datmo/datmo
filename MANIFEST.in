@@ -1,2 +1,4 @@
 include datmo/controller/environment/driver/templates/baseDockerfile
+include datmo/controller/environment/driver/templates/python2Dockerfile
+include datmo/controller/environment/driver/templates/python3Dockerfile
 recursive-include templates *
