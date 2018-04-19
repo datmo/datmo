@@ -68,13 +68,16 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             directory, filename = os.path.split(path)
             output_path = os.path.join(directory,
                                        "datmo" + filename)
+        if not language:
+            language = "python3"
+
         requirements_filepath = None
         if not os.path.isfile(path):
             if language == "python3":
                 # Create requirements txt file for python
                 requirements_filepath = self.create_requirements_file()
                 # Create Dockerfile for ubuntu
-                path = self.create_default_dockerfile(requirements_filpath=requirements_filepath,
+                path = self.create_default_dockerfile(requirements_filepath=requirements_filepath,
                                                       language=language)
             else:
                 raise DoesNotExistException(_("error",
@@ -489,8 +492,12 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         return True
 
     def create_requirements_file(self, execpath="pipreqs"):
-        """
-        In order to create requirements txt file for the project
+        """Create requirements txt file for the project
+
+        Returns
+        -------
+        str
+            absolute filepath for requirements file
         """
         try:
             subprocess.check_output([execpath, self.filepath, "--force"],
@@ -498,19 +505,24 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             requirements_filepath = os.path.join(self.filepath, "requirements.txt")
             return requirements_filepath
         except Exception as e:
-            raise EnvironmentRequirementsCreateException(__("error",
-                                                         "controller.environment.requirements.create",
-                                                         str(e)))
+            raise EnvironmentRequirementsCreateException(_("error",
+                                                           "controller.environment.requirements.create",
+                                                           str(e)))
 
+    def create_default_dockerfile(self, requirements_filepath, language):
+        """Create a default Dockerfile for a given language
 
-    def create_default_dockerfile(self, requirements_filpath, language):
-        """
-        Args:
-            requirements_filpath: Path for the requirements txt file
-            language:
-                 Currently supports python2 and python3
+        Parameters
+        ----------
+        requirements_filepath : str
+            path for the requirements txt file
+        language : str
+            programming language used ("python2" and "python3" currently supported)
 
-        Returns: Path for the new Dockerfile using requirements txt file
+        Returns
+        -------
+        str
+            absolute path for the new Dockerfile using requirements txt file
         """
         language_dockerfile = "%sDockerfile" % language
         base_dockerfile_filepath = os.path.join(os.path.dirname(os.path.abspath(__file__)),
@@ -520,7 +532,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         destination_dockerfile = os.path.join(self.filepath, "Dockerfile")
         destination = open(destination_dockerfile, "w")
         shutil.copyfileobj(open(base_dockerfile_filepath, "r"), destination)
-        destination.write(str("ADD %s /tmp/requirements.txt\n" %requirements_filpath))
+        destination.write(str("ADD %s /tmp/requirements.txt\n" % requirements_filepath))
         destination.write(str("RUN pip install --no-cache-dir -r /tmp/requirements.txt\n"))
         destination.close()
 

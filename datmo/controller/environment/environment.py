@@ -5,8 +5,7 @@ from datmo.util.i18n import get as __
 from datmo.controller.base import BaseController
 from datmo.controller.file.file_collection import FileCollectionController
 from datmo.util.json_store import JSONStore
-from datmo.util.exceptions import RequiredArgumentMissing, \
-    DoesNotExistException
+from datmo.util.exceptions import DoesNotExistException
 
 
 class EnvironmentController(BaseController):
@@ -42,6 +41,9 @@ class EnvironmentController(BaseController):
                 hardware_info : dict, optional
                     information about the environment hardware
                     (default is to extract hardware from platform currently running)
+                language : str, optional
+                    programming language used
+                    (default is None, which allows Driver to determine default)
             optional values to populate optional  environment entity args
                 description : str, optional
                     description of the environment
@@ -65,15 +67,15 @@ class EnvironmentController(BaseController):
         }
 
         # Required args for Environment entity
-        required_args = ["driver_type", "definition_filename",
+        required_args = ["driver_type", "language", "definition_filename",
                          "hardware_info", "file_collection_id", "unique_hash"]
         for required_arg in required_args:
             # Pull in driver type from base
             if required_arg == "driver_type":
                 create_dict[required_arg] = self.environment_driver.type
+            elif required_arg == "language":
+                create_dict['language'] = dictionary.get("language", None)
             elif required_arg == "definition_filename":
-                language = dictionary.get("language", "python3")
-                create_dict['language'] = language
                 if "definition_filepath" in dictionary:
                     original_definition_filepath = dictionary['definition_filepath']
                     # Split up the given path and save definition filename
@@ -86,9 +88,12 @@ class EnvironmentController(BaseController):
                     _, _, _, requirements_filepath = self.environment_driver.create(path=dictionary['definition_filepath'],
                                                    output_path=datmo_definition_filepath)
                 else:
+                    # If path is not given, then only use the language to create a default
+                    # environment
+
                     # Use the default create to find environment definition
                     _, original_definition_filepath, datmo_definition_filepath, requirements_filepath = \
-                        self.environment_driver.create(language=language)
+                        self.environment_driver.create(language=create_dict['language'])
                     # Split up the default path obtained to save the definition name
                     definition_path, definition_filename = \
                         os.path.split(original_definition_filepath)

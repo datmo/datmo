@@ -62,7 +62,8 @@ class SnapshotController(BaseController):
                     environment_definition_filepath : str, optional
                         absolute filepath for the environment definition file
                         (e.g. Dockerfile path for Docker)
-                    language: coding language in which datmo client would be written and run
+                    language : str, optional
+                        programming language used
                 file_collection :
                     filepaths : list, optional
                         list of files or folder paths to include within the snapshot
@@ -90,7 +91,6 @@ class SnapshotController(BaseController):
                     short description of snapshot
                 visible : bool, optional
                     True if visible to user via list command else False
-
 
         Returns
         -------
@@ -131,7 +131,7 @@ class SnapshotController(BaseController):
                     create_dict['environment_id'] = self.environment.create({
                         "definition_filepath": dictionary['environment_definition_filepath']
                     }).id
-                elif language:
+                elif create_dict['language']:
                     create_dict['environment_id'] = self.environment. \
                         create({"language": language}).id
                 else:

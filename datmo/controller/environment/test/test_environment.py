@@ -97,6 +97,9 @@ class TestEnvironmentController():
             "definition_filepath": definition_filepath,
         }
 
+        # TODO: Add test for 3rd case if the user does not pass
+        # a definition file and no default definition found
+
         # Create a new environment obj
         environment_obj_3 = self.environment.create(input_dict)
 

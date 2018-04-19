@@ -12,6 +12,8 @@ class Environment():
         the parent model id for the entity
     driver_type : str
         the driver class that created the entity
+    language : str
+        programming language used
     definition_filename : str
         definition filename to search for
     hardware_info : dict

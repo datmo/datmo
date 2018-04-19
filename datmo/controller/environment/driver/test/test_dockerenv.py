@@ -12,7 +12,8 @@ import uuid
 
 from datmo.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.util.exceptions import EnvironmentInitFailed, \
-    DoesNotExistException, FileAlreadyExistsException
+    DoesNotExistException, FileAlreadyExistsException, \
+    EnvironmentRequirementsCreateException
 
 
 class TestDockerEnv():
@@ -102,7 +103,6 @@ class TestDockerEnv():
         with open(script_path, "w") as f:
             f.write("import numpy\n")
             f.write("import sklearn\n")
-        f.close()
         success, path, output_path, requirements_filepath = \
             self.docker_environment_manager.create(language="python3")
         assert success and \
@@ -467,6 +467,46 @@ class TestDockerEnv():
         self.docker_environment_manager.stop_container(container_id)
         self.docker_environment_manager.remove_container(container_id, force=True)
         self.docker_environment_manager.remove_image(image_name, force=True)
+
+    def test_create_requirements_file(self):
+        script_path = os.path.join(self.docker_environment_manager.filepath,
+                                   "script.py")
+        with open(script_path, "w") as f:
+            f.write("import numpy\n")
+            f.write("import sklearn\n")
+        # Test default
+        result = self.docker_environment_manager.create_requirements_file()
+        assert result
+        assert os.path.isfile(result) and \
+               "numpy" in open(result, "r").read() and \
+               "scikit_learn" in open(result, "r").read()
+
+        # Test failure
+        exception_thrown = False
+        try:
+            _ = self.docker_environment_manager.\
+                create_requirements_file(execpath="does_not_work")
+        except EnvironmentRequirementsCreateException:
+            exception_thrown = True
+
+        assert exception_thrown
+
+    def test_create_default_dockerfile(self):
+        script_path = os.path.join(self.docker_environment_manager.filepath,
+                                   "script.py")
+        with open(script_path, "w") as f:
+            f.write("import numpy\n")
+            f.write("import sklearn\n")
+        requirements_filepath = \
+            self.docker_environment_manager.create_requirements_file()
+        result = self.docker_environment_manager.\
+            create_default_dockerfile(requirements_filepath,
+                                      language="python3")
+
+        assert result
+        assert os.path.isfile(result)
+        assert "python" in open(result, "r").read()
+        assert "requirements.txt" in open(result, "r").read()
 
     def test_stop_remove_containers_by_term(self):
         # TODO: add more robust tests
