@@ -36,26 +36,32 @@ class TestSnapshotModule():
 
         # Create a snapshot with default params and files to commit
         # (fails w/ no environment)
-        test_filepath = os.path.join(self.temp_dir, "test.txt")
+        test_filepath = os.path.join(self.temp_dir, "script.py")
         with open(test_filepath, "w") as f:
-            f.write("test")
-        failed = False
-        try:
-            _ = create(message="test", home=self.temp_dir)
-        except DoesNotExistException:
-            failed = True
-        assert failed
+            f.write("import numpy\n")
+            f.write("import sklean\n")
+
+        snapshot_obj_1 = create(message="test", home=self.temp_dir)
+
+        assert snapshot_obj_1
+        assert snapshot_obj_1.message == "test"
+        assert snapshot_obj_1.code_id
+        assert snapshot_obj_1.environment_id
+        assert snapshot_obj_1.file_collection_id
+        assert snapshot_obj_1.config == {}
+        assert snapshot_obj_1.stats == {}
 
         # Create a snapshot with default params, files, and environment
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "w") as f:
             f.write("FROM datmo/xgboost:cpu")
-        snapshot_obj = create(message="test", home=self.temp_dir)
+        snapshot_obj_2 = create(message="test", home=self.temp_dir)
 
-        assert snapshot_obj
-        assert snapshot_obj.message == "test"
-        assert snapshot_obj.code_id
-        assert snapshot_obj.environment_id
-        assert snapshot_obj.file_collection_id
-        assert snapshot_obj.config == {}
-        assert snapshot_obj.stats == {}
+        assert snapshot_obj_2
+        assert snapshot_obj_2.message == "test"
+        assert snapshot_obj_2.code_id
+        assert snapshot_obj_2.environment_id
+        assert snapshot_obj_2.file_collection_id
+        assert snapshot_obj_2.config == {}
+        assert snapshot_obj_2.stats == {}
+        assert snapshot_obj_2 != snapshot_obj_1

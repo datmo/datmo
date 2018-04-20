@@ -67,6 +67,9 @@ class FileStructureException(FileExecutionException):
 class EnvironmentExecutionException(Exception):
     pass
 
+class EnvironmentRequirementsCreateException(Exception):
+    pass
+
 class EnvironmentInitFailed(EnvironmentExecutionException):
     pass
 

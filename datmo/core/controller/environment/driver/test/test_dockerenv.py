@@ -12,7 +12,9 @@ import uuid
 
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.core.util.exceptions import EnvironmentInitFailed, \
-    DoesNotExistException, FileAlreadyExistsException
+    DoesNotExistException, FileAlreadyExistsException, \
+    EnvironmentRequirementsCreateException
+
 
 
 class TestDockerEnv():
@@ -57,7 +59,7 @@ class TestDockerEnv():
         output_dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
                                               "datmoDockerfile")
         # Test both default values
-        success, path, output_path = \
+        success, path, output_path, requirements_filepath = \
             self.docker_environment_manager.create()
 
         assert success and \
@@ -65,10 +67,12 @@ class TestDockerEnv():
                "datmo" in open(output_dockerfile_path, "r").read()
         assert path == input_dockerfile_path
         assert output_path == output_dockerfile_path
+        assert requirements_filepath == None
+
         os.remove(output_dockerfile_path)
 
         # Test default values for output
-        success, path, output_path = \
+        success, path, output_path, requirements_filepath = \
             self.docker_environment_manager.create(input_dockerfile_path)
 
         assert success and \
@@ -76,10 +80,12 @@ class TestDockerEnv():
                "datmo" in open(output_dockerfile_path, "r").read()
         assert path == input_dockerfile_path
         assert output_path == output_dockerfile_path
+        assert requirements_filepath == None
+
         os.remove(output_dockerfile_path)
 
         # Test both values given
-        success, path, output_path = \
+        success, path, output_path, requirements_filepath = \
             self.docker_environment_manager.create(input_dockerfile_path,
                                                         output_dockerfile_path)
         assert success and \
@@ -87,14 +93,39 @@ class TestDockerEnv():
                "datmo" in open(output_dockerfile_path, "r").read()
         assert path == input_dockerfile_path
         assert output_path == output_dockerfile_path
+        assert requirements_filepath == None
+
+        # Test for language being passed in
+        os.remove(input_dockerfile_path)
+        os.remove(output_dockerfile_path)
+
+        script_path = os.path.join(self.docker_environment_manager.filepath,
+                            "script.py")
+        with open(script_path, "w") as f:
+            f.write("import numpy\n")
+            f.write("import sklearn\n")
+        success, path, output_path, requirements_filepath = \
+            self.docker_environment_manager.create(language="python3")
+        assert success and \
+               os.path.isfile(output_dockerfile_path) and \
+               "datmo" in open(output_dockerfile_path, "r").read()
+        assert path == input_dockerfile_path
+        assert output_path == output_dockerfile_path
+        assert requirements_filepath and os.path.isfile(requirements_filepath) and \
+               "numpy" in open(requirements_filepath, "r").read()
 
         # Test exception for path does not exist
-        failed = False
-        try:
-            self.docker_environment_manager.create("nonexistant_path")
-        except DoesNotExistException:
-            failed = True
-        assert failed
+        os.remove(input_dockerfile_path)
+        os.remove(output_dockerfile_path)
+        success, path, output_path, requirements_filepath =\
+            self.docker_environment_manager.create()
+        assert success and \
+               os.path.isfile(output_dockerfile_path) and \
+               "datmo" in open(output_dockerfile_path, "r").read()
+        assert path == input_dockerfile_path
+        assert output_path == output_dockerfile_path
+        assert requirements_filepath
+
 
         # Test exception for output path already exists
         failed = False
@@ -165,6 +196,8 @@ class TestDockerEnv():
         assert return_code == 0
         assert run_id
         assert logs
+        # teardown container
+        self.docker_environment_manager.stop(run_id, force=True)
         # teardown image
         self.docker_environment_manager.remove(image_name, force=True)
 
@@ -247,7 +280,7 @@ class TestDockerEnv():
         self.docker_environment_manager.build_image(image_name, dockerfile_path)
 
         result = self.docker_environment_manager.get_image(image_name)
-        tags  = result.__dict__['attrs']['RepoTags']
+        tags = result.__dict__['attrs']['RepoTags']
         assert image_name + ":latest" in tags
         self.docker_environment_manager.remove_image(image_name, force=True)
 
@@ -338,6 +371,8 @@ class TestDockerEnv():
             self.docker_environment_manager.run_container(image_name)
         assert return_code == 0 and \
             container_id
+        # teardown container
+        self.docker_environment_manager.stop(container_id, force=True)
         # With api=True, detach=False
         logs = self.docker_environment_manager.run_container(image_name, api=True)
         assert logs == ""
@@ -345,6 +380,7 @@ class TestDockerEnv():
         container_obj = self.docker_environment_manager.run_container(image_name, api=True,
                                                                       detach=True)
         assert container_obj
+        self.docker_environment_manager.stop(container_obj.id, force=True)
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_get_container(self):
@@ -375,6 +411,7 @@ class TestDockerEnv():
                                                                      detach=True)
         result = self.docker_environment_manager.list_containers()
         assert container_id and len(result) > 0
+        self.docker_environment_manager.stop(container_id, force=True)
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_stop_container(self):
@@ -428,7 +465,6 @@ class TestDockerEnv():
         _, container_id = \
             self.docker_environment_manager.run_container(image_name,
                                                           command=["sh", "-c", "echo yo"])
-        self.docker_environment_manager.stop_container(container_id)
         return_code, logs = self.docker_environment_manager.log_container(container_id,
                                                                log_filepath)
         assert return_code == 0
@@ -441,6 +477,46 @@ class TestDockerEnv():
         self.docker_environment_manager.stop_container(container_id)
         self.docker_environment_manager.remove_container(container_id, force=True)
         self.docker_environment_manager.remove_image(image_name, force=True)
+
+    def test_create_requirements_file(self):
+        script_path = os.path.join(self.docker_environment_manager.filepath,
+                                   "script.py")
+        with open(script_path, "w") as f:
+            f.write("import numpy\n")
+            f.write("import sklearn\n")
+        # Test default
+        result = self.docker_environment_manager.create_requirements_file()
+        assert result
+        assert os.path.isfile(result) and \
+               "numpy" in open(result, "r").read() and \
+               "scikit_learn" in open(result, "r").read()
+
+        # Test failure
+        exception_thrown = False
+        try:
+            _ = self.docker_environment_manager.\
+                create_requirements_file(execpath="does_not_work")
+        except EnvironmentRequirementsCreateException:
+            exception_thrown = True
+
+        assert exception_thrown
+
+    def test_create_default_dockerfile(self):
+        script_path = os.path.join(self.docker_environment_manager.filepath,
+                                   "script.py")
+        with open(script_path, "w") as f:
+            f.write("import numpy\n")
+            f.write("import sklearn\n")
+        requirements_filepath = \
+            self.docker_environment_manager.create_requirements_file()
+        result = self.docker_environment_manager.\
+            create_default_dockerfile(requirements_filepath,
+                                      language="python3")
+
+        assert result
+        assert os.path.isfile(result)
+        assert "python" in open(result, "r").read()
+        assert "requirements.txt" in open(result, "r").read()
 
     def test_stop_remove_containers_by_term(self):
         # TODO: add more robust tests

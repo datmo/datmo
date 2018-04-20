@@ -34,14 +34,24 @@ class TestSnapshotController():
             failed = True
         assert failed
 
-        # Test default values for snapshot, fail due to environment
+        # Test default values for snapshot, fail due to environment with other than default
         self.snapshot.file_driver.create("filepath1")
         failed = False
         try:
-            self.snapshot.create({})
+            self.snapshot.create({"language": "java"})
         except DoesNotExistException:
             failed = True
         assert failed
+
+        # Test default values when there is not environment
+        snapshot_obj_1 = self.snapshot.create({})
+
+        assert snapshot_obj_1
+        assert snapshot_obj_1.code_id
+        assert snapshot_obj_1.environment_id
+        assert snapshot_obj_1.file_collection_id
+        assert snapshot_obj_1.config == {}
+        assert snapshot_obj_1.stats == {}
 
         # Create environment definition
         env_def_path = os.path.join(self.snapshot.home,
@@ -50,29 +60,29 @@ class TestSnapshotController():
             f.write(str("FROM datmo/xgboost:cpu"))
 
         # Test default values for snapshot, success
-        snapshot_obj = self.snapshot.create({})
+        snapshot_obj_2 = self.snapshot.create({})
 
-        assert snapshot_obj
-        assert snapshot_obj.code_id
-        assert snapshot_obj.environment_id
-        assert snapshot_obj.file_collection_id
-        assert snapshot_obj.config == {}
-        assert snapshot_obj.stats == {}
+        assert snapshot_obj_2
+        assert snapshot_obj_2.code_id
+        assert snapshot_obj_2.environment_id
+        assert snapshot_obj_2.file_collection_id
+        assert snapshot_obj_2.config == {}
+        assert snapshot_obj_2.stats == {}
 
         # Test 2 snapshots with same parameters
         # Should return the same object back
         snapshot_obj_3 = self.snapshot.create({})
 
-        assert snapshot_obj_3 == snapshot_obj
-        assert snapshot_obj_3.code_id == snapshot_obj.code_id
+        assert snapshot_obj_3 == snapshot_obj_2
+        assert snapshot_obj_3.code_id == snapshot_obj_2.code_id
         assert snapshot_obj_3.environment_id == \
-               snapshot_obj.environment_id
+               snapshot_obj_2.environment_id
         assert snapshot_obj_3.file_collection_id == \
-               snapshot_obj.file_collection_id
+               snapshot_obj_2.file_collection_id
         assert snapshot_obj_3.config == \
-               snapshot_obj.config
+               snapshot_obj_2.config
         assert snapshot_obj_3.stats == \
-               snapshot_obj.stats
+               snapshot_obj_2.stats
 
         # Create files to add
         self.snapshot.file_driver.create("dirpath1", dir=True)
@@ -100,16 +110,16 @@ class TestSnapshotController():
             "stats_filepath": stats_filepath,
         }
         # Create snapshot in the project
-        snapshot_obj_2 = self.snapshot.create(input_dict)
+        snapshot_obj_4 = self.snapshot.create(input_dict)
 
-        assert snapshot_obj_2 != snapshot_obj
-        assert snapshot_obj_2.code_id != snapshot_obj.code_id
-        assert snapshot_obj_2.environment_id == \
-               snapshot_obj.environment_id
-        assert snapshot_obj_2.file_collection_id != \
-               snapshot_obj.file_collection_id
-        assert snapshot_obj_2.config == {"foo": "bar"}
-        assert snapshot_obj_2.stats == {"foo": "bar"}
+        assert snapshot_obj_4 != snapshot_obj_2
+        assert snapshot_obj_4.code_id != snapshot_obj_2.code_id
+        assert snapshot_obj_4.environment_id == \
+               snapshot_obj_2.environment_id
+        assert snapshot_obj_4.file_collection_id != \
+               snapshot_obj_2.file_collection_id
+        assert snapshot_obj_4.config == {"foo": "bar"}
+        assert snapshot_obj_4.stats == {"foo": "bar"}
 
         # Test different config and stats inputs
         input_dict = {
@@ -122,11 +132,11 @@ class TestSnapshotController():
         }
 
         # Create snapshot in the project
-        snapshot_obj_4 = self.snapshot.create(input_dict)
+        snapshot_obj_5 = self.snapshot.create(input_dict)
 
-        assert snapshot_obj_4 != snapshot_obj_2
-        assert snapshot_obj_4.config == {}
-        assert snapshot_obj_4.stats == {}
+        assert snapshot_obj_5 != snapshot_obj_2
+        assert snapshot_obj_5.config == {}
+        assert snapshot_obj_5.stats == {}
 
         # Test different config and stats inputs
         input_dict = {
@@ -139,11 +149,11 @@ class TestSnapshotController():
         }
 
         # Create snapshot in the project
-        snapshot_obj_5 = self.snapshot.create(input_dict)
+        snapshot_obj_6 = self.snapshot.create(input_dict)
 
-        assert snapshot_obj_5 != snapshot_obj_4
-        assert snapshot_obj_5.config == {"foo": "bar"}
-        assert snapshot_obj_5.stats == {"foo": "bar"}
+        assert snapshot_obj_6 != snapshot_obj_5
+        assert snapshot_obj_6.config == {"foo": "bar"}
+        assert snapshot_obj_6.stats == {"foo": "bar"}
 
     def test_checkout(self):
         # Create snapshot

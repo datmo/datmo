@@ -12,6 +12,8 @@ class Environment():
         the parent model id for the entity
     driver_type : str
         the driver class that created the entity
+    language : str
+        programming language used
     definition_filename : str
         definition filename to search for
     hardware_info : dict
@@ -30,6 +32,7 @@ class Environment():
         self.model_id = dictionary['model_id']
         self.driver_type = dictionary['driver_type']
 
+        self.language = dictionary['language']
         self.definition_filename = dictionary['definition_filename']
         self.hardware_info = dictionary['hardware_info']
 

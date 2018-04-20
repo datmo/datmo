@@ -111,7 +111,6 @@ class SnapshotController(BaseController):
                     absolute filepath to stats parameters file
                 stats_filename : str, optional
                     name of file with metrics and statistics.
-
                 Default
                 -------
                 stats will be considered empty ({}) and saved to the snapshot
@@ -148,7 +147,6 @@ class SnapshotController(BaseController):
             "model_id": self.model.id,
             "session_id": self.current_session.id
         }
-
         # Required args for Snapshot entity
         required_args = ["code_id", "environment_id", "file_collection_id",
                          "config", "stats"]
@@ -164,12 +162,16 @@ class SnapshotController(BaseController):
                     create_dict['code_id'] = self.code.create().id
             # Environment setup
             elif required_arg == "environment_id":
+                language = dictionary.get("language", None)
                 if "environment_id" in dictionary:
                     create_dict[required_arg] = dictionary[required_arg]
                 elif "environment_definition_filepath" in dictionary:
                     create_dict['environment_id'] = self.environment.create({
                         "definition_filepath": dictionary['environment_definition_filepath']
                     }).id
+                elif language:
+                    create_dict['environment_id'] = self.environment. \
+                        create({"language": language}).id
                 else:
                     # create some default environment
                     create_dict['environment_id'] = self.environment.\
