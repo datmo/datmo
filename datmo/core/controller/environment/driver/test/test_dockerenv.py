@@ -12,9 +12,7 @@ import uuid
 
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.core.util.exceptions import EnvironmentInitFailed, \
-    DoesNotExistException, FileAlreadyExistsException, \
-    EnvironmentRequirementsCreateException
-
+    FileAlreadyExistsException, EnvironmentRequirementsCreateException
 
 
 class TestDockerEnv():
@@ -125,7 +123,6 @@ class TestDockerEnv():
         assert path == input_dockerfile_path
         assert output_path == output_dockerfile_path
         assert requirements_filepath
-
 
         # Test exception for output path already exists
         failed = False

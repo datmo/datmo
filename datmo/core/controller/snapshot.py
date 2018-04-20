@@ -133,7 +133,7 @@ class SnapshotController(BaseController):
         Returns
         -------
         Snapshot
-            Snapshot object as specified in datmo.src.entity.snapshot
+            Snapshot object as specified in datmo.core.entity.snapshot
 
         Raises
         ------
