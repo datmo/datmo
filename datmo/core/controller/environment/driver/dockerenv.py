@@ -180,7 +180,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             # Passing path of Dockerfile
             docker_shell_cmd_list.append("-f")
             docker_shell_cmd_list.append(definition_path)
-            docker_shell_cmd_list.append(str(self.filepath))
+            dockerfile_dirpath = os.path.split(definition_path)[0]
+            docker_shell_cmd_list.append(str(dockerfile_dirpath))
 
             # Remove intermediate containers after a successful build
             docker_shell_cmd_list.append("--rm")
@@ -532,7 +533,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         destination_dockerfile = os.path.join(self.filepath, "Dockerfile")
         destination = open(destination_dockerfile, "w")
         shutil.copyfileobj(open(base_dockerfile_filepath, "r"), destination)
-        destination.write(str("ADD %s /tmp/requirements.txt\n" % requirements_filepath))
+        destination.write(str("COPY %s /tmp/requirements.txt\n") % os.path.split(requirements_filepath)[-1])
         destination.write(str("RUN pip install --no-cache-dir -r /tmp/requirements.txt\n"))
         destination.close()
 

@@ -137,6 +137,7 @@ class EnvironmentController(BaseController):
                 # Delete temporary files created once transfered into file collection
                 if requirements_filepath:
                     os.remove(requirements_filepath)
+                    os.remove(original_definition_filepath)
                 os.remove(datmo_definition_filepath)
                 os.remove(hardware_info_filepath)
             # Create new unique hash or find existing from the file collection above

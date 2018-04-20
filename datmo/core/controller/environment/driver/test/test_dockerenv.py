@@ -146,6 +146,29 @@ class TestDockerEnv():
         # teardown
         self.docker_environment_manager.remove(name, force=True)
 
+        # test
+        os.remove(path)
+        script_path = os.path.join(self.docker_environment_manager.filepath,
+                                   "script.py")
+
+        with open(script_path, "w") as f:
+            f.write("import numpy\n")
+            f.write("import sklearn\n")
+
+        success, path, output_path, requirements_filepath = \
+            self.docker_environment_manager.create(language="python3")
+
+        assert success and \
+               os.path.isfile(path) and \
+               "datmo" in open(output_path, "r").read()
+        assert requirements_filepath and os.path.isfile(requirements_filepath) and \
+               "numpy" in open(requirements_filepath, "r").read()
+
+        result = self.docker_environment_manager.build(name, path)
+        assert result == True
+        # teardown
+        self.docker_environment_manager.remove(name, force=True)
+
     def test_run(self):
         # TODO: add more options for run w/ volumes etc
         image_name = str(uuid.uuid1())

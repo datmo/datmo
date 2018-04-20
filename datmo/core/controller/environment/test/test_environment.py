@@ -104,6 +104,8 @@ class TestEnvironmentController():
         environment_obj_4 = self.environment.create(input_dict)
         assert environment_obj_4.id
         assert environment_obj_4.id != environment_obj_3.id
+        assert not os.path.isfile(definition_filepath)
+        assert not os.path.isfile(os.path.join(self.environment.home, "requirements.txt"))
 
     def test_build(self):
         self.project.init("test5", "test description")
@@ -128,6 +130,21 @@ class TestEnvironmentController():
 
         # teardown
         self.environment.delete(environment_obj.id)
+
+        # Test for building dockerfile when there exists not
+        os.remove(definition_filepath)
+
+        input_dict = {}
+
+        # Create environment in the project
+        environment_obj_1 = self.environment.create(input_dict)
+
+        # Build environment
+        result = self.environment.build(environment_obj_1.id)
+
+        assert result
+        # teardown
+        self.environment.delete(environment_obj_1.id)
 
     def test_run(self):
         self.project.init("test5", "test description")
