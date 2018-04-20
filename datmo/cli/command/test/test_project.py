@@ -15,6 +15,7 @@ from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
+import platform
 
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
@@ -22,7 +23,7 @@ from datmo.cli.command.project import ProjectCommand
 class TestInit():
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
+        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)

@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
+import platform
 
 from datmo.core.controller.base import BaseController
 from datmo.core.controller.code.driver.git import GitCodeDriver
@@ -17,7 +18,7 @@ from datmo.core.util.exceptions import  \
 class TestBaseController():
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp"
+        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)

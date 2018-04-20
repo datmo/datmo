@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import os
 import sys
 import tempfile
+import platform
 
 # TODO: include builtin libraries for the appropriate Python
 # try:
@@ -24,7 +25,7 @@ class TestHelper():
 
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
+        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
