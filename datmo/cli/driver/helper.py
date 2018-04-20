@@ -7,8 +7,8 @@ import sys
 import importlib
 import inspect
 
-from datmo.util.i18n import get as _
-from datmo.util.exceptions import ArgumentException
+from datmo.core.util.i18n import get as __
+from datmo.core.util.exceptions import ArgumentException
 
 
 class Helper():
@@ -48,7 +48,7 @@ class Helper():
         try:
             command_class = importlib.import_module(command_path)
         except ImportError as ex:
-            self.echo(_("error", "cli.general",  ex.message))
+            self.echo(__("error", "cli.general",  ex.message))
             sys.exit()
 
         all_members = inspect.getmembers(command_class)

@@ -1,10 +1,10 @@
 import os
 import sys
 
-from datmo.util.i18n import get as _
+from datmo.core.util.i18n import get as __
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.base import BaseCommand
-from datmo.util.exceptions import CLIArgumentException
+from datmo.core.util.exceptions import CLIArgumentException
 
 
 def main():
@@ -27,19 +27,19 @@ def main():
     try:
         command_instance = command_class(os.getcwd(), cli_helper)
     except TypeError as ex:
-        cli_helper.echo(_("error", "cli.general", str(ex)))
+        cli_helper.echo(__("error", "cli.general", str(ex)))
         sys.exit()
 
     try:
         command_instance.parse(sys.argv[1:])
     except CLIArgumentException as ex:
-        cli_helper.echo(_("error", "cli.general", str(ex)))
+        cli_helper.echo(__("error", "cli.general", str(ex)))
         sys.exit()
 
     try:
         command_instance.execute()
     except Exception as ex:
-        cli_helper.echo(_("error", "cli.general", str(ex)))
+        cli_helper.echo(__("error", "cli.general", str(ex)))
 
 if __name__ == "__main__":
     main()

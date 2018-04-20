@@ -1,6 +1,6 @@
-from datmo.util.i18n import get as _
+from datmo.core.util.i18n import get as __
 from datmo.cli.command.base import BaseCommand
-from datmo.controller.project import ProjectController
+from datmo.core.controller.project import ProjectController
 
 
 class ProjectCommand(BaseCommand):
@@ -15,8 +15,8 @@ class ProjectCommand(BaseCommand):
 
     def init(self, name, description):
         if not name:
-            name = self.cli_helper.prompt(_("prompt", "cli.project.init.name"))
+            name = self.cli_helper.prompt(__("prompt", "cli.project.init.name"))
         if not description:
-            description = self.cli_helper.prompt(_("prompt", "cli.project.init.description"))
-        self.cli_helper.echo(_("info", "cli.project.init", {"name":name, "path": self.home}))
+            description = self.cli_helper.prompt(__("prompt", "cli.project.init.description"))
+        self.cli_helper.echo(__("info", "cli.project.init", {"name":name, "path": self.home}))
         self.project_controller.init(name, description)

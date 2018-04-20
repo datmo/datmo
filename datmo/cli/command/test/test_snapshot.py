@@ -18,7 +18,7 @@ import tempfile
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
-from datmo.util.exceptions import ProjectNotInitializedException
+from datmo.core.util.exceptions import ProjectNotInitializedException
 
 
 class TestSnapshot():
@@ -67,10 +67,12 @@ class TestSnapshot():
             f.write(str("test"))
 
     def test_snapshot_project_not_init(self):
+        failed = False
         try:
             self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
         except ProjectNotInitializedException:
-            assert True
+            failed = True
+        assert failed
 
     def test_datmo_snapshot_create(self):
         self.__set_variables()
@@ -238,15 +240,3 @@ class TestSnapshot():
 
         result = self.snapshot.execute()
         assert result
-
-    def test_datmo_snapshot_checkout_invalid_arg(self):
-        self.__set_variables()
-        exception_thrown = False
-        try:
-          self.snapshot.parse([
-            "snapshot",
-            "checkout"
-            "--foobar","foobar"])
-        except Exception:
-            exception_thrown = True
-        assert exception_thrown
