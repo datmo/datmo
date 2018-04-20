@@ -21,7 +21,6 @@ setup(
     install_requires=[
         "future>=0.16.0",
         "enum34>=1.1.6",
-        "sh>=1.12.11",
         "glob2>=0.5",
         "docker>=2.2.1",
         "pyyaml>=3.12",
