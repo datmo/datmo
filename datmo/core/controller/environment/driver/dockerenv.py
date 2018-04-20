@@ -2,6 +2,7 @@ import ast
 import os
 import shutil
 import subprocess
+import platform
 from docker import DockerClient
 
 from datmo.core.util.i18n import get as __
@@ -14,9 +15,27 @@ from datmo.core.controller.environment.driver import EnvironmentDriver
 class DockerEnvironmentDriver(EnvironmentDriver):
     """
     This EnvironmentDriver handles environment management in the project using docker
+
+    Parameters
+    ----------
+    filepath : str, optional
+        home filepath for project
+        (default is empty)
+    docker_execpath : str, optional
+        execution path for docker
+        (default is "docker" which defers to system)
+    docker_socket : str, optional
+        socket path to docker daemon to connect
+        (default is None, this takes the default path for the system)
     """
 
-    def __init__(self, filepath="", docker_execpath="docker", docker_socket="unix:///var/run/docker.sock"):
+    def __init__(self, filepath="", docker_execpath="docker",
+                 docker_socket=None):
+        if not docker_socket:
+            if platform.system() == "Windows":
+                docker_socket = "//./pipe/docker_engine"
+            else:
+                docker_socket = "unix:///var/run/docker.sock"
         super(DockerEnvironmentDriver, self).__init__()
         self.filepath = filepath
         # Check if filepath exists
