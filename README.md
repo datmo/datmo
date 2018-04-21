@@ -78,6 +78,91 @@ as you start new projects.
 In the `/examples` folder we have a few projects that have already been created and converted to datmo. You can 
 navigate to them and try datmo commands for yourself in order to get a feel for the tool.
 
+Here's a comparison of a typical logistic regression model with one leveraging Datmo.
+
+<table class="tg">
+  <tr>
+    <th class="tg-us36">Normal Script</th>
+    <th class="tg-us36">With Datmo</th>
+  </tr>
+<tr>
+<td class="tg-us36">
+<pre lang="python">
+from sklearn import datasets
+from sklearn import linear_model as lm
+from sklearn import model_selection as ms
+from sklearn import externals as ex
+#
+#
+#
+#
+#
+#
+iris_dataset = datasets.load_iris()
+X = iris_dataset.data
+y = iris_dataset.target
+data = ms.train_test_split(X, y)
+X_train, X_test, y_train, y_test = data
+#
+model = lm.LogisticRegression(solver="newton-cg")
+model.fit(X_train, y_train)
+ex.joblib.dump(model, 'model.pkl')
+#
+train_acc = model.score(X_train, y_train)
+test_acc = model.score(X_test, y_test)
+#
+print(train_acc)
+print(test_acc)
+#
+#
+#
+#
+#
+#
+#
+#
+#
+</pre></td>
+<td class="tg-us36">
+<pre lang="python">
+from sklearn import datasets
+from sklearn import linear_model as lm
+from sklearn import model_selection as ms
+from sklearn import externals as ex
+import datmo # extra line
+#
+config = {
+    "solver": "newton-cg"
+} # extra line
+#
+iris_dataset = datasets.load_iris()
+X = iris_dataset.data
+y = iris_dataset.target
+data = ms.train_test_split(X, y)
+X_train, X_test, y_train, y_test = data
+#
+model = lm.LogisticRegression(**config)
+model.fit(X_train, y_train)
+ex.joblib.dump(model, "model.pkl")
+#
+train_acc = model.score(X_train, y_train)
+test_acc = model.score(X_test, y_test)
+#
+stats = {
+    "train_accuracy": train_acc,
+    "test_accuracy": test_acc
+} # extra line
+#
+datmo.snapshot.create(
+    message="my first snapshot",
+    filepaths=["model.pkl"],
+    config=config,
+    stats=stats
+) # extra line
+</pre></td>
+</tr>
+</table>
+
 ## Sharing (Beta)
 Although datmo is made to track your changes locally, you can share a project with your
 friends by doing the following (this is shown only for git, if you are using another git 
