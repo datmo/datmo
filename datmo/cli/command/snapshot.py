@@ -52,7 +52,6 @@ class SnapshotCommand(ProjectCommand):
 
         ls = subcommand_parsers.add_parser("ls", help="List snapshots")
         ls.add_argument("--session-id", dest="session_id", default=None, help="Session ID to filter")
-        ls.add_argument("--session-name", dest="session_name", default=None, help="Session name to filter")
         ls.add_argument("--all", "-a", dest="details", action="store_true",
                             help="Show detailed snapshot information")
 
