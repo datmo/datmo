@@ -265,3 +265,24 @@ class TaskController(BaseController):
                                             "controller.task.delete.arg",
                                             "id"))
         return self.dal.task.delete(id)
+
+    def stop(self, id):
+        """Stop and remove container for the task
+
+        Parameters
+        ----------
+        container_id : str
+            id of the container environment that was run for the task
+        Returns
+        -------
+        return_code : bool
+            system return code of the stop
+        """
+        if not id:
+            raise RequiredArgumentMissing(__("error",
+                                            "controller.task.delete.arg",
+                                            "id"))
+        task_obj = self.dal.task.get_by_id(id)
+        container_id = task_obj.container_id
+        return_code = self.environment.stop(container_id)
+        return return_code

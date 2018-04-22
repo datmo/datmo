@@ -232,7 +232,6 @@ class TestTaskController():
                task_obj_1 in result and \
                task_obj_2 in result
 
-
     def test_delete(self):
         task_command = ["sh", "-c", "echo yo"]
         input_dict = {
@@ -246,6 +245,38 @@ class TestTaskController():
         result = self.task.delete(task_obj.id)
 
         # Check if task retrieval throws error
+        thrown = False
+        try:
+            self.task.dal.snapshot.get_by_id(task_obj.id)
+        except EntityNotFound:
+            thrown = True
+
+        assert result == True and \
+               thrown == True
+
+    def test_stop(self):
+        task_command = ["sh", "-c", "echo yo"]
+        input_dict = {
+            "command": task_command
+        }
+
+        # Create task in the project
+        task_obj = self.task.create(input_dict)
+
+        # Create environment_driver definition
+        env_def_path = os.path.join(self.project.home,
+                                    "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(str("FROM datmo/xgboost:cpu"))
+
+        # Test the default values
+        updated_task_obj = self.task.run(task_obj.id)
+
+        # Stop the task
+        task_id = updated_task_obj.id
+        result = self.task.stop(task_id)
+
+        # Check if task stop throws error when wrong container id is given
         thrown = False
         try:
             self.task.dal.snapshot.get_by_id(task_obj.id)
