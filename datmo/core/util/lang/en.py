@@ -23,7 +23,7 @@ MESSAGES = {
         "cli.general": "An exception occurred: %s",
         "cli.general.method.not_found": "Method %s.%s not found",
         "cli.project": "No project found in the current directory: %s",
-        "cli.task.delete": "Error while deleting the task",
+        "cli.task.stop": "Error while stoping the task",
         "util.misc_functions.get_filehash": "Filepath does not point to a valid file: %s",
         "controller.code.driver.git.__init__.dne": "File path does not exist: %s",
         "controller.code.driver.git.__init__.giterror": "Error in git: %s",
