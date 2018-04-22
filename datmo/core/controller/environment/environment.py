@@ -270,3 +270,26 @@ class EnvironmentController(BaseController):
 
         return file_collection_deleted and environment_artifacts_removed and \
                delete_success
+
+    def stop(self, run_id):
+        """Stop the trace of running Environment
+
+        Parameters
+        ----------
+        run id : str
+            run id with specific environment to be stopped
+
+        Returns
+        -------
+        bool
+            True if success
+
+        Raises
+        ------
+        DoesNotExistException
+            if the specified Environment does not exist.
+        """
+        # Stop the instance(e.g. container) running using environment driver(e.g. docker)
+        stop_success = self.environment_driver.stop(run_id, force=True)
+
+        return stop_success
