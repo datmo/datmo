@@ -8,7 +8,7 @@ import tempfile
 from datmo.snapshot import create, ls
 from datmo.core.controller.project import ProjectController
 from datmo.core.util.exceptions import GitCommitDoesNotExist, \
-    ProjectNotInitializedException, SessionDoesNotExistException
+    InvalidProjectPathException, SessionDoesNotExistException
 
 
 class TestSnapshotModule():
@@ -30,7 +30,7 @@ class TestSnapshotModule():
         try:
             create(message="test",
                    home=os.path.join("does","not", "exist"))
-        except ProjectNotInitializedException:
+        except InvalidProjectPathException:
             failed = True
         assert failed
 
@@ -79,7 +79,7 @@ class TestSnapshotModule():
         failed = False
         try:
             ls(home=os.path.join("does","not", "exist"))
-        except ProjectNotInitializedException:
+        except InvalidProjectPathException:
             failed = True
         assert failed
 
