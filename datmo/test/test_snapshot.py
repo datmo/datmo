@@ -8,7 +8,7 @@ import tempfile
 from datmo.snapshot import create, ls
 from datmo.core.controller.project import ProjectController
 from datmo.core.util.exceptions import GitCommitDoesNotExist, \
-    DoesNotExistException
+    ProjectNotInitializedException, SessionDoesNotExistException
 
 
 class TestSnapshotModule():
@@ -25,6 +25,15 @@ class TestSnapshotModule():
         shutil.rmtree(self.temp_dir)
 
     def test_create(self):
+        # check project is not initialized if wrong home
+        failed = False
+        try:
+            create(message="test",
+                   home=os.path.join("does","not", "exist"))
+        except ProjectNotInitializedException:
+            failed = True
+        assert failed
+
         # Create a snapshot with default params
         # (fails w/ no commit)
         failed = False
@@ -66,6 +75,21 @@ class TestSnapshotModule():
         assert snapshot_obj_2 != snapshot_obj_1
 
     def test_ls(self):
+        # check project is not initialized if wrong home
+        failed = False
+        try:
+            ls(home=os.path.join("does","not", "exist"))
+        except ProjectNotInitializedException:
+            failed = True
+        assert failed
+
+        # check session does not exist if wrong session
+        failed = False
+        try:
+            ls(session_id="does_not_exist", home=self.temp_dir)
+        except SessionDoesNotExistException:
+            failed = True
+        assert failed
 
         # create with default params and files to commit
         test_filepath = os.path.join(self.temp_dir, "script.py")
@@ -73,18 +97,32 @@ class TestSnapshotModule():
             f.write("import numpy\n")
             f.write("import sklean\n")
 
-        create(message="test", home=self.temp_dir)
+        create(message="test1", home=self.temp_dir)
+
+        # list all snapshots with no filters
+        snapshot_list_1 = ls(home=self.temp_dir)
+
+        assert snapshot_list_1
+        assert len(list(snapshot_list_1)) == 1
 
         # Create a snapshot with default params, files, and environment
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "w") as f:
             f.write("FROM datmo/xgboost:cpu")
-        create(message="test", home=self.temp_dir)
+        create(message="test2", home=self.temp_dir)
 
-        # list all snapshots with no filters
-        snapshot_ls_1 = ls(home=self.temp_dir)
+        # list all snapshots with no filters (works when more than 1 snapshot)
+        snapshot_list_2 = ls(home=self.temp_dir)
+
+        assert snapshot_list_2
+        assert len(list(snapshot_list_2)) == 2
+
         # list snapshots with specific filter
-        snapshot_ls_2 = ls(filter='test', home=self.temp_dir)
-        assert snapshot_ls_1
-        assert len(snapshot_ls_1) == 2
-        assert len(snapshot_ls_2) == 2
+        snapshot_list_3 = ls(filter='test2', home=self.temp_dir)
+
+        assert len(list(snapshot_list_3)) == 1
+
+        # list snapshots with filter of none
+        snapshot_list_4 = ls(filter='test3', home=self.temp_dir)
+
+        assert len(list(snapshot_list_4)) == 0

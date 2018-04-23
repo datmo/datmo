@@ -5,7 +5,6 @@ import prettytable
 from datmo.core.util.i18n import get as __
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.snapshot import SnapshotController
-from datmo.core.util.exceptions import ProjectNotInitializedException
 
 
 class SnapshotCommand(ProjectCommand):

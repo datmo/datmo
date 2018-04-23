@@ -5,8 +5,7 @@ from datmo.core.controller.snapshot import SnapshotController
 
 def create(message, label=None, commit_id=None, environment_id=None, filepaths=None,
            config=None, stats=None, home=None):
-    """
-    Create a snapshot within a project
+    """Create a snapshot within a project
 
     The project must be created before this is implemented. You can do that by using
     the following command::
@@ -43,7 +42,7 @@ def create(message, label=None, commit_id=None, environment_id=None, filepaths=N
     Returns
     -------
     Snapshot
-        returns a snapshot entity for reference
+        returns a snapshot entity (as defined in datmo.core.entity.snapshot)
 
     Examples
     --------
@@ -53,7 +52,6 @@ def create(message, label=None, commit_id=None, environment_id=None, filepaths=N
 
     >>> import datmo
     >>> datmo.snapshot.create(message="my first snapshot", filepaths=["/path/to/a/large/file"], config={"test": 0.4, "test2": "string"}, stats={"accuracy": 0.94})
-    Snapshot()
     """
     if not home:
         home = os.getcwd()
@@ -81,10 +79,8 @@ def create(message, label=None, commit_id=None, environment_id=None, filepaths=N
 
     return snapshot_controller.create(snapshot_create_dict)
 
-
 def ls(session_id=None, filter=None, home=None):
-    """
-    List snapshots within a project
+    """List snapshots within a project
 
     The project must be created before this is implemented. You can do that by using
     the following command::
@@ -94,9 +90,10 @@ def ls(session_id=None, filter=None, home=None):
 
     Parameters
     ----------
-    session_id : str
+    session_id : str, optional
         a description of the snapshot for later reference
-    filter: str
+        (default is None, which means no session filter is given)
+    filter : str, optional
         a string to use to filter from message and label
         (default is to give all snapshots, unless provided a specific string. eg: best)
     home : str, optional
@@ -105,21 +102,8 @@ def ls(session_id=None, filter=None, home=None):
 
     Returns
     -------
-    Snapshot
-        returns a list of dictionary of snapshot with following parameters
-        id: str
-            snapshot id
-        created at: str "%Y-%m-%d %H:%M:%S"
-            time when the snapshot was created (UTC)
-        config: dict
-            dictionary of configurations
-        stats: dict
-            dictionary of relevant statistics or metrics
-        message: str
-            a description of the snapshot for later reference
-        label : str
-            a short description of the snapshot for later reference
-            (default is None, which means a blank label is stored)
+    list
+        returns a list of Snapshot entities (as defined in datmo.core.entity.snapshot)
 
     Examples
     --------
@@ -127,7 +111,6 @@ def ls(session_id=None, filter=None, home=None):
 
     >>> import datmo
     >>> snapshots = datmo.snapshot.ls()
-    Snapshot()
     """
     if not home:
         home = os.getcwd()
@@ -138,24 +121,18 @@ def ls(session_id=None, filter=None, home=None):
         session_id = snapshot_controller.current_session.id
 
     snapshot_objs = snapshot_controller.list(session_id)
-    filtered_snapshot_objs = []
-    for snapshot_obj in snapshot_objs:
-            snapshot_dict = {
-                'id': snapshot_obj.id,
-                'created_at': snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                'config': snapshot_obj.config,
-                'stats': snapshot_obj.stats,
-                'message': snapshot_obj.message,
-                'label': snapshot_obj.label,
-                'code_id': snapshot_obj.code_id,
-                'environment_id': snapshot_obj.environment_id,
-                'file_collection_id': snapshot_obj.file_collection_id
-            }
-            if snapshot_obj.visible and filter is None:
-                filtered_snapshot_objs.append(snapshot_dict.copy())
-            elif snapshot_obj.visible and \
-                    filter and (filter in snapshot_dict['message']
-                                or filter in snapshot_dict['label']):
-                filtered_snapshot_objs.append(snapshot_dict.copy())
 
+    # Filtering Snapshots
+    # TODO: move to list function in SnapshotController
+    # Add in preliminary snapshots if no filter
+    filtered_snapshot_objs = [snapshot_obj for snapshot_obj in snapshot_objs
+                              if snapshot_obj.visible and not filter]
+    # If filter is present then use it and only add those that pass filter
+    for snapshot_obj in snapshot_objs:
+        if snapshot_obj.visible:
+            if filter and (filter in snapshot_obj.message
+                             or filter in snapshot_obj.label):
+                filtered_snapshot_objs.append(snapshot_obj)
+
+    # Return Snapshot entities
     return filtered_snapshot_objs
