@@ -8,8 +8,7 @@ import tempfile
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import \
     EnvironmentController
-from datmo.core.util.exceptions import EntityNotFound, \
-    DoesNotExistException
+from datmo.core.util.exceptions import EntityNotFound
 
 
 class TestEnvironmentController():
@@ -167,7 +166,6 @@ class TestEnvironmentController():
             "api": False
         }
 
-
         # Create environment_driver definition
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
@@ -261,3 +259,54 @@ class TestEnvironmentController():
 
         assert result == True and \
             thrown == True
+
+    def test_stop(self):
+        self.project.init("test5", "test description")
+
+        # Create environment definition
+        definition_filepath = os.path.join(self.environment.home,
+                                           "Dockerfile")
+        with open(definition_filepath, "w") as f:
+            f.write(str("FROM datmo/xgboost:cpu"))
+
+        run_options = {
+            "command": ["sh", "-c", "echo yo"],
+            "ports": ["8888:8888"],
+            "name": None,
+            "volumes": None,
+            "detach": False,
+            "stdin_open": False,
+            "tty": False,
+            "gpu": False,
+            "api": False
+        }
+
+        # Create environment_driver definition
+        env_def_path = os.path.join(self.project.home,
+                                    "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(str("FROM datmo/xgboost:cpu"))
+
+        input_dict = {
+            "definition_filepath": definition_filepath,
+        }
+
+        # Create environment in the project
+        environment_obj = self.environment.create(input_dict)
+
+        log_filepath = os.path.join(self.project.home,
+                                    "task.log")
+
+        # Build environment in the project
+        _ = self.environment.build(environment_obj.id)
+
+        # Run environment in the project
+        _, run_id, _ = \
+            self.environment.run(environment_obj.id, run_options, log_filepath)
+
+        # Stop the running environment
+        return_code = self.environment.stop(run_id)
+        assert return_code
+
+        # teardown
+        self.environment.delete(environment_obj.id)
