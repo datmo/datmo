@@ -65,8 +65,13 @@ class TaskCommand(ProjectCommand):
         task_obj = self.task_controller.create(task_dict)
 
         # Pass in the task
-        self.task_controller.run(task_obj.id, snapshot_dict=snapshot_dict)
-
+        try:
+            self.task_controller.run(task_obj.id, snapshot_dict=snapshot_dict)
+        except:
+            self.cli_helper.echo(__("error",
+                                    "cli.task.run",
+                                    task_obj.id))
+            return False
         return task_obj.id
 
     def ls(self, **kwargs):
@@ -80,16 +85,29 @@ class TaskCommand(ProjectCommand):
             t.add_row([task_obj.id, task_obj.command, task_obj.status, task_obj.gpu,
                        task_obj.created_at.strftime("%Y-%m-%d %H:%M:%S")])
         self.cli_helper.echo(t)
+
         return True
 
     def stop(self, **kwargs):
         id = kwargs.get('id', None)
-        task_delete_dict = {"id": id}
-        result = self.task_controller.stop(**task_delete_dict)
-        if not result:
-            self.cli_helper.echo(__("error", "cli.task.delete"))
+        task_stop_dict = {"id": id}
+        self.cli_helper.echo(__("info",
+                                "cli.task.stop",
+                                id))
+        try:
+            result = self.task_controller.stop(**task_stop_dict)
+            if not result:
+                self.cli_helper.echo(__("error",
+                                        "cli.task.stop",
+                                        id))
+            return result
+        except:
+            self.cli_helper.echo(__("error",
+                                    "cli.task.stop",
+                                    id))
+            return False
 
-        return result
+
 
 
 

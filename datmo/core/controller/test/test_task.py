@@ -263,7 +263,7 @@ class TestTaskController():
         # Create task in the project
         task_obj = self.task.create(input_dict)
 
-        # Create environment_driver definition
+        # Create environment driver definition
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
@@ -276,7 +276,7 @@ class TestTaskController():
         task_id = updated_task_obj.id
         result = self.task.stop(task_id)
 
-        # Check if task stop throws error when wrong container id is given
+        # Check if task stop throws error when wrong task id is given
         thrown = False
         try:
             self.task.dal.snapshot.get_by_id(task_obj.id)

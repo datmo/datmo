@@ -30,7 +30,7 @@ class TaskController(BaseController):
         creates a Task object with the permanent parameters
     _run_helper(environment_id, log_filepath, options)
         helper for run to start environment and run with the appropriate parameters
-    run(self, task_id, dictionary=None)
+    run(self, id, dictionary=None)
         runs the task and tracks the run, logs, inputs and outputs
     list(session_id=None)
         lists all tasks within the project given filters
@@ -141,7 +141,7 @@ class TaskController(BaseController):
 
         return return_code, container_id, logs
 
-    def run(self, task_id, snapshot_dict={"visible": False}, task_dict={}):
+    def run(self, id, snapshot_dict={"visible": False}, task_dict={}):
         """Run a task with parameters. If dictionary specified, create a new task with new run parameters.
         Snapshot objects are created before and after the task to keep track of the state. During the run,
         you can access task outputs using environment variable DATMO_TASK_DIR or `/task` which points to
@@ -150,7 +150,7 @@ class TaskController(BaseController):
 
         Parameters
         ----------
-        task_id : str
+        id : str
             id for the task you would like to run
         snapshot_dict : dict
             set of parameters to create a snapshot (see SnapshotController for details.
@@ -170,7 +170,7 @@ class TaskController(BaseController):
             If there is any error in creating files for the task or downstream errors
         """
         # Obtain Task to run
-        task_obj = self.dal.task.get_by_id(task_id)
+        task_obj = self.dal.task.get_by_id(id)
 
         # Create Task directory for user during run
         task_dirpath = os.path.join("datmo_tasks",
@@ -262,8 +262,8 @@ class TaskController(BaseController):
     def delete(self, id):
         if not id:
             raise RequiredArgumentMissing(__("error",
-                                            "controller.task.delete.arg",
-                                            "id"))
+                                             "controller.task.delete.arg",
+                                             "id"))
         return self.dal.task.delete(id)
 
     def stop(self, id):
@@ -271,8 +271,9 @@ class TaskController(BaseController):
 
         Parameters
         ----------
-        container_id : str
-            id of the container environment that was run for the task
+        id : str
+            id for the task you would like to stop
+
         Returns
         -------
         return_code : bool
@@ -280,8 +281,8 @@ class TaskController(BaseController):
         """
         if not id:
             raise RequiredArgumentMissing(__("error",
-                                            "controller.task.delete.arg",
-                                            "id"))
+                                             "controller.task.stop.arg",
+                                             "id"))
         task_obj = self.dal.task.get_by_id(id)
         container_id = task_obj.container_id
         return_code = self.environment.stop(container_id)

@@ -19,7 +19,7 @@ import tempfile
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
-from datmo.core.util.exceptions import ProjectNotInitializedException, EntityNotFound
+from datmo.core.util.exceptions import ProjectNotInitializedException
 
 
 class TestTaskCommand():
@@ -60,8 +60,31 @@ class TestTaskCommand():
     def test_datmo_task_run(self):
         self.__set_variables()
 
+        # Test failure case
+        self.task.parse([
+            "task",
+            "run"
+        ])
+        failed = False
+        try:
+            _ = self.task.execute()
+        except:
+            failed = True
+        assert failed
+
+        # Test failure case execute
+        test_command = ["yo", "yo"]
+        self.task.parse([
+            "task",
+            "run",
+            test_command
+        ])
+        result = self.task.execute()
+        assert not result
+
+        # Test success case
         test_command = ["sh", "-c", "echo yo"]
-        test_gpu = True
+        test_gpu = True # TODO: implement in controller
         test_ports = "8888:8888"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         test_interactive = True
@@ -168,12 +191,8 @@ class TestTaskCommand():
         ])
 
         # test when wrong task id is passed to stop it
-        failed = False
-        try:
-            self.task.execute()
-        except EntityNotFound:
-            failed = True
-        assert failed
+        result = self.task.execute()
+        assert not result
 
     def test_datmo_task_stop_invalid_arg(self):
         self.__set_variables()

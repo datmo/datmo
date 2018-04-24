@@ -276,7 +276,7 @@ class EnvironmentController(BaseController):
 
         Parameters
         ----------
-        run id : str
+        run_id : str
             run id with specific environment to be stopped
 
         Returns

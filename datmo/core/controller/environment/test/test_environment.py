@@ -8,8 +8,7 @@ import tempfile
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import \
     EnvironmentController
-from datmo.core.util.exceptions import EntityNotFound, \
-    DoesNotExistException
+from datmo.core.util.exceptions import EntityNotFound
 
 
 class TestEnvironmentController():
