@@ -8,7 +8,8 @@ import tempfile
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.util.exceptions import EntityNotFound, \
-    DoesNotExistException, GitCommitDoesNotExist
+    DoesNotExistException, GitCommitDoesNotExist, \
+    SessionDoesNotExistException
 
 
 class TestSnapshotController():
@@ -209,6 +210,14 @@ class TestSnapshotController():
                os.path.isdir(snapshot_obj_1_path)
 
     def test_list(self):
+        # Check for error if incorrect session given
+        failed = False
+        try:
+            self.snapshot.list(session_id="does_not_exist")
+        except SessionDoesNotExistException:
+            failed = True
+        assert failed
+
         # Create files to add
         self.snapshot.file_driver.create("dirpath1", dir=True)
         self.snapshot.file_driver.create("dirpath2", dir=True)
