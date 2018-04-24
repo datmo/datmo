@@ -43,18 +43,17 @@ class BaseController(object):
         Return the config dictionary based on key
     get_config_defaults()
         Return the configuration defaults
-
     """
 
     def __init__(self, home):
         self.home = home
+        if not os.path.isdir(self.home):
+            raise InvalidProjectPathException(__("error",
+                                                 "controller.base.__init__",
+                                                 home))
         self.config = JSONStore(os.path.join(self.home,
                                              ".datmo",
                                              ".config"))
-        if not os.path.isdir(self.home):
-            raise InvalidProjectPathException(__("error",
-                                                "controller.base.__init__",
-                                                home))
         # property caches and initial values
         self._dal = None
         self._model = None

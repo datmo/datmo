@@ -25,8 +25,8 @@ class GitCodeDriver(CodeDriver):
         # Check if filepath exists
         if not os.path.exists(self.filepath):
             raise DoesNotExistException(__("error",
-                                          "controller.code.driver.git.__init__.dne",
-                                          filepath))
+                                           "controller.code.driver.git.__init__.dne",
+                                           filepath))
         self.execpath = execpath
         # Check the execpath and the version
         try:
