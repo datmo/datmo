@@ -36,7 +36,7 @@ class SnapshotController(BaseController):
         Delete the snapshot specified from the project
 
     """
-    def ___init__(self, home):
+    def __init__(self, home):
         super(SnapshotController, self).__init__(home)
         self.code = CodeController(home)
         self.file_collection = FileCollectionController(home)
