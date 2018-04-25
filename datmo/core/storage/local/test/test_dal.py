@@ -808,16 +808,20 @@ class TestLocalDAL():
         assert isinstance(task.created_at, datetime)
         assert isinstance(task.updated_at, datetime)
 
+        # Create a new Task and test if None values work and not same as first
         task_2 = dal.task.create({
             "model_id": model.id,
             "session_id": session.id,
             "command": task_command,
-            "start_time": task_start_time,
-            "end_time": task_end_time,
-            "duration": task_duration
+            "start_time": None,
+            "end_time": None,
+            "duration": None
         })
 
         assert task_2.id != task.id
+        assert not task_2.start_time
+        assert not task_2.end_time
+        assert not task_2.duration
 
         task_id = "task_id"
         task_3 = dal.task.create({

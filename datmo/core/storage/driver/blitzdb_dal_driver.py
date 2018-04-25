@@ -122,7 +122,7 @@ class BlitzDBDALDriver(DALDriver):
         return True
 
 def normalize_entity(in_dict):
-    """ Converts BlitzDB Document to standard dictionary
+    """Converts BlitzDB Document to standard dictionary
 
     Parameters
     ----------
@@ -139,9 +139,13 @@ def normalize_entity(in_dict):
         out_dict['id'] = in_dict['pk']
         del out_dict['pk']
     if 'start_time' in list(in_dict):
-        out_dict['start_time'] = datetime.strptime(in_dict['start_time'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        out_dict['start_time'] = \
+            datetime.strptime(in_dict['start_time'], '%Y-%m-%dT%H:%M:%S.%fZ') \
+                if out_dict['start_time'] else None
     if 'end_time' in list(in_dict):
-        out_dict['end_time'] = datetime.strptime(in_dict['end_time'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        out_dict['end_time'] = \
+            datetime.strptime(in_dict['end_time'], '%Y-%m-%dT%H:%M:%S.%fZ') \
+                if out_dict['end_time'] else None
     if 'created_at' in list(in_dict):
         out_dict['created_at'] = datetime.strptime(in_dict['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
     if 'updated_at' in list(in_dict):
@@ -149,7 +153,7 @@ def normalize_entity(in_dict):
     return out_dict
 
 def denormalize_entity(in_dict):
-    """ Converts standard dictionary to BlitzDB Document-compatible dictionary
+    """Converts standard dictionary to BlitzDB Document-compatible dictionary
 
     Parameters
     ----------
@@ -167,14 +171,18 @@ def denormalize_entity(in_dict):
         del out_dict['id']
     if 'start_time' in list(in_dict):
         # if not a datetime object, throw error
-        if not isinstance(in_dict['start_time'], datetime):
+        if in_dict['start_time'] and not isinstance(in_dict['start_time'], datetime):
             raise IncorrectTypeException()
-        out_dict['start_time'] = in_dict['start_time'].strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        out_dict['start_time'] = \
+            in_dict['start_time'].strftime('%Y-%m-%dT%H:%M:%S.%fZ') \
+                if in_dict['start_time'] else None
     if 'end_time' in list(in_dict):
         # if not a datetime object, throw error
-        if not isinstance(in_dict['end_time'], datetime):
+        if in_dict['end_time'] and not isinstance(in_dict['end_time'], datetime):
             raise IncorrectTypeException()
-        out_dict['end_time'] = in_dict['end_time'].strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        out_dict['end_time'] = \
+            in_dict['end_time'].strftime('%Y-%m-%dT%H:%M:%S.%fZ') \
+                if in_dict['end_time'] else None
     if 'created_at' in list(in_dict):
         # if not a datetime object, throw error
         if not isinstance(in_dict['created_at'], datetime):
