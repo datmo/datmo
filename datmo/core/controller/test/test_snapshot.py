@@ -331,3 +331,23 @@ class TestSnapshotController():
 
         assert result == True and \
             thrown == True
+
+    def test_code_setup_with_code_id(self):
+        val = 1
+        incoming_data = {"code_id": val}
+        final_data = {}
+        self.snapshot._code_setup(incoming_data, final_data)
+        assert final_data['code_id'] == val
+
+    def test_code_setup_with_commit_id(self):
+        val = "f38a8ace"
+        incoming_data = {"commit_id": val}
+        final_data = {}
+        self.snapshot._code_setup(incoming_data, final_data)
+        assert final_data['code_id']
+
+    def test_code_setup_with_none(self):
+        incoming_data = {}
+        final_data = {}
+        self.snapshot._code_setup(incoming_data, final_data)
+        assert final_data['code_id']
