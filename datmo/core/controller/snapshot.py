@@ -223,88 +223,37 @@ class SnapshotController(BaseController):
                                             "id"))
         return self.dal.snapshot.delete(id)
 
-    def __config_setup(self, incoming_dictionary, create_dict):
-        """[summary]
-            Fills in snapshot config by having one of the following:
-            1. config = JSON object
-            2. config_filepath = some location where a json file exists
-            3. config_filename = just the file name and we'll try to find it
+    def __code_setup(self, incoming_dictionary, create_dict):
+        """Set the code_id by using:
+            1. code_id
+            2. commit_id string, which creates a new code_id
+            3. create a new code id
 
-        Arguments:
-            incoming_dictionary {dict}
-            create_dict {dict}
-
-        Raises:
-            FileIOException
-        """
-        if "config" in incoming_dictionary:
-            create_dict["config"] = incoming_dictionary["config"]
-        elif "config_filepath" in incoming_dictionary:
-            if not os.path.isfile(incoming_dictionary['config_filepath']):
-                raise FileIOException(__("error",
-                                        "controller.snapshot.create.file_config"))
-            # If path exists transform file to config dict
-            config_json_driver = JSONStore(incoming_dictionary['config_filepath'])
-            create_dict['config'] = config_json_driver.to_dict()
-        else:
-            config_filename = incoming_dictionary['config_filename'] \
-                if "config_filename" in incoming_dictionary else "config.json"
-            create_dict['config'] = self.__find_in_filecollection(config_filename, create_dict['file_collection_id'])
-
-    def __stats_setup(self, incoming_dictionary, create_dict):
-        """[summary]
-            Fills in snapshot stats by having one of the following:
-            1. stats = JSON object
-            2. stats_filepath = some location where a json file exists
-            3. stats_filename = just the file name and we'll try to find it
-
-        Arguments:
-            incoming_dictionary {dict}
-            create_dict {dict}
-
-        Raises:
-            FileIOException
+        Parameters
+        ----------
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
         """
 
-        if "stats" in incoming_dictionary:
-            create_dict["stats"] = incoming_dictionary["stats"]
-        elif "stats_filepath" in incoming_dictionary:
-            if not os.path.isfile(incoming_dictionary['stats_filepath']):
-                raise FileIOException(__("error",
-                                        "controller.snapshot.create.file_stat"))
-            # If path exists transform file to config dict
-            stats_json_driver = JSONStore(incoming_dictionary['stats_filepath'])
-            create_dict['stats'] = stats_json_driver.to_dict()
+        if "code_id" in incoming_dictionary:
+            create_dict["code_id"] = incoming_dictionary["code_id"]
+        elif "commit_id" in incoming_dictionary:
+            create_dict['code_id'] = self.code.\
+                create(commit_id=incoming_dictionary['commit_id']).id
         else:
-            stats_filename = incoming_dictionary['stats_filename'] \
-                if "stats_filename" in incoming_dictionary else "stats.json"
-            create_dict['stats'] = self.__find_in_filecollection(stats_filename, create_dict['file_collection_id'])
-
-    def __file_setup(self, incoming_dictionary, create_dict):
-        """ TODO:
-
-        Arguments:
-            incoming_dictionary {[type]} -- [description]
-            create_dict {[type]} -- [description]
-        """
-
-        if "file_collection_id" in incoming_dictionary:
-            create_dict["file_collection_id"] = incoming_dictionary["file_collection_id"]
-        elif "filepaths" in incoming_dictionary:
-            # transform file paths to file_collection_id
-            create_dict['file_collection_id'] = self.file_collection.\
-                create(incoming_dictionary['filepaths']).id
-        else:
-            # create some default file collection
-            create_dict['file_collection_id'] = self.file_collection.\
-                create([]).id
+            create_dict['code_id'] = self.code.create().id
 
     def __env_setup(self, incoming_dictionary, create_dict):
-        """ TODO:
+        """Create or add environment to create_dict for Snapshot entity
 
-        Arguments:
-            incoming_dictionary {[type]} -- [description]
-            create_dict {[type]} -- [description]
+        Parameters
+        ----------
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
         """
 
         language = incoming_dictionary.get("language", None)
@@ -322,30 +271,105 @@ class SnapshotController(BaseController):
             create_dict['environment_id'] = self.environment.\
                 create({}).id
 
-    def __code_setup(self, incoming_dictionary, create_dict):
-        """ Set the code_id by using:
-            1. code_id
-            2. commit_id string, which creates a new code_id
-            3. create a new code id
+    def __file_setup(self, incoming_dictionary, create_dict):
+        """ Creates file collections and adds it to the create dict
 
-        Arguments:
-            incoming_dictionary {[type]} -- [description]
-            create_dict {[type]} -- [description]
+        Parameters
+        ----------
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
         """
 
-        if "code_id" in incoming_dictionary:
-            create_dict["code_id"] = incoming_dictionary["code_id"]
-        elif "commit_id" in incoming_dictionary:
-            create_dict['code_id'] = self.code.\
-                create(commit_id=incoming_dictionary['commit_id']).id
+        if "file_collection_id" in incoming_dictionary:
+            create_dict["file_collection_id"] = incoming_dictionary["file_collection_id"]
+        elif "filepaths" in incoming_dictionary:
+            # transform file paths to file_collection_id
+            create_dict['file_collection_id'] = self.file_collection.\
+                create(incoming_dictionary['filepaths']).id
         else:
-            create_dict['code_id'] = self.code.create().id
+            # create some default file collection
+            create_dict['file_collection_id'] = self.file_collection.\
+                create([]).id
 
-    def __find_in_filecollection(self, file_to_find, file_collection_id):
-        """ Attempts to find a file within the file collection
+    def __config_setup(self, incoming_dictionary, create_dict):
+        """Fills in snapshot config by having one of the following:
+            1. config = JSON object
+            2. config_filepath = some location where a json file exists
+            3. config_filename = just the file name and we'll try to find it
 
-        Arguments:
-            file_to_find {string} -- just the file name
+        Parameters
+        ----------
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
+
+        Raises
+        ------
+        FileIOException
+        """
+        if "config" in incoming_dictionary:
+            create_dict["config"] = incoming_dictionary["config"]
+        elif "config_filepath" in incoming_dictionary:
+            if not os.path.isfile(incoming_dictionary['config_filepath']):
+                raise FileIOException(__("error",
+                                        "controller.snapshot.create.file_config"))
+            # If path exists transform file to config dict
+            config_json_driver = JSONStore(incoming_dictionary['config_filepath'])
+            create_dict['config'] = config_json_driver.to_dict()
+        else:
+            config_filename = incoming_dictionary['config_filename'] \
+                if "config_filename" in incoming_dictionary else "config.json"
+            create_dict['config'] = \
+                self.__find_in_file_collection(config_filename, create_dict['file_collection_id'])
+
+    def __stats_setup(self, incoming_dictionary, create_dict):
+        """Fills in snapshot stats by having one of the following:
+            1. stats = JSON object
+            2. stats_filepath = some location where a json file exists
+            3. stats_filename = just the file name and we'll try to find it
+
+        Parameters
+        ----------
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
+
+        Raises
+        ------
+        FileIOException
+        """
+
+        if "stats" in incoming_dictionary:
+            create_dict["stats"] = incoming_dictionary["stats"]
+        elif "stats_filepath" in incoming_dictionary:
+            if not os.path.isfile(incoming_dictionary['stats_filepath']):
+                raise FileIOException(__("error",
+                                        "controller.snapshot.create.file_stat"))
+            # If path exists transform file to config dict
+            stats_json_driver = JSONStore(incoming_dictionary['stats_filepath'])
+            create_dict['stats'] = stats_json_driver.to_dict()
+        else:
+            stats_filename = incoming_dictionary['stats_filename'] \
+                if "stats_filename" in incoming_dictionary else "stats.json"
+            create_dict['stats'] = \
+                self.__find_in_file_collection(stats_filename, create_dict['file_collection_id'])
+
+    def __find_in_file_collection(self, file_to_find, file_collection_id):
+        """Attempts to find a JSON file within the file collection
+
+        Parameters
+        ----------
+        file_to_find : str
+            filename for file in collection
+
+        Returns
+        -------
+        dict
+            output dictionary of the JSON file
         """
 
         file_collection_obj = self.file_collection.dal.file_collection.\
