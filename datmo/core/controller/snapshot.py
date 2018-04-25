@@ -224,18 +224,20 @@ class SnapshotController(BaseController):
         return self.dal.snapshot.delete(id)
 
     def _config_setup(self, incoming_dictionary, create_dict):
-        """[summary]
-            Fills in snapshot config by having one of the following:
+        """ Fills in snapshot config by having one of the following:
             1. config = JSON object
             2. config_filepath = some location where a json file exists
-            3. config_filename = just the file name and we'll try to find it
+            3. config_filename = just the file nam
+        Parameters
+        ----------
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
 
-        Arguments:
-            incoming_dictionary {dict}
-            create_dict {dict}
-
-        Raises:
-            FileIOException
+        Raises
+        ------
+        FileIOException
         """
         if "config" in incoming_dictionary:
             create_dict["config"] = incoming_dictionary["config"]
@@ -254,18 +256,21 @@ class SnapshotController(BaseController):
             create_dict['config'] = None
 
     def _stats_setup(self, incoming_dictionary, create_dict):
-        """[summary]
-            Fills in snapshot stats by having one of the following:
+        """Fills in snapshot stats by having one of the following:
             1. stats = JSON object
             2. stats_filepath = some location where a json file exists
-            3. stats_filename = just the file name and we'll try to find it
+            3. stats_filename = just the file name
 
-        Arguments:
-            incoming_dictionary {dict}
-            create_dict {dict}
+        Parameters
+        ----------
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
 
-        Raises:
-            FileIOException
+        Raises
+        ------
+        FileIOException
         """
 
         if "stats" in incoming_dictionary:
@@ -287,9 +292,10 @@ class SnapshotController(BaseController):
     def _file_setup(self, incoming_dictionary, create_dict):
         """ TODO:
 
-        Arguments:
-            incoming_dictionary {[type]} -- [description]
-            create_dict {[type]} -- [description]
+        Parameters
+        ----------
+            incoming_dictionary: dict
+            create_dict: dict
         """
 
         if "file_collection_id" in incoming_dictionary:
@@ -306,9 +312,10 @@ class SnapshotController(BaseController):
     def _env_setup(self, incoming_dictionary, create_dict):
         """ TODO:
 
-        Arguments:
-            incoming_dictionary {[type]} -- [description]
-            create_dict {[type]} -- [description]
+        Parameters
+        ----------
+            incoming_dictionary: dict
+            create_dict: dict
         """
 
         language = incoming_dictionary.get("language", None)
@@ -332,9 +339,10 @@ class SnapshotController(BaseController):
             2. commit_id string, which creates a new code_id
             3. create a new code id
 
-        Arguments:
-            incoming_dictionary {[type]} -- [description]
-            create_dict {[type]} -- [description]
+        Parameters
+        ----------
+        incoming_dictionary: dict
+        create_dict: dict
         """
 
         if "code_id" in incoming_dictionary:
@@ -348,8 +356,10 @@ class SnapshotController(BaseController):
     def _find_in_filecollection(self, file_to_find, file_collection_id):
         """ Attempts to find a file within the file collection
 
-        Arguments:
-            file_to_find {string} -- just the file name
+        Returns
+        -------
+        dict
+            output dictionary of the JSON file
         """
 
         file_collection_obj = self.file_collection.dal.file_collection.\
