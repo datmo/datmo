@@ -42,8 +42,8 @@ class Task():
         after_snapshot_id : str, optional
             snapshot created after the task is run
             (default is "", which means it isn't set yet)
-        container_id : str, optional
-            run id for the running task
+        run_id : str, optional
+            run id for the run (different from environment id and task id)
             (default is "", which means it isn't set yet)
         logs : str, optional
             string output of logs
@@ -56,6 +56,9 @@ class Task():
             (default is {}, which means it isn't set yet)
         end_time : datetime.datetime, optional
             timestamp for the beginning time of the task
+            (default is None, which means it isn't set yet)
+        duration : datetime.timedelta, optional
+            timedelta object signifying the time taken to run
             (default is None, which means it isn't set yet)
         created_at : datetime, optional
             (default is datetime.utcnow(), at time of instantiation)
@@ -90,16 +93,18 @@ class Task():
         timestamp for the beginning time of the task
     after_snapshot_id : str
         snapshot created after the task is run
-    container_id : str
-        run id for the running task
+    run_id : str
+        run id for the run (different from environment id and task id)
     logs : str
         string output of logs
     status : str
         status of the current task
     results : dict
         dictionary containing output results from the task
-    end_time : datetime.datetime, optional
+    end_time : datetime.datetime
         timestamp for the beginning time of the task
+    duration : datetime.timedelta
+        timedelta object signifying the time taken to run
     created_at : datetime
     updated_at : datetime
     """
@@ -122,7 +127,7 @@ class Task():
 
         # Post-Execution
         self.after_snapshot_id = dictionary.get('after_snapshot_id', "")
-        self.container_id = dictionary.get('container_id', "")
+        self.run_id = dictionary.get('run_id', "")
         self.logs = dictionary.get('logs', "")
         self.status = dictionary.get('status', "")
         self.results = dictionary.get('results', {})

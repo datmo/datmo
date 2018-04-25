@@ -26,11 +26,12 @@ class TestTask():
 
         # Post-Execution
         assert task_entity.after_snapshot_id == ""
-        assert task_entity.container_id == ""
+        assert task_entity.run_id == ""
         assert task_entity.logs == ""
         assert task_entity.status == ""
         assert task_entity.results == {}
         assert task_entity.end_time == None
+        assert task_entity.duration == None
         assert task_entity.created_at
         assert task_entity.updated_at
 
