@@ -155,12 +155,12 @@ def denormalize_entity(in_dict):
         del out_dict['id']
     if 'created_at' in list(in_dict):
         # if not a datetime object, throw error
-        if type(in_dict['created_at']) != datetime:
+        if not isinstance(in_dict['created_at'], datetime):
             raise IncorrectTypeException()
         out_dict['created_at'] = in_dict['created_at'].strftime('%Y-%m-%dT%H:%M:%S.%fZ')
     if 'updated_at' in list(in_dict):
         # if not a datetime object, throw error
-        if type(in_dict['updated_at']) != datetime:
+        if not isinstance(in_dict['updated_at'], datetime):
             raise IncorrectTypeException()
         out_dict['updated_at'] = in_dict['updated_at'].strftime('%Y-%m-%dT%H:%M:%S.%fZ')
     return out_dict

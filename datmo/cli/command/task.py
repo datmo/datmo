@@ -51,7 +51,7 @@ class TaskCommand(ProjectCommand):
                 kwargs['environment_definition_filepath']
         }
 
-        if type(kwargs['cmd']) is not list:
+        if not isinstance(kwargs['cmd'], list):
             kwargs['cmd'] = shlex.split(kwargs['cmd'])
 
         task_dict = {
