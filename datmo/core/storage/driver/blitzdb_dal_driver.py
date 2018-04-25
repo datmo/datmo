@@ -124,11 +124,15 @@ class BlitzDBDALDriver(DALDriver):
 def normalize_entity(in_dict):
     """ Converts BlitzDB Document to standard dictionary
 
-    Arguments:
-        [dictionary] -- [BlitzDB Document-compatible dictionary of values]
+    Parameters
+    ----------
+    in_dict : dict
+        BlitzDB Document-compatible dictionary of values
 
-    Returns:
-        [dictionary] -- [normal dictionary of values, output of to_dictionary function]
+    Returns
+    -------
+    dict
+        normal dictionary of values, output of to_dictionary function
     """
     out_dict = in_dict.copy()
     if 'pk' in list(in_dict):
@@ -143,11 +147,15 @@ def normalize_entity(in_dict):
 def denormalize_entity(in_dict):
     """ Converts standard dictionary to BlitzDB Document-compatible dictionary
 
-    Arguments:
-        [dictionary] -- [normal dictionary of values, output of to_dictionary function]
+    Parameters
+    ----------
+    in_dict : dict
+        normal dictionary of values, output of to_dictionary function
 
-    Returns:
-        [dictionary] -- [BlitzDB Document-compatible dictionary of values]
+    Returns
+    -------
+    dict
+        BlitzDB Document-compatible dictionary of values
     """
     out_dict = in_dict.copy()
     if 'id' in list(in_dict):
