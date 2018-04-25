@@ -46,6 +46,12 @@ class TestSnapshotModule():
         with open(test_filepath, "w") as f:
             f.write("FROM datmo/xgboost:cpu")
 
-        task_obj = run(command="python script.py", env=test_filepath, home=self.temp_dir)
-        assert task_obj.id
-        assert 'hello' in task_obj.logs
+        # passing string as command
+        task_obj_1 = run(command="python script.py", env=test_filepath, home=self.temp_dir)
+        assert task_obj_1.id
+        assert 'hello' in task_obj_1.logs
+
+        # passing list as command
+        task_obj_2 = run(command=["python", "script.py"], env=test_filepath, home=self.temp_dir)
+        assert task_obj_2.id
+        assert 'hello' in task_obj_2.logs
