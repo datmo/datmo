@@ -346,7 +346,6 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                         docker_shell_cmd_list.append(mapping)
 
                 docker_shell_cmd_list.append(image_name)
-
                 if command:
                     docker_shell_cmd_list.extend(command)
                 return_code = subprocess.call(docker_shell_cmd_list)

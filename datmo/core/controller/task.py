@@ -243,7 +243,6 @@ class TaskController(BaseController):
         after_snapshot_obj = self.snapshot.create(after_snapshot_dict)
 
         # (optional) Remove temporary task directory path
-
         # Update the task with post-execution parameters
         return self.dal.task.update({
             "id": task_obj.id,

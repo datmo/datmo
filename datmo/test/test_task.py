@@ -5,7 +5,7 @@ import os
 import shutil
 import tempfile
 
-from datmo.snapshot import create
+from datmo.task import run
 from datmo.core.controller.project import ProjectController
 from datmo.core.util.exceptions import GitCommitDoesNotExist
 
@@ -28,7 +28,7 @@ class TestSnapshotModule():
         # (fails w/ no commit)
         failed = False
         try:
-            _ = create(message="test", home=self.temp_dir)
+            _ = run(command="test", home=self.temp_dir)
         except GitCommitDoesNotExist:
             failed = True
         assert failed
@@ -38,29 +38,18 @@ class TestSnapshotModule():
         test_filepath = os.path.join(self.temp_dir, "script.py")
         with open(test_filepath, "w") as f:
             f.write("import numpy\n")
-            f.write("import sklean\n")
-
-        snapshot_obj_1 = create(message="test", home=self.temp_dir)
-
-        assert snapshot_obj_1
-        assert snapshot_obj_1.message == "test"
-        assert snapshot_obj_1.code_id
-        assert snapshot_obj_1.environment_id
-        assert snapshot_obj_1.file_collection_id
-        assert snapshot_obj_1.config == {}
-        assert snapshot_obj_1.stats == {}
+            f.write("import sklearn\n")
+            f.write("print 'hello'\n")
+            f.write("result_filepath = '/task/result.json'\n"
+                    "with open(result_filepath, \"w\") as f:\n"
+                    "    f.write(str('{\"foo\":\"bar\"}'))")
 
         # Create a snapshot with default params, files, and environment
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "w") as f:
             f.write("FROM datmo/xgboost:cpu")
-        snapshot_obj_2 = create(message="test", home=self.temp_dir)
 
-        assert snapshot_obj_2
-        assert snapshot_obj_2.message == "test"
-        assert snapshot_obj_2.code_id
-        assert snapshot_obj_2.environment_id
-        assert snapshot_obj_2.file_collection_id
-        assert snapshot_obj_2.config == {}
-        assert snapshot_obj_2.stats == {}
-        assert snapshot_obj_2 != snapshot_obj_1
+        task_obj = run(command="python script.py", env=test_filepath, home=self.temp_dir)
+        assert task_obj.id
+        assert 'hello' in task_obj.logs
+        assert 'foo' in task_obj.result

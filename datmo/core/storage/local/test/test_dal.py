@@ -903,13 +903,17 @@ class TestLocalDAL():
         task_code_id = "code_id"
         task_environment_id = "environment_id"
         task_file_collection_id = "file_collection_id"
+        task_before_snapshot_id = "before_snapshot_id"
+        task_after_snapshot_id = "after_snapshot_id"
         task = dal.task.create({
             "model_id": model.id,
             "session_id": session.id,
             "command": task_command,
             "code_id": task_code_id,
             "environment_id": task_environment_id,
-            "file_collection_id": task_file_collection_id
+            "file_collection_id": task_file_collection_id,
+            "before_snapshot_id": task_before_snapshot_id,
+            "after_snapshot_id": task_after_snapshot_id
         })
 
         # Update required and optional parameters
@@ -924,7 +928,9 @@ class TestLocalDAL():
         assert task.id == updated_task.id and \
                task.updated_at < updated_task.updated_at and \
                updated_task.command == updated_task_command and \
-               updated_task.ports == updated_task_ports
+               updated_task.ports == updated_task_ports and \
+               updated_task.before_snapshot_id == task_before_snapshot_id and \
+               updated_task.after_snapshot_id == task_after_snapshot_id
 
     def test_delete_task(self):
         dal = LocalDAL(self.datadriver)
