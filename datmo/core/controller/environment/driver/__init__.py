@@ -25,8 +25,7 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def create(self, path, output_path):
-        """
-        Create datmo environment definition
+        """Create datmo environment definition
 
         Parameters
         ----------
@@ -53,8 +52,7 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def build(self, name, path):
-        """
-        Build an environment from a definition path
+        """Build an environment from a definition path
 
         Parameters
         ----------

@@ -156,8 +156,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def get_collection_path(self, filehash):
-        """
-        return the collection path by filehash
+        """Return the collection path by filehash
 
         Parameters
         ----------
@@ -173,8 +172,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def exists_collection(self, filehash):
-        """
-        checks if a collection exists based on filehash
+        """Checks if a collection exists based on filehash
 
         Parameters
         ----------
@@ -208,8 +206,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def delete_collection(self, filehash):
-        """
-        deletes collection based on filehash
+        """Deletes collection based on filehash
 
         Parameters
         ----------
@@ -225,8 +222,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def transfer_collection(self, filehash, dst_dirpath):
-        """
-        transfers collection contents to absolute dst path
+        """Transfers collection contents to absolute dst path
 
         Parameters
         ----------
