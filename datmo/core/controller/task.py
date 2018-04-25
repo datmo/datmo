@@ -1,11 +1,12 @@
 import os
+from datetime import datetime
 
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.util.exceptions import TaskRunException, RequiredArgumentMissing, \
-    ProjectNotInitializedException
+    ProjectNotInitializedException, DoesNotExistException
 
 
 class TaskController(BaseController):
@@ -76,14 +77,13 @@ class TaskController(BaseController):
                 create_dict[required_arg] = dictionary[required_arg]
             else:
                 raise RequiredArgumentMissing(__("error",
-                                                "controller.task.create.arg",
-                                                required_arg))
+                                                 "controller.task.create.arg",
+                                                 required_arg))
 
         # Create Task
         return self.dal.task.create(create_dict)
 
-    def _run_helper(self, environment_id,
-                    options, log_filepath):
+    def _run_helper(self, environment_id, options, log_filepath):
         """Run environment with parameters
 
         Parameters
@@ -114,8 +114,8 @@ class TaskController(BaseController):
         -------
         return_code : int
             system return code of the environment that was run
-        container_id : str
-            id of the container environment that was run
+        run_id : str
+            id of the environment run (different from environment id)
         logs : str
             output logs from the run
         """
@@ -136,10 +136,10 @@ class TaskController(BaseController):
         self.environment.build(environment_id)
 
         # Run container with environment
-        return_code, container_id, logs = \
+        return_code, run_id, logs = \
             self.environment.run(environment_id, run_options, log_filepath)
 
-        return return_code, container_id, logs
+        return return_code, run_id, logs
 
     def run(self, id, snapshot_dict={"visible": False}, task_dict={}):
         """Run a task with parameters. If dictionary specified, create a new task with new run parameters.
@@ -156,8 +156,8 @@ class TaskController(BaseController):
             set of parameters to create a snapshot (see SnapshotController for details.
             default is dictionary with `visible` False to hide auto-generated snapshot)
         task_dict : dict
-            set of parameters to characterize the task run (default is empty dictionary,
-            see datmo.entity.task for more details on inputs)
+            set of parameters to characterize the task run
+            (default is {}, see datmo.core.entity.task for more details on inputs)
 
         Returns
         -------
@@ -181,8 +181,8 @@ class TaskController(BaseController):
                              task_obj.id), dir=True)
         except:
             raise TaskRunException(__("error",
-                                     "controller.task.run",
-                                     task_dirpath))
+                                      "controller.task.run",
+                                      task_dirpath))
 
         # Create the before snapshot prior to execution
         before_snapshot_obj = self.snapshot.create(snapshot_dict)
@@ -196,7 +196,8 @@ class TaskController(BaseController):
             "gpu": task_dict.get('gpu', task_obj.gpu),
             "interactive": task_dict.get('interactive', task_obj.interactive),
             "task_dirpath": task_dict.get('task_dirpath', task_dirpath),
-            "log_filepath": task_dict.get('log_filepath', os.path.join(task_dirpath, "task.log"))
+            "log_filepath": task_dict.get('log_filepath', os.path.join(task_dirpath, "task.log")),
+            "start_time": task_dict.get('start_time', datetime.utcnow())
         })
 
         # Copy over files from the before_snapshot file collection to task dir
@@ -229,27 +230,39 @@ class TaskController(BaseController):
         }
 
         # Run environment via the helper function
-        return_code, container_id, logs =  \
+        return_code, run_id, logs =  \
             self._run_helper(before_snapshot_obj.environment_id,
                              environment_run_options,
                              os.path.join(self.home, task_obj.log_filepath))
 
         # Create the after snapshot after execution is completed with new filepaths
         after_snapshot_dict = snapshot_dict.copy()
+        # Add in absolute filepaths from running task directory
+        absolute_task_dir_path = os.path.join(self.home, task_obj.task_dirpath)
+        absolute_filepaths = []
+        for item in os.listdir(absolute_task_dir_path):
+            path = os.path.join(absolute_task_dir_path, item)
+            if os.path.isfile(path) or os.path.isdir(path):
+                absolute_filepaths.append(path)
         after_snapshot_dict.update({
-            "filepaths": [os.path.join(self.home, task_obj.task_dirpath)],
+            "filepaths": absolute_filepaths,
             "environment_id": before_snapshot_obj.environment_id,
         })
         after_snapshot_obj = self.snapshot.create(after_snapshot_dict)
 
         # (optional) Remove temporary task directory path
         # Update the task with post-execution parameters
+        end_time = datetime.utcnow()
+        duration = (end_time - task_obj.start_time).total_seconds()
         return self.dal.task.update({
             "id": task_obj.id,
             "after_snapshot_id": after_snapshot_obj.id,
-            "container_id": container_id,
+            "run_id": run_id,
             "logs": logs,
             "status": "SUCCESS" if return_code==0 else "FAILED",
+            "results": task_obj.results, # updated during run
+            "end_time": end_time,
+            "duration": duration
         })
 
     def list(self, session_id=None):
@@ -257,6 +270,55 @@ class TaskController(BaseController):
         if session_id:
             query['session_id'] = session_id
         return self.dal.task.query(query)
+
+    def get_files(self, id, mode="r"):
+        """Get list of file objects for task id. It will look in the following areas in the following order
+
+        1) look in the after snapshot for file collection
+        2) look in the running task file collection
+        3) look in the before snapshot for file collection
+
+        Parameters
+        ----------
+        id : str
+            id for the task you would like to get file objects for
+        mode : str
+            file open mode
+            (default is "r" to open file for read)
+
+        Returns
+        -------
+        list
+            list of python file objects
+
+        Raises
+        ------
+        DoesNotExistException
+            no file objects exist for the task
+        """
+        task_obj = self.dal.task.get_by_id(id)
+        if task_obj.after_snapshot_id:
+            # perform number 1) and return file list
+            after_snapshot_obj = \
+                self.dal.snapshot.get_by_id(task_obj.after_snapshot_id)
+            file_collection_obj = \
+                self.dal.file_collection.get_by_id(after_snapshot_obj.file_collection_id)
+            return self.file_driver.\
+                get_collection_files(file_collection_obj.filehash, mode=mode)
+        elif task_obj.task_dirpath:
+            # perform number 2) and return file list
+            return self.file_driver.get(task_obj.task_dirpath, mode=mode, dir=True)
+        elif task_obj.before_snapshot_id:
+            # perform number 3) and return file list
+            before_snapshot_obj = \
+                self.dal.snapshot.get_by_id(task_obj.before_snapshot_id)
+            file_collection_obj = \
+                self.dal.file_collection.get_by_id(before_snapshot_obj.file_collection_id)
+            return self.file_driver. \
+                get_collection_files(file_collection_obj.filehash, mode=mode)
+        else:
+            # Error because the task does not have any files associated with it
+            raise DoesNotExistException()
 
     def delete(self, id):
         if not id:
@@ -266,7 +328,7 @@ class TaskController(BaseController):
         return self.dal.task.delete(id)
 
     def stop(self, id):
-        """Stop and remove container for the task
+        """Stop and remove run for the task
 
         Parameters
         ----------
@@ -283,6 +345,6 @@ class TaskController(BaseController):
                                              "controller.task.stop.arg",
                                              "id"))
         task_obj = self.dal.task.get_by_id(id)
-        container_id = task_obj.container_id
-        return_code = self.environment.stop(container_id)
+        run_id = task_obj.run_id
+        return_code = self.environment.stop(run_id)
         return return_code
