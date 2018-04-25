@@ -45,7 +45,7 @@ class SnapshotController(BaseController):
             raise ProjectNotInitializedException(__("error",
                                                     "controller.snapshot.__init__"))
 
-    def create(self, dictionary):
+    def create(self, incoming_dictionary):
         """Create snapshot object
 
         Parameters
@@ -147,117 +147,21 @@ class SnapshotController(BaseController):
             "model_id": self.model.id,
             "session_id": self.current_session.id
         }
-        # Required args for Snapshot entity
-        required_args = ["code_id", "environment_id", "file_collection_id",
-                         "config", "stats"]
-        for required_arg in required_args:
-            # Code setup
-            if required_arg == "code_id":
-                if "code_id" in dictionary:
-                    create_dict[required_arg] = dictionary[required_arg]
-                elif "commit_id" in dictionary:
-                    create_dict['code_id'] = self.code.\
-                        create(commit_id=dictionary['commit_id']).id
-                else:
-                    create_dict['code_id'] = self.code.create().id
-            # Environment setup
-            elif required_arg == "environment_id":
-                language = dictionary.get("language", None)
-                if "environment_id" in dictionary:
-                    create_dict[required_arg] = dictionary[required_arg]
-                elif "environment_definition_filepath" in dictionary:
-                    create_dict['environment_id'] = self.environment.create({
-                        "definition_filepath": dictionary['environment_definition_filepath']
-                    }).id
-                elif language:
-                    create_dict['environment_id'] = self.environment. \
-                        create({"language": language}).id
-                else:
-                    # create some default environment
-                    create_dict['environment_id'] = self.environment.\
-                        create({}).id
-            # File setup
-            elif required_arg == "file_collection_id":
-                if "file_collection_id" in dictionary:
-                    create_dict[required_arg] = dictionary[required_arg]
-                elif "filepaths" in dictionary:
-                    # transform file paths to file_collection_id
-                    create_dict['file_collection_id'] = self.file_collection. \
-                        create(dictionary['filepaths']).id
-                else:
-                    # create some default file collection
-                    create_dict['file_collection_id'] = self.file_collection.\
-                        create([]).id
-            # Config setup
-            elif required_arg == "config":
-                if "config" in dictionary:
-                    create_dict[required_arg] = dictionary[required_arg]
-                elif "config_filepath" in dictionary:
-                    if not os.path.isfile(dictionary['config_filepath']):
-                        raise FileIOException(__("error",
-                                                "controller.snapshot.create.file_config"))
-                    # If path exists transform file to config dict
-                    config_json_driver = JSONStore(dictionary['config_filepath'])
-                    create_dict['config'] = config_json_driver.to_dict()
-                else:
-                    config_filename = dictionary['config_filename'] \
-                        if "config_filename" in dictionary else "config.json"
-                    # get all filepaths
-                    file_collection_obj = self.file_collection.dal.file_collection.\
-                        get_by_id(create_dict['file_collection_id'])
-                    file_collection_path = \
-                        self.file_collection.file_driver.get_collection_path(
-                            file_collection_obj.filehash)
-                    # find all of the possible paths it could exist
-                    possible_paths = [os.path.join(self.home, config_filename)] + \
-                                     [os.path.join(self.home, tuple[0], config_filename)
-                                       for tuple in os.walk(file_collection_path)]
-                    existing_possible_paths = [possible_path for possible_path in possible_paths
-                                               if os.path.isfile(possible_path)]
-                    if not existing_possible_paths:
-                        # TODO: Add some info / warning that no file was found
-                        # create some default config
-                        create_dict['config'] = {}
-                        continue
-                    # If any such path exists, transform file to config dict
-                    config_json_driver = JSONStore(existing_possible_paths[0])
-                    create_dict['config'] = config_json_driver.to_dict()
-            # Stats setup
-            elif required_arg == "stats":
-                if "stats" in dictionary:
-                    create_dict[required_arg] = dictionary[required_arg]
-                elif "stats_filepath" in dictionary:
-                    if not os.path.isfile(dictionary['stats_filepath']):
-                        raise FileIOException(__("error",
-                                                "controller.snapshot.create.file_stat"))
-                    # If path exists transform file to config dict
-                    stats_json_driver = JSONStore(dictionary['stats_filepath'])
-                    create_dict['stats'] = stats_json_driver.to_dict()
-                else:
-                    stats_filename = dictionary['stats_filename'] \
-                        if "stats_filename" in dictionary else "stats.json"
-                    # get all filepaths
-                    file_collection_obj = self.file_collection.dal.file_collection. \
-                        get_by_id(create_dict['file_collection_id'])
-                    file_collection_path = \
-                        self.file_collection.file_driver.get_collection_path(
-                            file_collection_obj.filehash)
-                    # find all of the possible paths it could exist
-                    possible_paths = [os.path.join(self.home, stats_filename)] + \
-                                     [os.path.join(self.home, tuple[0], stats_filename)
-                                      for tuple in os.walk(file_collection_path)]
-                    existing_possible_paths = [possible_path for possible_path in possible_paths
-                                               if os.path.isfile(possible_path)]
-                    if not existing_possible_paths:
-                        # TODO: Add some info / warning that no file was found
-                        # create some default stats
-                        create_dict['stats'] = {}
-                        continue
-                    # If any such path exists, transform file to stats dict
-                    stats_json_driver = JSONStore(existing_possible_paths[0])
-                    create_dict['stats'] = stats_json_driver.to_dict()
-            else:
-                raise NotImplementedError()
+
+        # Code setup
+        self.__code_setup(incoming_dictionary, create_dict)
+
+        # Environment setup
+        self.__env_setup(incoming_dictionary, create_dict)
+
+        # File setup
+        self.__file_setup(incoming_dictionary, create_dict)
+
+        # Config setup
+        self.__config_setup(incoming_dictionary, create_dict)
+
+        # Stats setup
+        self.__stats_setup(incoming_dictionary, create_dict)
 
         # If snapshot object with required args already exists, return it
         # DO NOT create a new snapshot with the same required arguments
@@ -268,13 +172,13 @@ class SnapshotController(BaseController):
             "config": create_dict['config'],
             "stats": create_dict['stats']
         })
-        if results: return results[0];
+        if results: return results[0]
 
         # Optional args for Snapshot entity
         optional_args = ["session_id", "task_id", "message", "label", "visible"]
         for optional_arg in optional_args:
-            if optional_arg in dictionary:
-                create_dict[optional_arg] = dictionary[optional_arg]
+            if optional_arg in incoming_dictionary:
+                create_dict[optional_arg] = incoming_dictionary[optional_arg]
 
         # Create snapshot and return
         return self.dal.snapshot.create(create_dict)
@@ -318,3 +222,172 @@ class SnapshotController(BaseController):
                                             "controller.snapshot.delete.arg",
                                             "id"))
         return self.dal.snapshot.delete(id)
+
+    def __code_setup(self, incoming_dictionary, create_dict):
+        """Set the code_id by using:
+            1. code_id
+            2. commit_id string, which creates a new code_id
+            3. create a new code id
+
+        Parameters
+        ----------
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
+        """
+
+        if "code_id" in incoming_dictionary:
+            create_dict["code_id"] = incoming_dictionary["code_id"]
+        elif "commit_id" in incoming_dictionary:
+            create_dict['code_id'] = self.code.\
+                create(commit_id=incoming_dictionary['commit_id']).id
+        else:
+            create_dict['code_id'] = self.code.create().id
+
+    def __env_setup(self, incoming_dictionary, create_dict):
+        """Create or add environment to create_dict for Snapshot entity
+
+        Parameters
+        ----------
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
+        """
+
+        language = incoming_dictionary.get("language", None)
+        if "environment_id" in incoming_dictionary:
+            create_dict["environment_id"] = incoming_dictionary["environment_id"]
+        elif "environment_definition_filepath" in incoming_dictionary:
+            create_dict['environment_id'] = self.environment.create({
+                "definition_filepath": incoming_dictionary['environment_definition_filepath']
+            }).id
+        elif language:
+            create_dict['environment_id'] = self.environment.\
+                create({"language": language}).id
+        else:
+            # create some default environment
+            create_dict['environment_id'] = self.environment.\
+                create({}).id
+
+    def __file_setup(self, incoming_dictionary, create_dict):
+        """ Creates file collections and adds it to the create dict
+
+        Parameters
+        ----------
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
+        """
+
+        if "file_collection_id" in incoming_dictionary:
+            create_dict["file_collection_id"] = incoming_dictionary["file_collection_id"]
+        elif "filepaths" in incoming_dictionary:
+            # transform file paths to file_collection_id
+            create_dict['file_collection_id'] = self.file_collection.\
+                create(incoming_dictionary['filepaths']).id
+        else:
+            # create some default file collection
+            create_dict['file_collection_id'] = self.file_collection.\
+                create([]).id
+
+    def __config_setup(self, incoming_dictionary, create_dict):
+        """Fills in snapshot config by having one of the following:
+            1. config = JSON object
+            2. config_filepath = some location where a json file exists
+            3. config_filename = just the file name and we'll try to find it
+
+        Parameters
+        ----------
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
+
+        Raises
+        ------
+        FileIOException
+        """
+        if "config" in incoming_dictionary:
+            create_dict["config"] = incoming_dictionary["config"]
+        elif "config_filepath" in incoming_dictionary:
+            if not os.path.isfile(incoming_dictionary['config_filepath']):
+                raise FileIOException(__("error",
+                                        "controller.snapshot.create.file_config"))
+            # If path exists transform file to config dict
+            config_json_driver = JSONStore(incoming_dictionary['config_filepath'])
+            create_dict['config'] = config_json_driver.to_dict()
+        else:
+            config_filename = incoming_dictionary['config_filename'] \
+                if "config_filename" in incoming_dictionary else "config.json"
+            create_dict['config'] = \
+                self.__find_in_file_collection(config_filename, create_dict['file_collection_id'])
+
+    def __stats_setup(self, incoming_dictionary, create_dict):
+        """Fills in snapshot stats by having one of the following:
+            1. stats = JSON object
+            2. stats_filepath = some location where a json file exists
+            3. stats_filename = just the file name and we'll try to find it
+
+        Parameters
+        ----------
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
+
+        Raises
+        ------
+        FileIOException
+        """
+
+        if "stats" in incoming_dictionary:
+            create_dict["stats"] = incoming_dictionary["stats"]
+        elif "stats_filepath" in incoming_dictionary:
+            if not os.path.isfile(incoming_dictionary['stats_filepath']):
+                raise FileIOException(__("error",
+                                        "controller.snapshot.create.file_stat"))
+            # If path exists transform file to config dict
+            stats_json_driver = JSONStore(incoming_dictionary['stats_filepath'])
+            create_dict['stats'] = stats_json_driver.to_dict()
+        else:
+            stats_filename = incoming_dictionary['stats_filename'] \
+                if "stats_filename" in incoming_dictionary else "stats.json"
+            create_dict['stats'] = \
+                self.__find_in_file_collection(stats_filename, create_dict['file_collection_id'])
+
+    def __find_in_file_collection(self, file_to_find, file_collection_id):
+        """Attempts to find a JSON file within the file collection
+
+        Parameters
+        ----------
+        file_to_find : str
+            filename for file in collection
+
+        Returns
+        -------
+        dict
+            output dictionary of the JSON file
+        """
+
+        file_collection_obj = self.file_collection.dal.file_collection.\
+            get_by_id(file_collection_id)
+        file_collection_path = \
+            self.file_collection.file_driver.get_collection_path(
+                file_collection_obj.filehash)
+        # find all of the possible paths it could exist
+        possible_paths = [os.path.join(self.home, file_to_find)] + \
+                            [os.path.join(self.home, item[0], file_to_find)
+                            for item in os.walk(file_collection_path)]
+        existing_possible_paths = [possible_path for possible_path in possible_paths
+                                    if os.path.isfile(possible_path)]
+        if not existing_possible_paths:
+            # TODO: Add some info / warning that no file was found
+            # create some default stats
+            return {}
+        else:
+            # If any such path exists, transform file to stats dict
+            json_file = JSONStore(existing_possible_paths[0])
+            return json_file.to_dict()
