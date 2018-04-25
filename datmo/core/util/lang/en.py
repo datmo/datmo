@@ -12,7 +12,8 @@ MESSAGES = {
         "cli.general.tuple.test" : "%s, %s",
         "cli.snapshot.create": "Creating a new snapshot",
         "cli.snapshot.delete": "Deleting a snapshot",
-        "cli.task.run": "Running a new task"
+        "cli.task.run": "Running a new task",
+        "cli.task.stop": "Stopping task: %s"
     },
     "warn": {
         "cli.general.internet": "Internet connectivity doesn't exist",
@@ -23,7 +24,8 @@ MESSAGES = {
         "cli.general": "An exception occurred: %s",
         "cli.general.method.not_found": "Method %s.%s not found",
         "cli.project": "No project found in the current directory: %s",
-        "cli.task.delete": "Error while deleting the task",
+        "cli.task.run": "Error while running the task: %s",
+        "cli.task.stop": "Error while stopping the task: %s",
         "util.misc_functions.get_filehash": "Filepath does not point to a valid file: %s",
         "controller.code.driver.git.__init__.dne": "File path does not exist: %s",
         "controller.code.driver.git.__init__.giterror": "Error in git: %s",
@@ -101,10 +103,12 @@ MESSAGES = {
         "controller.snapshot.create.arg": "Required argument missing to create snapshot: %s",
         "controller.snapshot.create.file_config": "Config file does not exist",
         "controller.snapshot.create.file_stat": "Stats file does not exist",
+        "controller.snapshot.list": "Session does not exist for id: %s",
         "controller.snapshot.delete.arg": "Delete argument %s not present in input",
         "controller.task.__init__": "Project has not been initialized",
         "controller.task._run_helper.env_dne": "Environment specified does not exist: %s",
         "controller.task.run": "Error creating task directory for run: %s",
+        "controller.task.stop.arg": "Stop argument %s not present in input",
         "controller.task.delete.arg": "Delete argument %s not present in input",
         "storage.local.dal.update": "Entity id not provided in the input for update",
     },
