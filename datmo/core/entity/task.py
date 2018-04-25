@@ -6,6 +6,62 @@ class Task():
     to capture the relevant components. These snapshots are flagged as temporary unless otherwise specified
     by the user but are stored as ids within the task object for reference.
 
+    Parameters
+    ----------
+    dictionary : dict
+        id : str
+            the id of the entity
+        model_id : str
+            the parent model id for the entity
+        session_id : str
+            id of session associated with task
+        command : str
+            command that is used by the task
+        before_snapshot_id : str, optional
+            snapshot created before the task is run
+            (default is "", which means it isn't set yet)
+        ports : list, optional
+            list of string mappings from host system (left) to environment (right)
+            (e.g. ["9999:9999", "8888:8888"])
+            (default is [], which means it isn't set yet)
+        gpu : bool, optional
+            boolean to signify if run requires gpu
+            (default is False, which means no gpu unless specified)
+        interactive : bool, optional
+            boolean to signify if should be run in interactive mode
+            (default is False, which means no interactive mode unless specified)
+        task_dirpath : str, optional
+            task directory path relative to the project root
+            (default is "", which means it isn't set yet)
+        log_filepath : str, optional
+            log filepath relative to the project root
+            (default is "", which means it isn't set yet)
+        start_time : datetime.datetime
+            timestamp for the beginning time of the task
+            (default is None, which means it isn't set yet)
+        after_snapshot_id : str, optional
+            snapshot created after the task is run
+            (default is "", which means it isn't set yet)
+        container_id : str, optional
+            run id for the running task
+            (default is "", which means it isn't set yet)
+        logs : str, optional
+            string output of logs
+            (default is "", which means it isn't set yet)
+        status : str, optional
+            status of the current task
+            (default is "", which means it isn't set yet)
+        results : dict, optional
+            dictionary containing output results from the task
+            (default is {}, which means it isn't set yet)
+        end_time : datetime.datetime, optional
+            timestamp for the beginning time of the task
+            (default is None, which means it isn't set yet)
+        created_at : datetime, optional
+            (default is datetime.utcnow(), at time of instantiation)
+        updated_at : datetime, optional
+            (default is same as created_at, at time of instantiation)
+
     Attributes
     ----------
     id : str
@@ -13,24 +69,39 @@ class Task():
     model_id : str
         the parent model id for the entity
     session_id : str
+        id of session associated with task
     command : str
-    before_snapshot_id : str, optional
-    ports : list, optional
+        command that is used by the task
+    before_snapshot_id : str
+        snapshot created before the task is run
+    ports : list
         list of string mappings from host system (left) to environment (right)
         (e.g. ["9999:9999", "8888:8888"])
-    gpu : bool, optional
-    interactive : bool, optional
-    task_dirpath : str, optional
+    gpu : bool
+        boolean to signify if run requires gpu
+    interactive : bool
+        boolean to signify if should be run in interactive mode
+    task_dirpath : str
         task directory path relative to the project root
-    log_filepath : str, optional
+    log_filepath : str
         log filepath relative to the project root
-    after_snapshot_id : str, optional
-    container_id : str, optional
-    logs : str, optional
-    status : str, optional
-    created_at : datetime, optional
-    updated_at : datetime, optional
-
+        (default is None, which means it isn't set yet)
+    start_time : datetime.datetime
+        timestamp for the beginning time of the task
+    after_snapshot_id : str
+        snapshot created after the task is run
+    container_id : str
+        run id for the running task
+    logs : str
+        string output of logs
+    status : str
+        status of the current task
+    results : dict
+        dictionary containing output results from the task
+    end_time : datetime.datetime, optional
+        timestamp for the beginning time of the task
+    created_at : datetime
+    updated_at : datetime
     """
     def __init__(self, dictionary):
         self.id = dictionary['id']
@@ -47,12 +118,16 @@ class Task():
         self.interactive = dictionary.get('interactive', False)
         self.task_dirpath = dictionary.get('task_dirpath', "")
         self.log_filepath = dictionary.get('log_filepath', "")
+        self.start_time = dictionary.get('start_time', None)
 
         # Post-Execution
         self.after_snapshot_id = dictionary.get('after_snapshot_id', "")
         self.container_id = dictionary.get('container_id', "")
         self.logs = dictionary.get('logs', "")
         self.status = dictionary.get('status', "")
+        self.results = dictionary.get('results', {})
+        self.end_time = dictionary.get('end_time', None)
+        self.duration = dictionary.get('duration', None)
 
         self.created_at = dictionary.get('created_at', datetime.utcnow())
         self.updated_at = dictionary.get('updated_at', self.created_at)

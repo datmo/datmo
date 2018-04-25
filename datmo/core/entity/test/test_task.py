@@ -22,12 +22,15 @@ class TestTask():
         assert task_entity.interactive == False
         assert task_entity.task_dirpath == ""
         assert task_entity.log_filepath == ""
+        assert task_entity.start_time == None
 
         # Post-Execution
         assert task_entity.after_snapshot_id == ""
         assert task_entity.container_id == ""
         assert task_entity.logs == ""
         assert task_entity.status == ""
+        assert task_entity.results == {}
+        assert task_entity.end_time == None
         assert task_entity.created_at
         assert task_entity.updated_at
 
