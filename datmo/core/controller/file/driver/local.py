@@ -146,6 +146,16 @@ class LocalFileDriver(FileDriver):
         else:
             return True if os.path.isfile(filepath) else False
 
+    def get(self, relative_path, mode="r"):
+        if not os.path.exists(os.path.join(self.filepath,
+                                       relative_path)):
+            raise DoesNotExistException(__("error",
+                                          "controller.file.driver.local.delete",
+                                          os.path.join(self.filepath, relative_path)))
+        filepath = os.path.join(self.filepath,
+                                relative_path)
+        return open(filepath, mode)
+
     def ensure(self, relative_path, dir=False):
         if not self.exists(os.path.join(self.filepath,
                                         relative_path),
@@ -241,6 +251,20 @@ class LocalFileDriver(FileDriver):
         collection_path = os.path.join(self.filepath, ".datmo",
                                        "collections", filehash)
         return self.exists(collection_path, dir=True)
+
+    def get_collection_files(self, filehash, mode="r"):
+        collection_path = os.path.join(self.filepath, ".datmo",
+                                       "collections", filehash)
+        # Walk through all files in the collection and provide absolute filenames
+        absolute_filepaths = []
+        for dirname, dirnames, filenames in os.walk(collection_path):
+            # print path to all filenames.
+            for filename in filenames:
+                absolute_filepaths.append(os.path.join(dirname, filename))
+
+        # Return a list of file objects
+        return [open(absolute_filepath, mode)
+                for absolute_filepath in absolute_filepaths]
 
     def delete_collection(self, filehash):
         collection_path = os.path.join(self.filepath, ".datmo",

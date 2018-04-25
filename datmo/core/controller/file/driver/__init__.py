@@ -35,8 +35,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def init(self):
-        """
-        Initialize the datmo file structure
+        """Initialize the datmo file structure
 
         Returns
         -------
@@ -51,8 +50,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def create(self, relative_path, dir=False):
-        """
-        create a file or directory
+        """Create a file or directory
 
         Parameters
         ----------
@@ -70,8 +68,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def exists(self, relative_path, dir=False):
-        """
-        determine if a file or directory exists
+        """Determine if a file or directory exists
 
         Parameters
         ----------
@@ -88,9 +85,26 @@ class FileDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def ensure(self, relative_path, dir=False):
+    def get(self, relative_path, mode="r"):
+        """Retrieve file as python file object
+
+        Parameters
+        ----------
+        relative_path : str
+            path relative to the filepath
+        mode : str
+            file object open mode
+
+        Returns
+        -------
+        file
+            python file object representing file opened
+            in the mode specified
         """
-        ensure file or directory exists or create if not
+
+    @abstractmethod
+    def ensure(self, relative_path, dir=False):
+        """Ensure file or directory exists or create if not
 
         Parameters
         ----------
@@ -108,8 +122,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def delete(self, relative_path, dir=False):
-        """
-        delete the file or directory
+        """Delete the file or directory
 
         Parameters
         ----------
@@ -127,8 +140,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def create_collection(self, filepaths):
-        """
-        takes a list of absolute filepaths and aggregates into collection
+        """Takes a list of absolute filepaths and aggregates into collection
 
         Parameters
         ----------
@@ -175,6 +187,24 @@ class FileDriver(with_metaclass(ABCMeta, object)):
             True if exists else False
         """
         pass
+
+    @abstractmethod
+    def get_collection_files(self, filehash, mode="r"):
+        """Retrieve collection files as python file object
+
+        Parameters
+        ----------
+        filehash : str
+            hash representing the files in the collection
+        mode : str
+            file object open mode
+
+        Returns
+        -------
+        list
+            list of python file objects representing each
+            file in the collection opened in mode specified
+        """
 
     @abstractmethod
     def delete_collection(self, filehash):
