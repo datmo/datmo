@@ -246,10 +246,12 @@ class SnapshotController(BaseController):
             # If path exists transform file to config dict
             config_json_driver = JSONStore(incoming_dictionary['config_filepath'])
             create_dict['config'] = config_json_driver.to_dict()
-        else:
+        elif "config_filename" in incoming_dictionary:
             config_filename = incoming_dictionary['config_filename'] \
                 if "config_filename" in incoming_dictionary else "config.json"
             create_dict['config'] = self._find_in_filecollection(config_filename, create_dict['file_collection_id'])
+        else:
+            create_dict['config'] = None
 
     def _stats_setup(self, incoming_dictionary, create_dict):
         """[summary]
@@ -275,10 +277,12 @@ class SnapshotController(BaseController):
             # If path exists transform file to config dict
             stats_json_driver = JSONStore(incoming_dictionary['stats_filepath'])
             create_dict['stats'] = stats_json_driver.to_dict()
-        else:
+        elif "stats_filename" in incoming_dictionary:
             stats_filename = incoming_dictionary['stats_filename'] \
                 if "stats_filename" in incoming_dictionary else "stats.json"
             create_dict['stats'] = self._find_in_filecollection(stats_filename, create_dict['file_collection_id'])
+        else:
+            create_dict['stats'] = None
 
     def _file_setup(self, incoming_dictionary, create_dict):
         """ TODO:
