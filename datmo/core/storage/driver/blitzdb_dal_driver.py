@@ -138,6 +138,10 @@ def normalize_entity(in_dict):
     if 'pk' in list(in_dict):
         out_dict['id'] = in_dict['pk']
         del out_dict['pk']
+    if 'start_time' in list(in_dict):
+        out_dict['start_time'] = datetime.strptime(in_dict['start_time'], '%Y-%m-%dT%H:%M:%S.%fZ')
+    if 'end_time' in list(in_dict):
+        out_dict['end_time'] = datetime.strptime(in_dict['end_time'], '%Y-%m-%dT%H:%M:%S.%fZ')
     if 'created_at' in list(in_dict):
         out_dict['created_at'] = datetime.strptime(in_dict['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
     if 'updated_at' in list(in_dict):
@@ -161,6 +165,16 @@ def denormalize_entity(in_dict):
     if 'id' in list(in_dict):
         out_dict['pk'] = in_dict['id']
         del out_dict['id']
+    if 'start_time' in list(in_dict):
+        # if not a datetime object, throw error
+        if not isinstance(in_dict['start_time'], datetime):
+            raise IncorrectTypeException()
+        out_dict['start_time'] = in_dict['start_time'].strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    if 'end_time' in list(in_dict):
+        # if not a datetime object, throw error
+        if not isinstance(in_dict['end_time'], datetime):
+            raise IncorrectTypeException()
+        out_dict['end_time'] = in_dict['end_time'].strftime('%Y-%m-%dT%H:%M:%S.%fZ')
     if 'created_at' in list(in_dict):
         # if not a datetime object, throw error
         if not isinstance(in_dict['created_at'], datetime):

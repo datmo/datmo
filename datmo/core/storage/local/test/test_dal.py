@@ -788,30 +788,33 @@ class TestLocalDAL():
         })
 
         task_command = "task_1"
-        task_code_id = "code_id"
-        task_environment_id = "environment_id"
-        task_file_collection_id = "file_collection_id"
+        task_start_time = datetime.utcnow()
+        task_end_time = datetime.utcnow()
+        task_duration = (task_end_time - task_start_time).total_seconds()
         task = dal.task.create({
             "model_id": model.id,
             "session_id": session.id,
             "command": task_command,
-            "code_id": task_code_id,
-            "environment_id": task_environment_id,
-            "file_collection_id": task_file_collection_id
+            "start_time": task_start_time,
+            "end_time": task_end_time,
+            "duration": task_duration
         })
 
         assert task.id
         assert task.command == task_command
-        assert task.created_at
-        assert task.updated_at
+        assert isinstance(task.start_time, datetime)
+        assert isinstance(task.end_time, datetime)
+        assert isinstance(task.duration, float)
+        assert isinstance(task.created_at, datetime)
+        assert isinstance(task.updated_at, datetime)
 
         task_2 = dal.task.create({
             "model_id": model.id,
             "session_id": session.id,
             "command": task_command,
-            "code_id": task_code_id,
-            "environment_id": task_environment_id,
-            "file_collection_id": task_file_collection_id
+            "start_time": task_start_time,
+            "end_time": task_end_time,
+            "duration": task_duration
         })
 
         assert task_2.id != task.id
@@ -822,13 +825,12 @@ class TestLocalDAL():
             "model_id": model.id,
             "session_id": session.id,
             "command": task_command,
-            "code_id": task_code_id,
-            "environment_id": task_environment_id,
-            "file_collection_id": task_file_collection_id
+            "start_time": task_start_time,
+            "end_time": task_end_time,
+            "duration": task_duration
         })
 
         assert task_3.id == task_id
-
 
     def test_get_by_id_task(self):
         dal = LocalDAL(self.datadriver)
@@ -841,20 +843,25 @@ class TestLocalDAL():
         })
 
         task_command = "task_2"
-        task_code_id = "code_id"
-        task_environment_id = "environment_id"
-        task_file_collection_id = "file_collection_id"
+        task_start_time = datetime.utcnow()
+        task_end_time = datetime.utcnow()
+        task_duration = (task_end_time - task_start_time).total_seconds()
         task = dal.task.create({
             "model_id": model.id,
             "session_id": session.id,
             "command": task_command,
-            "code_id": task_code_id,
-            "environment_id": task_environment_id,
-            "file_collection_id": task_file_collection_id
+            "start_time": task_start_time,
+            "end_time": task_end_time,
+            "duration": task_duration
         })
-
         result = dal.task.get_by_id(task.id)
         assert task.id == result.id
+        assert task.model_id == result.model_id
+        assert task.session_id == result.session_id
+        assert task.command == result.command
+        assert task.start_time == result.start_time
+        assert task.end_time == result.end_time
+        assert task.duration == result.duration
 
     def test_get_by_id_task_new_driver_instance(self):
         dal = LocalDAL(self.datadriver)
@@ -867,16 +874,16 @@ class TestLocalDAL():
         })
 
         task_command = "task_3"
-        task_code_id = "code_id"
-        task_environment_id = "environment_id"
-        task_file_collection_id = "file_collection_id"
+        task_start_time = datetime.utcnow()
+        task_end_time = datetime.utcnow()
+        task_duration = (task_end_time - task_start_time).total_seconds()
         task = dal.task.create({
             "model_id": model.id,
             "session_id": session.id,
             "command": task_command,
-            "code_id": task_code_id,
-            "environment_id": task_environment_id,
-            "file_collection_id": task_file_collection_id
+            "start_time": task_start_time,
+            "end_time": task_end_time,
+            "duration": task_duration
         })
 
         # create new dal with new driver instance (success)
@@ -900,25 +907,25 @@ class TestLocalDAL():
         })
 
         task_command = "task_4"
-        task_code_id = "code_id"
-        task_environment_id = "environment_id"
-        task_file_collection_id = "file_collection_id"
+        task_start_time = datetime.utcnow()
+        task_end_time = datetime.utcnow()
+        task_duration = (task_end_time - task_start_time).total_seconds()
         task_before_snapshot_id = "before_snapshot_id"
         task_after_snapshot_id = "after_snapshot_id"
         task = dal.task.create({
             "model_id": model.id,
             "session_id": session.id,
             "command": task_command,
-            "code_id": task_code_id,
-            "environment_id": task_environment_id,
-            "file_collection_id": task_file_collection_id,
+            "start_time": task_start_time,
+            "end_time": task_end_time,
+            "duration": task_duration,
             "before_snapshot_id": task_before_snapshot_id,
             "after_snapshot_id": task_after_snapshot_id
         })
 
         # Update required and optional parameters
         updated_task_command = "task_new"
-        updated_task_ports = [9000]
+        updated_task_ports = ["9000:9000"]
         updated_task = dal.task.update({
             "id": task.id,
             "command": updated_task_command,
@@ -943,16 +950,16 @@ class TestLocalDAL():
         })
 
         task_command = "task_4"
-        task_code_id = "code_id"
-        task_environment_id = "environment_id"
-        task_file_collection_id = "file_collection_id"
+        task_start_time = datetime.utcnow()
+        task_end_time = datetime.utcnow()
+        task_duration = (task_end_time - task_start_time).total_seconds()
         task = dal.task.create({
             "model_id": model.id,
             "session_id": session.id,
             "command": task_command,
-            "code_id": task_code_id,
-            "environment_id": task_environment_id,
-            "file_collection_id": task_file_collection_id
+            "start_time": task_start_time,
+            "end_time": task_end_time,
+            "duration": task_duration
         })
 
         dal.task.delete(task.id)
@@ -974,16 +981,16 @@ class TestLocalDAL():
         })
 
         task_command = "task_5"
-        task_code_id = "code_id"
-        task_environment_id = "environment_id"
-        task_file_collection_id = "file_collection_id"
+        task_start_time = datetime.utcnow()
+        task_end_time = datetime.utcnow()
+        task_duration = (task_end_time - task_start_time).total_seconds()
         task = dal.task.create({
             "model_id": model.id,
             "session_id": session.id,
             "command": task_command,
-            "code_id": task_code_id,
-            "environment_id": task_environment_id,
-            "file_collection_id": task_file_collection_id
+            "start_time": task_start_time,
+            "end_time": task_end_time,
+            "duration": task_duration
         })
 
         assert len(dal.task.query({"id": task.id})) == 1
