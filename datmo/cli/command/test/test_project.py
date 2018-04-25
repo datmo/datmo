@@ -1,5 +1,5 @@
 """
-Tests for Init
+Tests for Project Commands
 """
 from __future__ import division
 from __future__ import print_function
@@ -19,7 +19,8 @@ import tempfile
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 
-class TestInit():
+
+class TestProject():
     def setup_class(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = '/tmp'

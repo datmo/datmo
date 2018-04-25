@@ -11,7 +11,6 @@ from datmo.core.util.exceptions import GitCommitDoesNotExist, \
     InvalidProjectPathException, SessionDoesNotExistException
 
 
-
 class TestSnapshotModule():
     def setup_method(self):
         # provide mountable tmp directory for docker
