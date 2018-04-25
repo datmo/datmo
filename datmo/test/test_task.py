@@ -40,9 +40,6 @@ class TestSnapshotModule():
             f.write("import numpy\n")
             f.write("import sklearn\n")
             f.write("print 'hello'\n")
-            f.write("result_filepath = '/task/result.json'\n"
-                    "with open(result_filepath, \"w\") as f:\n"
-                    "    f.write(str('{\"foo\":\"bar\"}'))")
 
         # Create a snapshot with default params, files, and environment
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
@@ -52,4 +49,3 @@ class TestSnapshotModule():
         task_obj = run(command="python script.py", env=test_filepath, home=self.temp_dir)
         assert task_obj.id
         assert 'hello' in task_obj.logs
-        assert 'foo' in task_obj.result
