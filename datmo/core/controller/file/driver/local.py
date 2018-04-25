@@ -22,8 +22,8 @@ class LocalFileDriver(FileDriver):
         # Check if filepath exists
         if not os.path.exists(self.filepath):
             raise DoesNotExistException(__("error",
-                                          "controller.file.driver.local.__init__",
-                                          filepath))
+                                           "controller.file.driver.local.__init__",
+                                           filepath))
         self._is_initialized = self.is_initialized
         self.type = "local"
 

@@ -3,6 +3,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 import datmo # extra line
 
+# Run `$ datmo init` in your terminal to instantiate a Datmo project
+
 config = { "solver": "newton-cg" } # extra line
 iris_dataset = datasets.load_iris()
 X, y = iris_dataset.data, iris_dataset.target

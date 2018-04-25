@@ -7,7 +7,7 @@ from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.util.i18n import get as __
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import FileIOException, RequiredArgumentMissing, \
-    ProjectNotInitializedException
+    ProjectNotInitializedException, SessionDoesNotExistException, EntityNotFound
 
 
 class SnapshotController(BaseController):
@@ -303,6 +303,12 @@ class SnapshotController(BaseController):
     def list(self, session_id=None):
         query = {}
         if session_id:
+            try:
+                self.dal.session.get_by_id(session_id)
+            except EntityNotFound:
+                raise SessionDoesNotExistException(__("error",
+                                                      "controller.snapshot.list",
+                                                      session_id))
             query['session_id'] = session_id
         return self.dal.snapshot.query(query)
 

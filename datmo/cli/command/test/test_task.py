@@ -60,8 +60,31 @@ class TestTaskCommand():
     def test_datmo_task_run(self):
         self.__set_variables()
 
+        # Test failure case
+        self.task.parse([
+            "task",
+            "run"
+        ])
+        failed = False
+        try:
+            _ = self.task.execute()
+        except:
+            failed = True
+        assert failed
+
+        # Test failure case execute
+        test_command = ["yo", "yo"]
+        self.task.parse([
+            "task",
+            "run",
+            test_command
+        ])
+        result = self.task.execute()
+        assert not result
+
+        # Test success case
         test_command = ["sh", "-c", "echo yo"]
-        test_gpu = True
+        test_gpu = True # TODO: implement in controller
         test_ports = "8888:8888"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         test_interactive = True
@@ -127,54 +150,49 @@ class TestTaskCommand():
             exception_thrown = True
         assert exception_thrown
 
-    # TODO: implement with proper task controller
-    # def test_datmo_task_stop(self):
-    #     self.__set_variables()
-    #
-    #     test_command = ["sh", "-c", "echo yo"]
-    #     test_ports = "8888:8888"
-    #     test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-    #
-    #     self.task.parse([
-    #         "task",
-    #         "run",
-    #         "--gpu",
-    #         "--ports", test_ports,
-    #         "--env-def", test_dockerfile,
-    #         "--interactive",
-    #         test_command
-    #     ])
-    #
-    #     test_task_id = self.task.execute()
-    #
-    #     self.task.parse([
-    #         "task",
-    #         "stop",
-    #         "--id", test_task_id
-    #     ])
-    #
-    #     # test for desired side effects
-    #     assert self.task.args.id == test_task_id
-    #
-    #     # test when task id is passed to stop it
-    #     task_stop_command = self.task.execute()
-    #     assert task_stop_command == True
-    #
-    #     # Passing wrong task id
-    #     test_task_id = "task_id"
-    #     self.task.parse([
-    #         "task",
-    #         "stop",
-    #         "--id", test_task_id
-    #     ])
-    #
-    #     # test when wrong task id is passed to stop it
-    #     failed = False
-    #     try:
-    #         self.task.execute()
-    #     except:
-    #         failed = True
-    #     assert failed
+    def test_datmo_task_stop(self):
+        self.__set_variables()
+
+        test_command = ["sh", "-c", "echo yo"]
+        test_ports = "8888:8888"
+        test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
+
+        self.task.parse([
+            "task",
+            "run",
+            "--gpu",
+            "--ports", test_ports,
+            "--env-def", test_dockerfile,
+            "--interactive",
+            test_command
+        ])
+
+        test_task_id = self.task.execute()
+
+        self.task.parse([
+            "task",
+            "stop",
+            "--id", test_task_id
+        ])
+
+        # test for desired side effects
+        assert self.task.args.id == test_task_id
+
+        # test when task id is passed to stop it
+        task_stop_command = self.task.execute()
+        assert task_stop_command == True
+
+        # Passing wrong task id
+        test_task_id = "task_id"
+        self.task.parse([
+            "task",
+            "stop",
+            "--id", test_task_id
+        ])
+
+        # test when wrong task id is passed to stop it
+        result = self.task.execute()
+        assert not result
 
     def test_datmo_task_stop_invalid_arg(self):
         self.__set_variables()
