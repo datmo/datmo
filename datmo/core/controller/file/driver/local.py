@@ -146,15 +146,28 @@ class LocalFileDriver(FileDriver):
         else:
             return True if os.path.isfile(filepath) else False
 
-    def get(self, relative_path, mode="r"):
+    def get(self, relative_path, mode="r", dir=False):
         if not os.path.exists(os.path.join(self.filepath,
                                        relative_path)):
             raise DoesNotExistException(__("error",
-                                          "controller.file.driver.local.delete",
-                                          os.path.join(self.filepath, relative_path)))
-        filepath = os.path.join(self.filepath,
-                                relative_path)
-        return open(filepath, mode)
+                                           "controller.file.driver.local.get",
+                                           os.path.join(self.filepath, relative_path)))
+        if dir:
+            dirpath = os.path.join(self.filepath,
+                                   relative_path)
+            absolute_filepaths = []
+            for dirname, dirnames, filenames in os.walk(dirpath):
+                # print path to all filenames.
+                for filename in filenames:
+                    absolute_filepaths.append(os.path.join(dirname, filename))
+
+            # Return a list of file objects
+            return [open(absolute_filepath, mode)
+                    for absolute_filepath in absolute_filepaths]
+        else:
+            filepath = os.path.join(self.filepath,
+                                    relative_path)
+            return open(filepath, mode)
 
     def ensure(self, relative_path, dir=False):
         if not self.exists(os.path.join(self.filepath,
@@ -253,18 +266,9 @@ class LocalFileDriver(FileDriver):
         return self.exists(collection_path, dir=True)
 
     def get_collection_files(self, filehash, mode="r"):
-        collection_path = os.path.join(self.filepath, ".datmo",
-                                       "collections", filehash)
-        # Walk through all files in the collection and provide absolute filenames
-        absolute_filepaths = []
-        for dirname, dirnames, filenames in os.walk(collection_path):
-            # print path to all filenames.
-            for filename in filenames:
-                absolute_filepaths.append(os.path.join(dirname, filename))
-
-        # Return a list of file objects
-        return [open(absolute_filepath, mode)
-                for absolute_filepath in absolute_filepaths]
+        relative_collection_path = os.path.join(".datmo", "collections", filehash)
+        # Call get function with the dir=True parameter
+        return self.get(relative_collection_path, mode=mode, dir=True)
 
     def delete_collection(self, filehash):
         collection_path = os.path.join(self.filepath, ".datmo",

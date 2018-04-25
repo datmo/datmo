@@ -85,7 +85,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def get(self, relative_path, mode="r"):
+    def get(self, relative_path, mode="r", dir=False):
         """Retrieve file as python file object
 
         Parameters
@@ -94,6 +94,8 @@ class FileDriver(with_metaclass(ABCMeta, object)):
             path relative to the filepath
         mode : str
             file object open mode
+        dir : bool
+            True if directory else file
 
         Returns
         -------

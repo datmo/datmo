@@ -121,6 +121,20 @@ class TestLocalFileManager():
         self.local_file_driver.create(temp_relative_filepath)
         result = self.local_file_driver.get(temp_relative_filepath)
         assert isinstance(result, TextIOWrapper)
+        # Test success with default mode and dir=True
+
+        # Create test directories to move
+        self.local_file_driver.create("dirpath1", dir=True)
+        self.local_file_driver.create(os.path.join("dirpath1", "filepath1"))
+
+        # Absolute file paths after added to collection (to test)
+        filepath1 = os.path.join(self.local_file_driver.filepath,
+                                 "dirpath1", "filepath1")
+        result = self.local_file_driver.get(os.path.join("dirpath1"), dir=True)
+
+        assert len(result) == 1
+        assert isinstance(result[0], TextIOWrapper) and \
+            result[0].name == filepath1
 
     def test_ensure(self):
         temp_relative_filepath = "test.json"
