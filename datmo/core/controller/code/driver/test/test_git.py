@@ -7,6 +7,11 @@ from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.core.controller.code.driver.git import GitCodeDriver, \
     GitHostDriver
@@ -70,7 +75,7 @@ class TestGitCodeDriver():
         random_filepath = os.path.join(self.git_code_manager.filepath,
                                        ".datmo", ".test")
         with open(random_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
         # Add files and commit then check they exist
         self.git_code_manager.add(".datmo", "-f")
         self.git_code_manager.commit(["-m", "test message"])
@@ -91,7 +96,7 @@ class TestGitCodeDriver():
         with open(exclude_file) as f:
             lines = f.readlines()
         with open(exclude_file, 'w') as f:
-            f.writelines([item for item in lines[:-2]])
+            f.writelines([to_unicode(item) for item in lines[:-2]])
         result = self.git_code_manager.exists_datmo_files_ignored()
         assert result == False
 
@@ -103,7 +108,7 @@ class TestGitCodeDriver():
         with open(exclude_file) as f:
             lines = f.readlines()
         with open(exclude_file, 'w') as f:
-            f.writelines([item for item in lines[:-2]])
+            f.writelines([to_unicode(item) for item in lines[:-2]])
         result = self.git_code_manager.ensure_datmo_files_ignored()
         assert result and \
                self.git_code_manager.exists_datmo_files_ignored()
@@ -115,7 +120,7 @@ class TestGitCodeDriver():
         random_filepath = os.path.join(self.git_code_manager.filepath,
                                        ".datmo", ".test")
         with open(random_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
         # Check that it doesn't exist
         result = self.git_code_manager.exists_datmo_files_in_worktree()
         assert result == False
@@ -159,7 +164,7 @@ class TestGitCodeDriver():
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
         result = self.git_code_manager.add(test_filepath)
         assert result == True
         # Test True case for new file with option
@@ -176,7 +181,7 @@ class TestGitCodeDriver():
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
         self.git_code_manager.add(test_filepath)
         result = self.git_code_manager.commit(["-m", "test"])
         commit_id = self.git_code_manager.latest_commit()
@@ -191,7 +196,7 @@ class TestGitCodeDriver():
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
         self.git_code_manager.add(test_filepath)
         self.git_code_manager.commit(["-m", "test"])
         commit_id = self.git_code_manager.latest_commit()
@@ -207,12 +212,12 @@ class TestGitCodeDriver():
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
-            f.write(str("test1"))
+            f.write(to_unicode(str("test1")))
         self.git_code_manager.add(test_filepath)
         _ = self.git_code_manager.commit(["-m", "test"])
         commit_id_1 = self.git_code_manager.latest_commit()
         with open(test_filepath, "w") as f:
-            f.write(str("test2"))
+            f.write(to_unicode(str("test2")))
         self.git_code_manager.add(test_filepath)
         _ = self.git_code_manager.commit(["-m", "test"])
         commit_id_2 = self.git_code_manager.latest_commit()
@@ -247,7 +252,7 @@ class TestGitCodeDriver():
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
         self.git_code_manager.add(test_filepath)
         self.git_code_manager.commit(["-m", "test"])
         latest_commit = self.git_code_manager.latest_commit()
@@ -258,7 +263,7 @@ class TestGitCodeDriver():
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
         self.git_code_manager.add(test_filepath)
         self.git_code_manager.commit(["-m", "test"])
         commit_id = self.git_code_manager.latest_commit()
@@ -312,7 +317,7 @@ class TestGitCodeDriver():
     #                                  "test.txt")
     #
     #     with open(test_filepath, "w") as f:
-    #         f.write(str("test"))
+    #         f.write(to_unicode(str("test")))
     #     self.git_code_manager.add(test_filepath)
     #     self.git_code_manager.commit(["-m", "test"])
     #     if self.git_code_manager.git_host_manager.host == "github":
@@ -366,7 +371,7 @@ class TestGitCodeDriver():
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
         code_id = self.git_code_manager.create_ref()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
                                    ".git/refs/datmo/",
@@ -388,7 +393,7 @@ class TestGitCodeDriver():
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
         code_id = self.git_code_manager.create_ref()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
                                      ".git/refs/datmo/",
@@ -402,7 +407,7 @@ class TestGitCodeDriver():
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
         code_id = self.git_code_manager.create_ref()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
                                      ".git/refs/datmo/",
@@ -416,7 +421,7 @@ class TestGitCodeDriver():
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
         code_id = self.git_code_manager.create_ref()
         code_refs = self.git_code_manager.list_refs()
         assert code_refs and \
@@ -434,17 +439,17 @@ class TestGitCodeDriver():
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:
-            f.write(str("test1"))
+            f.write(to_unicode(str("test1")))
         # Create first ref
         ref_id_1 = self.git_code_manager.create_ref()
         with open(test_filepath, "w") as f:
-            f.write(str("test2"))
+            f.write(to_unicode(str("test2")))
         # Add random file to .datmo directory before next ref
         os.makedirs(os.path.join(self.git_code_manager.filepath, ".datmo"))
         random_filepath = os.path.join(self.git_code_manager.filepath,
                                    ".datmo", ".test")
         with open(random_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
         # Check to make sure .datmo/.test exists and has contents
         assert os.path.isfile(random_filepath) and \
                "test" in open(random_filepath, "r").read()

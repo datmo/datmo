@@ -24,21 +24,26 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def create(self, path, output_path):
-        """
-        Create datmo environment definition
+    def create(self, path=None, output_path=None, language=None):
+        """Create datmo environment definition
 
         Parameters
         ----------
         path : str, optional
             absolute input definition file path
-            (default is to search for standard filename in project root,
+            (default is None, which searches for standard filename in project root,
             e.g. `Dockerfile` in project root for docker driver)
         output_path : str, optional
             absolute datmo output definition file path
-            (default is to create name of above file with `datmo` prefixed
+            (default is None, which creates a name of above file with `datmo` prefixed
             in the same directory as `path`. e.g. `datmoDockerfile` in
             the project root for the default above for docker driver)
+        language : str, optional
+            language of the code that is being used in the project
+            (default is None, which means if a definition file is not given,
+            and a default definition path is not found, and the language is supported
+            a definition will automatically be created. If this is not supported
+            in the EnvironmentDriver, then it will ignore this)
 
         Returns
         -------
@@ -53,8 +58,7 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def build(self, name, path):
-        """
-        Build an environment from a definition path
+        """Build an environment from a definition path
 
         Parameters
         ----------

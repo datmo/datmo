@@ -51,7 +51,7 @@ class TaskCommand(ProjectCommand):
                 kwargs['environment_definition_filepath']
         }
 
-        if type(kwargs['cmd']) is not list:
+        if not isinstance(kwargs['cmd'], list):
             kwargs['cmd'] = shlex.split(kwargs['cmd'])
 
         task_dict = {
@@ -89,22 +89,21 @@ class TaskCommand(ProjectCommand):
         return True
 
     def stop(self, **kwargs):
-        id = kwargs.get('id', None)
-        task_stop_dict = {"id": id}
+        task_id = kwargs.get('id', None)
         self.cli_helper.echo(__("info",
                                 "cli.task.stop",
-                                id))
+                                task_id))
         try:
-            result = self.task_controller.stop(**task_stop_dict)
+            result = self.task_controller.stop(task_id)
             if not result:
                 self.cli_helper.echo(__("error",
                                         "cli.task.stop",
-                                        id))
+                                        task_id))
             return result
         except:
             self.cli_helper.echo(__("error",
                                     "cli.task.stop",
-                                    id))
+                                    task_id))
             return False
 
 

@@ -6,6 +6,11 @@ import random
 import string
 import shutil
 import tempfile
+from io import open, TextIOWrapper
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController
@@ -50,7 +55,7 @@ class TestTaskController():
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         environment_obj = self.environment.create({
             "definition_filepath": env_def_path
@@ -84,12 +89,12 @@ class TestTaskController():
             "api": False
         }
 
-        return_code, container_id, logs = \
+        return_code, run_id, logs = \
             self.task._run_helper(environment_obj.id,
                                   options_dict, log_filepath)
         assert return_code == 0
-        assert container_id and \
-               self.task.environment_driver.get_container(container_id)
+        assert run_id and \
+               self.task.environment_driver.get_container(run_id)
         assert logs and \
                os.path.exists(log_filepath)
         self.task.environment_driver.stop_remove_containers_by_term(term=random_name)
@@ -114,12 +119,12 @@ class TestTaskController():
             "api": True
         }
 
-        return_code, container_id, logs = \
+        return_code, run_id, logs = \
             self.task._run_helper(environment_obj.id,
                                   options_dict, log_filepath)
         assert return_code == 0
-        assert container_id and \
-               self.task.environment_driver.get_container(container_id)
+        assert run_id and \
+               self.task.environment_driver.get_container(run_id)
         assert logs and \
                os.path.exists(log_filepath)
         self.task.environment_driver.stop_remove_containers_by_term(term=random_name_2)
@@ -138,7 +143,7 @@ class TestTaskController():
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         # Test the default values
         updated_task_obj = self.task.run(task_obj.id)
@@ -151,19 +156,23 @@ class TestTaskController():
         assert updated_task_obj.interactive == False
         assert updated_task_obj.task_dirpath
         assert updated_task_obj.log_filepath
+        assert updated_task_obj.start_time
 
         assert updated_task_obj.after_snapshot_id
-        assert updated_task_obj.container_id
+        assert updated_task_obj.run_id
         assert updated_task_obj.logs
         assert updated_task_obj.status == "SUCCESS"
+        assert updated_task_obj.results == {}
+        assert updated_task_obj.end_time
+        assert updated_task_obj.duration
 
         # Test running the same task again with different parameters
         # THIS WILL UPDATE THE SAME TASK AND LOSE ORIGINAL TASK WORK
         # This will fail because running the same task id (conflicting containers)
 
         # Create files to add
-        self.project.file_driver.create("dirpath1", dir=True)
-        self.project.file_driver.create("dirpath2", dir=True)
+        self.project.file_driver.create("dirpath1", directory=True)
+        self.project.file_driver.create("dirpath2", directory=True)
         self.project.file_driver.create("filepath1")
 
         # Snapshot dictionary
@@ -182,9 +191,7 @@ class TestTaskController():
             failed = True
         assert failed
 
-        # Test running a different task again with different parameters
-        # THIS WILL UPDATE THE SAME TASK AND LOSE ORIGINAL TASK WORK
-        # This will fail because running the same task id (conflicting containers)
+        # Test for Task where the snapshot dictionary is passed in and succeeds
 
         # Create a new task in the project
         task_obj_1 = self.task.create(input_dict)
@@ -201,11 +208,15 @@ class TestTaskController():
         assert updated_task_obj_1.interactive == False
         assert updated_task_obj_1.task_dirpath
         assert updated_task_obj_1.log_filepath
+        assert updated_task_obj_1.start_time
 
         assert updated_task_obj_1.after_snapshot_id
-        assert updated_task_obj_1.container_id
+        assert updated_task_obj_1.run_id
         assert updated_task_obj_1.logs
         assert updated_task_obj_1.status == "SUCCESS"
+        assert updated_task_obj_1.results == {}
+        assert updated_task_obj_1.end_time
+        assert updated_task_obj_1.duration
 
     def test_list(self):
         task_command = ["sh", "-c", "echo yo"]
@@ -231,6 +242,76 @@ class TestTaskController():
         assert len(result) == 2 and \
                task_obj_1 in result and \
                task_obj_2 in result
+
+    def test_get_files(self):
+        task_command = ["sh", "-c", "echo yo"]
+        input_dict = {
+            "command": task_command
+        }
+
+        # Create task in the project
+        task_obj = self.task.create(input_dict)
+
+        # Create environment definition
+        env_def_path = os.path.join(self.project.home,
+                                    "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        # Create file to add
+        self.project.file_driver.create("dirpath1", directory=True)
+        self.project.file_driver.create(os.path.join("dirpath1", "filepath1"))
+
+        # Snapshot dictionary
+        snapshot_dict = {
+            "filepaths": [os.path.join(self.project.home, "dirpath1", "filepath1")],
+        }
+
+        # Test the default values
+        updated_task_obj = self.task.run(task_obj.id,
+                                         snapshot_dict=snapshot_dict)
+
+        # TODO: Test case for during run and before_snapshot run
+        # Get files for the task after run is complete (default)
+        result = self.task.get_files(updated_task_obj.id)
+
+        after_snapshot_obj = self.task.dal.snapshot.get_by_id(
+            updated_task_obj.after_snapshot_id
+        )
+        file_collection_obj = self.task.dal.file_collection.get_by_id(
+            after_snapshot_obj.file_collection_id
+        )
+
+        assert len(result) == 2
+        assert isinstance(result[0], TextIOWrapper)
+        assert result[0].name == os.path.join(self.task.home, ".datmo",
+                                              "collections",
+                                              file_collection_obj.filehash,
+                                              "task.log")
+        assert result[0].mode == "r"
+        assert isinstance(result[1], TextIOWrapper)
+        assert result[1].name == os.path.join(self.task.home, ".datmo",
+                                              "collections",
+                                              file_collection_obj.filehash,
+                                              "filepath1")
+        assert result[1].mode == "r"
+
+        # Get files for the task after run is complete for different mode
+        result = self.task.get_files(updated_task_obj.id, mode="a")
+
+        assert len(result) == 2
+        assert isinstance(result[0], TextIOWrapper)
+        assert result[0].name == os.path.join(self.task.home, ".datmo",
+                                              "collections",
+                                              file_collection_obj.filehash,
+                                              "task.log")
+        assert result[0].mode == "a"
+        assert isinstance(result[1], TextIOWrapper)
+        assert result[1].name == os.path.join(self.task.home, ".datmo",
+                                              "collections",
+                                              file_collection_obj.filehash,
+                                              "filepath1")
+        assert result[1].mode == "a"
 
     def test_delete(self):
         task_command = ["sh", "-c", "echo yo"]
@@ -267,7 +348,7 @@ class TestTaskController():
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         # Test the default values
         updated_task_obj = self.task.run(task_obj.id)

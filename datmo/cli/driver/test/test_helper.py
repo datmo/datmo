@@ -8,6 +8,11 @@ from __future__ import unicode_literals
 import os
 import sys
 import tempfile
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 # TODO: include builtin libraries for the appropriate Python
 # try:
@@ -16,8 +21,8 @@ import tempfile
 #     # Python 3
 #     import builtins as __builtin__
 
-
 from datmo.cli.driver.helper import Helper
+
 
 class TestHelper():
     # https://stackoverflow.com/questions/35851323/pytest-how-to-test-a-function-with-input-call/36377194
@@ -42,7 +47,7 @@ class TestHelper():
         test_message = 'foobar'
         with open(os.path.join(self.temp_dir,
                                "test.txt"), "w") as f:
-            f.write(test_message)
+            f.write(to_unicode(test_message))
 
         with open(os.path.join(self.temp_dir,
                                "test.txt"), "r") as f:

@@ -4,15 +4,32 @@ from datetime import datetime
 class User():
     """User is an entity object to represent a given user
 
+    Note
+    ----
+    All attributes of the class in the ``Attributes`` section must be serializable by the DB
+
+    Parameters
+    ----------
+    dictionary : dict
+        id : str
+            the id of the entity
+        name : str
+            the name of the user
+        email : str
+            the email of the user
+        created_at : datetime.datetime, optional
+        updated_at : datetime.datetime, optional
+
     Attributes
     ----------
     id : str
         the id of the entity
     name : str
+        the name of the user
     email : str
-    created_at : datetime, optional
-    updated_at : datetime, optional
-
+        the email of the user
+    created_at : datetime.datetime
+    updated_at : datetime.datetime
     """
     def __init__(self, dictionary):
         self.id = dictionary['id']
