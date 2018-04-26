@@ -86,8 +86,8 @@ class TestSnapshotController():
                snapshot_obj_2.stats
 
         # Create files to add
-        self.snapshot.file_driver.create("dirpath1", dir=True)
-        self.snapshot.file_driver.create("dirpath2", dir=True)
+        self.snapshot.file_driver.create("dirpath1", directory=True)
+        self.snapshot.file_driver.create("dirpath2", directory=True)
         self.snapshot.file_driver.create("filepath1")
 
         # Create config
@@ -160,8 +160,8 @@ class TestSnapshotController():
         # Create snapshot
 
         # Create files to add
-        self.snapshot.file_driver.create("dirpath1", dir=True)
-        self.snapshot.file_driver.create("dirpath2", dir=True)
+        self.snapshot.file_driver.create("dirpath1", directory=True)
+        self.snapshot.file_driver.create("dirpath2", directory=True)
         self.snapshot.file_driver.create("filepath1")
 
         # Create environment_driver definition
@@ -219,8 +219,8 @@ class TestSnapshotController():
         assert failed
 
         # Create files to add
-        self.snapshot.file_driver.create("dirpath1", dir=True)
-        self.snapshot.file_driver.create("dirpath2", dir=True)
+        self.snapshot.file_driver.create("dirpath1", directory=True)
+        self.snapshot.file_driver.create("dirpath2", directory=True)
         self.snapshot.file_driver.create("filepath1")
 
         # Create environment_driver definition
@@ -285,8 +285,8 @@ class TestSnapshotController():
 
     def test_delete(self):
         # Create files to add
-        self.snapshot.file_driver.create("dirpath1", dir=True)
-        self.snapshot.file_driver.create("dirpath2", dir=True)
+        self.snapshot.file_driver.create("dirpath1", directory=True)
+        self.snapshot.file_driver.create("dirpath2", directory=True)
         self.snapshot.file_driver.create("filepath1")
 
         # Create environment_driver definition

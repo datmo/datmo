@@ -9,13 +9,13 @@ class FileDriver(with_metaclass(ABCMeta, object)):
     -------
     init()
         initialize the datmo file structure
-    create(relative_path, dir=False)
+    create(relative_path, directory=False)
         create a file or directory
-    exists(relative_path, dir=False)
+    exists(relative_path, directory=False)
         determine if file or directory exists
-    ensure(relative_path, dir=False)
+    ensure(relative_path, directory=False)
         ensure file or directory exists or create if not
-    delete(relative_path, dir=False)
+    delete(relative_path, directory=False)
         delete file or directory
     create_collection(filepaths)
         takes a list of absolute filepaths and aggregates into collection
@@ -49,7 +49,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def create(self, relative_path, dir=False):
+    def create(self, relative_path, directory=False):
         """Create a file or directory
 
         Parameters
@@ -67,7 +67,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def exists(self, relative_path, dir=False):
+    def exists(self, relative_path, directory=False):
         """Determine if a file or directory exists
 
         Parameters
@@ -85,7 +85,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def get(self, relative_path, mode="r", dir=False):
+    def get(self, relative_path, mode="r", directory=False):
         """Retrieve file as python file object
 
         Parameters
@@ -105,7 +105,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
         """
 
     @abstractmethod
-    def ensure(self, relative_path, dir=False):
+    def ensure(self, relative_path, directory=False):
         """Ensure file or directory exists or create if not
 
         Parameters
@@ -123,7 +123,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def delete(self, relative_path, dir=False):
+    def delete(self, relative_path, directory=False):
         """Delete the file or directory
 
         Parameters

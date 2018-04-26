@@ -279,9 +279,9 @@ class SnapshotController(BaseController):
         # Create snapshot and return
         return self.dal.snapshot.create(create_dict)
 
-    def checkout(self, id):
+    def checkout(self, snapshot_id):
         # Get snapshot object
-        snapshot_obj = self.dal.snapshot.get_by_id(id)
+        snapshot_obj = self.dal.snapshot.get_by_id(snapshot_id)
         code_obj = self.dal.code.get_by_id(snapshot_obj.code_id)
         file_collection_obj = self.dal.file_collection.\
             get_by_id(snapshot_obj.file_collection_id)
@@ -294,8 +294,8 @@ class SnapshotController(BaseController):
         self.code_driver.checkout_ref(code_obj.commit_id)
 
         # Pull file collection to the project home
-        dst_dirpath = os.path.join("datmo_snapshots", id)
-        abs_dst_dirpath = self.file_driver.create(dst_dirpath, dir=True)
+        dst_dirpath = os.path.join("datmo_snapshots", snapshot_id)
+        abs_dst_dirpath = self.file_driver.create(dst_dirpath, directory=True)
         self.file_driver.transfer_collection(file_collection_obj.filehash,
                                              abs_dst_dirpath)
         return True
@@ -312,9 +312,9 @@ class SnapshotController(BaseController):
             query['session_id'] = session_id
         return self.dal.snapshot.query(query)
 
-    def delete(self, id):
-        if not id:
+    def delete(self, snapshot_id):
+        if not snapshot_id:
             raise RequiredArgumentMissing(__("error",
-                                            "controller.snapshot.delete.arg",
-                                            "id"))
-        return self.dal.snapshot.delete(id)
+                                             "controller.snapshot.delete.arg",
+                                             "snapshot_id"))
+        return self.dal.snapshot.delete(snapshot_id)

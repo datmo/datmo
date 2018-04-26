@@ -36,7 +36,7 @@ class TestFileCollectionController():
         assert failed
 
         # Test successful creation of collection
-        self.file_collection.file_driver.create("dirpath1", dir=True)
+        self.file_collection.file_driver.create("dirpath1", directory=True)
         self.file_collection.file_driver.create("filepath1")
 
         dirpath1 = os.path.join(self.file_collection.home,
@@ -60,7 +60,7 @@ class TestFileCollectionController():
     def test_list(self):
         self.project.init("test4", "test description")
 
-        self.file_collection.file_driver.create("dirpath1", dir=True)
+        self.file_collection.file_driver.create("dirpath1", directory=True)
         self.file_collection.file_driver.create("filepath1")
         dirpath1 = os.path.join(self.file_collection.home,
                                 "dirpath1")
@@ -89,7 +89,7 @@ class TestFileCollectionController():
         self.project.init("test5", "test description")
 
         # Test successful creation of collection
-        self.file_collection.file_driver.create("dirpath1", dir=True)
+        self.file_collection.file_driver.create("dirpath1", directory=True)
         self.file_collection.file_driver.create("filepath1")
 
         dirpath1 = os.path.join(self.file_collection.home,

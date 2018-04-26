@@ -321,7 +321,7 @@ class TestDockerEnv():
         group_flat = [item for sublist in list_of_lists for item in sublist]
         assert image_name + ":latest" in group_flat
         # List images with all flag
-        result = self.docker_environment_manager.list_images(all=True)
+        result = self.docker_environment_manager.list_images(all_images=True)
         group = [item.__dict__['attrs']['RepoTags'] for item in result]
         list_of_lists = [sublist for sublist in group if sublist]
         group_flat = [item for sublist in list_of_lists for item in sublist]

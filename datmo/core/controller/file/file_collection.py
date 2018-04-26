@@ -74,12 +74,12 @@ class FileCollectionController(BaseController):
         # TODO: Add time filters
         return self.dal.file_collection.query({})
 
-    def delete(self, id):
+    def delete(self, file_collection_id):
         """Delete all traces of FileCollection object
 
         Parameters
         ----------
-        id : str
+        file_collection_id : str
             file collection id to remove
 
         Returns
@@ -92,11 +92,11 @@ class FileCollectionController(BaseController):
         DoesNotExistException
             if the specified FileCollection does not exist.
         """
-        file_collection_obj = self.dal.file_collection.get_by_id(id)
+        file_collection_obj = self.dal.file_collection.get_by_id(file_collection_id)
         if not file_collection_obj:
             raise DoesNotExistException(__("error",
-                                          "controller.file_collection.delete",
-                                          id))
+                                           "controller.file_collection.delete",
+                                           file_collection_id))
         # Remove file collection files
         delete_file_collection_success = self.file_driver.delete_collection(file_collection_obj.filehash)
         # Delete FileCollection

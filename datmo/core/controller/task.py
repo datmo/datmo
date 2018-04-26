@@ -141,7 +141,7 @@ class TaskController(BaseController):
 
         return return_code, run_id, logs
 
-    def run(self, id, snapshot_dict={"visible": False}, task_dict={}):
+    def run(self, task_id, snapshot_dict={"visible": False}, task_dict={}):
         """Run a task with parameters. If dictionary specified, create a new task with new run parameters.
         Snapshot objects are created before and after the task to keep track of the state. During the run,
         you can access task outputs using environment variable DATMO_TASK_DIR or `/task` which points to
@@ -150,7 +150,7 @@ class TaskController(BaseController):
 
         Parameters
         ----------
-        id : str
+        task_id : str
             id for the task you would like to run
         snapshot_dict : dict
             set of parameters to create a snapshot (see SnapshotController for details.
@@ -170,7 +170,7 @@ class TaskController(BaseController):
             If there is any error in creating files for the task or downstream errors
         """
         # Obtain Task to run
-        task_obj = self.dal.task.get_by_id(id)
+        task_obj = self.dal.task.get_by_id(task_id)
 
         # Create Task directory for user during run
         task_dirpath = os.path.join("datmo_tasks",
@@ -178,7 +178,7 @@ class TaskController(BaseController):
         try:
             _ = self.file_driver.create(
                 os.path.join("datmo_tasks",
-                             task_obj.id), dir=True)
+                             task_obj.id), directory=True)
         except:
             raise TaskRunException(__("error",
                                       "controller.task.run",
@@ -271,7 +271,7 @@ class TaskController(BaseController):
             query['session_id'] = session_id
         return self.dal.task.query(query)
 
-    def get_files(self, id, mode="r"):
+    def get_files(self, task_id, mode="r"):
         """Get list of file objects for task id. It will look in the following areas in the following order
 
         1) look in the after snapshot for file collection
@@ -280,7 +280,7 @@ class TaskController(BaseController):
 
         Parameters
         ----------
-        id : str
+        task_id : str
             id for the task you would like to get file objects for
         mode : str
             file open mode
@@ -296,7 +296,7 @@ class TaskController(BaseController):
         DoesNotExistException
             no file objects exist for the task
         """
-        task_obj = self.dal.task.get_by_id(id)
+        task_obj = self.dal.task.get_by_id(task_id)
         if task_obj.after_snapshot_id:
             # perform number 1) and return file list
             after_snapshot_obj = \
@@ -307,7 +307,7 @@ class TaskController(BaseController):
                 get_collection_files(file_collection_obj.filehash, mode=mode)
         elif task_obj.task_dirpath:
             # perform number 2) and return file list
-            return self.file_driver.get(task_obj.task_dirpath, mode=mode, dir=True)
+            return self.file_driver.get(task_obj.task_dirpath, mode=mode, directory=True)
         elif task_obj.before_snapshot_id:
             # perform number 3) and return file list
             before_snapshot_obj = \
@@ -320,19 +320,19 @@ class TaskController(BaseController):
             # Error because the task does not have any files associated with it
             raise DoesNotExistException()
 
-    def delete(self, id):
-        if not id:
+    def delete(self, task_id):
+        if not task_id:
             raise RequiredArgumentMissing(__("error",
                                              "controller.task.delete.arg",
                                              "id"))
-        return self.dal.task.delete(id)
+        return self.dal.task.delete(task_id)
 
-    def stop(self, id):
+    def stop(self, task_id):
         """Stop and remove run for the task
 
         Parameters
         ----------
-        id : str
+        task_id : str
             id for the task you would like to stop
 
         Returns
@@ -340,11 +340,11 @@ class TaskController(BaseController):
         return_code : bool
             system return code of the stop
         """
-        if not id:
+        if not task_id:
             raise RequiredArgumentMissing(__("error",
                                              "controller.task.stop.arg",
                                              "id"))
-        task_obj = self.dal.task.get_by_id(id)
+        task_obj = self.dal.task.get_by_id(task_id)
         run_id = task_obj.run_id
         return_code = self.environment.stop(run_id)
         return return_code

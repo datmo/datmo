@@ -167,8 +167,8 @@ class TestTaskController():
         # This will fail because running the same task id (conflicting containers)
 
         # Create files to add
-        self.project.file_driver.create("dirpath1", dir=True)
-        self.project.file_driver.create("dirpath2", dir=True)
+        self.project.file_driver.create("dirpath1", directory=True)
+        self.project.file_driver.create("dirpath2", directory=True)
         self.project.file_driver.create("filepath1")
 
         # Snapshot dictionary
@@ -255,7 +255,7 @@ class TestTaskController():
             f.write(str("FROM datmo/xgboost:cpu"))
 
         # Create file to add
-        self.project.file_driver.create("dirpath1", dir=True)
+        self.project.file_driver.create("dirpath1", directory=True)
         self.project.file_driver.create(os.path.join("dirpath1", "filepath1"))
 
         # Snapshot dictionary

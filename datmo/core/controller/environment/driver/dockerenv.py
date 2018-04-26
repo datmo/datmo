@@ -200,8 +200,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
     def get_image(self, image_name):
         return self.client.images.get(image_name)
 
-    def list_images(self, name=None, all=False, filters=None):
-        return self.client.images.list(name=name, all=all, filters=filters)
+    def list_images(self, name=None, all_images=False, filters=None):
+        return self.client.images.list(name=name, all=all_images, filters=filters)
 
     def search_images(self, term):
         return self.client.images.search(term=term)
@@ -226,7 +226,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         """Remove multiple images
         """
         try:
-            images = self.list_images(name=name, all=all, filters=filters)
+            images = self.list_images(name=name, all_images=all, filters=filters)
             for image in images:
                 self.remove_image(image.id, force=force)
         except Exception as e:
@@ -466,11 +466,11 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 docker_container_stop_cmd_str = str(" ".join(docker_container_stop_cmd_list))
                 output = subprocess.Popen(docker_container_stop_cmd_str,
                                   shell=True, stdout=subprocess.PIPE)
-                out_stop_cmd, err_stop_cmd = output.communicate()
+                _, _ = output.communicate()
                 # rechecking for container id after stopping them to ensure no errors
                 output = subprocess.Popen(running_docker_container_cmd_str,
                                           shell=True, stdout=subprocess.PIPE)
-                out_list_cmd, err_list_cmd = output.communicate()
+                out_list_cmd, _ = output.communicate()
                 if out_list_cmd:
                     docker_container_remove_cmd_list = list(self.cpu_prefix)
                     if force:
@@ -484,7 +484,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                     docker_container_remove_cmd_str = str(" ".join(docker_container_remove_cmd_list))
                     output = subprocess.Popen(docker_container_remove_cmd_str,
                                               shell=True, stdout=subprocess.PIPE)
-                    out_remove_cmd, err_remove_cmd = output.communicate()
+                    _, _ = output.communicate()
         except Exception as e:
             raise EnvironmentExecutionException(__("error",
                                                   "controller.environment.driver.docker.stop_remove_containers_by_term",

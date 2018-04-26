@@ -41,7 +41,7 @@ class TestLocalFileManager():
         self.local_file_driver.create(relative_filepath)
         # Create destination directory
         relative_dirpath = "dest"
-        self.local_file_driver.create(relative_dirpath, dir=True)
+        self.local_file_driver.create(relative_dirpath, directory=True)
         # Create file within destination directory
         relative_filename_2 = os.path.join(relative_dirpath, "test.json")
         self.local_file_driver.create(relative_filename_2)
@@ -57,12 +57,12 @@ class TestLocalFileManager():
     def test_copytree(self):
         # Create source directory
         relative_src_dirpath = "core"
-        self.local_file_driver.create(relative_src_dirpath, dir=True)
+        self.local_file_driver.create(relative_src_dirpath, directory=True)
         relative_src_filepath = os.path.join(relative_src_dirpath, "test.json")
         self.local_file_driver.create(relative_src_filepath)
         # Create destination directory
         relative_dst_dirpath = "dst"
-        self.local_file_driver.create(relative_dst_dirpath, dir=True)
+        self.local_file_driver.create(relative_dst_dirpath, directory=True)
         # Copy source directory to destination
         src_dirpath = os.path.join(self.local_file_driver.filepath,
                                    relative_src_dirpath)
@@ -79,7 +79,7 @@ class TestLocalFileManager():
         self.local_file_driver.create(relative_filepath)
         # Create destination directory
         relative_dst_dirpath = "dest"
-        self.local_file_driver.create(relative_dst_dirpath, dir=True)
+        self.local_file_driver.create(relative_dst_dirpath, directory=True)
         # Copy file to destination
         filepath = os.path.join(self.local_file_driver.filepath,
                                 relative_filepath)
@@ -121,16 +121,16 @@ class TestLocalFileManager():
         self.local_file_driver.create(temp_relative_filepath)
         result = self.local_file_driver.get(temp_relative_filepath)
         assert isinstance(result, TextIOWrapper)
-        # Test success with default mode and dir=True
+        # Test success with default mode and directory=True
 
         # Create test directories to move
-        self.local_file_driver.create("dirpath1", dir=True)
+        self.local_file_driver.create("dirpath1", directory=True)
         self.local_file_driver.create(os.path.join("dirpath1", "filepath1"))
 
         # Absolute file paths after added to collection (to test)
         filepath1 = os.path.join(self.local_file_driver.filepath,
                                  "dirpath1", "filepath1")
-        result = self.local_file_driver.get(os.path.join("dirpath1"), dir=True)
+        result = self.local_file_driver.get(os.path.join("dirpath1"), directory=True)
 
         assert len(result) == 1
         assert isinstance(result[0], TextIOWrapper) and \
@@ -280,8 +280,8 @@ class TestLocalFileManager():
         self.local_file_driver.delete_collection(filehash_empty)
 
         # Create test directories to move
-        self.local_file_driver.create("dirpath1", dir=True)
-        self.local_file_driver.create("dirpath2", dir=True)
+        self.local_file_driver.create("dirpath1", directory=True)
+        self.local_file_driver.create("dirpath2", directory=True)
         self.local_file_driver.create("filepath1")
 
         dirpath1 = os.path.join(self.local_file_driver.filepath,
@@ -354,8 +354,8 @@ class TestLocalFileManager():
         assert not result
 
         # Create test directories to move
-        self.local_file_driver.create("dirpath1", dir=True)
-        self.local_file_driver.create("dirpath2", dir=True)
+        self.local_file_driver.create("dirpath1", directory=True)
+        self.local_file_driver.create("dirpath2", directory=True)
         self.local_file_driver.create(os.path.join("dirpath1", "filepath1"))
         self.local_file_driver.create(os.path.join("dirpath2", "filepath2"))
         self.local_file_driver.create("filepath3")
@@ -415,8 +415,8 @@ class TestLocalFileManager():
 
     def test_transfer_collection(self):
         # Create test directories to move
-        self.local_file_driver.create("dirpath1", dir=True)
-        self.local_file_driver.create("dirpath2", dir=True)
+        self.local_file_driver.create("dirpath1", directory=True)
+        self.local_file_driver.create("dirpath2", directory=True)
         self.local_file_driver.create("filepath1")
 
         dirpath1 = os.path.join(self.local_file_driver.filepath,
@@ -429,7 +429,7 @@ class TestLocalFileManager():
         filehash = self.local_file_driver. \
             create_collection([dirpath1, dirpath2, filepath1])
         dst_dirpath = os.path.join(self.temp_dir, "new_dir")
-        self.local_file_driver.create(dst_dirpath, dir=True)
+        self.local_file_driver.create(dst_dirpath, directory=True)
         result = self.local_file_driver.transfer_collection(filehash,
                                                     dst_dirpath)
         assert result == True and \
