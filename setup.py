@@ -15,13 +15,12 @@ setup(
            'Intended Audience :: Developers',
            'License :: OSI Approved :: Apache Software License',
            'Operating System :: OS Independent',
-           'Programming Language :: Python :: 2',
+           'Programming Language :: Python',
            'Topic :: Scientific/Engineering :: Artificial Intelligence'
     ],
     install_requires=[
         "future==0.16.0",
         "enum34==1.1.6",
-        "sh==1.12.11",
         "glob2==0.5",
         "docker==2.2.1",
         "pyyaml==3.12",

@@ -1,5 +1,6 @@
 import os
 import shlex
+import platform
 
 from datmo.core.controller.task import TaskController
 from datmo.core.entity.task import Task as CoreTask
@@ -143,7 +144,10 @@ def run(command, env=None, home=None):
     if isinstance(command, list):
         task_dict["command"] = command
     else:
-        task_dict["command"] = shlex.split(command)
+        if platform.system() == "Windows":
+            task_dict["command"] = command
+        else:
+            task_dict["command"] = shlex.split(command)
 
     # Create the task object
     task_obj = task_controller.create(task_dict)
