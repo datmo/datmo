@@ -253,7 +253,7 @@ class SnapshotController(BaseController):
                 if "config_filename" in incoming_dictionary else "config.json"
             create_dict['config'] = self._find_in_filecollection(config_filename, create_dict['file_collection_id'])
         else:
-            create_dict['config'] = None
+            create_dict['config'] = {}
 
     def _stats_setup(self, incoming_dictionary, create_dict):
         """Fills in snapshot stats by having one of the following:
@@ -358,6 +358,7 @@ class SnapshotController(BaseController):
                 create(commit_id=incoming_dictionary['commit_id']).id
         else:
             create_dict['code_id'] = self.code.create().id
+            create_dict['stats'] = {}
 
     def _find_in_filecollection(self, file_to_find, file_collection_id):
         """ Attempts to find a file within the file collection

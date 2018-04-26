@@ -90,11 +90,11 @@ class TestSnapshotController():
         self.snapshot._config_setup(incoming_data, final_data)
         assert final_data['config']["foo"] == 1
 
-    def test_config_setup_with_none(self):
+    def test_config_setup_with_empty(self):
         incoming_data = {}
         final_data = {}
         self.snapshot._config_setup(incoming_data, final_data)
-        assert final_data['config'] == None
+        assert final_data['config'] == {}
 
     def test_stats_setup_with_json(self):
         incoming_data = {"stats":{"bar":1}}
@@ -108,11 +108,11 @@ class TestSnapshotController():
         self.snapshot._stats_setup(incoming_data, final_data)
         assert final_data['stats']["bar"] == 1
 
-    def test_stats_setup_with_none(self):
+    def test_stats_setup_with_empty(self):
         incoming_data = {}
         final_data = {}
         self.snapshot._stats_setup(incoming_data, final_data)
-        assert final_data['stats'] == None
+        assert final_data['stats'] == {}
 
     def test_stats_setup_with_filename(self):
         incoming_data = {"stats_filename": "stats.json" }
