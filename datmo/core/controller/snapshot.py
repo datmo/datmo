@@ -149,19 +149,19 @@ class SnapshotController(BaseController):
         }
 
         # Code setup
-        self.__code_setup(incoming_dictionary, create_dict)
+        self._code_setup(incoming_dictionary, create_dict)
 
         # Environment setup
-        self.__env_setup(incoming_dictionary, create_dict)
+        self._env_setup(incoming_dictionary, create_dict)
 
         # File setup
-        self.__file_setup(incoming_dictionary, create_dict)
+        self._file_setup(incoming_dictionary, create_dict)
 
         # Config setup
-        self.__config_setup(incoming_dictionary, create_dict)
+        self._config_setup(incoming_dictionary, create_dict)
 
         # Stats setup
-        self.__stats_setup(incoming_dictionary, create_dict)
+        self._stats_setup(incoming_dictionary, create_dict)
 
         # If snapshot object with required args already exists, return it
         # DO NOT create a new snapshot with the same required arguments
@@ -223,8 +223,8 @@ class SnapshotController(BaseController):
                                              "snapshot_id"))
         return self.dal.snapshot.delete(snapshot_id)
 
-    def __code_setup(self, incoming_dictionary, create_dict):
-        """Set the code_id by using:
+    def _code_setup(self, incoming_dictionary, create_dict):
+        """ Set the code_id by using:
             1. code_id
             2. commit_id string, which creates a new code_id
             3. create a new code id
@@ -245,8 +245,8 @@ class SnapshotController(BaseController):
         else:
             create_dict['code_id'] = self.code.create().id
 
-    def __env_setup(self, incoming_dictionary, create_dict):
-        """Create or add environment to create_dict for Snapshot entity
+    def _env_setup(self, incoming_dictionary, create_dict):
+        """ TODO:
 
         Parameters
         ----------
@@ -271,8 +271,8 @@ class SnapshotController(BaseController):
             create_dict['environment_id'] = self.environment.\
                 create({}).id
 
-    def __file_setup(self, incoming_dictionary, create_dict):
-        """ Creates file collections and adds it to the create dict
+    def _file_setup(self, incoming_dictionary, create_dict):
+        """ TODO:
 
         Parameters
         ----------
@@ -293,12 +293,11 @@ class SnapshotController(BaseController):
             create_dict['file_collection_id'] = self.file_collection.\
                 create([]).id
 
-    def __config_setup(self, incoming_dictionary, create_dict):
-        """Fills in snapshot config by having one of the following:
+    def _config_setup(self, incoming_dictionary, create_dict):
+        """ Fills in snapshot config by having one of the following:
             1. config = JSON object
             2. config_filepath = some location where a json file exists
-            3. config_filename = just the file name and we'll try to find it
-
+            3. config_filename = just the file nam
         Parameters
         ----------
         incoming_dictionary : dict
@@ -319,17 +318,18 @@ class SnapshotController(BaseController):
             # If path exists transform file to config dict
             config_json_driver = JSONStore(incoming_dictionary['config_filepath'])
             create_dict['config'] = config_json_driver.to_dict()
-        else:
+        elif "config_filename" in incoming_dictionary:
             config_filename = incoming_dictionary['config_filename'] \
                 if "config_filename" in incoming_dictionary else "config.json"
-            create_dict['config'] = \
-                self.__find_in_file_collection(config_filename, create_dict['file_collection_id'])
+            create_dict['config'] = self._find_in_filecollection(config_filename, create_dict['file_collection_id'])
+        else:
+            create_dict['config'] = {}
 
-    def __stats_setup(self, incoming_dictionary, create_dict):
+    def _stats_setup(self, incoming_dictionary, create_dict):
         """Fills in snapshot stats by having one of the following:
             1. stats = JSON object
             2. stats_filepath = some location where a json file exists
-            3. stats_filename = just the file name and we'll try to find it
+            3. stats_filename = just the file name
 
         Parameters
         ----------
@@ -352,19 +352,15 @@ class SnapshotController(BaseController):
             # If path exists transform file to config dict
             stats_json_driver = JSONStore(incoming_dictionary['stats_filepath'])
             create_dict['stats'] = stats_json_driver.to_dict()
-        else:
+        elif "stats_filename" in incoming_dictionary:
             stats_filename = incoming_dictionary['stats_filename'] \
                 if "stats_filename" in incoming_dictionary else "stats.json"
-            create_dict['stats'] = \
-                self.__find_in_file_collection(stats_filename, create_dict['file_collection_id'])
+            create_dict['stats'] = self._find_in_filecollection(stats_filename, create_dict['file_collection_id'])
+        else:
+            create_dict['stats'] = {}
 
-    def __find_in_file_collection(self, file_to_find, file_collection_id):
-        """Attempts to find a JSON file within the file collection
-
-        Parameters
-        ----------
-        file_to_find : str
-            filename for file in collection
+    def _find_in_filecollection(self, file_to_find, file_collection_id):
+        """ Attempts to find a file within the file collection
 
         Returns
         -------
