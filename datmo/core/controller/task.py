@@ -173,12 +173,10 @@ class TaskController(BaseController):
         task_obj = self.dal.task.get_by_id(id)
 
         # Create Task directory for user during run
-        task_dirpath = os.path.join("datmo_tasks",
-                                    task_obj.id)
+        task_dirpath = os.path.join("datmo_tasks", task_obj.id)
         try:
             _ = self.file_driver.create(
-                os.path.join("datmo_tasks",
-                             task_obj.id), dir=True)
+                os.path.join("datmo_tasks", task_obj.id), dir=True)
         except:
             raise TaskRunException(__("error",
                                      "controller.task.run",

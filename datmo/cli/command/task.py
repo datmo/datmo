@@ -91,20 +91,14 @@ class TaskCommand(ProjectCommand):
     def stop(self, **kwargs):
         id = kwargs.get('id', None)
         task_stop_dict = {"id": id}
-        self.cli_helper.echo(__("info",
-                                "cli.task.stop",
-                                id))
+        self.cli_helper.echo(__("info", "cli.task.stop", id))
         try:
             result = self.task_controller.stop(**task_stop_dict)
             if not result:
-                self.cli_helper.echo(__("error",
-                                        "cli.task.stop",
-                                        id))
+                self.cli_helper.echo(__("error", "cli.task.stop", id))
             return result
         except:
-            self.cli_helper.echo(__("error",
-                                    "cli.task.stop",
-                                    id))
+            self.cli_helper.echo(__("error", "cli.task.stop", id))
             return False
 
 

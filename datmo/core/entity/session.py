@@ -28,6 +28,7 @@ class Session():
         self.created_at = dictionary.get('created_at', datetime.utcnow())
         self.updated_at = dictionary.get('updated_at', self.created_at)
 
+
     def __eq__(self, other):
         return self.id == other.id if other else False
 
