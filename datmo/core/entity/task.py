@@ -57,12 +57,12 @@ class Task():
         end_time : datetime.datetime, optional
             timestamp for the beginning time of the task
             (default is None, which means it isn't set yet)
-        duration : datetime.timedelta, optional
-            timedelta object signifying the time taken to run
+        duration : float, optional
+            float object signifying number of seconds for run
             (default is None, which means it isn't set yet)
-        created_at : datetime, optional
+        created_at : datetime.datetime, optional
             (default is datetime.utcnow(), at time of instantiation)
-        updated_at : datetime, optional
+        updated_at : datetime.datetime, optional
             (default is same as created_at, at time of instantiation)
 
     Attributes
@@ -103,10 +103,10 @@ class Task():
         dictionary containing output results from the task
     end_time : datetime.datetime
         timestamp for the beginning time of the task
-    duration : datetime.timedelta
-        timedelta object signifying the time taken to run
-    created_at : datetime
-    updated_at : datetime
+    duration : float, optional
+        float object signifying number of seconds for run
+    created_at : datetime.datetime
+    updated_at : datetime.datetime
     """
     def __init__(self, dictionary):
         self.id = dictionary['id']
