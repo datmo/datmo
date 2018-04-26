@@ -4,6 +4,26 @@ from datetime import datetime
 class FileCollection():
     """FileCollection is an entity object to represent a collection of files
 
+    Note
+    ----
+    All attributes of the class in the ``Attributes`` section must be serializable by the DB
+
+    Parameters
+    ----------
+    dictionary : dict
+        id : str
+            the id of the entity
+        model_id : str
+            the parent model id for the entity
+        driver_type : str
+            the driver class that created the entity
+        filehash : str
+            hash of file collection contents
+        path : str
+            path to collection relative to project root
+        created_at : datetime.datetime, optional
+        updated_at : datetime.datetime, optional
+
     Attributes
     ----------
     id : str
@@ -16,8 +36,8 @@ class FileCollection():
         hash of file collection contents
     path : str
         path to collection relative to project root
-    created_at : datetime, optional
-    updated_at : datetime, optional
+    created_at : datetime.datetime
+    updated_at : datetime.datetime
 
     """
     def __init__(self, dictionary):

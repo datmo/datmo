@@ -1,5 +1,11 @@
 import os
 import requests
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
+
 
 class S3RemoteFileDriver(object):
     def __init__(self):
@@ -26,4 +32,4 @@ class S3RemoteFileDriver(object):
             raise Exception("Upload failed: %s" % res.text)
         with open(dst_filepath, "w") as handle:
             for block in res.iter_content(1024):
-                handle.write(block)
+                handle.write(to_unicode(block))

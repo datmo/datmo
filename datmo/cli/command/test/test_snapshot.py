@@ -14,6 +14,11 @@ from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
@@ -46,25 +51,25 @@ class TestSnapshot():
         self.env_def_path = os.path.join(self.temp_dir,
                                          "Dockerfile")
         with open(self.env_def_path, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         # Create config
         self.config_filepath = os.path.join(self.snapshot.home,
                                        "config.json")
         with open(self.config_filepath, "w") as f:
-            f.write(str("{}"))
+            f.write(to_unicode(str("{}")))
 
         # Create stats
         self.stats_filepath = os.path.join(self.snapshot.home,
                                       "stats.json")
         with open(self.stats_filepath, "w") as f:
-            f.write(str("{}"))
+            f.write(to_unicode(str("{}")))
 
         # Create test file
         self.filepath = os.path.join(self.snapshot.home,
                                            "file.txt")
         with open(self.filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
 
     def test_snapshot_project_not_init(self):
         failed = False

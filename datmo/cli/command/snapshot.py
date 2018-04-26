@@ -103,8 +103,8 @@ class SnapshotCommand(ProjectCommand):
 
     def delete(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.delete"))
-        id = kwargs.get("id", None)
-        return self.snapshot_controller.delete(id)
+        snapshot_id = kwargs.get("id", None)
+        return self.snapshot_controller.delete(snapshot_id)
 
     def ls(self, **kwargs):
         session_id = kwargs.get('session_id',
@@ -135,8 +135,8 @@ class SnapshotCommand(ProjectCommand):
         return True
 
     def checkout(self, **kwargs):
-        id = kwargs.get("id", None)
-        return self.snapshot_controller.checkout(id)
+        snapshot_id = kwargs.get("id", None)
+        return self.snapshot_controller.checkout(snapshot_id)
 
 
 

@@ -15,6 +15,11 @@ from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
@@ -47,7 +52,7 @@ class TestTaskCommand():
         env_def_path = os.path.join(self.temp_dir,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
     def test_task_project_not_init(self):
         failed = False

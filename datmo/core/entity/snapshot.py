@@ -17,6 +17,41 @@ class Snapshot():
     4) Configurations of your model, features, data, etc
     5) Performance metrics that evaluate your model
 
+    Note
+    ----
+    All attributes of the class in the ``Attributes`` section must be serializable by the DB
+
+    Parameters
+    ----------
+    dictionary : dict
+        id : str
+            the id of the entity
+        model_id : str
+            the parent model id for the entity
+        code_id : str
+            code reference associated with the snapshot
+        environment_id : str
+            id for environment used to create snapshot
+        file_collection_id : str
+            file collection associated with the snapshot
+        config : dict
+            key, value pairs of configurations
+        stats : dict
+            key, value pairs of metrics and statistics
+        session_id : str, optional
+            session id within which snapshot is created
+        task_id : str, optional
+            task id associated with snapshot
+        message : str, optional
+            long description of snapshot
+        label : str, optional
+            short description of snapshot
+        visible : bool, optional
+            True if visible to user via list command else False
+            (the default is True to show users unless otherwise specified)
+        created_at : datetime.datetime, optional
+        updated_at : datetime.datetime, optional
+
     Attributes
     ----------
     id : str
@@ -33,20 +68,19 @@ class Snapshot():
         key, value pairs of configurations
     stats : dict
         key, value pairs of metrics and statistics
-    session_id : str, optional
+    session_id : str
         session id within which snapshot is created
-    task_id : str, optional
+    task_id : str
         task id associated with snapshot
-    message : str, optional
+    message : str
         long description of snapshot
-    label : str, optional
+    label : str
         short description of snapshot
-    visible : bool, optional
+    visible : bool
         True if visible to user via list command else False
         (the default is True to show users unless otherwise specified)
-    created_at : datetime, optional
-    updated_at : datetime, optional
-
+    created_at : datetime.datetime
+    updated_at : datetime.datetime
     """
     def __init__(self, dictionary):
         self.id = dictionary['id']

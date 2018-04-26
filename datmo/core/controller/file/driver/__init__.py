@@ -9,13 +9,13 @@ class FileDriver(with_metaclass(ABCMeta, object)):
     -------
     init()
         initialize the datmo file structure
-    create(relative_path, dir=False)
+    create(relative_path, directory=False)
         create a file or directory
-    exists(relative_path, dir=False)
+    exists(relative_path, directory=False)
         determine if file or directory exists
-    ensure(relative_path, dir=False)
+    ensure(relative_path, directory=False)
         ensure file or directory exists or create if not
-    delete(relative_path, dir=False)
+    delete(relative_path, directory=False)
         delete file or directory
     create_collection(filepaths)
         takes a list of absolute filepaths and aggregates into collection
@@ -35,8 +35,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def init(self):
-        """
-        Initialize the datmo file structure
+        """Initialize the datmo file structure
 
         Returns
         -------
@@ -50,9 +49,8 @@ class FileDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def create(self, relative_path, dir=False):
-        """
-        create a file or directory
+    def create(self, relative_path, directory=False):
+        """Create a file or directory
 
         Parameters
         ----------
@@ -69,9 +67,8 @@ class FileDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def exists(self, relative_path, dir=False):
-        """
-        determine if a file or directory exists
+    def exists(self, relative_path, directory=False):
+        """Determine if a file or directory exists
 
         Parameters
         ----------
@@ -88,9 +85,28 @@ class FileDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def ensure(self, relative_path, dir=False):
+    def get(self, relative_path, mode="r", directory=False):
+        """Retrieve file as python file object
+
+        Parameters
+        ----------
+        relative_path : str
+            path relative to the filepath
+        mode : str
+            file object open mode
+        dir : bool
+            True if directory else file
+
+        Returns
+        -------
+        file
+            python file object representing file opened
+            in the mode specified
         """
-        ensure file or directory exists or create if not
+
+    @abstractmethod
+    def ensure(self, relative_path, directory=False):
+        """Ensure file or directory exists or create if not
 
         Parameters
         ----------
@@ -107,9 +123,8 @@ class FileDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def delete(self, relative_path, dir=False):
-        """
-        delete the file or directory
+    def delete(self, relative_path, directory=False):
+        """Delete the file or directory
 
         Parameters
         ----------
@@ -127,8 +142,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def create_collection(self, filepaths):
-        """
-        takes a list of absolute filepaths and aggregates into collection
+        """Takes a list of absolute filepaths and aggregates into collection
 
         Parameters
         ----------
@@ -144,8 +158,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def get_collection_path(self, filehash):
-        """
-        return the collection path by filehash
+        """Return the collection path by filehash
 
         Parameters
         ----------
@@ -161,8 +174,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def exists_collection(self, filehash):
-        """
-        checks if a collection exists based on filehash
+        """Checks if a collection exists based on filehash
 
         Parameters
         ----------
@@ -177,9 +189,26 @@ class FileDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def delete_collection(self, filehash):
+    def get_collection_files(self, filehash, mode="r"):
+        """Retrieve collection files as python file object
+
+        Parameters
+        ----------
+        filehash : str
+            hash representing the files in the collection
+        mode : str
+            file object open mode
+
+        Returns
+        -------
+        list
+            list of python file objects representing each
+            file in the collection opened in mode specified
         """
-        deletes collection based on filehash
+
+    @abstractmethod
+    def delete_collection(self, filehash):
+        """Deletes collection based on filehash
 
         Parameters
         ----------
@@ -195,8 +224,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def transfer_collection(self, filehash, dst_dirpath):
-        """
-        transfers collection contents to absolute dst path
+        """Transfers collection contents to absolute dst path
 
         Parameters
         ----------
