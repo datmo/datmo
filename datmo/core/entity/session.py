@@ -4,6 +4,24 @@ from datetime import datetime
 class Session():
     """Session is an entity object to represent a workspace to group tasks and snapshots
 
+    Note
+    ----
+    All attributes of the class in the ``Attributes`` section must be serializable by the DB
+
+    Parameters
+    ----------
+    dictionary : dict
+        id : str
+            the id of the entity
+        model_id : str
+            the parent model id for the entity
+        name : str
+            name given by the user at creation
+        current : bool, optional
+            identifies if the session is the current session
+        created_at : datetime.datetime, optional
+        updated_at : datetime.datetime, optional
+
     Attributes
     ----------
     id : str
@@ -11,10 +29,11 @@ class Session():
     model_id : str
         the parent model id for the entity
     name : str
-    current : bool, optional
+        name given by the user at creation
+    current : bool
         identifies if the session is the current session
-    created_at : datetime, optional
-    updated_at : datetime, optional
+    created_at : datetime.datetime
+    updated_at : datetime.datetime
 
     """
     def __init__(self, dictionary):

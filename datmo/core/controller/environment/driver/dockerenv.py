@@ -2,6 +2,11 @@ import ast
 import os
 import shutil
 import subprocess
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 from docker import DockerClient
 
 from datmo.core.util.i18n import get as __
@@ -200,8 +205,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
     def get_image(self, image_name):
         return self.client.images.get(image_name)
 
-    def list_images(self, name=None, all=False, filters=None):
-        return self.client.images.list(name=name, all=all, filters=filters)
+    def list_images(self, name=None, all_images=False, filters=None):
+        return self.client.images.list(name=name, all=all_images, filters=filters)
 
     def search_images(self, term):
         return self.client.images.search(term=term)
@@ -226,7 +231,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         """Remove multiple images
         """
         try:
-            images = self.list_images(name=name, all=all, filters=filters)
+            images = self.list_images(name=name, all_images=all, filters=filters)
             for image in images:
                 self.remove_image(image.id, force=force)
         except Exception as e:
@@ -346,7 +351,6 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                         docker_shell_cmd_list.append(mapping)
 
                 docker_shell_cmd_list.append(image_name)
-
                 if command:
                     docker_shell_cmd_list.extend(command)
                 return_code = subprocess.call(docker_shell_cmd_list)
@@ -425,7 +429,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         if api: # calling the docker client via the API
             with open(filepath, "w") as log_file:
                 for line in self.client.containers.get(container_id).logs(stream=True):
-                    log_file.write(line.strip() + "\n")
+                    log_file.write(to_unicode(line.strip() + "\n"))
         else:
             command = list(self.cpu_prefix)
             if follow:
@@ -441,7 +445,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                         break
                     if output:
                         printable_output = output.strip().replace("\x08", " ")
-                        log_file.write(printable_output + "\n")
+                        log_file.write(to_unicode(printable_output + "\n"))
             return_code = process.poll()
             with open(filepath, "r") as log_file:
                 logs = log_file.read()
@@ -467,11 +471,11 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 docker_container_stop_cmd_str = str(" ".join(docker_container_stop_cmd_list))
                 output = subprocess.Popen(docker_container_stop_cmd_str,
                                   shell=True, stdout=subprocess.PIPE)
-                out_stop_cmd, err_stop_cmd = output.communicate()
+                _, _ = output.communicate()
                 # rechecking for container id after stopping them to ensure no errors
                 output = subprocess.Popen(running_docker_container_cmd_str,
                                           shell=True, stdout=subprocess.PIPE)
-                out_list_cmd, err_list_cmd = output.communicate()
+                out_list_cmd, _ = output.communicate()
                 if out_list_cmd:
                     docker_container_remove_cmd_list = list(self.cpu_prefix)
                     if force:
@@ -485,7 +489,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                     docker_container_remove_cmd_str = str(" ".join(docker_container_remove_cmd_list))
                     output = subprocess.Popen(docker_container_remove_cmd_str,
                                               shell=True, stdout=subprocess.PIPE)
-                    out_remove_cmd, err_remove_cmd = output.communicate()
+                    _, _ = output.communicate()
         except Exception as e:
             raise EnvironmentExecutionException(__("error",
                                                   "controller.environment.driver.docker.stop_remove_containers_by_term",
@@ -533,8 +537,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         destination_dockerfile = os.path.join(self.filepath, "Dockerfile")
         destination = open(destination_dockerfile, "w")
         shutil.copyfileobj(open(base_dockerfile_filepath, "r"), destination)
-        destination.write(str("COPY %s /tmp/requirements.txt\n") % os.path.split(requirements_filepath)[-1])
-        destination.write(str("RUN pip install --no-cache-dir -r /tmp/requirements.txt\n"))
+        destination.write(to_unicode(str("COPY %s /tmp/requirements.txt\n") % os.path.split(requirements_filepath)[-1]))
+        destination.write(to_unicode(str("RUN pip install --no-cache-dir -r /tmp/requirements.txt\n")))
         destination.close()
 
         return destination_dockerfile

@@ -4,6 +4,11 @@ import glob
 import hashlib
 import uuid
 import checksumdir
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import DoesNotExistException, \
@@ -109,7 +114,7 @@ class LocalFileDriver(FileDriver):
                                     str(e)))
         return True
 
-    def create(self, relative_path, dir=False):
+    def create(self, relative_path, directory=False):
         """
         Create files or directories
 
@@ -117,8 +122,8 @@ class LocalFileDriver(FileDriver):
         ----------
         relative_path : str
             relative filepath from base filepath
-        dir : bool
-            true for directory, false for file
+        directory : bool
+            True for directory, False for file
 
         Returns
         -------
@@ -130,7 +135,7 @@ class LocalFileDriver(FileDriver):
         if os.path.exists(filepath):
             os.utime(filepath, None)
         else:
-            if dir:
+            if directory:
                 os.makedirs(filepath)
             else:
                 with open(os.path.join(self.filepath,
@@ -138,30 +143,53 @@ class LocalFileDriver(FileDriver):
                     os.utime(filepath, None)
         return filepath
 
-    def exists(self, relative_path, dir=False):
+    def exists(self, relative_path, directory=False):
         filepath = os.path.join(self.filepath,
                                 relative_path)
-        if dir:
+        if directory:
             return True if os.path.isdir(filepath) else False
         else:
             return True if os.path.isfile(filepath) else False
 
-    def ensure(self, relative_path, dir=False):
+    def get(self, relative_path, mode="r", directory=False):
+        if not os.path.exists(os.path.join(self.filepath,
+                                       relative_path)):
+            raise DoesNotExistException(__("error",
+                                           "controller.file.driver.local.get",
+                                           os.path.join(self.filepath, relative_path)))
+        if directory:
+            dirpath = os.path.join(self.filepath,
+                                   relative_path)
+            absolute_filepaths = []
+            for dirname, _, filenames in os.walk(dirpath):
+                # print path to all filenames.
+                for filename in filenames:
+                    absolute_filepaths.append(os.path.join(dirname, filename))
+
+            # Return a list of file objects
+            return [open(absolute_filepath, mode)
+                    for absolute_filepath in absolute_filepaths]
+        else:
+            filepath = os.path.join(self.filepath,
+                                    relative_path)
+            return open(filepath, mode)
+
+    def ensure(self, relative_path, directory=False):
         if not self.exists(os.path.join(self.filepath,
                                         relative_path),
-                           dir=dir):
+                           directory=directory):
             self.create(os.path.join(os.path.join(self.filepath,
                                                   relative_path)),
-                        dir=dir)
+                        directory=directory)
         return True
 
-    def delete(self, relative_path, dir=False):
+    def delete(self, relative_path, directory=False):
         if not os.path.exists(os.path.join(self.filepath,
                                        relative_path)):
             raise DoesNotExistException(__("error",
                                           "controller.file.driver.local.delete",
                                           os.path.join(self.filepath, relative_path)))
-        if dir:
+        if directory:
             shutil.rmtree(relative_path)
         else:
             os.remove(os.path.join(self.filepath,
@@ -194,7 +222,7 @@ class LocalFileDriver(FileDriver):
             _, dirname = os.path.split(filepath)
             if os.path.isdir(filepath):
                 dst_dirpath = os.path.join(temp_collection_path, dirname)
-                self.create(dst_dirpath, dir=True)
+                self.create(dst_dirpath, directory=True)
                 # All contents of directory are copied into the dst_dirpath
                 self.copytree(filepath, dst_dirpath)
             elif os.path.isfile(filepath):
@@ -240,12 +268,17 @@ class LocalFileDriver(FileDriver):
     def exists_collection(self, filehash):
         collection_path = os.path.join(self.filepath, ".datmo",
                                        "collections", filehash)
-        return self.exists(collection_path, dir=True)
+        return self.exists(collection_path, directory=True)
+
+    def get_collection_files(self, filehash, mode="r"):
+        relative_collection_path = os.path.join(".datmo", "collections", filehash)
+        # Call get function with the directory=True parameter
+        return self.get(relative_collection_path, mode=mode, directory=True)
 
     def delete_collection(self, filehash):
         collection_path = os.path.join(self.filepath, ".datmo",
                                        "collections", filehash)
-        return self.delete(collection_path, dir=True)
+        return self.delete(collection_path, directory=True)
 
     def transfer_collection(self, filehash, dst_dirpath):
         if not self.exists_collection(filehash):
@@ -271,17 +304,17 @@ class LocalFileDriver(FileDriver):
     def exists_hidden_datmo_dir(self):
         filepath = os.path.join(self.filepath,
                                  ".datmo")
-        return self.exists(filepath, dir=True)
+        return self.exists(filepath, directory=True)
 
     def ensure_hidden_datmo_dir(self):
         filepath = os.path.join(self.filepath,
                                  ".datmo")
-        return self.ensure(filepath, dir=True)
+        return self.ensure(filepath, directory=True)
 
     def delete_hidden_datmo_dir(self):
         filepath = os.path.join(self.filepath,
                                  ".datmo")
-        return self.delete(filepath, dir=True)
+        return self.delete(filepath, directory=True)
 
 
     # Overall Datmo file structure
@@ -315,17 +348,17 @@ class LocalFileDriver(FileDriver):
     def exists_collections_dir(self):
         collections_path = os.path.join(self.filepath, ".datmo",
                                              "collections")
-        return self.exists(collections_path, dir=True)
+        return self.exists(collections_path, directory=True)
 
     def ensure_collections_dir(self):
         collections_path = os.path.join(self.filepath, ".datmo",
                                              "collections")
-        return self.ensure(collections_path, dir=True)
+        return self.ensure(collections_path, directory=True)
 
     def delete_collections_dir(self):
         collections_path = os.path.join(self.filepath, ".datmo",
                                         "collections")
-        return self.delete(collections_path, dir=True)
+        return self.delete(collections_path, directory=True)
 
     def list_file_collections(self):
         if not self.is_initialized:

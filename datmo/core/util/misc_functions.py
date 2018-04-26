@@ -3,6 +3,11 @@ import hashlib
 import logging
 import textwrap
 import datetime
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 from glob import glob
 
 from datmo.core.util.i18n import get as __
@@ -20,7 +25,6 @@ def printable_string(string, max_width=100):
     return '\n'.join(textwrap.wrap(string, max_width))
 
 def which(program):
-    import os
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 

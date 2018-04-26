@@ -7,9 +7,6 @@ import tempfile
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
-from datmo.core.util.exceptions import EntityNotFound, \
-    DoesNotExistException, GitCommitDoesNotExist, \
-    SessionDoesNotExistException
 
 
 class TestSnapshotController():
@@ -71,6 +68,24 @@ class TestSnapshotController():
         self.snapshot._code_setup(incoming_data, final_data)
         assert final_data['code_id']
 
+    def test_env_setup_with_none(self):
+        incoming_data = {}
+        final_data = {}
+        self.snapshot._env_setup(incoming_data, final_data)
+        assert final_data['environment_id']
+
+    def test_file_setup_with_none(self):
+        incoming_data = {}
+        final_data = {}
+        self.snapshot._file_setup(incoming_data, final_data)
+        assert final_data['file_collection_id']
+
+    def test_file_setup_with_filepaths(self):
+        incoming_data = {"filepaths": [self.filepath]}
+        final_data = {}
+        self.snapshot._file_setup(incoming_data, final_data)
+        assert final_data['file_collection_id']
+
     def test_config_setup_with_json(self):
         incoming_data = {"config":{"foo":1}}
         final_data = {}
@@ -90,11 +105,11 @@ class TestSnapshotController():
         self.snapshot._config_setup(incoming_data, final_data)
         assert final_data['config']["foo"] == 1
 
-    def test_config_setup_with_none(self):
+    def test_config_setup_with_empty(self):
         incoming_data = {}
         final_data = {}
         self.snapshot._config_setup(incoming_data, final_data)
-        assert final_data['config'] == None
+        assert final_data['config'] == {}
 
     def test_stats_setup_with_json(self):
         incoming_data = {"stats":{"bar":1}}
@@ -108,11 +123,11 @@ class TestSnapshotController():
         self.snapshot._stats_setup(incoming_data, final_data)
         assert final_data['stats']["bar"] == 1
 
-    def test_stats_setup_with_none(self):
+    def test_stats_setup_with_empty(self):
         incoming_data = {}
         final_data = {}
         self.snapshot._stats_setup(incoming_data, final_data)
-        assert final_data['stats'] == None
+        assert final_data['stats'] == {}
 
     def test_stats_setup_with_filename(self):
         incoming_data = {"stats_filename": "stats.json" }
@@ -120,9 +135,3 @@ class TestSnapshotController():
         self.snapshot._file_setup(incoming_data, final_data)
         self.snapshot._stats_setup(incoming_data, final_data)
         assert final_data['stats']["bar"] == 1
-
-    def test_env_setup_with_none(self):
-        incoming_data = {}
-        final_data = {}
-        self.snapshot._env_setup(incoming_data, final_data)
-        assert final_data['environment_id']

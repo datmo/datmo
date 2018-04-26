@@ -4,6 +4,24 @@ from datetime import datetime
 class Code():
     """Code is an entity object to represent a version of source code
 
+    Note
+    ----
+    All attributes of the class in the ``Attributes`` section must be serializable by the DB
+
+    Parameters
+    ----------
+    dictionary : dict
+        id : str
+            the id of the entity
+        model_id : str
+            the parent model id for the entity
+        driver_type : str
+            the driver class that created the entity
+        commit_id : str
+            commit id given by the driver
+        created_at : datetime.datetime, optional
+        updated_at : datetime.datetime, optional
+
     Attributes
     ----------
     id : str
@@ -13,8 +31,9 @@ class Code():
     driver_type : str
         the driver class that created the entity
     commit_id : str
-    created_at : datetime, optional
-    updated_at : datetime, optional
+        commit id given by the driver
+    created_at : datetime.datetime
+    updated_at : datetime.datetime
 
     """
     def __init__(self, dictionary):

@@ -75,12 +75,12 @@ class CodeController(BaseController):
         # TODO: Add time filters
         return self.dal.code.query({})
 
-    def delete(self, id):
+    def delete(self, code_id):
         """Delete all traces of Code object
 
         Parameters
         ----------
-        id : str
+        code_id : str
             code object id to remove
 
         Returns
@@ -93,11 +93,11 @@ class CodeController(BaseController):
         DoesNotExistException
             if the specified Code does not exist.
         """
-        code_obj = self.dal.code.get_by_id(id)
+        code_obj = self.dal.code.get_by_id(code_id)
         if not code_obj:
             raise DoesNotExistException(__("error",
-                                          "controller.code.delete",
-                                          id))
+                                           "controller.code.delete",
+                                           code_id))
         # Remove code reference
         delete_code_success = self.code_driver.delete_ref(code_obj.commit_id)
         # Delete code object
