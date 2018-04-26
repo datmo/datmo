@@ -25,7 +25,7 @@ class TestBaseController():
         self.base = BaseController(home=self.temp_dir)
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_failed_controller_instantiation(self):
         failed = False

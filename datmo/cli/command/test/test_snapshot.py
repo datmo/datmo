@@ -37,7 +37,7 @@ class TestSnapshot():
         self.cli_helper = Helper()
 
     def teardown_class(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def __set_variables(self):
         self.init = ProjectCommand(self.temp_dir, self.cli_helper)

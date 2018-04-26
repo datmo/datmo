@@ -47,7 +47,7 @@ class TestSnapshotController():
             f.write(str("test"))
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_code_setup_with_code_id(self):
         val = 1

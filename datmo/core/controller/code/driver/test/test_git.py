@@ -34,7 +34,7 @@ class TestGitCodeDriver():
         self.git_code_manager = GitCodeDriver(filepath=self.temp_dir, execpath="git")
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_instantiation(self):
         assert self.git_code_manager != None

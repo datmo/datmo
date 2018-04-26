@@ -28,7 +28,7 @@ class TestSnapshotModule():
             init("test", "test description")
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_create(self):
         # check project is not initialized if wrong home

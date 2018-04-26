@@ -32,7 +32,7 @@ class TestProject():
         self.init = ProjectCommand(self.temp_dir, self.cli)
 
     def teardown_class(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_datmo_init(self):
         self.init.parse([

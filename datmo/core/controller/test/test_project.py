@@ -24,7 +24,7 @@ class TestProjectController():
         self.project = ProjectController(self.temp_dir)
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_init(self):
         # Test failed case

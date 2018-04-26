@@ -26,7 +26,7 @@ class TestLocalDAL():
         self.datadriver = BlitzDBDALDriver("file", self.temp_dir)
 
     def teardown_class(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_init(self):
         dal = LocalDAL(self.datadriver)

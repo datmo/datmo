@@ -29,7 +29,7 @@ class TestLocalFileManager():
         self.local_file_driver = LocalFileDriver(filepath=self.temp_dir)
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_initialize(self):
         assert self.local_file_driver != None

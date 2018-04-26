@@ -30,7 +30,7 @@ class TestSnapshotController():
         self.snapshot = SnapshotController(self.temp_dir)
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_create(self):
         # Test default values for snapshot, fail due to code

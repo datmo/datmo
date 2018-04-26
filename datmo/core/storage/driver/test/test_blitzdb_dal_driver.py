@@ -26,7 +26,7 @@ class TestBlitzDBDALDriverInit():
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
 
     def teardown_class(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_file_db_init(self):
         database = BlitzDBDALDriver("file", self.temp_dir)
@@ -57,7 +57,7 @@ class TestBlitzDBDALDriver():
         self.database = BlitzDBDALDriver("file", self.temp_dir)
 
     def teardown_class(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_filebased_db(self):
         assert self.database != None

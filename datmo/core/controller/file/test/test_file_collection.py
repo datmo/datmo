@@ -28,7 +28,7 @@ class TestFileCollectionController():
         self.file_collection = FileCollectionController(self.temp_dir)
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_create(self):
         self.project.init("test3", "test description")

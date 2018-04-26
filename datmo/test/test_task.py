@@ -30,7 +30,7 @@ class TestTaskModule():
             init("test", "test description")
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_task_entity_instantiate(self):
         input_dict = {

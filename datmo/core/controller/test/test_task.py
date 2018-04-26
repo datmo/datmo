@@ -33,7 +33,7 @@ class TestTaskController():
         self.task = TaskController(self.temp_dir)
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_create(self):
         task_command = ["sh", "-c", "echo yo"]

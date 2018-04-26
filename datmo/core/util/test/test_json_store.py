@@ -28,7 +28,7 @@ class TestJSONStore():
         self.storage_file = os.path.join(self.temp_dir, 'testing.json')
 
     def teardown_class(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_init(self):
         storage = JSONStore(self.storage_file)

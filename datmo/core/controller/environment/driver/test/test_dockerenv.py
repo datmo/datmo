@@ -43,7 +43,7 @@ class TestDockerEnv():
             f.write(to_unicode(str("RUN echo " + random_text)))
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_instantiation_and_connected(self):
         assert self.docker_environment_manager.is_connected
@@ -73,6 +73,7 @@ class TestDockerEnv():
         assert output_path == output_dockerfile_path
         assert requirements_filepath == None
 
+        open(output_dockerfile_path, "r").close()
         os.remove(output_dockerfile_path)
 
         # Test default values for output
@@ -86,6 +87,7 @@ class TestDockerEnv():
         assert output_path == output_dockerfile_path
         assert requirements_filepath == None
 
+        open(output_dockerfile_path, "r").close()
         os.remove(output_dockerfile_path)
 
         # Test both values given
@@ -101,6 +103,7 @@ class TestDockerEnv():
 
         # Test for language being passed in
         os.remove(input_dockerfile_path)
+        open(output_dockerfile_path, "r").close()
         os.remove(output_dockerfile_path)
 
         script_path = os.path.join(self.docker_environment_manager.filepath,
@@ -120,6 +123,7 @@ class TestDockerEnv():
 
         # Test exception for path does not exist
         os.remove(input_dockerfile_path)
+        open(output_dockerfile_path, "r").close()
         os.remove(output_dockerfile_path)
         success, path, output_path, requirements_filepath =\
             self.docker_environment_manager.create()
