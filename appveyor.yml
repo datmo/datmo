@@ -39,10 +39,11 @@ install:
   - ps: (new-object net.webclient).DownloadFile('https://bootstrap.pypa.io/get-pip.py', 'C:/get-pip.py')
   - git config --global user.email "dev@datmo.com"
   - git config --global user.name "Datmo Devs"
+  - docker pull microsoft/nanoserver
   - "%PYTHON%/python.exe C:/get-pip.py"
   - "%PYTHON%/python.exe -m pip install pip==9.0.3"
   - "%PYTHON%/Scripts/pip.exe install pytest"
   - "%PYTHON%/python.exe setup.py install"
 test_script:
   - "%PYTHON%/Scripts/pip.exe --version"
-  - "%PYTHON%/Scripts/pytest"
+  - "%PYTHON%/Scripts/pytest "
