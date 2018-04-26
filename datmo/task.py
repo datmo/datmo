@@ -2,72 +2,92 @@ import os
 import shlex
 
 from datmo.core.controller.task import TaskController
-from datetime import datetime
+from datmo.core.entity.task import Task as CoreTask
+from datmo.core.util.exceptions import InvalidArgumentType
 
 
-class ClientTask():
-    """ClientTask is an entity object to represent an experiment run as output while using the client
+class Task():
+    """Task is an entity object to represent the task object for user
 
-    Initialize with task object returned from controller task run
+    Parameters
+    ----------
+    task_entity : datmo.core.entity.task.Task
 
     Attributes
     ----------
     id : str
         the id of the entity
+    model_id : str
+        the parent model id for the entity
+    session_id : str
+        id of session associated with task
     command : str
-    files : list
-        list of file absolute paths created during the task
+        command that is used by the task
+    status : str
+        status of the current task
+    start_time : datetime.datetime
+        timestamp for the beginning time of the task
+    end_time : datetime.datetime
+        timestamp for the end time of the task
+    duration : datetime.timedelta
+        delta between start and end times
     logs : str
-        absolute path for the logs for the experiment
-    result : dict
-        dictionary containing output results from the experiment
-    status : str, optional
-    created_at : datetime, optional
-    updated_at : datetime, optional
+        string output of logs
+    results : dict
+        dictionary containing output results from the task
 
+    Raises
+    ------
+    InvalidArgumentType
     """
     def __init__(self, task_entity, home=None):
-        if hasattr(task_entity,'to_dictionary'):
-            dictionary = task_entity.to_dictionary()
-        else:
-            dictionary = task_entity
+        if not home:
+            home = os.getcwd()
 
-        self.id = dictionary['id']
+        if not isinstance(task_entity, CoreTask):
+            raise InvalidArgumentType()
+
+        self._core_task = task_entity
+        self._home = home
+
+        self.id = self._core_task.id
+        self.model_id = self._core_task.model_id
+        self.session_id = self._core_task.session_id
 
         # Execution definition
-        self.command = dictionary['command']
+        self.command = self._core_task.command
 
-        # Post-Execution
-        self.logs = dictionary.get('logs', "")
-        task_path = dictionary.get('task_dirpath', "")
+        # Run parameters
+        self.status = self._core_task.status
+        self.start_time = self._core_task.start_time
+        self.end_time = self._core_task.end_time
+        self.duration = self._core_task.duration
+        self.logs = self._core_task.logs
+        self.results = self._core_task.results
 
-        if task_path:
-            task_path = os.path.join(home, task_path)
-            self.files = [f for f in os.listdir(task_path)
-                          if (os.path.isfile(os.path.join(task_path, f))
-                                             and f != 'task.log')]
-        else:
-            self.files = []
-        self.result = dictionary.get('result', {})
-        self.status = dictionary.get('status', "")
+    def files(self, mode="r"):
+        """Returns a list of file objects for the task
 
-        self.created_at = dictionary.get('created_at', datetime.utcnow())
-        self.updated_at = dictionary.get('updated_at', self.created_at)
+        Parameters
+        ----------
+        mode : str
+            file object mode
+            (default is "r" which signifies read mode)
+
+        Returns
+        -------
+        list
+            list of file objects associated with the task
+        """
+        task_controller = TaskController(home=self._home)
+        return task_controller.get_files(self.id, mode=mode)
+
 
     def __eq__(self, other):
         return self.id == other.id if other else False
 
-    def to_dictionary(self):
-        attr_dict = self.__dict__
-        pruned_attr_dict = { attr: val
-                    for attr, val in attr_dict.items() if not callable(getattr(self, attr)) and not attr.startswith("__")
-        }
-        return pruned_attr_dict
-
-
 def run(command, env=None, home=None):
-    """
-    Run the code or script inside
+    """Run the code or script inside
 
     The project must be created before this is implemented. You can do that by using
     the following command::
@@ -77,25 +97,25 @@ def run(command, env=None, home=None):
 
     Parameters
     ----------
-    command : str
-        the command to be run in environment
+    command : str or list
+        the command to be run in environment. this can be either a string or list
     env : str, optional
         the location for the environment definition path
-        (default is None, which means a blank label is stored)
+        (default is None, which will defer to the environment to find a default environment,
+        or will fail if not found)
     home : str, optional
         absolute home path of the project
         (default is None, which will use the CWD as the project path)
 
     Returns
     -------
-    Snapshot
-        returns a snapshot entity for reference
+    Task
+        returns a Task entity as defined above
 
     Examples
     --------
-    You can use this function within a project repository to save snapshots
-    for later use. Once you have created this, you will be able to view the
-    snapshot with the `datmo snapshot ls` cli command
+    You can use this function within a project repository to run tasks
+    in the following way.
 
     >>> import datmo
     >>> datmo.task.run(command="python script.py", env='Dockerfile')
@@ -111,7 +131,7 @@ def run(command, env=None, home=None):
     if env:
         snapshot_dict["environment_definition_filepath"] = env
 
-    if type(command) is list:
+    if isinstance(command, list):
         task_dict["command"] = command
     else:
         task_dict["command"] = shlex.split(command)
@@ -123,6 +143,15 @@ def run(command, env=None, home=None):
     updated_task_obj = task_controller.run(task_obj.id, snapshot_dict=snapshot_dict)
 
     # Create a new task object for the
-    sdk_task_obj = ClientTask(updated_task_obj, home)
+    client_task_obj = Task(updated_task_obj, home=home)
 
-    return sdk_task_obj
+    return client_task_obj
+
+def add_file():
+    pass
+
+def set_status():
+    pass
+
+def set_results():
+    pass
