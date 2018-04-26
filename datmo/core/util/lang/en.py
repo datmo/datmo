@@ -110,6 +110,7 @@ MESSAGES = {
         "controller.task.run": "Error creating task directory for run: %s",
         "controller.task.stop.arg": "Stop argument %s not present in input",
         "controller.task.delete.arg": "Delete argument %s not present in input",
+        "controller.session.delete.default": "Can not delete default session",
         "storage.local.dal.update": "Entity id not provided in the input for update",
     },
     "debug": {
