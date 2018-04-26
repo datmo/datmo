@@ -4,6 +4,11 @@ Tests for EnvironmentController
 import os
 import shutil
 import tempfile
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import \
@@ -31,7 +36,7 @@ class TestEnvironmentController():
         definition_filepath = os.path.join(self.environment.home,
                                     "Dockerfile")
         with open(definition_filepath, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         # Test no inputs but defaults work
         environment_obj = self.environment.create({})
@@ -84,7 +89,7 @@ class TestEnvironmentController():
         definition_filepath = os.path.join(self.environment.home,
                                            "Dockerfile")
         with open(definition_filepath, "w") as f:
-            f.write(str("FROM cloudgear/ubuntu:14.04"))
+            f.write(to_unicode(str("FROM cloudgear/ubuntu:14.04")))
 
         input_dict = {
             "definition_filepath": definition_filepath,
@@ -113,7 +118,7 @@ class TestEnvironmentController():
         definition_filepath = os.path.join(self.environment.home,
                                            "Dockerfile")
         with open(definition_filepath, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         input_dict = {
             "definition_filepath": definition_filepath,
@@ -152,7 +157,7 @@ class TestEnvironmentController():
         definition_filepath = os.path.join(self.environment.home,
                                            "Dockerfile")
         with open(definition_filepath, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         run_options = {
             "command": ["sh", "-c", "echo yo"],
@@ -170,7 +175,7 @@ class TestEnvironmentController():
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         input_dict = {
             "definition_filepath": definition_filepath,
@@ -202,7 +207,7 @@ class TestEnvironmentController():
         definition_path_1 = os.path.join(self.environment.home,
                                     "Dockerfile")
         with open(definition_path_1, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         input_dict_1 = {
             "definition_filepath": definition_path_1,
@@ -215,7 +220,7 @@ class TestEnvironmentController():
         definition_path_2 = os.path.join(self.environment.home,
                                          "Dockerfile2")
         with open(definition_path_2, "w") as f:
-            f.write(str("FROM datmo/scikit-opencv"))
+            f.write(to_unicode(str("FROM datmo/scikit-opencv")))
 
         input_dict_2 = {
             "definition_filepath": definition_path_2,
@@ -238,7 +243,7 @@ class TestEnvironmentController():
         definition_filepath = os.path.join(self.environment.home,
                                            "Dockerfile")
         with open(definition_filepath, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         input_dict = {
             "definition_filepath": definition_filepath,
@@ -267,7 +272,7 @@ class TestEnvironmentController():
         definition_filepath = os.path.join(self.environment.home,
                                            "Dockerfile")
         with open(definition_filepath, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         run_options = {
             "command": ["sh", "-c", "echo yo"],
@@ -285,7 +290,7 @@ class TestEnvironmentController():
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         input_dict = {
             "definition_filepath": definition_filepath,

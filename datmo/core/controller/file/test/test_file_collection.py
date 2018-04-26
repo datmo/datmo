@@ -4,6 +4,11 @@ Tests for FileCollectionController
 import os
 import shutil
 import tempfile
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.file.file_collection import \
@@ -72,7 +77,7 @@ class TestFileCollectionController():
         filepath2 = os.path.join(self.file_collection.home,
                                  "filepath2")
         with open(filepath2, "w") as f:
-            f.write("test" + "\n")
+            f.write(to_unicode("test" + "\n"))
         filepaths_2 = [filepath2]
 
         file_collection_obj_1 = self.file_collection.create(filepaths_1)

@@ -2,6 +2,11 @@ import ast
 import os
 import shutil
 import subprocess
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 from docker import DockerClient
 
 from datmo.core.util.i18n import get as __
@@ -424,7 +429,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         if api: # calling the docker client via the API
             with open(filepath, "w") as log_file:
                 for line in self.client.containers.get(container_id).logs(stream=True):
-                    log_file.write(line.strip() + "\n")
+                    log_file.write(to_unicode(line.strip() + "\n"))
         else:
             command = list(self.cpu_prefix)
             if follow:
@@ -440,7 +445,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                         break
                     if output:
                         printable_output = output.strip().replace("\x08", " ")
-                        log_file.write(printable_output + "\n")
+                        log_file.write(to_unicode(printable_output + "\n"))
             return_code = process.poll()
             with open(filepath, "r") as log_file:
                 logs = log_file.read()
@@ -532,8 +537,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         destination_dockerfile = os.path.join(self.filepath, "Dockerfile")
         destination = open(destination_dockerfile, "w")
         shutil.copyfileobj(open(base_dockerfile_filepath, "r"), destination)
-        destination.write(str("COPY %s /tmp/requirements.txt\n") % os.path.split(requirements_filepath)[-1])
-        destination.write(str("RUN pip install --no-cache-dir -r /tmp/requirements.txt\n"))
+        destination.write(to_unicode(str("COPY %s /tmp/requirements.txt\n") % os.path.split(requirements_filepath)[-1]))
+        destination.write(to_unicode(str("RUN pip install --no-cache-dir -r /tmp/requirements.txt\n")))
         destination.close()
 
         return destination_dockerfile

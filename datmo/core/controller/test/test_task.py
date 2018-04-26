@@ -6,7 +6,11 @@ import random
 import string
 import shutil
 import tempfile
-from io import TextIOWrapper
+from io import open, TextIOWrapper
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController
@@ -51,7 +55,7 @@ class TestTaskController():
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         environment_obj = self.environment.create({
             "definition_filepath": env_def_path
@@ -139,7 +143,7 @@ class TestTaskController():
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         # Test the default values
         updated_task_obj = self.task.run(task_obj.id)
@@ -252,7 +256,7 @@ class TestTaskController():
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         # Create file to add
         self.project.file_driver.create("dirpath1", directory=True)
@@ -344,7 +348,7 @@ class TestTaskController():
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         # Test the default values
         updated_task_obj = self.task.run(task_obj.id)

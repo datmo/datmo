@@ -4,7 +4,11 @@ Tests for task module
 import os
 import shutil
 import tempfile
-from io import TextIOWrapper
+from io import open, TextIOWrapper
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.task import run
 from datmo.task import Task
@@ -59,13 +63,13 @@ class TestTaskModule():
         # (fails w/ no environment)
         test_filepath = os.path.join(self.temp_dir, "script.py")
         with open(test_filepath, "w") as f:
-            f.write("import numpy\n")
-            f.write("import sklearn\n")
-            f.write("print 'hello'\n")
+            f.write(to_unicode("import numpy\n"))
+            f.write(to_unicode("import sklearn\n"))
+            f.write(to_unicode("print 'hello'\n"))
 
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "w") as f:
-            f.write("FROM datmo/xgboost:cpu")
+            f.write(to_unicode("FROM datmo/xgboost:cpu"))
 
         task_obj_1 = run(command="python script.py", env=test_filepath,
                          home=self.temp_dir)
@@ -100,13 +104,13 @@ class TestTaskModule():
         # Create a basic task and run it with string command
         test_filepath = os.path.join(self.temp_dir, "script.py")
         with open(test_filepath, "w") as f:
-            f.write("import numpy\n")
-            f.write("import sklearn\n")
-            f.write("print 'hello'\n")
+            f.write(to_unicode("import numpy\n"))
+            f.write(to_unicode("import sklearn\n"))
+            f.write(to_unicode("print 'hello'\n"))
 
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "w") as f:
-            f.write("FROM datmo/xgboost:cpu")
+            f.write(to_unicode("FROM datmo/xgboost:cpu"))
 
         task_entity = run(command="python script.py", env=test_filepath,
                           home=self.temp_dir)

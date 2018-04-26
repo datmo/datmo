@@ -1,15 +1,14 @@
 import os
-import io
 import json
 import yaml
-
-from datmo.core.util.exceptions import SaveSettingException, \
-    FileIOException
-
+from io import open
 try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+
+from datmo.core.util.exceptions import SaveSettingException, \
+    FileIOException
 
 
 class JSONStore():
@@ -30,7 +29,7 @@ class JSONStore():
         self.in_memory_settings = False
 
     def to_file(self, dictionary):
-        with io.open(self.filepath, 'w', encoding='utf8') as outfile:
+        with open(self.filepath, 'w', encoding='utf8') as outfile:
             str_ = json.dumps(dictionary,
                               indent=4,
                               sort_keys=True,
@@ -43,11 +42,11 @@ class JSONStore():
         self.in_memory_settings = False
         settings_dict = {}
         if not os.path.exists(self.filepath):
-            io.open(self.filepath, 'w').close()
+            open(self.filepath, 'w').close()
         else:
-            settings_dict = json.load(io.open(self.filepath, 'r'))
+            settings_dict = json.load(open(self.filepath, 'r'))
         settings_dict[key] = value
-        with io.open(self.filepath, 'w', encoding='utf8') as outfile:
+        with open(self.filepath, 'w', encoding='utf8') as outfile:
             str_ = json.dumps(settings_dict,
                               indent=4,
                               sort_keys=True,
@@ -63,7 +62,7 @@ class JSONStore():
         if not os.path.exists(self.filepath):
             return None
 
-        with io.open(self.filepath) as settings_file:
+        with open(self.filepath) as settings_file:
             try:
                 settings = json.load(settings_file)
                 # save in memory

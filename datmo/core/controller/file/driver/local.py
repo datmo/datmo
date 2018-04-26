@@ -4,6 +4,11 @@ import glob
 import hashlib
 import uuid
 import checksumdir
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import DoesNotExistException, \

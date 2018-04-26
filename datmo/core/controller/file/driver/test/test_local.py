@@ -381,16 +381,17 @@ class TestLocalFileManager():
         filepath3_after = os.path.join(self.local_file_driver.filepath,
                                        ".datmo", "collections", filehash,
                                        "filepath3")
-
+        filepaths_list = [filepath1_after, filepath2_after, filepath3_after]
         result = self.local_file_driver.get_collection_files(filehash)
+
 
         assert len(result) == 3
         assert isinstance(result[0], TextIOWrapper) and \
-               result[0].name == filepath3_after
+               result[0].name in filepaths_list
         assert isinstance(result[1], TextIOWrapper) and \
-               result[1].name == filepath2_after
+               result[1].name in filepaths_list
         assert isinstance(result[2], TextIOWrapper) and \
-               result[2].name == filepath1_after
+               result[2].name in filepaths_list
 
     def test_delete_collection(self):
         self.local_file_driver.init()

@@ -3,6 +3,11 @@ import hashlib
 import logging
 import textwrap
 import datetime
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 from glob import glob
 
 from datmo.core.util.i18n import get as __
