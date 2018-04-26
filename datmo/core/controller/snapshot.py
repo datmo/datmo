@@ -223,6 +223,76 @@ class SnapshotController(BaseController):
                                              "snapshot_id"))
         return self.dal.snapshot.delete(snapshot_id)
 
+    def _code_setup(self, incoming_dictionary, create_dict):
+        """ Set the code_id by using:
+            1. code_id
+            2. commit_id string, which creates a new code_id
+            3. create a new code id
+
+        Parameters
+        ----------
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
+        """
+
+        if "code_id" in incoming_dictionary:
+            create_dict["code_id"] = incoming_dictionary["code_id"]
+        elif "commit_id" in incoming_dictionary:
+            create_dict['code_id'] = self.code.\
+                create(commit_id=incoming_dictionary['commit_id']).id
+        else:
+            create_dict['code_id'] = self.code.create().id
+
+    def _env_setup(self, incoming_dictionary, create_dict):
+        """ TODO:
+
+        Parameters
+        ----------
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
+        """
+
+        language = incoming_dictionary.get("language", None)
+        if "environment_id" in incoming_dictionary:
+            create_dict["environment_id"] = incoming_dictionary["environment_id"]
+        elif "environment_definition_filepath" in incoming_dictionary:
+            create_dict['environment_id'] = self.environment.create({
+                "definition_filepath": incoming_dictionary['environment_definition_filepath']
+            }).id
+        elif language:
+            create_dict['environment_id'] = self.environment.\
+                create({"language": language}).id
+        else:
+            # create some default environment
+            create_dict['environment_id'] = self.environment.\
+                create({}).id
+
+    def _file_setup(self, incoming_dictionary, create_dict):
+        """ TODO:
+
+        Parameters
+        ----------
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
+        """
+
+        if "file_collection_id" in incoming_dictionary:
+            create_dict["file_collection_id"] = incoming_dictionary["file_collection_id"]
+        elif "filepaths" in incoming_dictionary:
+            # transform file paths to file_collection_id
+            create_dict['file_collection_id'] = self.file_collection.\
+                create(incoming_dictionary['filepaths']).id
+        else:
+            # create some default file collection
+            create_dict['file_collection_id'] = self.file_collection.\
+                create([]).id
+
     def _config_setup(self, incoming_dictionary, create_dict):
         """ Fills in snapshot config by having one of the following:
             1. config = JSON object
@@ -287,77 +357,6 @@ class SnapshotController(BaseController):
                 if "stats_filename" in incoming_dictionary else "stats.json"
             create_dict['stats'] = self._find_in_filecollection(stats_filename, create_dict['file_collection_id'])
         else:
-            create_dict['stats'] = None
-
-    def _file_setup(self, incoming_dictionary, create_dict):
-        """ TODO:
-
-        Parameters
-        ----------
-        incoming_dictionary : dict
-            dictionary for the create function defined above
-        create_dict : dict
-            dictionary for creating the Snapshot entity
-        """
-
-        if "file_collection_id" in incoming_dictionary:
-            create_dict["file_collection_id"] = incoming_dictionary["file_collection_id"]
-        elif "filepaths" in incoming_dictionary:
-            # transform file paths to file_collection_id
-            create_dict['file_collection_id'] = self.file_collection.\
-                create(incoming_dictionary['filepaths']).id
-        else:
-            # create some default file collection
-            create_dict['file_collection_id'] = self.file_collection.\
-                create([]).id
-
-    def _env_setup(self, incoming_dictionary, create_dict):
-        """ TODO:
-
-        Parameters
-        ----------
-        incoming_dictionary : dict
-            dictionary for the create function defined above
-        create_dict : dict
-            dictionary for creating the Snapshot entity
-        """
-
-        language = incoming_dictionary.get("language", None)
-        if "environment_id" in incoming_dictionary:
-            create_dict["environment_id"] = incoming_dictionary["environment_id"]
-        elif "environment_definition_filepath" in incoming_dictionary:
-            create_dict['environment_id'] = self.environment.create({
-                "definition_filepath": incoming_dictionary['environment_definition_filepath']
-            }).id
-        elif language:
-            create_dict['environment_id'] = self.environment.\
-                create({"language": language}).id
-        else:
-            # create some default environment
-            create_dict['environment_id'] = self.environment.\
-                create({}).id
-
-    def _code_setup(self, incoming_dictionary, create_dict):
-        """ Set the code_id by using:
-            1. code_id
-            2. commit_id string, which creates a new code_id
-            3. create a new code id
-
-        Parameters
-        ----------
-        incoming_dictionary : dict
-            dictionary for the create function defined above
-        create_dict : dict
-            dictionary for creating the Snapshot entity
-        """
-
-        if "code_id" in incoming_dictionary:
-            create_dict["code_id"] = incoming_dictionary["code_id"]
-        elif "commit_id" in incoming_dictionary:
-            create_dict['code_id'] = self.code.\
-                create(commit_id=incoming_dictionary['commit_id']).id
-        else:
-            create_dict['code_id'] = self.code.create().id
             create_dict['stats'] = {}
 
     def _find_in_filecollection(self, file_to_find, file_collection_id):
