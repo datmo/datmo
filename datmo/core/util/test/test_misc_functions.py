@@ -1,10 +1,17 @@
 """
 Tests for misc_functions.py
 """
+import os
 import tempfile
 import platform
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
-from datmo.core.util.misc_functions import *
+from datmo.core.util.misc_functions import get_filehash, \
+    create_unique_hash
 
 
 class TestMiscFunctions():
@@ -19,7 +26,7 @@ class TestMiscFunctions():
     def test_get_filehash(self):
         filepath =  os.path.join(self.temp_dir, "test.txt")
         with open(filepath, "w") as f:
-            f.write("hello\n")
+            f.write(to_unicode("hello\n"))
         result = get_filehash(filepath)
         assert result == "b1946ac92492d2347c6235b4d2611184"
 

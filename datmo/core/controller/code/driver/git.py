@@ -2,6 +2,11 @@ import os
 import shutil
 import subprocess
 import semver
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 from giturlparse import parse
 
 from datmo.core.util.i18n import get as __
@@ -25,8 +30,8 @@ class GitCodeDriver(CodeDriver):
         # Check if filepath exists
         if not os.path.exists(self.filepath):
             raise DoesNotExistException(__("error",
-                                          "controller.code.driver.git.__init__.dne",
-                                          filepath))
+                                           "controller.code.driver.git.__init__.dne",
+                                           filepath))
         self.execpath = execpath
         # Check the execpath and the version
         try:
@@ -142,7 +147,7 @@ class GitCodeDriver(CodeDriver):
                                      ".git/refs/datmo/",
                                      commit_id)
         with open(code_ref_path, "w") as f:
-            f.write(commit_id)
+            f.write(to_unicode(commit_id))
         return commit_id
 
     def exists_ref(self, commit_id):
@@ -227,7 +232,7 @@ class GitCodeDriver(CodeDriver):
         try:
             if not self.exists_datmo_files_ignored():
                 with open(exclude_file, "a") as f:
-                    f.write("\n.datmo/*\n")
+                    f.write(to_unicode("\n.datmo/*\n"))
         except Exception as e:
             raise FileIOException(__("error",
                                      "controller.code.driver.git.ensure_code_refs_dir",
@@ -694,12 +699,12 @@ class GitHostDriver(object):
         netrc_filepath = os.path.join(self.home, ".netrc")
         netrc_file = open(netrc_filepath, "w")
         netrc_file.truncate()
-        netrc_file.write("machine %s" % (self.host))
-        netrc_file.write("\n")
-        netrc_file.write("login " + str(username))
-        netrc_file.write("\n")
-        netrc_file.write("password " + str(password))
-        netrc_file.write("\n")
+        netrc_file.write(to_unicode("machine %s" % (self.host)))
+        netrc_file.write(to_unicode("\n"))
+        netrc_file.write(to_unicode("login " + str(username)))
+        netrc_file.write(to_unicode("\n"))
+        netrc_file.write(to_unicode("password " + str(password)))
+        netrc_file.write(to_unicode("\n"))
         netrc_file.close()
         return True
 

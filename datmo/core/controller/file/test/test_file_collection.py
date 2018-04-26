@@ -5,6 +5,11 @@ import os
 import shutil
 import tempfile
 import platform
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.file.file_collection import \
@@ -37,7 +42,7 @@ class TestFileCollectionController():
         assert failed
 
         # Test successful creation of collection
-        self.file_collection.file_driver.create("dirpath1", dir=True)
+        self.file_collection.file_driver.create("dirpath1", directory=True)
         self.file_collection.file_driver.create("filepath1")
 
         dirpath1 = os.path.join(self.file_collection.home,
@@ -61,7 +66,7 @@ class TestFileCollectionController():
     def test_list(self):
         self.project.init("test4", "test description")
 
-        self.file_collection.file_driver.create("dirpath1", dir=True)
+        self.file_collection.file_driver.create("dirpath1", directory=True)
         self.file_collection.file_driver.create("filepath1")
         dirpath1 = os.path.join(self.file_collection.home,
                                 "dirpath1")
@@ -73,7 +78,7 @@ class TestFileCollectionController():
         filepath2 = os.path.join(self.file_collection.home,
                                  "filepath2")
         with open(filepath2, "w") as f:
-            f.write("test" + "\n")
+            f.write(to_unicode("test" + "\n"))
         filepaths_2 = [filepath2]
 
         file_collection_obj_1 = self.file_collection.create(filepaths_1)
@@ -90,7 +95,7 @@ class TestFileCollectionController():
         self.project.init("test5", "test description")
 
         # Test successful creation of collection
-        self.file_collection.file_driver.create("dirpath1", dir=True)
+        self.file_collection.file_driver.create("dirpath1", directory=True)
         self.file_collection.file_driver.create("filepath1")
 
         dirpath1 = os.path.join(self.file_collection.home,

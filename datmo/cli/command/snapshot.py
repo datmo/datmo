@@ -5,7 +5,6 @@ import prettytable
 from datmo.core.util.i18n import get as __
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.snapshot import SnapshotController
-from datmo.core.util.exceptions import ProjectNotInitializedException
 
 
 class SnapshotCommand(ProjectCommand):
@@ -52,7 +51,6 @@ class SnapshotCommand(ProjectCommand):
 
         ls = subcommand_parsers.add_parser("ls", help="List snapshots")
         ls.add_argument("--session-id", dest="session_id", default=None, help="Session ID to filter")
-        ls.add_argument("--session-name", dest="session_name", default=None, help="Session name to filter")
         ls.add_argument("--all", "-a", dest="details", action="store_true",
                             help="Show detailed snapshot information")
 
@@ -105,8 +103,8 @@ class SnapshotCommand(ProjectCommand):
 
     def delete(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.delete"))
-        id = kwargs.get("id", None)
-        return self.snapshot_controller.delete(id)
+        snapshot_id = kwargs.get("id", None)
+        return self.snapshot_controller.delete(snapshot_id)
 
     def ls(self, **kwargs):
         session_id = kwargs.get('session_id',
@@ -137,8 +135,8 @@ class SnapshotCommand(ProjectCommand):
         return True
 
     def checkout(self, **kwargs):
-        id = kwargs.get("id", None)
-        return self.snapshot_controller.checkout(id)
+        snapshot_id = kwargs.get("id", None)
+        return self.snapshot_controller.checkout(snapshot_id)
 
 
 

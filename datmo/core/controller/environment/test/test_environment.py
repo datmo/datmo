@@ -5,12 +5,16 @@ import os
 import shutil
 import tempfile
 import platform
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import \
     EnvironmentController
-from datmo.core.util.exceptions import EntityNotFound, \
-    DoesNotExistException
+from datmo.core.util.exceptions import EntityNotFound
 
 
 class TestEnvironmentController():
@@ -33,7 +37,7 @@ class TestEnvironmentController():
         definition_filepath = os.path.join(self.environment.home,
                                     "Dockerfile")
         with open(definition_filepath, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         # Test no inputs but defaults work
         environment_obj = self.environment.create({})
@@ -86,7 +90,7 @@ class TestEnvironmentController():
         definition_filepath = os.path.join(self.environment.home,
                                            "Dockerfile")
         with open(definition_filepath, "w") as f:
-            f.write(str("FROM cloudgear/ubuntu:14.04"))
+            f.write(to_unicode(str("FROM cloudgear/ubuntu:14.04")))
 
         input_dict = {
             "definition_filepath": definition_filepath,
@@ -105,6 +109,8 @@ class TestEnvironmentController():
         environment_obj_4 = self.environment.create(input_dict)
         assert environment_obj_4.id
         assert environment_obj_4.id != environment_obj_3.id
+        assert not os.path.isfile(definition_filepath)
+        assert not os.path.isfile(os.path.join(self.environment.home, "requirements.txt"))
 
     def test_build(self):
         self.project.init("test5", "test description")
@@ -113,7 +119,7 @@ class TestEnvironmentController():
         definition_filepath = os.path.join(self.environment.home,
                                            "Dockerfile")
         with open(definition_filepath, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         input_dict = {
             "definition_filepath": definition_filepath,
@@ -130,6 +136,21 @@ class TestEnvironmentController():
         # teardown
         self.environment.delete(environment_obj.id)
 
+        # Test for building dockerfile when there exists not
+        os.remove(definition_filepath)
+
+        input_dict = {}
+
+        # Create environment in the project
+        environment_obj_1 = self.environment.create(input_dict)
+
+        # Build environment
+        result = self.environment.build(environment_obj_1.id)
+
+        assert result
+        # teardown
+        self.environment.delete(environment_obj_1.id)
+
     def test_run(self):
         self.project.init("test5", "test description")
 
@@ -137,7 +158,7 @@ class TestEnvironmentController():
         definition_filepath = os.path.join(self.environment.home,
                                            "Dockerfile")
         with open(definition_filepath, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         run_options = {
             "command": ["sh", "-c", "echo yo"],
@@ -151,12 +172,11 @@ class TestEnvironmentController():
             "api": False
         }
 
-
         # Create environment_driver definition
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         input_dict = {
             "definition_filepath": definition_filepath,
@@ -188,7 +208,7 @@ class TestEnvironmentController():
         definition_path_1 = os.path.join(self.environment.home,
                                     "Dockerfile")
         with open(definition_path_1, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         input_dict_1 = {
             "definition_filepath": definition_path_1,
@@ -201,7 +221,7 @@ class TestEnvironmentController():
         definition_path_2 = os.path.join(self.environment.home,
                                          "Dockerfile2")
         with open(definition_path_2, "w") as f:
-            f.write(str("FROM datmo/scikit-opencv"))
+            f.write(to_unicode(str("FROM datmo/scikit-opencv")))
 
         input_dict_2 = {
             "definition_filepath": definition_path_2,
@@ -224,7 +244,7 @@ class TestEnvironmentController():
         definition_filepath = os.path.join(self.environment.home,
                                            "Dockerfile")
         with open(definition_filepath, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         input_dict = {
             "definition_filepath": definition_filepath,
@@ -245,3 +265,54 @@ class TestEnvironmentController():
 
         assert result == True and \
             thrown == True
+
+    def test_stop(self):
+        self.project.init("test5", "test description")
+
+        # Create environment definition
+        definition_filepath = os.path.join(self.environment.home,
+                                           "Dockerfile")
+        with open(definition_filepath, "w") as f:
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        run_options = {
+            "command": ["sh", "-c", "echo yo"],
+            "ports": ["8888:8888"],
+            "name": None,
+            "volumes": None,
+            "detach": False,
+            "stdin_open": False,
+            "tty": False,
+            "gpu": False,
+            "api": False
+        }
+
+        # Create environment_driver definition
+        env_def_path = os.path.join(self.project.home,
+                                    "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        input_dict = {
+            "definition_filepath": definition_filepath,
+        }
+
+        # Create environment in the project
+        environment_obj = self.environment.create(input_dict)
+
+        log_filepath = os.path.join(self.project.home,
+                                    "task.log")
+
+        # Build environment in the project
+        _ = self.environment.build(environment_obj.id)
+
+        # Run environment in the project
+        _, run_id, _ = \
+            self.environment.run(environment_obj.id, run_options, log_filepath)
+
+        # Stop the running environment
+        return_code = self.environment.stop(run_id)
+        assert return_code
+
+        # teardown
+        self.environment.delete(environment_obj.id)

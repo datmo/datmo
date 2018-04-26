@@ -137,6 +137,7 @@ class EnvironmentController(BaseController):
                 # Delete temporary files created once transfered into file collection
                 if requirements_filepath:
                     os.remove(requirements_filepath)
+                    os.remove(original_definition_filepath)
                 os.remove(datmo_definition_filepath)
                 os.remove(hardware_info_filepath)
             # Create new unique hash or find existing from the file collection above
@@ -161,12 +162,12 @@ class EnvironmentController(BaseController):
         # Create environment and return
         return self.dal.environment.create(create_dict)
 
-    def build(self, id):
+    def build(self, environment_id):
         """Build Environment from definition file
 
         Parameters
         ----------
-        id : str
+        environment_id : str
             environment object id to build
 
         Returns
@@ -179,26 +180,26 @@ class EnvironmentController(BaseController):
         DoesNotExistException
             if the specified Environment does not exist.
         """
-        environment_obj = self.dal.environment.get_by_id(id)
+        environment_obj = self.dal.environment.get_by_id(environment_id)
         if not environment_obj:
             raise DoesNotExistException(__("error",
-                                          "controller.environment.build",
-                                          id))
+                                           "controller.environment.build",
+                                           environment_id))
         file_collection_obj = self.dal.file_collection.\
             get_by_id(environment_obj.file_collection_id)
         # TODO: Check hardware info here if different from creation time
         # Build the Environment with the driver
         datmo_definition_filepath = os.path.join(self.home, file_collection_obj.path,
                                                  "datmo" + environment_obj.definition_filename)
-        result = self.environment_driver.build(id, path=datmo_definition_filepath)
+        result = self.environment_driver.build(environment_id, path=datmo_definition_filepath)
         return result
 
-    def run(self, id, options, log_filepath):
+    def run(self, environment_id, options, log_filepath):
         """Run and log an instance of the environment with the options given
 
         Parameters
         ----------
-        id : str
+        environment_id : str
         options : dict
             can include the following values:
 
@@ -230,19 +231,19 @@ class EnvironmentController(BaseController):
         """
         # TODO: Check hardware info here if different from creation time
         final_return_code, run_id, logs = \
-            self.environment_driver.run(id, options, log_filepath)
+            self.environment_driver.run(environment_id, options, log_filepath)
         return final_return_code, run_id, logs
 
     def list(self):
         # TODO: Add time filters
         return self.dal.environment.query({})
 
-    def delete(self, id):
+    def delete(self, environment_id):
         """Delete all traces of an Environment
 
         Parameters
         ----------
-        id : str
+        environment_id : str
             environment object id to remove
 
         Returns
@@ -255,17 +256,40 @@ class EnvironmentController(BaseController):
         DoesNotExistException
             if the specified Environment does not exist.
         """
-        environment_obj = self.dal.environment.get_by_id(id)
+        environment_obj = self.dal.environment.get_by_id(environment_id)
         if not environment_obj:
             raise DoesNotExistException(__("error",
-                                          "controller.environment.delete",
-                                          id))
+                                           "controller.environment.delete",
+                                           environment_id))
         # Remove file collection
         file_collection_deleted = self.file_collection.delete(environment_obj.file_collection_id)
         # Remove artifacts associated with the environment_driver
-        environment_artifacts_removed = self.environment_driver.remove(id, force=True)
+        environment_artifacts_removed = self.environment_driver.remove(environment_id, force=True)
         # Delete environment_driver object
         delete_success = self.dal.environment.delete(environment_obj.id)
 
         return file_collection_deleted and environment_artifacts_removed and \
                delete_success
+
+    def stop(self, run_id):
+        """Stop the trace of running Environment
+
+        Parameters
+        ----------
+        run_id : str
+            run id with specific environment to be stopped
+
+        Returns
+        -------
+        bool
+            True if success
+
+        Raises
+        ------
+        DoesNotExistException
+            if the specified Environment does not exist.
+        """
+        # Stop the instance(e.g. container) running using environment driver(e.g. docker)
+        stop_success = self.environment_driver.stop(run_id, force=True)
+
+        return stop_success

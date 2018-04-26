@@ -5,6 +5,11 @@ import os
 import shutil
 import tempfile
 import platform
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.code.code import \
@@ -41,7 +46,7 @@ class TestCodeController():
         definition_filepath = os.path.join(self.code.home,
                                     "test.txt")
         with open(definition_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
 
         # Test passing with something to commit
         code_obj = self.code.create()
@@ -69,7 +74,7 @@ class TestCodeController():
         definition_filepath = os.path.join(self.code.home,
                                            "test.txt")
         with open(definition_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
 
         # Test passing with something to commit
         code_obj_1 = self.code.create()
@@ -78,7 +83,7 @@ class TestCodeController():
         definition_filepath = os.path.join(self.code.home,
                                            "test2.txt")
         with open(definition_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
 
         # Test passing with something to commit
         code_obj_2 = self.code.create()
@@ -97,7 +102,7 @@ class TestCodeController():
         definition_filepath = os.path.join(self.code.home,
                                            "test.txt")
         with open(definition_filepath, "w") as f:
-            f.write(str("test"))
+            f.write(to_unicode(str("test")))
 
         # Test passing with something to commit
         code_obj = self.code.create()

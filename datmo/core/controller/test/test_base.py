@@ -12,7 +12,7 @@ import platform
 from datmo.core.controller.base import BaseController
 from datmo.core.controller.code.driver.git import GitCodeDriver
 from datmo.core.util.exceptions import  \
-    DatmoModelNotInitializedException
+    DatmoModelNotInitializedException, InvalidProjectPathException
 
 
 class TestBaseController():
@@ -22,10 +22,18 @@ class TestBaseController():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.base = BaseController(self.temp_dir)
+        self.base = BaseController(home=self.temp_dir)
 
     def teardown_method(self):
         shutil.rmtree(self.temp_dir)
+
+    def test_failed_controller_instantiation(self):
+        failed = False
+        try:
+            BaseController(home=os.path.join("does", "not", "exist"))
+        except InvalidProjectPathException:
+            failed = True
+        assert failed
 
     def test_instantiation(self):
         assert self.base != None

@@ -9,6 +9,11 @@ import shutil
 import tempfile
 import platform
 import os
+from io import open
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.core.util.json_store import JSONStore
 
