@@ -32,17 +32,34 @@ class DockerEnvironmentDriver(EnvironmentDriver):
     docker_socket : str, optional
         socket path to docker daemon to connect
         (default is None, this takes the default path for the system)
+
+    Attributes
+    ----------
+    filepath : str
+        home filepath for project
+    docker_execpath : str
+        docker execution path for the system
+    docker_socket : str
+        specific socket for docker
+        (default is None, which means system default is used by docker)
+    client : DockerClient
+        docker python api client
+    cpu_prefix : list
+        list of strings for the prefix command for all docker commands
+    info : dict
+        information about the docker daemon connection
+    is_connected : bool
+        True if connected to daemon else False
+    type : str
+        type of EnvironmentDriver
     """
 
     def __init__(self, filepath="", docker_execpath="docker",
                  docker_socket=None):
         if not docker_socket:
-            print(type(platform.system()))
-            print(platform.system())
-            if platform.system() == "Windows":
-                docker_socket = "//./pipe/docker_engine"
-            else:
+            if platform.system() != "Windows":
                 docker_socket = "unix:///var/run/docker.sock"
+
         super(DockerEnvironmentDriver, self).__init__()
         self.filepath = filepath
         # Check if filepath exists
@@ -55,17 +72,21 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
         # Initiate Docker execution
         self.docker_execpath = docker_execpath
-        self.docker_socket = docker_socket
         try:
-            self.client = DockerClient(base_url=self.docker_socket)
+            self.docker_socket = docker_socket
+            if self.docker_socket:
+                self.client = DockerClient(base_url=self.docker_socket)
+                self.cpu_prefix = [self.docker_execpath, "-H", self.docker_socket]
+            else:
+                self.client = DockerClient()
+                self.cpu_prefix = [self.docker_execpath]
             self.info = self.client.info()
         except Exception:
             raise EnvironmentInitFailed(__("error",
                                            "controller.environment.driver.docker.__init__",
-                                           self.docker_socket))
+                                           platform.system()))
 
         self.is_connected = True if self.info["Images"] != None else False
-        self.cpu_prefix = [self.docker_execpath, "-H", self.docker_socket]
 
         self._is_initialized = self.is_initialized
         self.type = "docker"

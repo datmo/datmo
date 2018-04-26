@@ -63,7 +63,7 @@ MESSAGES = {
         "controller.code.create": "Required argument not present in input",
         "controller.code.delete": "Code with id %s does NOT exist",
         "controller.environment.driver.docker.__init__.dne": "File path does not exist: %s",
-        "controller.environment.driver.docker.__init__": "Docker environment management initialization failed. Socket: %s",
+        "controller.environment.driver.docker.__init__": "Docker environment management initialization failed. Platform: %s",
         "controller.environment.driver.docker.init": "Error in docker initialization: %s",
         "controller.environment.driver.docker.create.dne": "path does not exist: %s",
         "controller.environment.driver.docker.create.exists": "output path already exists: %s",
