@@ -6,6 +6,10 @@ class Task():
     to capture the relevant components. These snapshots are flagged as temporary unless otherwise specified
     by the user but are stored as ids within the task object for reference.
 
+    Note
+    ----
+    All attributes of the class in the ``Attributes`` section must be serializable by the DB
+
     Parameters
     ----------
     dictionary : dict

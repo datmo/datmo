@@ -12,6 +12,10 @@ class Task():
     Parameters
     ----------
     task_entity : datmo.core.entity.task.Task
+        core task entity to emulate
+    home : str, optional
+        root directory of the project
+        (default is CWD, if not provided)
 
     Attributes
     ----------
@@ -35,6 +39,11 @@ class Task():
         string output of logs
     results : dict
         dictionary containing output results from the task
+
+    Methods
+    -------
+    files(mode="r")
+        Returns a list of file objects for the task
 
     Raises
     ------
