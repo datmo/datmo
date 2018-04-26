@@ -294,8 +294,10 @@ class SnapshotController(BaseController):
 
         Parameters
         ----------
-            incoming_dictionary: dict
-            create_dict: dict
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
         """
 
         if "file_collection_id" in incoming_dictionary:
@@ -314,8 +316,10 @@ class SnapshotController(BaseController):
 
         Parameters
         ----------
-            incoming_dictionary: dict
-            create_dict: dict
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
         """
 
         language = incoming_dictionary.get("language", None)
@@ -341,8 +345,10 @@ class SnapshotController(BaseController):
 
         Parameters
         ----------
-        incoming_dictionary: dict
-        create_dict: dict
+        incoming_dictionary : dict
+            dictionary for the create function defined above
+        create_dict : dict
+            dictionary for creating the Snapshot entity
         """
 
         if "code_id" in incoming_dictionary:
