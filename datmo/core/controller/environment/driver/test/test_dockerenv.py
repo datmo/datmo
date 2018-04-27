@@ -8,7 +8,6 @@ from __future__ import unicode_literals
 import os
 import tempfile
 import platform
-import shutil
 import uuid
 from io import open
 try:
@@ -32,9 +31,9 @@ class TestDockerEnv():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        # Test the default parameters
         self.docker_environment_manager = \
-            DockerEnvironmentDriver(self.temp_dir, 'docker',
-                                     'unix:///var/run/docker.sock')
+            DockerEnvironmentDriver(self.temp_dir)
         self.init_result = self.docker_environment_manager.init()
         random_text = str(uuid.uuid1())
         with open(os.path.join(self.temp_dir, "Dockerfile"),
@@ -52,7 +51,7 @@ class TestDockerEnv():
     def test_instantiation_not_connected(self):
         thrown = False
         try:
-            DockerEnvironmentDriver(self.temp_dir, 'docker', 'unix:///var/run/fooo')
+            DockerEnvironmentDriver(self.temp_dir, docker_socket="unix:///var/run/fooo")
         except EnvironmentInitFailed:
             thrown = True
         assert thrown

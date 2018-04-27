@@ -2,7 +2,6 @@
 Tests for FileCollectionController
 """
 import os
-import shutil
 import tempfile
 import platform
 from io import open

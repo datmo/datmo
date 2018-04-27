@@ -465,7 +465,6 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             Process return code for the container
         logs : str
             Output logs read into a string format
-
         """
         # TODO: Fix function to better accomodate all logs in the same way
         if api: # calling the docker client via the API

@@ -2,7 +2,6 @@
 Tests for task module
 """
 import os
-import shutil
 import tempfile
 import platform
 from io import open, TextIOWrapper

@@ -2,7 +2,6 @@
 Tests for SnapshotController
 """
 import os
-import shutil
 import tempfile
 import platform
 from io import open

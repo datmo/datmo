@@ -4,7 +4,6 @@ Tests for TaskController
 import os
 import random
 import string
-import shutil
 import tempfile
 import platform
 from io import open, TextIOWrapper
