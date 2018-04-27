@@ -175,6 +175,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         return True
 
     def get_tags_for_docker_repository(self, repo_name):
+        # TODO: Use more common CLI command (e.g. curl instead of wget)
         """Method to get tags for docker repositories
 
         Parameters
