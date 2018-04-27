@@ -37,7 +37,8 @@ init:
 install:
   - ps: '[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12'
   - ps: (new-object net.webclient).DownloadFile('https://bootstrap.pypa.io/get-pip.py', 'C:/get-pip.py')
-  - ps: "'C:/Program Files/Docker/Docker/DockerCli.exe' -SwitchDaemon"
+  - ps: '[Environment]::SetEnvironmentVariable("LCOW_SUPPORTED", "1", "Machine")'
+  - ps: 'Restart-Service Docker'
   - git config --global user.email "dev@datmo.com"
   - git config --global user.name "Datmo Devs"
   - "%PYTHON%/python.exe C:/get-pip.py"
