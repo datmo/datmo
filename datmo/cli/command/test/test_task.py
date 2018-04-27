@@ -187,12 +187,12 @@ class TestTaskCommand():
         task_stop_command = self.task.execute()
         assert task_stop_command == True
 
+    def test_task_stop_invalid_task_id(self):
         # Passing wrong task id
-        test_task_id = "task_id"
         self.task.parse([
             "task",
             "stop",
-            "--id", test_task_id
+            "--id", "invalid-task-id"
         ])
 
         # test when wrong task id is passed to stop it
