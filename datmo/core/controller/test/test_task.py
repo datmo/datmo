@@ -139,7 +139,7 @@ class TestTaskController():
         # Create task in the project
         task_obj = self.task.create(input_dict)
 
-        # Create environment_driver definition
+        # Create environment definition
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:

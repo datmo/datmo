@@ -497,22 +497,37 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         return True
 
     def create_requirements_file(self, execpath="pipreqs"):
-        """Create requirements txt file for the project
+        """Create python requirements txt file for the project
+
+        Parameters
+        ----------
+        execpath : str, optional
+            execpath for the pipreqs command to form requirements.txt file
+            (default is "pipreqs")
 
         Returns
         -------
         str
             absolute filepath for requirements file
+
+        Raises
+        ------
+        DoesNotExistException
+            no python requirements found
+        EnvironmentRequirementsCreateException
+            error in running pipreqs command to extract python requirements
         """
         try:
             subprocess.check_output([execpath, self.filepath, "--force"],
                                     cwd=self.filepath).strip()
             requirements_filepath = os.path.join(self.filepath, "requirements.txt")
-            return requirements_filepath
         except Exception as e:
             raise EnvironmentRequirementsCreateException(__("error",
-                                                           "controller.environment.requirements.create",
-                                                           str(e)))
+                                                            "controller.environment.requirements.create",
+                                                            str(e)))
+        if open(requirements_filepath, "r").read() == "\n":
+            raise DoesNotExistException()
+        return requirements_filepath
 
     def create_default_dockerfile(self, requirements_filepath, language):
         """Create a default Dockerfile for a given language

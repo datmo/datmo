@@ -62,6 +62,7 @@ class SnapshotController(BaseController):
                     code reference associated with the snapshot; if not
                     provided will look to inputs below for code creation
                 commit_id : str, optional
+                    commit id provided by the user if already available
 
                 Default
                 -------
@@ -111,6 +112,7 @@ class SnapshotController(BaseController):
                     absolute filepath to stats parameters file
                 stats_filename : str, optional
                     name of file with metrics and statistics.
+
                 Default
                 -------
                 stats will be considered empty ({}) and saved to the snapshot
