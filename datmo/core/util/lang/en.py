@@ -13,7 +13,10 @@ MESSAGES = {
         "cli.snapshot.create": "Creating a new snapshot",
         "cli.snapshot.delete": "Deleting a snapshot",
         "cli.task.run": "Running a new task",
-        "cli.task.stop": "Stopping task: %s"
+        "cli.task.stop": "Stopping task: %s",
+        "cli.session.create": "Created session '%s'",
+        "cli.session.select": "Selecting new session '%s'",
+        "cli.session.delete": "Removed session '%s'",
     },
     "warn": {
         "cli.general.internet": "Internet connectivity doesn't exist",
