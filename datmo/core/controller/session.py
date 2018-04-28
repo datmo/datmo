@@ -101,5 +101,14 @@ class SessionController(BaseController):
         if session.current == True:
             self.select("default")
         self.dal.session.delete(session.id)
+
+        #  Delete snapshots for this session
+        for s in self.dal.snapshot.query({"session_id": session.id}):
+            self.dal.snapshot.delete(s.id)
+
+        # Delete tasks for this session
+        for t in self.dal.task.query({"session_id": session.id}):
+            self.dal.task.delete(t.id)
+
         return True
 
