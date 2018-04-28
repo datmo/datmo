@@ -127,6 +127,7 @@ def run(command, env=None, home=None):
     in the following way.
 
     >>> import datmo
+    >>> datmo.task.run(command="python script.py")
     >>> datmo.task.run(command="python script.py", env='Dockerfile')
     """
     if not home:
