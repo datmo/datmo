@@ -70,97 +70,90 @@ class EnvironmentController(BaseController):
             "model_id": self.model.id,
         }
 
-        # Required args for Environment entity
-        required_args = ["driver_type", "language", "definition_filename",
-                         "hardware_info", "file_collection_id", "unique_hash"]
-        for required_arg in required_args:
-            # Pull in driver type from base
-            if required_arg == "driver_type":
-                create_dict[required_arg] = self.environment_driver.type
-            elif required_arg == "language":
-                create_dict['language'] = dictionary.get("language", None)
-            elif required_arg == "definition_filename":
-                if "definition_filepath" in dictionary:
-                    original_definition_filepath = dictionary['definition_filepath']
-                    # Split up the given path and save definition filename
-                    definition_path, definition_filename = \
-                        os.path.split(original_definition_filepath)
-                    create_dict['definition_filename'] = definition_filename
-                    # Create datmo environment definition in the same dir as definition filepath
-                    datmo_definition_filepath = \
-                        os.path.join(definition_path, "datmo" + definition_filename)
-                    _, _, _, requirements_filepath = self.environment_driver.create(path=dictionary['definition_filepath'],
-                                                   output_path=datmo_definition_filepath)
-                else:
-                    # If path is not given, then only use the language to create a default environment
-                    # Use the default create to find environment definition
-                    _, original_definition_filepath, datmo_definition_filepath, requirements_filepath = \
-                        self.environment_driver.create(language=create_dict['language'])
-                    # Split up the default path obtained to save the definition name
-                    definition_path, definition_filename = \
-                        os.path.split(original_definition_filepath)
-                    create_dict['definition_filename'] = definition_filename
+        create_dict["driver_type"] = self.environment_driver.type
+        create_dict["language"] = dictionary.get("language", None)
 
-            # Extract the hardware information
-            elif required_arg == "hardware_info":
-                if "hardware_info" in dictionary:
-                    create_dict['hardware_info'] = dictionary['hardware_info']
-                else:
-                    # Extract hardware info of the container (currently taking from system platform)
-                    # TODO: extract hardware information directly from the container
-                    (system, node, release, version, machine, processor) = platform.uname()
-                    create_dict['hardware_info'] = {
-                        'system': system,
-                        'node': node,
-                        'release': release,
-                        'version': version,
-                        'machine': machine,
-                        'processor': processor
-                    }
-                # Create hardware info file in definition path
-                hardware_info_filepath = os.path.join(definition_path, "hardware_info")
-                _ = JSONStore(hardware_info_filepath,
-                              initial_dict=create_dict['hardware_info'])
-            # File collection setup using files created above
-            elif required_arg == "file_collection_id":
-                # Add all environment files to collection:
-                # definition path, datmo_definition_path, hardware_info
-                if not requirements_filepath:
-                    filepaths = [original_definition_filepath, datmo_definition_filepath,
-                                 hardware_info_filepath]
-                else:
-                    filepaths = [original_definition_filepath, datmo_definition_filepath,
-                                 requirements_filepath, hardware_info_filepath]
-                file_collection_obj = self.file_collection.create(filepaths)
-                create_dict['file_collection_id'] = file_collection_obj.id
+        if "definition_filepath" in dictionary:
+            original_definition_filepath = dictionary['definition_filepath']
+            # Split up the given path and save definition filename
+            definition_path, definition_filename = \
+                os.path.split(original_definition_filepath)
+            create_dict['definition_filename'] = definition_filename
+            # Create datmo environment definition in the same dir as definition filepath
+            datmo_definition_filepath = \
+                os.path.join(definition_path, "datmo" + definition_filename)
+            _, _, _, requirements_filepath = self.environment_driver.create(path=dictionary['definition_filepath'],
+                                            output_path=datmo_definition_filepath)
+        else:
+            # If path is not given, then only use the language to create a default environment
+            # Use the default create to find environment definition
+            _, original_definition_filepath, datmo_definition_filepath, requirements_filepath = \
+                self.environment_driver.create(language=create_dict['language'])
+            # Split up the default path obtained to save the definition name
+            definition_path, definition_filename = \
+                os.path.split(original_definition_filepath)
+            create_dict['definition_filename'] = definition_filename
 
-                # Delete temporary files created once transfered into file collection
-                if requirements_filepath:
-                    os.remove(requirements_filepath)
-                    os.remove(original_definition_filepath)
-                os.remove(datmo_definition_filepath)
-                os.remove(hardware_info_filepath)
-            # Create new unique hash or find existing from the file collection above
-            elif required_arg == "unique_hash":
-                create_dict['unique_hash'] = file_collection_obj.filehash
-                # Check if unique hash is unique or not.
-                # If not, DO NOT CREATE Environment and return existing Environment object
-                results = self.dal.environment.query({
-                    "unique_hash": file_collection_obj.filehash
-                })
-                if results: return results[0];
-            else:
-                NotImplementedError()
+
+        hardware_info_filepath = self._store_hardware_info(dictionary, create_dict, definition_path)
+
+        # Add all environment files to collection:
+        # definition path, datmo_definition_path, hardware_info
+        filepaths = [
+                        original_definition_filepath,
+                        datmo_definition_filepath,
+                        hardware_info_filepath
+                    ]
+        if requirements_filepath:
+            filepaths.append(requirements_filepath)
+
+        file_collection_obj = self.file_collection.create(filepaths)
+        create_dict['file_collection_id'] = file_collection_obj.id
+
+        # Delete temporary files created once transfered into file collection
+        if requirements_filepath:
+            os.remove(requirements_filepath)
+            os.remove(original_definition_filepath)
+        os.remove(datmo_definition_filepath)
+        os.remove(hardware_info_filepath)
+
+
+        create_dict['unique_hash'] = file_collection_obj.filehash
+        # Check if unique hash is unique or not.
+        # If not, DO NOT CREATE Environment and return existing Environment object
+        results = self.dal.environment.query({
+            "unique_hash": file_collection_obj.filehash
+        })
+        if results: return results[0]
 
         # Optional args for Environment entity
-        optional_args = ["description"]
-        for optional_arg in optional_args:
+        for optional_arg in ["description"]:
             if optional_arg in dictionary:
                 create_dict[optional_arg] = dictionary[optional_arg]
 
-
         # Create environment and return
         return self.dal.environment.create(create_dict)
+
+    def _store_hardware_info(self, dictionary, create_dict, definition_path):
+        if "hardware_info" in dictionary:
+            create_dict['hardware_info'] = dictionary['hardware_info']
+        else:
+            # Extract hardware info of the container (currently taking from system platform)
+            # TODO: extract hardware information directly from the container
+            (system, node, release, version, machine, processor) = platform.uname()
+            create_dict['hardware_info'] = {
+                'system': system,
+                'node': node,
+                'release': release,
+                'version': version,
+                'machine': machine,
+                'processor': processor
+            }
+        # Create hardware info file in definition path
+        hardware_info_filepath = os.path.join(definition_path, "hardware_info")
+        _ = JSONStore(hardware_info_filepath,
+                        initial_dict=create_dict['hardware_info'])
+        return hardware_info_filepath
 
     def build(self, environment_id):
         """Build Environment from definition file
