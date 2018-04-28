@@ -141,7 +141,7 @@ class TaskController(BaseController):
 
         return return_code, run_id, logs
 
-    def run(self, task_id, snapshot_dict={"visible": False}, task_dict={}):
+    def run(self, task_id, snapshot_dict=None, task_dict=None):
         """Run a task with parameters. If dictionary specified, create a new task with new run parameters.
         Snapshot objects are created before and after the task to keep track of the state. During the run,
         you can access task outputs using environment variable DATMO_TASK_DIR or `/task` which points to
@@ -154,10 +154,12 @@ class TaskController(BaseController):
             id for the task you would like to run
         snapshot_dict : dict
             set of parameters to create a snapshot (see SnapshotController for details.
-            default is dictionary with `visible` False to hide auto-generated snapshot)
+            default is None, which means dictionary with `visible` False will be added to
+            hide auto-generated snapshot) NOTE: `visible` False will always be False regardless
+            of whether the user provides another value for `visible`.
         task_dict : dict
             set of parameters to characterize the task run
-            (default is {}, see datmo.core.entity.task for more details on inputs)
+            (default is None, which translate to {}, see datmo.core.entity.task for more details on inputs)
 
         Returns
         -------
@@ -169,6 +171,17 @@ class TaskController(BaseController):
         TaskRunException
             If there is any error in creating files for the task or downstream errors
         """
+        # Ensure visible=False is present in the snapshot dictionary
+        if not snapshot_dict:
+            snapshot_dict = {
+                "visible": False
+            }
+        else:
+            snapshot_dict['visible'] = False
+
+        if not task_dict:
+            task_dict = {}
+
         # Obtain Task to run
         task_obj = self.dal.task.get_by_id(task_id)
 
