@@ -16,7 +16,7 @@ from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.task import TaskController
 from datmo.core.util.exceptions import EntityNotFound, \
-    EnvironmentExecutionException
+    EnvironmentExecutionException, TaskRunException
 
 
 class TestTaskController():
@@ -191,32 +191,48 @@ class TestTaskController():
             failed = True
         assert failed
 
+        # Test when the specific task id is already RUNNING
+        # Create task in the project
+        task_obj_1 = self.task.create(input_dict)
+        self.task.dal.task.update({"id": task_obj_1.id, "status": "RUNNING"})
+        # Create environment_driver definition
+        env_def_path = os.path.join(self.project.home,
+                                    "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        failed = False
+        try:
+            self.task.run(task_obj_1.id)
+        except TaskRunException:
+            failed = True
+        assert failed
+
         # Test for Task where the snapshot dictionary is passed in and succeeds
 
         # Create a new task in the project
-        task_obj_1 = self.task.create(input_dict)
+        task_obj_2 = self.task.create(input_dict)
 
         # Run another task in the project
-        updated_task_obj_1 = self.task.run(task_obj_1.id,
+        updated_task_obj_2 = self.task.run(task_obj_2.id,
                                            snapshot_dict=snapshot_dict)
 
-        assert task_obj_1.id == updated_task_obj_1.id
+        assert task_obj_2.id == updated_task_obj_2.id
+        assert updated_task_obj_2.before_snapshot_id
+        assert updated_task_obj_2.ports == []
+        assert updated_task_obj_2.gpu == False
+        assert updated_task_obj_2.interactive == False
+        assert updated_task_obj_2.task_dirpath
+        assert updated_task_obj_2.log_filepath
+        assert updated_task_obj_2.start_time
 
-        assert updated_task_obj_1.before_snapshot_id
-        assert updated_task_obj_1.ports == []
-        assert updated_task_obj_1.gpu == False
-        assert updated_task_obj_1.interactive == False
-        assert updated_task_obj_1.task_dirpath
-        assert updated_task_obj_1.log_filepath
-        assert updated_task_obj_1.start_time
-
-        assert updated_task_obj_1.after_snapshot_id
-        assert updated_task_obj_1.run_id
-        assert updated_task_obj_1.logs
-        assert updated_task_obj_1.status == "SUCCESS"
-        assert updated_task_obj_1.results == {}
-        assert updated_task_obj_1.end_time
-        assert updated_task_obj_1.duration
+        assert updated_task_obj_2.after_snapshot_id
+        assert updated_task_obj_2.run_id
+        assert updated_task_obj_2.logs
+        assert updated_task_obj_2.status == "SUCCESS"
+        assert updated_task_obj_2.results == {}
+        assert updated_task_obj_2.end_time
+        assert updated_task_obj_2.duration
 
     def test_list(self):
         task_command = ["sh", "-c", "echo yo"]

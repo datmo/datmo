@@ -172,6 +172,13 @@ class TaskController(BaseController):
         # Obtain Task to run
         task_obj = self.dal.task.get_by_id(task_id)
 
+        if task_obj.status != 'RUNNING':
+            task_obj.status = 'RUNNING'
+        else:
+            raise TaskRunException(__("error",
+                                      "cli.task.run.already_running",
+                                      task_obj.id))
+
         # Create Task directory for user during run
         task_dirpath = os.path.join("datmo_tasks",
                                     task_obj.id)
