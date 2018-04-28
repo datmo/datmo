@@ -27,6 +27,7 @@ MESSAGES = {
         "cli.task.run": "Error while running the task: %s",
         "cli.task.stop": "Error while stopping the task: %s",
         "util.misc_functions.get_filehash": "Filepath does not point to a valid file: %s",
+        "util.misc_functions.mutually_exclusive": "Mutually exclusive arguments passed: %s",
         "controller.code.driver.git.__init__.dne": "File path does not exist: %s",
         "controller.code.driver.git.__init__.giterror": "Error in git: %s",
         "controller.code.driver.git.__init__.gitversion": "Git version must be later than 1.9.7. Current version: %s",

@@ -23,7 +23,7 @@ except NameError:
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
-from datmo.core.util.exceptions import ProjectNotInitializedException
+from datmo.core.util.exceptions import ProjectNotInitializedException, MutuallyExclusiveArguments
 
 
 class TestSnapshot():
@@ -103,9 +103,7 @@ class TestSnapshot():
             "--task-id", test_task_id,
             "--code-id", test_code_id,
             "--environment-def-path", test_environment_def_path,
-            "--config-filename", test_config_filename,
             "--config-filepath", test_config_filepath,
-            "--stats-filename", test_stats_filename,
             "--stats-filepath", test_stats_filepath,
             "--filepaths", test_filepaths[0],
             "--not-visible"
@@ -118,15 +116,37 @@ class TestSnapshot():
         assert self.snapshot.args.task_id == test_task_id
         assert self.snapshot.args.code_id == test_code_id
         assert self.snapshot.args.environment_def_path == test_environment_def_path
-        assert self.snapshot.args.config_filename == test_config_filename
         assert self.snapshot.args.config_filepath == test_config_filepath
-        assert self.snapshot.args.stats_filename == test_stats_filename
         assert self.snapshot.args.stats_filepath == test_stats_filepath
         assert self.snapshot.args.filepaths == test_filepaths
         assert self.snapshot.args.visible == test_visible
 
         snapshot_id_1 = self.snapshot.execute()
         assert snapshot_id_1
+
+        exception_thrown = False
+        try:
+            self.snapshot.parse([
+                "snapshot",
+                "create",
+                "--message", test_message,
+                "--label", test_label,
+                "--session-id", test_session_id,
+                "--task-id", test_task_id,
+                "--code-id", test_code_id,
+                "--environment-def-path", test_environment_def_path,
+                "--config-filename", test_config_filename,
+                "--config-filepath", test_config_filepath,
+                "--stats-filename", test_stats_filename,
+                "--stats-filepath", test_stats_filepath,
+                "--filepaths", test_filepaths[0],
+                "--not-visible"
+            ])
+
+            _ = self.snapshot.execute()
+        except MutuallyExclusiveArguments:
+            exception_thrown = True
+        assert exception_thrown
 
         # Test when optional parameters are not given
         self.snapshot.parse([

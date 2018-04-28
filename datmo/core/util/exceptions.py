@@ -84,3 +84,6 @@ class DatmoFolderInWorkTree(Exception):
 
 class InvalidArgumentType(Exception):
     pass
+
+class MutuallyExclusiveArguments(Exception):
+    pass

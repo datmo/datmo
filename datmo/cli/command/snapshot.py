@@ -3,6 +3,7 @@ from __future__ import print_function
 import prettytable
 
 from datmo.core.util.i18n import get as __
+from datmo.core.util.misc_functions import mutually_exclusive
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.snapshot import SnapshotController
 
@@ -62,34 +63,27 @@ class SnapshotCommand(ProjectCommand):
     def create(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.create"))
 
-        def mutually_exclusive(dictionary, mutually_exclusive_args):
-            for arg in mutually_exclusive_args:
-                if arg in kwargs and kwargs[arg]:
-                    snapshot_dict[arg] = kwargs[arg]
-                    break
-            return dictionary
-
         snapshot_dict = {}
 
         # Code
         mutually_exclusive_args = ["code_id", "commit_id"]
-        snapshot_dict = mutually_exclusive(snapshot_dict, mutually_exclusive_args)
+        mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
 
         # Environment
         mutually_exclusive_args = ["environment_id", "environment_definition_filepath"]
-        snapshot_dict = mutually_exclusive(snapshot_dict, mutually_exclusive_args)
+        mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
 
         # File
         mutually_exclusive_args = ["file_collection_id", "file_collection"]
-        snapshot_dict = mutually_exclusive(snapshot_dict, mutually_exclusive_args)
+        mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
 
         # Config
         mutually_exclusive_args = ["config_filepath", "config_filename"]
-        snapshot_dict = mutually_exclusive(snapshot_dict, mutually_exclusive_args)
+        mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
 
         # Stats
         mutually_exclusive_args = ["stats_filepath", "stats_filename"]
-        snapshot_dict = mutually_exclusive(snapshot_dict, mutually_exclusive_args)
+        mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
 
         optional_args = ["session_id", "task_id", "message", "label", "visible"]
 
