@@ -12,7 +12,6 @@ from __future__ import unicode_literals
 #     # Python 3
 #     import builtins as __builtin__
 import os
-import shutil
 import tempfile
 import platform
 from io import open
@@ -24,7 +23,8 @@ except NameError:
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
-from datmo.core.util.exceptions import ProjectNotInitializedException, MutuallyExclusiveArguments
+from datmo.core.util.exceptions import ProjectNotInitializedException, \
+    MutuallyExclusiveArguments
 
 
 class TestSnapshot():
@@ -88,12 +88,9 @@ class TestSnapshot():
         test_task_id = "test_task_id"
         test_code_id = "test_code_id"
         test_environment_def_path = self.env_def_path
-        test_config_filename = "config.json"
         test_config_filepath = self.config_filepath
-        test_stats_filename = "stats.json"
         test_stats_filepath = self.config_filepath
         test_filepaths = [self.filepath]
-        test_visible = False
 
         self.snapshot.parse([
             "snapshot",
@@ -107,7 +104,6 @@ class TestSnapshot():
             "--config-filepath", test_config_filepath,
             "--stats-filepath", test_stats_filepath,
             "--filepaths", test_filepaths[0],
-            "--not-visible"
         ])
 
         # test for desired side effects
@@ -120,10 +116,23 @@ class TestSnapshot():
         assert self.snapshot.args.config_filepath == test_config_filepath
         assert self.snapshot.args.stats_filepath == test_stats_filepath
         assert self.snapshot.args.filepaths == test_filepaths
-        assert self.snapshot.args.visible == test_visible
 
         snapshot_id_1 = self.snapshot.execute()
         assert snapshot_id_1
+
+    def test_datmo_snapshot_create_fail_mutually_exclusive_args(self):
+        self.__set_variables()
+        test_message = "this is a test message"
+        test_label = "test label"
+        test_session_id = "test_session_id"
+        test_task_id = "test_task_id"
+        test_code_id = "test_code_id"
+        test_environment_def_path = self.env_def_path
+        test_config_filename = "config.json"
+        test_config_filepath = self.config_filepath
+        test_stats_filename = "stats.json"
+        test_stats_filepath = self.config_filepath
+        test_filepaths = [self.filepath]
 
         exception_thrown = False
         try:
@@ -141,7 +150,6 @@ class TestSnapshot():
                 "--stats-filename", test_stats_filename,
                 "--stats-filepath", test_stats_filepath,
                 "--filepaths", test_filepaths[0],
-                "--not-visible"
             ])
 
             _ = self.snapshot.execute()
@@ -149,7 +157,8 @@ class TestSnapshot():
             exception_thrown = True
         assert exception_thrown
 
-        # Test when optional parameters are not given
+    def test_datmo_snapshot_create_default(self):
+        self.__set_variables()
         self.snapshot.parse([
             "snapshot",
             "create",

@@ -44,9 +44,6 @@ class SnapshotCommand(ProjectCommand):
         create.add_argument("--filepaths", dest="filepaths", default=None, nargs="*",
                             help="Absolute paths to files or folders to include within the files of the snapshot")
 
-        create.add_argument("--not-visible", dest="visible", action="store_false",
-                         help="Boolean if you want snapshot to not be visible")
-
         delete = subcommand_parsers.add_parser("delete", help="Delete a snapshot by id")
         delete.add_argument("--id", dest="id", help="snapshot id to delete")
 
@@ -85,7 +82,7 @@ class SnapshotCommand(ProjectCommand):
         mutually_exclusive_args = ["stats_filepath", "stats_filename"]
         mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
 
-        optional_args = ["session_id", "task_id", "message", "label", "visible"]
+        optional_args = ["session_id", "task_id", "message", "label"]
 
         for arg in optional_args:
             if arg in kwargs and kwargs[arg] is not None:

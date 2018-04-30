@@ -45,12 +45,12 @@ class TestMiscFunctions():
         assert dictionary
         assert dictionary['code_id'] == arguments_dictionary['code_id']
 
-        update_dictionary = False
+        update_dictionary_failed = False
         try:
             mutually_exclusive_args = ["code_id", "commit_id"]
             arguments_dictionary = {'code_id': 'test_code_id', 'commit_id': 'test_environment_id'}
             dictionary = {}
             mutually_exclusive(mutually_exclusive_args, arguments_dictionary, dictionary)
         except MutuallyExclusiveArguments:
-            update_dictionary = True
-        assert update_dictionary
+            update_dictionary_failed = True
+        assert update_dictionary_failed

@@ -11,8 +11,8 @@ except NameError:
 from glob import glob
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import MutuallyExclusiveArguments, PathDoesNotExist
-
+from datmo.core.util.exceptions import PathDoesNotExist, \
+    MutuallyExclusiveArguments
 
 
 def printable_dict(input_dictionary):
