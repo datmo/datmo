@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import shlex
+import platform
 import prettytable
 
 from datmo.core.util.i18n import get as __
@@ -52,7 +53,10 @@ class TaskCommand(ProjectCommand):
         }
 
         if not isinstance(kwargs['cmd'], list):
-            kwargs['cmd'] = shlex.split(kwargs['cmd'])
+            if platform.system() == "Windows":
+                kwargs['cmd'] = kwargs['cmd']
+            else:
+                kwargs['cmd'] = shlex.split(kwargs['cmd'])
 
         task_dict = {
             "gpu": kwargs['gpu'],
@@ -66,13 +70,13 @@ class TaskCommand(ProjectCommand):
 
         # Pass in the task
         try:
-            self.task_controller.run(task_obj.id, snapshot_dict=snapshot_dict)
+            updated_task_obj = self.task_controller.run(task_obj.id, snapshot_dict=snapshot_dict)
         except:
             self.cli_helper.echo(__("error",
                                     "cli.task.run",
                                     task_obj.id))
             return False
-        return task_obj.id
+        return updated_task_obj
 
     def ls(self, **kwargs):
         session_id = kwargs.get('session_id',

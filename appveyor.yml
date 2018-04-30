@@ -1,3 +1,5 @@
+image:
+- Visual Studio 2017
 environment:
   global:
     # SDK v7.0 MSVC Express 2008's SetEnv.cmd script will fail if the
@@ -35,8 +37,14 @@ init:
 install:
   - ps: '[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12'
   - ps: (new-object net.webclient).DownloadFile('https://bootstrap.pypa.io/get-pip.py', 'C:/get-pip.py')
+  - ps: '[Environment]::SetEnvironmentVariable("LCOW_SUPPORTED", "1", "Machine")'
+  - ps: 'Restart-Service Docker'
+  - git config --global user.email "dev@datmo.com"
+  - git config --global user.name "Datmo Devs"
   - "%PYTHON%/python.exe C:/get-pip.py"
+  - "%PYTHON%/python.exe -m pip install pip==9.0.3"
+  - "%PYTHON%/Scripts/pip.exe install pytest"
   - "%PYTHON%/python.exe setup.py install"
 test_script:
   - "%PYTHON%/Scripts/pip.exe --version"
-  - "%PYTHON%/Scripts/py.test"
+  - "%PYTHON%/Scripts/pytest "

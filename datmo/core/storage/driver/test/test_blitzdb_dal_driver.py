@@ -6,8 +6,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import shutil
 import tempfile
+import platform
 
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.util.exceptions import EntityNotFound
@@ -19,13 +19,13 @@ class TestBlitzDBDALDriverInit():
     """
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
+        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
 
     def teardown_class(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_file_db_init(self):
         database = BlitzDBDALDriver("file", self.temp_dir)
@@ -45,7 +45,7 @@ class TestBlitzDBDALDriver():
 
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
+        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -56,7 +56,7 @@ class TestBlitzDBDALDriver():
         self.database = BlitzDBDALDriver("file", self.temp_dir)
 
     def teardown_class(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_filebased_db(self):
         assert self.database != None
@@ -88,6 +88,12 @@ class TestBlitzDBDALDriver():
         results = self.database.query(self.collection, test_obj)
         assert len(results) == 1
 
+    def test_db_query_bool(self):
+        test_obj = {"bool": True}
+        result = self.database.set(self.collection, test_obj)
+        results = self.database.query(self.collection, test_obj)
+        assert result.get('id') == results[0].get('id')
+
     def test_db_exists(self):
         test_obj = {"foo": "bar_2"}
         result = self.database.set(self.collection, test_obj)
@@ -96,7 +102,7 @@ class TestBlitzDBDALDriver():
 
     def test_db_query_all(self):
         results = self.database.query(self.collection, {})
-        assert len(results) == 4
+        assert len(results) == 5
         # ensure each entity returns an 'id'
         for entity in results:
             assert entity['id'] != None

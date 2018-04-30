@@ -11,8 +11,9 @@ class Code():
     Parameters
     ----------
     dictionary : dict
-        id : str
+        id : str, optional
             the id of the entity
+            (default is None; storage driver has not assigned an id yet)
         model_id : str
             the parent model id for the entity
         driver_type : str
@@ -37,7 +38,7 @@ class Code():
 
     """
     def __init__(self, dictionary):
-        self.id = dictionary['id']
+        self.id = dictionary.get('id', None)
         self.model_id = dictionary['model_id']
         self.driver_type = dictionary['driver_type']
 

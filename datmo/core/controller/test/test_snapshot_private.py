@@ -2,8 +2,8 @@
 Tests for SnapshotController
 """
 import os
-import shutil
 import tempfile
+import platform
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
@@ -12,7 +12,7 @@ from datmo.core.controller.snapshot import SnapshotController
 class TestSnapshotController():
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
+        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -46,7 +46,7 @@ class TestSnapshotController():
             f.write(str("test"))
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_code_setup_with_code_id(self):
         val = 1

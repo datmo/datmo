@@ -11,7 +11,7 @@ except NameError:
 from glob import glob
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import DoesNotExistException
+from datmo.core.util.exceptions import PathDoesNotExist
 
 
 def printable_dict(input_dictionary):
@@ -59,9 +59,9 @@ def get_nvidia_devices():
 
 def get_filehash(filepath):
     if not os.path.isfile(filepath):
-        raise DoesNotExistException(__("error",
+        raise PathDoesNotExist(__("error",
                                       "util.misc_functions.get_filehash",
-                                      filepath))
+                                  filepath))
     BUFF_SIZE = 65536
     sha1 = hashlib.md5()
     with open(filepath, "rb") as f:

@@ -4,10 +4,12 @@ from datmo.core.controller.base import BaseController
 from datmo.core.controller.code.code import CodeController
 from datmo.core.controller.file.file_collection import FileCollectionController
 from datmo.core.controller.environment.environment import EnvironmentController
+from datmo.core.entity.snapshot import Snapshot
 from datmo.core.util.i18n import get as __
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import FileIOException, RequiredArgumentMissing, \
-    ProjectNotInitializedException, SessionDoesNotExistException, EntityNotFound
+    ProjectNotInitializedException, SessionDoesNotExistException, EntityNotFound, \
+    TaskNotComplete
 
 
 class SnapshotController(BaseController):
@@ -62,6 +64,7 @@ class SnapshotController(BaseController):
                     code reference associated with the snapshot; if not
                     provided will look to inputs below for code creation
                 commit_id : str, optional
+                    commit id provided by the user if already available
 
                 Default
                 -------
@@ -111,6 +114,7 @@ class SnapshotController(BaseController):
                     absolute filepath to stats parameters file
                 stats_filename : str, optional
                     name of file with metrics and statistics.
+
                 Default
                 -------
                 stats will be considered empty ({}) and saved to the snapshot
@@ -118,13 +122,13 @@ class SnapshotController(BaseController):
             for the remaining optional arguments it will search for them
             in the input dictionary
 
+                message : str
+                    long description of snapshot
                 session_id : str, optional
                     session id within which snapshot is created,
-                    will overwrite default
+                    will overwrite default if given
                 task_id : str, optional
                     task id associated with snapshot
-                message : str, optional
-                    long description of snapshot
                 label : str, optional
                     short description of snapshot
                 visible : bool, optional
@@ -145,8 +149,16 @@ class SnapshotController(BaseController):
         # Validate Inputs
         create_dict = {
             "model_id": self.model.id,
-            "session_id": self.current_session.id
+            "session_id": self.current_session.id,
         }
+
+        # Message must be present
+        if "message" in incoming_dictionary:
+            create_dict['message'] = incoming_dictionary['message']
+        else:
+            raise RequiredArgumentMissing(__("error",
+                                             "controller.snapshot.create.arg",
+                                             "message"))
 
         # Code setup
         self._code_setup(incoming_dictionary, create_dict)
@@ -175,13 +187,48 @@ class SnapshotController(BaseController):
         if results: return results[0]
 
         # Optional args for Snapshot entity
-        optional_args = ["session_id", "task_id", "message", "label", "visible"]
+        optional_args = ["task_id", "label", "visible"]
         for optional_arg in optional_args:
             if optional_arg in incoming_dictionary:
                 create_dict[optional_arg] = incoming_dictionary[optional_arg]
 
         # Create snapshot and return
-        return self.dal.snapshot.create(create_dict)
+        return self.dal.snapshot.create(Snapshot(create_dict))
+
+    def create_from_task(self, message, task_id):
+        """Create snapshot from a completed task.
+        # TODO: enable create from task DURING a run
+
+        Parameters
+        ----------
+        message : str
+            long description of snapshot
+        task_id : str
+            task object to use to create snapshot
+
+        Returns
+        -------
+        Snapshot
+            Snapshot object as specified in datmo.core.entity.snapshot
+
+        Raises
+        ------
+        TaskNotComplete
+            if task specified has not been completed
+        """
+        task_obj = self.dal.task.get_by_id(task_id)
+
+        if not task_obj.status and not task_obj.after_snapshot_id:
+            raise TaskNotComplete(__("error",
+                                     "controller.snapshot.create_from_task",
+                                     str(task_obj.id)))
+
+        return self.dal.snapshot.update({
+            "id": task_obj.after_snapshot_id,
+            "message": message,
+            "stats": task_obj.results,
+            "visible": True
+        })
 
     def checkout(self, snapshot_id):
         # Get snapshot object
@@ -204,7 +251,7 @@ class SnapshotController(BaseController):
                                              abs_dst_dirpath)
         return True
 
-    def list(self, session_id=None):
+    def list(self, session_id=None, visible=None):
         query = {}
         if session_id:
             try:
@@ -214,6 +261,9 @@ class SnapshotController(BaseController):
                                                       "controller.snapshot.list",
                                                       session_id))
             query['session_id'] = session_id
+        if visible is not None and isinstance(visible, bool):
+            query['visible'] = visible
+
         return self.dal.snapshot.query(query)
 
     def delete(self, snapshot_id):
@@ -238,7 +288,7 @@ class SnapshotController(BaseController):
         """
 
         if "code_id" in incoming_dictionary:
-            create_dict["code_id"] = incoming_dictionary["code_id"]
+            create_dict['code_id'] = incoming_dictionary['code_id']
         elif "commit_id" in incoming_dictionary:
             create_dict['code_id'] = self.code.\
                 create(commit_id=incoming_dictionary['commit_id']).id
@@ -258,7 +308,7 @@ class SnapshotController(BaseController):
 
         language = incoming_dictionary.get("language", None)
         if "environment_id" in incoming_dictionary:
-            create_dict["environment_id"] = incoming_dictionary["environment_id"]
+            create_dict['environment_id'] = incoming_dictionary['environment_id']
         elif "environment_definition_filepath" in incoming_dictionary:
             create_dict['environment_id'] = self.environment.create({
                 "definition_filepath": incoming_dictionary['environment_definition_filepath']
@@ -283,7 +333,7 @@ class SnapshotController(BaseController):
         """
 
         if "file_collection_id" in incoming_dictionary:
-            create_dict["file_collection_id"] = incoming_dictionary["file_collection_id"]
+            create_dict['file_collection_id'] = incoming_dictionary['file_collection_id']
         elif "filepaths" in incoming_dictionary:
             # transform file paths to file_collection_id
             create_dict['file_collection_id'] = self.file_collection.\
@@ -310,7 +360,7 @@ class SnapshotController(BaseController):
         FileIOException
         """
         if "config" in incoming_dictionary:
-            create_dict["config"] = incoming_dictionary["config"]
+            create_dict['config'] = incoming_dictionary['config']
         elif "config_filepath" in incoming_dictionary:
             if not os.path.isfile(incoming_dictionary['config_filepath']):
                 raise FileIOException(__("error",
@@ -344,7 +394,7 @@ class SnapshotController(BaseController):
         """
 
         if "stats" in incoming_dictionary:
-            create_dict["stats"] = incoming_dictionary["stats"]
+            create_dict['stats'] = incoming_dictionary['stats']
         elif "stats_filepath" in incoming_dictionary:
             if not os.path.isfile(incoming_dictionary['stats_filepath']):
                 raise FileIOException(__("error",
