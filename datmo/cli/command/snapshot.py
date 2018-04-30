@@ -17,31 +17,31 @@ class SnapshotCommand(ProjectCommand):
         subcommand_parsers = snapshot_parser.add_subparsers(title="subcommands", dest="subcommand")
 
         create = subcommand_parsers.add_parser("create", help="Create snapshot")
-        create.add_argument("--message", "-m", dest="message", default="", help="Message to describe snapshot")
-        create.add_argument("--label", "-l", dest="label", default="",
+        create.add_argument("--message", "-m", dest="message", default=None, help="Message to describe snapshot")
+        create.add_argument("--label", "-l", dest="label", default=None,
                             help="Label snapshots with a category (e.g. best)")
-        create.add_argument("--session-id", dest="session_id", default="", help="User given session id")
+        create.add_argument("--session-id", dest="session_id", default=None, help="User given session id")
 
-        create.add_argument("--task-id", dest="task_id", default="",
+        create.add_argument("--task-id", dest="task_id", default=None,
                             help="Specify task id to pull information from")
 
-        create.add_argument("--code-id", dest="code_id", default="",
+        create.add_argument("--code-id", dest="code_id", default=None,
                             help="User provided code id (e.g. git revision for git)")
 
-        create.add_argument("--environment-def-path", dest="environment_def_path", default="",
+        create.add_argument("--environment-def-path", dest="environment_def_path", default=None,
                             help="Absolute filepath to environment definition file (e.g. /path/to/Dockerfile)")
 
-        create.add_argument("--config-filename", dest="config_filename", default="",
+        create.add_argument("--config-filename", dest="config_filename", default=None,
                             help="Filename to use to search for configuration JSON")
-        create.add_argument("--config-filepath", dest="config_filepath", default="",
+        create.add_argument("--config-filepath", dest="config_filepath", default=None,
                             help="Absolute filepath to use to search for configuration JSON")
 
-        create.add_argument("--stats-filename", dest="stats_filename", default="",
+        create.add_argument("--stats-filename", dest="stats_filename", default=None,
                             help="Filename to use to search for metrics JSON")
-        create.add_argument("--stats-filepath", dest="stats_filepath", default="",
+        create.add_argument("--stats-filepath", dest="stats_filepath", default=None,
                             help="Absolute filepath to use to search for metrics JSON")
 
-        create.add_argument("--filepaths", dest="filepaths", default=[], nargs="*",
+        create.add_argument("--filepaths", dest="filepaths", default=None, nargs="*",
                             help="Absolute paths to files or folders to include within the files of the snapshot")
 
         create.add_argument("--not-visible", dest="visible", action="store_false",
@@ -88,7 +88,7 @@ class SnapshotCommand(ProjectCommand):
         optional_args = ["session_id", "task_id", "message", "label", "visible"]
 
         for arg in optional_args:
-            if arg in kwargs and kwargs[arg]:
+            if arg in kwargs and kwargs[arg] is not None:
                 snapshot_dict[arg] = kwargs[arg]
 
         snapshot_obj = self.snapshot_controller.create(snapshot_dict)

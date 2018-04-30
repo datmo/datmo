@@ -89,7 +89,7 @@ def create_unique_hash(base_hash=None, salt=None):
 def mutually_exclusive(mutually_exclusive_args, arguments_dictionary, dictionary):
     mutually_exclusive_arg_count = 0
     for arg in mutually_exclusive_args:
-        if arg in arguments_dictionary and arguments_dictionary[arg]:
+        if arg in arguments_dictionary and arguments_dictionary[arg] is not None:
             dictionary[arg] = arguments_dictionary[arg]
             mutually_exclusive_arg_count+=1
     if mutually_exclusive_arg_count>1:
