@@ -10,8 +10,9 @@ try:
 except NameError:
     to_unicode = str
 
-from datmo.snapshot import create, ls
+from datmo.snapshot import create, create_from_task, ls
 from datmo.snapshot import Snapshot
+from datmo.task import run
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.controller.project import ProjectController
 from datmo.core.util.exceptions import GitCommitDoesNotExist, \
@@ -103,6 +104,27 @@ class TestSnapshotModule():
         assert snapshot_obj_2.config == {}
         assert snapshot_obj_2.stats == {}
         assert snapshot_obj_2 != snapshot_obj_1
+
+    def test_create_from_task(self):
+        # 1) Test if success with task files, results, and message
+        # TODO: test for failure case where tasks is not complete
+
+        # Setup task
+
+        # Create environment definition
+        env_def_path = os.path.join(self.temp_dir,
+                                    "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        task_obj = run("sh -c echo accuracy:0.45", home=self.temp_dir)
+        snapshot_obj = create_from_task(message="my test snapshot",
+                                        task_id=task_obj.id,
+                                        home=self.temp_dir)
+
+        assert isinstance(snapshot_obj, Snapshot)
+        assert snapshot_obj.message == "my test snapshot"
+        assert snapshot_obj.stats == task_obj.results
 
     def test_ls(self):
         # check project is not initialized if wrong home

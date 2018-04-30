@@ -9,5 +9,6 @@ print(task.files())
 print(task.results)
 
 # create a snapshot from the task id directly, create from task that is best
-snapshot = datmo.snapshot.create(message="my great snapshot", task_id=task.id)
+snapshot = datmo.snapshot.create_from_task(message="my great snapshot",
+                                           task_id=task.id)
 

@@ -162,6 +162,42 @@ def create(message, label=None, commit_id=None, environment_id=None, filepaths=N
 
     return client_snapshot_obj
 
+def create_from_task(message, task_id, home=None):
+    """Create a snapshot within a project from a completed task
+
+    Parameters
+    ----------
+    message : str
+        a description of the snapshot for later reference
+    task_id : str
+        task object id to use to create snapshot
+
+    Returns
+    -------
+    Snapshot
+        returns a Snapshot entity as defined above
+
+    Examples
+    --------
+    You can use this function within a project repository to save snapshots
+    for later use. Once you have created this, you will be able to view the
+    snapshot with the `datmo snapshot ls` cli command
+
+    >>> import datmo
+    >>> datmo.snapshot.create_from_task(message="my first snapshot from task", task_id="1jfkshg049")
+    """
+    if not home:
+        home = os.getcwd()
+    snapshot_controller = SnapshotController(home=home)
+
+    # Create a new core snapshot object
+    core_snapshot_obj = snapshot_controller.create_from_task(message, task_id)
+
+    # Create a new snapshot object
+    client_snapshot_obj = Snapshot(core_snapshot_obj, home=home)
+
+    return client_snapshot_obj
+
 def ls(session_id=None, filter=None, home=None):
     """List snapshots within a project
 

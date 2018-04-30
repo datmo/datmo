@@ -7,7 +7,8 @@ from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.util.i18n import get as __
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import FileIOException, RequiredArgumentMissing, \
-    ProjectNotInitializedException, SessionDoesNotExistException, EntityNotFound
+    ProjectNotInitializedException, SessionDoesNotExistException, EntityNotFound, \
+    TaskNotComplete
 
 
 class SnapshotController(BaseController):
@@ -192,6 +193,41 @@ class SnapshotController(BaseController):
 
         # Create snapshot and return
         return self.dal.snapshot.create(create_dict)
+
+    def create_from_task(self, message, task_id):
+        """Create snapshot from a completed task.
+        # TODO: enable create from task DURING a run
+
+        Parameters
+        ----------
+        message : str
+            long description of snapshot
+        task_id : str
+            task object to use to create snapshot
+
+        Returns
+        -------
+        Snapshot
+            Snapshot object as specified in datmo.core.entity.snapshot
+
+        Raises
+        ------
+        TaskNotComplete
+            if task specified has not been completed
+        """
+        task_obj = self.dal.task.get_by_id(task_id)
+
+        if not task_obj.status and not task_obj.after_snapshot_id:
+            raise TaskNotComplete(__("error",
+                                     "controller.snapshot.create_from_task",
+                                     str(task_obj.id)))
+
+        return self.dal.snapshot.update({
+            "id": task_obj.after_snapshot_id,
+            "message": message,
+            "stats": task_obj.results,
+            "visible": True
+        })
 
     def checkout(self, snapshot_id):
         # Get snapshot object

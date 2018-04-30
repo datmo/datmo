@@ -12,9 +12,11 @@ except NameError:
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
+from datmo.core.controller.task import TaskController
 from datmo.core.util.exceptions import EntityNotFound, \
     EnvironmentDoesNotExist, GitCommitDoesNotExist, \
-    SessionDoesNotExistException, RequiredArgumentMissing
+    SessionDoesNotExistException, RequiredArgumentMissing, \
+    TaskNotComplete
 
 
 class TestSnapshotController():
@@ -26,6 +28,7 @@ class TestSnapshotController():
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.project = ProjectController(self.temp_dir)
         self.project.init("test", "test description")
+        self.task = TaskController(self.temp_dir)
         self.snapshot = SnapshotController(self.temp_dir)
 
     def teardown_method(self):
@@ -266,6 +269,46 @@ class TestSnapshotController():
 
         assert snapshot_obj_6.config == {"foo": "bar"}
         assert snapshot_obj_6.stats == {"foo": "bar"}
+
+    def test_create_from_task(self):
+        # 1) Test if fails with TaskNotComplete error
+        # 2) Test if success with task files, results, and message
+
+        # Setup task
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
+        input_dict = {
+            "command": task_command
+        }
+
+        # Create task in the project
+        task_obj = self.task.create(input_dict)
+
+        # 1) Test option 1
+        failed = False
+        try:
+            _ = self.snapshot.create_from_task(message="my test snapshot",
+                                               task_id=task_obj.id)
+        except TaskNotComplete:
+            failed = True
+        assert failed
+
+        # Create environment definition
+        env_def_path = os.path.join(self.project.home,
+                                    "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        # Test the default values
+        updated_task_obj = self.task.run(task_obj.id)
+
+        # 2) Test option 2
+        snapshot_obj = self.snapshot.create_from_task(message="my test snapshot",
+                                                      task_id=updated_task_obj.id)
+
+        assert snapshot_obj.id == updated_task_obj.after_snapshot_id
+        assert snapshot_obj.message == "my test snapshot"
+        assert snapshot_obj.stats == updated_task_obj.results
+        assert snapshot_obj.visible == True
 
     def __default_create(self):
         # Create files to add
