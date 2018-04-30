@@ -5,16 +5,18 @@ from datmo.core.entity.task import Task
 
 
 class TestTask():
-    def test_init(self):
-        input_dict = {
+    def setup_class(self):
+        self.input_dict = {
             "id": "test",
             "model_id": "my_model",
             "session_id": "my_session",
             "command": "python test.py"
         }
-        task_entity = Task(input_dict)
 
-        for k, v in input_dict.items():
+    def test_init(self):
+        task_entity = Task(self.input_dict)
+
+        for k, v in self.input_dict.items():
             assert getattr(task_entity, k) == v
         assert task_entity.before_snapshot_id == ""
         assert task_entity.ports == []
@@ -36,25 +38,13 @@ class TestTask():
         assert task_entity.updated_at
 
     def test_eq(self):
-        input_dict = {
-            "id": "test",
-            "model_id": "my_model",
-            "session_id": "my_session",
-            "command": "python test.py"
-        }
-        task_entity_1 = Task(input_dict)
-        task_entity_2 = Task(input_dict)
+        task_entity_1 = Task(self.input_dict)
+        task_entity_2 = Task(self.input_dict)
 
         assert task_entity_1 == task_entity_2
 
     def test_to_dictionary(self):
-        input_dict = {
-            "id": "test",
-            "model_id": "my_model",
-            "session_id": "my_session",
-            "command": "python test.py"
-        }
-        task_entity = Task(input_dict)
+        task_entity = Task(self.input_dict)
         output_dict = task_entity.to_dictionary()
 
         for k, v in output_dict.items():

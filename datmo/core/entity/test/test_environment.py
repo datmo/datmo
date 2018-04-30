@@ -5,8 +5,8 @@ from datmo.core.entity.environment import Environment
 
 
 class TestEnvironment():
-    def test_init(self):
-        input_dict = {
+    def setup_method(self):
+        self.input_dict = {
             "id": "test",
             "model_id": "my_model",
             "driver_type": "docker",
@@ -16,9 +16,11 @@ class TestEnvironment():
             "unique_hash": "sjfl39w",
             "language": "python3"
         }
-        environment_entity = Environment(input_dict)
 
-        for k, v in input_dict.items():
+    def test_init(self):
+        environment_entity = Environment(self.input_dict)
+
+        for k, v in self.input_dict.items():
             assert getattr(environment_entity, k) == v
         assert environment_entity.description == ""
         assert environment_entity.created_at
@@ -26,33 +28,13 @@ class TestEnvironment():
         assert environment_entity.language
 
     def test_eq(self):
-        input_dict = {
-            "id": "test",
-            "model_id": "my_model",
-            "driver_type": "docker",
-            "definition_filename": "Dockerfile",
-            "hardware_info": {"system": "test"},
-            "file_collection_id": "my_collection",
-            "unique_hash": "sjfl39w",
-            "language": "python3"
-        }
-        environment_entity_1 = Environment(input_dict)
-        environment_entity_2 = Environment(input_dict)
+        environment_entity_1 = Environment(self.input_dict)
+        environment_entity_2 = Environment(self.input_dict)
 
         assert environment_entity_1 == environment_entity_2
 
     def test_to_dictionary(self):
-        input_dict = {
-            "id": "test",
-            "model_id": "my_model",
-            "driver_type": "docker",
-            "definition_filename": "Dockerfile",
-            "hardware_info": {"system": "test"},
-            "file_collection_id": "my_collection",
-            "unique_hash": "sjfl39w",
-            "language": "python3"
-        }
-        environment_entity = Environment(input_dict)
+        environment_entity = Environment(self.input_dict)
         output_dict = environment_entity.to_dictionary()
 
         for k, v in output_dict.items():
