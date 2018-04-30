@@ -151,7 +151,7 @@ class TestTaskController():
         assert task_obj.id == updated_task_obj.id
 
         assert updated_task_obj.before_snapshot_id
-        assert updated_task_obj.ports == []
+        assert updated_task_obj.ports == None
         assert updated_task_obj.gpu == False
         assert updated_task_obj.interactive == False
         assert updated_task_obj.task_dirpath
@@ -162,7 +162,7 @@ class TestTaskController():
         assert updated_task_obj.run_id
         assert updated_task_obj.logs
         assert updated_task_obj.status == "SUCCESS"
-        assert updated_task_obj.results == {}
+        assert updated_task_obj.results == None
         assert updated_task_obj.end_time
         assert updated_task_obj.duration
 
@@ -187,7 +187,7 @@ class TestTaskController():
         try:
             self.task.run(task_obj.id,
                           snapshot_dict=snapshot_dict)
-        except EnvironmentExecutionException:
+        except TaskRunException:
             failed = True
         assert failed
 
@@ -219,7 +219,7 @@ class TestTaskController():
 
         assert task_obj_2.id == updated_task_obj_2.id
         assert updated_task_obj_2.before_snapshot_id
-        assert updated_task_obj_2.ports == []
+        assert updated_task_obj_2.ports == None
         assert updated_task_obj_2.gpu == False
         assert updated_task_obj_2.interactive == False
         assert updated_task_obj_2.task_dirpath
@@ -230,7 +230,7 @@ class TestTaskController():
         assert updated_task_obj_2.run_id
         assert updated_task_obj_2.logs
         assert updated_task_obj_2.status == "SUCCESS"
-        assert updated_task_obj_2.results == {}
+        assert updated_task_obj_2.results == None
         assert updated_task_obj_2.end_time
         assert updated_task_obj_2.duration
 

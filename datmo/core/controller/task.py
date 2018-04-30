@@ -172,7 +172,7 @@ class TaskController(BaseController):
         # Obtain Task to run
         task_obj = self.dal.task.get_by_id(task_id)
 
-        if task_obj.status != 'RUNNING':
+        if task_obj.status==None:
             task_obj.status = 'RUNNING'
         else:
             raise TaskRunException(__("error",
@@ -217,7 +217,7 @@ class TaskController(BaseController):
         # Set the parameters set in the task
         environment_run_options = {
             "command": task_obj.command,
-            "ports": task_obj.ports,
+            "ports": [] if task_obj.ports is None else task_obj.ports,
             "gpu": task_obj.gpu,
             "name": "datmo-task-" + task_obj.id,
             "volumes": {
