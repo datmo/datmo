@@ -8,8 +8,7 @@ import tempfile
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.session import SessionController
 from datmo.core.util.exceptions import EntityNotFound, \
-    DoesNotExistException, GitCommitDoesNotExist, \
-    SessionDoesNotExistException
+    GitCommitDoesNotExist, SessionDoesNotExistException
 
 class TestSessionController():
     def setup_method(self):
