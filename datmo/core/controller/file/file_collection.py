@@ -1,6 +1,6 @@
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
-from datmo.core.util.exceptions import DoesNotExistException
+from datmo.core.util.exceptions import PathDoesNotExist
 
 
 class FileCollectionController(BaseController):
@@ -89,14 +89,14 @@ class FileCollectionController(BaseController):
 
         Raises
         ------
-        DoesNotExistException
+        PathDoesNotExist
             if the specified FileCollection does not exist.
         """
         file_collection_obj = self.dal.file_collection.get_by_id(file_collection_id)
         if not file_collection_obj:
-            raise DoesNotExistException(__("error",
+            raise PathDoesNotExist(__("error",
                                            "controller.file_collection.delete",
-                                           file_collection_id))
+                                      file_collection_id))
         # Remove file collection files
         delete_file_collection_success = self.file_driver.delete_collection(file_collection_obj.filehash)
         # Delete FileCollection

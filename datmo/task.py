@@ -7,12 +7,12 @@ from datmo.core.util.exceptions import InvalidArgumentType
 
 
 class Task():
-    """Task is an entity object to represent the task object for user
+    """Task is an entity object to enable user access to properties
 
     Parameters
     ----------
     task_entity : datmo.core.entity.task.Task
-        core task entity to emulate
+        core task entity to reference
     home : str, optional
         root directory of the project
         (default is CWD, if not provided)
@@ -147,13 +147,13 @@ def run(command, env=None, home=None):
         task_dict["command"] = shlex.split(command)
 
     # Create the task object
-    task_obj = task_controller.create(task_dict)
+    core_task_obj = task_controller.create(task_dict)
 
     # Pass in the task
-    updated_task_obj = task_controller.run(task_obj.id, snapshot_dict=snapshot_dict)
+    updated_core_task_obj = task_controller.run(core_task_obj.id, snapshot_dict=snapshot_dict)
 
     # Create a new task object for the
-    client_task_obj = Task(updated_task_obj, home=home)
+    client_task_obj = Task(updated_core_task_obj, home=home)
 
     return client_task_obj
 

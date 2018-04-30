@@ -1,6 +1,6 @@
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
-from datmo.core.util.exceptions import DoesNotExistException
+from datmo.core.util.exceptions import PathDoesNotExist
 
 
 class CodeController(BaseController):
@@ -90,14 +90,14 @@ class CodeController(BaseController):
 
         Raises
         ------
-        DoesNotExistException
+        PathDoesNotExist
             if the specified Code does not exist.
         """
         code_obj = self.dal.code.get_by_id(code_id)
         if not code_obj:
-            raise DoesNotExistException(__("error",
+            raise PathDoesNotExist(__("error",
                                            "controller.code.delete",
-                                           code_id))
+                                      code_id))
         # Remove code reference
         delete_code_success = self.code_driver.delete_ref(code_obj.commit_id)
         # Delete code object

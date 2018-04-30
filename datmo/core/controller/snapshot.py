@@ -120,13 +120,13 @@ class SnapshotController(BaseController):
             for the remaining optional arguments it will search for them
             in the input dictionary
 
+                message : str
+                    long description of snapshot
                 session_id : str, optional
                     session id within which snapshot is created,
-                    will overwrite default
+                    will overwrite default if given
                 task_id : str, optional
                     task id associated with snapshot
-                message : str, optional
-                    long description of snapshot
                 label : str, optional
                     short description of snapshot
                 visible : bool, optional
@@ -147,8 +147,16 @@ class SnapshotController(BaseController):
         # Validate Inputs
         create_dict = {
             "model_id": self.model.id,
-            "session_id": self.current_session.id
+            "session_id": self.current_session.id,
         }
+
+        # Message must be present
+        if "message" in incoming_dictionary:
+            create_dict['message'] = incoming_dictionary['message']
+        else:
+            raise RequiredArgumentMissing(__("error",
+                                             "controller.snapshot.create.arg",
+                                             "message"))
 
         # Code setup
         self._code_setup(incoming_dictionary, create_dict)
@@ -177,7 +185,7 @@ class SnapshotController(BaseController):
         if results: return results[0]
 
         # Optional args for Snapshot entity
-        optional_args = ["session_id", "task_id", "message", "label", "visible"]
+        optional_args = ["task_id", "label", "visible"]
         for optional_arg in optional_args:
             if optional_arg in incoming_dictionary:
                 create_dict[optional_arg] = incoming_dictionary[optional_arg]
@@ -240,7 +248,7 @@ class SnapshotController(BaseController):
         """
 
         if "code_id" in incoming_dictionary:
-            create_dict["code_id"] = incoming_dictionary["code_id"]
+            create_dict['code_id'] = incoming_dictionary['code_id']
         elif "commit_id" in incoming_dictionary:
             create_dict['code_id'] = self.code.\
                 create(commit_id=incoming_dictionary['commit_id']).id
@@ -260,7 +268,7 @@ class SnapshotController(BaseController):
 
         language = incoming_dictionary.get("language", None)
         if "environment_id" in incoming_dictionary:
-            create_dict["environment_id"] = incoming_dictionary["environment_id"]
+            create_dict['environment_id'] = incoming_dictionary['environment_id']
         elif "environment_definition_filepath" in incoming_dictionary:
             create_dict['environment_id'] = self.environment.create({
                 "definition_filepath": incoming_dictionary['environment_definition_filepath']
@@ -285,7 +293,7 @@ class SnapshotController(BaseController):
         """
 
         if "file_collection_id" in incoming_dictionary:
-            create_dict["file_collection_id"] = incoming_dictionary["file_collection_id"]
+            create_dict['file_collection_id'] = incoming_dictionary['file_collection_id']
         elif "filepaths" in incoming_dictionary:
             # transform file paths to file_collection_id
             create_dict['file_collection_id'] = self.file_collection.\
@@ -312,7 +320,7 @@ class SnapshotController(BaseController):
         FileIOException
         """
         if "config" in incoming_dictionary:
-            create_dict["config"] = incoming_dictionary["config"]
+            create_dict['config'] = incoming_dictionary['config']
         elif "config_filepath" in incoming_dictionary:
             if not os.path.isfile(incoming_dictionary['config_filepath']):
                 raise FileIOException(__("error",
@@ -346,7 +354,7 @@ class SnapshotController(BaseController):
         """
 
         if "stats" in incoming_dictionary:
-            create_dict["stats"] = incoming_dictionary["stats"]
+            create_dict['stats'] = incoming_dictionary['stats']
         elif "stats_filepath" in incoming_dictionary:
             if not os.path.isfile(incoming_dictionary['stats_filepath']):
                 raise FileIOException(__("error",

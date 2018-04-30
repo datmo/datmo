@@ -14,7 +14,7 @@ from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import \
     EnvironmentController
 from datmo.core.util.exceptions import EntityNotFound, \
-    DoesNotExistException
+    PathDoesNotExist, EnvironmentDoesNotExist
 
 
 class TestEnvironmentController():
@@ -31,6 +31,7 @@ class TestEnvironmentController():
         shutil.rmtree(self.temp_dir)
 
     def test_create(self):
+        # 0) Test create when unsupported language given
         # 1) Test create when NO file exists and NO definition path exists
         # 2) Test create when NO file exists and definition path exists
         # 3) Test create when definition path exists and given
@@ -40,11 +41,20 @@ class TestEnvironmentController():
 
         self.project.init("test3", "test description")
 
+        # 0) Test option 0
+        try:
+            self.environment.create({
+                "language": "java"
+            })
+        except EnvironmentDoesNotExist:
+            failed = True
+        assert failed
+
         # 1) Test option 1
         failed = False
         try:
             self.environment.create({})
-        except DoesNotExistException:
+        except EnvironmentDoesNotExist:
             failed = True
         assert failed
 

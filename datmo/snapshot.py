@@ -1,7 +1,84 @@
 import os
 
 from datmo.core.controller.snapshot import SnapshotController
+from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
+from datmo.core.util.exceptions import InvalidArgumentType
 
+
+class Snapshot():
+    """Snapshot is an entity object to enable user access to properties
+
+    Parameters
+    ----------
+    snapshot_entity : datmo.core.entity.snapshot.Snapshot
+        core snapshot entity to reference
+    home : str, optional
+        root directory of the project
+        (default is CWD, if not provided)
+
+    Attributes
+    ----------
+    id : str
+        the id of the entity
+    model_id : str
+        the parent model id for the entity
+    session_id : str
+        id of session associated with task
+    id : str
+        the id of the entity
+    model_id : str
+        the parent model id for the entity
+    session_id : str
+        session id within which snapshot is created
+    message : str
+        long description of snapshot
+    code_id : str
+        code reference associated with the snapshot
+    environment_id : str
+        id for environment used to create snapshot
+    file_collection_id : str
+        file collection associated with the snapshot
+    config : dict
+        key, value pairs of configurations
+    stats : dict
+        key, value pairs of metrics and statistics
+    task_id : str
+        task id associated with snapshot
+    label : str
+        short description of snapshot
+    created_at : datetime.datetime
+
+    Raises
+    ------
+    InvalidArgumentType
+    """
+    def __init__(self, snapshot_entity, home=None):
+        if not home:
+            home = os.getcwd()
+
+        if not isinstance(snapshot_entity, CoreSnapshot):
+            raise InvalidArgumentType()
+
+        self._core_snapshot = snapshot_entity
+        self._home = home
+
+        self.id = self._core_snapshot.id
+        self.model_id = self._core_snapshot.model_id
+        self.session_id = self._core_snapshot.session_id
+        self.message = self._core_snapshot.message
+
+        self.code_id = self._core_snapshot.code_id
+        self.environment_id = self._core_snapshot.environment_id
+        self.file_collection_id = self._core_snapshot.file_collection_id
+        self.config = self._core_snapshot.config
+        self.stats = self._core_snapshot.stats
+
+        self.task_id = self._core_snapshot.task_id
+        self.label = self._core_snapshot.label
+        self.created_at = self._core_snapshot.created_at
+
+    def __eq__(self, other):
+        return self.id == other.id if other else False
 
 def create(message, label=None, commit_id=None, environment_id=None, filepaths=None,
            config=None, stats=None, home=None):
@@ -42,7 +119,7 @@ def create(message, label=None, commit_id=None, environment_id=None, filepaths=N
     Returns
     -------
     Snapshot
-        returns a snapshot entity (as defined in datmo.core.entity.snapshot)
+        returns a Snapshot entity as defined above
 
     Examples
     --------
@@ -77,7 +154,13 @@ def create(message, label=None, commit_id=None, environment_id=None, filepaths=N
     if label:
         snapshot_create_dict['label'] = label
 
-    return snapshot_controller.create(snapshot_create_dict)
+    # Create a new core snapshot object
+    core_snapshot_obj = snapshot_controller.create(snapshot_create_dict)
+
+    # Create a new snapshot object
+    client_snapshot_obj = Snapshot(core_snapshot_obj, home=home)
+
+    return client_snapshot_obj
 
 def ls(session_id=None, filter=None, home=None):
     """List snapshots within a project
@@ -103,7 +186,7 @@ def ls(session_id=None, filter=None, home=None):
     Returns
     -------
     list
-        returns a list of Snapshot entities (as defined in datmo.core.entity.snapshot)
+        returns a list of Snapshot entities (as defined above)
 
     Examples
     --------
@@ -120,19 +203,20 @@ def ls(session_id=None, filter=None, home=None):
     if not session_id:
         session_id = snapshot_controller.current_session.id
 
-    snapshot_objs = snapshot_controller.list(session_id)
+    core_snapshot_objs = snapshot_controller.list(session_id)
 
     # Filtering Snapshots
     # TODO: move to list function in SnapshotController
     # Add in preliminary snapshots if no filter
-    filtered_snapshot_objs = [snapshot_obj for snapshot_obj in snapshot_objs
-                              if snapshot_obj.visible and not filter]
+    filtered_core_snapshot_objs = [core_snapshot_obj for core_snapshot_obj in core_snapshot_objs
+                                    if core_snapshot_obj.visible and not filter]
     # If filter is present then use it and only add those that pass filter
-    for snapshot_obj in snapshot_objs:
-        if snapshot_obj.visible:
-            if filter and (filter in snapshot_obj.message
-                             or filter in snapshot_obj.label):
-                filtered_snapshot_objs.append(snapshot_obj)
+    for core_snapshot_obj in core_snapshot_objs:
+        if core_snapshot_obj.visible:
+            if filter and (filter in core_snapshot_obj.message
+                             or filter in core_snapshot_obj.label):
+                filtered_core_snapshot_objs.append(core_snapshot_obj)
 
     # Return Snapshot entities
-    return filtered_snapshot_objs
+    return [Snapshot(filtered_core_snapshot_obj, home=home)
+            for filtered_core_snapshot_obj in filtered_core_snapshot_objs]
