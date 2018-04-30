@@ -148,7 +148,7 @@ class EntityMethodsCRUD(object):
         if hasattr(datmo_entity,'to_dictionary'):
             dict_obj = datmo_entity.to_dictionary()
         else:
-            dict_obj = datmo_entity
+            dict_obj = datmo_entity.copy()
             # set created_at if not present
             dict_obj['created_at'] = dict_obj.get('created_at',
                                                   datetime.now()).utcnow()
