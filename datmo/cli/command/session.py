@@ -53,8 +53,8 @@ class SessionCommand(ProjectCommand):
         header_list = ["name", "selected", "tasks", "snapshots"]
         t = prettytable.PrettyTable(header_list)
         for sess in sessions:
-            snapshot_count = len(self.session_controller.dal.snapshot.query({"session_id": sess.id}))
-            task_count = len(self.session_controller.dal.task.query({"session_id": sess.id}))
+            snapshot_count = len(self.session_controller.dal.snapshot.query({"session_id": sess.id, "model_id": self.session_controller.model.id }))
+            task_count = len(self.session_controller.dal.task.query({"session_id": sess.id, "model_id": self.session_controller.model.id }))
             t.add_row([sess.name, sess.current, task_count, snapshot_count])
 
         self.cli_helper.echo(t)

@@ -62,7 +62,8 @@ class CodeController(BaseController):
                         self.code_driver.create_ref()
                 # If code object with commit id exists, return it
                 results = self.dal.code.query({
-                    "commit_id": create_dict[required_arg]
+                    "commit_id": create_dict[required_arg],
+                    "model_id": self.model.id
                 })
                 if results: return results[0];
             else:
@@ -73,7 +74,7 @@ class CodeController(BaseController):
 
     def list(self):
         # TODO: Add time filters
-        return self.dal.code.query({})
+        return self.dal.code.query({"model_id": self.model.id })
 
     def delete(self, code_id):
         """Delete all traces of Code object
