@@ -24,8 +24,9 @@ class Snapshot():
     Parameters
     ----------
     dictionary : dict
-        id : str
+        id : str, optional
             the id of the entity
+            (default is None; storage driver has not assigned an id yet)
         model_id : str
             the parent model id for the entity
         session_id : str
@@ -83,7 +84,7 @@ class Snapshot():
     updated_at : datetime.datetime
     """
     def __init__(self, dictionary):
-        self.id = dictionary['id']
+        self.id = dictionary.get('id', None)
         self.model_id = dictionary['model_id']
         self.session_id = dictionary['session_id']
         self.message = dictionary['message']

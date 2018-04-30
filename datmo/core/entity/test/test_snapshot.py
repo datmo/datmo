@@ -7,7 +7,6 @@ from datmo.core.entity.snapshot import Snapshot
 class TestSnapshot():
     def setup_class(self):
         self.input_dict = {
-            "id": "test",
             "model_id": "my_model",
             "session_id": "my_session",
             "message": "my message",
@@ -22,7 +21,20 @@ class TestSnapshot():
             }
         }
 
-    def test_init(self):
+    def test_init_no_id(self):
+        snapshot_entity = Snapshot(self.input_dict)
+
+        for k, v in self.input_dict.items():
+            assert getattr(snapshot_entity, k) == v
+        assert snapshot_entity.id == None
+        assert snapshot_entity.task_id == ""
+        assert snapshot_entity.label == ""
+        assert snapshot_entity.visible == True
+        assert snapshot_entity.created_at
+        assert snapshot_entity.updated_at
+
+    def test_init_with_id(self):
+        self.input_dict['id'] = "test"
         snapshot_entity = Snapshot(self.input_dict)
 
         for k, v in self.input_dict.items():

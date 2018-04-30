@@ -412,6 +412,15 @@ class TestSnapshotController():
                snapshot_obj_1 in result and \
                snapshot_obj_2 in result
 
+        # List snapshots with visible filter
+        result = self.snapshot.list(visible=False)
+        assert len(result) == 0
+
+        result = self.snapshot.list(visible=True)
+        assert len(result) == 2 and \
+               snapshot_obj_1 in result and \
+               snapshot_obj_2 in result
+
     def test_delete(self):
         # Create snapshot in the project
         snapshot_obj = self.__default_create()

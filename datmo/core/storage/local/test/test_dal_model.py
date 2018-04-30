@@ -11,6 +11,7 @@ import tempfile
 
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
+from datmo.core.entity.model import Model
 from datmo.core.util.exceptions import EntityNotFound
 
 
@@ -31,22 +32,22 @@ class TestLocalDAL():
         shutil.rmtree(self.temp_dir)
 
     def test_create_model_by_dictionary(self):
-        model = self.dal.model.create(self.model_input_dict)
+        model = self.dal.model.create(Model(self.model_input_dict))
         assert model.id
         assert model.name == self.model_input_dict['name']
         assert model.created_at
         assert model.updated_at
 
-        model_2 = self.dal.model.create(self.model_input_dict)
+        model_2 = self.dal.model.create(Model(self.model_input_dict))
         assert model.id != model_2.id
 
         test_model_input_dict = self.model_input_dict.copy()
         test_model_input_dict['id'] = "cool"
-        model_3 = self.dal.model.create(test_model_input_dict)
+        model_3 = self.dal.model.create(Model(test_model_input_dict))
         assert model_3.id == test_model_input_dict['id']
 
     def test_get_by_id_model(self):
-        model = self.dal.model.create(self.model_input_dict)
+        model = self.dal.model.create(Model(self.model_input_dict))
         result = self.dal.model.get_by_id(model.id)
         assert model.id == result.id
 
@@ -54,17 +55,17 @@ class TestLocalDAL():
         test_dir = "test-dir"
         datadriver = BlitzDBDALDriver("file", test_dir)
         dal = LocalDAL(datadriver)
-        model1 = dal.model.create(self.model_input_dict)
+        model1 = dal.model.create(Model(self.model_input_dict))
         del datadriver
         del dal
         datadriver = BlitzDBDALDriver("file", test_dir)
         dal = LocalDAL(datadriver)
-        model2 = dal.model.create(self.model_input_dict)
+        model2 = dal.model.create(Model(self.model_input_dict))
         del datadriver
         del dal
         datadriver = BlitzDBDALDriver("file", test_dir)
         dal = LocalDAL(datadriver)
-        model3 = dal.model.create(self.model_input_dict)
+        model3 = dal.model.create(Model(self.model_input_dict))
 
         model1 = dal.model.get_by_id(model1.id)
         model2 = dal.model.get_by_id(model2.id)
@@ -77,7 +78,7 @@ class TestLocalDAL():
         shutil.rmtree(test_dir)
 
     def test_get_by_id_model_new_driver_instance(self):
-        model = self.dal.model.create(self.model_input_dict)
+        model = self.dal.model.create(Model(self.model_input_dict))
         # create new dal with new driver instance (success)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
         new_dal_instance = LocalDAL(new_driver_instance)
@@ -89,7 +90,7 @@ class TestLocalDAL():
         assert new_model_2.id == model.id
 
     def test_update_model(self):
-        model = self.dal.model.create(self.model_input_dict)
+        model = self.dal.model.create(Model(self.model_input_dict))
 
         # Update required and optional parameters
         updated_model_input_dict = self.model_input_dict.copy()
@@ -103,7 +104,7 @@ class TestLocalDAL():
         assert updated_model.description == updated_model_input_dict['description']
 
     def test_delete_model(self):
-        model = self.dal.model.create(self.model_input_dict)
+        model = self.dal.model.create(Model(self.model_input_dict))
 
         self.dal.model.delete(model.id)
 
@@ -115,6 +116,6 @@ class TestLocalDAL():
         assert deleted
 
     def test_query_models(self):
-        model = self.dal.model.create(self.model_input_dict)
+        model = self.dal.model.create(Model(self.model_input_dict))
         assert len(self.dal.model.query({"id": model.id})) == 1
         assert len(self.dal.model.query({"name": self.model_input_dict['name']})) == 6

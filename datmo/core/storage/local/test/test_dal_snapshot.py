@@ -11,6 +11,9 @@ import tempfile
 
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
+from datmo.core.entity.model import Model
+from datmo.core.entity.session import Session
+from datmo.core.entity.snapshot import Snapshot
 from datmo.core.util.exceptions import EntityNotFound
 
 
@@ -25,12 +28,12 @@ class TestLocalDAL():
 
         self.dal = LocalDAL(self.datadriver)
         model_name = "model_1"
-        model = self.dal.model.create({"name": model_name})
+        model = self.dal.model.create(Model({"name": model_name}))
         session_name = "session_1"
-        session = self.dal.session.create({
+        session = self.dal.session.create(Session({
             "name": session_name,
             "model_id": model.id
-        })
+        }))
 
         self.snapshot_input_dict = {
             "model_id": model.id,
@@ -47,7 +50,7 @@ class TestLocalDAL():
         shutil.rmtree(self.temp_dir)
 
     def test_create_snapshot_by_dictionary(self):
-        snapshot = self.dal.snapshot.create(self.snapshot_input_dict)
+        snapshot = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
         assert snapshot.id
         assert snapshot.model_id == self.snapshot_input_dict['model_id']
         assert snapshot.session_id == self.snapshot_input_dict['session_id']
@@ -60,24 +63,24 @@ class TestLocalDAL():
         assert snapshot.created_at
         assert snapshot.updated_at
 
-        snapshot_2 = self.dal.snapshot.create(self.snapshot_input_dict)
+        snapshot_2 = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
 
         assert snapshot_2.id != snapshot.id
 
         test_snapshot_input_dict = self.snapshot_input_dict.copy()
         test_snapshot_input_dict['id'] = "snapshot_id"
-        snapshot_3 = self.dal.snapshot.create(test_snapshot_input_dict)
+        snapshot_3 = self.dal.snapshot.create(Snapshot(test_snapshot_input_dict))
 
         assert snapshot_3.id == test_snapshot_input_dict['id']
 
     def test_get_by_id_snapshot(self):
-        snapshot = self.dal.snapshot.create(self.snapshot_input_dict)
+        snapshot = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
 
         result = self.dal.snapshot.get_by_id(snapshot.id)
         assert snapshot.id == result.id
 
     def test_get_by_id_snapshot_new_driver_instance(self):
-        snapshot = self.dal.snapshot.create(self.snapshot_input_dict)
+        snapshot = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
 
         # create new dal with new driver instance (fails)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
@@ -90,7 +93,7 @@ class TestLocalDAL():
         assert new_snapshot_2.id == snapshot.id
 
     def test_update_snapshot(self):
-        snapshot = self.dal.snapshot.create(self.snapshot_input_dict)
+        snapshot = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
 
         # Update required and optional parameters
         updated_snapshot_input_dict = self.snapshot_input_dict.copy()
@@ -105,7 +108,7 @@ class TestLocalDAL():
         assert updated_snapshot.label == updated_snapshot_input_dict['label']
 
     def test_delete_snapshot(self):
-        snapshot = self.dal.snapshot.create(self.snapshot_input_dict)
+        snapshot = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
 
         self.dal.snapshot.delete(snapshot.id)
         deleted = False
@@ -116,8 +119,9 @@ class TestLocalDAL():
         assert deleted
 
     def test_query_snapshots(self):
-        snapshot = self.dal.snapshot.create(self.snapshot_input_dict)
+        snapshot = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
 
         # All snapshots created are the same, 1 is deleted => 7
         assert len(self.dal.snapshot.query({"id": snapshot.id})) == 1
         assert len(self.dal.snapshot.query({"code_id": self.snapshot_input_dict['code_id']})) == 7
+        assert len(self.dal.snapshot.query({"visible": True})) == 7

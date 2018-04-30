@@ -12,6 +12,8 @@ from datetime import datetime
 
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
+from datmo.core.entity.model import Model
+from datmo.core.entity.environment import Environment
 from datmo.core.util.exceptions import EntityNotFound
 
 
@@ -26,7 +28,7 @@ class TestLocalDAL():
 
         self.dal = LocalDAL(self.datadriver)
         model_name = "model_1"
-        model = self.dal.model.create({"name": model_name})
+        model = self.dal.model.create(Model({"name": model_name}))
 
         self.environment_input_dict = {
             "model_id": model.id,
@@ -44,7 +46,7 @@ class TestLocalDAL():
     # TODO: Add tests for other variables once figured out.
 
     def test_create_environment_by_dictionary(self):
-        environment = self.dal.environment.create(self.environment_input_dict)
+        environment = self.dal.environment.create(Environment(self.environment_input_dict))
 
         assert environment.id
         assert environment.driver_type == self.environment_input_dict['driver_type']
@@ -56,24 +58,24 @@ class TestLocalDAL():
         assert environment.created_at
         assert environment.updated_at
 
-        environment_2 = self.dal.environment.create(self.environment_input_dict)
+        environment_2 = self.dal.environment.create(Environment(self.environment_input_dict))
 
         assert environment_2.id != environment.id
 
         test_environment_input_dict = self.environment_input_dict.copy()
         test_environment_input_dict['id'] = "environment_id"
-        environment_3 = self.dal.environment.create(test_environment_input_dict)
+        environment_3 = self.dal.environment.create(Environment(test_environment_input_dict))
 
         assert environment_3.id == test_environment_input_dict['id']
 
     def test_get_by_id_environment(self):
-        environment = self.dal.environment.create(self.environment_input_dict)
+        environment = self.dal.environment.create(Environment(self.environment_input_dict))
 
         result = self.dal.environment.get_by_id(environment.id)
         assert environment.id == result.id
 
     def test_get_by_id_environment_new_driver_instance(self):
-        environment = self.dal.environment.create(self.environment_input_dict)
+        environment = self.dal.environment.create(Environment(self.environment_input_dict))
 
         # create new dal with new driver instance (success)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
@@ -86,7 +88,7 @@ class TestLocalDAL():
         assert new_environment_2.id == environment.id
 
     def test_update_environment(self):
-        environment = self.dal.environment.create(self.environment_input_dict)
+        environment = self.dal.environment.create(Environment(self.environment_input_dict))
 
         # Update required and optional parameters
         updated_environment_input_dict = self.environment_input_dict.copy()
@@ -100,7 +102,7 @@ class TestLocalDAL():
         assert updated_environment.created_at == updated_environment_input_dict['created_at']
 
     def test_delete_environment(self):
-        environment = self.dal.environment.create(self.environment_input_dict)
+        environment = self.dal.environment.create(Environment(self.environment_input_dict))
 
         self.dal.environment.delete(environment.id)
         deleted = False
@@ -111,6 +113,6 @@ class TestLocalDAL():
         assert deleted
 
     def test_query_environments(self):
-        environment = self.dal.environment.create(self.environment_input_dict)
+        environment = self.dal.environment.create(Environment(self.environment_input_dict))
 
         assert len(self.dal.environment.query({"id": environment.id})) == 1

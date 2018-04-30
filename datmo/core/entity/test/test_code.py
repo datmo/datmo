@@ -7,15 +7,23 @@ from datmo.core.entity.code import Code
 class TestCode():
     def setup_class(self):
         self.input_dict = {
-            "id": "test",
             "model_id": "my_model",
             "driver_type": "git",
             "commit_id": "mycommit"
         }
 
-    def test_init(self):
+    def test_init_no_id(self):
         code_entity = Code(self.input_dict)
 
+        for k, v in self.input_dict.items():
+            assert getattr(code_entity, k) == v
+        assert code_entity.id == None
+        assert code_entity.created_at
+        assert code_entity.updated_at
+
+    def test_init_with_id(self):
+        self.input_dict['id'] = "test"
+        code_entity = Code(self.input_dict)
         for k, v in self.input_dict.items():
             assert getattr(code_entity, k) == v
         assert code_entity.created_at

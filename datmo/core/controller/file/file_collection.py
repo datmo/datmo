@@ -1,5 +1,6 @@
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
+from datmo.core.entity.file_collection import FileCollection
 from datmo.core.util.exceptions import PathDoesNotExist
 
 
@@ -68,7 +69,7 @@ class FileCollectionController(BaseController):
                 raise NotImplementedError()
 
         # Create file collection and return
-        return self.dal.file_collection.create(create_dict)
+        return self.dal.file_collection.create(FileCollection(create_dict))
 
     def list(self):
         # TODO: Add time filters

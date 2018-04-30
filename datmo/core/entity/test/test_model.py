@@ -7,11 +7,21 @@ from datmo.core.entity.model import Model
 class TestModel():
     def setup_class(self):
         self.input_dict = {
-            "id": "test",
             "name": "test"
         }
 
-    def test_init(self):
+    def test_init_no_id(self):
+        model_entity = Model(self.input_dict)
+
+        for k, v in self.input_dict.items():
+            assert getattr(model_entity, k) == v
+        assert model_entity.id == None
+        assert model_entity.description == ""
+        assert model_entity.created_at
+        assert model_entity.updated_at
+
+    def test_init_with_id(self):
+        self.input_dict['id'] = "test"
         model_entity = Model(self.input_dict)
 
         for k, v in self.input_dict.items():

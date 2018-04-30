@@ -4,6 +4,7 @@ import platform
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
 from datmo.core.controller.file.file_collection import FileCollectionController
+from datmo.core.entity.environment import Environment
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import PathDoesNotExist
 
@@ -160,7 +161,7 @@ class EnvironmentController(BaseController):
 
 
         # Create environment and return
-        return self.dal.environment.create(create_dict)
+        return self.dal.environment.create(Environment(create_dict))
 
     def build(self, environment_id):
         """Build Environment from definition file

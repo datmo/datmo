@@ -12,7 +12,9 @@ from datetime import datetime
 
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
-from datmo.core.util.exceptions import EntityNotFound, EntityCollectionNotFound
+from datmo.core.entity.model import Model
+from datmo.core.entity.code import Code
+from datmo.core.util.exceptions import EntityNotFound
 
 
 class TestLocalDAL():
@@ -26,7 +28,7 @@ class TestLocalDAL():
 
         self.dal = LocalDAL(self.datadriver)
         model_name = "model_1"
-        model = self.dal.model.create({"name": model_name})
+        model = self.dal.model.create(Model({"name": model_name}))
 
         self.code_input_dict = {
             "model_id": model.id,
@@ -39,7 +41,7 @@ class TestLocalDAL():
 
     def test_create_code_by_dictionary(self):
 
-        code = self.dal.code.create(self.code_input_dict)
+        code = self.dal.code.create(Code(self.code_input_dict))
 
         assert code.id
         assert code.model_id == self.code_input_dict['model_id']
@@ -48,23 +50,23 @@ class TestLocalDAL():
         assert code.created_at
         assert code.updated_at
 
-        code_2 = self.dal.code.create(self.code_input_dict)
+        code_2 = self.dal.code.create(Code(self.code_input_dict))
 
         assert code_2.id != code.id
 
         test_code_input_dict = self.code_input_dict.copy()
         test_code_input_dict['id'] = "id_1"
-        code_3 = self.dal.code.create(test_code_input_dict)
+        code_3 = self.dal.code.create(Code(test_code_input_dict))
 
         assert code_3.id == test_code_input_dict['id']
 
     def test_get_by_id_code(self):
-        code = self.dal.code.create(self.code_input_dict)
+        code = self.dal.code.create(Code(self.code_input_dict))
         result = self.dal.code.get_by_id(code.id)
         assert code.id == result.id
 
     def test_get_by_id_code_new_driver_instance(self):
-        code = self.dal.code.create(self.code_input_dict)
+        code = self.dal.code.create(Code(self.code_input_dict))
 
         # create new dal with new driver instance (success)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
@@ -77,7 +79,7 @@ class TestLocalDAL():
         assert new_code_2.id == code.id
 
     def test_update_code(self):
-        code = self.dal.code.create(self.code_input_dict)
+        code = self.dal.code.create(Code(self.code_input_dict))
 
         # Update required and optional parameters
         updated_code_input_dict = self.code_input_dict.copy()
@@ -91,7 +93,7 @@ class TestLocalDAL():
         assert updated_code.created_at == updated_code_input_dict['created_at']
 
     def test_delete_code(self):
-        code = self.dal.code.create(self.code_input_dict)
+        code = self.dal.code.create(Code(self.code_input_dict))
 
         self.dal.code.delete(code.id)
         deleted = False
@@ -102,6 +104,6 @@ class TestLocalDAL():
         assert deleted
 
     def test_query_codes(self):
-        code = self.dal.code.create(self.code_input_dict)
+        code = self.dal.code.create(Code(self.code_input_dict))
 
         assert len(self.dal.code.query({"id": code.id})) == 1

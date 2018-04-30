@@ -4,6 +4,7 @@ from datmo.core.controller.base import BaseController
 from datmo.core.controller.code.code import CodeController
 from datmo.core.controller.file.file_collection import FileCollectionController
 from datmo.core.controller.environment.environment import EnvironmentController
+from datmo.core.entity.snapshot import Snapshot
 from datmo.core.util.i18n import get as __
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import FileIOException, RequiredArgumentMissing, \
@@ -192,7 +193,7 @@ class SnapshotController(BaseController):
                 create_dict[optional_arg] = incoming_dictionary[optional_arg]
 
         # Create snapshot and return
-        return self.dal.snapshot.create(create_dict)
+        return self.dal.snapshot.create(Snapshot(create_dict))
 
     def create_from_task(self, message, task_id):
         """Create snapshot from a completed task.
@@ -250,7 +251,7 @@ class SnapshotController(BaseController):
                                              abs_dst_dirpath)
         return True
 
-    def list(self, session_id=None):
+    def list(self, session_id=None, visible=None):
         query = {}
         if session_id:
             try:
@@ -260,6 +261,9 @@ class SnapshotController(BaseController):
                                                       "controller.snapshot.list",
                                                       session_id))
             query['session_id'] = session_id
+        if visible is not None and isinstance(visible, bool):
+            query['visible'] = visible
+
         return self.dal.snapshot.query(query)
 
     def delete(self, snapshot_id):

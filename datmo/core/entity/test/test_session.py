@@ -7,12 +7,20 @@ from datmo.core.entity.session import Session
 class TestSession():
     def setup_class(self):
         self.input_dict = {
-            "id": "test",
             "model_id": "my_model",
             "name": "test"
         }
 
-    def test_init(self):
+    def test_init_no_id(self):
+        session_entity = Session(self.input_dict)
+
+        for k, v in self.input_dict.items():
+            assert getattr(session_entity, k) == v
+        assert session_entity.id == None
+        assert session_entity.created_at
+        assert session_entity.updated_at
+
+    def test_init_with_id(self):
         session_entity = Session(self.input_dict)
 
         for k, v in self.input_dict.items():

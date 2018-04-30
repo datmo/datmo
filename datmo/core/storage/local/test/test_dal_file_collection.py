@@ -12,6 +12,8 @@ from datetime import datetime
 
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
+from datmo.core.entity.model import Model
+from datmo.core.entity.file_collection import FileCollection
 from datmo.core.util.exceptions import EntityNotFound
 
 
@@ -26,7 +28,7 @@ class TestLocalDAL():
 
         self.dal = LocalDAL(self.datadriver)
         model_name = "model_1"
-        model = self.dal.model.create({"name": model_name})
+        model = self.dal.model.create(Model({"name": model_name}))
 
         self.file_collection_input_dict = {
             "model_id": model.id,
@@ -40,7 +42,7 @@ class TestLocalDAL():
 
     def test_create_file_collection_by_dictionary(self):
 
-        file_collection = self.dal.file_collection.create(self.file_collection_input_dict)
+        file_collection = self.dal.file_collection.create(FileCollection(self.file_collection_input_dict))
 
         assert file_collection.id
         assert file_collection.model_id == self.file_collection_input_dict['model_id']
@@ -50,24 +52,24 @@ class TestLocalDAL():
         assert file_collection.created_at
         assert file_collection.updated_at
 
-        file_collection_2 = self.dal.file_collection.create(self.file_collection_input_dict)
+        file_collection_2 = self.dal.file_collection.create(FileCollection(self.file_collection_input_dict))
 
         assert file_collection_2.id != file_collection.id
 
         test_file_collection_input_dict = self.file_collection_input_dict.copy()
         test_file_collection_input_dict['id'] = "file_collection_id"
-        file_collection_3 = self.dal.file_collection.create(test_file_collection_input_dict)
+        file_collection_3 = self.dal.file_collection.create(FileCollection(test_file_collection_input_dict))
 
         assert file_collection_3.id == test_file_collection_input_dict['id']
 
     def test_get_by_id_file_collection(self):
-        file_collection = self.dal.file_collection.create(self.file_collection_input_dict)
+        file_collection = self.dal.file_collection.create(FileCollection(self.file_collection_input_dict))
 
         result = self.dal.file_collection.get_by_id(file_collection.id)
         assert file_collection.id == result.id
 
     def test_get_by_id_file_collection_new_driver_instance(self):
-        file_collection = self.dal.file_collection.create(self.file_collection_input_dict)
+        file_collection = self.dal.file_collection.create(FileCollection(self.file_collection_input_dict))
 
         # create new dal with new driver instance (success)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
@@ -80,7 +82,7 @@ class TestLocalDAL():
         assert new_file_collection_2.id == file_collection.id
 
     def test_update_file_collection(self):
-        file_collection = self.dal.file_collection.create(self.file_collection_input_dict)
+        file_collection = self.dal.file_collection.create(FileCollection(self.file_collection_input_dict))
 
         # Update required and optional parameters
         updated_file_collection_input_dict = self.file_collection_input_dict.copy()
@@ -94,7 +96,7 @@ class TestLocalDAL():
         assert updated_file_collection.created_at == updated_file_collection_input_dict['created_at']
 
     def test_delete_file_collection(self):
-        file_collection = self.dal.file_collection.create(self.file_collection_input_dict)
+        file_collection = self.dal.file_collection.create(FileCollection(self.file_collection_input_dict))
 
         self.dal.file_collection.delete(file_collection.id)
         deleted = False
@@ -105,6 +107,6 @@ class TestLocalDAL():
         assert deleted
 
     def test_query_file_collections(self):
-        file_collection = self.dal.file_collection.create(self.file_collection_input_dict)
+        file_collection = self.dal.file_collection.create(FileCollection(self.file_collection_input_dict))
 
         assert len(self.dal.file_collection.query({"id": file_collection.id})) == 1

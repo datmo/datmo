@@ -5,6 +5,7 @@ from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.snapshot import SnapshotController
+from datmo.core.entity.task import Task
 from datmo.core.util.exceptions import TaskRunException, RequiredArgumentMissing, \
     ProjectNotInitializedException, PathDoesNotExist
 
@@ -81,7 +82,7 @@ class TaskController(BaseController):
                                                  required_arg))
 
         # Create Task
-        return self.dal.task.create(create_dict)
+        return self.dal.task.create(Task(create_dict))
 
     def _run_helper(self, environment_id, options, log_filepath):
         """Run environment with parameters

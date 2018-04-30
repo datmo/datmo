@@ -239,7 +239,7 @@ def ls(session_id=None, filter=None, home=None):
     if not session_id:
         session_id = snapshot_controller.current_session.id
 
-    core_snapshot_objs = snapshot_controller.list(session_id)
+    core_snapshot_objs = snapshot_controller.list(session_id, visible=True)
 
     # Filtering Snapshots
     # TODO: move to list function in SnapshotController

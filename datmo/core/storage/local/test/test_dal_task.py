@@ -12,7 +12,10 @@ from datetime import datetime
 
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
-from datmo.core.util.exceptions import EntityNotFound, EntityCollectionNotFound
+from datmo.core.entity.model import Model
+from datmo.core.entity.session import Session
+from datmo.core.entity.task import Task
+from datmo.core.util.exceptions import EntityNotFound
 
 
 class TestLocalDAL():
@@ -26,12 +29,12 @@ class TestLocalDAL():
 
         self.dal = LocalDAL(self.datadriver)
         model_name = "model_1"
-        model = self.dal.model.create({"name": model_name})
+        model = self.dal.model.create(Model({"name": model_name}))
         session_name = "session_1"
-        session = self.dal.session.create({
+        session = self.dal.session.create(Session({
             "name": session_name,
             "model_id": model.id
-        })
+        }))
 
         self.task_input_dict = {
             "model_id": model.id,
@@ -47,7 +50,7 @@ class TestLocalDAL():
 
     def test_create_task_by_dictionary(self):
 
-        task = self.dal.task.create(self.task_input_dict)
+        task = self.dal.task.create(Task(self.task_input_dict))
 
         assert task.id
         assert task.command == self.task_input_dict['command']
@@ -63,7 +66,7 @@ class TestLocalDAL():
         test_task_input_dict['end_time'] = None
         test_task_input_dict['duration'] = None
 
-        task_2 = self.dal.task.create(test_task_input_dict)
+        task_2 = self.dal.task.create(Task(test_task_input_dict))
 
         assert task_2.id != task.id
         assert not task_2.start_time
@@ -72,12 +75,12 @@ class TestLocalDAL():
 
         test_task_input_dict_1 = self.task_input_dict.copy()
         test_task_input_dict_1['id'] = "task_id"
-        task_3 = self.dal.task.create(test_task_input_dict_1)
+        task_3 = self.dal.task.create(Task(test_task_input_dict_1))
 
         assert task_3.id == test_task_input_dict_1['id']
 
     def test_get_by_id_task(self):
-        task = self.dal.task.create(self.task_input_dict)
+        task = self.dal.task.create(Task(self.task_input_dict))
         result = self.dal.task.get_by_id(task.id)
         assert task.id == result.id
         assert task.model_id == result.model_id
@@ -88,7 +91,7 @@ class TestLocalDAL():
         assert task.duration == result.duration
 
     def test_get_by_id_task_new_driver_instance(self):
-        task = self.dal.task.create(self.task_input_dict)
+        task = self.dal.task.create(Task(self.task_input_dict))
 
         # create new dal with new driver instance (success)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
@@ -101,7 +104,7 @@ class TestLocalDAL():
         assert new_task_2.id == task.id
 
     def test_update_task(self):
-        task = self.dal.task.create(self.task_input_dict)
+        task = self.dal.task.create(Task(self.task_input_dict))
 
         # Update required and optional parameters
         updated_task_input_dict = self.task_input_dict.copy()
@@ -116,7 +119,7 @@ class TestLocalDAL():
         assert updated_task.ports == updated_task_input_dict['ports']
 
     def test_delete_task(self):
-        task = self.dal.task.create(self.task_input_dict)
+        task = self.dal.task.create(Task(self.task_input_dict))
 
         self.dal.task.delete(task.id)
         deleted = False
@@ -127,7 +130,7 @@ class TestLocalDAL():
         assert deleted
 
     def test_query_tasks(self):
-        task = self.dal.task.create(self.task_input_dict)
+        task = self.dal.task.create(Task(self.task_input_dict))
 
         assert len(self.dal.task.query({"id": task.id})) == 1
         assert len(self.dal.task.query({"command": self.task_input_dict['command']})) == 6
