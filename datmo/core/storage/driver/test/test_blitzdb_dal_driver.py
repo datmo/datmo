@@ -6,9 +6,9 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import shutil
 import tempfile
 import datetime
+import platform
 
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.util.exceptions import EntityNotFound
@@ -20,13 +20,13 @@ class TestBlitzDBDALDriverInit():
     """
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
+        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
 
     def teardown_class(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_file_db_init(self):
         database = BlitzDBDALDriver("file", self.temp_dir)
@@ -46,7 +46,7 @@ class TestBlitzDBDALDriver():
 
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
+        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -57,7 +57,7 @@ class TestBlitzDBDALDriver():
         self.database = BlitzDBDALDriver("file", self.temp_dir)
 
     def teardown_class(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_filebased_db(self):
         assert self.database != None

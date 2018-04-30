@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import shlex
+import platform
 import prettytable
 
 from datmo.core.util.i18n import get as __
@@ -52,15 +53,11 @@ class TaskCommand(ProjectCommand):
                 kwargs['environment_definition_filepath']
         }
 
-        # if not isinstance(kwargs['cmd'], list):
-        #     kwargs['cmd'] = shlex.split(kwargs['cmd'])
-
-        cmd = kwargs.get('cmd')
-        if cmd == None:
-            raise RequiredArgumentMissing('cmd')
-
-        if type(cmd) is not list:
-            cmd = shlex.split(cmd)
+        if not isinstance(kwargs['cmd'], list):
+            if platform.system() == "Windows":
+                kwargs['cmd'] = kwargs['cmd']
+            else:
+                kwargs['cmd'] = shlex.split(kwargs['cmd'])
 
         task_dict = {
             "gpu": kwargs['gpu'],

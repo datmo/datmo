@@ -6,6 +6,7 @@ python:
 - '3.6'
 sudo: required
 install:
+- pip install pip==9.0.3
 - pip install pytest pytest-cov
 - pip install coveralls
 - python setup.py install

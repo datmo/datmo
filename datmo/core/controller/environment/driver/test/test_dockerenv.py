@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 
 import os
 import tempfile
-import shutil
+import platform
 import uuid
 from io import open
 try:
@@ -28,13 +28,13 @@ class TestDockerEnv():
     """
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
+        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        # Test the default parameters
         self.docker_environment_manager = \
-            DockerEnvironmentDriver(self.temp_dir, 'docker',
-                                     'unix:///var/run/docker.sock')
+            DockerEnvironmentDriver(self.temp_dir)
         self.init_result = self.docker_environment_manager.init()
         random_text = str(uuid.uuid1())
         with open(os.path.join(self.temp_dir, "Dockerfile"),
@@ -43,7 +43,7 @@ class TestDockerEnv():
             f.write(to_unicode(str("RUN echo " + random_text)))
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_instantiation_and_connected(self):
         assert self.docker_environment_manager.is_connected
@@ -52,7 +52,7 @@ class TestDockerEnv():
     def test_instantiation_not_connected(self):
         thrown = False
         try:
-            DockerEnvironmentDriver(self.temp_dir, 'docker', 'unix:///var/run/fooo')
+            DockerEnvironmentDriver(self.temp_dir, docker_socket="unix:///var/run/fooo")
         except EnvironmentInitFailed:
             thrown = True
         assert thrown
@@ -73,6 +73,7 @@ class TestDockerEnv():
         assert output_path == output_dockerfile_path
         assert requirements_filepath == None
 
+        open(output_dockerfile_path, "r").close()
         os.remove(output_dockerfile_path)
 
         # Test default values for output
@@ -86,6 +87,7 @@ class TestDockerEnv():
         assert output_path == output_dockerfile_path
         assert requirements_filepath == None
 
+        open(output_dockerfile_path, "r").close()
         os.remove(output_dockerfile_path)
 
         # Test both values given
@@ -101,6 +103,7 @@ class TestDockerEnv():
 
         # Test for language being passed in
         os.remove(input_dockerfile_path)
+        open(output_dockerfile_path, "r").close()
         os.remove(output_dockerfile_path)
 
         script_path = os.path.join(self.docker_environment_manager.filepath,
@@ -120,6 +123,7 @@ class TestDockerEnv():
 
         # Test exception for path does not exist
         os.remove(input_dockerfile_path)
+        open(output_dockerfile_path, "r").close()
         os.remove(output_dockerfile_path)
         success, path, output_path, requirements_filepath =\
             self.docker_environment_manager.create()

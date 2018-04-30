@@ -4,8 +4,8 @@ Tests for TaskController
 import os
 import random
 import string
-import shutil
 import tempfile
+import platform
 from io import open, TextIOWrapper
 try:
     to_unicode = unicode
@@ -22,7 +22,7 @@ from datmo.core.util.exceptions import EntityNotFound, \
 class TestTaskController():
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
+        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -32,7 +32,7 @@ class TestTaskController():
         self.task = TaskController(self.temp_dir)
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_create(self):
         task_command = ["sh", "-c", "echo accuracy:0.45"]

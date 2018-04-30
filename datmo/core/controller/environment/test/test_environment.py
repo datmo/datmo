@@ -2,8 +2,8 @@
 Tests for EnvironmentController
 """
 import os
-import shutil
 import tempfile
+import platform
 from io import open
 try:
     to_unicode = unicode
@@ -20,7 +20,7 @@ from datmo.core.util.exceptions import EntityNotFound, \
 class TestEnvironmentController():
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
+        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -28,7 +28,7 @@ class TestEnvironmentController():
         self.environment = EnvironmentController(self.temp_dir)
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_create(self):
         # 0) Test create when unsupported language given

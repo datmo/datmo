@@ -204,8 +204,7 @@ class BaseController(object):
                 "class_constructor": "datmo.core.controller.environment.driver.dockerenv.DockerEnvironmentDriver",
                 "options": {
                     "filepath": self.home,
-                    "docker_execpath": "docker",
-                    "docker_socket": "unix:///var/run/docker.sock"
+                    "docker_execpath": "docker"
                 }
             },
             "storage.local": {

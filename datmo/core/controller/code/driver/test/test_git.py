@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
+import platform
 from io import open
 try:
     to_unicode = unicode
@@ -26,14 +27,14 @@ class TestGitCodeDriver():
     """
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
+        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.git_code_manager = GitCodeDriver(filepath=self.temp_dir, execpath="git")
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_instantiation(self):
         assert self.git_code_manager != None
@@ -133,14 +134,13 @@ class TestGitCodeDriver():
     def test_clone(self):
         result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git", mode="https")
         assert result and os.path.exists(os.path.join(self.temp_dir, "hello-world",".git"))
-        shutil.rmtree(os.path.join(self.temp_dir, "hello-world"))
-        result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git", mode="http")
-        assert result and os.path.exists(os.path.join(self.temp_dir, "hello-world", ".git"))
-        shutil.rmtree(os.path.join(self.temp_dir, "hello-world"))
+        result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git",
+                                             repo_name="hello-world-2", mode="http")
+        assert result and os.path.exists(os.path.join(self.temp_dir, "hello-world-2", ".git"))
         if self.git_code_manager.git_host_manager.ssh_enabled:
-            result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git", mode="ssh")
-            assert result and os.path.exists(os.path.join(self.temp_dir, "hello-world", ".git"))
-            shutil.rmtree(os.path.join(self.temp_dir, "hello-world"))
+            result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git",
+                                                 repo_name="hello-world-3", mode="ssh")
+            assert result and os.path.exists(os.path.join(self.temp_dir, "hello-world-3", ".git"))
 
     def test_parse_git_url(self):
         parsed = self.git_code_manager._parse_git_url("https://github.com/datmo/hello-world.git", mode="ssh")
