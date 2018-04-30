@@ -166,6 +166,7 @@ class SnapshotController(BaseController):
         # If snapshot object with required args already exists, return it
         # DO NOT create a new snapshot with the same required arguments
         results = self.dal.snapshot.query({
+            "model_id": create_dict["model_id"],
             "code_id": create_dict['code_id'],
             "environment_id": create_dict['environment_id'],
             "file_collection_id": create_dict['file_collection_id'],
