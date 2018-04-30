@@ -2,8 +2,8 @@
 Tests for task module
 """
 import os
-import shutil
 import tempfile
+import platform
 from io import open, TextIOWrapper
 try:
     to_unicode = unicode
@@ -21,7 +21,7 @@ from datmo.core.util.exceptions import GitCommitDoesNotExist, \
 class TestTaskModule():
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp"
+        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -29,7 +29,7 @@ class TestTaskModule():
             init("test", "test description")
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_task_entity_instantiate(self):
         input_dict = {
@@ -51,7 +51,12 @@ class TestTaskModule():
         assert task_entity.results == {}
 
     def test_run(self):
-        # Try task run with no commit (cannot save states before)
+        # 1) Run task with no commit or code available (cannot save states before), string command
+        # 2) Run task with simple python file, no environment definition, string command (auto generate env)
+        # 3) Run task with simple python file and environment definition, string command
+        # 4) Run task with simple python file and environment definition, list command
+
+        # 1) Test out option 1)
         failed = False
         try:
             _ = run(command="test", home=self.temp_dir)
@@ -65,24 +70,37 @@ class TestTaskModule():
         with open(test_filepath, "w") as f:
             f.write(to_unicode("import numpy\n"))
             f.write(to_unicode("import sklearn\n"))
-            f.write(to_unicode("print 'hello'\n"))
+            f.write(to_unicode("print('hello')\n"))
+            f.write(to_unicode("print(' accuracy: 0.56 ')\n"))
 
+        # 2) Test out option 2
+        task_obj_0 = run(command="python script.py",
+                         home=self.temp_dir)
+        assert isinstance(task_obj_0, Task)
+        assert task_obj_0.id
+        assert 'hello' in task_obj_0.logs
+        assert task_obj_0.results == {"accuracy": "0.56"}
+
+        # Add environment definition
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu"))
 
+        # 3) Test out option 3
         task_obj_1 = run(command="python script.py", env=test_filepath,
                          home=self.temp_dir)
         assert isinstance(task_obj_1, Task)
         assert task_obj_1.id
         assert 'hello' in task_obj_1.logs
+        assert task_obj_1.results == {"accuracy": "0.56"}
 
-        # Run task with list as command
+        # 4) Test out option 4
         task_obj_2 = run(command=["python", "script.py"], env=test_filepath,
                          home=self.temp_dir)
         assert isinstance(task_obj_2, Task)
         assert task_obj_2.id
         assert 'hello' in task_obj_2.logs
+        assert task_obj_2.results == {"accuracy": "0.56"}
 
     def test_task_entity_files(self):
         input_dict = {

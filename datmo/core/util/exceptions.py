@@ -55,7 +55,13 @@ class FileExecutionException(Exception):
 class FileAlreadyExistsException(Exception):
     pass
 
-class DoesNotExistException(FileExecutionException):
+class DoesNotExist(Exception):
+    pass
+
+class EnvironmentDoesNotExist(DoesNotExist):
+    pass
+
+class PathDoesNotExist(FileExecutionException):
     pass
 
 class FileIOException(FileExecutionException):
@@ -86,4 +92,7 @@ class InvalidArgumentType(Exception):
     pass
 
 class MutuallyExclusiveArguments(Exception):
+    pass
+
+class TaskNotComplete(ArgumentException):
     pass

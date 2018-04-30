@@ -11,8 +11,9 @@ class User():
     Parameters
     ----------
     dictionary : dict
-        id : str
+        id : str, optional
             the id of the entity
+            (default is None; storage driver has not assigned an id yet)
         name : str
             the name of the user
         email : str
@@ -32,7 +33,7 @@ class User():
     updated_at : datetime.datetime
     """
     def __init__(self, dictionary):
-        self.id = dictionary['id']
+        self.id = dictionary.get('id', None)
         self.name = dictionary['name']
         self.email = dictionary['email']
 

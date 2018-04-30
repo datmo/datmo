@@ -10,7 +10,7 @@ except NameError:
 from giturlparse import parse
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import DoesNotExistException,\
+from datmo.core.util.exceptions import PathDoesNotExist,\
     GitUrlArgumentException, GitExecutionException, \
     FileIOException, GitCommitDoesNotExist, \
     DatmoFolderInWorkTree
@@ -29,9 +29,9 @@ class GitCodeDriver(CodeDriver):
         self.filepath = filepath
         # Check if filepath exists
         if not os.path.exists(self.filepath):
-            raise DoesNotExistException(__("error",
+            raise PathDoesNotExist(__("error",
                                            "controller.code.driver.git.__init__.dne",
-                                           filepath))
+                                      filepath))
         self.execpath = execpath
         # Check the execpath and the version
         try:
@@ -45,7 +45,8 @@ class GitCodeDriver(CodeDriver):
                 raise GitExecutionException(__("error",
                                                "controller.code.driver.git.__init__.giterror",
                                                 err))
-            if not semver.match(str(out.split()[2]), ">=1.9.7"):
+            version = str(out.split()[2].split(".windows")[0])
+            if not semver.match(version, ">=1.9.7"):
                 raise GitExecutionException(__("error",
                                                "controller.code.driver.git.__init__.gitversion",
                                                out.split()[2]))

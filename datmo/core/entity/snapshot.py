@@ -24,10 +24,15 @@ class Snapshot():
     Parameters
     ----------
     dictionary : dict
-        id : str
+        id : str, optional
             the id of the entity
+            (default is None; storage driver has not assigned an id yet)
         model_id : str
             the parent model id for the entity
+        session_id : str
+            session id within which snapshot is created
+        message : str
+            long description of snapshot
         code_id : str
             code reference associated with the snapshot
         environment_id : str
@@ -38,12 +43,8 @@ class Snapshot():
             key, value pairs of configurations
         stats : dict
             key, value pairs of metrics and statistics
-        session_id : str, optional
-            session id within which snapshot is created
         task_id : str, optional
             task id associated with snapshot
-        message : str, optional
-            long description of snapshot
         label : str, optional
             short description of snapshot
         visible : bool, optional
@@ -58,6 +59,10 @@ class Snapshot():
         the id of the entity
     model_id : str
         the parent model id for the entity
+    session_id : str
+        session id within which snapshot is created
+    message : str
+        long description of snapshot
     code_id : str
         code reference associated with the snapshot
     environment_id : str
@@ -68,12 +73,8 @@ class Snapshot():
         key, value pairs of configurations
     stats : dict
         key, value pairs of metrics and statistics
-    session_id : str
-        session id within which snapshot is created
     task_id : str
         task id associated with snapshot
-    message : str
-        long description of snapshot
     label : str
         short description of snapshot
     visible : bool
@@ -83,8 +84,10 @@ class Snapshot():
     updated_at : datetime.datetime
     """
     def __init__(self, dictionary):
-        self.id = dictionary['id']
+        self.id = dictionary.get('id', None)
         self.model_id = dictionary['model_id']
+        self.session_id = dictionary['session_id']
+        self.message = dictionary['message']
 
         self.code_id = dictionary['code_id']
         self.environment_id = dictionary['environment_id']
@@ -92,10 +95,7 @@ class Snapshot():
         self.config = dictionary['config']
         self.stats = dictionary['stats']
 
-        self.session_id = dictionary.get('session_id', "")
         self.task_id = dictionary.get('task_id', "")
-
-        self.message = dictionary.get('message', "")
         self.label = dictionary.get('label', "")
         self.visible = dictionary.get('visible', True)
 

@@ -11,8 +11,9 @@ class Model():
     Parameters
     ----------
     dictionary : dict
-        id : str
+        id : str, optional
             the id of the entity
+            (default is None; storage driver has not assigned an id yet)
         name : str
             name given by the user at creation
         description : str, optional
@@ -32,7 +33,7 @@ class Model():
     updated_at : datetime.datetime
     """
     def __init__(self, dictionary):
-        self.id = dictionary['id']
+        self.id = dictionary.get('id', None)
         self.name = dictionary['name']
         # TODO: figure out User object and handling of owner in Project
         # self.owner_id = dictionary['owner_id']
