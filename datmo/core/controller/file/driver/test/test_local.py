@@ -11,7 +11,7 @@ import tempfile
 from io import TextIOWrapper
 
 from datmo.core.controller.file.driver.local import LocalFileDriver
-from datmo.core.util.exceptions import DoesNotExistException
+from datmo.core.util.exceptions import PathDoesNotExist
 
 
 class TestLocalFileManager():
@@ -114,7 +114,7 @@ class TestLocalFileManager():
         failed = False
         try:
             self.local_file_driver.get(temp_relative_filepath)
-        except DoesNotExistException:
+        except PathDoesNotExist:
             failed = True
         assert failed
         # Test success with default mode

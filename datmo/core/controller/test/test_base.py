@@ -10,6 +10,8 @@ import tempfile
 
 from datmo.core.controller.base import BaseController
 from datmo.core.controller.code.driver.git import GitCodeDriver
+from datmo.core.entity.model import Model
+from datmo.core.entity.session import Session
 from datmo.core.util.exceptions import  \
     DatmoModelNotInitializedException, InvalidProjectPathException
 
@@ -42,10 +44,10 @@ class TestBaseController():
         assert self.base.model == None
 
         # Test success case
-        self.base.dal.model.create({
+        self.base.dal.model.create(Model({
             "name": "test",
             "description": "test"
-        })
+        }))
         model = self.base.model
 
         assert model.id
@@ -62,16 +64,16 @@ class TestBaseController():
         assert failed
 
         # Test success case
-        self.base.dal.model.create({
+        self.base.dal.model.create(Model({
             "name": "test",
             "description": "test"
-        })
+        }))
         _ = self.base.model
-        self.base.dal.session.create({
+        self.base.dal.session.create(Session({
             "name": "test",
             "model_id": "test",
             "current": True
-        })
+        }))
         session = self.base.current_session
 
         assert session.id
@@ -101,7 +103,7 @@ class TestBaseController():
                GitCodeDriver
 
     def test_sanity_check_for_dal(self):
-        model = self.base.dal.model.create({"name": "test"})
+        model = self.base.dal.model.create(Model({"name": "test"}))
         model2 = self.base.dal.model.get_by_id(model.id)
         assert model and model2
         assert model.id == model2.id

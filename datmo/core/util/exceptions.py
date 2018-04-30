@@ -55,7 +55,13 @@ class FileExecutionException(Exception):
 class FileAlreadyExistsException(Exception):
     pass
 
-class DoesNotExistException(FileExecutionException):
+class DoesNotExist(Exception):
+    pass
+
+class EnvironmentDoesNotExist(DoesNotExist):
+    pass
+
+class PathDoesNotExist(FileExecutionException):
     pass
 
 class FileIOException(FileExecutionException):
@@ -82,5 +88,8 @@ class TaskRunException(Exception):
 class DatmoFolderInWorkTree(Exception):
     pass
 
-class InvalidArgumentType(Exception):
+class InvalidArgumentType(ArgumentException):
+    pass
+
+class TaskNotComplete(ArgumentException):
     pass

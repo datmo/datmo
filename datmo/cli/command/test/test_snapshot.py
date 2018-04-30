@@ -131,7 +131,8 @@ class TestSnapshot():
         # Test when optional parameters are not given
         self.snapshot.parse([
             "snapshot",
-            "create"
+            "create",
+            "-m", "my test snapshot"
         ])
 
         snapshot_id_2 = self.snapshot.execute()
@@ -155,7 +156,8 @@ class TestSnapshot():
         # Test when optional parameters are not given
         self.snapshot.parse([
             "snapshot",
-            "create"
+            "create",
+            "-m", "my test snapshot"
         ])
 
         snapshot_id = self.snapshot.execute()
@@ -188,7 +190,8 @@ class TestSnapshot():
         # Test when optional parameters are not given
         self.snapshot.parse([
             "snapshot",
-            "create"
+            "create",
+            "-m", "my test snapshot"
         ])
 
         self.snapshot.execute()
@@ -231,7 +234,8 @@ class TestSnapshot():
         # Test when optional parameters are not given
         self.snapshot.parse([
             "snapshot",
-            "create"
+            "create",
+            "-m", "my test snapshot"
         ])
 
         snapshot_id = self.snapshot.execute()

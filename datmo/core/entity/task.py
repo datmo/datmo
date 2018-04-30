@@ -13,8 +13,9 @@ class Task():
     Parameters
     ----------
     dictionary : dict
-        id : str
+        id : str, optional
             the id of the entity
+            (default is None; storage driver has not assigned an id yet)
         model_id : str
             the parent model id for the entity
         session_id : str
@@ -107,13 +108,13 @@ class Task():
         dictionary containing output results from the task
     end_time : datetime.datetime
         timestamp for the beginning time of the task
-    duration : float, optional
+    duration : float
         float object signifying number of seconds for run
     created_at : datetime.datetime
     updated_at : datetime.datetime
     """
     def __init__(self, dictionary):
-        self.id = dictionary['id']
+        self.id = dictionary.get('id', None)
         self.model_id = dictionary['model_id']
         self.session_id = dictionary['session_id']
 
