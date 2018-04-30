@@ -4,8 +4,9 @@ import platform
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
 from datmo.core.controller.file.file_collection import FileCollectionController
+from datmo.core.entity.environment import Environment
 from datmo.core.util.json_store import JSONStore
-from datmo.core.util.exceptions import DoesNotExistException
+from datmo.core.util.exceptions import PathDoesNotExist
 
 
 class EnvironmentController(BaseController):
@@ -132,7 +133,7 @@ class EnvironmentController(BaseController):
                 create_dict[optional_arg] = dictionary[optional_arg]
 
         # Create environment and return
-        return self.dal.environment.create(create_dict)
+        return self.dal.environment.create(Environment(create_dict))
 
     def _store_hardware_info(self, dictionary, create_dict, definition_path):
         if "hardware_info" in dictionary:
@@ -170,14 +171,14 @@ class EnvironmentController(BaseController):
 
         Raises
         ------
-        DoesNotExistException
+        PathDoesNotExist
             if the specified Environment does not exist.
         """
         environment_obj = self.dal.environment.get_by_id(environment_id)
         if not environment_obj:
-            raise DoesNotExistException(__("error",
+            raise PathDoesNotExist(__("error",
                                            "controller.environment.build",
-                                           environment_id))
+                                      environment_id))
         file_collection_obj = self.dal.file_collection.\
             get_by_id(environment_obj.file_collection_id)
         # TODO: Check hardware info here if different from creation time
@@ -246,14 +247,14 @@ class EnvironmentController(BaseController):
 
         Raises
         ------
-        DoesNotExistException
+        PathDoesNotExist
             if the specified Environment does not exist.
         """
         environment_obj = self.dal.environment.get_by_id(environment_id)
         if not environment_obj:
-            raise DoesNotExistException(__("error",
+            raise PathDoesNotExist(__("error",
                                            "controller.environment.delete",
-                                           environment_id))
+                                      environment_id))
         # Remove file collection
         file_collection_deleted = self.file_collection.delete(environment_obj.file_collection_id)
         # Remove artifacts associated with the environment_driver
@@ -279,7 +280,7 @@ class EnvironmentController(BaseController):
 
         Raises
         ------
-        DoesNotExistException
+        PathDoesNotExist
             if the specified Environment does not exist.
         """
         # Stop the instance(e.g. container) running using environment driver(e.g. docker)

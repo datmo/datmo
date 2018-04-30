@@ -35,7 +35,7 @@ class TestTaskController():
         shutil.rmtree(self.temp_dir)
 
     def test_create(self):
-        task_command = ["sh", "-c", "echo yo"]
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
         task_gpu = False
         input_dict = {
             "command": task_command,
@@ -73,7 +73,7 @@ class TestTaskController():
         random_name = ''.join([random.choice(string.ascii_letters + string.digits)
                                for _ in range(32)])
         options_dict = {
-            "command": ["sh", "-c", "echo yo"],
+            "command": ["sh", "-c", "echo accuracy:0.45"],
             "ports": ["8888:8888"],
             "gpu": False,
             "name": random_name,
@@ -103,7 +103,7 @@ class TestTaskController():
         random_name_2 = ''.join([random.choice(string.ascii_letters + string.digits)
                                for _ in range(32)])
         options_dict = {
-            "command": ["sh", "-c", "echo yo"],
+            "command": ["sh", "-c", "echo accuracy:0.45"],
             "ports": ["8888:8888"],
             "gpu": False,
             "name": random_name_2 ,
@@ -129,9 +129,31 @@ class TestTaskController():
                os.path.exists(log_filepath)
         self.task.environment_driver.stop_remove_containers_by_term(term=random_name_2)
 
+    def test_parse_logs_for_results(self):
+        test_logs = """
+        this is a log
+        accuracy is good
+        accuracy : 0.94
+        this did not work
+        validation : 0.32
+        model_type : logistic regression
+        """
+        result = self.task._parse_logs_for_results(test_logs)
+
+        assert isinstance(result, dict)
+        assert result['accuracy'] == "0.94"
+        assert result['validation'] == "0.32"
+        assert result['model_type'] == "logistic regression"
+
     def test_run(self):
+        # 1) Test success case with default values and env def file
+        # 2) Test failure case if running same task (conflicting containers)
+        # 3) Test failure case if running same task with snapshot_dict (conflicting containers)
+        # 4) Test success case with snapshot_dict
+        # 5) Test success case with saved file during task run
+
         # TODO: look into log filepath randomness, sometimes logs are not written
-        task_command = ["sh", "-c", "echo yo"]
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
         input_dict = {
             "command": task_command
         }
@@ -139,13 +161,13 @@ class TestTaskController():
         # Create task in the project
         task_obj = self.task.create(input_dict)
 
-        # Create environment_driver definition
+        # Create environment definition
         env_def_path = os.path.join(self.project.home,
                                     "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
-        # Test the default values
+        # 1) Test option 1
         updated_task_obj = self.task.run(task_obj.id)
 
         assert task_obj.id == updated_task_obj.id
@@ -161,14 +183,22 @@ class TestTaskController():
         assert updated_task_obj.after_snapshot_id
         assert updated_task_obj.run_id
         assert updated_task_obj.logs
+        assert "accuracy" in updated_task_obj.logs
+        assert updated_task_obj.results
+        assert updated_task_obj.results == {"accuracy": "0.45"}
         assert updated_task_obj.status == "SUCCESS"
-        assert updated_task_obj.results == {}
         assert updated_task_obj.end_time
         assert updated_task_obj.duration
 
-        # Test running the same task again with different parameters
-        # THIS WILL UPDATE THE SAME TASK AND LOSE ORIGINAL TASK WORK
-        # This will fail because running the same task id (conflicting containers)
+        # 2) Test option 2
+        failed = False
+        try:
+             self.task.run(task_obj.id)
+        except EnvironmentExecutionException:
+            failed = True
+        assert failed
+
+        # 3) Test option 3
 
         # Create files to add
         self.project.file_driver.create("dirpath1", directory=True)
@@ -191,7 +221,7 @@ class TestTaskController():
             failed = True
         assert failed
 
-        # Test for Task where the snapshot dictionary is passed in and succeeds
+        # 4) Test option 4
 
         # Create a new task in the project
         task_obj_1 = self.task.create(input_dict)
@@ -213,13 +243,75 @@ class TestTaskController():
         assert updated_task_obj_1.after_snapshot_id
         assert updated_task_obj_1.run_id
         assert updated_task_obj_1.logs
+        assert "accuracy" in updated_task_obj_1.logs
+        assert updated_task_obj_1.results
+        assert updated_task_obj_1.results == {"accuracy": "0.45"}
         assert updated_task_obj_1.status == "SUCCESS"
-        assert updated_task_obj_1.results == {}
         assert updated_task_obj_1.end_time
         assert updated_task_obj_1.duration
 
+        # 5) Test option 5
+
+        # Create a basic script
+        # (fails w/ no environment)
+        test_filepath = os.path.join(self.temp_dir, "script.py")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode("import os\n"))
+            f.write(to_unicode("import numpy\n"))
+            f.write(to_unicode("import sklearn\n"))
+            f.write(to_unicode("print('hello')\n"))
+            f.write(to_unicode("print(' accuracy: 0.56 ')\n"))
+            f.write(to_unicode("with open(os.path.join('/task', 'new_file.txt'), 'a') as f:\n"))
+            f.write(to_unicode("    f.write('my test file')\n"))
+
+        task_command = ["python", "script.py"]
+        input_dict = {
+            "command": task_command
+        }
+
+        # Create task in the project
+        task_obj_2 = self.task.create(input_dict)
+
+        # Create environment definition
+        env_def_path = os.path.join(self.project.home,
+                                    "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        updated_task_obj_2 = self.task.run(task_obj_2.id)
+
+        assert updated_task_obj_2.before_snapshot_id
+        assert updated_task_obj_2.ports == []
+        assert updated_task_obj_2.gpu == False
+        assert updated_task_obj_2.interactive == False
+        assert updated_task_obj_2.task_dirpath
+        assert updated_task_obj_2.log_filepath
+        assert updated_task_obj_2.start_time
+
+        assert updated_task_obj_2.after_snapshot_id
+        assert updated_task_obj_2.run_id
+        assert updated_task_obj_2.logs
+        assert "accuracy" in updated_task_obj_1.logs
+        assert updated_task_obj_2.results
+        assert updated_task_obj_2.results == {"accuracy": "0.56"}
+        assert updated_task_obj_2.status == "SUCCESS"
+        assert updated_task_obj_2.end_time
+        assert updated_task_obj_2.duration
+
+        # test if after snapshot has the file written
+        after_snapshot_obj = self.task.dal.snapshot.get_by_id(
+            updated_task_obj_2.after_snapshot_id
+        )
+        file_collection_obj = self.task.dal.file_collection.get_by_id(
+            after_snapshot_obj.file_collection_id
+        )
+        files_absolute_path = os.path.join(self.task.home, file_collection_obj.path)
+
+        assert os.path.isfile(os.path.join(files_absolute_path, "task.log"))
+        assert os.path.isfile(os.path.join(files_absolute_path, "new_file.txt"))
+
     def test_list(self):
-        task_command = ["sh", "-c", "echo yo"]
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
         input_dict = {
             "command": task_command
         }
@@ -244,7 +336,7 @@ class TestTaskController():
                task_obj_2 in result
 
     def test_get_files(self):
-        task_command = ["sh", "-c", "echo yo"]
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
         input_dict = {
             "command": task_command
         }
@@ -314,7 +406,7 @@ class TestTaskController():
         assert result[1].mode == "a"
 
     def test_delete(self):
-        task_command = ["sh", "-c", "echo yo"]
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
         input_dict = {
             "command": task_command
         }
@@ -336,7 +428,7 @@ class TestTaskController():
                thrown == True
 
     def test_stop(self):
-        task_command = ["sh", "-c", "echo yo"]
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
         input_dict = {
             "command": task_command
         }

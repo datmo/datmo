@@ -10,9 +10,10 @@ except NameError:
 from docker import DockerClient
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import DoesNotExistException, \
-    EnvironmentInitFailed, EnvironmentExecutionException, \
-    FileAlreadyExistsException, EnvironmentRequirementsCreateException
+from datmo.core.util.exceptions import PathDoesNotExist, \
+    EnvironmentDoesNotExist, EnvironmentInitFailed, \
+    EnvironmentExecutionException, FileAlreadyExistsException, \
+    EnvironmentRequirementsCreateException
 from datmo.core.controller.environment.driver import EnvironmentDriver
 
 
@@ -26,9 +27,9 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         self.filepath = filepath
         # Check if filepath exists
         if not os.path.exists(self.filepath):
-            raise DoesNotExistException(__("error",
-                                          "controller.environment.driver.docker.__init__.dne",
-                                          filepath))
+            raise PathDoesNotExist(__("error",
+                                      "controller.environment.driver.docker.__init__.dne",
+                                      filepath))
 
         # TODO: separate methods for instantiation into init function below
 
@@ -85,7 +86,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 path = self.create_default_dockerfile(requirements_filepath=requirements_filepath,
                                                       language=language)
             else:
-                raise DoesNotExistException(__("error",
+                raise EnvironmentDoesNotExist(__("error",
                                               "controller.environment.driver.docker.create.dne",
                                               path))
         if os.path.isfile(output_path):
@@ -497,22 +498,37 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         return True
 
     def create_requirements_file(self, execpath="pipreqs"):
-        """Create requirements txt file for the project
+        """Create python requirements txt file for the project
+
+        Parameters
+        ----------
+        execpath : str, optional
+            execpath for the pipreqs command to form requirements.txt file
+            (default is "pipreqs")
 
         Returns
         -------
         str
             absolute filepath for requirements file
+
+        Raises
+        ------
+        EnvironmentDoesNotExist
+            no python requirements found for environment
+        EnvironmentRequirementsCreateException
+            error in running pipreqs command to extract python requirements
         """
         try:
             subprocess.check_output([execpath, self.filepath, "--force"],
                                     cwd=self.filepath).strip()
             requirements_filepath = os.path.join(self.filepath, "requirements.txt")
-            return requirements_filepath
         except Exception as e:
             raise EnvironmentRequirementsCreateException(__("error",
-                                                           "controller.environment.requirements.create",
-                                                           str(e)))
+                                                            "controller.environment.requirements.create",
+                                                            str(e)))
+        if open(requirements_filepath, "r").read() == "\n":
+            raise EnvironmentDoesNotExist()
+        return requirements_filepath
 
     def create_default_dockerfile(self, requirements_filepath, language):
         """Create a default Dockerfile for a given language

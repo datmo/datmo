@@ -107,6 +107,7 @@ MESSAGES = {
         "controller.snapshot.create.arg": "Required argument missing to create snapshot: %s",
         "controller.snapshot.create.file_config": "Config file does not exist",
         "controller.snapshot.create.file_stat": "Stats file does not exist",
+        "controller.snapshot.create_from_task": "Task specified by id %s has not been completed",
         "controller.snapshot.list": "Session does not exist for id: %s",
         "controller.snapshot.delete.arg": "Delete argument %s not present in input",
         "controller.task.__init__": "Project has not been initialized",

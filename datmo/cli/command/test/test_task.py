@@ -24,6 +24,7 @@ except NameError:
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
+from datmo.core.entity.task import Task as CoreTask
 from datmo.core.util.exceptions import ProjectNotInitializedException
 
 
@@ -93,7 +94,7 @@ class TestTaskCommand():
     def test_datmo_task_run(self):
         self.__set_variables()
         # Test success case
-        test_command = ["sh", "-c", "echo yo"]
+        test_command = ["sh", "-c", "echo accuracy:0.45"]
         test_gpu = True # TODO: implement in controller
         test_ports = "8888:8888"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
@@ -119,8 +120,14 @@ class TestTaskCommand():
         # test proper execution of task run command
         result = self.task.execute()
         assert result
+        assert isinstance(result, CoreTask)
+        assert result.logs
+        assert "accuracy" in result.logs
+        assert result.results
+        assert result.results == {"accuracy": "0.45"}
+        assert result.status == "SUCCESS"
 
-    def test_datmo_task_run_invalid_arg(self):
+    def test_task_run_invalid_arg(self):
         self.__set_variables()
         exception_thrown = False
         try:
@@ -132,7 +139,7 @@ class TestTaskCommand():
             exception_thrown = True
         assert exception_thrown
 
-    def test_datmo_task_ls(self):
+    def test_task_ls(self):
         self.__set_variables()
         test_session_id = 'test_session_id'
 
@@ -148,7 +155,7 @@ class TestTaskCommand():
         task_ls_command = self.task.execute()
         assert task_ls_command == True
 
-    def test_datmo_task_ls_invalid_arg(self):
+    def test_task_ls_invalid_arg(self):
         self.__set_variables()
         exception_thrown = False
         try:
@@ -160,7 +167,7 @@ class TestTaskCommand():
             exception_thrown = True
         assert exception_thrown
 
-    def test_datmo_task_stop(self):
+    def test_task_stop(self):
         self.__set_variables()
 
         test_command = ["sh", "-c", "echo yo"]
@@ -176,16 +183,17 @@ class TestTaskCommand():
             "--interactive",
             test_command
         ])
-        test_task_id = self.task.execute()
+
+        test_task_obj = self.task.execute()
 
         self.task.parse([
             "task",
             "stop",
-            "--id", test_task_id
+            "--id", test_task_obj.id
         ])
 
         # test for desired side effects
-        assert self.task.args.id == test_task_id
+        assert self.task.args.id == test_task_obj.id
 
         # test when task id is passed to stop it
         task_stop_command = self.task.execute()
@@ -203,7 +211,7 @@ class TestTaskCommand():
         result = self.task.execute()
         assert not result
 
-    def test_datmo_task_stop_invalid_arg(self):
+    def test_task_stop_invalid_arg(self):
         self.__set_variables()
         exception_thrown = False
         try:

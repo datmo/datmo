@@ -2,6 +2,8 @@ import datetime
 
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
+from datmo.core.entity.model import Model
+from datmo.core.entity.session import Session
 from datmo.core.util.exceptions import SessionDoesNotExistException, \
     RequiredArgumentMissing
 
@@ -38,10 +40,10 @@ class ProjectController(BaseController):
         # Create the Model, is it new or update?
         is_new_model = False
         if not self.model:
-            _ = self.dal.model.create({
+            _ = self.dal.model.create(Model({
                 "name": name,
                 "description": description
-            })
+            }))
             is_new_model = True
         else:
             self._model = self.dal.model.update({
@@ -72,11 +74,11 @@ class ProjectController(BaseController):
         # Create and set current session
         if is_new_model:
             # Create new default session
-            _ = self.dal.session.create({
+            _ = self.dal.session.create(Session({
                 "name": "default",
                 "model_id": self.model.id,
                 "current": True
-            })
+            }))
         else:
             if not self.current_session:
                 default_session_obj = self.dal.session.query({
