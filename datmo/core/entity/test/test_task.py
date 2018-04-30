@@ -16,20 +16,20 @@ class TestTask():
 
         for k, v in input_dict.items():
             assert getattr(task_entity, k) == v
-        assert task_entity.before_snapshot_id == ""
-        assert task_entity.ports == []
+        assert task_entity.before_snapshot_id == None
+        assert task_entity.ports == None
         assert task_entity.gpu == False
         assert task_entity.interactive == False
-        assert task_entity.task_dirpath == ""
-        assert task_entity.log_filepath == ""
+        assert task_entity.task_dirpath == None
+        assert task_entity.log_filepath == None
         assert task_entity.start_time == None
 
         # Post-Execution
-        assert task_entity.after_snapshot_id == ""
-        assert task_entity.run_id == ""
-        assert task_entity.logs == ""
-        assert task_entity.status == ""
-        assert task_entity.results == {}
+        assert task_entity.after_snapshot_id == None
+        assert task_entity.run_id == None
+        assert task_entity.logs == None
+        assert task_entity.status == None
+        assert task_entity.results == None
         assert task_entity.end_time == None
         assert task_entity.duration == None
         assert task_entity.created_at

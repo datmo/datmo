@@ -121,20 +121,20 @@ class Task():
         self.command = dictionary['command']
 
         # Pre-Execution
-        self.before_snapshot_id = dictionary.get('before_snapshot_id', "")
-        self.ports = dictionary.get('ports', [])
+        self.before_snapshot_id = dictionary.get('before_snapshot_id', None)
+        self.ports = dictionary.get('ports', None)
         self.gpu = dictionary.get('gpu', False)
         self.interactive = dictionary.get('interactive', False)
-        self.task_dirpath = dictionary.get('task_dirpath', "")
-        self.log_filepath = dictionary.get('log_filepath', "")
+        self.task_dirpath = dictionary.get('task_dirpath', None)
+        self.log_filepath = dictionary.get('log_filepath', None)
         self.start_time = dictionary.get('start_time', None)
 
         # Post-Execution
-        self.after_snapshot_id = dictionary.get('after_snapshot_id', "")
-        self.run_id = dictionary.get('run_id', "")
-        self.logs = dictionary.get('logs', "")
-        self.status = dictionary.get('status', "")
-        self.results = dictionary.get('results', {})
+        self.after_snapshot_id = dictionary.get('after_snapshot_id', None)
+        self.run_id = dictionary.get('run_id', None)
+        self.logs = dictionary.get('logs', None)
+        self.status = dictionary.get('status', None)
+        self.results = dictionary.get('results', None)
         self.end_time = dictionary.get('end_time', None)
         self.duration = dictionary.get('duration', None)
 
