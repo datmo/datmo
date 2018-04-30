@@ -148,7 +148,7 @@ class EntityMethodsCRUD(object):
         if hasattr(datmo_entity,'to_dictionary'):
             dict_obj = datmo_entity.to_dictionary()
         else:
-            raise InvalidArgumentType()
+            dict_obj = self.entity_class(datmo_entity).to_dictionary()
         # create a unique hash from misc_functions.py
         # TODO: find efficient way to get previous hash for entity
         # latest_entity = self.query({"id": latest})
