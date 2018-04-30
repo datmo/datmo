@@ -127,13 +127,17 @@ class TestSnapshot():
         test_session_id = "test_session_id"
         test_task_id = "test_task_id"
         test_code_id = "test_code_id"
+        test_commit_id = "test_commit_id"
+        test_environment_id = "test_environment_id"
         test_environment_def_path = self.env_def_path
+        test_file_collection_id = "test_file_collection_id"
+        test_filepaths = [self.filepath]
         test_config_filename = "config.json"
         test_config_filepath = self.config_filepath
         test_stats_filename = "stats.json"
         test_stats_filepath = self.config_filepath
-        test_filepaths = [self.filepath]
 
+        # Code exception
         exception_thrown = False
         try:
             self.snapshot.parse([
@@ -144,18 +148,85 @@ class TestSnapshot():
                 "--session-id", test_session_id,
                 "--task-id", test_task_id,
                 "--code-id", test_code_id,
-                "--environment-def-path", test_environment_def_path,
-                "--config-filename", test_config_filename,
-                "--config-filepath", test_config_filepath,
-                "--stats-filename", test_stats_filename,
-                "--stats-filepath", test_stats_filepath,
-                "--filepaths", test_filepaths[0],
+                "--commit-id", test_commit_id
             ])
-
             _ = self.snapshot.execute()
         except MutuallyExclusiveArguments:
             exception_thrown = True
         assert exception_thrown
+
+        # Environment exception
+        exception_thrown = False
+        try:
+            self.snapshot.parse([
+                "snapshot",
+                "create",
+                "--message", test_message,
+                "--label", test_label,
+                "--session-id", test_session_id,
+                "--task-id", test_task_id,
+                "--environment-id", test_environment_id,
+                "--environment-def-path", test_environment_def_path,
+            ])
+            _ = self.snapshot.execute()
+        except MutuallyExclusiveArguments:
+            exception_thrown = True
+        assert exception_thrown
+
+        # File exception
+        exception_thrown = False
+        try:
+            self.snapshot.parse([
+                "snapshot",
+                "create",
+                "--message", test_message,
+                "--label", test_label,
+                "--session-id", test_session_id,
+                "--task-id", test_task_id,
+                "--file-collection-id", test_file_collection_id,
+                "--filepaths", test_filepaths[0],
+            ])
+            _ = self.snapshot.execute()
+        except MutuallyExclusiveArguments:
+            exception_thrown = True
+        assert exception_thrown
+
+        # Config exception
+        exception_thrown = False
+        try:
+            self.snapshot.parse([
+                "snapshot",
+                "create",
+                "--message", test_message,
+                "--label", test_label,
+                "--session-id", test_session_id,
+                "--task-id", test_task_id,
+                "--config-filename", test_config_filename,
+                "--config-filepath", test_config_filepath,
+            ])
+            _ = self.snapshot.execute()
+        except MutuallyExclusiveArguments:
+            exception_thrown = True
+        assert exception_thrown
+
+        # Stats exception
+        exception_thrown = False
+        try:
+            self.snapshot.parse([
+                "snapshot",
+                "create",
+                "--message", test_message,
+                "--label", test_label,
+                "--session-id", test_session_id,
+                "--task-id", test_task_id,
+                "--stats-filename", test_stats_filename,
+                "--stats-filepath", test_stats_filepath,
+            ])
+            _ = self.snapshot.execute()
+        except MutuallyExclusiveArguments:
+            exception_thrown = True
+        assert exception_thrown
+
 
     def test_datmo_snapshot_create_default(self):
         self.__set_variables()

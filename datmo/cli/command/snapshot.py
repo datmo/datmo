@@ -16,33 +16,39 @@ class SnapshotCommand(ProjectCommand):
         snapshot_parser = self.subparsers.add_parser("snapshot", help="Snapshot module")
         subcommand_parsers = snapshot_parser.add_subparsers(title="subcommands", dest="subcommand")
 
-        create = subcommand_parsers.add_parser("create", help="Create snapshot")
-        create.add_argument("--message", "-m", dest="message", default=None, help="Message to describe snapshot")
+        create = subcommand_parsers.add_parser("create", help="create snapshot")
+        create.add_argument("--message", "-m", dest="message", default=None, help="message to describe snapshot")
         create.add_argument("--label", "-l", dest="label", default=None,
                             help="Label snapshots with a category (e.g. best)")
-        create.add_argument("--session-id", dest="session_id", default=None, help="User given session id")
+        create.add_argument("--session-id", dest="session_id", default=None, help="user given session id")
 
         create.add_argument("--task-id", dest="task_id", default=None,
                             help="Specify task id to pull information from")
 
         create.add_argument("--code-id", dest="code_id", default=None,
-                            help="User provided code id (e.g. git revision for git)")
+                            help="code id from code object")
+        create.add_argument("--commit-id", dest="commit_id", default=None,
+                            help="commit id from source control")
 
+        create.add_argument("--environment-id", dest="environment_id", default=None,
+                            help="environment id from environment object")
         create.add_argument("--environment-def-path", dest="environment_def_path", default=None,
-                            help="Absolute filepath to environment definition file (e.g. /path/to/Dockerfile)")
+                            help="absolute filepath to environment definition file (e.g. /path/to/Dockerfile)")
+
+        create.add_argument("--file-collection-id", dest="file_collection_id", default=None,
+                            help="file collection id for file collection object")
+        create.add_argument("--filepaths", dest="filepaths", default=None, nargs="*",
+                            help="absolute paths to files or folders to include within the files of the snapshot")
 
         create.add_argument("--config-filename", dest="config_filename", default=None,
-                            help="Filename to use to search for configuration JSON")
+                            help="filename to use to search for configuration JSON")
         create.add_argument("--config-filepath", dest="config_filepath", default=None,
-                            help="Absolute filepath to use to search for configuration JSON")
+                            help="absolute filepath to use to search for configuration JSON")
 
         create.add_argument("--stats-filename", dest="stats_filename", default=None,
-                            help="Filename to use to search for metrics JSON")
+                            help="filename to use to search for metrics JSON")
         create.add_argument("--stats-filepath", dest="stats_filepath", default=None,
-                            help="Absolute filepath to use to search for metrics JSON")
-
-        create.add_argument("--filepaths", dest="filepaths", default=None, nargs="*",
-                            help="Absolute paths to files or folders to include within the files of the snapshot")
+                            help="absolute filepath to use to search for metrics JSON")
 
         delete = subcommand_parsers.add_parser("delete", help="Delete a snapshot by id")
         delete.add_argument("--id", dest="id", help="snapshot id to delete")
@@ -67,11 +73,11 @@ class SnapshotCommand(ProjectCommand):
         mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
 
         # Environment
-        mutually_exclusive_args = ["environment_id", "environment_definition_filepath"]
+        mutually_exclusive_args = ["environment_id", "environment_def_path"]
         mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
 
         # File
-        mutually_exclusive_args = ["file_collection_id", "file_collection"]
+        mutually_exclusive_args = ["file_collection_id", "filepaths"]
         mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
 
         # Config
