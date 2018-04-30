@@ -17,7 +17,8 @@ except NameError:
 
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.core.util.exceptions import EnvironmentInitFailed, \
-    FileAlreadyExistsException, EnvironmentRequirementsCreateException
+    FileAlreadyExistsException, EnvironmentRequirementsCreateException, \
+    EnvironmentDoesNotExist
 
 
 class TestDockerEnv():
@@ -508,6 +509,19 @@ class TestDockerEnv():
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_create_requirements_file(self):
+        # 1) Test failure EnvironmentDoesNotExist
+        # 2) Test success
+        # 3) Test failure EnvironmentRequirementsCreateException
+
+        # 1) Test option 1
+        failed = False
+        try:
+            _ = self.docker_environment_manager.create_requirements_file()
+        except EnvironmentDoesNotExist:
+            failed = True
+        assert failed
+
+        # 2) Test option 2
         script_path = os.path.join(self.docker_environment_manager.filepath,
                                    "script.py")
         with open(script_path, "w") as f:
@@ -520,7 +534,7 @@ class TestDockerEnv():
                "numpy" in open(result, "r").read() and \
                "scikit_learn" in open(result, "r").read()
 
-        # Test failure
+        # 3) Test option 3
         exception_thrown = False
         try:
             _ = self.docker_environment_manager.\

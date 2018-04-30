@@ -17,7 +17,7 @@ except NameError:
 from datmo.core.controller.code.driver.git import GitCodeDriver, \
     GitHostDriver
 from datmo.core.util.exceptions import GitCommitDoesNotExist, \
-    DoesNotExistException, GitExecutionException, \
+    PathDoesNotExist, GitExecutionException, \
     DatmoFolderInWorkTree
 
 
@@ -43,7 +43,7 @@ class TestGitCodeDriver():
         failed = False
         try:
             _ = GitCodeDriver(filepath="nonexistant_path", execpath="git")
-        except DoesNotExistException:
+        except PathDoesNotExist:
             failed = True
         assert failed
 

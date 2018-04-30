@@ -10,7 +10,8 @@ from datmo.core.entity.file_collection import FileCollection
 from datmo.core.entity.task import Task
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.entity.user import User
-from datmo.core.util.exceptions import InputException
+from datmo.core.util.exceptions import InputException, \
+    InvalidArgumentType
 from datmo.core.util.misc_functions import create_unique_hash
 
 
@@ -148,15 +149,12 @@ class EntityMethodsCRUD(object):
         if hasattr(datmo_entity,'to_dictionary'):
             dict_obj = datmo_entity.to_dictionary()
         else:
-            dict_obj = datmo_entity
-            # set created_at if not present
-            dict_obj['created_at'] = dict_obj.get('created_at',
-                                                  datetime.now()).utcnow()
+            raise InvalidArgumentType()
         # create a unique hash from misc_functions.py
         # TODO: find efficient way to get previous hash for entity
         # latest_entity = self.query({"id": latest})
         # dict_obj['id'] = create_unique_hash(base_hash=latest_entity['id'])
-        dict_obj['id'] = dict_obj['id'] if 'id' in dict_obj.keys() else \
+        dict_obj['id'] = dict_obj['id'] if 'id' in dict_obj.keys() and dict_obj['id'] else \
             create_unique_hash()
         response = self.driver.set(self.collection, dict_obj)
         entity_instance = self.entity_class(response)

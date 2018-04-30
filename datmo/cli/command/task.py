@@ -70,13 +70,13 @@ class TaskCommand(ProjectCommand):
 
         # Pass in the task
         try:
-            self.task_controller.run(task_obj.id, snapshot_dict=snapshot_dict)
+            updated_task_obj = self.task_controller.run(task_obj.id, snapshot_dict=snapshot_dict)
         except:
             self.cli_helper.echo(__("error",
                                     "cli.task.run",
                                     task_obj.id))
             return False
-        return task_obj.id
+        return updated_task_obj
 
     def ls(self, **kwargs):
         session_id = kwargs.get('session_id',

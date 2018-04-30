@@ -88,6 +88,12 @@ class TestBlitzDBDALDriver():
         results = self.database.query(self.collection, test_obj)
         assert len(results) == 1
 
+    def test_db_query_bool(self):
+        test_obj = {"bool": True}
+        result = self.database.set(self.collection, test_obj)
+        results = self.database.query(self.collection, test_obj)
+        assert result.get('id') == results[0].get('id')
+
     def test_db_exists(self):
         test_obj = {"foo": "bar_2"}
         result = self.database.set(self.collection, test_obj)
@@ -96,7 +102,7 @@ class TestBlitzDBDALDriver():
 
     def test_db_query_all(self):
         results = self.database.query(self.collection, {})
-        assert len(results) == 4
+        assert len(results) == 5
         # ensure each entity returns an 'id'
         for entity in results:
             assert entity['id'] != None
