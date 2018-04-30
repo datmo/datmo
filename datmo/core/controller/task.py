@@ -59,7 +59,7 @@ class TaskController(BaseController):
         Returns
         -------
         Task
-            object entity for Task
+            object entity for Task (datmo.core.entity.task.Task)
         """
 
         # Validate Inputs
@@ -140,6 +140,31 @@ class TaskController(BaseController):
             self.environment.run(environment_id, run_options, log_filepath)
 
         return return_code, run_id, logs
+
+    def _parse_logs_for_results(self, logs):
+        """Parse log string to extract results and return dictionary.
+
+        Note
+        ----
+        If the same key is found multiple times in the logs, the last occurring
+        one will be the one that is saved.
+
+        Parameters
+        ----------
+        logs : str
+            raw string value of output logs
+
+        Returns
+        -------
+        dict
+            dictionary to represent results from task
+        """
+        results = {}
+        for line in logs.split("\n"):
+            split_line = line.split(":")
+            if len(split_line) == 2:
+                results[split_line[0].strip()] = split_line[1].strip()
+        return results
 
     def run(self, task_id, snapshot_dict=None, task_dict=None):
         """Run a task with parameters. If dictionary specified, create a new task with new run parameters.
@@ -276,8 +301,9 @@ class TaskController(BaseController):
             "after_snapshot_id": after_snapshot_obj.id,
             "run_id": run_id,
             "logs": logs,
+            "results": self._parse_logs_for_results(logs),
+            # "results": task_obj.results, # TODO: update during run
             "status": "SUCCESS" if return_code==0 else "FAILED",
-            "results": task_obj.results, # updated during run
             "end_time": end_time,
             "duration": duration
         })

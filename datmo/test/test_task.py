@@ -71,6 +71,7 @@ class TestTaskModule():
             f.write(to_unicode("import numpy\n"))
             f.write(to_unicode("import sklearn\n"))
             f.write(to_unicode("print('hello')\n"))
+            f.write(to_unicode("print(' accuracy: 0.56 ')\n"))
 
         # 2) Test out option 2
         task_obj_0 = run(command="python script.py",
@@ -78,6 +79,7 @@ class TestTaskModule():
         assert isinstance(task_obj_0, Task)
         assert task_obj_0.id
         assert 'hello' in task_obj_0.logs
+        assert task_obj_0.results == {"accuracy": "0.56"}
 
         # Add environment definition
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
@@ -90,6 +92,7 @@ class TestTaskModule():
         assert isinstance(task_obj_1, Task)
         assert task_obj_1.id
         assert 'hello' in task_obj_1.logs
+        assert task_obj_1.results == {"accuracy": "0.56"}
 
         # 4) Test out option 4
         task_obj_2 = run(command=["python", "script.py"], env=test_filepath,
@@ -97,6 +100,7 @@ class TestTaskModule():
         assert isinstance(task_obj_2, Task)
         assert task_obj_2.id
         assert 'hello' in task_obj_2.logs
+        assert task_obj_2.results == {"accuracy": "0.56"}
 
     def test_task_entity_files(self):
         input_dict = {

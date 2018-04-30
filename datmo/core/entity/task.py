@@ -107,7 +107,7 @@ class Task():
         dictionary containing output results from the task
     end_time : datetime.datetime
         timestamp for the beginning time of the task
-    duration : float, optional
+    duration : float
         float object signifying number of seconds for run
     created_at : datetime.datetime
     updated_at : datetime.datetime

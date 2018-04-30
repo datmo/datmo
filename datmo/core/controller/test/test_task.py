@@ -35,7 +35,7 @@ class TestTaskController():
         shutil.rmtree(self.temp_dir)
 
     def test_create(self):
-        task_command = ["sh", "-c", "echo yo"]
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
         task_gpu = False
         input_dict = {
             "command": task_command,
@@ -73,7 +73,7 @@ class TestTaskController():
         random_name = ''.join([random.choice(string.ascii_letters + string.digits)
                                for _ in range(32)])
         options_dict = {
-            "command": ["sh", "-c", "echo yo"],
+            "command": ["sh", "-c", "echo accuracy:0.45"],
             "ports": ["8888:8888"],
             "gpu": False,
             "name": random_name,
@@ -103,7 +103,7 @@ class TestTaskController():
         random_name_2 = ''.join([random.choice(string.ascii_letters + string.digits)
                                for _ in range(32)])
         options_dict = {
-            "command": ["sh", "-c", "echo yo"],
+            "command": ["sh", "-c", "echo accuracy:0.45"],
             "ports": ["8888:8888"],
             "gpu": False,
             "name": random_name_2 ,
@@ -129,9 +129,25 @@ class TestTaskController():
                os.path.exists(log_filepath)
         self.task.environment_driver.stop_remove_containers_by_term(term=random_name_2)
 
+    def test_parse_logs_for_results(self):
+        test_logs = """
+        this is a log
+        accuracy is good
+        accuracy : 0.94
+        this did not work
+        validation : 0.32
+        model_type : logistic regression
+        """
+        result = self.task._parse_logs_for_results(test_logs)
+
+        assert isinstance(result, dict)
+        assert result['accuracy'] == "0.94"
+        assert result['validation'] == "0.32"
+        assert result['model_type'] == "logistic regression"
+
     def test_run(self):
         # TODO: look into log filepath randomness, sometimes logs are not written
-        task_command = ["sh", "-c", "echo yo"]
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
         input_dict = {
             "command": task_command
         }
@@ -161,8 +177,10 @@ class TestTaskController():
         assert updated_task_obj.after_snapshot_id
         assert updated_task_obj.run_id
         assert updated_task_obj.logs
+        assert "accuracy" in updated_task_obj.logs
+        assert updated_task_obj.results
+        assert updated_task_obj.results == {"accuracy": "0.45"}
         assert updated_task_obj.status == "SUCCESS"
-        assert updated_task_obj.results == {}
         assert updated_task_obj.end_time
         assert updated_task_obj.duration
 
@@ -213,13 +231,15 @@ class TestTaskController():
         assert updated_task_obj_1.after_snapshot_id
         assert updated_task_obj_1.run_id
         assert updated_task_obj_1.logs
+        assert "accuracy" in updated_task_obj_1.logs
+        assert updated_task_obj_1.results
+        assert updated_task_obj_1.results == {"accuracy": "0.45"}
         assert updated_task_obj_1.status == "SUCCESS"
-        assert updated_task_obj_1.results == {}
         assert updated_task_obj_1.end_time
         assert updated_task_obj_1.duration
 
     def test_list(self):
-        task_command = ["sh", "-c", "echo yo"]
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
         input_dict = {
             "command": task_command
         }
@@ -244,7 +264,7 @@ class TestTaskController():
                task_obj_2 in result
 
     def test_get_files(self):
-        task_command = ["sh", "-c", "echo yo"]
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
         input_dict = {
             "command": task_command
         }
@@ -314,7 +334,7 @@ class TestTaskController():
         assert result[1].mode == "a"
 
     def test_delete(self):
-        task_command = ["sh", "-c", "echo yo"]
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
         input_dict = {
             "command": task_command
         }
@@ -336,7 +356,7 @@ class TestTaskController():
                thrown == True
 
     def test_stop(self):
-        task_command = ["sh", "-c", "echo yo"]
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
         input_dict = {
             "command": task_command
         }

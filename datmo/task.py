@@ -156,12 +156,3 @@ def run(command, env=None, home=None):
     client_task_obj = Task(updated_core_task_obj, home=home)
 
     return client_task_obj
-
-def add_file():
-    pass
-
-def set_status():
-    pass
-
-def set_results():
-    pass
