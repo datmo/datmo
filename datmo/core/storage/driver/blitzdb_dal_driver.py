@@ -93,7 +93,7 @@ class BlitzDBDALDriver(DALDriver):
         elif collection == 'user':
             item = self.UserDocument(compatible_obj)
         else:
-            raise EntityCollectionNotFound()
+            raise EntityCollectionNotFound(collection)
         self.backend.save(item)
         self.backend.commit()
         return self.get(collection, item.pk)
