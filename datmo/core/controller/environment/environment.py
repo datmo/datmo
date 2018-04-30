@@ -135,7 +135,7 @@ class EnvironmentController(BaseController):
                 file_collection_obj = self.file_collection.create(filepaths)
                 create_dict['file_collection_id'] = file_collection_obj.id
 
-                # Delete temporary files created once transfered into file collection
+                # Delete temporary files created once transferred into file collection
                 if requirements_filepath:
                     os.remove(requirements_filepath)
                     os.remove(original_definition_filepath)

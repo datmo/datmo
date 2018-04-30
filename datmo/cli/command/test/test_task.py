@@ -15,6 +15,7 @@ from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
+import platform
 from io import open
 try:
     to_unicode = unicode
@@ -31,14 +32,14 @@ from datmo.core.util.exceptions import ProjectNotInitializedException
 class TestTaskCommand():
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
+        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
 
     def teardown_class(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def __set_variables(self):
         self.init = ProjectCommand(self.temp_dir, self.cli_helper)

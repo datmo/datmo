@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import os
 import shutil
 import tempfile
+import platform
 from io import TextIOWrapper
 
 from datmo.core.controller.file.driver.local import LocalFileDriver
@@ -21,14 +22,14 @@ class TestLocalFileManager():
     """
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
+        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.local_file_driver = LocalFileDriver(filepath=self.temp_dir)
 
     def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+        pass
 
     def test_initialize(self):
         assert self.local_file_driver != None
