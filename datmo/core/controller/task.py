@@ -185,7 +185,7 @@ class TaskController(BaseController):
             of whether the user provides another value for `visible`.
         task_dict : dict
             set of parameters to characterize the task run
-            (default is None, which translate to {}, see datmo.core.entity.task for more details on inputs)
+            (default is None, which translate to {}, see datmo.core.entity.task.Task for more details on inputs)
 
         Returns
         -------

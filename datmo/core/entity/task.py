@@ -24,11 +24,11 @@ class Task():
             command that is used by the task
         before_snapshot_id : str, optional
             snapshot created before the task is run
-            (default is "", which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         ports : list, optional
             list of string mappings from host system (left) to environment (right)
             (e.g. ["9999:9999", "8888:8888"])
-            (default is [], which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         gpu : bool, optional
             boolean to signify if run requires gpu
             (default is False, which means no gpu unless specified)
@@ -37,28 +37,28 @@ class Task():
             (default is False, which means no interactive mode unless specified)
         task_dirpath : str, optional
             task directory path relative to the project root
-            (default is "", which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         log_filepath : str, optional
             log filepath relative to the project root
-            (default is "", which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         start_time : datetime.datetime
             timestamp for the beginning time of the task
             (default is None, which means it isn't set yet)
         after_snapshot_id : str, optional
             snapshot created after the task is run
-            (default is "", which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         run_id : str, optional
             run id for the run (different from environment id and task id)
-            (default is "", which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         logs : str, optional
             string output of logs
-            (default is "", which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         status : str, optional
             status of the current task
-            (default is "", which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         results : dict, optional
             dictionary containing output results from the task
-            (default is {}, which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         end_time : datetime.datetime, optional
             timestamp for the beginning time of the task
             (default is None, which means it isn't set yet)
