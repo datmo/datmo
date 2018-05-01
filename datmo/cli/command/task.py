@@ -53,11 +53,12 @@ class TaskCommand(ProjectCommand):
                 kwargs['environment_definition_filepath']
         }
 
+        cmd = []
         if not isinstance(kwargs['cmd'], list):
             if platform.system() == "Windows":
-                kwargs['cmd'] = kwargs['cmd']
+                cmd = kwargs['cmd']
             else:
-                kwargs['cmd'] = shlex.split(kwargs['cmd'])
+                cmd = shlex.split(kwargs['cmd'])
 
         task_dict = {
             "gpu": kwargs['gpu'],
