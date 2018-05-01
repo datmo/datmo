@@ -13,7 +13,10 @@ MESSAGES = {
         "cli.snapshot.create": "Creating a new snapshot",
         "cli.snapshot.delete": "Deleting a snapshot",
         "cli.task.run": "Running a new task",
-        "cli.task.stop": "Stopping task: %s"
+        "cli.task.stop": "Stopping task: %s",
+        "cli.session.create": "Created session '%s'",
+        "cli.session.select": "Selecting new session '%s'",
+        "cli.session.delete": "Removed session '%s'",
     },
     "warn": {
         "cli.general.internet": "Internet connectivity doesn't exist",
@@ -28,6 +31,7 @@ MESSAGES = {
         "cli.task.run.already_running": "Already task running with id: %s",
         "cli.task.stop": "Error while stopping the task: %s",
         "util.misc_functions.get_filehash": "Filepath does not point to a valid file: %s",
+        "util.misc_functions.mutually_exclusive": "Mutually exclusive arguments passed: %s",
         "controller.code.driver.git.__init__.dne": "File path does not exist: %s",
         "controller.code.driver.git.__init__.giterror": "Error in git: %s",
         "controller.code.driver.git.__init__.gitversion": "Git version must be later than 1.9.7. Current version: %s",
@@ -113,6 +117,7 @@ MESSAGES = {
         "controller.task.run": "Error creating task directory for run: %s",
         "controller.task.stop.arg": "Stop argument %s not present in input",
         "controller.task.delete.arg": "Delete argument %s not present in input",
+        "controller.session.delete.default": "Can not delete default session",
         "storage.local.dal.update": "Entity id not provided in the input for update",
     },
     "debug": {

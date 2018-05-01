@@ -11,7 +11,8 @@ except NameError:
     to_unicode = str
 
 from datmo.core.util.misc_functions import get_filehash, \
-    create_unique_hash
+    create_unique_hash, mutually_exclusive
+from datmo.core.util.exceptions import MutuallyExclusiveArguments
 
 
 class TestMiscFunctions():
@@ -35,3 +36,21 @@ class TestMiscFunctions():
         result_hash_2 = create_unique_hash()
 
         assert result_hash_1 != result_hash_2
+
+    def test_mutually_exclusive(self):
+        mutually_exclusive_args = ["code_id", "commit_id"]
+        arguments_dictionary = {'code_id': 'test_code_id', 'environment_id': 'test_environment_id'}
+        dictionary = {}
+        mutually_exclusive(mutually_exclusive_args, arguments_dictionary, dictionary)
+        assert dictionary
+        assert dictionary['code_id'] == arguments_dictionary['code_id']
+
+        update_dictionary_failed = False
+        try:
+            mutually_exclusive_args = ["code_id", "commit_id"]
+            arguments_dictionary = {'code_id': 'test_code_id', 'commit_id': 'test_environment_id'}
+            dictionary = {}
+            mutually_exclusive(mutually_exclusive_args, arguments_dictionary, dictionary)
+        except MutuallyExclusiveArguments:
+            update_dictionary_failed = True
+        assert update_dictionary_failed

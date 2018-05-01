@@ -10,6 +10,9 @@ class DatmoModelNotInitializedException(Exception):
 class SessionDoesNotExistException(Exception):
     pass
 
+class InvalidOperation(Exception):
+    pass
+
 class ClassMethodNotFound(Exception):
     pass
 
@@ -26,6 +29,9 @@ class InputException(Exception):
     pass
 
 class EntityNotFound(Exception):
+    pass
+
+class MoreThanOneEntityFound(Exception):
     pass
 
 class EntityCollectionNotFound(Exception):
@@ -88,7 +94,10 @@ class TaskRunException(Exception):
 class DatmoFolderInWorkTree(Exception):
     pass
 
-class InvalidArgumentType(ArgumentException):
+class InvalidArgumentType(Exception):
+    pass
+
+class MutuallyExclusiveArguments(Exception):
     pass
 
 class TaskNotComplete(ArgumentException):

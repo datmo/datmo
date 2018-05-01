@@ -14,7 +14,7 @@ class BlitzDBDALDriver(DALDriver):
         if driver_type == "file":
             from blitzdb import FileBackend
             self.backend = FileBackend(connection_string)
-        else:
+        elif driver_type == "mongo":
             from pymongo import MongoClient
             from blitzdb.backends.mongo import Backend as MongoBackend
             c = MongoClient(connection_string)
@@ -54,11 +54,12 @@ class BlitzDBDALDriver(DALDriver):
             collection = 'user'
 
     def __reload(self):
-        for _, nested_index in self.backend.indexes.items():
-            for index, _ in nested_index.items():
-                # Only load from store if storage exists
-                if nested_index[index]._store:
-                    nested_index[index].load_from_store()
+        if hasattr(self.backend, "indexes"):
+            for _, nested_index in self.backend.indexes.items():
+                for index, _ in nested_index.items():
+                    # Only load from store if storage exists
+                    if nested_index[index]._store:
+                        nested_index[index].load_from_store()
 
     def get(self, collection, entity_id):
         self.__reload()
@@ -92,7 +93,7 @@ class BlitzDBDALDriver(DALDriver):
         elif collection == 'user':
             item = self.UserDocument(compatible_obj)
         else:
-            raise EntityCollectionNotFound()
+            raise EntityCollectionNotFound(collection)
         self.backend.save(item)
         self.backend.commit()
         return self.get(collection, item.pk)

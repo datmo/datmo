@@ -11,7 +11,8 @@ except NameError:
 from glob import glob
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import PathDoesNotExist
+from datmo.core.util.exceptions import PathDoesNotExist, \
+    MutuallyExclusiveArguments
 
 
 def printable_dict(input_dictionary):
@@ -85,3 +86,15 @@ def create_unique_hash(base_hash=None, salt=None):
                           datetime.datetime(1970, 1, 1)).total_seconds() * 100000
     sha1.update(salt+str(timestamp_microsec).encode('utf-8'))
     return sha1.hexdigest()
+
+def mutually_exclusive(mutually_exclusive_args, arguments_dictionary, dictionary):
+    mutually_exclusive_arg_count = 0
+    for arg in mutually_exclusive_args:
+        if arg in arguments_dictionary and arguments_dictionary[arg] is not None:
+            dictionary[arg] = arguments_dictionary[arg]
+            mutually_exclusive_arg_count+=1
+    if mutually_exclusive_arg_count>1:
+        raise MutuallyExclusiveArguments(__("error",
+                                            "util.misc_functions.mutually_exclusive",
+                                            ' '.join(mutually_exclusive_args)))
+    return

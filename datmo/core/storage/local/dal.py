@@ -10,8 +10,7 @@ from datmo.core.entity.file_collection import FileCollection
 from datmo.core.entity.task import Task
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.entity.user import User
-from datmo.core.util.exceptions import InputException, \
-    InvalidArgumentType
+from datmo.core.util.exceptions import InputException, EntityNotFound, MoreThanOneEntityFound, InvalidArgumentType
 from datmo.core.util.misc_functions import create_unique_hash
 
 
@@ -149,7 +148,7 @@ class EntityMethodsCRUD(object):
         if hasattr(datmo_entity,'to_dictionary'):
             dict_obj = datmo_entity.to_dictionary()
         else:
-            raise InvalidArgumentType()
+            dict_obj = self.entity_class(datmo_entity).to_dictionary()
         # create a unique hash from misc_functions.py
         # TODO: find efficient way to get previous hash for entity
         # latest_entity = self.query({"id": latest})
@@ -166,8 +165,7 @@ class EntityMethodsCRUD(object):
             dict_obj = datmo_entity.to_dictionary()
         else:
             if 'id' not in list(datmo_entity) or not datmo_entity['id']:
-                raise InputException(__("error",
-                                       "storage.local.dal.update"))
+                raise InputException(__("error", "storage.local.dal.update"))
             # Aggregate original object and new object into dict_obj var
             new_dict_obj = datmo_entity
             original_datmo_entity = self.get_by_id(datmo_entity['id'])
@@ -191,6 +189,16 @@ class EntityMethodsCRUD(object):
     def query(self, query_params):
         return [self.entity_class(item) for item in
                 self.driver.query(self.collection, query_params)]
+
+    def findOne(self, query_params):
+        results = self.query(query_params)
+        if len(results) == 0:
+            raise EntityNotFound()
+
+        if len(results) > 1:
+            raise MoreThanOneEntityFound()
+
+        return results[0]
 
 #
 # https://stackoverflow.com/questions/1713038/super-fails-with-error-typeerror-argument-1-must-be-type-not-classobj
