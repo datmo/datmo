@@ -32,11 +32,13 @@ class Environment():
             description of the environment given by user
             (default is "", blank description)
         created_at : datetime.datetime, optional
+            (default is datetime.utcnow(), at time of instantiation)
         updated_at : datetime.datetime, optional
+            (default is same as created_at, at time of instantiation)
 
     Attributes
     ----------
-    id : str
+    id : str or None
         the id of the entity
     model_id : str
         the parent model id for the entity

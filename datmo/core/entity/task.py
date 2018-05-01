@@ -41,7 +41,7 @@ class Task():
         log_filepath : str, optional
             log filepath relative to the project root
             (default is None, which means it isn't set yet)
-        start_time : datetime.datetime
+        start_time : datetime.datetime, optional
             timestamp for the beginning time of the task
             (default is None, which means it isn't set yet)
         after_snapshot_id : str, optional
@@ -93,12 +93,11 @@ class Task():
         task directory path relative to the project root
     log_filepath : str or None
         log filepath relative to the project root
-        (default is None, which means it isn't set yet)
-    start_time : datetime.datetime
+    start_time : datetime.datetime or None
         timestamp for the beginning time of the task
     after_snapshot_id : str or None
         snapshot created after the task is run
-    run_id : str
+    run_id : str or None
         run id for the run (different from environment id and task id)
     logs : str or None
         string output of logs
@@ -106,9 +105,9 @@ class Task():
         status of the current task
     results : dict or None
         dictionary containing output results from the task
-    end_time : datetime.datetime
+    end_time : datetime.datetime or None
         timestamp for the beginning time of the task
-    duration : float
+    duration : float or None
         float object signifying number of seconds for run
     created_at : datetime.datetime
     updated_at : datetime.datetime

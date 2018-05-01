@@ -45,17 +45,21 @@ class Snapshot():
             key, value pairs of metrics and statistics
         task_id : str, optional
             task id associated with snapshot
+            (default is None, means no task_id set)
         label : str, optional
             short description of snapshot
+            (default is None, means no label set)
         visible : bool, optional
             True if visible to user via list command else False
-            (the default is True to show users unless otherwise specified)
+            (default is True to show users unless otherwise specified)
         created_at : datetime.datetime, optional
+            (default is datetime.utcnow(), at time of instantiation)
         updated_at : datetime.datetime, optional
+            (default is same as created_at, at time of instantiation)
 
     Attributes
     ----------
-    id : str
+    id : str or None
         the id of the entity
     model_id : str
         the parent model id for the entity
@@ -79,7 +83,6 @@ class Snapshot():
         short description of snapshot
     visible : bool
         True if visible to user via list command else False
-        (the default is True to show users unless otherwise specified)
     created_at : datetime.datetime
     updated_at : datetime.datetime
     """

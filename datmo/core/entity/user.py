@@ -19,7 +19,9 @@ class User():
         email : str
             the email of the user
         created_at : datetime.datetime, optional
+            (default is datetime.utcnow(), at time of instantiation)
         updated_at : datetime.datetime, optional
+            (default is same as created_at, at time of instantiation)
 
     Attributes
     ----------

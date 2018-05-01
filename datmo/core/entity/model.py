@@ -18,12 +18,15 @@ class Model():
             name given by the user at creation
         description : str, optional
             description given by the user at creation
+            (default is None, which means no description set)
         created_at : datetime.datetime, optional
+            (default is datetime.utcnow(), at time of instantiation)
         updated_at : datetime.datetime, optional
+            (default is same as created_at, at time of instantiation)
 
     Attributes
     ----------
-    id : str
+    id : str or None
         the id of the entity
     name : str
         name given by the user at creation

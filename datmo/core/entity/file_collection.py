@@ -23,11 +23,13 @@ class FileCollection():
         path : str
             path to collection relative to project root
         created_at : datetime.datetime, optional
+            (default is datetime.utcnow(), at time of instantiation)
         updated_at : datetime.datetime, optional
+            (default is same as created_at, at time of instantiation)
 
     Attributes
     ----------
-    id : str
+    id : str or None
         the id of the entity
     model_id : str
         the parent model id for the entity
@@ -39,7 +41,6 @@ class FileCollection():
         path to collection relative to project root
     created_at : datetime.datetime
     updated_at : datetime.datetime
-
     """
     def __init__(self, dictionary):
         self.id = dictionary.get('id', None)
