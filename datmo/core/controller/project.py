@@ -101,6 +101,8 @@ class ProjectController(BaseController):
                                                           self.model.name)
         image_id = images[0].id if images else None
 
+        import pdb; pdb.set_trace()
+
         # Remove Datmo code_driver references
         self.code_driver.delete_code_refs_dir()
 

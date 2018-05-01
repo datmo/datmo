@@ -7,7 +7,6 @@ import prettytable
 from datmo.core.util.i18n import get as __
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
-from datmo.core.util.exceptions import RequiredArgumentMissing
 
 
 class TaskCommand(ProjectCommand):
@@ -53,18 +52,17 @@ class TaskCommand(ProjectCommand):
                 kwargs['environment_definition_filepath']
         }
 
-        cmd = []
         if not isinstance(kwargs['cmd'], list):
             if platform.system() == "Windows":
-                cmd = kwargs['cmd']
+                kwargs['cmd'] = kwargs['cmd']
             else:
-                cmd = shlex.split(kwargs['cmd'])
+                kwargs['cmd'] = shlex.split(kwargs['cmd'])
 
         task_dict = {
             "gpu": kwargs['gpu'],
             "ports": kwargs['ports'],
             "interactive": kwargs['interactive'],
-            "command": cmd
+            "command": kwargs['cmd']
         }
 
         # Create the task object
