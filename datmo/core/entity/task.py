@@ -80,31 +80,31 @@ class Task():
         id of session associated with task
     command : str
         command that is used by the task
-    before_snapshot_id : str
+    before_snapshot_id : str or None
         snapshot created before the task is run
-    ports : list
+    ports : list or None
         list of string mappings from host system (left) to environment (right)
         (e.g. ["9999:9999", "8888:8888"])
     gpu : bool
         boolean to signify if run requires gpu
     interactive : bool
         boolean to signify if should be run in interactive mode
-    task_dirpath : str
+    task_dirpath : str or None
         task directory path relative to the project root
-    log_filepath : str
+    log_filepath : str or None
         log filepath relative to the project root
         (default is None, which means it isn't set yet)
     start_time : datetime.datetime
         timestamp for the beginning time of the task
-    after_snapshot_id : str
+    after_snapshot_id : str or None
         snapshot created after the task is run
     run_id : str
         run id for the run (different from environment id and task id)
-    logs : str
+    logs : str or None
         string output of logs
-    status : str
+    status : str or None
         status of the current task
-    results : dict
+    results : dict or None
         dictionary containing output results from the task
     end_time : datetime.datetime
         timestamp for the beginning time of the task

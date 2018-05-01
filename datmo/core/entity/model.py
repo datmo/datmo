@@ -42,7 +42,6 @@ class Model():
         self.created_at = dictionary.get('created_at', datetime.utcnow())
         self.updated_at = dictionary.get('updated_at', self.created_at)
 
-
         # self.best_snapshot_id = best_snapshot_id
         # self.owner_id = owner_id
         # self.base_model_id = base_model_id

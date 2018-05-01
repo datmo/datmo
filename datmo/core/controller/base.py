@@ -158,7 +158,7 @@ class BaseController(object):
         if not self._is_initialized:
           if self.code_driver.is_initialized and \
               self.environment_driver.is_initialized and \
-              self.file_driver.is_initialized:
+                  self.file_driver.is_initialized:
               if self.model:
                   self._is_initialized = True
         return self._is_initialized
