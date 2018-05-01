@@ -88,7 +88,10 @@ class TaskRunException(Exception):
 class DatmoFolderInWorkTree(Exception):
     pass
 
-class InvalidArgumentType(ArgumentException):
+class InvalidArgumentType(Exception):
+    pass
+
+class MutuallyExclusiveArguments(Exception):
     pass
 
 class TaskNotComplete(ArgumentException):
