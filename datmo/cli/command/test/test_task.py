@@ -201,6 +201,7 @@ class TestTaskCommand():
         assert task_stop_command == True
 
     def test_task_stop_invalid_task_id(self):
+        self.__set_variables()
         # Passing wrong task id
         self.task.parse([
             "task",

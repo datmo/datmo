@@ -62,7 +62,7 @@ class TestProjectController():
         result = self.project.cleanup()
         assert not self.project.code_driver.exists_code_refs_dir()
         assert not self.project.file_driver.exists_datmo_file_structure()
-        assert not self.project.environment_driver.list_images("datmo-test")
+        assert not self.project.environment_driver.list_images("datmo-test2")
         # Ensure that containers built with this image do not exist
         # assert not self.project.environment_driver.list_containers(filters={
         #     "ancestor": image_id
