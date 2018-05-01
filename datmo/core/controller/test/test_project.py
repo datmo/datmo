@@ -58,7 +58,7 @@ class TestProjectController():
         assert result == True
 
     def test_cleanup(self):
-        self.project.init("test2", "test description")
+        self.project.init("test", "test description")
         result = self.project.cleanup()
         assert not self.project.code_driver.exists_code_refs_dir()
         assert not self.project.file_driver.exists_datmo_file_structure()
