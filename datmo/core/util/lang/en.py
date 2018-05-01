@@ -13,7 +13,10 @@ MESSAGES = {
         "cli.snapshot.create": "Creating a new snapshot",
         "cli.snapshot.delete": "Deleting a snapshot",
         "cli.task.run": "Running a new task",
-        "cli.task.stop": "Stopping task: %s"
+        "cli.task.stop": "Stopping task: %s",
+        "cli.session.create": "Created session '%s'",
+        "cli.session.select": "Selecting new session '%s'",
+        "cli.session.delete": "Removed session '%s'",
     },
     "warn": {
         "cli.general.internet": "Internet connectivity doesn't exist",
@@ -113,6 +116,7 @@ MESSAGES = {
         "controller.task.run": "Error creating task directory for run: %s",
         "controller.task.stop.arg": "Stop argument %s not present in input",
         "controller.task.delete.arg": "Delete argument %s not present in input",
+        "controller.session.delete.default": "Can not delete default session",
         "storage.local.dal.update": "Entity id not provided in the input for update",
     },
     "debug": {

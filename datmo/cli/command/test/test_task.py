@@ -42,12 +42,13 @@ class TestTaskCommand():
         pass
 
     def __set_variables(self):
-        self.init = ProjectCommand(self.temp_dir, self.cli_helper)
-        self.init.parse([
+        init = ProjectCommand(self.temp_dir, self.cli_helper)
+        init.parse([
             "init",
             "--name", "foobar",
             "--description", "test model"])
-        self.init.execute()
+        init.execute()
+
         self.task = TaskCommand(self.temp_dir, self.cli_helper)
 
         # Create environment_driver definition
@@ -64,9 +65,8 @@ class TestTaskCommand():
             failed = True
         assert failed
 
-    def test_datmo_task_run(self):
+    def test_datmo_task_run_should_fail1(self):
         self.__set_variables()
-
         # Test failure case
         self.task.parse([
             "task",
@@ -79,6 +79,8 @@ class TestTaskCommand():
             failed = True
         assert failed
 
+    def test_datmo_task_run_should_fail2(self):
+        self.__set_variables()
         # Test failure case execute
         test_command = ["yo", "yo"]
         self.task.parse([
@@ -89,6 +91,9 @@ class TestTaskCommand():
         result = self.task.execute()
         assert not result
 
+
+    def test_datmo_task_run(self):
+        self.__set_variables()
         # Test success case
         test_command = ["sh", "-c", "echo accuracy:0.45"]
         test_gpu = True # TODO: implement in controller
@@ -195,12 +200,12 @@ class TestTaskCommand():
         task_stop_command = self.task.execute()
         assert task_stop_command == True
 
+    def test_task_stop_invalid_task_id(self):
         # Passing wrong task id
-        test_task_id = "task_id"
         self.task.parse([
             "task",
             "stop",
-            "--id", test_task_id
+            "--id", "invalid-task-id"
         ])
 
         # test when wrong task id is passed to stop it

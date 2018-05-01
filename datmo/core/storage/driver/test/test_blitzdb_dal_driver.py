@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 
 import os
 import tempfile
+import datetime
 import platform
 
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
@@ -165,4 +166,34 @@ class TestBlitzDBDALDriver():
         # Test to ensure the intermediate object is found
         assert test_obj_3['id'] == test_obj['id']
 
+    def test_query_gte_int(self):
+        collection = 'snapshot'
+        self.database.set(collection, {"range_query": 1 })
+        self.database.set(collection, {"range_query": 2 })
+        self.database.set(collection, {"range_query": 3 })
+
+        items = self.database.query(collection, {"range_query": {"$gte": 2 }})
+        assert len(items) == 2
+
+    def test_query_gte_date_str(self):
+        collection = 'snapshot'
+        self.database.set(collection, {"range_query2": datetime.datetime(2017,1,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') })
+        self.database.set(collection, {"range_query2": datetime.datetime(2017,2,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') })
+        self.database.set(collection, {"range_query2": datetime.datetime(2017,3,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') })
+
+        items = self.database.query(collection,{"range_query2": {"$gte": datetime.datetime(2017,2,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') }})
+        assert len(items) == 2
+
+    def test_query_gte_datetime_should_fail(self):
+        collection = 'snapshot'
+        self.database.set(collection, {"range_query3": datetime.datetime(2017,1,1) })
+        self.database.set(collection, {"range_query3": datetime.datetime(2017,2,1) })
+        self.database.set(collection, {"range_query3": datetime.datetime(2017,3,1) })
+
+        failed = False
+        try:
+            items = self.database.query(collection,{"range_query2": {"$gte": datetime.datetime(2017,2,1) }})
+        except:
+            failed = True
+        assert failed
 

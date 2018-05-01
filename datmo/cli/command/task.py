@@ -7,6 +7,7 @@ import prettytable
 from datmo.core.util.i18n import get as __
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
+from datmo.core.util.exceptions import RequiredArgumentMissing
 
 
 class TaskCommand(ProjectCommand):
@@ -62,7 +63,7 @@ class TaskCommand(ProjectCommand):
             "gpu": kwargs['gpu'],
             "ports": kwargs['ports'],
             "interactive": kwargs['interactive'],
-            "command": kwargs['cmd']
+            "command": cmd
         }
 
         # Create the task object
