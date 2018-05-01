@@ -249,8 +249,9 @@ def ls(session_id=None, filter=None, home=None):
     # If filter is present then use it and only add those that pass filter
     for core_snapshot_obj in core_snapshot_objs:
         if core_snapshot_obj.visible:
-            if filter and (filter in core_snapshot_obj.message
-                             or filter in core_snapshot_obj.label):
+            if filter and \
+                    (filter in core_snapshot_obj.message) \
+                    or (core_snapshot_obj.label != None and filter in core_snapshot_obj.label):
                 filtered_core_snapshot_objs.append(core_snapshot_obj)
 
     # Return Snapshot entities

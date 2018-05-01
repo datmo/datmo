@@ -22,7 +22,7 @@ class TestEnvironment():
         for k, v in self.input_dict.items():
             assert getattr(environment_entity, k) == v
         assert environment_entity.id == None
-        assert environment_entity.description == ""
+        assert environment_entity.description == None
         assert environment_entity.created_at
         assert environment_entity.updated_at
         assert environment_entity.language
@@ -33,7 +33,7 @@ class TestEnvironment():
 
         for k, v in self.input_dict.items():
             assert getattr(environment_entity, k) == v
-        assert environment_entity.description == ""
+        assert environment_entity.description == None
         assert environment_entity.created_at
         assert environment_entity.updated_at
         assert environment_entity.language

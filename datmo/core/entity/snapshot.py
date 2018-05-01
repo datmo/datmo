@@ -73,9 +73,9 @@ class Snapshot():
         key, value pairs of configurations
     stats : dict
         key, value pairs of metrics and statistics
-    task_id : str
+    task_id : str or None
         task id associated with snapshot
-    label : str
+    label : str or None
         short description of snapshot
     visible : bool
         True if visible to user via list command else False
@@ -95,8 +95,8 @@ class Snapshot():
         self.config = dictionary['config']
         self.stats = dictionary['stats']
 
-        self.task_id = dictionary.get('task_id', "")
-        self.label = dictionary.get('label', "")
+        self.task_id = dictionary.get('task_id', None)
+        self.label = dictionary.get('label', None)
         self.visible = dictionary.get('visible', True)
 
         self.created_at = dictionary.get('created_at', datetime.utcnow())

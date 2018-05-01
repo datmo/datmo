@@ -23,7 +23,7 @@ class User():
 
     Attributes
     ----------
-    id : str
+    id : str or None
         the id of the entity
     name : str
         the name of the user

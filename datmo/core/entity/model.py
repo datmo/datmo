@@ -27,7 +27,7 @@ class Model():
         the id of the entity
     name : str
         name given by the user at creation
-    description : str
+    description : str or None
         description given by the user at creation
     created_at : datetime.datetime
     updated_at : datetime.datetime
@@ -38,7 +38,7 @@ class Model():
         # TODO: figure out User object and handling of owner in Project
         # self.owner_id = dictionary['owner_id']
 
-        self.description = dictionary.get('description', "")
+        self.description = dictionary.get('description', None)
         self.created_at = dictionary.get('created_at', datetime.utcnow())
         self.updated_at = dictionary.get('updated_at', self.created_at)
 
