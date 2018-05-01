@@ -24,11 +24,11 @@ class Task():
             command that is used by the task
         before_snapshot_id : str, optional
             snapshot created before the task is run
-            (default is "", which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         ports : list, optional
             list of string mappings from host system (left) to environment (right)
             (e.g. ["9999:9999", "8888:8888"])
-            (default is [], which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         gpu : bool, optional
             boolean to signify if run requires gpu
             (default is False, which means no gpu unless specified)
@@ -37,28 +37,28 @@ class Task():
             (default is False, which means no interactive mode unless specified)
         task_dirpath : str, optional
             task directory path relative to the project root
-            (default is "", which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         log_filepath : str, optional
             log filepath relative to the project root
-            (default is "", which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         start_time : datetime.datetime
             timestamp for the beginning time of the task
             (default is None, which means it isn't set yet)
         after_snapshot_id : str, optional
             snapshot created after the task is run
-            (default is "", which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         run_id : str, optional
             run id for the run (different from environment id and task id)
-            (default is "", which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         logs : str, optional
             string output of logs
-            (default is "", which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         status : str, optional
             status of the current task
-            (default is "", which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         results : dict, optional
             dictionary containing output results from the task
-            (default is {}, which means it isn't set yet)
+            (default is None, which means it isn't set yet)
         end_time : datetime.datetime, optional
             timestamp for the beginning time of the task
             (default is None, which means it isn't set yet)
@@ -122,20 +122,20 @@ class Task():
         self.command = dictionary['command']
 
         # Pre-Execution
-        self.before_snapshot_id = dictionary.get('before_snapshot_id', "")
-        self.ports = dictionary.get('ports', [])
+        self.before_snapshot_id = dictionary.get('before_snapshot_id', None)
+        self.ports = dictionary.get('ports', None)
         self.gpu = dictionary.get('gpu', False)
         self.interactive = dictionary.get('interactive', False)
-        self.task_dirpath = dictionary.get('task_dirpath', "")
-        self.log_filepath = dictionary.get('log_filepath', "")
+        self.task_dirpath = dictionary.get('task_dirpath', None)
+        self.log_filepath = dictionary.get('log_filepath', None)
         self.start_time = dictionary.get('start_time', None)
 
         # Post-Execution
-        self.after_snapshot_id = dictionary.get('after_snapshot_id', "")
-        self.run_id = dictionary.get('run_id', "")
-        self.logs = dictionary.get('logs', "")
-        self.status = dictionary.get('status', "")
-        self.results = dictionary.get('results', {})
+        self.after_snapshot_id = dictionary.get('after_snapshot_id', None)
+        self.run_id = dictionary.get('run_id', None)
+        self.logs = dictionary.get('logs', None)
+        self.status = dictionary.get('status', None)
+        self.results = dictionary.get('results', None)
         self.end_time = dictionary.get('end_time', None)
         self.duration = dictionary.get('duration', None)
 

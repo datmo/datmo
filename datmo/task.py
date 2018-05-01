@@ -28,17 +28,17 @@ class Task():
         id of session associated with task
     command : str
         command that is used by the task
-    status : str
+    status : str or None
         status of the current task
-    start_time : datetime.datetime
+    start_time : datetime.datetime or None
         timestamp for the beginning time of the task
-    end_time : datetime.datetime
+    end_time : datetime.datetime or None
         timestamp for the end time of the task
-    duration : datetime.timedelta
+    duration : datetime.timedelta or None
         delta between start and end times
-    logs : str
+    logs : str or None
         string output of logs
-    results : dict
+    results : dict or None
         dictionary containing output results from the task
 
     Methods

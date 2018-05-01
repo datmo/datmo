@@ -43,12 +43,12 @@ class TestTaskModule():
 
         for k, v in input_dict.items():
             assert getattr(task_entity, k) == v
-        assert task_entity.status == ""
+        assert task_entity.status == None
         assert task_entity.start_time == None
         assert task_entity.end_time == None
         assert task_entity.duration == None
-        assert task_entity.logs == ""
-        assert task_entity.results == {}
+        assert task_entity.logs == None
+        assert task_entity.results == None
 
     def test_run(self):
         # 1) Run task with no commit or code available (cannot save states before), string command
