@@ -159,7 +159,6 @@ class SnapshotController(BaseController):
             raise RequiredArgumentMissing(__("error",
                                              "controller.snapshot.create.arg",
                                              "message"))
-
         # Code setup
         self._code_setup(incoming_dictionary, create_dict)
 
@@ -306,7 +305,6 @@ class SnapshotController(BaseController):
         create_dict : dict
             dictionary for creating the Snapshot entity
         """
-
         language = incoming_dictionary.get("language", None)
         if "environment_id" in incoming_dictionary:
             create_dict['environment_id'] = incoming_dictionary['environment_id']

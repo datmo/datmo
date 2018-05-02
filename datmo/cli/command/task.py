@@ -25,12 +25,13 @@ class TaskCommand(ProjectCommand):
             is the environment port available during a run.
         """)
         # run.add_argument("--data", nargs="*", dest="data", type=str, help="Path for data to be used during the Task")
-        run.add_argument("--env-def", dest="environment_definition_filepath", default="",
+        run.add_argument("--env-def", dest="environment_definition_filepath", default=None,
                          nargs="?", type=str,
                          help="Pass in the Dockerfile with which you want to build the environment")
         run.add_argument("--interactive", dest="interactive", action="store_true",
                          help="Run the environment in interactive mode (keeps STDIN open)")
-        run.add_argument("cmd", nargs="?", default=None)
+        run.add_argument("--cmd", "-c", dest="cmd", default=None, nargs="?",
+                         help="Pass in the command to be run inside container")
 
         # Task list arguments
         ls = subcommand_parsers.add_parser("ls", help="List tasks")
@@ -47,15 +48,14 @@ class TaskCommand(ProjectCommand):
         self.cli_helper.echo(__("info", "cli.task.run"))
 
         # Create input dictionaries
-        snapshot_dict = {
-            "environment_definition_filepath":
+        snapshot_dict = {}
+        if kwargs['environment_definition_filepath']:
+            snapshot_dict["environment_definition_filepath"] =\
                 kwargs['environment_definition_filepath']
-        }
-
         if not isinstance(kwargs['cmd'], list):
             if platform.system() == "Windows":
                 kwargs['cmd'] = kwargs['cmd']
-            else:
+            elif type(kwargs['cmd']) is str:
                 kwargs['cmd'] = shlex.split(kwargs['cmd'])
 
         task_dict = {

@@ -13,7 +13,6 @@ from __future__ import unicode_literals
 #     import builtins as __builtin__
 
 import os
-import shutil
 import tempfile
 import platform
 from io import open
@@ -86,7 +85,7 @@ class TestTaskCommand():
         self.task.parse([
             "task",
             "run",
-            test_command
+            "--cmd", test_command
         ])
         result = self.task.execute()
         assert not result
@@ -108,7 +107,7 @@ class TestTaskCommand():
             "--ports", test_ports,
             "--env-def", test_dockerfile,
             "--interactive",
-            test_command
+            "--cmd", test_command
         ])
 
         # test for desired side effects
@@ -126,6 +125,27 @@ class TestTaskCommand():
         assert "accuracy" in result.logs
         assert result.results
         assert result.results == {"accuracy": "0.45"}
+        assert result.status == "SUCCESS"
+
+    def test_datmo_task_run_notebook(self):
+        self.__set_variables()
+        # Test success case
+        test_command = ["jupyter", "notebook", "list"]
+        test_ports = "8888:8888"
+
+        self.task.parse([
+            "task",
+            "run",
+            "--ports", test_ports,
+            "--cmd", test_command
+        ])
+
+        # test proper execution of task run command
+        result = self.task.execute()
+        assert result
+        assert isinstance(result, CoreTask)
+        assert result.logs
+        assert "Currently running servers" in result.logs
         assert result.status == "SUCCESS"
 
     def test_task_run_invalid_arg(self):
@@ -182,7 +202,7 @@ class TestTaskCommand():
             "--ports", test_ports,
             "--env-def", test_dockerfile,
             "--interactive",
-            test_command
+            "--cmd", test_command
         ])
 
         test_task_obj = self.task.execute()

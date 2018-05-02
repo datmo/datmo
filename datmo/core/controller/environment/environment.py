@@ -70,11 +70,10 @@ class EnvironmentController(BaseController):
         create_dict = {
             "model_id": self.model.id,
         }
-
         create_dict["driver_type"] = self.environment_driver.type
         create_dict["language"] = dictionary.get("language", None)
 
-        if "definition_filepath" in dictionary:
+        if "definition_filepath" in dictionary and dictionary['definition_filepath']:
             original_definition_filepath = dictionary['definition_filepath']
             # Split up the given path and save definition filename
             definition_path, definition_filename = \
