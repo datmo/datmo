@@ -32,7 +32,8 @@ from datmo.core.util.exceptions import ProjectNotInitializedException
 class TestTaskCommand():
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -43,17 +44,13 @@ class TestTaskCommand():
 
     def __set_variables(self):
         init = ProjectCommand(self.temp_dir, self.cli_helper)
-        init.parse([
-            "init",
-            "--name", "foobar",
-            "--description", "test model"])
+        init.parse(["init", "--name", "foobar", "--description", "test model"])
         init.execute()
 
         self.task = TaskCommand(self.temp_dir, self.cli_helper)
 
         # Create environment_driver definition
-        env_def_path = os.path.join(self.temp_dir,
-                                    "Dockerfile")
+        env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
@@ -68,10 +65,7 @@ class TestTaskCommand():
     def test_datmo_task_run_should_fail1(self):
         self.__set_variables()
         # Test failure case
-        self.task.parse([
-            "task",
-            "run"
-        ])
+        self.task.parse(["task", "run"])
         failed = False
         try:
             _ = self.task.execute()
@@ -83,32 +77,22 @@ class TestTaskCommand():
         self.__set_variables()
         # Test failure case execute
         test_command = ["yo", "yo"]
-        self.task.parse([
-            "task",
-            "run",
-            test_command
-        ])
+        self.task.parse(["task", "run", test_command])
         result = self.task.execute()
         assert not result
-
 
     def test_datmo_task_run(self):
         self.__set_variables()
         # Test success case
         test_command = ["sh", "-c", "echo accuracy:0.45"]
-        test_gpu = True # TODO: implement in controller
+        test_gpu = True  # TODO: implement in controller
         test_ports = "8888:8888"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         test_interactive = True
 
         self.task.parse([
-            "task",
-            "run",
-            "--gpu",
-            "--ports", test_ports,
-            "--env-def", test_dockerfile,
-            "--interactive",
-            test_command
+            "task", "run", "--gpu", "--ports", test_ports, "--env-def",
+            test_dockerfile, "--interactive", test_command
         ])
 
         # test for desired side effects
@@ -132,10 +116,7 @@ class TestTaskCommand():
         self.__set_variables()
         exception_thrown = False
         try:
-          self.task.parse([
-            "task",
-            "run"
-            "--foobar", "foobar"])
+            self.task.parse(["task", "run" "--foobar", "foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown
@@ -144,11 +125,7 @@ class TestTaskCommand():
         self.__set_variables()
         test_session_id = 'test_session_id'
 
-        self.task.parse([
-            "task",
-            "ls",
-            "--session-id", test_session_id
-        ])
+        self.task.parse(["task", "ls", "--session-id", test_session_id])
 
         # test for desired side effects
         assert self.task.args.session_id == test_session_id
@@ -160,10 +137,7 @@ class TestTaskCommand():
         self.__set_variables()
         exception_thrown = False
         try:
-          self.task.parse([
-            "task",
-            "ls"
-            "--foobar", "foobar"])
+            self.task.parse(["task", "ls" "--foobar", "foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown
@@ -176,22 +150,13 @@ class TestTaskCommand():
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
 
         self.task.parse([
-            "task",
-            "run",
-            "--gpu",
-            "--ports", test_ports,
-            "--env-def", test_dockerfile,
-            "--interactive",
-            test_command
+            "task", "run", "--gpu", "--ports", test_ports, "--env-def",
+            test_dockerfile, "--interactive", test_command
         ])
 
         test_task_obj = self.task.execute()
 
-        self.task.parse([
-            "task",
-            "stop",
-            "--id", test_task_obj.id
-        ])
+        self.task.parse(["task", "stop", "--id", test_task_obj.id])
 
         # test for desired side effects
         assert self.task.args.id == test_task_obj.id
@@ -203,11 +168,7 @@ class TestTaskCommand():
     def test_task_stop_invalid_task_id(self):
         self.__set_variables()
         # Passing wrong task id
-        self.task.parse([
-            "task",
-            "stop",
-            "--id", "invalid-task-id"
-        ])
+        self.task.parse(["task", "stop", "--id", "invalid-task-id"])
 
         # test when wrong task id is passed to stop it
         result = self.task.execute()
@@ -217,10 +178,7 @@ class TestTaskCommand():
         self.__set_variables()
         exception_thrown = False
         try:
-          self.task.parse([
-            "task",
-            "stop"
-            "--foobar", "foobar"])
+            self.task.parse(["task", "stop" "--foobar", "foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown

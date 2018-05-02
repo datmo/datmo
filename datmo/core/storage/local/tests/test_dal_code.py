@@ -20,7 +20,8 @@ from datmo.core.util.exceptions import EntityNotFound
 class TestLocalDAL():
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -89,7 +90,8 @@ class TestLocalDAL():
         updated_code = self.dal.code.update(updated_code_input_dict)
         assert code.id == updated_code.id
         assert code.updated_at < updated_code.updated_at
-        assert updated_code.driver_type == updated_code_input_dict['driver_type']
+        assert updated_code.driver_type == updated_code_input_dict[
+            'driver_type']
         assert updated_code.created_at == updated_code_input_dict['created_at']
 
     def test_delete_code(self):

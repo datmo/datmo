@@ -30,7 +30,8 @@ from datmo.core.util.exceptions import ProjectNotInitializedException, \
 class TestSnapshot():
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -41,34 +42,28 @@ class TestSnapshot():
 
     def __set_variables(self):
         self.init = ProjectCommand(self.temp_dir, self.cli_helper)
-        self.init.parse([
-            "init",
-            "--name", "foobar",
-            "--description", "test model"])
+        self.init.parse(
+            ["init", "--name", "foobar", "--description", "test model"])
         self.init.execute()
         self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
 
         # Create environment_driver definition
-        self.env_def_path = os.path.join(self.temp_dir,
-                                         "Dockerfile")
+        self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(self.env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         # Create config
-        self.config_filepath = os.path.join(self.snapshot.home,
-                                       "config.json")
+        self.config_filepath = os.path.join(self.snapshot.home, "config.json")
         with open(self.config_filepath, "w") as f:
             f.write(to_unicode(str("{}")))
 
         # Create stats
-        self.stats_filepath = os.path.join(self.snapshot.home,
-                                      "stats.json")
+        self.stats_filepath = os.path.join(self.snapshot.home, "stats.json")
         with open(self.stats_filepath, "w") as f:
             f.write(to_unicode(str("{}")))
 
         # Create test file
-        self.filepath = os.path.join(self.snapshot.home,
-                                           "file.txt")
+        self.filepath = os.path.join(self.snapshot.home, "file.txt")
         with open(self.filepath, "w") as f:
             f.write(to_unicode(str("test")))
 
@@ -95,15 +90,24 @@ class TestSnapshot():
         self.snapshot.parse([
             "snapshot",
             "create",
-            "--message", test_message,
-            "--label", test_label,
-            "--session-id", test_session_id,
-            "--task-id", test_task_id,
-            "--code-id", test_code_id,
-            "--environment-def-path", test_environment_def_path,
-            "--config-filepath", test_config_filepath,
-            "--stats-filepath", test_stats_filepath,
-            "--filepaths", test_filepaths[0],
+            "--message",
+            test_message,
+            "--label",
+            test_label,
+            "--session-id",
+            test_session_id,
+            "--task-id",
+            test_task_id,
+            "--code-id",
+            test_code_id,
+            "--environment-def-path",
+            test_environment_def_path,
+            "--config-filepath",
+            test_config_filepath,
+            "--stats-filepath",
+            test_stats_filepath,
+            "--filepaths",
+            test_filepaths[0],
         ])
 
         # test for desired side effects
@@ -141,14 +145,10 @@ class TestSnapshot():
         exception_thrown = False
         try:
             self.snapshot.parse([
-                "snapshot",
-                "create",
-                "--message", test_message,
-                "--label", test_label,
-                "--session-id", test_session_id,
-                "--task-id", test_task_id,
-                "--code-id", test_code_id,
-                "--commit-id", test_commit_id
+                "snapshot", "create", "--message", test_message, "--label",
+                test_label, "--session-id", test_session_id, "--task-id",
+                test_task_id, "--code-id", test_code_id, "--commit-id",
+                test_commit_id
             ])
             _ = self.snapshot.execute()
         except MutuallyExclusiveArguments:
@@ -161,12 +161,18 @@ class TestSnapshot():
             self.snapshot.parse([
                 "snapshot",
                 "create",
-                "--message", test_message,
-                "--label", test_label,
-                "--session-id", test_session_id,
-                "--task-id", test_task_id,
-                "--environment-id", test_environment_id,
-                "--environment-def-path", test_environment_def_path,
+                "--message",
+                test_message,
+                "--label",
+                test_label,
+                "--session-id",
+                test_session_id,
+                "--task-id",
+                test_task_id,
+                "--environment-id",
+                test_environment_id,
+                "--environment-def-path",
+                test_environment_def_path,
             ])
             _ = self.snapshot.execute()
         except MutuallyExclusiveArguments:
@@ -179,12 +185,18 @@ class TestSnapshot():
             self.snapshot.parse([
                 "snapshot",
                 "create",
-                "--message", test_message,
-                "--label", test_label,
-                "--session-id", test_session_id,
-                "--task-id", test_task_id,
-                "--file-collection-id", test_file_collection_id,
-                "--filepaths", test_filepaths[0],
+                "--message",
+                test_message,
+                "--label",
+                test_label,
+                "--session-id",
+                test_session_id,
+                "--task-id",
+                test_task_id,
+                "--file-collection-id",
+                test_file_collection_id,
+                "--filepaths",
+                test_filepaths[0],
             ])
             _ = self.snapshot.execute()
         except MutuallyExclusiveArguments:
@@ -197,12 +209,18 @@ class TestSnapshot():
             self.snapshot.parse([
                 "snapshot",
                 "create",
-                "--message", test_message,
-                "--label", test_label,
-                "--session-id", test_session_id,
-                "--task-id", test_task_id,
-                "--config-filename", test_config_filename,
-                "--config-filepath", test_config_filepath,
+                "--message",
+                test_message,
+                "--label",
+                test_label,
+                "--session-id",
+                test_session_id,
+                "--task-id",
+                test_task_id,
+                "--config-filename",
+                test_config_filename,
+                "--config-filepath",
+                test_config_filepath,
             ])
             _ = self.snapshot.execute()
         except MutuallyExclusiveArguments:
@@ -215,26 +233,27 @@ class TestSnapshot():
             self.snapshot.parse([
                 "snapshot",
                 "create",
-                "--message", test_message,
-                "--label", test_label,
-                "--session-id", test_session_id,
-                "--task-id", test_task_id,
-                "--stats-filename", test_stats_filename,
-                "--stats-filepath", test_stats_filepath,
+                "--message",
+                test_message,
+                "--label",
+                test_label,
+                "--session-id",
+                test_session_id,
+                "--task-id",
+                test_task_id,
+                "--stats-filename",
+                test_stats_filename,
+                "--stats-filepath",
+                test_stats_filepath,
             ])
             _ = self.snapshot.execute()
         except MutuallyExclusiveArguments:
             exception_thrown = True
         assert exception_thrown
 
-
     def test_datmo_snapshot_create_default(self):
         self.__set_variables()
-        self.snapshot.parse([
-            "snapshot",
-            "create",
-            "-m", "my test snapshot"
-        ])
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
 
         snapshot_id_2 = self.snapshot.execute()
         assert snapshot_id_2
@@ -243,10 +262,7 @@ class TestSnapshot():
         self.__set_variables()
         exception_thrown = False
         try:
-          self.snapshot.parse([
-            "snapshot",
-            "create"
-            "--foobar","foobar"])
+            self.snapshot.parse(["snapshot", "create" "--foobar", "foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown
@@ -255,20 +271,12 @@ class TestSnapshot():
         self.__set_variables()
 
         # Test when optional parameters are not given
-        self.snapshot.parse([
-            "snapshot",
-            "create",
-            "-m", "my test snapshot"
-        ])
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
 
         snapshot_id = self.snapshot.execute()
 
         # Test when optional parameters are not given
-        self.snapshot.parse([
-            "snapshot",
-            "delete",
-            "--id", snapshot_id
-        ])
+        self.snapshot.parse(["snapshot", "delete", "--id", snapshot_id])
 
         result = self.snapshot.execute()
         assert result
@@ -277,10 +285,7 @@ class TestSnapshot():
         self.__set_variables()
         exception_thrown = False
         try:
-          self.snapshot.parse([
-            "snapshot",
-            "delete"
-            "--foobar","foobar"])
+            self.snapshot.parse(["snapshot", "delete" "--foobar", "foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown
@@ -289,29 +294,19 @@ class TestSnapshot():
         self.__set_variables()
 
         # Test when optional parameters are not given
-        self.snapshot.parse([
-            "snapshot",
-            "create",
-            "-m", "my test snapshot"
-        ])
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
 
         self.snapshot.execute()
 
         # Test when optional parameters are not given
-        self.snapshot.parse([
-            "snapshot",
-            "ls"
-        ])
+        self.snapshot.parse(["snapshot", "ls"])
 
         result = self.snapshot.execute()
 
         assert result
 
         # Test when optional parameters are not given
-        self.snapshot.parse([
-            "snapshot",
-            "ls", "-a"
-        ])
+        self.snapshot.parse(["snapshot", "ls", "-a"])
 
         result = self.snapshot.execute()
 
@@ -321,10 +316,7 @@ class TestSnapshot():
         self.__set_variables()
         exception_thrown = False
         try:
-          self.snapshot.parse([
-            "snapshot",
-            "checkout"
-            "--foobar","foobar"])
+            self.snapshot.parse(["snapshot", "checkout" "--foobar", "foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown
@@ -333,20 +325,12 @@ class TestSnapshot():
         self.__set_variables()
 
         # Test when optional parameters are not given
-        self.snapshot.parse([
-            "snapshot",
-            "create",
-            "-m", "my test snapshot"
-        ])
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
 
         snapshot_id = self.snapshot.execute()
 
         # Test when optional parameters are not given
-        self.snapshot.parse([
-            "snapshot",
-            "checkout",
-            "--id", snapshot_id
-        ])
+        self.snapshot.parse(["snapshot", "checkout", "--id", snapshot_id])
 
         result = self.snapshot.execute()
         assert result

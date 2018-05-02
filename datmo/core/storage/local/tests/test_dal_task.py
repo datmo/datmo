@@ -21,7 +21,8 @@ from datmo.core.util.exceptions import EntityNotFound
 class TestLocalDAL():
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -31,10 +32,11 @@ class TestLocalDAL():
         model_name = "model_1"
         model = self.dal.model.create(Model({"name": model_name}))
         session_name = "session_1"
-        session = self.dal.session.create(Session({
-            "name": session_name,
-            "model_id": model.id
-        }))
+        session = self.dal.session.create(
+            Session({
+                "name": session_name,
+                "model_id": model.id
+            }))
 
         self.task_input_dict = {
             "model_id": model.id,
@@ -133,4 +135,7 @@ class TestLocalDAL():
         task = self.dal.task.create(Task(self.task_input_dict))
 
         assert len(self.dal.task.query({"id": task.id})) == 1
-        assert len(self.dal.task.query({"command": self.task_input_dict['command']})) == 6
+        assert len(
+            self.dal.task.query({
+                "command": self.task_input_dict['command']
+            })) == 6

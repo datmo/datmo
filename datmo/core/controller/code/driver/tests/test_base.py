@@ -9,7 +9,6 @@ from datmo.core.controller.code.driver import CodeDriver
 
 
 class TestCodeDriver(unittest.TestCase):
-
     def test_init(self):
         failed = False
         try:

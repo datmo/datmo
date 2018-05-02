@@ -20,7 +20,8 @@ from datmo.core.util.exceptions import EntityNotFound, \
 class TestCodeController():
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -42,8 +43,7 @@ class TestCodeController():
         assert failed
 
         # Create test file
-        definition_filepath = os.path.join(self.code.home,
-                                    "test.txt")
+        definition_filepath = os.path.join(self.code.home, "test.txt")
         with open(definition_filepath, "w") as f:
             f.write(to_unicode(str("test")))
 
@@ -70,8 +70,7 @@ class TestCodeController():
         self.project.init("test4", "test description")
 
         # Create test file
-        definition_filepath = os.path.join(self.code.home,
-                                           "test.txt")
+        definition_filepath = os.path.join(self.code.home, "test.txt")
         with open(definition_filepath, "w") as f:
             f.write(to_unicode(str("test")))
 
@@ -79,8 +78,7 @@ class TestCodeController():
         code_obj_1 = self.code.create()
 
         # Create test file
-        definition_filepath = os.path.join(self.code.home,
-                                           "test2.txt")
+        definition_filepath = os.path.join(self.code.home, "test2.txt")
         with open(definition_filepath, "w") as f:
             f.write(to_unicode(str("test")))
 
@@ -98,8 +96,7 @@ class TestCodeController():
         self.project.init("test5", "test description")
 
         # Create test file
-        definition_filepath = os.path.join(self.code.home,
-                                           "test.txt")
+        definition_filepath = os.path.join(self.code.home, "test.txt")
         with open(definition_filepath, "w") as f:
             f.write(to_unicode(str("test")))
 

@@ -20,7 +20,8 @@ from datmo.core.util.json_store import JSONStore
 class TestJSONStore():
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -52,8 +53,7 @@ class TestJSONStore():
     def test_get_obj(self):
         storage = JSONStore(self.storage_file)
         key = 'foobar1'
-        value = {"does this work":"noway"}
+        value = {"does this work": "noway"}
         storage.save(key, value)
         return_value = storage.get(key)
         assert return_value == value
-

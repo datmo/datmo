@@ -25,13 +25,16 @@ class TestGitCodeDriver():
     """
     Checks all functions of the GitCodeDriver
     """
+
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.git_code_manager = GitCodeDriver(filepath=self.temp_dir, execpath="git")
+        self.git_code_manager = GitCodeDriver(
+            filepath=self.temp_dir, execpath="git")
 
     def teardown_method(self):
         pass
@@ -50,7 +53,8 @@ class TestGitCodeDriver():
     def test_instantiation_fail_git_does_not_exist(self):
         failed = False
         try:
-            _ = GitCodeDriver(filepath=self.temp_dir, execpath="nonexistant_execpath")
+            _ = GitCodeDriver(
+                filepath=self.temp_dir, execpath="nonexistant_execpath")
         except GitExecutionException:
             failed = True
         assert failed
@@ -65,7 +69,8 @@ class TestGitCodeDriver():
 
     def test_init_then_instantiation(self):
         self.git_code_manager.init()
-        another_git_code_manager = GitCodeDriver(filepath=self.temp_dir, execpath="git")
+        another_git_code_manager = GitCodeDriver(
+            filepath=self.temp_dir, execpath="git")
         result = another_git_code_manager.is_initialized
         assert result == True
 
@@ -132,30 +137,44 @@ class TestGitCodeDriver():
         assert result == True
 
     def test_clone(self):
-        result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git", mode="https")
-        assert result and os.path.exists(os.path.join(self.temp_dir, "hello-world",".git"))
-        result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git",
-                                             repo_name="hello-world-2", mode="http")
-        assert result and os.path.exists(os.path.join(self.temp_dir, "hello-world-2", ".git"))
+        result = self.git_code_manager.clone(
+            "https://github.com/datmo/hello-world.git", mode="https")
+        assert result and os.path.exists(
+            os.path.join(self.temp_dir, "hello-world", ".git"))
+        result = self.git_code_manager.clone(
+            "https://github.com/datmo/hello-world.git",
+            repo_name="hello-world-2",
+            mode="http")
+        assert result and os.path.exists(
+            os.path.join(self.temp_dir, "hello-world-2", ".git"))
         if self.git_code_manager.git_host_manager.ssh_enabled:
-            result = self.git_code_manager.clone("https://github.com/datmo/hello-world.git",
-                                                 repo_name="hello-world-3", mode="ssh")
-            assert result and os.path.exists(os.path.join(self.temp_dir, "hello-world-3", ".git"))
+            result = self.git_code_manager.clone(
+                "https://github.com/datmo/hello-world.git",
+                repo_name="hello-world-3",
+                mode="ssh")
+            assert result and os.path.exists(
+                os.path.join(self.temp_dir, "hello-world-3", ".git"))
 
     def test_parse_git_url(self):
-        parsed = self.git_code_manager._parse_git_url("https://github.com/datmo/hello-world.git", mode="ssh")
+        parsed = self.git_code_manager._parse_git_url(
+            "https://github.com/datmo/hello-world.git", mode="ssh")
         assert parsed == "git@github.com:datmo/hello-world.git"
-        parsed = self.git_code_manager._parse_git_url("https://github.com/datmo/hello-world.git", mode="https")
+        parsed = self.git_code_manager._parse_git_url(
+            "https://github.com/datmo/hello-world.git", mode="https")
         assert parsed == "https://github.com/datmo/hello-world.git"
-        parsed = self.git_code_manager._parse_git_url("https://github.com/datmo/hello-world.git", mode="http")
+        parsed = self.git_code_manager._parse_git_url(
+            "https://github.com/datmo/hello-world.git", mode="http")
         assert parsed == "http://github.com/datmo/hello-world.git"
         # git@github.com:gitpython-developers/GitPython.git
         # https://github.com/gitpython-developers/GitPython.git
-        parsed = self.git_code_manager._parse_git_url("git://github.com/datmo/hello-world.git", mode="ssh")
+        parsed = self.git_code_manager._parse_git_url(
+            "git://github.com/datmo/hello-world.git", mode="ssh")
         assert parsed == "git@github.com:datmo/hello-world.git"
-        parsed = self.git_code_manager._parse_git_url("git://github.com/datmo/hello-world.git", mode="https")
+        parsed = self.git_code_manager._parse_git_url(
+            "git://github.com/datmo/hello-world.git", mode="https")
         assert parsed == "https://github.com/datmo/hello-world.git"
-        parsed = self.git_code_manager._parse_git_url("git://github.com/datmo/hello-world.git", mode="http")
+        parsed = self.git_code_manager._parse_git_url(
+            "git://github.com/datmo/hello-world.git", mode="http")
         assert parsed == "http://github.com/datmo/hello-world.git"
 
     def test_add(self):
@@ -280,14 +299,14 @@ class TestGitCodeDriver():
         self.git_code_manager.init()
         # Test remote add
         if self.git_code_manager.git_host_manager.host == "github.com":
-            result = self.git_code_manager.remote("add", "origin",
-                                         "https://github.com/datmo/test.git")
+            result = self.git_code_manager.remote(
+                "add", "origin", "https://github.com/datmo/test.git")
             remote_url = self.git_code_manager.get_remote_url()
             assert result == True and \
                 remote_url == "https://github.com/datmo/test.git"
             # Test remote set-url
-            result = self.git_code_manager.remote("set-url", "origin",
-                                         "https://github.com/datmo/test.git")
+            result = self.git_code_manager.remote(
+                "set-url", "origin", "https://github.com/datmo/test.git")
             remote_url = self.git_code_manager.get_remote_url()
             assert result == True and \
                 remote_url == "https://github.com/datmo/test.git"
@@ -305,8 +324,6 @@ class TestGitCodeDriver():
                                          "https://github.com/datmo/test.git")
             remote_url = self.git_code_manager.get_remote_url()
             assert remote_url == "https://github.com/datmo/test.git"
-
-
 
     # def test_fetch(self):
     #     pass
@@ -374,8 +391,7 @@ class TestGitCodeDriver():
             f.write(to_unicode(str("test")))
         code_id = self.git_code_manager.create_ref()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
-                                   ".git/refs/datmo/",
-                                     code_id)
+                                     ".git/refs/datmo/", code_id)
         assert code_id and \
             os.path.isfile(code_ref_path)
         # Test error raised with commit_id
@@ -396,8 +412,7 @@ class TestGitCodeDriver():
             f.write(to_unicode(str("test")))
         code_id = self.git_code_manager.create_ref()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
-                                     ".git/refs/datmo/",
-                                     code_id)
+                                     ".git/refs/datmo/", code_id)
         result = self.git_code_manager.exists_ref(code_id)
         assert result == True and \
             os.path.isfile(code_ref_path)
@@ -410,9 +425,8 @@ class TestGitCodeDriver():
             f.write(to_unicode(str("test")))
         code_id = self.git_code_manager.create_ref()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
-                                     ".git/refs/datmo/",
-                                     code_id)
-        result  = self.git_code_manager.delete_ref(code_id)
+                                     ".git/refs/datmo/", code_id)
+        result = self.git_code_manager.delete_ref(code_id)
         assert result == True and \
             not os.path.isfile(code_ref_path)
 
@@ -447,7 +461,7 @@ class TestGitCodeDriver():
         # Add random file to .datmo directory before next ref
         os.makedirs(os.path.join(self.git_code_manager.filepath, ".datmo"))
         random_filepath = os.path.join(self.git_code_manager.filepath,
-                                   ".datmo", ".test")
+                                       ".datmo", ".test")
         with open(random_filepath, "w") as f:
             f.write(to_unicode(str("test")))
         # Check to make sure .datmo/.test exists and has contents
@@ -471,6 +485,7 @@ class TestGitHostDriver():
     """
     Checks all functions of the GitHostDriver
     """
+
     def setup_class(self):
         self.netrc_temp_dir = tempfile.mkdtemp("netrc_test")
         self.ssh_temp_dir = tempfile.mkdtemp("ssh_test")
@@ -481,7 +496,7 @@ class TestGitHostDriver():
 
     def test_netrc(self):
         hostm = GitHostDriver(self.netrc_temp_dir)
-        assert hostm.create_git_netrc("foobar","foo")
+        assert hostm.create_git_netrc("foobar", "foo")
         hostm = GitHostDriver(self.netrc_temp_dir)
         assert os.path.exists(os.path.join(self.netrc_temp_dir, ".netrc"))
         assert hostm.https_enabled
@@ -497,5 +512,3 @@ class TestGitHostDriver():
         #     assert os.path.exists(os.path.join(self.ssh_temp_dir, ".ssh", "id_rsa"))
         #     hostm = GitHostDriver(self.ssh_temp_dir)
         #     assert hostm.ssh_enabled == True
-
-

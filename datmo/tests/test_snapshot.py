@@ -22,7 +22,8 @@ from datmo.core.util.exceptions import GitCommitDoesNotExist, \
 class TestSnapshotModule():
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -57,8 +58,7 @@ class TestSnapshotModule():
         # check project is not initialized if wrong home
         failed = False
         try:
-            create(message="test",
-                   home=os.path.join("does","not", "exist"))
+            create(message="test", home=os.path.join("does", "not", "exist"))
         except InvalidProjectPathException:
             failed = True
         assert failed
@@ -112,15 +112,15 @@ class TestSnapshotModule():
         # Setup task
 
         # Create environment definition
-        env_def_path = os.path.join(self.temp_dir,
-                                    "Dockerfile")
+        env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         task_obj = run("sh -c echo accuracy:0.45", home=self.temp_dir)
-        snapshot_obj = create_from_task(message="my test snapshot",
-                                        task_id=task_obj.id,
-                                        home=self.temp_dir)
+        snapshot_obj = create_from_task(
+            message="my test snapshot",
+            task_id=task_obj.id,
+            home=self.temp_dir)
 
         assert isinstance(snapshot_obj, Snapshot)
         assert snapshot_obj.message == "my test snapshot"
@@ -130,7 +130,7 @@ class TestSnapshotModule():
         # check project is not initialized if wrong home
         failed = False
         try:
-            ls(home=os.path.join("does","not", "exist"))
+            ls(home=os.path.join("does", "not", "exist"))
         except InvalidProjectPathException:
             failed = True
         assert failed

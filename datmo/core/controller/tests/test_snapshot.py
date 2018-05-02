@@ -22,7 +22,8 @@ from datmo.core.util.exceptions import EntityNotFound, \
 class TestSnapshotController():
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -47,9 +48,7 @@ class TestSnapshotController():
         # Test default values for snapshot, fail due to code
         failed = False
         try:
-            self.snapshot.create({
-                "message": "my test snapshot"
-            })
+            self.snapshot.create({"message": "my test snapshot"})
         except GitCommitDoesNotExist:
             failed = True
         assert failed
@@ -81,16 +80,13 @@ class TestSnapshotController():
 
     def test_create_success_default_detected_in_file(self):
         # Test default values for snapshot when there is no environment
-        test_filepath = os.path.join(self.snapshot.home,
-                                     "script.py")
+        test_filepath = os.path.join(self.snapshot.home, "script.py")
         with open(test_filepath, "w") as f:
             f.write(to_unicode("import numpy\n"))
             f.write(to_unicode("import sklearn\n"))
             f.write(to_unicode("print('hello')\n"))
 
-        snapshot_obj_1 = self.snapshot.create({
-            "message": "my test snapshot"
-        })
+        snapshot_obj_1 = self.snapshot.create({"message": "my test snapshot"})
 
         assert snapshot_obj_1
         assert snapshot_obj_1.code_id
@@ -101,15 +97,12 @@ class TestSnapshotController():
 
     def test_create_success_default_env_def(self):
         # Create environment definition
-        env_def_path = os.path.join(self.snapshot.home,
-                                    "Dockerfile")
+        env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         # Test default values for snapshot, success
-        snapshot_obj = self.snapshot.create({
-            "message": "my test snapshot"
-        })
+        snapshot_obj = self.snapshot.create({"message": "my test snapshot"})
 
         assert snapshot_obj
         assert snapshot_obj.code_id
@@ -121,18 +114,13 @@ class TestSnapshotController():
     def test_create_success_default_env_def_duplicate(self):
         # Test 2 snapshots with same parameters
         # Create environment definition
-        env_def_path = os.path.join(self.snapshot.home,
-                                    "Dockerfile")
+        env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
-        snapshot_obj = self.snapshot.create({
-            "message": "my test snapshot"
-        })
+        snapshot_obj = self.snapshot.create({"message": "my test snapshot"})
 
-        snapshot_obj_1 = self.snapshot.create({
-            "message": "my test snapshot"
-        })
+        snapshot_obj_1 = self.snapshot.create({"message": "my test snapshot"})
 
         # Should return the same object back
         assert snapshot_obj_1 == snapshot_obj
@@ -148,14 +136,11 @@ class TestSnapshotController():
 
     def test_create_success_given_files_env_def_config_file_stats_file(self):
         # Create environment definition
-        env_def_path = os.path.join(self.snapshot.home,
-                                    "Dockerfile")
+        env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
-        snapshot_obj = self.snapshot.create({
-            "message": "my test snapshot"
-        })
+        snapshot_obj = self.snapshot.create({"message": "my test snapshot"})
 
         # Create files to add
         self.snapshot.file_driver.create("dirpath1", directory=True)
@@ -163,25 +148,29 @@ class TestSnapshotController():
         self.snapshot.file_driver.create("filepath1")
 
         # Create config
-        config_filepath = os.path.join(self.snapshot.home,
-                                       "config.json")
+        config_filepath = os.path.join(self.snapshot.home, "config.json")
         with open(config_filepath, "w") as f:
             f.write(to_unicode(str('{"foo":"bar"}')))
 
         # Create stats
-        stats_filepath = os.path.join(self.snapshot.home,
-                                      "stats.json")
+        stats_filepath = os.path.join(self.snapshot.home, "stats.json")
         with open(stats_filepath, "w") as f:
             f.write(to_unicode(str('{"foo":"bar"}')))
 
         input_dict = {
-            "message": "my test snapshot",
-            "filepaths": [os.path.join(self.snapshot.home, "dirpath1"),
-                          os.path.join(self.snapshot.home, "dirpath2"),
-                          os.path.join(self.snapshot.home, "filepath1")],
-            "environment_definition_filepath": env_def_path,
-            "config_filepath": config_filepath,
-            "stats_filepath": stats_filepath,
+            "message":
+                "my test snapshot",
+            "filepaths": [
+                os.path.join(self.snapshot.home, "dirpath1"),
+                os.path.join(self.snapshot.home, "dirpath2"),
+                os.path.join(self.snapshot.home, "filepath1")
+            ],
+            "environment_definition_filepath":
+                env_def_path,
+            "config_filepath":
+                config_filepath,
+            "stats_filepath":
+                stats_filepath,
         }
         # Create snapshot in the project
         snapshot_obj_4 = self.snapshot.create(input_dict)
@@ -197,14 +186,11 @@ class TestSnapshotController():
 
     def test_create_success_given_files_env_def_different_config_stats(self):
         # Create environment definition
-        env_def_path = os.path.join(self.snapshot.home,
-                                    "Dockerfile")
+        env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
-        snapshot_obj = self.snapshot.create({
-            "message": "my test snapshot"
-        })
+        snapshot_obj = self.snapshot.create({"message": "my test snapshot"})
 
         # Create files to add
         self.snapshot.file_driver.create("dirpath1", directory=True)
@@ -212,26 +198,30 @@ class TestSnapshotController():
         self.snapshot.file_driver.create("filepath1")
 
         # Create config
-        config_filepath = os.path.join(self.snapshot.home,
-                                       "config.json")
+        config_filepath = os.path.join(self.snapshot.home, "config.json")
         with open(config_filepath, "w") as f:
             f.write(to_unicode(str('{"foo":"bar"}')))
 
         # Create stats
-        stats_filepath = os.path.join(self.snapshot.home,
-                                      "stats.json")
+        stats_filepath = os.path.join(self.snapshot.home, "stats.json")
         with open(stats_filepath, "w") as f:
             f.write(to_unicode(str('{"foo":"bar"}')))
 
         # Test different config and stats inputs
         input_dict = {
-            "message": "my test snapshot",
-            "filepaths": [os.path.join(self.snapshot.home, "dirpath1"),
-                          os.path.join(self.snapshot.home, "dirpath2"),
-                          os.path.join(self.snapshot.home, "filepath1")],
-            "environment_definition_filepath": env_def_path,
-            "config_filename": "different_name",
-            "stats_filename": "different_name",
+            "message":
+                "my test snapshot",
+            "filepaths": [
+                os.path.join(self.snapshot.home, "dirpath1"),
+                os.path.join(self.snapshot.home, "dirpath2"),
+                os.path.join(self.snapshot.home, "filepath1")
+            ],
+            "environment_definition_filepath":
+                env_def_path,
+            "config_filename":
+                "different_name",
+            "stats_filename":
+                "different_name",
         }
 
         # Create snapshot in the project
@@ -243,8 +233,7 @@ class TestSnapshotController():
 
     def test_create_success_given_files_env_def_direct_config_stats(self):
         # Create environment definition
-        env_def_path = os.path.join(self.snapshot.home,
-                                    "Dockerfile")
+        env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
@@ -255,13 +244,21 @@ class TestSnapshotController():
 
         # Test different config and stats inputs
         input_dict = {
-            "message": "my test snapshot",
-            "filepaths": [os.path.join(self.snapshot.home, "dirpath1"),
-                          os.path.join(self.snapshot.home, "dirpath2"),
-                          os.path.join(self.snapshot.home, "filepath1")],
-            "environment_definition_filepath": env_def_path,
-            "config": {"foo": "bar"},
-            "stats": {"foo": "bar"},
+            "message":
+                "my test snapshot",
+            "filepaths": [
+                os.path.join(self.snapshot.home, "dirpath1"),
+                os.path.join(self.snapshot.home, "dirpath2"),
+                os.path.join(self.snapshot.home, "filepath1")
+            ],
+            "environment_definition_filepath":
+                env_def_path,
+            "config": {
+                "foo": "bar"
+            },
+            "stats": {
+                "foo": "bar"
+            },
         }
 
         # Create snapshot in the project
@@ -276,9 +273,7 @@ class TestSnapshotController():
 
         # Setup task
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        input_dict = {
-            "command": task_command
-        }
+        input_dict = {"command": task_command}
 
         # Create task in the project
         task_obj = self.task.create(input_dict)
@@ -286,15 +281,14 @@ class TestSnapshotController():
         # 1) Test option 1
         failed = False
         try:
-            _ = self.snapshot.create_from_task(message="my test snapshot",
-                                               task_id=task_obj.id)
+            _ = self.snapshot.create_from_task(
+                message="my test snapshot", task_id=task_obj.id)
         except TaskNotComplete:
             failed = True
         assert failed
 
         # Create environment definition
-        env_def_path = os.path.join(self.project.home,
-                                    "Dockerfile")
+        env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
@@ -302,8 +296,8 @@ class TestSnapshotController():
         updated_task_obj = self.task.run(task_obj.id)
 
         # 2) Test option 2
-        snapshot_obj = self.snapshot.create_from_task(message="my test snapshot",
-                                                      task_id=updated_task_obj.id)
+        snapshot_obj = self.snapshot.create_from_task(
+            message="my test snapshot", task_id=updated_task_obj.id)
 
         assert snapshot_obj.id == updated_task_obj.after_snapshot_id
         assert snapshot_obj.message == "my test snapshot"
@@ -317,31 +311,34 @@ class TestSnapshotController():
         self.snapshot.file_driver.create("filepath1")
 
         # Create environment_driver definition
-        env_def_path = os.path.join(self.snapshot.home,
-                                    "Dockerfile")
+        env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         # Create config
-        config_filepath = os.path.join(self.snapshot.home,
-                                       "config.json")
+        config_filepath = os.path.join(self.snapshot.home, "config.json")
         with open(config_filepath, "w") as f:
             f.write(to_unicode(str("{}")))
 
         # Create stats
-        stats_filepath = os.path.join(self.snapshot.home,
-                                      "stats.json")
+        stats_filepath = os.path.join(self.snapshot.home, "stats.json")
         with open(stats_filepath, "w") as f:
             f.write(to_unicode(str("{}")))
 
         input_dict = {
-            "message": "my test snapshot",
-            "filepaths": [os.path.join(self.snapshot.home, "dirpath1"),
-                          os.path.join(self.snapshot.home, "dirpath2"),
-                          os.path.join(self.snapshot.home, "filepath1")],
-            "environment_definition_filepath": env_def_path,
-            "config_filename": config_filepath,
-            "stats_filename": stats_filepath,
+            "message":
+                "my test snapshot",
+            "filepaths": [
+                os.path.join(self.snapshot.home, "dirpath1"),
+                os.path.join(self.snapshot.home, "dirpath2"),
+                os.path.join(self.snapshot.home, "filepath1")
+            ],
+            "environment_definition_filepath":
+                env_def_path,
+            "config_filename":
+                config_filepath,
+            "stats_filename":
+                stats_filepath,
         }
 
         # Create snapshot in the project
@@ -363,8 +360,8 @@ class TestSnapshotController():
         result = self.snapshot.checkout(snapshot_obj_1.id)
 
         # Snapshot directory in user directory
-        snapshot_obj_1_path = os.path.join(self.snapshot.home, "datmo_snapshots",
-                                           snapshot_obj_1.id)
+        snapshot_obj_1_path = os.path.join(
+            self.snapshot.home, "datmo_snapshots", snapshot_obj_1.id)
 
         assert result == True and \
                self.snapshot.code_driver.latest_commit() == code_obj_1.commit_id and \
@@ -380,8 +377,7 @@ class TestSnapshotController():
         assert failed
 
         # Create file to add to snapshot
-        test_filepath_1 = os.path.join(self.snapshot.home,
-                                     "test.txt")
+        test_filepath_1 = os.path.join(self.snapshot.home, "test.txt")
         with open(test_filepath_1, "w") as f:
             f.write(to_unicode(str("test")))
 
@@ -389,8 +385,7 @@ class TestSnapshotController():
         snapshot_obj_1 = self.__default_create()
 
         # Create file to add to second snapshot
-        test_filepath_2 = os.path.join(self.snapshot.home,
-                                     "test2.txt")
+        test_filepath_2 = os.path.join(self.snapshot.home, "test2.txt")
         with open(test_filepath_2, "w") as f:
             f.write(to_unicode(str("test2")))
 
@@ -405,8 +400,7 @@ class TestSnapshotController():
             snapshot_obj_2 in result
 
         # List all snapshots with session filter
-        result = self.snapshot.list(session_id=
-                                    self.project.current_session.id)
+        result = self.snapshot.list(session_id=self.project.current_session.id)
 
         assert len(result) == 2 and \
                snapshot_obj_1 in result and \

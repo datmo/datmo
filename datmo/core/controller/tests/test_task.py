@@ -21,7 +21,8 @@ from datmo.core.util.exceptions import EntityNotFound, TaskRunException
 class TestTaskController():
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -36,10 +37,7 @@ class TestTaskController():
     def test_create(self):
         task_command = ["sh", "-c", "echo accuracy:0.45"]
         task_gpu = False
-        input_dict = {
-            "command": task_command,
-            "gpu": task_gpu
-        }
+        input_dict = {"command": task_command, "gpu": task_gpu}
 
         # Create task in the project
         task_obj = self.task.create(input_dict)
@@ -51,8 +49,7 @@ class TestTaskController():
     def test_run_helper(self):
         # TODO: Try out more options (see below)
         # Create environment_driver id
-        env_def_path = os.path.join(self.project.home,
-                                    "Dockerfile")
+        env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
@@ -61,16 +58,17 @@ class TestTaskController():
         })
 
         # Set log filepath
-        log_filepath = os.path.join(self.task.home,
-                                    "test.log")
+        log_filepath = os.path.join(self.task.home, "test.log")
 
         # create volume to mount
         temp_test_dirpath = os.path.join(self.temp_dir, "temp")
         os.makedirs(temp_test_dirpath)
 
         # Test option set 1
-        random_name = ''.join([random.choice(string.ascii_letters + string.digits)
-                               for _ in range(32)])
+        random_name = ''.join([
+            random.choice(string.ascii_letters + string.digits)
+            for _ in range(32)
+        ])
         options_dict = {
             "command": ["sh", "-c", "echo accuracy:0.45"],
             "ports": ["8888:8888"],
@@ -96,16 +94,19 @@ class TestTaskController():
                self.task.environment_driver.get_container(run_id)
         assert logs and \
                os.path.exists(log_filepath)
-        self.task.environment_driver.stop_remove_containers_by_term(term=random_name)
+        self.task.environment_driver.stop_remove_containers_by_term(
+            term=random_name)
 
         # Test option set 2
-        random_name_2 = ''.join([random.choice(string.ascii_letters + string.digits)
-                               for _ in range(32)])
+        random_name_2 = ''.join([
+            random.choice(string.ascii_letters + string.digits)
+            for _ in range(32)
+        ])
         options_dict = {
             "command": ["sh", "-c", "echo accuracy:0.45"],
             "ports": ["8888:8888"],
             "gpu": False,
-            "name": random_name_2 ,
+            "name": random_name_2,
             "volumes": {
                 temp_test_dirpath: {
                     'bind': '/task/',
@@ -126,7 +127,8 @@ class TestTaskController():
                self.task.environment_driver.get_container(run_id)
         assert logs and \
                os.path.exists(log_filepath)
-        self.task.environment_driver.stop_remove_containers_by_term(term=random_name_2)
+        self.task.environment_driver.stop_remove_containers_by_term(
+            term=random_name_2)
 
     def test_parse_logs_for_results(self):
         test_logs = """
@@ -153,16 +155,13 @@ class TestTaskController():
 
         # TODO: look into log filepath randomness, sometimes logs are not written
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        input_dict = {
-            "command": task_command
-        }
+        input_dict = {"command": task_command}
 
         # Create task in the project
         task_obj = self.task.create(input_dict)
 
         # Create environment definition
-        env_def_path = os.path.join(self.project.home,
-                                    "Dockerfile")
+        env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
@@ -192,7 +191,7 @@ class TestTaskController():
         # 2) Test option 2
         failed = False
         try:
-             self.task.run(task_obj.id)
+            self.task.run(task_obj.id)
         except TaskRunException:
             failed = True
         assert failed
@@ -206,16 +205,17 @@ class TestTaskController():
 
         # Snapshot dictionary
         snapshot_dict = {
-            "filepaths": [os.path.join(self.project.home, "dirpath1"),
-                          os.path.join(self.project.home, "dirpath2"),
-                          os.path.join(self.project.home, "filepath1")],
+            "filepaths": [
+                os.path.join(self.project.home, "dirpath1"),
+                os.path.join(self.project.home, "dirpath2"),
+                os.path.join(self.project.home, "filepath1")
+            ],
         }
 
         # Run a basic task in the project
         failed = False
         try:
-            self.task.run(task_obj.id,
-                          snapshot_dict=snapshot_dict)
+            self.task.run(task_obj.id, snapshot_dict=snapshot_dict)
         except TaskRunException:
             failed = True
         assert failed
@@ -225,8 +225,7 @@ class TestTaskController():
         task_obj_1 = self.task.create(input_dict)
         self.task.dal.task.update({"id": task_obj_1.id, "status": "RUNNING"})
         # Create environment_driver definition
-        env_def_path = os.path.join(self.project.home,
-                                    "Dockerfile")
+        env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
@@ -243,8 +242,8 @@ class TestTaskController():
         task_obj_2 = self.task.create(input_dict)
 
         # Run another task in the project
-        updated_task_obj_2 = self.task.run(task_obj_2.id,
-                                           snapshot_dict=snapshot_dict)
+        updated_task_obj_2 = self.task.run(
+            task_obj_2.id, snapshot_dict=snapshot_dict)
 
         assert task_obj_2.id == updated_task_obj_2.id
 
@@ -277,20 +276,20 @@ class TestTaskController():
             f.write(to_unicode("import sklearn\n"))
             f.write(to_unicode("print('hello')\n"))
             f.write(to_unicode("print(' accuracy: 0.56 ')\n"))
-            f.write(to_unicode("with open(os.path.join('/task', 'new_file.txt'), 'a') as f:\n"))
+            f.write(
+                to_unicode(
+                    "with open(os.path.join('/task', 'new_file.txt'), 'a') as f:\n"
+                ))
             f.write(to_unicode("    f.write('my test file')\n"))
 
         task_command = ["python", "script.py"]
-        input_dict = {
-            "command": task_command
-        }
+        input_dict = {"command": task_command}
 
         # Create task in the project
         task_obj_2 = self.task.create(input_dict)
 
         # Create environment definition
-        env_def_path = os.path.join(self.project.home,
-                                    "Dockerfile")
+        env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
@@ -316,21 +315,19 @@ class TestTaskController():
 
         # test if after snapshot has the file written
         after_snapshot_obj = self.task.dal.snapshot.get_by_id(
-            updated_task_obj_2.after_snapshot_id
-        )
+            updated_task_obj_2.after_snapshot_id)
         file_collection_obj = self.task.dal.file_collection.get_by_id(
-            after_snapshot_obj.file_collection_id
-        )
-        files_absolute_path = os.path.join(self.task.home, file_collection_obj.path)
+            after_snapshot_obj.file_collection_id)
+        files_absolute_path = os.path.join(self.task.home,
+                                           file_collection_obj.path)
 
         assert os.path.isfile(os.path.join(files_absolute_path, "task.log"))
-        assert os.path.isfile(os.path.join(files_absolute_path, "new_file.txt"))
+        assert os.path.isfile(
+            os.path.join(files_absolute_path, "new_file.txt"))
 
     def test_list(self):
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        input_dict = {
-            "command": task_command
-        }
+        input_dict = {"command": task_command}
 
         # Create tasks in the project
         task_obj_1 = self.task.create(input_dict)
@@ -344,8 +341,7 @@ class TestTaskController():
                task_obj_2 in result
 
         # List all tasks and filter by session
-        result = self.task.list(session_id=
-                                self.project.current_session.id)
+        result = self.task.list(session_id=self.project.current_session.id)
 
         assert len(result) == 2 and \
                task_obj_1 in result and \
@@ -353,16 +349,13 @@ class TestTaskController():
 
     def test_get_files(self):
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        input_dict = {
-            "command": task_command
-        }
+        input_dict = {"command": task_command}
 
         # Create task in the project
         task_obj = self.task.create(input_dict)
 
         # Create environment definition
-        env_def_path = os.path.join(self.project.home,
-                                    "Dockerfile")
+        env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
@@ -372,36 +365,34 @@ class TestTaskController():
 
         # Snapshot dictionary
         snapshot_dict = {
-            "filepaths": [os.path.join(self.project.home, "dirpath1", "filepath1")],
+            "filepaths": [
+                os.path.join(self.project.home, "dirpath1", "filepath1")
+            ],
         }
 
         # Test the default values
-        updated_task_obj = self.task.run(task_obj.id,
-                                         snapshot_dict=snapshot_dict)
+        updated_task_obj = self.task.run(
+            task_obj.id, snapshot_dict=snapshot_dict)
 
         # TODO: Test case for during run and before_snapshot run
         # Get files for the task after run is complete (default)
         result = self.task.get_files(updated_task_obj.id)
 
         after_snapshot_obj = self.task.dal.snapshot.get_by_id(
-            updated_task_obj.after_snapshot_id
-        )
+            updated_task_obj.after_snapshot_id)
         file_collection_obj = self.task.dal.file_collection.get_by_id(
-            after_snapshot_obj.file_collection_id
-        )
+            after_snapshot_obj.file_collection_id)
 
         assert len(result) == 2
         assert isinstance(result[0], TextIOWrapper)
-        assert result[0].name == os.path.join(self.task.home, ".datmo",
-                                              "collections",
-                                              file_collection_obj.filehash,
-                                              "task.log")
+        assert result[0].name == os.path.join(
+            self.task.home, ".datmo", "collections",
+            file_collection_obj.filehash, "task.log")
         assert result[0].mode == "r"
         assert isinstance(result[1], TextIOWrapper)
-        assert result[1].name == os.path.join(self.task.home, ".datmo",
-                                              "collections",
-                                              file_collection_obj.filehash,
-                                              "filepath1")
+        assert result[1].name == os.path.join(
+            self.task.home, ".datmo", "collections",
+            file_collection_obj.filehash, "filepath1")
         assert result[1].mode == "r"
 
         # Get files for the task after run is complete for different mode
@@ -409,23 +400,19 @@ class TestTaskController():
 
         assert len(result) == 2
         assert isinstance(result[0], TextIOWrapper)
-        assert result[0].name == os.path.join(self.task.home, ".datmo",
-                                              "collections",
-                                              file_collection_obj.filehash,
-                                              "task.log")
+        assert result[0].name == os.path.join(
+            self.task.home, ".datmo", "collections",
+            file_collection_obj.filehash, "task.log")
         assert result[0].mode == "a"
         assert isinstance(result[1], TextIOWrapper)
-        assert result[1].name == os.path.join(self.task.home, ".datmo",
-                                              "collections",
-                                              file_collection_obj.filehash,
-                                              "filepath1")
+        assert result[1].name == os.path.join(
+            self.task.home, ".datmo", "collections",
+            file_collection_obj.filehash, "filepath1")
         assert result[1].mode == "a"
 
     def test_delete(self):
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        input_dict = {
-            "command": task_command
-        }
+        input_dict = {"command": task_command}
 
         # Create tasks in the project
         task_obj = self.task.create(input_dict)
@@ -445,16 +432,13 @@ class TestTaskController():
 
     def test_stop(self):
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        input_dict = {
-            "command": task_command
-        }
+        input_dict = {"command": task_command}
 
         # Create task in the project
         task_obj = self.task.create(input_dict)
 
         # Create environment driver definition
-        env_def_path = os.path.join(self.project.home,
-                                    "Dockerfile")
+        env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 

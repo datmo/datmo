@@ -9,7 +9,6 @@ from datmo.core.controller.file.driver import FileDriver
 
 
 class TestFileDriver(unittest.TestCase):
-
     def test_init(self):
         failed = False
         try:

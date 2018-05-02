@@ -21,7 +21,8 @@ from datmo.core.util.exceptions import GitCommitDoesNotExist, \
 class TestTaskModule():
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -74,8 +75,7 @@ class TestTaskModule():
             f.write(to_unicode("print(' accuracy: 0.56 ')\n"))
 
         # 2) Test out option 2
-        task_obj_0 = run(command="python script.py",
-                         home=self.temp_dir)
+        task_obj_0 = run(command="python script.py", home=self.temp_dir)
         assert isinstance(task_obj_0, Task)
         assert task_obj_0.id
         assert 'hello' in task_obj_0.logs
@@ -87,16 +87,18 @@ class TestTaskModule():
             f.write(to_unicode("FROM datmo/xgboost:cpu"))
 
         # 3) Test out option 3
-        task_obj_1 = run(command="python script.py", env=test_filepath,
-                         home=self.temp_dir)
+        task_obj_1 = run(
+            command="python script.py", env=test_filepath, home=self.temp_dir)
         assert isinstance(task_obj_1, Task)
         assert task_obj_1.id
         assert 'hello' in task_obj_1.logs
         assert task_obj_1.results == {"accuracy": "0.56"}
 
         # 4) Test out option 4
-        task_obj_2 = run(command=["python", "script.py"], env=test_filepath,
-                         home=self.temp_dir)
+        task_obj_2 = run(
+            command=["python", "script.py"],
+            env=test_filepath,
+            home=self.temp_dir)
         assert isinstance(task_obj_2, Task)
         assert task_obj_2.id
         assert 'hello' in task_obj_2.logs
@@ -130,8 +132,8 @@ class TestTaskModule():
         with open(test_filepath, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu"))
 
-        task_entity = run(command="python script.py", env=test_filepath,
-                          home=self.temp_dir)
+        task_entity = run(
+            command="python script.py", env=test_filepath, home=self.temp_dir)
         result = task_entity.files()
 
         assert len(result) == 1

@@ -6,10 +6,7 @@ from datmo.core.entity.session import Session
 
 class TestSession():
     def setup_class(self):
-        self.input_dict = {
-            "model_id": "my_model",
-            "name": "test"
-        }
+        self.input_dict = {"model_id": "my_model", "name": "test"}
 
     def test_init_no_id(self):
         session_entity = Session(self.input_dict)

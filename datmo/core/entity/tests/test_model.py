@@ -6,9 +6,7 @@ from datmo.core.entity.model import Model
 
 class TestModel():
     def setup_class(self):
-        self.input_dict = {
-            "name": "test"
-        }
+        self.input_dict = {"name": "test"}
 
     def test_init_no_id(self):
         model_entity = Model(self.input_dict)

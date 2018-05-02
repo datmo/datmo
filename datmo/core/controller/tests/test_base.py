@@ -19,7 +19,8 @@ from datmo.core.util.exceptions import  \
 class TestBaseController():
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -44,10 +45,11 @@ class TestBaseController():
         assert self.base.model == None
 
         # Test success case
-        self.base.dal.model.create(Model({
-            "name": "test",
-            "description": "test"
-        }))
+        self.base.dal.model.create(
+            Model({
+                "name": "test",
+                "description": "test"
+            }))
         model = self.base.model
 
         assert model.id
@@ -64,16 +66,18 @@ class TestBaseController():
         assert failed
 
         # Test success case
-        self.base.dal.model.create(Model({
-            "name": "test",
-            "description": "test"
-        }))
+        self.base.dal.model.create(
+            Model({
+                "name": "test",
+                "description": "test"
+            }))
         _ = self.base.model
-        self.base.dal.session.create(Session({
-            "name": "test",
-            "model_id": "test",
-            "current": True
-        }))
+        self.base.dal.session.create(
+            Session({
+                "name": "test",
+                "model_id": "test",
+                "current": True
+            }))
         session = self.base.current_session
 
         assert session.id
@@ -107,5 +111,3 @@ class TestBaseController():
         model2 = self.base.dal.model.get_by_id(model.id)
         assert model and model2
         assert model.id == model2.id
-
-

@@ -18,9 +18,11 @@ class TestBlitzDBDALDriverInit():
     """
     Checks init of BlitzDBDALDriver
     """
+
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -46,7 +48,8 @@ class TestBlitzDBDALDriver():
 
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -76,10 +79,7 @@ class TestBlitzDBDALDriver():
     def test_db_update(self):
         test_obj = {"foo": "bar_2"}
         result = self.database.set(self.collection, test_obj)
-        test_obj2 = {
-            "id": result.get('id'),
-            "foo": "bar_3"
-        }
+        test_obj2 = {"id": result.get('id'), "foo": "bar_3"}
         result2 = self.database.set(self.collection, test_obj2)
         assert result.get('id') == result2.get('id')
         assert result2.get('foo') == "bar_3"
@@ -122,7 +122,8 @@ class TestBlitzDBDALDriver():
         result = self.database.delete(self.collection, obj_to_delete.get('id'))
         exp_thrown = False
         try:
-            result = self.database.get(self.collection, obj_to_delete.get('id'))
+            result = self.database.get(self.collection,
+                                       obj_to_delete.get('id'))
         except EntityNotFound:
             exp_thrown = True
         assert exp_thrown
@@ -139,7 +140,7 @@ class TestBlitzDBDALDriver():
         try:
             result = self.database.set(collection_2, test_obj)
         except:
-            thrown =True
+            thrown = True
         assert thrown
 
     def test_multiple_blitzdb_objects(self):
@@ -147,7 +148,7 @@ class TestBlitzDBDALDriver():
         test_obj_dict = {"foo": "bar"}
         test_obj = database_2.set(self.collection, test_obj_dict)
         # new_test_obj = database_2.get(self.collection, test_obj.get('id'))
-        results_2 = database_2.query(self.collection,{})
+        results_2 = database_2.query(self.collection, {})
         # Try a new data base
         database_3 = BlitzDBDALDriver("file", self.temp_dir)
         results_3 = database_3.query(self.collection, {})
@@ -168,32 +169,60 @@ class TestBlitzDBDALDriver():
 
     def test_query_gte_int(self):
         collection = 'snapshot'
-        self.database.set(collection, {"range_query": 1 })
-        self.database.set(collection, {"range_query": 2 })
-        self.database.set(collection, {"range_query": 3 })
+        self.database.set(collection, {"range_query": 1})
+        self.database.set(collection, {"range_query": 2})
+        self.database.set(collection, {"range_query": 3})
 
-        items = self.database.query(collection, {"range_query": {"$gte": 2 }})
+        items = self.database.query(collection, {"range_query": {"$gte": 2}})
         assert len(items) == 2
 
     def test_query_gte_date_str(self):
         collection = 'snapshot'
-        self.database.set(collection, {"range_query2": datetime.datetime(2017,1,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') })
-        self.database.set(collection, {"range_query2": datetime.datetime(2017,2,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') })
-        self.database.set(collection, {"range_query2": datetime.datetime(2017,3,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') })
+        self.database.set(
+            collection, {
+                "range_query2":
+                    datetime.datetime(2017, 1, 1)
+                    .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            })
+        self.database.set(
+            collection, {
+                "range_query2":
+                    datetime.datetime(2017, 2, 1)
+                    .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            })
+        self.database.set(
+            collection, {
+                "range_query2":
+                    datetime.datetime(2017, 3, 1)
+                    .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            })
 
-        items = self.database.query(collection,{"range_query2": {"$gte": datetime.datetime(2017,2,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') }})
+        items = self.database.query(
+            collection, {
+                "range_query2": {
+                    "$gte":
+                        datetime.datetime(2017, 2, 1)
+                        .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                }
+            })
         assert len(items) == 2
 
     def test_query_gte_datetime_should_fail(self):
         collection = 'snapshot'
-        self.database.set(collection, {"range_query3": datetime.datetime(2017,1,1) })
-        self.database.set(collection, {"range_query3": datetime.datetime(2017,2,1) })
-        self.database.set(collection, {"range_query3": datetime.datetime(2017,3,1) })
+        self.database.set(collection,
+                          {"range_query3": datetime.datetime(2017, 1, 1)})
+        self.database.set(collection,
+                          {"range_query3": datetime.datetime(2017, 2, 1)})
+        self.database.set(collection,
+                          {"range_query3": datetime.datetime(2017, 3, 1)})
 
         failed = False
         try:
-            items = self.database.query(collection,{"range_query2": {"$gte": datetime.datetime(2017,2,1) }})
+            items = self.database.query(
+                collection,
+                {"range_query2": {
+                    "$gte": datetime.datetime(2017, 2, 1)
+                }})
         except:
             failed = True
         assert failed
-

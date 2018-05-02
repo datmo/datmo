@@ -10,7 +10,9 @@ class TestEnvironment():
             "model_id": "my_model",
             "driver_type": "docker",
             "definition_filename": "Dockerfile",
-            "hardware_info": {"system": "test"},
+            "hardware_info": {
+                "system": "test"
+            },
             "file_collection_id": "my_collection",
             "unique_hash": "sjfl39w",
             "language": "python3"

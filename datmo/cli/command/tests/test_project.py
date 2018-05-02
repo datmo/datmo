@@ -24,7 +24,8 @@ from datmo.cli.command.project import ProjectCommand
 class TestProject():
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -35,20 +36,16 @@ class TestProject():
         pass
 
     def test_datmo_init(self):
-        self.init.parse([
-          "init",
-          "--name","foobar",
-          "--description","test model"])
+        self.init.parse(
+            ["init", "--name", "foobar", "--description", "test model"])
         self.init.execute()
         # test for desired side effects
-        assert os.path.exists(os.path.join(self.temp_dir,'.datmo'))
+        assert os.path.exists(os.path.join(self.temp_dir, '.datmo'))
 
     def test_datmo_init_invalid_arg(self):
         exception_thrown = False
         try:
-          self.init.parse([
-            "init",
-            "--foobar","foobar"])
+            self.init.parse(["init", "--foobar", "foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown

@@ -30,29 +30,18 @@ class TestSession():
         self.session_command = SessionCommand(self.temp_dir, self.cli_helper)
 
         init = ProjectCommand(self.temp_dir, self.cli_helper)
-        init.parse([
-            "init",
-            "--name", "foobar",
-            "--description", "test model"])
+        init.parse(["init", "--name", "foobar", "--description", "test model"])
         init.execute()
 
     def teardown_class(self):
         shutil.rmtree(self.temp_dir)
 
     def test_session_create(self):
-        self.session_command.parse([
-          "session",
-          "create",
-          "--name","pizza"
-        ])
+        self.session_command.parse(["session", "create", "--name", "pizza"])
         assert self.session_command.execute()
 
     def test_session_select(self):
-        self.session_command.parse([
-          "session",
-          "select",
-          "--name","pizza"
-        ])
+        self.session_command.parse(["session", "select", "--name", "pizza"])
         assert self.session_command.execute()
         current = 0
         for s in self.session_command.session_controller.list():
@@ -62,26 +51,16 @@ class TestSession():
         assert current == 1
 
     def test_session_ls(self):
-        self.session_command.parse([
-          "session",
-          "ls"
-        ])
+        self.session_command.parse(["session", "ls"])
         assert self.session_command.execute()
 
     def test_session_delete(self):
-        self.session_command.parse([
-          "session",
-          "delete",
-          "--name","pizza"
-        ])
+        self.session_command.parse(["session", "delete", "--name", "pizza"])
         assert self.session_command.execute()
         session_removed = True
         for s in self.session_command.session_controller.list():
             if s.name == 'pizza':
                 session_removed = False
         assert session_removed
-        self.session_command.parse([
-          "session",
-          "ls"
-        ])
+        self.session_command.parse(["session", "ls"])
         assert self.session_command.execute()

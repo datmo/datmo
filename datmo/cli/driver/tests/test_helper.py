@@ -30,7 +30,8 @@ class TestHelper():
 
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -46,12 +47,10 @@ class TestHelper():
     def test_prompt(self):
         cli = Helper()
         test_message = 'foobar'
-        with open(os.path.join(self.temp_dir,
-                               "test.txt"), "w") as f:
+        with open(os.path.join(self.temp_dir, "test.txt"), "w") as f:
             f.write(to_unicode(test_message))
 
-        with open(os.path.join(self.temp_dir,
-                               "test.txt"), "r") as f:
+        with open(os.path.join(self.temp_dir, "test.txt"), "r") as f:
             sys.stdin = f
             i = cli.prompt("what is this test?")
             assert i == test_message

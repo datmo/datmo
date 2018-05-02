@@ -40,6 +40,7 @@ class Session():
     updated_at : datetime.datetime
 
     """
+
     def __init__(self, dictionary):
         self.id = dictionary.get('id', None)
         self.model_id = dictionary['model_id']
@@ -56,7 +57,9 @@ class Session():
 
     def to_dictionary(self):
         attr_dict = self.__dict__
-        pruned_attr_dict = { attr: val
-                    for attr, val in attr_dict.items() if not callable(getattr(self, attr)) and not attr.startswith("__")
+        pruned_attr_dict = {
+            attr: val
+            for attr, val in attr_dict.items()
+            if not callable(getattr(self, attr)) and not attr.startswith("__")
         }
         return pruned_attr_dict

@@ -20,7 +20,8 @@ from datmo.core.util.exceptions import EntityNotFound
 class TestLocalDAL():
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -30,10 +31,7 @@ class TestLocalDAL():
         model_name = "model_1"
         model = self.dal.model.create(Model({"name": model_name}))
 
-        self.session_input_dict = {
-            "name": "session_1",
-            "model_id": model.id
-        }
+        self.session_input_dict = {"name": "session_1", "model_id": model.id}
 
     def teardown_class(self):
         pass
@@ -89,7 +87,8 @@ class TestLocalDAL():
         assert session.id == updated_session.id
         assert session.updated_at < updated_session.updated_at
         assert updated_session.name == updated_session_input_dict['name']
-        assert updated_session.created_at == updated_session_input_dict['created_at']
+        assert updated_session.created_at == updated_session_input_dict[
+            'created_at']
 
     def test_delete_session(self):
         session = self.dal.session.create(Session(self.session_input_dict))
@@ -106,4 +105,7 @@ class TestLocalDAL():
         session = self.dal.session.create(Session(self.session_input_dict))
 
         assert len(self.dal.session.query({"id": session.id})) == 1
-        assert len(self.dal.session.query({"name": self.session_input_dict['name']})) == 6
+        assert len(
+            self.dal.session.query({
+                "name": self.session_input_dict['name']
+            })) == 6

@@ -10,6 +10,7 @@ from datmo.core.controller.session import SessionController
 from datmo.core.util.exceptions import EntityNotFound, \
     GitCommitDoesNotExist, SessionDoesNotExistException
 
+
 class TestSessionController():
     def setup_method(self):
         # provide mountable tmp directory for docker
@@ -64,10 +65,10 @@ class TestSessionController():
         self.session.delete_by_name("test3")
         entity_exists = False
         try:
-            session_still_exists = self.session.findOne({"name":"test3"})
+            session_still_exists = self.session.findOne({"name": "test3"})
             entity_exists = True
         except:
-          pass
+            pass
         assert not entity_exists
         # current session should be "default"
         assert self.session.get_current().name == 'default'

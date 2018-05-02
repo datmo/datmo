@@ -19,7 +19,8 @@ from datmo.core.util.exceptions import EntityNotFound
 class TestFileCollectionController():
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -44,10 +45,8 @@ class TestFileCollectionController():
         self.file_collection.file_driver.create("dirpath1", directory=True)
         self.file_collection.file_driver.create("filepath1")
 
-        dirpath1 = os.path.join(self.file_collection.home,
-                                "dirpath1")
-        filepath1 = os.path.join(self.file_collection.home,
-                                 "filepath1")
+        dirpath1 = os.path.join(self.file_collection.home, "dirpath1")
+        filepath1 = os.path.join(self.file_collection.home, "filepath1")
         filepaths = [filepath1, dirpath1]
 
         file_collection_obj = self.file_collection.create(filepaths)
@@ -67,15 +66,11 @@ class TestFileCollectionController():
 
         self.file_collection.file_driver.create("dirpath1", directory=True)
         self.file_collection.file_driver.create("filepath1")
-        dirpath1 = os.path.join(self.file_collection.home,
-                                "dirpath1")
-        filepath1 = os.path.join(self.file_collection.home,
-                                 "filepath1")
+        dirpath1 = os.path.join(self.file_collection.home, "dirpath1")
+        filepath1 = os.path.join(self.file_collection.home, "filepath1")
         filepaths_1 = [filepath1, dirpath1]
 
-
-        filepath2 = os.path.join(self.file_collection.home,
-                                 "filepath2")
+        filepath2 = os.path.join(self.file_collection.home, "filepath2")
         with open(filepath2, "w") as f:
             f.write(to_unicode("test" + "\n"))
         filepaths_2 = [filepath2]
@@ -97,10 +92,8 @@ class TestFileCollectionController():
         self.file_collection.file_driver.create("dirpath1", directory=True)
         self.file_collection.file_driver.create("filepath1")
 
-        dirpath1 = os.path.join(self.file_collection.home,
-                                "dirpath1")
-        filepath1 = os.path.join(self.file_collection.home,
-                                 "filepath1")
+        dirpath1 = os.path.join(self.file_collection.home, "dirpath1")
+        filepath1 = os.path.join(self.file_collection.home, "filepath1")
         filepaths = [filepath1, dirpath1]
 
         file_collection_obj = self.file_collection.create(filepaths)
@@ -111,7 +104,8 @@ class TestFileCollectionController():
         # Check if code retrieval throws error
         thrown = False
         try:
-            self.file_collection.dal.file_collection.get_by_id(file_collection_obj.id)
+            self.file_collection.dal.file_collection.get_by_id(
+                file_collection_obj.id)
         except EntityNotFound:
             thrown = True
 

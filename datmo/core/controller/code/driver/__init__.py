@@ -22,6 +22,7 @@ class CodeDriver(with_metaclass(ABCMeta, object)):
     checkout_ref()
         checkout to commit reference given
     """
+
     @abstractmethod
     def __init__(self):
         pass

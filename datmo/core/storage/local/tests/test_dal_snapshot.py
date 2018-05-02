@@ -20,7 +20,8 @@ from datmo.core.util.exceptions import EntityNotFound
 class TestLocalDAL():
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -30,10 +31,11 @@ class TestLocalDAL():
         model_name = "model_1"
         model = self.dal.model.create(Model({"name": model_name}))
         session_name = "session_1"
-        session = self.dal.session.create(Session({
-            "name": session_name,
-            "model_id": model.id
-        }))
+        session = self.dal.session.create(
+            Session({
+                "name": session_name,
+                "model_id": model.id
+            }))
 
         self.snapshot_input_dict = {
             "model_id": model.id,
@@ -42,8 +44,12 @@ class TestLocalDAL():
             "code_id": "code_id",
             "environment_id": "environment_id",
             "file_collection_id": "file_collection_id",
-            "config": {"test": 0.45},
-            "stats": {"test": 0.98}
+            "config": {
+                "test": 0.45
+            },
+            "stats": {
+                "test": 0.98
+            }
         }
 
     def teardown_class(self):
@@ -56,20 +62,24 @@ class TestLocalDAL():
         assert snapshot.session_id == self.snapshot_input_dict['session_id']
         assert snapshot.message == self.snapshot_input_dict['message']
         assert snapshot.code_id == self.snapshot_input_dict['code_id']
-        assert snapshot.environment_id == self.snapshot_input_dict['environment_id']
-        assert snapshot.file_collection_id == self.snapshot_input_dict['file_collection_id']
+        assert snapshot.environment_id == self.snapshot_input_dict[
+            'environment_id']
+        assert snapshot.file_collection_id == self.snapshot_input_dict[
+            'file_collection_id']
         assert snapshot.config == self.snapshot_input_dict['config']
         assert snapshot.stats == self.snapshot_input_dict['stats']
         assert snapshot.created_at
         assert snapshot.updated_at
 
-        snapshot_2 = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
+        snapshot_2 = self.dal.snapshot.create(
+            Snapshot(self.snapshot_input_dict))
 
         assert snapshot_2.id != snapshot.id
 
         test_snapshot_input_dict = self.snapshot_input_dict.copy()
         test_snapshot_input_dict['id'] = "snapshot_id"
-        snapshot_3 = self.dal.snapshot.create(Snapshot(test_snapshot_input_dict))
+        snapshot_3 = self.dal.snapshot.create(
+            Snapshot(test_snapshot_input_dict))
 
         assert snapshot_3.id == test_snapshot_input_dict['id']
 
@@ -100,11 +110,13 @@ class TestLocalDAL():
         updated_snapshot_input_dict['id'] = snapshot.id
         updated_snapshot_input_dict['message'] = "this is really cool"
         updated_snapshot_input_dict['label'] = "new"
-        updated_snapshot = self.dal.snapshot.update(updated_snapshot_input_dict)
+        updated_snapshot = self.dal.snapshot.update(
+            updated_snapshot_input_dict)
 
         assert snapshot.id == updated_snapshot.id
         assert snapshot.updated_at < updated_snapshot.updated_at
-        assert updated_snapshot.message == updated_snapshot_input_dict['message']
+        assert updated_snapshot.message == updated_snapshot_input_dict[
+            'message']
         assert updated_snapshot.label == updated_snapshot_input_dict['label']
 
     def test_delete_snapshot(self):
@@ -123,5 +135,8 @@ class TestLocalDAL():
 
         # All snapshots created are the same, 1 is deleted => 7
         assert len(self.dal.snapshot.query({"id": snapshot.id})) == 1
-        assert len(self.dal.snapshot.query({"code_id": self.snapshot_input_dict['code_id']})) == 7
+        assert len(
+            self.dal.snapshot.query({
+                "code_id": self.snapshot_input_dict['code_id']
+            })) == 7
         assert len(self.dal.snapshot.query({"visible": True})) == 7

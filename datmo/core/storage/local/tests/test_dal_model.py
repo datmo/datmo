@@ -19,7 +19,8 @@ from datmo.core.util.exceptions import EntityNotFound
 class TestLocalDAL():
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -102,7 +103,8 @@ class TestLocalDAL():
         assert model.id == updated_model.id
         assert model.updated_at < updated_model.updated_at
         assert updated_model.name == updated_model_input_dict['name']
-        assert updated_model.description == updated_model_input_dict['description']
+        assert updated_model.description == updated_model_input_dict[
+            'description']
 
     def test_delete_model(self):
         model = self.dal.model.create(Model(self.model_input_dict))
@@ -119,4 +121,7 @@ class TestLocalDAL():
     def test_query_models(self):
         model = self.dal.model.create(Model(self.model_input_dict))
         assert len(self.dal.model.query({"id": model.id})) == 1
-        assert len(self.dal.model.query({"name": self.model_input_dict['name']})) == 6
+        assert len(
+            self.dal.model.query({
+                "name": self.model_input_dict['name']
+            })) == 6

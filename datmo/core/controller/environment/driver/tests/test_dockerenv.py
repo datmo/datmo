@@ -26,9 +26,11 @@ class TestDockerEnv():
     """
     Checks all functions of the DockerEnvironmentDriver
     """
+
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -37,8 +39,7 @@ class TestDockerEnv():
             DockerEnvironmentDriver(self.temp_dir)
         self.init_result = self.docker_environment_manager.init()
         random_text = str(uuid.uuid1())
-        with open(os.path.join(self.temp_dir, "Dockerfile"),
-                  "a+") as f:
+        with open(os.path.join(self.temp_dir, "Dockerfile"), "a+") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
 
@@ -52,16 +53,17 @@ class TestDockerEnv():
     def test_instantiation_not_connected(self):
         thrown = False
         try:
-            DockerEnvironmentDriver(self.temp_dir, docker_socket="unix:///var/run/fooo")
+            DockerEnvironmentDriver(
+                self.temp_dir, docker_socket="unix:///var/run/fooo")
         except EnvironmentInitFailed:
             thrown = True
         assert thrown
 
     def test_create(self):
-        input_dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                             "Dockerfile")
-        output_dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                              "datmoDockerfile")
+        input_dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
+        output_dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "datmoDockerfile")
         # Test both default values
         success, path, output_path, requirements_filepath = \
             self.docker_environment_manager.create()
@@ -107,7 +109,7 @@ class TestDockerEnv():
         os.remove(output_dockerfile_path)
 
         script_path = os.path.join(self.docker_environment_manager.filepath,
-                            "script.py")
+                                   "script.py")
         with open(script_path, "w") as f:
             f.write(to_unicode("import numpy\n"))
             f.write(to_unicode("import sklearn\n"))
@@ -146,7 +148,7 @@ class TestDockerEnv():
     def test_build(self):
         name = str(uuid.uuid1())
         path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
+                            "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
@@ -218,9 +220,7 @@ class TestDockerEnv():
         self.docker_environment_manager.stop(run_id, force=True)
 
         # Test default values for run options
-        run_options = {
-            "command": ["sh", "-c", "echo yo"]
-        }
+        run_options = {"command": ["sh", "-c", "echo yo"]}
         return_code, run_id, logs = \
             self.docker_environment_manager.run(image_name, run_options, log_filepath)
         assert return_code == 0
@@ -264,7 +264,7 @@ class TestDockerEnv():
     def test_remove(self):
         name = str(uuid.uuid1())
         path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
+                            "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
@@ -284,30 +284,33 @@ class TestDockerEnv():
                self.docker_environment_manager.is_initialized == True
 
     def test_get_tags_for_docker_repository(self):
-        result = self.docker_environment_manager.get_tags_for_docker_repository("hello-world")
+        result = self.docker_environment_manager.get_tags_for_docker_repository(
+            "hello-world")
         assert 'latest' in result
 
     def test_build_image(self):
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
+        dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        result = self.docker_environment_manager.build_image(image_name, dockerfile_path)
+        result = self.docker_environment_manager.build_image(
+            image_name, dockerfile_path)
         assert result == True
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_get_image(self):
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
+        dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name, dockerfile_path)
+        self.docker_environment_manager.build_image(image_name,
+                                                    dockerfile_path)
 
         result = self.docker_environment_manager.get_image(image_name)
         tags = result.__dict__['attrs']['RepoTags']
@@ -317,13 +320,14 @@ class TestDockerEnv():
     def test_list_images(self):
         # TODO: Test out all input permutations
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
+        dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name, dockerfile_path)
+        self.docker_environment_manager.build_image(image_name,
+                                                    dockerfile_path)
         # List images without all flag
         result = self.docker_environment_manager.list_images()
         group = [item.__dict__['attrs']['RepoTags'] for item in result]
@@ -340,62 +344,70 @@ class TestDockerEnv():
 
     def test_search_images(self):
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
+        dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name, dockerfile_path)
-        result  = self.docker_environment_manager.search_images(image_name)
+        self.docker_environment_manager.build_image(image_name,
+                                                    dockerfile_path)
+        result = self.docker_environment_manager.search_images(image_name)
         assert len(result) > 0
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_remove_image(self):
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
+        dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
         # Without force
-        self.docker_environment_manager.build_image(image_name, dockerfile_path)
+        self.docker_environment_manager.build_image(image_name,
+                                                    dockerfile_path)
         result = self.docker_environment_manager.remove_image(image_name)
         assert result == True
         # With force
-        self.docker_environment_manager.build_image(image_name, dockerfile_path)
-        result = self.docker_environment_manager.remove_image(image_name, force=True)
+        self.docker_environment_manager.build_image(image_name,
+                                                    dockerfile_path)
+        result = self.docker_environment_manager.remove_image(
+            image_name, force=True)
         assert result == True
 
     def test_remove_images(self):
         # TODO: Test out all input permutations
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
+        dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
         # Without force
-        self.docker_environment_manager.build_image(image_name, dockerfile_path)
+        self.docker_environment_manager.build_image(image_name,
+                                                    dockerfile_path)
         result = self.docker_environment_manager.remove_images(name=image_name)
         assert result == True
         # With force
-        self.docker_environment_manager.build_image(image_name, dockerfile_path)
-        result = self.docker_environment_manager.remove_images(name=image_name, force=True)
+        self.docker_environment_manager.build_image(image_name,
+                                                    dockerfile_path)
+        result = self.docker_environment_manager.remove_images(
+            name=image_name, force=True)
         assert result == True
 
     def test_run_container(self):
         # TODO: test with all variables provided
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
+        dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name, dockerfile_path)
+        self.docker_environment_manager.build_image(image_name,
+                                                    dockerfile_path)
         # With default parameters
         return_code, container_id = \
             self.docker_environment_manager.run_container(image_name)
@@ -404,25 +416,28 @@ class TestDockerEnv():
         # teardown container
         self.docker_environment_manager.stop(container_id, force=True)
         # With api=True, detach=False
-        logs = self.docker_environment_manager.run_container(image_name, api=True)
+        logs = self.docker_environment_manager.run_container(
+            image_name, api=True)
         assert logs == ""
         # With api=True, detach=True
-        container_obj = self.docker_environment_manager.run_container(image_name, api=True,
-                                                                      detach=True)
+        container_obj = self.docker_environment_manager.run_container(
+            image_name, api=True, detach=True)
         assert container_obj
         self.docker_environment_manager.stop(container_obj.id, force=True)
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_get_container(self):
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
+        dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name, dockerfile_path)
-        _, container_id = self.docker_environment_manager.run_container(image_name)
+        self.docker_environment_manager.build_image(image_name,
+                                                    dockerfile_path)
+        _, container_id = self.docker_environment_manager.run_container(
+            image_name)
         result = self.docker_environment_manager.get_container(container_id)
         assert result
         self.docker_environment_manager.remove_image(image_name, force=True)
@@ -430,15 +445,16 @@ class TestDockerEnv():
     def test_list_containers(self):
         # TODO: Test out all input permutations
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
+        dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name, dockerfile_path)
-        _, container_id = self.docker_environment_manager.run_container(image_name,
-                                                                     detach=True)
+        self.docker_environment_manager.build_image(image_name,
+                                                    dockerfile_path)
+        _, container_id = self.docker_environment_manager.run_container(
+            image_name, detach=True)
         result = self.docker_environment_manager.list_containers()
         assert container_id and len(result) > 0
         self.docker_environment_manager.stop(container_id, force=True)
@@ -446,14 +462,16 @@ class TestDockerEnv():
 
     def test_stop_container(self):
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
+        dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name, dockerfile_path)
-        _, container_id = self.docker_environment_manager.run_container(image_name)
+        self.docker_environment_manager.build_image(image_name,
+                                                    dockerfile_path)
+        _, container_id = self.docker_environment_manager.run_container(
+            image_name)
         result = self.docker_environment_manager.stop_container(container_id)
         assert result == True
         result = self.docker_environment_manager.get_container(container_id)
@@ -462,20 +480,24 @@ class TestDockerEnv():
 
     def test_remove_container(self):
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
+        dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
         # Without force
-        self.docker_environment_manager.build_image(image_name, dockerfile_path)
-        _, container_id = self.docker_environment_manager.run_container(image_name)
+        self.docker_environment_manager.build_image(image_name,
+                                                    dockerfile_path)
+        _, container_id = self.docker_environment_manager.run_container(
+            image_name)
         result = self.docker_environment_manager.remove_container(container_id)
         assert result == True
         # With force
-        _, container_id = self.docker_environment_manager.run_container(image_name)
-        result = self.docker_environment_manager.remove_container(container_id, force=True)
+        _, container_id = self.docker_environment_manager.run_container(
+            image_name)
+        result = self.docker_environment_manager.remove_container(
+            container_id, force=True)
         assert result == True
         self.docker_environment_manager.remove_image(image_name, force=True)
 
@@ -483,20 +505,21 @@ class TestDockerEnv():
         # TODO: Do a more comprehensive test, test out optional variables
         # TODO: Test out more commands at the system level
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
+        dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
         log_filepath = os.path.join(self.docker_environment_manager.filepath,
                                     "test.log")
-        self.docker_environment_manager.build_image(image_name, dockerfile_path)
+        self.docker_environment_manager.build_image(image_name,
+                                                    dockerfile_path)
         _, container_id = \
             self.docker_environment_manager.run_container(image_name,
                                                           command=["sh", "-c", "echo yo"])
-        return_code, logs = self.docker_environment_manager.log_container(container_id,
-                                                               log_filepath)
+        return_code, logs = self.docker_environment_manager.log_container(
+            container_id, log_filepath)
         assert return_code == 0
         assert logs and \
                os.path.exists(log_filepath)
@@ -505,7 +528,8 @@ class TestDockerEnv():
             assert f.readline() != ""
 
         self.docker_environment_manager.stop_container(container_id)
-        self.docker_environment_manager.remove_container(container_id, force=True)
+        self.docker_environment_manager.remove_container(
+            container_id, force=True)
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_create_requirements_file(self):
@@ -564,31 +588,33 @@ class TestDockerEnv():
     def test_stop_remove_containers_by_term(self):
         # TODO: add more robust tests
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
+        dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name, dockerfile_path)
+        self.docker_environment_manager.build_image(image_name,
+                                                    dockerfile_path)
         # Test without force
         self.docker_environment_manager.run_container(image_name)
-        result = self.docker_environment_manager.stop_remove_containers_by_term(image_name)
+        result = self.docker_environment_manager.stop_remove_containers_by_term(
+            image_name)
         assert result == True
         # Test with force
         self.docker_environment_manager.run_container(image_name)
-        result = self.docker_environment_manager.stop_remove_containers_by_term(image_name,
-                                                                                force=True)
+        result = self.docker_environment_manager.stop_remove_containers_by_term(
+            image_name, force=True)
         assert result == True
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_form_datmo_dockerfile(self):
-        input_dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                       "Dockerfile")
-        output_dockerfile_path = os.path.join(self.docker_environment_manager.filepath,
-                                              "datmoDockerfile")
-        result = self.docker_environment_manager.form_datmo_definition_file(input_dockerfile_path,
-                                                                            output_dockerfile_path)
+        input_dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
+        output_dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "datmoDockerfile")
+        result = self.docker_environment_manager.form_datmo_definition_file(
+            input_dockerfile_path, output_dockerfile_path)
         assert result and \
             os.path.isfile(output_dockerfile_path) and \
             "datmo" in open(output_dockerfile_path, "r").read()

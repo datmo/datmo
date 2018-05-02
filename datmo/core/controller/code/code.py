@@ -22,6 +22,7 @@ class CodeController(BaseController):
     delete(id)
         delete the specified code object from the project
     """
+
     def __init__(self, home):
         super(CodeController, self).__init__(home)
 
@@ -66,7 +67,7 @@ class CodeController(BaseController):
                     "commit_id": create_dict[required_arg],
                     "model_id": self.model.id
                 })
-                if results: return results[0];
+                if results: return results[0]
             else:
                 raise NotImplementedError()
 
@@ -75,7 +76,7 @@ class CodeController(BaseController):
 
     def list(self):
         # TODO: Add time filters
-        return self.dal.code.query({"model_id": self.model.id })
+        return self.dal.code.query({"model_id": self.model.id})
 
     def delete(self, code_id):
         """Delete all traces of Code object
@@ -97,9 +98,8 @@ class CodeController(BaseController):
         """
         code_obj = self.dal.code.get_by_id(code_id)
         if not code_obj:
-            raise PathDoesNotExist(__("error",
-                                           "controller.code.delete",
-                                      code_id))
+            raise PathDoesNotExist(
+                __("error", "controller.code.delete", code_id))
         # Remove code reference
         delete_code_success = self.code_driver.delete_ref(code_obj.commit_id)
         # Delete code object

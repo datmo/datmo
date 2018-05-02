@@ -22,6 +22,7 @@ class FileCollectionController(BaseController):
     delete(id)
         delete the specified file collection from the project
     """
+
     def __init__(self, home):
         super(FileCollectionController, self).__init__(home)
 
@@ -59,7 +60,7 @@ class FileCollectionController(BaseController):
                 results = self.dal.file_collection.query({
                     "filehash": create_dict[required_arg]
                 })
-                if results: return results[0];
+                if results: return results[0]
             elif required_arg == "path":
                 create_dict[required_arg] = \
                     self.file_driver.get_relative_collection_path(create_dict['filehash'])
@@ -93,14 +94,17 @@ class FileCollectionController(BaseController):
         PathDoesNotExist
             if the specified FileCollection does not exist.
         """
-        file_collection_obj = self.dal.file_collection.get_by_id(file_collection_id)
+        file_collection_obj = self.dal.file_collection.get_by_id(
+            file_collection_id)
         if not file_collection_obj:
-            raise PathDoesNotExist(__("error",
-                                           "controller.file_collection.delete",
-                                      file_collection_id))
+            raise PathDoesNotExist(
+                __("error", "controller.file_collection.delete",
+                   file_collection_id))
         # Remove file collection files
-        delete_file_collection_success = self.file_driver.delete_collection(file_collection_obj.filehash)
+        delete_file_collection_success = self.file_driver.delete_collection(
+            file_collection_obj.filehash)
         # Delete FileCollection
-        delete_file_collection_obj_success = self.dal.file_collection.delete(file_collection_obj.id)
+        delete_file_collection_obj_success = self.dal.file_collection.delete(
+            file_collection_obj.id)
 
         return delete_file_collection_success and delete_file_collection_obj_success

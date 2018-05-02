@@ -9,7 +9,6 @@ from datmo.core.controller.environment.driver import EnvironmentDriver
 
 
 class TestEnvironmentDriver(unittest.TestCase):
-
     def test_init(self):
         failed = False
         try:

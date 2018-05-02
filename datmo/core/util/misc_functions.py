@@ -22,8 +22,10 @@ def printable_dict(input_dictionary):
             printable_output = printable_output + key + ": " + str(value) + "\n"
     return printable_output
 
+
 def printable_string(string, max_width=100):
     return '\n'.join(textwrap.wrap(string, max_width))
+
 
 def which(program):
     def is_exe(fpath):
@@ -41,6 +43,7 @@ def which(program):
                 return exe_file
     return None
 
+
 def create_logger(logfile_location):
     logger = logging.getLogger('datmo')
     logger.setLevel(logging.INFO)
@@ -51,6 +54,7 @@ def create_logger(logfile_location):
     logger.addHandler(handler)
     return logger
 
+
 def get_nvidia_devices():
     nvidia_devices = glob('/dev/nvidia*')
     devices = []
@@ -58,11 +62,11 @@ def get_nvidia_devices():
         devices.append(device + ':' + device + ':rwm')
     return devices
 
+
 def get_filehash(filepath):
     if not os.path.isfile(filepath):
-        raise PathDoesNotExist(__("error",
-                                      "util.misc_functions.get_filehash",
-                                  filepath))
+        raise PathDoesNotExist(
+            __("error", "util.misc_functions.get_filehash", filepath))
     BUFF_SIZE = 65536
     sha1 = hashlib.md5()
     with open(filepath, "rb") as f:
@@ -73,6 +77,7 @@ def get_filehash(filepath):
             sha1.update(data)
     return sha1.hexdigest()
 
+
 def create_unique_hash(base_hash=None, salt=None):
     if not salt:
         salt = os.urandom(16)
@@ -82,19 +87,22 @@ def create_unique_hash(base_hash=None, salt=None):
         sha1 = hashlib.sha1()
     else:
         sha1 = hashlib.sha1(base_hash)
-    timestamp_microsec = (datetime.datetime.utcnow() -
-                          datetime.datetime(1970, 1, 1)).total_seconds() * 100000
-    sha1.update(salt+str(timestamp_microsec).encode('utf-8'))
+    timestamp_microsec = (
+        datetime.datetime.utcnow() - datetime.datetime(1970, 1, 1)
+    ).total_seconds() * 100000
+    sha1.update(salt + str(timestamp_microsec).encode('utf-8'))
     return sha1.hexdigest()
 
-def mutually_exclusive(mutually_exclusive_args, arguments_dictionary, dictionary):
+
+def mutually_exclusive(mutually_exclusive_args, arguments_dictionary,
+                       dictionary):
     mutually_exclusive_arg_count = 0
     for arg in mutually_exclusive_args:
         if arg in arguments_dictionary and arguments_dictionary[arg] is not None:
             dictionary[arg] = arguments_dictionary[arg]
-            mutually_exclusive_arg_count+=1
-    if mutually_exclusive_arg_count>1:
-        raise MutuallyExclusiveArguments(__("error",
-                                            "util.misc_functions.mutually_exclusive",
-                                            ' '.join(mutually_exclusive_args)))
+            mutually_exclusive_arg_count += 1
+    if mutually_exclusive_arg_count > 1:
+        raise MutuallyExclusiveArguments(
+            __("error", "util.misc_functions.mutually_exclusive",
+               ' '.join(mutually_exclusive_args)))
     return
