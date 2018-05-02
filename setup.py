@@ -10,14 +10,6 @@ setup(
     url="https://github.com/datmo/datmo",
     license='See LICENSE.txt',
     description='Open source model tracking tool for developers',
-    classifiers=[
-           'Development Status :: 2 - Pre-Alpha',
-           'Intended Audience :: Developers',
-           'License :: OSI Approved :: Apache Software License',
-           'Operating System :: OS Independent',
-           'Programming Language :: Python',
-           'Topic :: Scientific/Engineering :: Artificial Intelligence'
-    ],
     install_requires=[
         "future>=0.16.0",
         "enum34>=1.1.6",
