@@ -240,3 +240,65 @@ class TestBlitzDBDALDriver():
             "range_query4": {"$gte": datetime.datetime(2017, 2, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')}},
                                     sort_key="range_query4", sort_order='descending')
         assert items[0]['range_query4'] == datetime.datetime(2017, 3, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+
+        # none is passed
+        items = self.database.query(collection, {
+            "range_query4": {"$gte": datetime.datetime(2017, 2, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')}},
+                                    sort_key="range_query4")
+        assert len(items) == 2
+
+        # none is passed
+        items = self.database.query(collection, {
+            "range_query4": {"$gte": datetime.datetime(2017, 2, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')}},
+                                    sort_order='descending')
+        assert len(items) == 2
+
+    def test_query_sort_date_int(self):
+        collection = 'snapshot'
+        self.database.set(collection, {"range_query5": 1})
+        self.database.set(collection, {"range_query5": 2})
+        self.database.set(collection, {"range_query5": 3})
+
+        # ascending
+        items = self.database.query(collection, {"range_query5": {"$gte": 2}}, sort_key="range_query5", sort_order='ascending')
+        assert items[0]['range_query5'] == 2
+
+        # descending
+        items = self.database.query(collection, {"range_query5": {"$gte": 2}}, sort_key="range_query5",
+                                    sort_order='descending')
+        assert items[0]['range_query5'] == 3
+
+        # none is passed
+        items = self.database.query(collection, {"range_query5": {"$gte": 2}}, sort_key="range_query5")
+        assert len(items) == 2
+
+        # none is passed
+        items = self.database.query(collection, {"range_query5": {"$gte": 2}}, sort_order='descending')
+        assert len(items) == 2
+
+
+    def test_query_sort_bool(self):
+        collection = 'snapshot'
+        self.database.set(collection, {"range_query6": 1, "bool_query": True})
+        self.database.set(collection, {"range_query6": 2, "bool_query": False})
+        self.database.set(collection, {"range_query6": 3, "bool_query": True})
+        self.database.set(collection, {"range_query6": 4, "bool_query": True})
+
+        # ascending
+        items = self.database.query(collection, {"range_query6": {"$gte": 2}}, sort_key="bool_query", sort_order='ascending')
+        assert items[0]['range_query6'] == 2
+        assert items[0]['bool_query'] == False
+
+        # descending
+        items = self.database.query(collection, {"range_query6": {"$gte": 2}}, sort_key="bool_query",
+                                    sort_order='descending')
+        assert items[0]['range_query6'] == 3
+        assert items[0]['bool_query'] == True
+
+        # none is passed
+        items = self.database.query(collection, {"range_query6": {"$gte": 2}}, sort_key="bool_query")
+        assert len(items) == 3
+
+        # none is passed
+        items = self.database.query(collection, {"range_query6": {"$gte": 2}}, sort_order='descending')
+        assert len(items) == 3

@@ -108,20 +108,20 @@ class BlitzDBDALDriver(DALDriver):
         if query_params.get('id', None) != None:
             query_params['pk'] = query_params['id']
             del query_params['id']
-        if sort_key is None and sort_order is None:
-            return list(map(normalize_entity, [item.attributes.copy()
-                                               for item in self.backend.filter(collection, query_params)]))
-        else:
+        if sort_key is not None and sort_order is not None:
             if sort_order == 'ascending':
                 return list(map(normalize_entity, [item.attributes.copy()
                                                    for item in self.backend.filter(collection,
                                                                                    query_params).sort(sort_key,
                                                                                                       queryset.QuerySet.ASCENDING)]))
-            else:
+            elif sort_order == 'descending':
                 return list(map(normalize_entity, [item.attributes.copy()
                                                    for item in self.backend.filter(collection,
                                                                                    query_params).sort(sort_key,
                                                                                                       queryset.QuerySet.DESCENDING)]))
+        else:
+            return list(map(normalize_entity, [item.attributes.copy()
+                                               for item in self.backend.filter(collection, query_params)]))
 
     def delete(self, collection, entity_id):
         self.__reload()
