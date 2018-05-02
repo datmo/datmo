@@ -30,6 +30,7 @@ class EnvironmentController(BaseController):
         Delete the specified environment from the project
 
     """
+
     def __init__(self, home):
         super(EnvironmentController, self).__init__(home)
         self.file_collection = FileCollectionController(home)
@@ -83,8 +84,9 @@ class EnvironmentController(BaseController):
             # Create datmo environment definition in the same dir as definition filepath
             datmo_definition_filepath = \
                 os.path.join(definition_path, "datmo" + definition_filename)
-            _, _, _, requirements_filepath = self.environment_driver.create(path=dictionary['definition_filepath'],
-                                            output_path=datmo_definition_filepath)
+            _, _, _, requirements_filepath = self.environment_driver.create(
+                path=dictionary['definition_filepath'],
+                output_path=datmo_definition_filepath)
         else:
             # If path is not given, then only use the language to create a default environment
             # Use the default create to find environment definition
@@ -95,16 +97,15 @@ class EnvironmentController(BaseController):
                 os.path.split(original_definition_filepath)
             create_dict['definition_filename'] = definition_filename
 
-
-        hardware_info_filepath = self._store_hardware_info(dictionary, create_dict, definition_path)
+        hardware_info_filepath = self._store_hardware_info(
+            dictionary, create_dict, definition_path)
 
         # Add all environment files to collection:
         # definition path, datmo_definition_path, hardware_info
         filepaths = [
-                        original_definition_filepath,
-                        datmo_definition_filepath,
-                        hardware_info_filepath
-                    ]
+            original_definition_filepath, datmo_definition_filepath,
+            hardware_info_filepath
+        ]
         if requirements_filepath:
             filepaths.append(requirements_filepath)
 
@@ -117,7 +118,6 @@ class EnvironmentController(BaseController):
             os.remove(original_definition_filepath)
         os.remove(datmo_definition_filepath)
         os.remove(hardware_info_filepath)
-
 
         create_dict['unique_hash'] = file_collection_obj.filehash
         # Check if unique hash is unique or not.
@@ -141,7 +141,8 @@ class EnvironmentController(BaseController):
         else:
             # Extract hardware info of the container (currently taking from system platform)
             # TODO: extract hardware information directly from the container
-            (system, node, release, version, machine, processor) = platform.uname()
+            (system, node, release, version, machine,
+             processor) = platform.uname()
             create_dict['hardware_info'] = {
                 'system': system,
                 'node': node,
@@ -152,8 +153,8 @@ class EnvironmentController(BaseController):
             }
         # Create hardware info file in definition path
         hardware_info_filepath = os.path.join(definition_path, "hardware_info")
-        _ = JSONStore(hardware_info_filepath,
-                        initial_dict=create_dict['hardware_info'])
+        _ = JSONStore(
+            hardware_info_filepath, initial_dict=create_dict['hardware_info'])
         return hardware_info_filepath
 
     def build(self, environment_id):
@@ -176,16 +177,17 @@ class EnvironmentController(BaseController):
         """
         environment_obj = self.dal.environment.get_by_id(environment_id)
         if not environment_obj:
-            raise PathDoesNotExist(__("error",
-                                           "controller.environment.build",
-                                      environment_id))
+            raise PathDoesNotExist(
+                __("error", "controller.environment.build", environment_id))
         file_collection_obj = self.dal.file_collection.\
             get_by_id(environment_obj.file_collection_id)
         # TODO: Check hardware info here if different from creation time
         # Build the Environment with the driver
-        datmo_definition_filepath = os.path.join(self.home, file_collection_obj.path,
-                                                 "datmo" + environment_obj.definition_filename)
-        result = self.environment_driver.build(environment_id, path=datmo_definition_filepath)
+        datmo_definition_filepath = os.path.join(
+            self.home, file_collection_obj.path,
+            "datmo" + environment_obj.definition_filename)
+        result = self.environment_driver.build(
+            environment_id, path=datmo_definition_filepath)
         return result
 
     def run(self, environment_id, options, log_filepath):
@@ -252,13 +254,14 @@ class EnvironmentController(BaseController):
         """
         environment_obj = self.dal.environment.get_by_id(environment_id)
         if not environment_obj:
-            raise PathDoesNotExist(__("error",
-                                           "controller.environment.delete",
-                                      environment_id))
+            raise PathDoesNotExist(
+                __("error", "controller.environment.delete", environment_id))
         # Remove file collection
-        file_collection_deleted = self.file_collection.delete(environment_obj.file_collection_id)
+        file_collection_deleted = self.file_collection.delete(
+            environment_obj.file_collection_id)
         # Remove artifacts associated with the environment_driver
-        environment_artifacts_removed = self.environment_driver.remove(environment_id, force=True)
+        environment_artifacts_removed = self.environment_driver.remove(
+            environment_id, force=True)
         # Delete environment_driver object
         delete_success = self.dal.environment.delete(environment_obj.id)
 

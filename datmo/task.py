@@ -50,6 +50,7 @@ class Task():
     ------
     InvalidArgumentType
     """
+
     def __init__(self, task_entity, home=None):
         if not home:
             home = os.getcwd()
@@ -92,9 +93,9 @@ class Task():
         task_controller = TaskController(home=self._home)
         return task_controller.get_files(self.id, mode=mode)
 
-
     def __eq__(self, other):
         return self.id == other.id if other else False
+
 
 def run(command, env=None, home=None):
     """Run the code or script inside
@@ -154,7 +155,8 @@ def run(command, env=None, home=None):
     core_task_obj = task_controller.create(task_dict)
 
     # Pass in the task
-    updated_core_task_obj = task_controller.run(core_task_obj.id, snapshot_dict=snapshot_dict)
+    updated_core_task_obj = task_controller.run(
+        core_task_obj.id, snapshot_dict=snapshot_dict)
 
     # Create a new task object for the
     client_task_obj = Task(updated_core_task_obj, home=home)

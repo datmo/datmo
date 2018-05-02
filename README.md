@@ -12,7 +12,7 @@ powerhouse.
 * [Introduction](#introduction)
 * [Requirements](#requirements)
 * [Installation](#installation)
-* [Documentation](#documentation)
+* [Contributing to Datmo](/CONTRIBUTING.md)
 * [Testing](#testing)
 
 ## Introduction
@@ -37,36 +37,11 @@ We realized that we likely won't come up with the best solution on our own and t
 
 ## Installation
 ```
-# Clean up pycache and pyc libraries
-$ find . | grep -E "(__pycache__|\.pyc$)" | xargs rm -rf
-
-# Install the package and clean up all builds
-$ python setup.py clean --all install
-```
-
-## Documentation
-```
-$ pip install sphinx-argparse
-$ cd docs
-$ rm -rf source/*
-$ make clean
-$ sphinx-apidoc -o source/ ../datmo
-$ make html
-$ pip install sphinx-rtd-theme
-$ pip install recommonmark
-```
-
-## Testing
-```
-$ pip install pytest pytest-cov
-$ pip install coveralls
-$ export TEST_DATMO_DIR="/mydir" # Must be an absolute path
-$ python -m pytest --cov-config .coveragerc --cov=datmo
+pip install datmo
 ```
 
 ## Project Structure
-Datmo adds 2 things to existing repositories to keep track of the work, a `datmo.json` file with settings
-associated with the project and a `.datmo` directory which keeps track of all of the various entities. 
+Datmo adds `.datmo` directory which keeps track of all of the various entities into a repository to make it datmo-enabled. 
 
 ## Project Templates
 In the `/templates` folder we have templates for those who will be starting their projects from scratch. 
@@ -75,8 +50,9 @@ Each folder includes a set of files that are not required by datmo but that augm
 as you start new projects. 
 
 ## Project Examples
-In the `/examples` folder we have a few projects that have already been created and converted to datmo. You can 
-navigate to them and try datmo commands for yourself in order to get a feel for the tool.
+In the `/examples` folder we have a few scripts you can run to get a feel for datmo. You can 
+navigate to [Examples](/examples/README.md) to learn more about how you can run the examples 
+and get started with your own projects.
 
 Here's a comparison of a typical logistic regression model with one leveraging Datmo.
 
@@ -162,6 +138,26 @@ datmo.snapshot.create(
 </pre></td>
 </tr>
 </table>
+
+In order to run the above code you can do the following. 
+
+1. Navigate to a directory with a project
+
+        $ mkdir MY_PROJECT
+        $ cd MY_PROJECT
+
+2. Initialize a datmo project
+
+        $ datmo init
+       
+3. Copy the datmo code above into a `train.py` file in your `MY_PROJECT` directory
+4. Run the script like you normally would in python 
+
+        $ python train.py
+        
+5. Congrats! You just created your first snapshot :) Now run an ls command for snapshots to see your first snapshot.
+
+        $ datmo snapshot ls
 
 ## Sharing (Beta)
 Although datmo is made to track your changes locally, you can share a project with your

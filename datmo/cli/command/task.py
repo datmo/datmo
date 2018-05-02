@@ -14,32 +14,56 @@ class TaskCommand(ProjectCommand):
         super(TaskCommand, self).__init__(home, cli_helper)
 
         task_parser = self.subparsers.add_parser("task", help="Task module")
-        subcommand_parsers = task_parser.add_subparsers(title="subcommands", dest="subcommand")
+        subcommand_parsers = task_parser.add_subparsers(
+            title="subcommands", dest="subcommand")
 
         # Task run arguments
         run = subcommand_parsers.add_parser("run", help="Run task")
-        run.add_argument("--gpu", dest="gpu", action="store_true",
-                         help="Boolean if you want to run using GPUs")
-        run.add_argument("--ports", nargs="*", dest="ports", type=str, help="""
+        run.add_argument(
+            "--gpu",
+            dest="gpu",
+            action="store_true",
+            help="Boolean if you want to run using GPUs")
+        run.add_argument(
+            "--ports",
+            nargs="*",
+            dest="ports",
+            type=str,
+            help="""
             Network port mapping during task (e.g. 8888:8888). Left is the host machine port and right
             is the environment port available during a run.
         """)
         # run.add_argument("--data", nargs="*", dest="data", type=str, help="Path for data to be used during the Task")
-        run.add_argument("--env-def", dest="environment_definition_filepath", default="",
-                         nargs="?", type=str,
-                         help="Pass in the Dockerfile with which you want to build the environment")
-        run.add_argument("--interactive", dest="interactive", action="store_true",
-                         help="Run the environment in interactive mode (keeps STDIN open)")
+        run.add_argument(
+            "--env-def",
+            dest="environment_definition_filepath",
+            default="",
+            nargs="?",
+            type=str,
+            help=
+            "Pass in the Dockerfile with which you want to build the environment"
+        )
+        run.add_argument(
+            "--interactive",
+            dest="interactive",
+            action="store_true",
+            help="Run the environment in interactive mode (keeps STDIN open)")
         run.add_argument("cmd", nargs="?", default=None)
 
         # Task list arguments
         ls = subcommand_parsers.add_parser("ls", help="List tasks")
-        ls.add_argument("--session-id", dest="session_id", default=None, nargs="?", type=str,
-                         help="Pass in the session id to list the tasks in that session")
+        ls.add_argument(
+            "--session-id",
+            dest="session_id",
+            default=None,
+            nargs="?",
+            type=str,
+            help="Pass in the session id to list the tasks in that session")
 
         # Task stop arguments
         stop = subcommand_parsers.add_parser("stop", help="Stop tasks")
-        stop.add_argument("--id", dest="id", default=None, type=str, help="Task ID to stop")
+        stop.add_argument(
+            "--id", dest="id", default=None, type=str, help="Task ID to stop")
 
         self.task_controller = TaskController(home=home)
 
@@ -70,11 +94,10 @@ class TaskCommand(ProjectCommand):
 
         # Pass in the task
         try:
-            updated_task_obj = self.task_controller.run(task_obj.id, snapshot_dict=snapshot_dict)
+            updated_task_obj = self.task_controller.run(
+                task_obj.id, snapshot_dict=snapshot_dict)
         except:
-            self.cli_helper.echo(__("error",
-                                    "cli.task.run",
-                                    task_obj.id))
+            self.cli_helper.echo(__("error", "cli.task.run", task_obj.id))
             return False
         return updated_task_obj
 
@@ -86,26 +109,22 @@ class TaskCommand(ProjectCommand):
         t = prettytable.PrettyTable(header_list)
         task_objs = self.task_controller.list(session_id)
         for task_obj in task_objs:
-            t.add_row([task_obj.id, task_obj.command, task_obj.status, task_obj.gpu,
-                       task_obj.created_at.strftime("%Y-%m-%d %H:%M:%S")])
+            t.add_row([
+                task_obj.id, task_obj.command, task_obj.status, task_obj.gpu,
+                task_obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
+            ])
         self.cli_helper.echo(t)
 
         return True
 
     def stop(self, **kwargs):
         task_id = kwargs.get('id', None)
-        self.cli_helper.echo(__("info",
-                                "cli.task.stop",
-                                task_id))
+        self.cli_helper.echo(__("info", "cli.task.stop", task_id))
         try:
             result = self.task_controller.stop(task_id)
             if not result:
-                self.cli_helper.echo(__("error",
-                                        "cli.task.stop",
-                                        task_id))
+                self.cli_helper.echo(__("error", "cli.task.stop", task_id))
             return result
         except:
-            self.cli_helper.echo(__("error",
-                                    "cli.task.stop",
-                                    task_id))
+            self.cli_helper.echo(__("error", "cli.task.stop", task_id))
             return False

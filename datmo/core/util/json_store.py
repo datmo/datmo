@@ -30,11 +30,12 @@ class JSONStore():
 
     def to_file(self, dictionary):
         with open(self.filepath, 'w', encoding='utf8') as outfile:
-            str_ = json.dumps(dictionary,
-                              indent=4,
-                              sort_keys=True,
-                              separators=(',', ': '),
-                              ensure_ascii=False)
+            str_ = json.dumps(
+                dictionary,
+                indent=4,
+                sort_keys=True,
+                separators=(',', ': '),
+                ensure_ascii=False)
             outfile.write(to_unicode(str_))
         return
 
@@ -47,11 +48,12 @@ class JSONStore():
             settings_dict = json.load(open(self.filepath, 'r'))
         settings_dict[key] = value
         with open(self.filepath, 'w', encoding='utf8') as outfile:
-            str_ = json.dumps(settings_dict,
-                              indent=4,
-                              sort_keys=True,
-                              separators=(',', ': '),
-                              ensure_ascii=False)
+            str_ = json.dumps(
+                settings_dict,
+                indent=4,
+                sort_keys=True,
+                separators=(',', ': '),
+                ensure_ascii=False)
             outfile.write(to_unicode(str_))
         return
 

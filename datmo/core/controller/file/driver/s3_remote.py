@@ -14,7 +14,8 @@ class S3RemoteFileDriver(object):
     @staticmethod
     def upload(src_filepath, s3_presigned_url):
         if not os.path.isfile(src_filepath):
-            raise Exception("Can't upload file: %s, validation failed." % src_filepath)
+            raise Exception(
+                "Can't upload file: %s, validation failed." % src_filepath)
         with open(src_filepath, "r") as f:
             data = f.read()
             res = requests.put(s3_presigned_url, data=data)

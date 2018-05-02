@@ -86,6 +86,7 @@ class Snapshot():
     created_at : datetime.datetime
     updated_at : datetime.datetime
     """
+
     def __init__(self, dictionary):
         self.id = dictionary.get('id', None)
         self.model_id = dictionary['model_id']
@@ -109,20 +110,18 @@ class Snapshot():
         return self.id == other.id if other else False
 
     def save_config(self, filepath):
-        JSONStore(os.path.join(filepath, 'config.json'),
-                  self.config)
+        JSONStore(os.path.join(filepath, 'config.json'), self.config)
         return
 
     def save_stats(self, filepath):
-        JSONStore(os.path.join(filepath, 'stats.json'),
-                  self.stats)
+        JSONStore(os.path.join(filepath, 'stats.json'), self.stats)
         return
 
     def to_dictionary(self):
         attr_dict = self.__dict__
-        pruned_attr_dict = { attr: val
-                    for attr, val in attr_dict.items() if not callable(getattr(self, attr)) and not attr.startswith("__")
+        pruned_attr_dict = {
+            attr: val
+            for attr, val in attr_dict.items()
+            if not callable(getattr(self, attr)) and not attr.startswith("__")
         }
         return pruned_attr_dict
-
-

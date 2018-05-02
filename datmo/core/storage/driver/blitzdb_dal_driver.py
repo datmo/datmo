@@ -27,7 +27,7 @@ class BlitzDBDALDriver(DALDriver):
 
     class CodeDocument(Document):
         class Meta(Document.Meta):
-            collection =  'code'
+            collection = 'code'
 
     class EnvironmentDocument(Document):
         class Meta(Document.Meta):
@@ -108,8 +108,11 @@ class BlitzDBDALDriver(DALDriver):
         if query_params.get('id', None) != None:
             query_params['pk'] = query_params['id']
             del query_params['id']
-        return list(map(normalize_entity, [item.attributes.copy()
-                                           for item in self.backend.filter(collection, query_params)]))
+        return list(
+            map(normalize_entity, [
+                item.attributes.copy()
+                for item in self.backend.filter(collection, query_params)
+            ]))
 
     def delete(self, collection, entity_id):
         self.__reload()
@@ -121,6 +124,7 @@ class BlitzDBDALDriver(DALDriver):
         self.backend.delete(document)
         self.backend.commit()
         return True
+
 
 def normalize_entity(in_dict):
     """Converts BlitzDB Document to standard dictionary
@@ -148,10 +152,13 @@ def normalize_entity(in_dict):
             datetime.strptime(in_dict['end_time'], '%Y-%m-%dT%H:%M:%S.%fZ') \
                 if out_dict['end_time'] else None
     if 'created_at' in list(in_dict):
-        out_dict['created_at'] = datetime.strptime(in_dict['created_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        out_dict['created_at'] = datetime.strptime(in_dict['created_at'],
+                                                   '%Y-%m-%dT%H:%M:%S.%fZ')
     if 'updated_at' in list(in_dict):
-        out_dict['updated_at'] = datetime.strptime(in_dict['updated_at'], '%Y-%m-%dT%H:%M:%S.%fZ')
+        out_dict['updated_at'] = datetime.strptime(in_dict['updated_at'],
+                                                   '%Y-%m-%dT%H:%M:%S.%fZ')
     return out_dict
+
 
 def denormalize_entity(in_dict):
     """Converts standard dictionary to BlitzDB Document-compatible dictionary
@@ -172,14 +179,16 @@ def denormalize_entity(in_dict):
         del out_dict['id']
     if 'start_time' in list(in_dict):
         # if not a datetime object, throw error
-        if in_dict['start_time'] and not isinstance(in_dict['start_time'], datetime):
+        if in_dict['start_time'] and not isinstance(in_dict['start_time'],
+                                                    datetime):
             raise IncorrectTypeException()
         out_dict['start_time'] = \
             in_dict['start_time'].strftime('%Y-%m-%dT%H:%M:%S.%fZ') \
                 if in_dict['start_time'] else None
     if 'end_time' in list(in_dict):
         # if not a datetime object, throw error
-        if in_dict['end_time'] and not isinstance(in_dict['end_time'], datetime):
+        if in_dict['end_time'] and not isinstance(in_dict['end_time'],
+                                                  datetime):
             raise IncorrectTypeException()
         out_dict['end_time'] = \
             in_dict['end_time'].strftime('%Y-%m-%dT%H:%M:%S.%fZ') \
@@ -188,11 +197,12 @@ def denormalize_entity(in_dict):
         # if not a datetime object, throw error
         if not isinstance(in_dict['created_at'], datetime):
             raise IncorrectTypeException()
-        out_dict['created_at'] = in_dict['created_at'].strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        out_dict['created_at'] = in_dict['created_at'].strftime(
+            '%Y-%m-%dT%H:%M:%S.%fZ')
     if 'updated_at' in list(in_dict):
         # if not a datetime object, throw error
         if not isinstance(in_dict['updated_at'], datetime):
             raise IncorrectTypeException()
-        out_dict['updated_at'] = in_dict['updated_at'].strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        out_dict['updated_at'] = in_dict['updated_at'].strftime(
+            '%Y-%m-%dT%H:%M:%S.%fZ')
     return out_dict
-

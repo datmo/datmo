@@ -4,7 +4,6 @@ from sklearn import linear_model as lm
 from sklearn import model_selection as ms
 from sklearn import externals as ex
 
-
 iris_dataset = datasets.load_iris()
 X = iris_dataset.data
 y = iris_dataset.target

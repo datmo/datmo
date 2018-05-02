@@ -1,0 +1,4 @@
+[style]
+based_on_style = pep8
+indent_dictionary_value = true
+join_multiple_lines = true

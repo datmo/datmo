@@ -29,15 +29,23 @@ class Helper():
 
     def prompt_bool(self, msg):
         val = input(msg).lower()
-        return val in ['true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh']
+        return val in [
+            'true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh'
+        ]
 
-    def prompt_validator(self, msg, validate_function, tries=5, error_message="Invalid input"):
+    def prompt_validator(self,
+                         msg,
+                         validate_function,
+                         tries=5,
+                         error_message="Invalid input"):
         if not callable(validate_function):
-            raise ArgumentException('validate_function argument must be function')
+            raise ArgumentException(
+                'validate_function argument must be function')
         val = input(msg).lower()
         if not validate_function(val) and tries >= 0:
             tries -= 1
-            return self.prompt_validator(msg, validate_function, tries, error_message)
+            return self.prompt_validator(msg, validate_function, tries,
+                                         error_message)
         if tries == 0:
             self.echo(error_message)
         return val
@@ -48,7 +56,7 @@ class Helper():
         try:
             command_class = importlib.import_module(command_path)
         except ImportError as ex:
-            self.echo(__("error", "cli.general",  ex.message))
+            self.echo(__("error", "cli.general", ex.message))
             sys.exit()
 
         all_members = inspect.getmembers(command_class)
