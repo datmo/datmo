@@ -1,5 +1,8 @@
 from setuptools import setup, find_packages
 
+with open('README.md') as file:
+    long_description = file.read()
+
 setup(
     name='datmo',
     version='0.0.1',
@@ -10,6 +13,7 @@ setup(
     url="https://github.com/datmo/datmo",
     license='See LICENSE.txt',
     description='Open source model tracking tool for developers',
+    long_description=long_description,
     install_requires=[
         "future>=0.16.0", "enum34>=1.1.6", "glob2>=0.5", "docker>=2.2.1",
         "pyyaml>=3.12", "requests>=2.11.1", "prettytable>=0.7.2",
