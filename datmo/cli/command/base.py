@@ -39,7 +39,7 @@ class BaseCommand(object):
             If the Class method is not found
 
         """
-        command_args =  vars(self.args).copy()
+        command_args = vars(self.args).copy()
         # use command name if it exists,
         # otherwise use the module name
 

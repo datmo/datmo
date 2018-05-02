@@ -109,12 +109,3 @@ class TaskCommand(ProjectCommand):
                                     "cli.task.stop",
                                     task_id))
             return False
-
-
-
-
-
-
-
-
-

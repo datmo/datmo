@@ -15,8 +15,7 @@ except NameError:
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.task import TaskController
-from datmo.core.util.exceptions import EntityNotFound, \
-    EnvironmentExecutionException, TaskRunException
+from datmo.core.util.exceptions import EntityNotFound, TaskRunException
 
 
 class TestTaskController():

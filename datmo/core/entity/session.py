@@ -20,12 +20,15 @@ class Session():
             name given by the user at creation
         current : bool, optional
             identifies if the session is the current session
+            (default is False, which means not current)
         created_at : datetime.datetime, optional
+            (default is datetime.utcnow(), at time of instantiation)
         updated_at : datetime.datetime, optional
+            (default is same as created_at, at time of instantiation)
 
     Attributes
     ----------
-    id : str
+    id : str or None
         the id of the entity
     model_id : str
         the parent model id for the entity
@@ -47,7 +50,6 @@ class Session():
 
         self.created_at = dictionary.get('created_at', datetime.utcnow())
         self.updated_at = dictionary.get('updated_at', self.created_at)
-
 
     def __eq__(self, other):
         return self.id == other.id if other else False

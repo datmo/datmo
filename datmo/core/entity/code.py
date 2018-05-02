@@ -21,11 +21,13 @@ class Code():
         commit_id : str
             commit id given by the driver
         created_at : datetime.datetime, optional
+            (default is datetime.utcnow(), at time of instantiation)
         updated_at : datetime.datetime, optional
+            (default is same as created_at, at time of instantiation)
 
     Attributes
     ----------
-    id : str
+    id : str or None
         the id of the entity
     model_id : str
         the parent model id for the entity

@@ -49,8 +49,8 @@ class TestSnapshotModule():
 
         for k, v in input_dict.items():
             assert getattr(snapshot_entity, k) == v
-        assert snapshot_entity.task_id == ""
-        assert snapshot_entity.label == ""
+        assert snapshot_entity.task_id == None
+        assert snapshot_entity.label == None
         assert snapshot_entity.created_at
 
     def test_create(self):
