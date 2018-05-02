@@ -30,5 +30,5 @@ $ python -m pytest --cov-config .coveragerc --cov=datmo
 ```
 
 ## Cleaning Up Code
-We use (yapf)[https://github.com/google/yapf] to clean code and have added a pre-commit hook to
+We use [yapf](https://github.com/google/yapf) to clean code and have added a pre-commit hook to
 ensure any changed files adhere to the styles specified in `.style.yapf` in the root of the project. 
