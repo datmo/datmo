@@ -1,4 +1,4 @@
-from blitzdb import Document
+from blitzdb import Document, queryset
 from datetime import datetime
 
 from datmo.core.util.exceptions import EntityNotFound, \
@@ -103,13 +103,25 @@ class BlitzDBDALDriver(DALDriver):
         results = self.backend.filter(collection, {'pk': entity_id})
         return len(results) == 1
 
-    def query(self, collection, query_params):
+    def query(self, collection, query_params, sort_key=None, sort_order=None):
         self.__reload()
         if query_params.get('id', None) != None:
             query_params['pk'] = query_params['id']
             del query_params['id']
-        return list(map(normalize_entity, [item.attributes.copy()
-                                           for item in self.backend.filter(collection, query_params)]))
+        if sort_key is None and sort_order is None:
+            return list(map(normalize_entity, [item.attributes.copy()
+                                               for item in self.backend.filter(collection, query_params)]))
+        else:
+            if sort_order == 'ascending':
+                return list(map(normalize_entity, [item.attributes.copy()
+                                                   for item in self.backend.filter(collection,
+                                                                                   query_params).sort(sort_key,
+                                                                                                      queryset.QuerySet.ASCENDING)]))
+            else:
+                return list(map(normalize_entity, [item.attributes.copy()
+                                                   for item in self.backend.filter(collection,
+                                                                                   query_params).sort(sort_key,
+                                                                                                      queryset.QuerySet.DESCENDING)]))
 
     def delete(self, collection, entity_id):
         self.__reload()

@@ -197,3 +197,16 @@ class TestBlitzDBDALDriver():
             failed = True
         assert failed
 
+    def test_query_sort_date_str(self):
+        collection = 'snapshot'
+        self.database.set(collection, {"range_query4": datetime.datetime(2017,1,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') })
+        self.database.set(collection, {"range_query4": datetime.datetime(2017,2,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') })
+        self.database.set(collection, {"range_query4": datetime.datetime(2017,3,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') })
+        # ascending
+        items = self.database.query(collection, {"range_query4": {"$gte": datetime.datetime(2017,2,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') }}, sort_key="range_query4", sort_order='ascending')
+        assert items[0]['range_query4'] == datetime.datetime(2017,2,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        # descending
+        items = self.database.query(collection, {
+            "range_query4": {"$gte": datetime.datetime(2017, 2, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')}},
+                                    sort_key="range_query4", sort_order='descending')
+        assert items[0]['range_query4'] == datetime.datetime(2017, 3, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')

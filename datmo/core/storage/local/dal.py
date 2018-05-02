@@ -186,9 +186,9 @@ class EntityMethodsCRUD(object):
     def delete(self, entity_id):
         return self.driver.delete(self.collection, entity_id)
 
-    def query(self, query_params):
+    def query(self, query_params, sort_key=None, sort_order=None):
         return [self.entity_class(item) for item in
-                self.driver.query(self.collection, query_params)]
+                self.driver.query(self.collection, query_params, sort_key, sort_order)]
 
     def findOne(self, query_params):
         results = self.query(query_params)
