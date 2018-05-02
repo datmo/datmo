@@ -26,7 +26,7 @@ class JSONStore():
         if initial_dict:
             self.to_file(initial_dict)
         # keep file in memory until a write occurs
-        self.in_memory_settings = False
+        self.in_memory_settings = {}
 
     def to_file(self, dictionary):
         with open(self.filepath, 'w', encoding='utf8') as outfile:
@@ -40,13 +40,13 @@ class JSONStore():
         return
 
     def save(self, key, value):
-        self.in_memory_settings = False
         settings_dict = {}
         if not os.path.exists(self.filepath):
             open(self.filepath, 'w').close()
         else:
             settings_dict = json.load(open(self.filepath, 'r'))
         settings_dict[key] = value
+        self.in_memory_settings[key] = value
         with open(self.filepath, 'w', encoding='utf8') as outfile:
             str_ = json.dumps(
                 settings_dict,
