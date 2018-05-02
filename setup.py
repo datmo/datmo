@@ -5,7 +5,7 @@ with open('README.md') as file:
 
 setup(
     name='datmo',
-    version='0.0.1',
+    version='0.0.1-alpha',
     author='datmo developers',
     author_email='developer@datmo.com',
     packages=find_packages(
