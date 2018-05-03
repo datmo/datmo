@@ -6,6 +6,7 @@ import random
 import string
 import tempfile
 import platform
+import datetime
 from io import open, TextIOWrapper
 try:
     to_unicode = unicode
@@ -327,11 +328,19 @@ class TestTaskController():
 
     def test_list(self):
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        input_dict = {"command": task_command}
+        input_dict_1 = {
+            "command": task_command,
+            "created_at": datetime.datetime(2017, 2, 1)
+        }
+
+        input_dict_2 = {
+            "command": task_command,
+            "created_at": datetime.datetime(2017, 3, 1)
+        }
 
         # Create tasks in the project
-        task_obj_1 = self.task.create(input_dict)
-        task_obj_2 = self.task.create(input_dict)
+        task_obj_1 = self.task.create(input_dict_1)
+        task_obj_2 = self.task.create(input_dict_2)
 
         # List all tasks regardless of filters
         result = self.task.list()
@@ -339,6 +348,21 @@ class TestTaskController():
         assert len(result) == 2 and \
                task_obj_1 in result and \
                task_obj_2 in result
+
+        # List all tasks regardless of filters in ascending
+        result = self.task.list(sort_key='created_at', sort_order='ascending')
+
+        assert len(result) == 2 and \
+               task_obj_1 in result and \
+               task_obj_2 in result
+        assert result[0].created_at <= result[-1].created_at
+
+        # List all tasks regardless of filters in descending
+        result = self.task.list(sort_key='created_at', sort_order='descending')
+        assert len(result) == 2 and \
+               task_obj_1 in result and \
+               task_obj_2 in result
+        assert result[0].created_at >= result[-1].created_at
 
         # List all tasks and filter by session
         result = self.task.list(session_id=self.project.current_session.id)
