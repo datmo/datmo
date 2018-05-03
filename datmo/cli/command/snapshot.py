@@ -112,7 +112,8 @@ class SnapshotCommand(ProjectCommand):
             header_list = ["id", "created at", "config", "stats", "message", "label", "code id",
                            "environment id", "file collection id"]
             t = prettytable.PrettyTable(header_list)
-            snapshot_objs = self.snapshot_controller.list(session_id=session_id, visible=True)
+            snapshot_objs = self.snapshot_controller.list(session_id=session_id, visible=True,
+                                                          sort_key='created_at', sort_order='descending')
             for snapshot_obj in snapshot_objs:
                 t.add_row([snapshot_obj.id, snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"),
                            snapshot_obj.config, snapshot_obj.stats,
