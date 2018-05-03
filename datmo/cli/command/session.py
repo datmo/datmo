@@ -4,10 +4,10 @@ import prettytable
 
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.session import SessionController
-from datmo.cli.command.project import ProjectCommand
+from datmo.cli.command.project import BaseCommand
 
 
-class SessionCommand(ProjectCommand):
+class SessionCommand(BaseCommand):
     def __init__(self, home, cli_helper):
         super(SessionCommand, self).__init__(home, cli_helper)
         # dest="subcommand" argument will populate a "subcommand" property with the subparsers name
