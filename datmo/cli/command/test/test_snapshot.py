@@ -75,7 +75,7 @@ class TestSnapshot():
         # Create another test file
         self.filepath_2 = os.path.join(self.snapshot.home,
                                      "file2.txt")
-        with open(self.filepath, "w") as f:
+        with open(self.filepath_2, "w") as f:
             f.write(to_unicode(str("test")))
 
     def test_snapshot_project_not_init(self):
