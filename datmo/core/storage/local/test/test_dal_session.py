@@ -8,8 +8,8 @@ from __future__ import unicode_literals
 import os
 import tempfile
 import platform
-from datetime import datetime
 
+from datetime import datetime
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.entity.model import Model
@@ -32,7 +32,19 @@ class TestLocalDAL():
 
         self.session_input_dict = {
             "name": "session_1",
-            "model_id": model.id
+            "model_id": model.id,
+        }
+
+        self.session_input_dict_1 = {
+            "name": "session_2",
+            "model_id": model.id,
+            "created_at":  datetime(2017, 2, 1)
+        }
+
+        self.session_input_dict_2 = {
+            "name": "session_2",
+            "model_id": model.id,
+            "created_at": datetime(2017, 3, 1)
         }
 
     def teardown_class(self):
@@ -107,3 +119,17 @@ class TestLocalDAL():
 
         assert len(self.dal.session.query({"id": session.id})) == 1
         assert len(self.dal.session.query({"name": self.session_input_dict['name']})) == 6
+
+    def test_sort_sessions(self):
+        self.dal.session.create(Session(self.session_input_dict_1))
+        self.dal.session.create(Session(self.session_input_dict_2))
+
+        # Sorting of snapshot in descending
+        items = self.dal.session.query({"name": self.session_input_dict_1["name"]},
+                                        sort_key='created_at', sort_order='descending')
+        assert items[0].created_at == self.session_input_dict_2["created_at"]
+
+        # Sorting of snapshot in ascending
+        items = self.dal.session.query({"name": self.session_input_dict_1["name"]},
+                                        sort_key='created_at', sort_order='ascending')
+        assert items[0].created_at == self.session_input_dict_1["created_at"]

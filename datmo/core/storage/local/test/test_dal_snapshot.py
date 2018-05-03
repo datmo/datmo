@@ -9,6 +9,7 @@ import os
 import tempfile
 import platform
 
+from datetime import datetime
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.entity.model import Model
@@ -43,7 +44,20 @@ class TestLocalDAL():
             "environment_id": "environment_id",
             "file_collection_id": "file_collection_id",
             "config": {"test": 0.45},
-            "stats": {"test": 0.98}
+            "stats": {"test": 0.98},
+            "created_at": datetime(2017, 2, 1)
+        }
+
+        self.snapshot_input_dict_1 = {
+            "model_id": model.id,
+            "session_id": session.id,
+            "message": "my message for 1",
+            "code_id": "code_id",
+            "environment_id": "environment_id",
+            "file_collection_id": "file_collection_id",
+            "config": {"test": 0.90},
+            "stats": {"test": 1.23},
+            "created_at": datetime(2017, 3, 1)
         }
 
     def teardown_class(self):
@@ -125,3 +139,17 @@ class TestLocalDAL():
         assert len(self.dal.snapshot.query({"id": snapshot.id})) == 1
         assert len(self.dal.snapshot.query({"code_id": self.snapshot_input_dict['code_id']})) == 7
         assert len(self.dal.snapshot.query({"visible": True})) == 7
+
+    def test_sort_snapshots(self):
+        self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
+        self.dal.snapshot.create(Snapshot(self.snapshot_input_dict_1))
+
+        # Sorting of snapshot in descending
+        items = self.dal.snapshot.query({"model_id": self.snapshot_input_dict["model_id"]},
+                                        sort_key='created_at', sort_order='descending')
+        assert items[0].created_at == self.snapshot_input_dict_1["created_at"]
+
+        # Sorting of snapshot in ascending
+        items = self.dal.snapshot.query({"model_id": self.snapshot_input_dict["model_id"]},
+                                        sort_key='created_at', sort_order='ascending')
+        assert items[0].created_at == self.snapshot_input_dict["created_at"]
