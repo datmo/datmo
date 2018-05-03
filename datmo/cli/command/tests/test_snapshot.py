@@ -68,8 +68,7 @@ class TestSnapshot():
             f.write(to_unicode(str("test")))
 
         # Create another test file
-        self.filepath_2 = os.path.join(self.snapshot.home,
-                                     "file2.txt")
+        self.filepath_2 = os.path.join(self.snapshot.home, "file2.txt")
         with open(self.filepath_2, "w") as f:
             f.write(to_unicode(str("test")))
 
@@ -97,15 +96,24 @@ class TestSnapshot():
         self.snapshot.parse([
             "snapshot",
             "create",
-            "--message", test_message,
-            "--label", test_label,
-            "--session-id", test_session_id,
-            "--task-id", test_task_id,
-            "--code-id", test_code_id,
-            "--environment-def-path", test_environment_def_path,
-            "--config-filepath", test_config_filepath,
-            "--stats-filepath", test_stats_filepath,
-            "--filepaths", test_filepaths[0],
+            "--message",
+            test_message,
+            "--label",
+            test_label,
+            "--session-id",
+            test_session_id,
+            "--task-id",
+            test_task_id,
+            "--code-id",
+            test_code_id,
+            "--environment-def-path",
+            test_environment_def_path,
+            "--config-filepath",
+            test_config_filepath,
+            "--stats-filepath",
+            test_stats_filepath,
+            "--filepaths",
+            test_filepaths[0],
         ])
 
         # test for desired side effects
@@ -121,18 +129,12 @@ class TestSnapshot():
 
         # test multiple filepaths
         self.snapshot.parse([
-            "snapshot",
-            "create",
-            "--message", test_message,
-            "--label", test_label,
-            "--session-id", test_session_id,
-            "--task-id", test_task_id,
-            "--code-id", test_code_id,
-            "--environment-def-path", test_environment_def_path,
-            "--config-filepath", test_config_filepath,
-            "--stats-filepath", test_stats_filepath,
-            "--filepaths", test_filepaths[0],
-            "--filepaths", test_filepaths[1]
+            "snapshot", "create", "--message", test_message, "--label",
+            test_label, "--session-id", test_session_id, "--task-id",
+            test_task_id, "--code-id", test_code_id, "--environment-def-path",
+            test_environment_def_path, "--config-filepath",
+            test_config_filepath, "--stats-filepath", test_stats_filepath,
+            "--filepaths", test_filepaths[0], "--filepaths", test_filepaths[1]
         ])
 
         # test for desired side effects

@@ -84,20 +84,15 @@ class TestTaskCommand():
         self.__set_variables()
         # Test success case
         test_command = ["sh", "-c", "echo accuracy:0.45"]
-        test_gpu = True # TODO: implement in controller
+        test_gpu = True  # TODO: implement in controller
         test_ports = ["8888:8888", "9999:9999"]
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         test_interactive = True
 
         # test for single set of ports
         self.task.parse([
-            "task",
-            "run",
-            "--gpu",
-            "--ports", test_ports[0],
-            "--env-def", test_dockerfile,
-            "--interactive",
-            test_command
+            "task", "run", "--gpu", "--ports", test_ports[0], "--env-def",
+            test_dockerfile, "--interactive", test_command
         ])
 
         # test for desired side effects
@@ -108,13 +103,8 @@ class TestTaskCommand():
         assert self.task.args.interactive == test_interactive
 
         self.task.parse([
-            "task",
-            "run",
-            "--gpu",
-            "--ports", test_ports[0],
-            "--ports", test_ports[1],
-            "--env-def", test_dockerfile,
-            "--interactive",
+            "task", "run", "--gpu", "--ports", test_ports[0], "--ports",
+            test_ports[1], "--env-def", test_dockerfile, "--interactive",
             test_command
         ])
 
@@ -145,13 +135,8 @@ class TestTaskCommand():
         test_interactive = True
 
         self.task.parse([
-            "task",
-            "run",
-            "--gpu",
-            "--ports", test_ports[0],
-            "--ports", test_ports[1],
-            "--env-def", test_dockerfile,
-            "--interactive",
+            "task", "run", "--gpu", "--ports", test_ports[0], "--ports",
+            test_ports[1], "--env-def", test_dockerfile, "--interactive",
             test_command
         ])
 
@@ -179,12 +164,8 @@ class TestTaskCommand():
         test_ports = ["8888:8888", "9999:9999"]
 
         # test single ports option before command
-        self.task.parse([
-            "task",
-            "run",
-            "--ports", test_ports[0],
-            test_command
-        ])
+        self.task.parse(
+            ["task", "run", "--ports", test_ports[0], test_command])
 
         # test for desired side effects
         assert self.task.args.cmd == test_command
@@ -192,10 +173,7 @@ class TestTaskCommand():
 
         # test multiple ports option before command
         self.task.parse([
-            "task",
-            "run",
-            "--ports", test_ports[0],
-            "--ports", test_ports[1],
+            "task", "run", "--ports", test_ports[0], "--ports", test_ports[1],
             test_command
         ])
 

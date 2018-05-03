@@ -19,17 +19,35 @@ class TaskCommand(ProjectCommand):
 
         # Task run arguments
         run = subcommand_parsers.add_parser("run", help="Run task")
-        run.add_argument("--gpu", dest="gpu", action="store_true",
-                         help="Boolean if you want to run using GPUs")
-        run.add_argument("--ports", dest="ports", default=None, action="append", type=str, help="""
+        run.add_argument(
+            "--gpu",
+            dest="gpu",
+            action="store_true",
+            help="Boolean if you want to run using GPUs")
+        run.add_argument(
+            "--ports",
+            dest="ports",
+            default=None,
+            action="append",
+            type=str,
+            help="""
             Network port mapping during task (e.g. 8888:8888). Left is the host machine port and right
             is the environment port available during a run.
         """)
         # run.add_argument("--data", nargs="*", dest="data", type=str, help="Path for data to be used during the Task")
-        run.add_argument("--env-def", dest="environment_definition_filepath", default=None, type=str,
-                         help="Pass in the Dockerfile with which you want to build the environment")
-        run.add_argument("--interactive", dest="interactive", action="store_true",
-                         help="Run the environment in interactive mode (keeps STDIN open)")
+        run.add_argument(
+            "--env-def",
+            dest="environment_definition_filepath",
+            default=None,
+            type=str,
+            help=
+            "Pass in the Dockerfile with which you want to build the environment"
+        )
+        run.add_argument(
+            "--interactive",
+            dest="interactive",
+            action="store_true",
+            help="Run the environment in interactive mode (keeps STDIN open)")
         run.add_argument("cmd", nargs="?", default=None)
 
         # Task list arguments
