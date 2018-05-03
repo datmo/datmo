@@ -112,12 +112,3 @@ class DatmoLogger(object):
         log.addHandler(log_file_handler)
 
         return log
-
-
-
-
-
-
-
-
-
