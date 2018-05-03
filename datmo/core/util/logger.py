@@ -79,7 +79,7 @@ class DatmoLogger(object):
 
         # cache the logger and return it otherwise handlers will get added multiple times
         # and result in multiple messages to the same file
-        logger_hash = hashlib.sha1(name + file_name).hexdigest()
+        logger_hash = hashlib.sha1((name + file_name).encode('utf-8')).hexdigest()
 
         if logger_hash in DatmoLogger().loggers:
             # if the file still exists then use cached logger
@@ -112,12 +112,3 @@ class DatmoLogger(object):
         log.addHandler(log_file_handler)
 
         return log
-
-
-
-
-
-
-
-
-

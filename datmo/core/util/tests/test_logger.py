@@ -4,6 +4,7 @@ Tests for logger.py
 """
 import shutil
 import os
+from time import sleep
 from datmo.core.util.logger import DatmoLogger
 
 class TestLogger():
@@ -65,7 +66,12 @@ class TestLogger():
         default_logger.info("default-logger")
         assert len(DatmoLogger.find_text_in_logs("default-logger")) == 1
 
-
-
-
-
+    def test_timeit_decorator(self):
+        # NOTE:  If this test is failing be sure to add
+        # LOGGING_LEVEL=DEBUG before pytest
+        # or add as an environment variable
+        @DatmoLogger.timeit
+        def slow_fn():
+            sleep(1)
+        slow_fn()
+        assert len(DatmoLogger.find_text_in_logs("slow_fn")) == 1

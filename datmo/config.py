@@ -41,5 +41,3 @@ class Config(object):
         return getattr(self.instance, name)
     def __setattr__(self, name, value):
         return setattr(self.instance, name, value)
-
-

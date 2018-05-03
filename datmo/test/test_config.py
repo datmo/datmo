@@ -36,7 +36,3 @@ class TestConfigModule():
 
     def test_config_home_default(self):
         Config().home == os.getcwd()
-
-
-
-
