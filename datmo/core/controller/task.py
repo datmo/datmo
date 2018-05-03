@@ -135,7 +135,6 @@ class TaskController(BaseController):
 
         # Build image for environment
         self.environment.build(environment_id)
-
         # Run container with environment
         return_code, run_id, logs = \
             self.environment.run(environment_id, run_options, log_filepath)

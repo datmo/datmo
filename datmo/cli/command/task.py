@@ -75,10 +75,11 @@ class TaskCommand(ProjectCommand):
         if kwargs['environment_definition_filepath']:
             snapshot_dict["environment_definition_filepath"] =\
                 kwargs['environment_definition_filepath']
+
         if not isinstance(kwargs['cmd'], list):
             if platform.system() == "Windows":
                 kwargs['cmd'] = kwargs['cmd']
-            elif isinstance(kwargs['cmd'], str):
+            elif isinstance(kwargs['cmd'], basestring):
                 kwargs['cmd'] = shlex.split(kwargs['cmd'])
 
         task_dict = {
