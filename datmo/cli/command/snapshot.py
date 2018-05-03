@@ -179,8 +179,8 @@ class SnapshotCommand(ProjectCommand):
                 "code id", "environment id", "file collection id"
             ]
             t = prettytable.PrettyTable(header_list)
-            snapshot_objs = self.snapshot_controller.list(
-                session_id=session_id, visible=True)
+            snapshot_objs = self.snapshot_controller.list(session_id=session_id, visible=True,
+                                                          sort_key='created_at', sort_order='descending')
             for snapshot_obj in snapshot_objs:
                 t.add_row([
                     snapshot_obj.id,
