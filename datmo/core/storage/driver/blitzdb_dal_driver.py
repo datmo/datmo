@@ -105,7 +105,7 @@ class BlitzDBDALDriver(DALDriver):
 
     def query(self, collection, query_params, sort_key=None, sort_order=None):
         self.__reload()
-        if query_params.get('id', None) != None:
+        if query_params.get('id', None) is not None:
             query_params['pk'] = query_params['id']
             del query_params['id']
         if sort_key is not None and sort_order is not None:
@@ -119,6 +119,9 @@ class BlitzDBDALDriver(DALDriver):
                                                    for item in self.backend.filter(collection,
                                                                                    query_params).sort(sort_key,
                                                                                                       queryset.QuerySet.DESCENDING)]))
+            else:
+                return list(map(normalize_entity, [item.attributes.copy()
+                                                   for item in self.backend.filter(collection, query_params)]))
         else:
             return list(map(normalize_entity, [item.attributes.copy()
                                                for item in self.backend.filter(collection, query_params)]))
