@@ -11,7 +11,8 @@ except NameError:
     to_unicode = str
 
 from datmo.core.util.misc_functions import get_filehash, \
-    create_unique_hash, mutually_exclusive
+    create_unique_hash, mutually_exclusive, is_project_dir, find_project_dir, \
+    grep
 from datmo.core.util.exceptions import MutuallyExclusiveArguments
 
 class TestMiscFunctions():
@@ -64,9 +65,17 @@ class TestMiscFunctions():
         assert update_dictionary_failed
 
     def test_find_project_dir(self):
-        # TODO:
-        pass
+        exec_path = os.path.join(self.temp_dir,"1","1","1")
+        os.makedirs(exec_path)
+        os.makedirs(os.path.join(self.temp_dir,".datmo"))
+        project_path = find_project_dir(exec_path)
+        assert project_path == self.temp_dir
+
 
     def test_is_project_dir(self):
-        # TODO:
-        pass
+        os.makedirs(os.path.join(self.temp_dir,".datmo"))
+        assert is_project_dir(self.temp_dir)
+
+    def test_grep(self):
+        # open current file and try to find this method in it
+        assert len(grep("test_grep", open(__file__,"r"))) == 2

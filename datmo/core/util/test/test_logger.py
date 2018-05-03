@@ -64,8 +64,3 @@ class TestLogger():
         default_logger = DatmoLogger.get_logger()
         default_logger.info("default-logger")
         assert len(DatmoLogger.find_text_in_logs("default-logger")) == 1
-
-
-
-
-
