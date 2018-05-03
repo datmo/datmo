@@ -41,5 +41,6 @@ def main():
     except Exception as ex:
         cli_helper.echo(__("error", "cli.general", str(ex)))
 
+
 if __name__ == "__main__":
     main()

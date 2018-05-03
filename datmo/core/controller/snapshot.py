@@ -38,14 +38,15 @@ class SnapshotController(BaseController):
         Delete the snapshot specified from the project
 
     """
+
     def __init__(self, home):
         super(SnapshotController, self).__init__(home)
         self.code = CodeController(home)
         self.file_collection = FileCollectionController(home)
         self.environment = EnvironmentController(home)
         if not self.is_initialized:
-            raise ProjectNotInitializedException(__("error",
-                                                    "controller.snapshot.__init__"))
+            raise ProjectNotInitializedException(
+                __("error", "controller.snapshot.__init__"))
 
     def create(self, incoming_dictionary):
         """Create snapshot object
@@ -156,9 +157,9 @@ class SnapshotController(BaseController):
         if "message" in incoming_dictionary:
             create_dict['message'] = incoming_dictionary['message']
         else:
-            raise RequiredArgumentMissing(__("error",
-                                             "controller.snapshot.create.arg",
-                                             "message"))
+            raise RequiredArgumentMissing(
+                __("error", "controller.snapshot.create.arg", "message"))
+
         # Code setup
         self._code_setup(incoming_dictionary, create_dict)
 
@@ -219,9 +220,9 @@ class SnapshotController(BaseController):
         task_obj = self.dal.task.get_by_id(task_id)
 
         if not task_obj.status and not task_obj.after_snapshot_id:
-            raise TaskNotComplete(__("error",
-                                     "controller.snapshot.create_from_task",
-                                     str(task_obj.id)))
+            raise TaskNotComplete(
+                __("error", "controller.snapshot.create_from_task",
+                   str(task_obj.id)))
 
         return self.dal.snapshot.update({
             "id": task_obj.after_snapshot_id,
@@ -257,9 +258,8 @@ class SnapshotController(BaseController):
             try:
                 self.dal.session.get_by_id(session_id)
             except EntityNotFound:
-                raise SessionDoesNotExistException(__("error",
-                                                      "controller.snapshot.list",
-                                                      session_id))
+                raise SessionDoesNotExistException(
+                    __("error", "controller.snapshot.list", session_id))
             query['session_id'] = session_id
         if visible is not None and isinstance(visible, bool):
             query['visible'] = visible
@@ -268,9 +268,8 @@ class SnapshotController(BaseController):
 
     def delete(self, snapshot_id):
         if not snapshot_id:
-            raise RequiredArgumentMissing(__("error",
-                                             "controller.snapshot.delete.arg",
-                                             "snapshot_id"))
+            raise RequiredArgumentMissing(
+                __("error", "controller.snapshot.delete.arg", "snapshot_id"))
         return self.dal.snapshot.delete(snapshot_id)
 
     def _code_setup(self, incoming_dictionary, create_dict):
@@ -307,10 +306,12 @@ class SnapshotController(BaseController):
         """
         language = incoming_dictionary.get("language", None)
         if "environment_id" in incoming_dictionary:
-            create_dict['environment_id'] = incoming_dictionary['environment_id']
+            create_dict['environment_id'] = incoming_dictionary[
+                'environment_id']
         elif "environment_definition_filepath" in incoming_dictionary:
             create_dict['environment_id'] = self.environment.create({
-                "definition_filepath": incoming_dictionary['environment_definition_filepath']
+                "definition_filepath":
+                    incoming_dictionary['environment_definition_filepath']
             }).id
         elif language:
             create_dict['environment_id'] = self.environment.\
@@ -332,7 +333,8 @@ class SnapshotController(BaseController):
         """
 
         if "file_collection_id" in incoming_dictionary:
-            create_dict['file_collection_id'] = incoming_dictionary['file_collection_id']
+            create_dict['file_collection_id'] = incoming_dictionary[
+                'file_collection_id']
         elif "filepaths" in incoming_dictionary:
             # transform file paths to file_collection_id
             create_dict['file_collection_id'] = self.file_collection.\
@@ -362,15 +364,17 @@ class SnapshotController(BaseController):
             create_dict['config'] = incoming_dictionary['config']
         elif "config_filepath" in incoming_dictionary:
             if not os.path.isfile(incoming_dictionary['config_filepath']):
-                raise FileIOException(__("error",
-                                        "controller.snapshot.create.file_config"))
+                raise FileIOException(
+                    __("error", "controller.snapshot.create.file_config"))
             # If path exists transform file to config dict
-            config_json_driver = JSONStore(incoming_dictionary['config_filepath'])
+            config_json_driver = JSONStore(
+                incoming_dictionary['config_filepath'])
             create_dict['config'] = config_json_driver.to_dict()
         elif "config_filename" in incoming_dictionary:
             config_filename = incoming_dictionary['config_filename'] \
                 if "config_filename" in incoming_dictionary else "config.json"
-            create_dict['config'] = self._find_in_filecollection(config_filename, create_dict['file_collection_id'])
+            create_dict['config'] = self._find_in_filecollection(
+                config_filename, create_dict['file_collection_id'])
         else:
             create_dict['config'] = {}
 
@@ -396,15 +400,17 @@ class SnapshotController(BaseController):
             create_dict['stats'] = incoming_dictionary['stats']
         elif "stats_filepath" in incoming_dictionary:
             if not os.path.isfile(incoming_dictionary['stats_filepath']):
-                raise FileIOException(__("error",
-                                        "controller.snapshot.create.file_stat"))
+                raise FileIOException(
+                    __("error", "controller.snapshot.create.file_stat"))
             # If path exists transform file to config dict
-            stats_json_driver = JSONStore(incoming_dictionary['stats_filepath'])
+            stats_json_driver = JSONStore(
+                incoming_dictionary['stats_filepath'])
             create_dict['stats'] = stats_json_driver.to_dict()
         elif "stats_filename" in incoming_dictionary:
             stats_filename = incoming_dictionary['stats_filename'] \
                 if "stats_filename" in incoming_dictionary else "stats.json"
-            create_dict['stats'] = self._find_in_filecollection(stats_filename, create_dict['file_collection_id'])
+            create_dict['stats'] = self._find_in_filecollection(
+                stats_filename, create_dict['file_collection_id'])
         else:
             create_dict['stats'] = {}
 
@@ -426,8 +432,10 @@ class SnapshotController(BaseController):
         possible_paths = [os.path.join(self.home, file_to_find)] + \
                             [os.path.join(self.home, item[0], file_to_find)
                             for item in os.walk(file_collection_path)]
-        existing_possible_paths = [possible_path for possible_path in possible_paths
-                                    if os.path.isfile(possible_path)]
+        existing_possible_paths = [
+            possible_path for possible_path in possible_paths
+            if os.path.isfile(possible_path)
+        ]
         if not existing_possible_paths:
             # TODO: Add some info / warning that no file was found
             # create some default stats

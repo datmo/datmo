@@ -18,6 +18,7 @@ class DALDriver(with_metaclass(ABCMeta, object)):
     delete(collection, entity_id)
         delete entity from collection
     """
+
     @abstractmethod
     def __init__(self):
         pass

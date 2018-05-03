@@ -33,17 +33,17 @@ class ProjectController(BaseController):
     def init(self, name, description):
         # Error if name is not given
         if not name:
-            raise RequiredArgumentMissing(__("error",
-                                             "controller.project.init.arg",
-                                             "name"))
+            raise RequiredArgumentMissing(
+                __("error", "controller.project.init.arg", "name"))
 
         # Create the Model, is it new or update?
         is_new_model = False
         if not self.model:
-            _ = self.dal.model.create(Model({
-                "name": name,
-                "description": description
-            }))
+            _ = self.dal.model.create(
+                Model({
+                    "name": name,
+                    "description": description
+                }))
             is_new_model = True
         else:
             self._model = self.dal.model.update({
@@ -74,20 +74,21 @@ class ProjectController(BaseController):
         # Create and set current session
         if is_new_model:
             # Create new default session
-            _ = self.dal.session.create(Session({
-                "name": "default",
-                "model_id": self.model.id,
-                "current": True
-            }))
+            _ = self.dal.session.create(
+                Session({
+                    "name": "default",
+                    "model_id": self.model.id,
+                    "current": True
+                }))
         else:
             if not self.current_session:
                 default_session_obj = self.dal.session.query({
-                    "name":"default",
+                    "name": "default",
                     "model_id": self.model.id
                 })
                 if not default_session_obj:
-                    raise SessionDoesNotExistException(__("error",
-                                                          "controller.project.init"))
+                    raise SessionDoesNotExistException(
+                        __("error", "controller.project.init"))
                 # Update default session to be current
                 self.dal.session.update({
                     "id": default_session_obj.id,
@@ -109,19 +110,19 @@ class ProjectController(BaseController):
 
         if image_id:
             # Remove image created during init
-            self.environment_driver.remove_image(image_id_or_name=image_id,
-                                                 force=True)
+            self.environment_driver.remove_image(
+                image_id_or_name=image_id, force=True)
 
             # Remove any dangling images (optional)
 
             # Stop and remove all running environments with image_id
-            self.environment_driver.stop_remove_containers_by_term(image_id,
-                                                                   force=True)
+            self.environment_driver.stop_remove_containers_by_term(
+                image_id, force=True)
 
         return True
 
     def status(self):
-        # TODO: Convert pseudocode 
+        # TODO: Convert pseudocode
 
         status_dict = {}
 
@@ -131,7 +132,8 @@ class ProjectController(BaseController):
             else False
         status_dict["code_initialized"] = self.code_driver.is_initialized
         status_dict["file_initialized"] = self.file_driver.is_initialized
-        status_dict["environment_initialized"] = self.environment_driver.is_initialized
+        status_dict[
+            "environment_initialized"] = self.environment_driver.is_initialized
 
         # Show all project settings
         status_dict["settings"] = self.settings.driver.to_dict()
@@ -144,5 +146,3 @@ class ProjectController(BaseController):
 
         # Show unstaged tasks
         self.dal.task.query("created_at < " + latest_snapshot.created_at)
-
-

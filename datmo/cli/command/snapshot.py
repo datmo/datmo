@@ -54,12 +54,22 @@ class SnapshotCommand(ProjectCommand):
         delete.add_argument("--id", dest="id", help="snapshot id to delete")
 
         ls = subcommand_parsers.add_parser("ls", help="List snapshots")
-        ls.add_argument("--session-id", dest="session_id", default=None, help="Session ID to filter")
-        ls.add_argument("--all", "-a", dest="details", action="store_true",
-                            help="Show detailed snapshot information")
+        ls.add_argument(
+            "--session-id",
+            dest="session_id",
+            default=None,
+            help="Session ID to filter")
+        ls.add_argument(
+            "--all",
+            "-a",
+            dest="details",
+            action="store_true",
+            help="Show detailed snapshot information")
 
-        checkout = subcommand_parsers.add_parser("checkout", help="Checkout a snapshot by id")
-        checkout.add_argument("--id", dest="id", default=None, help="Snapshot ID")
+        checkout = subcommand_parsers.add_parser(
+            "checkout", help="Checkout a snapshot by id")
+        checkout.add_argument(
+            "--id", dest="id", default=None, help="Snapshot ID")
 
         self.snapshot_controller = SnapshotController(home=home)
 
@@ -109,24 +119,36 @@ class SnapshotCommand(ProjectCommand):
         # Get all snapshot meta information
         detailed_info = kwargs.get('details', None)
         if detailed_info:
-            header_list = ["id", "created at", "config", "stats", "message", "label", "code id",
-                           "environment id", "file collection id"]
+            header_list = [
+                "id", "created at", "config", "stats", "message", "label",
+                "code id", "environment id", "file collection id"
+            ]
             t = prettytable.PrettyTable(header_list)
-            snapshot_objs = self.snapshot_controller.list(session_id=session_id, visible=True)
+            snapshot_objs = self.snapshot_controller.list(
+                session_id=session_id, visible=True)
             for snapshot_obj in snapshot_objs:
-                t.add_row([snapshot_obj.id, snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                           snapshot_obj.config, snapshot_obj.stats,
-                           snapshot_obj.message, snapshot_obj.label,
-                           snapshot_obj.code_id, snapshot_obj.environment_id,
-                           snapshot_obj.file_collection_id])
+                t.add_row([
+                    snapshot_obj.id,
+                    snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    snapshot_obj.config, snapshot_obj.stats,
+                    snapshot_obj.message, snapshot_obj.label,
+                    snapshot_obj.code_id, snapshot_obj.environment_id,
+                    snapshot_obj.file_collection_id
+                ])
         else:
-            header_list = ["id", "created at", "config", "stats", "message", "label"]
+            header_list = [
+                "id", "created at", "config", "stats", "message", "label"
+            ]
             t = prettytable.PrettyTable(header_list)
-            snapshot_objs = self.snapshot_controller.list(session_id=session_id, visible=True)
+            snapshot_objs = self.snapshot_controller.list(
+                session_id=session_id, visible=True)
             for snapshot_obj in snapshot_objs:
-                t.add_row([snapshot_obj.id, snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                           snapshot_obj.config, snapshot_obj.stats,
-                           snapshot_obj.message, snapshot_obj.label])
+                t.add_row([
+                    snapshot_obj.id,
+                    snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+                    snapshot_obj.config, snapshot_obj.stats,
+                    snapshot_obj.message, snapshot_obj.label
+                ])
 
         self.cli_helper.echo(t)
         return True
@@ -134,10 +156,3 @@ class SnapshotCommand(ProjectCommand):
     def checkout(self, **kwargs):
         snapshot_id = kwargs.get("id", None)
         return self.snapshot_controller.checkout(snapshot_id)
-
-
-
-
-
-
-
