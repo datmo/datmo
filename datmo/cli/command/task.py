@@ -79,7 +79,7 @@ class TaskCommand(ProjectCommand):
         if not isinstance(kwargs['cmd'], list):
             if platform.system() == "Windows":
                 kwargs['cmd'] = kwargs['cmd']
-            elif isinstance(kwargs['cmd'], basestring):
+            elif isinstance(kwargs['cmd'], str) or isinstance(kwargs['cmd'], unicode):
                 kwargs['cmd'] = shlex.split(kwargs['cmd'])
 
         task_dict = {
