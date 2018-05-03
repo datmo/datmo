@@ -399,6 +399,21 @@ class TestSnapshotController():
             snapshot_obj_1 in result and \
             snapshot_obj_2 in result
 
+        # List all tasks regardless of filters in ascending
+        result = self.snapshot.list(sort_key='created_at', sort_order='ascending')
+
+        assert len(result) == 2 and \
+               snapshot_obj_1 in result and \
+               snapshot_obj_2 in result
+        assert result[0].created_at <= result[-1].created_at
+
+        # List all tasks regardless of filters in descending
+        result = self.snapshot.list(sort_key='created_at', sort_order='descending')
+        assert len(result) == 2 and \
+               snapshot_obj_1 in result and \
+               snapshot_obj_2 in result
+        assert result[0].created_at >= result[-1].created_at
+
         # List all snapshots with session filter
         result = self.snapshot.list(session_id=self.project.current_session.id)
 
