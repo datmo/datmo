@@ -59,6 +59,15 @@ class TestSessionController():
         assert current_sess
         assert current_sess.current == True
 
+    def test_get_session_sort(self):
+        # Sort ascending
+        sessions = self.session.list(sort_key='created_at', sort_order='ascending')
+        assert sessions[0].created_at <= sessions[-1].created_at
+
+        # Sort descending
+        sessions = self.session.list(sort_key='created_at', sort_order='descending')
+        assert sessions[0].created_at >= sessions[-1].created_at
+
     def test_delete_session(self):
         self.session.create({"name": "test3"})
         new_current = self.session.select("test3")
