@@ -14,7 +14,6 @@ from datmo.core.util.misc_functions import get_filehash, \
     create_unique_hash, mutually_exclusive
 from datmo.core.util.exceptions import MutuallyExclusiveArguments
 
-
 class TestMiscFunctions():
     # TODO: Add more cases for each test
     def setup_method(self):
@@ -63,3 +62,11 @@ class TestMiscFunctions():
         except MutuallyExclusiveArguments:
             update_dictionary_failed = True
         assert update_dictionary_failed
+
+    def test_find_project_dir(self):
+        # TODO:
+        pass
+
+    def test_is_project_dir(self):
+        # TODO:
+        pass

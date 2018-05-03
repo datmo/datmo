@@ -1,14 +1,25 @@
 import os
 import sys
 
-from datmo.core.util.i18n import get as __
-from datmo.cli.driver.helper import Helper
 from datmo.cli.command.base import BaseCommand
+from datmo.cli.driver.helper import Helper
 from datmo.core.util.exceptions import CLIArgumentException
-
+from datmo.core.util.i18n import get as __
+from datmo.core.util.logger import DatmoLogger
+from datmo.config import Config
+#from datmo.core.util.misc_functions import get_logger, create_logger
 
 def main():
     cli_helper = Helper()
+    # Config is required to run first so it can
+    # initialize/find datmo home directory (.datmo)
+    # This is required for logging to place the logs in a
+    # place for the user.
+    config = Config()
+
+    log = DatmoLogger.get_logger(__name__)
+    log.info("handling command %s", config.home)
+
 
     # parse_args defaults to [1:] for args, but you need to
     # exclude the rest of the args too, or validation will fail
