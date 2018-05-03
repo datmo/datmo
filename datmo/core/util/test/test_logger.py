@@ -10,12 +10,6 @@ from datmo.core.util.logger import DatmoLogger
 from datmo.core.controller.project import ProjectController
 
 class TestLogger():
-    def test_global_logger_configure(self):
-        self.temp_dir = tempfile.mkdtemp()
-        global_logger = DatmoLogger.configure(self.temp_dir, 10)
-        assert global_logger.logging_level == 10
-        assert global_logger.logging_path == self.temp_dir
-
     def test_logger(self):
         logger = DatmoLogger.get_logger()
         logger.info("testing")
@@ -62,6 +56,17 @@ class TestLogger():
         r = DatmoLogger.find_text_in_logs("purple")
         assert len(r) == 1
         assert r[0]["file"].find("info.txt")
+
+    def test_autocreate_dir(self):
+        log_path = os.path.join(os.path.expanduser("~"), '.datmo')
+        shutil.rmtree(log_path)
+        assert not os.path.exists(log_path)
+        logger = DatmoLogger.get_logger("logger3","new.txt")
+        logger.info("testing")
+        assert len(DatmoLogger.find_text_in_logs("testing")) == 1
+        default_logger = DatmoLogger.get_logger()
+        default_logger.info("default-logger")
+        assert len(DatmoLogger.find_text_in_logs("default-logger")) == 1
 
 
 

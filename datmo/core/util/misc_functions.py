@@ -126,7 +126,3 @@ def find_project_dir(starting_path = os.getcwd()):
 def is_project_dir(path):
     return ".datmo" in os.listdir(path) and os.path.isdir(os.path.join(path,".datmo"))
 
-def create_project_dir(path):
-    os.makedirs(os.path.join(path,'.datmo'))
-    os.makedirs(os.path.join(path,'.datmo','logs'))
-    return path

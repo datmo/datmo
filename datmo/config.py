@@ -1,7 +1,6 @@
 
 import os
 import logging
-from datmo.core.util.misc_functions import find_project_dir, create_project_dir
 from datmo.core.util.logger import DatmoLogger
 
 class Config(object):
@@ -25,14 +24,7 @@ class Config(object):
         def __init__(self):
             self._home = None
             self.logging_level = logging.DEBUG
-            self.logging_path = None
-
-            try:
-                self._home = find_project_dir()
-            except Exception as e:
-                self._home = create_project_dir(os.getcwd())
-            self.logging_path = os.path.join(self._home, '.datmo','logs')
-            self.configure_logging()
+            DatmoLogger.get_logger(__name__).info("initalizing")
 
         @property
         def home(self):
@@ -41,11 +33,6 @@ class Config(object):
         @home.setter
         def home(self, home_path):
             self._home = home_path
-            self.configure_logging()
-
-        def configure_logging(self):
-            self.logging_path = os.path.join(self._home, '.datmo','logs')
-            DatmoLogger.configure(self.logging_path, self.logging_level)
 
 
     def __new__(cls): # __new__ always a classmethod
