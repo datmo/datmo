@@ -37,7 +37,7 @@ class SnapshotCommand(ProjectCommand):
 
         create.add_argument("--file-collection-id", dest="file_collection_id", default=None,
                             help="file collection id for file collection object")
-        create.add_argument("--filepaths", dest="filepaths", default=None, nargs="*",
+        create.add_argument("--filepaths", dest="filepaths", default=None, action="append",
                             help="absolute paths to files or folders to include within the files of the snapshot")
 
         create.add_argument("--config-filename", dest="config_filename", default=None,

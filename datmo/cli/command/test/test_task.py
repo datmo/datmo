@@ -64,7 +64,7 @@ class TestTaskCommand():
             failed = True
         assert failed
 
-    def test_datmo_task_run_should_fail1(self):
+    def test_task_run_should_fail1(self):
         self.__set_variables()
         # Test failure case
         self.task.parse([
@@ -78,42 +78,61 @@ class TestTaskCommand():
             failed = True
         assert failed
 
-    def test_datmo_task_run_should_fail2(self):
+    def test_task_run_should_fail2(self):
         self.__set_variables()
         # Test failure case execute
         test_command = ["yo", "yo"]
         self.task.parse([
             "task",
             "run",
-            "--cmd", test_command
+            test_command
         ])
         result = self.task.execute()
         assert not result
 
 
-    def test_datmo_task_run(self):
+    def test_task_run(self):
         self.__set_variables()
         # Test success case
         test_command = ["sh", "-c", "echo accuracy:0.45"]
         test_gpu = True # TODO: implement in controller
-        test_ports = "8888:8888"
+        test_ports = ["8888:8888", "9999:9999"]
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         test_interactive = True
 
+        # test for single set of ports
         self.task.parse([
             "task",
             "run",
             "--gpu",
-            "--ports", test_ports,
+            "--ports", test_ports[0],
             "--env-def", test_dockerfile,
             "--interactive",
-            "--cmd", test_command
+            test_command
         ])
 
         # test for desired side effects
         assert self.task.args.cmd == test_command
         assert self.task.args.gpu == test_gpu
-        assert self.task.args.ports == [test_ports]
+        assert self.task.args.ports == [test_ports[0]]
+        assert self.task.args.environment_definition_filepath == test_dockerfile
+        assert self.task.args.interactive == test_interactive
+
+        self.task.parse([
+            "task",
+            "run",
+            "--gpu",
+            "--ports", test_ports[0],
+            "--ports", test_ports[1],
+            "--env-def", test_dockerfile,
+            "--interactive",
+            test_command
+        ])
+
+        # test for desired side effects
+        assert self.task.args.cmd == test_command
+        assert self.task.args.gpu == test_gpu
+        assert self.task.args.ports == test_ports
         assert self.task.args.environment_definition_filepath == test_dockerfile
         assert self.task.args.interactive == test_interactive
 
@@ -127,18 +146,73 @@ class TestTaskCommand():
         assert result.results == {"accuracy": "0.45"}
         assert result.status == "SUCCESS"
 
-    def test_datmo_task_run_notebook(self):
+    def test_task_run_string_command(self):
         self.__set_variables()
         # Test success case
-        test_command = ["jupyter", "notebook", "list"]
-        test_ports = "8888:8888"
+        test_command = "sh -c 'echo accuracy:0.45'"
+        test_gpu = True  # TODO: implement in controller
+        test_ports = ["8888:8888", "9999:9999"]
+        test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
+        test_interactive = True
 
         self.task.parse([
             "task",
             "run",
-            "--ports", test_ports,
-            "--cmd", test_command
+            "--gpu",
+            "--ports", test_ports[0],
+            "--ports", test_ports[1],
+            "--env-def", test_dockerfile,
+            "--interactive",
+            test_command
         ])
+
+        # test for desired side effects
+        assert self.task.args.cmd == test_command
+        assert self.task.args.gpu == test_gpu
+        assert self.task.args.ports == test_ports
+        assert self.task.args.environment_definition_filepath == test_dockerfile
+        assert self.task.args.interactive == test_interactive
+
+        # test proper execution of task run command
+        result = self.task.execute()
+        assert result
+        assert isinstance(result, CoreTask)
+        assert result.logs
+        assert "accuracy" in result.logs
+        assert result.results
+        assert result.results == {"accuracy": "0.45"}
+        assert result.status == "SUCCESS"
+
+    def test_task_run_notebook(self):
+        self.__set_variables()
+        # Test success case
+        test_command = ["jupyter", "notebook", "list"]
+        test_ports = ["8888:8888", "9999:9999"]
+
+        # test single ports option before command
+        self.task.parse([
+            "task",
+            "run",
+            "--ports", test_ports[0],
+            test_command
+        ])
+
+        # test for desired side effects
+        assert self.task.args.cmd == test_command
+        assert self.task.args.ports == [test_ports[0]]
+
+        # test multiple ports option before command
+        self.task.parse([
+            "task",
+            "run",
+            "--ports", test_ports[0],
+            "--ports", test_ports[1],
+            test_command
+        ])
+
+        # test for desired side effects
+        assert self.task.args.cmd == test_command
+        assert self.task.args.ports == test_ports
 
         # test proper execution of task run command
         result = self.task.execute()
@@ -202,7 +276,7 @@ class TestTaskCommand():
             "--ports", test_ports,
             "--env-def", test_dockerfile,
             "--interactive",
-            "--cmd", test_command
+            test_command
         ])
 
         test_task_obj = self.task.execute()

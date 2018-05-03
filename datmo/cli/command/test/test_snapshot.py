@@ -72,6 +72,12 @@ class TestSnapshot():
         with open(self.filepath, "w") as f:
             f.write(to_unicode(str("test")))
 
+        # Create another test file
+        self.filepath_2 = os.path.join(self.snapshot.home,
+                                     "file2.txt")
+        with open(self.filepath, "w") as f:
+            f.write(to_unicode(str("test")))
+
     def test_snapshot_project_not_init(self):
         failed = False
         try:
@@ -90,8 +96,9 @@ class TestSnapshot():
         test_environment_def_path = self.env_def_path
         test_config_filepath = self.config_filepath
         test_stats_filepath = self.config_filepath
-        test_filepaths = [self.filepath]
+        test_filepaths = [self.filepath, self.filepath_2]
 
+        # try single filepath
         self.snapshot.parse([
             "snapshot",
             "create",
@@ -104,6 +111,33 @@ class TestSnapshot():
             "--config-filepath", test_config_filepath,
             "--stats-filepath", test_stats_filepath,
             "--filepaths", test_filepaths[0],
+        ])
+
+        # test for desired side effects
+        assert self.snapshot.args.message == test_message
+        assert self.snapshot.args.label == test_label
+        assert self.snapshot.args.session_id == test_session_id
+        assert self.snapshot.args.task_id == test_task_id
+        assert self.snapshot.args.code_id == test_code_id
+        assert self.snapshot.args.environment_def_path == test_environment_def_path
+        assert self.snapshot.args.config_filepath == test_config_filepath
+        assert self.snapshot.args.stats_filepath == test_stats_filepath
+        assert self.snapshot.args.filepaths == [test_filepaths[0]]
+
+        # test multiple filepaths
+        self.snapshot.parse([
+            "snapshot",
+            "create",
+            "--message", test_message,
+            "--label", test_label,
+            "--session-id", test_session_id,
+            "--task-id", test_task_id,
+            "--code-id", test_code_id,
+            "--environment-def-path", test_environment_def_path,
+            "--config-filepath", test_config_filepath,
+            "--stats-filepath", test_stats_filepath,
+            "--filepaths", test_filepaths[0],
+            "--filepaths", test_filepaths[1]
         ])
 
         # test for desired side effects
