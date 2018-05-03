@@ -70,7 +70,7 @@ class TaskController(BaseController):
             "session_id": self.current_session.id
         }
 
-        ## Required args
+        # Required args
         required_args = ["command"]
         for required_arg in required_args:
             # Add in any values that are
@@ -314,11 +314,11 @@ class TaskController(BaseController):
             "duration": duration
         })
 
-    def list(self, session_id=None):
+    def list(self, session_id=None, sort_key=None, sort_order=None):
         query = {}
         if session_id:
             query['session_id'] = session_id
-        return self.dal.task.query(query)
+        return self.dal.task.query(query, sort_key, sort_order)
 
     def get_files(self, task_id, mode="r"):
         """Get list of file objects for task id. It will look in the following areas in the following order
