@@ -11,7 +11,7 @@ import datetime
 import platform
 
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
-from datmo.core.util.exceptions import EntityNotFound
+from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
 
 
 class TestBlitzDBDALDriverInit():
@@ -233,7 +233,8 @@ class TestBlitzDBDALDriver():
         self.database.set(collection, {"range_query4": datetime.datetime(2017,2,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') })
         self.database.set(collection, {"range_query4": datetime.datetime(2017,3,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') })
         # ascending
-        items = self.database.query(collection, {"range_query4": {"$gte": datetime.datetime(2017,2,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') }}, sort_key="range_query4", sort_order='ascending')
+        items = self.database.query(collection, {"range_query4": {"$gte": datetime.datetime(2017,2,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ') }},
+                                    sort_key="range_query4", sort_order='ascending')
         assert items[0]['range_query4'] == datetime.datetime(2017,2,1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         # descending
         items = self.database.query(collection, {
@@ -252,6 +253,33 @@ class TestBlitzDBDALDriver():
             "range_query4": {"$gte": datetime.datetime(2017, 2, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')}},
                                     sort_order='descending')
         assert len(items) == 2
+
+        failed = False
+        try:
+            _ = self.database.query(collection, {
+                "range_query4": {"$gte": datetime.datetime(2017, 2, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')}},
+                                        sort_key="range_query4", sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        failed = False
+        try:
+            _ = self.database.query(collection, {
+                "range_query4": {"$gte": datetime.datetime(2017, 2, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')}},
+                                    sort_key="wrong_key", sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_items = self.database.query(collection, {"range_query4": {"$gte": datetime.datetime(2017, 2, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')}},
+                                             sort_key="range_query4", sort_order='ascending')
+        items = self.database.query(collection, {"range_query4": {"$gte": datetime.datetime(2017, 2, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')}},
+                                             sort_key="wrong_key", sort_order='ascending')
+        expected_ids = [item['id'] for item in expected_items]
+        ids = [item['id'] for item in items]
+        assert set(expected_ids) == set(ids)
 
     def test_query_sort_int(self):
         collection = 'snapshot'
@@ -276,6 +304,29 @@ class TestBlitzDBDALDriver():
         items = self.database.query(collection, {"range_query5": {"$gte": 2}}, sort_order='descending')
         assert len(items) == 2
 
+        failed = False
+        try:
+            _ = self.database.query(collection, {"range_query5": {"$gte": 2}}, sort_key="range_query5",
+                                        sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        failed = False
+        try:
+            _ = self.database.query(collection, {"range_query5": {"$gte": 2}}, sort_key="wrong_key",
+                                        sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_items =self.database.query(collection, {"range_query5": {"$gte": 2}})
+        items = self.database.query(collection, {"range_query5": {"$gte": 2}}, sort_key="wrong_key",
+                                    sort_order='ascending')
+        expected_ids = [item['id'] for item in expected_items]
+        ids = [item['id'] for item in items]
+        assert set(expected_ids) == set(ids)
 
     def test_query_sort_bool(self):
         collection = 'snapshot'
@@ -302,3 +353,29 @@ class TestBlitzDBDALDriver():
         # none is passed
         items = self.database.query(collection, {"range_query6": {"$gte": 2}}, sort_order='descending')
         assert len(items) == 3
+
+        # wrong order being passed in
+        failed = False
+        try:
+            _ = self.database.query(collection, {"range_query6": {"$gte": 2}}, sort_key="range_query6",
+                                    sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and order being passed in
+        failed = False
+        try:
+            _ = self.database.query(collection, {"range_query6": {"$gte": 2}}, sort_key="wrong_key",
+                                    sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_items =self.database.query(collection, {"range_query6": {"$gte": 2}})
+        items = self.database.query(collection, {"range_query6": {"$gte": 2}}, sort_key="wrong_key",
+                                    sort_order='ascending')
+        expected_ids = [item['id'] for item in expected_items]
+        ids = [item['id'] for item in items]
+        assert set(expected_ids) == set(ids)

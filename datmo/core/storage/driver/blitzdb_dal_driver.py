@@ -2,7 +2,8 @@ from blitzdb import Document, queryset
 from datetime import datetime
 
 from datmo.core.util.exceptions import EntityNotFound, \
-    EntityCollectionNotFound, IncorrectTypeException
+    EntityCollectionNotFound, IncorrectTypeException, \
+    InvalidArgumentType
 from datmo.core.storage.driver import DALDriver
 
 
@@ -120,8 +121,7 @@ class BlitzDBDALDriver(DALDriver):
                                                                                    query_params).sort(sort_key,
                                                                                                       queryset.QuerySet.DESCENDING)]))
             else:
-                return list(map(normalize_entity, [item.attributes.copy()
-                                                   for item in self.backend.filter(collection, query_params)]))
+                raise InvalidArgumentType()
         else:
             return list(map(normalize_entity, [item.attributes.copy()
                                                for item in self.backend.filter(collection, query_params)]))
