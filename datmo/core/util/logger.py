@@ -16,11 +16,20 @@ class DatmoLogger(object):
             # INFO	20
             # DEBUG	10
             # NOTSET 0
-            self.logging_level = 20
+
+            self.logging_level = self.get_logging_level()
             self.logging_path = os.path.join(os.path.expanduser("~"),'.datmo','logs')
             self.loggers = {}
             if not os.path.exists(self.logging_path):
                 os.makedirs(self.logging_path)
+
+        def get_logging_level(self):
+            level = os.environ['LOGGING_LEVEL']
+            if hasattr(logging, level):
+                return getattr(logging, level)
+            else:
+                # warning
+                return 30
 
     def __new__(cls): # __new__ always a classmethod
         if not DatmoLogger.instance:
