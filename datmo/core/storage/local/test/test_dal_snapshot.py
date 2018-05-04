@@ -8,8 +8,8 @@ from __future__ import unicode_literals
 import os
 import tempfile
 import platform
-
 from datetime import datetime
+
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.entity.model import Model

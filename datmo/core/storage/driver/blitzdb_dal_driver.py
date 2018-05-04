@@ -3,7 +3,7 @@ from datetime import datetime
 
 from datmo.core.util.exceptions import EntityNotFound, \
     EntityCollectionNotFound, IncorrectTypeException, \
-    InvalidArgumentType
+    InvalidArgumentType, RequiredArgumentMissing
 from datmo.core.storage.driver import DALDriver
 
 
@@ -123,6 +123,9 @@ class BlitzDBDALDriver(DALDriver):
             else:
                 raise InvalidArgumentType()
         else:
+            if sort_key is not None and sort_order is None or \
+                sort_key is None and sort_order is not None:
+                raise RequiredArgumentMissing()
             return list(map(normalize_entity, [item.attributes.copy()
                                                for item in self.backend.filter(collection, query_params)]))
 

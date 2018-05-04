@@ -11,7 +11,8 @@ import datetime
 import platform
 
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
-from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
+from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType, \
+    RequiredArgumentMissing
 
 
 class TestBlitzDBDALDriverInit():
@@ -212,18 +213,27 @@ class TestBlitzDBDALDriver():
                                     sort_key="range_query4", sort_order='descending')
         assert items[0]['range_query4'] == datetime.datetime(2017, 3, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 
-        # none is passed
-        items = self.database.query(collection, {
+        # only sort_key is passed in with no sort_order
+        failed = False
+        try:
+            _ = self.database.query(collection, {
             "range_query4": {"$gte": datetime.datetime(2017, 2, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')}},
                                     sort_key="range_query4")
-        assert len(items) == 2
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
 
-        # none is passed
-        items = self.database.query(collection, {
+        # only sort_order is passed in with no sort_key
+        failed = False
+        try:
+            _ = self.database.query(collection, {
             "range_query4": {"$gte": datetime.datetime(2017, 2, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')}},
                                     sort_order='descending')
-        assert len(items) == 2
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
 
+        # both passed and wrong sort order
         failed = False
         try:
             _ = self.database.query(collection, {
@@ -233,6 +243,7 @@ class TestBlitzDBDALDriver():
             failed = True
         assert failed
 
+        # both passed and both are wrong
         failed = False
         try:
             _ = self.database.query(collection, {
@@ -266,14 +277,23 @@ class TestBlitzDBDALDriver():
                                     sort_order='descending')
         assert items[0]['range_query5'] == 3
 
-        # none is passed
-        items = self.database.query(collection, {"range_query5": {"$gte": 2}}, sort_key="range_query5")
-        assert len(items) == 2
+        # sort_key passed in but sort_order missing
+        failed = False
+        try:
+            _ = self.database.query(collection, {"range_query5": {"$gte": 2}}, sort_key="range_query5")
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
 
-        # none is passed
-        items = self.database.query(collection, {"range_query5": {"$gte": 2}}, sort_order='descending')
-        assert len(items) == 2
+        # sort_order passed in but sort_key missing
+        failed = False
+        try:
+            _ = self.database.query(collection, {"range_query5": {"$gte": 2}}, sort_order='descending')
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
 
+        # both passed but wrong sort_order
         failed = False
         try:
             _ = self.database.query(collection, {"range_query5": {"$gte": 2}}, sort_key="range_query5",
@@ -282,6 +302,7 @@ class TestBlitzDBDALDriver():
             failed = True
         assert failed
 
+        # both passed and both wrong key and order
         failed = False
         try:
             _ = self.database.query(collection, {"range_query5": {"$gte": 2}}, sort_key="wrong_key",
@@ -316,13 +337,21 @@ class TestBlitzDBDALDriver():
         assert items[0]['range_query6'] == 3
         assert items[0]['bool_query'] == True
 
-        # none is passed
-        items = self.database.query(collection, {"range_query6": {"$gte": 2}}, sort_key="bool_query")
-        assert len(items) == 3
+        # sort_key passed in but sort_order missing
+        failed = False
+        try:
+            _ = self.database.query(collection, {"range_query6": {"$gte": 2}}, sort_key="bool_query")
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
 
-        # none is passed
-        items = self.database.query(collection, {"range_query6": {"$gte": 2}}, sort_order='descending')
-        assert len(items) == 3
+        # sort_order passed in but sort_key missing
+        failed = False
+        try:
+            _ = self.database.query(collection, {"range_query6": {"$gte": 2}}, sort_order='descending')
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
 
         # wrong order being passed in
         failed = False
