@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# --- TEMPORARY ---
 # This script will create a datmo-enabled repository called `iris_sklearn`
 # run the initial script to create a snapshot and will list out the snapshots
 # by calling the `datmo snapshot ls` command
@@ -21,4 +22,3 @@ python iris_sklearn.py
 
 # Run the datmo command to list all snapshots
 datmo snapshot ls
-
