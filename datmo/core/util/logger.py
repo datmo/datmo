@@ -2,6 +2,7 @@ import hashlib
 import logging
 import os
 import tempfile
+import time
 from datmo.core.util.misc_functions import grep
 
 # https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
@@ -121,3 +122,15 @@ class DatmoLogger(object):
         log.addHandler(log_file_handler)
 
         return log
+
+    @staticmethod
+    def timeit(method):
+        log = DatmoLogger.get_logger("timeit", "timers.log")
+        def timed(*args, **kw):
+            ts = time.time()
+            result = method(*args, **kw)
+            te = time.time()
+            duration = '{message:{fill}{align}{width}}'.format(message=str(int((te - ts) * 1000))+'ms',fill=' ', width=10,align='<')
+            log.debug("%s %s.%s" % (duration, method.__module__, method.__name__))
+            return result
+        return timed
