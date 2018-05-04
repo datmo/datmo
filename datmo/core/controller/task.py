@@ -3,6 +3,7 @@ from datetime import datetime
 
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
+from datmo.core.util.misc_functions import mutually_exclusive
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.entity.task import Task
@@ -65,14 +66,14 @@ class TaskController(BaseController):
         """
 
         # Validate Inputs
-
         create_dict = {
             "model_id": self.model.id,
             "session_id": self.current_session.id
         }
+        import pdb; pdb.set_trace()
+        # Required args
+        required_args = ["command", "interactive"]
 
-        ## Required args
-        required_args = ["command"]
         for required_arg in required_args:
             # Add in any values that are
             if required_arg in dictionary and dictionary[required_arg] is not None:
@@ -80,6 +81,9 @@ class TaskController(BaseController):
             else:
                 raise RequiredArgumentMissing(
                     __("error", "controller.task.create.arg", required_arg))
+
+        mutually_exclusive_args = ["command", "interactive"]
+        mutually_exclusive(mutually_exclusive_args, dictionary, create_dict)
 
         # Create Task
         return self.dal.task.create(Task(create_dict))
