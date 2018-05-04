@@ -1,9 +1,12 @@
+#!/usr/bin/python
+
 import logging
 import os
 import datetime
 from datmo.core.util.logger import DatmoLogger
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.misc_functions import parameterized
+
 
 class Config(object):
     """Datmo Config properties
@@ -22,6 +25,7 @@ class Config(object):
     """
 
     instance = None
+
     class __InternalConfig:
         def __init__(self):
             self._home = None
@@ -65,8 +69,10 @@ class Config(object):
         if not Config.instance:
             Config.instance = Config.__InternalConfig()
         return Config.instance
+
     def __getattr__(self, name):
         return getattr(self.instance, name)
+
     def __setattr__(self, name, value):
         return setattr(self.instance, name, value)
 

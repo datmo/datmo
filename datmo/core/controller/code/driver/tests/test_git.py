@@ -14,11 +14,11 @@ try:
 except NameError:
     to_unicode = str
 
-from datmo.core.controller.code.driver.git import GitCodeDriver, \
-    GitHostDriver
-from datmo.core.util.exceptions import GitCommitDoesNotExist, \
-    PathDoesNotExist, GitExecutionException, \
-    DatmoFolderInWorkTree
+from datmo.core.controller.code.driver.git import (GitCodeDriver,
+                                                   GitHostDriver)
+from datmo.core.util.exceptions import (
+    GitCommitDoesNotExist, PathDoesNotExist, GitExecutionException,
+    DatmoFolderInWorkTree)
 
 
 class TestGitCodeDriver():

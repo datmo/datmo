@@ -7,8 +7,7 @@ try:
 except NameError:
     to_unicode = str
 
-from datmo.core.util.exceptions import SaveSettingException, \
-    FileIOException
+from datmo.core.util.exceptions import (SaveSettingException, FileIOException)
 
 
 class JSONStore():

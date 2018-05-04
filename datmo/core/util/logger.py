@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import hashlib
 import logging
 import os
@@ -5,10 +7,15 @@ import tempfile
 import time
 from datmo.core.util.misc_functions import grep
 
-# https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
 
 class DatmoLogger(object):
+    """ Datmo Logging singleton
+    Good info https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
+
+    """
+
     instance = None
+
     class __InternalObj:
         def __init__(self):
             # CRITICAL	50
@@ -17,49 +24,52 @@ class DatmoLogger(object):
             # INFO	20
             # DEBUG	10
             # NOTSET 0
-
             self.logging_level = self.get_logging_level()
-            self.logging_path = os.path.join(os.path.expanduser("~"),'.datmo','logs')
+            self.logging_path = os.path.join(
+                os.path.expanduser("~"), '.datmo', 'logs')
             self.loggers = {}
             if not os.path.exists(self.logging_path):
                 os.makedirs(self.logging_path)
 
         def get_logging_level(self):
-            level = os.environ['LOGGING_LEVEL']
+            level = os.environ.get('LOGGING_LEVEL', 'WARNING')
             if hasattr(logging, level):
                 return getattr(logging, level)
             else:
                 # warning
                 return 30
 
-    def __new__(cls): # __new__ always a classmethod
+    def __new__(cls):  # __new__ always a classmethod
         if not DatmoLogger.instance:
             DatmoLogger.instance = DatmoLogger.__InternalObj()
         return DatmoLogger.instance
+
     def __getattr__(self, name):
         return getattr(self.instance, name)
+
     def __setattr__(self, name, value):
         return setattr(self.instance, name, value)
 
     @staticmethod
     def get_logfiles():
-        return map(lambda f: os.path.join(DatmoLogger().logging_path,f), os.listdir(DatmoLogger().logging_path))
+        return map(lambda f: os.path.join(DatmoLogger().logging_path, f),
+                   os.listdir(DatmoLogger().logging_path))
 
     @staticmethod
     def find_text_in_logs(text_str):
         results = []
         for logfile in DatmoLogger.get_logfiles():
-            with open(logfile,"r") as f:
+            with open(logfile, "r") as f:
                 for r in grep(text_str, f):
                     results.append({
-                      "file": logfile,
-                      "line_number": r[0],
-                      "line": r[1]
+                        "file": logfile,
+                        "line_number": r[0],
+                        "line": r[1]
                     })
         return results
 
     @staticmethod
-    def get_logger(name = __name__, file_name="log.txt"):
+    def get_logger(name=__name__, file_name="log.txt"):
         """Returns a python logger with logging level set
 
         Parameters
@@ -89,7 +99,8 @@ class DatmoLogger(object):
 
         # cache the logger and return it otherwise handlers will get added multiple times
         # and result in multiple messages to the same file
-        logger_hash = hashlib.sha1((name + file_name).encode('utf-8')).hexdigest()
+        logger_hash = hashlib.sha1(
+            (name + file_name).encode('utf-8')).hexdigest()
 
         if logger_hash in DatmoLogger().loggers:
             # if file still exists then use cached logger
@@ -112,25 +123,35 @@ class DatmoLogger(object):
         # log_stdout.setLevel(logging.DEBUG)
         # log.addHandler(log_stdout)
 
-        log_file_handler = logging.handlers.RotatingFileHandler(logfile_path)
-        log_file_handler.maxBytes = 10485760
-        log_file_handler.backupCount = 10
-        log_file_handler.setLevel(DatmoLogger().logging_level)
-        log_file_handler.setFormatter(
-            logging.Formatter('%(asctime)s - ['+name+'@%(module)s.%(funcName)s] [%(levelname)s] - %(message)s')
-        )
-        log.addHandler(log_file_handler)
+        if hasattr(logging, 'handlers'):
+            log_file_handler = logging.handlers.RotatingFileHandler(
+                logfile_path, mode='a', maxBytes=10485760, backupCount=10)
+            log_file_handler.setLevel(DatmoLogger().logging_level)
+            log_file_handler.setFormatter(
+                logging.Formatter(
+                    '%(asctime)s - [' + name +
+                    '@%(module)s.%(funcName)s] [%(levelname)s] - %(message)s'))
+            log.addHandler(log_file_handler)
+        else:
+            print("warning logging doesnt have handlers")
 
         return log
 
     @staticmethod
     def timeit(method):
         log = DatmoLogger.get_logger("timeit", "timers.log")
+
         def timed(*args, **kw):
             ts = time.time()
             result = method(*args, **kw)
             te = time.time()
-            duration = '{message:{fill}{align}{width}}'.format(message=str(int((te - ts) * 1000))+'ms',fill=' ', width=10,align='<')
-            log.debug("%s %s.%s" % (duration, method.__module__, method.__name__))
+            duration = '{message:{fill}{align}{width}}'.format(
+                message=str(int((te - ts) * 1000)) + 'ms',
+                fill=' ',
+                width=10,
+                align='<')
+            log.debug("%s %s.%s" % (duration, method.__module__,
+                                    method.__name__))
             return result
+
         return timed

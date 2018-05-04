@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os
 import sys
 
@@ -7,7 +9,9 @@ from datmo.core.util.exceptions import CLIArgumentException
 from datmo.core.util.i18n import get as __
 from datmo.core.util.logger import DatmoLogger
 from datmo.config import Config
+
 #from datmo.core.util.misc_functions import get_logger, create_logger
+
 
 def main():
     cli_helper = Helper()
@@ -19,7 +23,6 @@ def main():
 
     log = DatmoLogger.get_logger(__name__)
     log.info("handling command %s", config.home)
-
 
     # parse_args defaults to [1:] for args, but you need to
     # exclude the rest of the args too, or validation will fail

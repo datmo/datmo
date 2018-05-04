@@ -14,8 +14,7 @@ from datmo.task import run
 from datmo.task import Task
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.controller.project import ProjectController
-from datmo.core.util.exceptions import GitCommitDoesNotExist, \
-    EntityNotFound
+from datmo.core.util.exceptions import (GitCommitDoesNotExist, EntityNotFound)
 
 
 class TestTaskModule():

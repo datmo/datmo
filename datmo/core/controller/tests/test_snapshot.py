@@ -13,10 +13,10 @@ except NameError:
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.controller.task import TaskController
-from datmo.core.util.exceptions import EntityNotFound, \
-    EnvironmentDoesNotExist, GitCommitDoesNotExist, \
-    SessionDoesNotExistException, RequiredArgumentMissing, \
-    TaskNotComplete, InvalidArgumentType
+from datmo.core.util.exceptions import (
+    EntityNotFound, EnvironmentDoesNotExist, GitCommitDoesNotExist,
+    SessionDoesNotExistException, RequiredArgumentMissing, TaskNotComplete,
+    InvalidArgumentType)
 
 
 class TestSnapshotController():

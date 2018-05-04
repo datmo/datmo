@@ -7,8 +7,9 @@ from datmo.core.util.misc_functions import mutually_exclusive
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.entity.task import Task
-from datmo.core.util.exceptions import TaskRunException, RequiredArgumentMissing, \
-    ProjectNotInitializedException, PathDoesNotExist
+from datmo.core.util.exceptions import (
+    TaskRunException, RequiredArgumentMissing, ProjectNotInitializedException,
+    PathDoesNotExist)
 
 
 class TaskController(BaseController):

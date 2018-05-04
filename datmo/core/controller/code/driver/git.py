@@ -10,10 +10,9 @@ except NameError:
 from giturlparse import parse
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import PathDoesNotExist,\
-    GitUrlArgumentException, GitExecutionException, \
-    FileIOException, GitCommitDoesNotExist, \
-    DatmoFolderInWorkTree
+from datmo.core.util.exceptions import (
+    PathDoesNotExist, GitUrlArgumentException, GitExecutionException,
+    FileIOException, GitCommitDoesNotExist, DatmoFolderInWorkTree)
 from datmo.core.controller.code.driver import CodeDriver
 from datmo.config import Config
 
@@ -331,7 +330,7 @@ class GitCodeDriver(CodeDriver):
 
         Parameters
         ----------
-        options: list 
+        options: list
             List of strings for the command (e.g. ["-m", "hello"])
 
         Returns

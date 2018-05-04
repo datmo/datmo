@@ -11,10 +11,10 @@ except NameError:
 from docker import DockerClient
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import PathDoesNotExist, \
-    EnvironmentDoesNotExist, EnvironmentInitFailed, \
-    EnvironmentExecutionException, FileAlreadyExistsException, \
-    EnvironmentRequirementsCreateException
+from datmo.core.util.exceptions import (
+    PathDoesNotExist, EnvironmentDoesNotExist, EnvironmentInitFailed,
+    EnvironmentExecutionException, FileAlreadyExistsException,
+    EnvironmentRequirementsCreateException)
 from datmo.core.controller.environment.driver import EnvironmentDriver
 
 

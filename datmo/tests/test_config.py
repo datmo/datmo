@@ -1,3 +1,4 @@
+#!/usr/bin/python
 """
 Tests for snapshot module
 """
@@ -11,13 +12,16 @@ except NameError:
 
 from datmo.config import Config
 from datmo.core.controller.project import ProjectController
-from datmo.core.util.exceptions import GitCommitDoesNotExist, \
-    InvalidProjectPathException, SessionDoesNotExistException
+from datmo.core.util.exceptions import (GitCommitDoesNotExist,
+                                        InvalidProjectPathException,
+                                        SessionDoesNotExistException)
+
 
 class TestConfigModule():
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
