@@ -92,9 +92,9 @@ class DatmoLogger(object):
         logger_hash = hashlib.sha1((name + file_name).encode('utf-8')).hexdigest()
 
         if logger_hash in DatmoLogger().loggers:
-            # if the file still exists then use cached logger
-            # if the file has been deleted manually, then empty cached obj
-            # and re-initialize
+            # if file still exists then use cached logger
+            # if file has been deleted manually, then empty cached obj
+            # and allow re-initialization
             if os.path.exists(logfile_path):
                 return DatmoLogger().loggers[logger_hash]
             else:
