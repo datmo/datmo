@@ -133,3 +133,9 @@ class TestLocalDAL():
         items = self.dal.session.query({"name": self.session_input_dict_1["name"]},
                                         sort_key='created_at', sort_order='ascending')
         assert items[0].created_at == self.session_input_dict_1["created_at"]
+
+        # Random variable being passed in
+        expected_items = self.dal.task.query({"name": self.session_input_dict_1["name"]})
+        items = self.dal.task.query({"name": self.session_input_dict_1["name"]},
+                                    sort_key='wrong_variable', sort_order='wrong_order')
+        assert len(items) == len(expected_items)

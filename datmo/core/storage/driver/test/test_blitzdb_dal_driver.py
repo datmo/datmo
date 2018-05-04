@@ -223,7 +223,7 @@ class TestBlitzDBDALDriver():
                                     sort_order='descending')
         assert len(items) == 2
 
-    def test_query_sort_date_int(self):
+    def test_query_sort_int(self):
         collection = 'snapshot'
         self.database.set(collection, {"range_query5": 1})
         self.database.set(collection, {"range_query5": 2})
