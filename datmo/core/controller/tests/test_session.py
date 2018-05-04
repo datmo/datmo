@@ -60,17 +60,20 @@ class TestSessionController():
 
     def test_get_session_sort(self):
         # Sort ascending
-        sessions = self.session.list(sort_key='created_at', sort_order='ascending')
+        sessions = self.session.list(
+            sort_key='created_at', sort_order='ascending')
         assert sessions[0].created_at <= sessions[-1].created_at
 
         # Sort descending
-        sessions = self.session.list(sort_key='created_at', sort_order='descending')
+        sessions = self.session.list(
+            sort_key='created_at', sort_order='descending')
         assert sessions[0].created_at >= sessions[-1].created_at
 
         # Wrong order being passed in
         failed = False
         try:
-            _ = self.session.list(sort_key='created_at', sort_order='wrong_order')
+            _ = self.session.list(
+                sort_key='created_at', sort_order='wrong_order')
         except InvalidArgumentType:
             failed = True
         assert failed
@@ -78,14 +81,17 @@ class TestSessionController():
         # Wrong key and order being passed in
         failed = False
         try:
-            _ = self.session.list(sort_key='wrong_key', sort_order='wrong_order')
+            _ = self.session.list(
+                sort_key='wrong_key', sort_order='wrong_order')
         except InvalidArgumentType:
             failed = True
         assert failed
 
         # wrong key and right order being passed in
-        expected_sessions = self.session.list(sort_key='created_at', sort_order='ascending')
-        sessions = self.session.list(sort_key='wrong_key', sort_order='ascending')
+        expected_sessions = self.session.list(
+            sort_key='created_at', sort_order='ascending')
+        sessions = self.session.list(
+            sort_key='wrong_key', sort_order='ascending')
         expected_ids = [item.id for item in expected_sessions]
         ids = [item.id for item in sessions]
         assert set(expected_ids) == set(ids)

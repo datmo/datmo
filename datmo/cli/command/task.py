@@ -108,7 +108,8 @@ class TaskCommand(ProjectCommand):
         # Get all snapshot meta information
         header_list = ["id", "command", "status", "gpu", "created at"]
         t = prettytable.PrettyTable(header_list)
-        task_objs = self.task_controller.list(session_id, sort_key='created_at', sort_order='descending')
+        task_objs = self.task_controller.list(
+            session_id, sort_key='created_at', sort_order='descending')
         for task_obj in task_objs:
             t.add_row([
                 task_obj.id, task_obj.command, task_obj.status, task_obj.gpu,
