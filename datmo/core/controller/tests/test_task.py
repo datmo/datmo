@@ -16,7 +16,7 @@ except NameError:
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.task import TaskController
-from datmo.core.util.exceptions import EntityNotFound, TaskRunException
+from datmo.core.util.exceptions import EntityNotFound, TaskRunException, InvalidArgumentType
 
 
 class TestTaskController():
@@ -363,6 +363,29 @@ class TestTaskController():
                task_obj_1 in result and \
                task_obj_2 in result
         assert result[0].created_at >= result[-1].created_at
+
+        # Wrong order being passed in
+        failed = False
+        try:
+            _ = self.task.list(sort_key='created_at', sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # Wrong key and order being passed in
+        failed = False
+        try:
+            _ = self.task.list(sort_key='wrong_key', sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_result = self.task.list(sort_key='created_at', sort_order='ascending')
+        result = self.task.list(sort_key='wrong_key', sort_order='ascending')
+        expected_ids = [item.id for item in expected_result]
+        ids = [item.id for item in result]
+        assert set(expected_ids) == set(ids)
 
         # List all tasks and filter by session
         result = self.task.list(session_id=self.project.current_session.id)

@@ -16,7 +16,7 @@ from datmo.core.controller.task import TaskController
 from datmo.core.util.exceptions import EntityNotFound, \
     EnvironmentDoesNotExist, GitCommitDoesNotExist, \
     SessionDoesNotExistException, RequiredArgumentMissing, \
-    TaskNotComplete
+    TaskNotComplete, InvalidArgumentType
 
 
 class TestSnapshotController():
@@ -413,6 +413,29 @@ class TestSnapshotController():
                snapshot_obj_1 in result and \
                snapshot_obj_2 in result
         assert result[0].created_at >= result[-1].created_at
+
+        # Wrong order being passed in
+        failed = False
+        try:
+            _ = self.snapshot.list(sort_key='created_at', sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # Wrong key and order being passed in
+        failed = False
+        try:
+            _ = self.snapshot.list(sort_key='wrong_key', sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_result = self.snapshot.list(sort_key='created_at', sort_order='ascending')
+        result = self.snapshot.list(sort_key='wrong_key', sort_order='ascending')
+        expected_ids = [item.id for item in expected_result]
+        ids = [item.id for item in result]
+        assert set(expected_ids) == set(ids)
 
         # List all snapshots with session filter
         result = self.snapshot.list(session_id=self.project.current_session.id)

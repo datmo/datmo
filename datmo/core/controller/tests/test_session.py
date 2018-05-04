@@ -7,8 +7,7 @@ import tempfile
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.session import SessionController
-from datmo.core.util.exceptions import EntityNotFound, \
-    GitCommitDoesNotExist, SessionDoesNotExistException
+from datmo.core.util.exceptions import InvalidArgumentType
 
 
 class TestSessionController():
@@ -67,6 +66,29 @@ class TestSessionController():
         # Sort descending
         sessions = self.session.list(sort_key='created_at', sort_order='descending')
         assert sessions[0].created_at >= sessions[-1].created_at
+
+        # Wrong order being passed in
+        failed = False
+        try:
+            _ = self.session.list(sort_key='created_at', sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # Wrong key and order being passed in
+        failed = False
+        try:
+            _ = self.session.list(sort_key='wrong_key', sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_sessions = self.session.list(sort_key='created_at', sort_order='ascending')
+        sessions = self.session.list(sort_key='wrong_key', sort_order='ascending')
+        expected_ids = [item.id for item in expected_sessions]
+        ids = [item.id for item in sessions]
+        assert set(expected_ids) == set(ids)
 
     def test_delete_session(self):
         self.session.create({"name": "test3"})
