@@ -14,7 +14,7 @@ from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.entity.model import Model
 from datmo.core.entity.session import Session
-from datmo.core.util.exceptions import EntityNotFound
+from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
 
 
 class TestLocalDAL():
@@ -136,8 +136,29 @@ class TestLocalDAL():
                                         sort_key='created_at', sort_order='ascending')
         assert items[0].created_at == self.session_input_dict_1["created_at"]
 
-        # Random variable being passed in
-        expected_items = self.dal.task.query({"name": self.session_input_dict_1["name"]})
-        items = self.dal.task.query({"name": self.session_input_dict_1["name"]},
-                                    sort_key='wrong_variable', sort_order='wrong_order')
-        assert len(items) == len(expected_items)
+        # Wrong order being passed in
+        failed = False
+        try:
+            _ = self.dal.session.query({"name": self.session_input_dict_1["name"]},
+                                        sort_key='created_at', sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # Wrong key and order being passed in
+        failed = False
+        try:
+            _ = self.dal.session.query({"name": self.session_input_dict_1["name"]},
+                                       sort_key='wrong_key', sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_items = self.dal.session.query({"name": self.session_input_dict_1["name"]},
+                                                sort_key='created_at', sort_order='ascending')
+        items = self.dal.session.query({"name": self.session_input_dict_1["name"]},
+                                                sort_key='wrong_key', sort_order='ascending')
+        expected_ids = [item.id for item in expected_items]
+        ids = [item.id for item in items]
+        assert set(expected_ids) == set(ids)
