@@ -400,7 +400,8 @@ class TestSnapshotController():
             snapshot_obj_2 in result
 
         # List all tasks regardless of filters in ascending
-        result = self.snapshot.list(sort_key='created_at', sort_order='ascending')
+        result = self.snapshot.list(
+            sort_key='created_at', sort_order='ascending')
 
         assert len(result) == 2 and \
                snapshot_obj_1 in result and \
@@ -408,7 +409,8 @@ class TestSnapshotController():
         assert result[0].created_at <= result[-1].created_at
 
         # List all tasks regardless of filters in descending
-        result = self.snapshot.list(sort_key='created_at', sort_order='descending')
+        result = self.snapshot.list(
+            sort_key='created_at', sort_order='descending')
         assert len(result) == 2 and \
                snapshot_obj_1 in result and \
                snapshot_obj_2 in result
@@ -417,7 +419,8 @@ class TestSnapshotController():
         # Wrong order being passed in
         failed = False
         try:
-            _ = self.snapshot.list(sort_key='created_at', sort_order='wrong_order')
+            _ = self.snapshot.list(
+                sort_key='created_at', sort_order='wrong_order')
         except InvalidArgumentType:
             failed = True
         assert failed
@@ -425,14 +428,17 @@ class TestSnapshotController():
         # Wrong key and order being passed in
         failed = False
         try:
-            _ = self.snapshot.list(sort_key='wrong_key', sort_order='wrong_order')
+            _ = self.snapshot.list(
+                sort_key='wrong_key', sort_order='wrong_order')
         except InvalidArgumentType:
             failed = True
         assert failed
 
         # wrong key and right order being passed in
-        expected_result = self.snapshot.list(sort_key='created_at', sort_order='ascending')
-        result = self.snapshot.list(sort_key='wrong_key', sort_order='ascending')
+        expected_result = self.snapshot.list(
+            sort_key='created_at', sort_order='ascending')
+        result = self.snapshot.list(
+            sort_key='wrong_key', sort_order='ascending')
         expected_ids = [item.id for item in expected_result]
         ids = [item.id for item in result]
         assert set(expected_ids) == set(ids)

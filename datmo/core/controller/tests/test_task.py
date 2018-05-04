@@ -381,7 +381,8 @@ class TestTaskController():
         assert failed
 
         # wrong key and right order being passed in
-        expected_result = self.task.list(sort_key='created_at', sort_order='ascending')
+        expected_result = self.task.list(
+            sort_key='created_at', sort_order='ascending')
         result = self.task.list(sort_key='wrong_key', sort_order='ascending')
         expected_ids = [item.id for item in expected_result]
         ids = [item.id for item in result]

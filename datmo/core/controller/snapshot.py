@@ -252,7 +252,11 @@ class SnapshotController(BaseController):
                                              abs_dst_dirpath)
         return True
 
-    def list(self, session_id=None, visible=None, sort_key=None, sort_order=None):
+    def list(self,
+             session_id=None,
+             visible=None,
+             sort_key=None,
+             sort_order=None):
         query = {}
         if session_id:
             try:

@@ -111,23 +111,30 @@ class BlitzDBDALDriver(DALDriver):
             del query_params['id']
         if sort_key is not None and sort_order is not None:
             if sort_order == 'ascending':
-                return list(map(normalize_entity, [item.attributes.copy()
-                                                   for item in self.backend.filter(collection,
-                                                                                   query_params).sort(sort_key,
-                                                                                                      queryset.QuerySet.ASCENDING)]))
+                return list(
+                    map(normalize_entity, [
+                        item.attributes.copy() for item in self.backend.filter(
+                            collection, query_params).sort(
+                                sort_key, queryset.QuerySet.ASCENDING)
+                    ]))
             elif sort_order == 'descending':
-                return list(map(normalize_entity, [item.attributes.copy()
-                                                   for item in self.backend.filter(collection,
-                                                                                   query_params).sort(sort_key,
-                                                                                                      queryset.QuerySet.DESCENDING)]))
+                return list(
+                    map(normalize_entity, [
+                        item.attributes.copy() for item in self.backend.filter(
+                            collection, query_params).sort(
+                                sort_key, queryset.QuerySet.DESCENDING)
+                    ]))
             else:
                 raise InvalidArgumentType()
         else:
             if sort_key is not None and sort_order is None or \
                 sort_key is None and sort_order is not None:
                 raise RequiredArgumentMissing()
-            return list(map(normalize_entity, [item.attributes.copy()
-                                               for item in self.backend.filter(collection, query_params)]))
+            return list(
+                map(normalize_entity, [
+                    item.attributes.copy()
+                    for item in self.backend.filter(collection, query_params)
+                ]))
 
     def delete(self, collection, entity_id):
         self.__reload()
