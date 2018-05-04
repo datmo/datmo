@@ -1,6 +1,5 @@
 import os
 import hashlib
-
 import textwrap
 import datetime
 from io import open
@@ -126,3 +125,22 @@ def find_project_dir(starting_path = os.getcwd()):
 def is_project_dir(path):
     return ".datmo" in os.listdir(path) and os.path.isdir(os.path.join(path,".datmo"))
 
+
+def parameterized(dec):
+    """Lifted from https://stackoverflow.com/questions/5929107/decorators-with-parameters
+
+    Parameters
+    ----------
+    dec : function
+
+    Returns
+    -------
+    function
+
+    """
+
+    def layer(*args, **kwargs):
+        def repl(f):
+            return dec(f, *args, **kwargs)
+        return repl
+    return layer
