@@ -52,6 +52,7 @@ class Snapshot():
     ------
     InvalidArgumentType
     """
+
     def __init__(self, snapshot_entity, home=None):
         if not home:
             home = os.getcwd()
@@ -80,8 +81,15 @@ class Snapshot():
     def __eq__(self, other):
         return self.id == other.id if other else False
 
-def create(message, label=None, commit_id=None, environment_id=None, filepaths=None,
-           config=None, stats=None, home=None):
+
+def create(message,
+           label=None,
+           commit_id=None,
+           environment_id=None,
+           filepaths=None,
+           config=None,
+           stats=None,
+           home=None):
     """Create a snapshot within a project
 
     The project must be created before this is implemented. You can do that by using
@@ -134,9 +142,7 @@ def create(message, label=None, commit_id=None, environment_id=None, filepaths=N
         home = os.getcwd()
     snapshot_controller = SnapshotController(home=home)
 
-    snapshot_create_dict = {
-        "message": message
-    }
+    snapshot_create_dict = {"message": message}
 
     # add arguments if they are not None
     if label:
@@ -161,6 +167,7 @@ def create(message, label=None, commit_id=None, environment_id=None, filepaths=N
     client_snapshot_obj = Snapshot(core_snapshot_obj, home=home)
 
     return client_snapshot_obj
+
 
 def create_from_task(message, task_id, home=None):
     """Create a snapshot within a project from a completed task
@@ -197,6 +204,7 @@ def create_from_task(message, task_id, home=None):
     client_snapshot_obj = Snapshot(core_snapshot_obj, home=home)
 
     return client_snapshot_obj
+
 
 def ls(session_id=None, filter=None, home=None):
     """List snapshots within a project
@@ -245,8 +253,10 @@ def ls(session_id=None, filter=None, home=None):
     # Filtering Snapshots
     # TODO: move to list function in SnapshotController
     # Add in preliminary snapshots if no filter
-    filtered_core_snapshot_objs = [core_snapshot_obj for core_snapshot_obj in core_snapshot_objs
-                                    if core_snapshot_obj.visible and not filter]
+    filtered_core_snapshot_objs = [
+        core_snapshot_obj for core_snapshot_obj in core_snapshot_objs
+        if core_snapshot_obj.visible and not filter
+    ]
     # If filter is present then use it and only add those that pass filter
     for core_snapshot_obj in core_snapshot_objs:
         if core_snapshot_obj.visible:
@@ -256,5 +266,7 @@ def ls(session_id=None, filter=None, home=None):
                 filtered_core_snapshot_objs.append(core_snapshot_obj)
 
     # Return Snapshot entities
-    return [Snapshot(filtered_core_snapshot_obj, home=home)
-            for filtered_core_snapshot_obj in filtered_core_snapshot_objs]
+    return [
+        Snapshot(filtered_core_snapshot_obj, home=home)
+        for filtered_core_snapshot_obj in filtered_core_snapshot_objs
+    ]

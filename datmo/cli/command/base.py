@@ -7,7 +7,9 @@ class BaseCommand(object):
     def __init__(self, home, cli_helper):
         self.home = home
         self.cli_helper = cli_helper
-        self.parser = Parser(prog="datmo", usage="""
+        self.parser = Parser(
+            prog="datmo",
+            usage="""
         
         datmo COMMAND [SUBCOMMANDS] ARGS 
 
@@ -23,10 +25,11 @@ class BaseCommand(object):
         
         command: 
         """)
-        self.subparsers = self.parser.add_subparsers(title="commands", dest="command")
+        self.subparsers = self.parser.add_subparsers(
+            title="commands", dest="command")
 
     def parse(self, args):
-        self.args =  self.parser.parse_args(args)
+        self.args = self.parser.parse_args(args)
 
     def execute(self):
         """
@@ -44,9 +47,12 @@ class BaseCommand(object):
         # otherwise use the module name
 
         if "subcommand" in command_args:
-            method = getattr(self, getattr(self.args, "subcommand", self.args.command))
+            method = getattr(self,
+                             getattr(self.args, "subcommand",
+                                     self.args.command))
         else:
-            method = getattr(self, getattr(self.args, "command", self.args.command))
+            method = getattr(self,
+                             getattr(self.args, "command", self.args.command))
 
         # remove extraneous options that the method should need to care about
         if "command" in command_args:
@@ -55,9 +61,9 @@ class BaseCommand(object):
             del command_args["subcommand"]
 
         if method is None:
-            raise ClassMethodNotFound(__("error",
-                                        "cli.general.method.not_found",
-                                        (self.args.command, method)))
+            raise ClassMethodNotFound(
+                __("error", "cli.general.method.not_found",
+                   (self.args.command, method)))
 
         method_result = method(**command_args)
         return method_result

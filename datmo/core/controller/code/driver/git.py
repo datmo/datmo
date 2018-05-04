@@ -29,31 +29,33 @@ class GitCodeDriver(CodeDriver):
         self.filepath = filepath
         # Check if filepath exists
         if not os.path.exists(self.filepath):
-            raise PathDoesNotExist(__("error",
-                                           "controller.code.driver.git.__init__.dne",
-                                      filepath))
+            raise PathDoesNotExist(
+                __("error", "controller.code.driver.git.__init__.dne",
+                   filepath))
         self.execpath = execpath
         # Check the execpath and the version
         try:
-            p = subprocess.Popen([self.execpath, "version"],
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE,
-                                 cwd=self.filepath)
+            p = subprocess.Popen(
+                [self.execpath, "version"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=self.filepath)
             out, err = p.communicate()
             out, err = out.decode(), err.decode()
             if err:
-                raise GitExecutionException(__("error",
-                                               "controller.code.driver.git.__init__.giterror",
-                                                err))
+                raise GitExecutionException(
+                    __("error", "controller.code.driver.git.__init__.giterror",
+                       err))
             version = str(out.split()[2].split(".windows")[0])
             if not semver.match(version, ">=1.9.7"):
-                raise GitExecutionException(__("error",
-                                               "controller.code.driver.git.__init__.gitversion",
-                                               out.split()[2]))
+                raise GitExecutionException(
+                    __("error",
+                       "controller.code.driver.git.__init__.gitversion",
+                       out.split()[2]))
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                           "controller.code.driver.git.__init__.giterror",
-                                           str(e)))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.__init__.giterror",
+                   str(e)))
 
         # TODO: handle multiple remote urls
         self.git_host_manager = GitHostDriver()
@@ -63,8 +65,8 @@ class GitCodeDriver(CodeDriver):
         if self._is_initialized:
             # If initialized ensure .datmo is not in working tree else error
             if self.exists_datmo_files_in_worktree():
-                raise DatmoFolderInWorkTree(__("error",
-                                               "controller.code.driver.git.__init__.datmo"))
+                raise DatmoFolderInWorkTree(
+                    __("error", "controller.code.driver.git.__init__.datmo"))
             # If initialized ensure .datmo is ignored (in .git/info/exclude)
             self.ensure_datmo_files_ignored()
             # If initialized update remote information
@@ -127,32 +129,31 @@ class GitCodeDriver(CodeDriver):
         if not commit_id:
             # add files and commit changes on current branch
             self.add("-A")
-            new_commit_bool = self.commit(options=["-m",
-                                                   "auto commit by datmo"])
+            new_commit_bool = self.commit(
+                options=["-m", "auto commit by datmo"])
             try:
                 commit_id = self.latest_commit()
             except GitExecutionException as e:
-                raise GitCommitDoesNotExist(__("error",
-                                              "controller.code.driver.git.create_ref.cannot_commit",
-                                              str(e)))
+                raise GitCommitDoesNotExist(
+                    __("error",
+                       "controller.code.driver.git.create_ref.cannot_commit",
+                       str(e)))
             # revert back to the original commit
             if new_commit_bool:
                 self.reset(commit_id)
         # writing git commit into ref if exists
         if not self.exists_commit(commit_id):
-            raise GitCommitDoesNotExist(__("error",
-                                          "controller.code.driver.git.create_ref.no_commit",
-                                          commit_id))
-        code_ref_path = os.path.join(self.filepath,
-                                     ".git/refs/datmo/",
+            raise GitCommitDoesNotExist(
+                __("error", "controller.code.driver.git.create_ref.no_commit",
+                   commit_id))
+        code_ref_path = os.path.join(self.filepath, ".git/refs/datmo/",
                                      commit_id)
         with open(code_ref_path, "w") as f:
             f.write(to_unicode(commit_id))
         return commit_id
 
     def exists_ref(self, commit_id):
-        code_ref_path = os.path.join(self.filepath,
-                                     ".git/refs/datmo/",
+        code_ref_path = os.path.join(self.filepath, ".git/refs/datmo/",
                                      commit_id)
         if not os.path.isfile(code_ref_path):
             return False
@@ -160,19 +161,17 @@ class GitCodeDriver(CodeDriver):
 
     def delete_ref(self, commit_id):
         self.ensure_code_refs_dir()
-        code_ref_path = os.path.join(self.filepath,
-                                     ".git/refs/datmo/",
+        code_ref_path = os.path.join(self.filepath, ".git/refs/datmo/",
                                      commit_id)
         if not self.exists_ref(commit_id):
-            raise FileIOException(__("error",
-                                    "controller.code.driver.git.delete_ref"))
+            raise FileIOException(
+                __("error", "controller.code.driver.git.delete_ref"))
         os.remove(code_ref_path)
         return True
 
     def list_refs(self):
         self.ensure_code_refs_dir()
-        code_refs_path = os.path.join(self.filepath,
-                                     ".git/refs/datmo/")
+        code_refs_path = os.path.join(self.filepath, ".git/refs/datmo/")
         code_refs_list = os.listdir(code_refs_path)
         return code_refs_list
 
@@ -183,9 +182,8 @@ class GitCodeDriver(CodeDriver):
         try:
             return self.push("origin", name=datmo_ref_map)
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                           "controller.code.driver.git.push_ref",
-                                           str(e)))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.push_ref", str(e)))
 
     def fetch_ref(self, commit_id):
         try:
@@ -193,13 +191,13 @@ class GitCodeDriver(CodeDriver):
             datmo_ref_map = "+" + datmo_ref + ":" + datmo_ref
             success, err = self.fetch("origin", datmo_ref_map, option="-fup")
             if not success:
-                raise GitExecutionException(__("error",
-                                              "controller.code.driver.git.fetch_ref",
-                                              (commit_id, err)))
+                raise GitExecutionException(
+                    __("error", "controller.code.driver.git.fetch_ref",
+                       (commit_id, err)))
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                          "controller.code.driver.git.fetch_ref",
-                                          (commit_id, str(e))))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.fetch_ref",
+                   (commit_id, str(e))))
         return True
 
     def checkout_ref(self, commit_id, remote=False):
@@ -211,9 +209,9 @@ class GitCodeDriver(CodeDriver):
             checkout_result = self.checkout(datmo_ref)
             return checkout_result
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                           "controller.code.driver.git.checkout_ref",
-                                           (commit_id, str(e))))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.checkout_ref",
+                   (commit_id, str(e))))
 
     def exists_datmo_files_ignored(self):
         exclude_file = os.path.join(self.filepath, ".git/info/exclude")
@@ -223,9 +221,9 @@ class GitCodeDriver(CodeDriver):
             else:
                 return True
         except Exception as e:
-            raise FileIOException(__("error",
-                                     "controller.code.driver.git.ensure_code_refs_dir",
-                                     str(e)))
+            raise FileIOException(
+                __("error", "controller.code.driver.git.ensure_code_refs_dir",
+                   str(e)))
 
     def ensure_datmo_files_ignored(self):
         exclude_file = os.path.join(self.filepath, ".git/info/exclude")
@@ -234,41 +232,39 @@ class GitCodeDriver(CodeDriver):
                 with open(exclude_file, "a") as f:
                     f.write(to_unicode("\n.datmo/*\n"))
         except Exception as e:
-            raise FileIOException(__("error",
-                                     "controller.code.driver.git.ensure_code_refs_dir",
-                                     str(e)))
+            raise FileIOException(
+                __("error", "controller.code.driver.git.ensure_code_refs_dir",
+                   str(e)))
         return True
 
     def exists_datmo_files_in_worktree(self):
         try:
-            result = subprocess.check_output([self.execpath, "ls-files", "|", "grep", ".datmo"],
-                                    cwd=self.filepath).strip()
+            result = subprocess.check_output(
+                [self.execpath, "ls-files", "|", "grep", ".datmo"],
+                cwd=self.filepath).strip()
             return True if result else False
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                           "controller.code.driver.git.init",
-                                           str(e)))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.init", str(e)))
 
     def init(self):
         try:
-            subprocess.check_output([self.execpath, "init", str(self.filepath)],
-                                    cwd=self.filepath).strip()
+            subprocess.check_output(
+                [self.execpath, "init",
+                 str(self.filepath)], cwd=self.filepath).strip()
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                           "controller.code.driver.git.init",
-                                           str(e)))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.init", str(e)))
         try:
             code_refs_success = self.ensure_code_refs_dir()
         except Exception as e:
-            raise FileIOException(__("error",
-                                    "controller.code.driver.git.init.file",
-                                    str(e)))
+            raise FileIOException(
+                __("error", "controller.code.driver.git.init.file", str(e)))
         try:
             datmo_files_ignored_success = self.ensure_datmo_files_ignored()
         except Exception as e:
-            raise FileIOException(__("error",
-                                    "controller.code.driver.git.init.file",
-                                    str(e)))
+            raise FileIOException(
+                __("error", "controller.code.driver.git.init.file", str(e)))
         return code_refs_success and datmo_files_ignored_success
 
     def clone(self, original_git_url, repo_name=None, mode="https"):
@@ -278,13 +274,17 @@ class GitCodeDriver(CodeDriver):
             repo_name = clone_git_url.split("/")[-1][:-4]
 
         try:
-            subprocess.check_output([self.execpath, "clone", str(clone_git_url),
-                                     os.path.join(self.filepath, repo_name)],
-                                    cwd=self.filepath).strip()
+            subprocess.check_output(
+                [
+                    self.execpath, "clone",
+                    str(clone_git_url),
+                    os.path.join(self.filepath, repo_name)
+                ],
+                cwd=self.filepath).strip()
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                          "controller.code.driver.git.clone",
-                                          (original_git_url, str(e))))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.clone",
+                   (original_git_url, str(e))))
         return True
 
     def _parse_git_url(self, original_git_url, mode="https"):
@@ -293,34 +293,36 @@ class GitCodeDriver(CodeDriver):
         p = parse(original_git_url)
 
         if not p.valid:
-            raise GitUrlArgumentException(__("error",
-                                            "controller.code.driver.git._parse_git_url.url",
-                                            original_git_url))
-        if mode=="ssh":
+            raise GitUrlArgumentException(
+                __("error", "controller.code.driver.git._parse_git_url.url",
+                   original_git_url))
+        if mode == "ssh":
             clone_git_url = p.url2ssh
-        elif mode=="https":
+        elif mode == "https":
             clone_git_url = p.url2https
-        elif mode=="http":
+        elif mode == "http":
             # If unsecured specified http connection used instead
             clone_git_url = "://".join(["http", p.url2https.split("://")[1]])
         else:
-            raise GitUrlArgumentException(__("error",
-                                            "controller.code.driver.git._parse_git_url.access",
-                                            original_git_url))
+            raise GitUrlArgumentException(
+                __("error", "controller.code.driver.git._parse_git_url.access",
+                   original_git_url))
         return clone_git_url
 
     def add(self, filepath, option=None):
         try:
             if option:
-                subprocess.check_output([self.execpath, "add", option, filepath],
-                                        cwd=self.filepath).strip()
+                subprocess.check_output(
+                    [self.execpath, "add", option, filepath],
+                    cwd=self.filepath).strip()
             else:
-                subprocess.check_output([self.execpath, "add", filepath],
-                                        cwd=self.filepath).strip()
+                subprocess.check_output(
+                    [self.execpath, "add", filepath],
+                    cwd=self.filepath).strip()
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                          "controller.code.driver.git.add",
-                                          (filepath, str(e))))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.add",
+                   (filepath, str(e))))
         return True
 
     def commit(self, options):
@@ -342,30 +344,32 @@ class GitCodeDriver(CodeDriver):
             If any errors occur in running git
         """
         try:
-            p = subprocess.Popen([self.execpath, "commit"] + options,
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE,
-                                 cwd=self.filepath)
+            p = subprocess.Popen(
+                [self.execpath, "commit"] + options,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=self.filepath)
             out, err = p.communicate()
             out, err = out.decode(), err.decode()
             if err:
-                raise GitExecutionException(__("error",
-                                              "controller.code.driver.git.commit",
-                                              (options, err)))
+                raise GitExecutionException(
+                    __("error", "controller.code.driver.git.commit",
+                       (options, err)))
             elif "nothing" in out:
                 return False
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                          "controller.code.driver.git.commit",
-                                          (options, str(e))))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.commit",
+                   (options, str(e))))
         return True
 
     def exists_commit(self, commit_id):
         try:
-            p = subprocess.Popen([self.execpath, "show", commit_id],
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE,
-                                 cwd=self.filepath)
+            p = subprocess.Popen(
+                [self.execpath, "show", commit_id],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                cwd=self.filepath)
             out, err = p.communicate()
             out, err = out.decode(), err.decode()
             if err or "fatal" in out:
@@ -374,165 +378,179 @@ class GitCodeDriver(CodeDriver):
             return False
         return True
 
-
     def branch(self, name, option=None):
         try:
             if option:
-                subprocess.check_output([self.execpath, "branch", option, name],
-                                                cwd=self.filepath).strip()
+                subprocess.check_output(
+                    [self.execpath, "branch", option, name],
+                    cwd=self.filepath).strip()
             else:
-                subprocess.check_output([self.execpath, "branch", name],
-                                                cwd=self.filepath).strip()
+                subprocess.check_output(
+                    [self.execpath, "branch", name],
+                    cwd=self.filepath).strip()
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                            "controller.code.driver.git.branch",
-                                            (name, str(e))))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.branch",
+                   (name, str(e))))
         return True
 
     def checkout(self, name, option=None):
         try:
             if option:
-                subprocess.check_output([self.execpath, "checkout", option, name],
-                                            cwd=self.filepath).strip()
+                subprocess.check_output(
+                    [self.execpath, "checkout", option, name],
+                    cwd=self.filepath).strip()
             else:
-                subprocess.check_output([self.execpath, "checkout", name],
-                                            cwd=self.filepath).strip()
+                subprocess.check_output(
+                    [self.execpath, "checkout", name],
+                    cwd=self.filepath).strip()
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                            "controller.code.driver.git.checkout",
-                                            (name, str(e))))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.checkout",
+                   (name, str(e))))
         return True
 
     def stash_save(self, message=None):
         # TODO: Test this function
         try:
             if message:
-                subprocess.check_output([self.execpath, "stash", "save", message],
-                                        cwd=self.filepath).strip()
+                subprocess.check_output(
+                    [self.execpath, "stash", "save", message],
+                    cwd=self.filepath).strip()
             else:
-                subprocess.check_output([self.execpath, "stash"],
-                                        cwd=self.filepath).strip()
+                subprocess.check_output(
+                    [self.execpath, "stash"], cwd=self.filepath).strip()
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                            "controller.code.driver.git.stash_save",
-                                            str(e)))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.stash_save", str(e)))
         return True
 
     def stash_list(self, regex="datmo"):
         # TODO: Test this function
         try:
-            git_stash_list = subprocess.check_output([self.execpath, "stash", "list", "|",
-                                                      "grep", """ + regex + """],
-                                                     cwd=self.filepath)
+            git_stash_list = subprocess.check_output(
+                [
+                    self.execpath, "stash", "list", "|", "grep",
+                    """ + regex + """
+                ],
+                cwd=self.filepath)
             git_stash_list = git_stash_list.decode().strip()
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                            "controller.code.driver.git.stash_list",
-                                            str(e)))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.stash_list", str(e)))
         return git_stash_list
 
     def stash_pop(self, regex=None):
         # TODO: Test this function
         try:
             if regex:
-                git_stash_pop = subprocess.check_output([self.execpath, "stash", "pop", "stash^{/"+regex+"}"],
-                                                        cwd=self.filepath)
+                git_stash_pop = subprocess.check_output(
+                    [self.execpath, "stash", "pop", "stash^{/" + regex + "}"],
+                    cwd=self.filepath)
                 git_stash_pop = git_stash_pop.decode().strip()
             else:
-                git_stash_pop = subprocess.check_output([self.execpath, "stash", "pop"],
-                                                        cwd=self.filepath)
+                git_stash_pop = subprocess.check_output(
+                    [self.execpath, "stash", "pop"], cwd=self.filepath)
                 git_stash_pop = git_stash_pop.decode().strip()
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                            "controller.code.driver.git.stash_pop",
-                                            str(e)))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.stash_pop", str(e)))
         return git_stash_pop
 
     def stash_apply(self, regex=None):
         # TODO: Test this function
         try:
             if regex:
-                git_stash_apply = subprocess.check_output([self.execpath,"stash", "apply", "stash^{/"+regex+"}"],
-                                                          cwd=self.filepath)
+                git_stash_apply = subprocess.check_output(
+                    [
+                        self.execpath, "stash", "apply",
+                        "stash^{/" + regex + "}"
+                    ],
+                    cwd=self.filepath)
                 git_stash_apply = git_stash_apply.decode().strip()
             else:
-                git_stash_apply = subprocess.check_output([self.execpath,"stash", "apply", "stash^{0}"],
-                                                          cwd=self.filepath)
+                git_stash_apply = subprocess.check_output(
+                    [self.execpath, "stash", "apply", "stash^{0}"],
+                    cwd=self.filepath)
                 git_stash_apply = git_stash_apply.decode().strip()
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                            "controller.code.driver.git.stash_apply",
-                                            str(e)))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.stash_apply", str(e)))
         return git_stash_apply
 
     def latest_commit(self):
         try:
-            git_commit = subprocess.check_output([self.execpath, "log", "--format=%H", "-n" , "1"],
-                                                 cwd=self.filepath)
+            git_commit = subprocess.check_output(
+                [self.execpath, "log", "--format=%H", "-n", "1"],
+                cwd=self.filepath)
             git_commit = git_commit.decode().strip()
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                          "controller.code.driver.git.latest_commit",
-                                          str(e)))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.latest_commit",
+                   str(e)))
         return git_commit
 
     def reset(self, git_commit):
         try:
-            subprocess.check_output([self.execpath,"reset", git_commit],
-                                    cwd=self.filepath).strip()
+            subprocess.check_output(
+                [self.execpath, "reset", git_commit],
+                cwd=self.filepath).strip()
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                            "controller.code.driver.git.reset",
-                                            str(e)))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.reset", str(e)))
         return True
 
     def check_git_work_tree(self):
         try:
-            git_work_tree_exists = subprocess.check_output([self.execpath,"rev-parse", "--is-inside-work-tree"],
-                                                           cwd=self.filepath)
+            git_work_tree_exists = subprocess.check_output(
+                [self.execpath, "rev-parse", "--is-inside-work-tree"],
+                cwd=self.filepath)
             git_work_tree_exists = git_work_tree_exists.decode().strip()
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                            "controller.code.driver.git.check_git_work_tree",
-                                            str(e)))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.check_git_work_tree",
+                   str(e)))
         return True if git_work_tree_exists == "true" else False
 
     def remote(self, mode, origin, git_url):
         # TODO: handle multiple remote urls
         try:
             if mode == "set-url":
-                p = subprocess.Popen([self.execpath, "remote",  "set-url", origin, git_url],
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     cwd=self.filepath)
+                p = subprocess.Popen(
+                    [self.execpath, "remote", "set-url", origin, git_url],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    cwd=self.filepath)
                 out, err = p.communicate()
                 out, err = out.decode(), err.decode()
             elif mode == "add":
-                p = subprocess.Popen([self.execpath, "remote", "add", origin, git_url],
-                                     stdout=subprocess.PIPE,
-                                     stderr=subprocess.PIPE,
-                                     cwd=self.filepath)
+                p = subprocess.Popen(
+                    [self.execpath, "remote", "add", origin, git_url],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    cwd=self.filepath)
                 out, err = p.communicate()
                 out, err = out.decode(), err.decode()
             else:
-                raise GitExecutionException(__("error",
-                                                "controller.code.driver.git.remote",
-                                                (mode, origin, git_url, "Incorrect mode specified")))
+                raise GitExecutionException(
+                    __("error", "controller.code.driver.git.remote",
+                       (mode, origin, git_url, "Incorrect mode specified")))
             if err:
-                raise GitExecutionException(__("error",
-                                                "controller.code.driver.git.remote",
-                                                (mode, origin, git_url, err)))
+                raise GitExecutionException(
+                    __("error", "controller.code.driver.git.remote",
+                       (mode, origin, git_url, err)))
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                            "controller.code.driver.git.remote",
-                                            (mode, origin, git_url, str(e))))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.remote",
+                   (mode, origin, git_url, str(e))))
         return True
 
     def get_remote_url(self):
         try:
             # TODO: handle multiple remote urls
-            git_url = subprocess.check_output([self.execpath, "config", "--get", "remote.origin.url"],
-                                              cwd=self.filepath)
+            git_url = subprocess.check_output(
+                [self.execpath, "config", "--get", "remote.origin.url"],
+                cwd=self.filepath)
             git_url = git_url.decode().strip()
         except Exception as e:
             # TODO: handle error vs. empty response properly
@@ -545,57 +563,63 @@ class GitCodeDriver(CodeDriver):
     def fetch(self, origin, name, option=None):
         try:
             if option:
-                subprocess.check_output([self.execpath, "fetch", option, origin,  name],
-                                     cwd=self.filepath).strip()
+                subprocess.check_output(
+                    [self.execpath, "fetch", option, origin, name],
+                    cwd=self.filepath).strip()
             else:
-                subprocess.check_output([self.execpath, "fetch", origin, name],
-                                     cwd=self.filepath).strip()
+                subprocess.check_output(
+                    [self.execpath, "fetch", origin, name],
+                    cwd=self.filepath).strip()
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                            "controller.code.driver.git.fetch",
-                                            (origin, name, str(e))))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.fetch",
+                   (origin, name, str(e))))
         return True
 
     def push(self, origin, option=None, name=None):
         try:
             if option:
                 if name:
-                    p = subprocess.Popen([self.execpath,"push",option,origin,name],
-                                         stdout=subprocess.PIPE,
-                                         stderr=subprocess.PIPE,
-                                         cwd=self.filepath)
+                    p = subprocess.Popen(
+                        [self.execpath, "push", option, origin, name],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        cwd=self.filepath)
                     out, err = p.communicate()
                     out, err = out.decode(), err.decode()
                 else:
-                    p = subprocess.Popen([self.execpath, "push", option, origin],
-                                         stdout=subprocess.PIPE,
-                                         stderr=subprocess.PIPE,
-                                         cwd=self.filepath)
+                    p = subprocess.Popen(
+                        [self.execpath, "push", option, origin],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        cwd=self.filepath)
                     out, err = p.communicate()
                     out, err = out.decode(), err.decode()
             else:
                 if name:
-                    p = subprocess.Popen([self.execpath,"push", origin, name],
-                                         stdout=subprocess.PIPE,
-                                         stderr=subprocess.PIPE,
-                                         cwd=self.filepath)
+                    p = subprocess.Popen(
+                        [self.execpath, "push", origin, name],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        cwd=self.filepath)
                     out, err = p.communicate()
                     out, err = out.decode(), err.decode()
                 else:
-                    p = subprocess.Popen([self.execpath, "push", origin],
-                                         stdout=subprocess.PIPE,
-                                         stderr=subprocess.PIPE,
-                                         cwd=self.filepath)
+                    p = subprocess.Popen(
+                        [self.execpath, "push", origin],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        cwd=self.filepath)
                     out, err = p.communicate()
                     out, err = out.decode(), err.decode()
             if err:
-                raise GitExecutionException(__("error",
-                                                "controller.code.driver.git.push",
-                                                (origin, err)))
+                raise GitExecutionException(
+                    __("error", "controller.code.driver.git.push",
+                       (origin, err)))
         except Exception as e:
-            raise GitExecutionException(__("error",
-                                            "controller.code.driver.git.push",
-                                            (origin, str(e))))
+            raise GitExecutionException(
+                __("error", "controller.code.driver.git.push",
+                   (origin, str(e))))
         return True
 
     def pull(self):
@@ -612,12 +636,12 @@ class GitCodeDriver(CodeDriver):
     def ensure_code_refs_dir(self):
         dir = ".git/refs/datmo"
         try:
-            if not os.path.isdir(os.path.join(self.filepath,dir)):
+            if not os.path.isdir(os.path.join(self.filepath, dir)):
                 os.makedirs(os.path.join(self.filepath, dir))
         except Exception as e:
-            raise FileIOException(__("error",
-                                    "controller.code.driver.git.ensure_code_refs_dir",
-                                    str(e)))
+            raise FileIOException(
+                __("error", "controller.code.driver.git.ensure_code_refs_dir",
+                   str(e)))
         return True
 
     def delete_code_refs_dir(self):
@@ -627,17 +651,16 @@ class GitCodeDriver(CodeDriver):
             if os.path.isdir(dir_path):
                 shutil.rmtree(dir_path)
         except Exception as e:
-            raise FileIOException(__("error",
-                                    "controller.code.driver.git.delete_code_refs_dir",
-                                    str(e)))
+            raise FileIOException(
+                __("error", "controller.code.driver.git.delete_code_refs_dir",
+                   str(e)))
         return True
 
 
 class GitHostDriver(object):
-
     def __init__(self, home=os.path.expanduser("~"), host="github"):
         self.home = home
-        if host=="github":
+        if host == "github":
             self.host = "github.com"
         else:
             self.host = "unknown"
@@ -666,34 +689,32 @@ class GitHostDriver(object):
 
     def _check_for_ssh(self):
         cmd = "ssh-keyscan %s >> ~/.ssh/known_hosts" % (self.host)
-        p = subprocess.Popen(cmd,
-                             shell=True,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-                             cwd=self.home)
+        p = subprocess.Popen(
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=self.home)
         out, err = p.communicate()
         out, err = out.decode(), err.decode()
         if "Error" in out or "Error" in err or "denied" in err:
             self._ssh_enabled = False
         cmd = "ssh -i %s/.ssh/id_rsa -T git@%s" % (self.home, self.host)
-        p = subprocess.Popen(str(cmd),
-                             shell=True,
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE,
-                             cwd=self.home)
+        p = subprocess.Popen(
+            str(cmd),
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=self.home)
         out, err = p.communicate()
         out, err = out.decode(), err.decode()
         error_strings = [
-            "Error",
-            "denied",
-            "Could not resolve hostname",
-            "not accessible"
+            "Error", "denied", "Could not resolve hostname", "not accessible"
         ]
         for err_str in error_strings:
             if err_str in err or err_str in out:
                 return False
         return True
-
 
     def create_git_netrc(self, username, password):
         netrc_filepath = os.path.join(self.home, ".netrc")
@@ -711,10 +732,7 @@ class GitHostDriver(object):
     def read_git_netrc(self):
         netrc_filepath = os.path.join(self.home, ".netrc")
         if not os.path.exists(netrc_filepath):
-            return {
-                "login": None,
-                "password": None
-            }
+            return {"login": None, "password": None}
         netrc_file = open(netrc_filepath, "r")
         file_content = netrc_file.read()
         lines = file_content.split("\n")

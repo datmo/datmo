@@ -1,9 +1,7 @@
-import os
-
 from datmo.core.controller.base import BaseController
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import RequiredArgumentMissing, \
-  SessionDoesNotExistException, EntityNotFound, InvalidOperation
+from datmo.core.util.exceptions import EntityNotFound, \
+    InvalidOperation
 
 
 class SessionController(BaseController):
@@ -29,9 +27,9 @@ class SessionController(BaseController):
         flagged as current, switches to default session
 
     """
+
     def __init__(self, home):
         super(SessionController, self).__init__(home)
-
 
     def create(self, incoming_dictionary):
         # Look for existing session first and return if it exists
@@ -57,7 +55,7 @@ class SessionController(BaseController):
         })
 
         if len(next_session) == 0:
-          raise EntityNotFound('session')
+            raise EntityNotFound('session')
 
         next_session = next_session[0]
         # already current session
@@ -91,11 +89,12 @@ class SessionController(BaseController):
 
     def delete_by_name(self, name):
         if name == 'default':
-          raise InvalidOperation(__("error","controller.session.delete.default"))
+            raise InvalidOperation(
+                __("error", "controller.session.delete.default"))
 
         session = self.dal.session.findOne({
-          "model_id": self.model.id,
-          "name": name
+            "model_id": self.model.id,
+            "name": name
         })
 
         if session.current == True:
@@ -111,4 +110,3 @@ class SessionController(BaseController):
             self.dal.task.delete(t.id)
 
         return True
-

@@ -38,6 +38,7 @@ class LocalDAL():
     user
 
     """
+
     def __init__(self, driver):
         self.driver = driver
 
@@ -133,6 +134,7 @@ class LocalDAL():
         """
         return UserMethods(self.driver)
 
+
 class EntityMethodsCRUD(object):
     def __init__(self, collection, entity_class, driver):
         self.collection = collection
@@ -145,7 +147,7 @@ class EntityMethodsCRUD(object):
 
     def create(self, datmo_entity):
         # translate datmo_entity to a standard dictionary (document) to be stored
-        if hasattr(datmo_entity,'to_dictionary'):
+        if hasattr(datmo_entity, 'to_dictionary'):
             dict_obj = datmo_entity.to_dictionary()
         else:
             dict_obj = self.entity_class(datmo_entity).to_dictionary()
@@ -200,66 +202,52 @@ class EntityMethodsCRUD(object):
 
         return results[0]
 
+
 #
 # https://stackoverflow.com/questions/1713038/super-fails-with-error-typeerror-argument-1-must-be-type-not-classobj
 #
+
 
 #
 # Datmo Entity methods
 #
 class ModelMethods(EntityMethodsCRUD):
     def __init__(self, driver):
-        super(ModelMethods, self).__init__(
-            'model',
-            Model,
-            driver)
+        super(ModelMethods, self).__init__('model', Model, driver)
+
 
 class CodeMethods(EntityMethodsCRUD):
     def __init__(self, driver):
-        super(CodeMethods, self).__init__(
-            'code',
-            Code,
-            driver)
+        super(CodeMethods, self).__init__('code', Code, driver)
+
 
 class EnvironmentMethods(EntityMethodsCRUD):
     def __init__(self, driver):
-        super(EnvironmentMethods, self).__init__(
-            'environment',
-            Environment,
-            driver)
+        super(EnvironmentMethods, self).__init__('environment', Environment,
+                                                 driver)
+
 
 class FileCollectionMethods(EntityMethodsCRUD):
     def __init__(self, driver):
-        super(FileCollectionMethods, self).__init__(
-            'file_collection',
-            FileCollection,
-            driver)
+        super(FileCollectionMethods, self).__init__('file_collection',
+                                                    FileCollection, driver)
+
 
 class SessionMethods(EntityMethodsCRUD):
     def __init__(self, driver):
-        super(SessionMethods, self).__init__(
-            'session',
-            Session,
-            driver)
+        super(SessionMethods, self).__init__('session', Session, driver)
+
 
 class TaskMethods(EntityMethodsCRUD):
     def __init__(self, driver):
-        super(TaskMethods, self).__init__(
-            'task',
-            Task,
-            driver
-        )
+        super(TaskMethods, self).__init__('task', Task, driver)
+
 
 class SnapshotMethods(EntityMethodsCRUD):
     def __init__(self, driver):
-        super(SnapshotMethods, self).__init__(
-            'snapshot',
-            Snapshot,
-            driver)
+        super(SnapshotMethods, self).__init__('snapshot', Snapshot, driver)
+
 
 class UserMethods(EntityMethodsCRUD):
     def __init__(self, driver):
-        super(UserMethods, self).__init__(
-            'user',
-            User,
-            driver)
+        super(UserMethods, self).__init__('user', User, driver)

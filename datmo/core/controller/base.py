@@ -48,12 +48,9 @@ class BaseController(object):
     def __init__(self, home):
         self.home = home
         if not os.path.isdir(self.home):
-            raise InvalidProjectPathException(__("error",
-                                                 "controller.base.__init__",
-                                                 home))
-        self.config = JSONStore(os.path.join(self.home,
-                                             ".datmo",
-                                             ".config"))
+            raise InvalidProjectPathException(
+                __("error", "controller.base.__init__", home))
+        self.config = JSONStore(os.path.join(self.home, ".datmo", ".config"))
         # property caches and initial values
         self._dal = None
         self._model = None
@@ -100,8 +97,8 @@ class BaseController(object):
         Session
         """
         if not self.model:
-            raise DatmoModelNotInitializedException(__("error",
-                                                      "controller.base.current_session"))
+            raise DatmoModelNotInitializedException(
+                __("error", "controller.base.current_session"))
         if self._current_session == None:
             sessions = self.dal.session.query({"current": True})
             self._current_session = sessions[0] if sessions else None
@@ -117,7 +114,8 @@ class BaseController(object):
         """
         if self._code_driver == None:
             module_details = self.config_loader("controller.code.driver")
-            self._code_driver = module_details["constructor"](**module_details["options"])
+            self._code_driver = module_details["constructor"](
+                **module_details["options"])
         return self._code_driver
 
     @property
@@ -130,7 +128,8 @@ class BaseController(object):
         """
         if self._file_driver == None:
             module_details = self.config_loader("controller.file.driver")
-            self._file_driver = module_details["constructor"](**module_details["options"])
+            self._file_driver = module_details["constructor"](
+                **module_details["options"])
         return self._file_driver
 
     @property
@@ -142,8 +141,10 @@ class BaseController(object):
         EnvironmentDriver
         """
         if self._environment_driver == None:
-            module_details = self.config_loader("controller.environment.driver")
-            self._environment_driver = module_details["constructor"](**module_details["options"])
+            module_details = self.config_loader(
+                "controller.environment.driver")
+            self._environment_driver = module_details["constructor"](
+                **module_details["options"])
         return self._environment_driver
 
     @property
@@ -156,17 +157,18 @@ class BaseController(object):
             True if the project is property initialized else False
         """
         if not self._is_initialized:
-          if self.code_driver.is_initialized and \
-              self.environment_driver.is_initialized and \
-                  self.file_driver.is_initialized:
-              if self.model:
-                  self._is_initialized = True
+            if self.code_driver.is_initialized and \
+                self.environment_driver.is_initialized and \
+                    self.file_driver.is_initialized:
+                if self.model:
+                    self._is_initialized = True
         return self._is_initialized
 
     def dal_instantiate(self):
         # first load driver, then create DAL using driver
         dal_driver_dict = self.config_loader("storage.driver")
-        dal_driver = dal_driver_dict["constructor"](**dal_driver_dict["options"])
+        dal_driver = dal_driver_dict["constructor"](
+            **dal_driver_dict["options"])
         # Get DAL, set driver,
         dal_dict = self.config_loader("storage.local")
         dal_dict["options"]["driver"] = dal_driver
@@ -182,26 +184,30 @@ class BaseController(object):
     def config_loader(self, key):
         defaults = self.get_config_defaults()
         module_details = self.get_or_set_default(key, defaults[key])
-        module_details["constructor"] = get_class_contructor(module_details["class_constructor"])
+        module_details["constructor"] = get_class_contructor(
+            module_details["class_constructor"])
         return module_details
 
     def get_config_defaults(self):
         return {
             "controller.code.driver": {
-                "class_constructor": "datmo.core.controller.code.driver.git.GitCodeDriver",
+                "class_constructor":
+                    "datmo.core.controller.code.driver.git.GitCodeDriver",
                 "options": {
                     "filepath": self.home,
                     "execpath": "git"
                 }
             },
             "controller.file.driver": {
-                "class_constructor": "datmo.core.controller.file.driver.local.LocalFileDriver",
+                "class_constructor":
+                    "datmo.core.controller.file.driver.local.LocalFileDriver",
                 "options": {
                     "filepath": self.home
                 }
             },
-            "controller.environment.driver":{
-                "class_constructor": "datmo.core.controller.environment.driver.dockerenv.DockerEnvironmentDriver",
+            "controller.environment.driver": {
+                "class_constructor":
+                    "datmo.core.controller.environment.driver.dockerenv.DockerEnvironmentDriver",
                 "options": {
                     "filepath": self.home,
                     "docker_execpath": "docker"
@@ -214,11 +220,13 @@ class BaseController(object):
                 }
             },
             "storage.driver": {
-                "class_constructor": "datmo.core.storage.driver.blitzdb_dal_driver.BlitzDBDALDriver",
+                "class_constructor":
+                    "datmo.core.storage.driver.blitzdb_dal_driver.BlitzDBDALDriver",
                 "options": {
-                    "driver_type": "file",
-                    "connection_string": os.path.join(self.home, ".datmo/database")
+                    "driver_type":
+                        "file",
+                    "connection_string":
+                        os.path.join(self.home, ".datmo/database")
                 }
             },
         }
-
