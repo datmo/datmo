@@ -161,3 +161,9 @@ class TestLocalDAL():
         items = self.dal.snapshot.query({"model_id": self.snapshot_input_dict["model_id"]},
                                         sort_key='created_at', sort_order='ascending')
         assert items[0].created_at == self.snapshot_input_dict["created_at"]
+
+        # Random variable being passed in
+        expected_items = self.dal.snapshot.query({"model_id": self.snapshot_input_dict["model_id"]})
+        items = self.dal.snapshot.query({"model_id": self.snapshot_input_dict["model_id"]},
+                                        sort_key='wrong_variable', sort_order='wrong_order')
+        assert len(items) == len(expected_items)
