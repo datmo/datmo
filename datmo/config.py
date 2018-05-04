@@ -1,5 +1,8 @@
+#!/usr/bin/python
+
 import logging
 from datmo.core.util.logger import DatmoLogger
+
 
 class Config(object):
     """Datmo Config properties
@@ -18,6 +21,7 @@ class Config(object):
     """
 
     instance = None
+
     class __InternalConfig:
         def __init__(self):
             self._home = None
@@ -32,12 +36,13 @@ class Config(object):
         def home(self, home_path):
             self._home = home_path
 
-
-    def __new__(cls): # __new__ always a classmethod
+    def __new__(cls):  # __new__ always a classmethod
         if not Config.instance:
             Config.instance = Config.__InternalConfig()
         return Config.instance
+
     def __getattr__(self, name):
         return getattr(self.instance, name)
+
     def __setattr__(self, name, value):
         return setattr(self.instance, name, value)

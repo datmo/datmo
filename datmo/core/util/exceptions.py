@@ -1,3 +1,6 @@
+#!/usr/bin/python
+
+
 class InvalidProjectPathException(Exception):
     pass
 
@@ -93,8 +96,10 @@ class EnvironmentDoesNotExist(DoesNotExist):
 class PathDoesNotExist(FileExecutionException):
     pass
 
+
 class LoggingPathDoesNotExist(PathDoesNotExist):
     pass
+
 
 class FileIOException(FileExecutionException):
     pass

@@ -1,9 +1,8 @@
 from blitzdb import Document, queryset
 from datetime import datetime
 
-from datmo.core.util.exceptions import EntityNotFound, \
-    EntityCollectionNotFound, IncorrectTypeException, \
-    InvalidArgumentType, RequiredArgumentMissing
+from datmo.core.util.exceptions import (
+    EntityNotFound, EntityCollectionNotFound, IncorrectTypeException)
 from datmo.core.storage.driver import DALDriver
 
 

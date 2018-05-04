@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os
 import hashlib
 
@@ -11,18 +13,20 @@ except NameError:
 from glob import glob
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import PathDoesNotExist, \
-    MutuallyExclusiveArguments
+from datmo.core.util.exceptions import (PathDoesNotExist,
+                                        MutuallyExclusiveArguments)
 
 import re
-def grep(pattern,fileObj):
-  r=[]
-  linenumber=0
-  for line in fileObj:
-    linenumber +=1
-    if re.search(pattern,line):
-      r.append((linenumber,line))
-  return r
+
+
+def grep(pattern, fileObj):
+    r = []
+    linenumber = 0
+    for line in fileObj:
+        linenumber += 1
+        if re.search(pattern, line):
+            r.append((linenumber, line))
+    return r
 
 
 def printable_dict(input_dictionary):
@@ -52,8 +56,6 @@ def which(program):
             if is_exe(exe_file):
                 return exe_file
     return None
-
-
 
 
 def get_nvidia_devices():
@@ -101,14 +103,15 @@ def mutually_exclusive(mutually_exclusive_args, arguments_dictionary,
     for arg in mutually_exclusive_args:
         if arg in arguments_dictionary and arguments_dictionary[arg] is not None:
             dictionary[arg] = arguments_dictionary[arg]
-            mutually_exclusive_arg_count+=1
-    if mutually_exclusive_arg_count>1:
-        raise MutuallyExclusiveArguments(__("error",
-                                            "util.misc_functions.mutually_exclusive",
-                                            ' '.join(mutually_exclusive_args)))
+            mutually_exclusive_arg_count += 1
+    if mutually_exclusive_arg_count > 1:
+        raise MutuallyExclusiveArguments(
+            __("error", "util.misc_functions.mutually_exclusive",
+               ' '.join(mutually_exclusive_args)))
     return
 
-def find_project_dir(starting_path = os.getcwd()):
+
+def find_project_dir(starting_path=os.getcwd()):
     if starting_path == "/":
         raise Exception("project not found")
 
@@ -123,6 +126,7 @@ def find_project_dir(starting_path = os.getcwd()):
         # take the first part
         return find_project_dir(os.path.split(starting_path)[0])
 
-def is_project_dir(path):
-    return ".datmo" in os.listdir(path) and os.path.isdir(os.path.join(path,".datmo"))
 
+def is_project_dir(path):
+    return ".datmo" in os.listdir(path) and os.path.isdir(
+        os.path.join(path, ".datmo"))
