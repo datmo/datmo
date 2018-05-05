@@ -100,7 +100,6 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
             detach : bool
             stdin_open : bool
             tty : bool
-            gpu : bool
         log_filepath : str
             filepath to the log file
 

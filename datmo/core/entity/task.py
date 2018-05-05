@@ -29,12 +29,12 @@ class Task():
             list of string mappings from host system (left) to environment (right)
             (e.g. ["9999:9999", "8888:8888"])
             (default is None, which means it isn't set yet)
-        gpu : bool, optional
-            boolean to signify if run requires gpu
-            (default is False, which means no gpu unless specified)
         interactive : bool, optional
             boolean to signify if should be run in interactive mode
             (default is False, which means no interactive mode unless specified)
+        detach : bool, optional
+            boolean to signify if should be run in detach mode
+            (default is False, which means output will not be shown in stdout)
         task_dirpath : str, optional
             task directory path relative to the project root
             (default is None, which means it isn't set yet)
@@ -85,10 +85,10 @@ class Task():
     ports : list or None
         list of string mappings from host system (left) to environment (right)
         (e.g. ["9999:9999", "8888:8888"])
-    gpu : bool
-        boolean to signify if run requires gpu
     interactive : bool
         boolean to signify if should be run in interactive mode
+    detach : bool
+        boolean to signify if should run be detached
     task_dirpath : str or None
         task directory path relative to the project root
     log_filepath : str or None
@@ -119,13 +119,13 @@ class Task():
         self.session_id = dictionary['session_id']
 
         # Execution definition
-        self.command = dictionary['command']
+        self.command = dictionary.get('command', None)
 
         # Pre-Execution
         self.before_snapshot_id = dictionary.get('before_snapshot_id', None)
         self.ports = dictionary.get('ports', None)
-        self.gpu = dictionary.get('gpu', False)
         self.interactive = dictionary.get('interactive', False)
+        self.detach = dictionary.get('detach', False)
         self.task_dirpath = dictionary.get('task_dirpath', None)
         self.log_filepath = dictionary.get('log_filepath', None)
         self.start_time = dictionary.get('start_time', None)

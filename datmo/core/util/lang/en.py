@@ -227,6 +227,8 @@ MESSAGES = {
             "Environment specified does not exist: %s",
         "controller.task.run":
             "Error creating task directory for run: %s",
+        "controller.task.run.args.detach.interactive":
+            "Error in running tasks since both detach and interactive is used",
         "controller.task.stop.arg":
             "Stop argument %s not present in input",
         "controller.task.delete.arg":
