@@ -37,15 +37,13 @@ class TestTaskController():
 
     def test_create(self):
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        task_gpu = False
-        input_dict = {"command": task_command, "gpu": task_gpu}
+        input_dict = {"command": task_command}
 
         # Create task in the project
         task_obj = self.task.create(input_dict)
 
         assert task_obj
         assert task_obj.command == task_command
-        assert task_obj.gpu == task_gpu
 
     def test_run_helper(self):
         # TODO: Try out more options (see below)
@@ -73,7 +71,6 @@ class TestTaskController():
         options_dict = {
             "command": ["sh", "-c", "echo accuracy:0.45"],
             "ports": ["8888:8888"],
-            "gpu": False,
             "name": random_name,
             "volumes": {
                 temp_test_dirpath: {
@@ -82,9 +79,10 @@ class TestTaskController():
                 }
             },
             "detach": False,
-            "stdin_open": True,
+            "stdin_open": False,
             "tty": False,
-            "api": False
+            "api": False,
+            "interactive": False
         }
 
         return_code, run_id, logs = \
@@ -106,7 +104,6 @@ class TestTaskController():
         options_dict = {
             "command": ["sh", "-c", "echo accuracy:0.45"],
             "ports": ["8888:8888"],
-            "gpu": False,
             "name": random_name_2,
             "volumes": {
                 temp_test_dirpath: {
@@ -114,10 +111,11 @@ class TestTaskController():
                     'mode': 'rw'
                 }
             },
-            "detach": False,
-            "stdin_open": True,
+            "detach": True,
+            "stdin_open": False,
             "tty": False,
-            "api": True
+            "api": True,
+            "interactive": False
         }
 
         return_code, run_id, logs = \
@@ -173,7 +171,6 @@ class TestTaskController():
 
         assert updated_task_obj.before_snapshot_id
         assert updated_task_obj.ports == None
-        assert updated_task_obj.gpu == False
         assert updated_task_obj.interactive == False
         assert updated_task_obj.task_dirpath
         assert updated_task_obj.log_filepath
@@ -250,7 +247,6 @@ class TestTaskController():
 
         assert updated_task_obj_2.before_snapshot_id
         assert updated_task_obj_2.ports == None
-        assert updated_task_obj_2.gpu == False
         assert updated_task_obj_2.interactive == False
         assert updated_task_obj_2.task_dirpath
         assert updated_task_obj_2.log_filepath
@@ -298,7 +294,6 @@ class TestTaskController():
 
         assert updated_task_obj_2.before_snapshot_id
         assert updated_task_obj_2.ports == None
-        assert updated_task_obj_2.gpu == False
         assert updated_task_obj_2.interactive == False
         assert updated_task_obj_2.task_dirpath
         assert updated_task_obj_2.log_filepath

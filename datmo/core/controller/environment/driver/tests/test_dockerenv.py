@@ -44,7 +44,7 @@ class TestDockerEnv():
             f.write(to_unicode(str("RUN echo " + random_text)))
 
     def teardown_method(self):
-        pass
+        self.docker_environment_manager.stop_remove_containers_by_term(term='cooltest', force=True)
 
     def test_instantiation_and_connected(self):
         assert self.docker_environment_manager.is_connected
@@ -183,6 +183,8 @@ class TestDockerEnv():
 
     def test_run(self):
         # TODO: add more options for run w/ volumes etc
+        # Keeping stdin_open and tty as either (True, True) or (False, False).
+        # other combination are not used
         image_name = str(uuid.uuid1())
         path = os.path.join(self.docker_environment_manager.filepath,
                             "Dockerfile")
@@ -193,11 +195,11 @@ class TestDockerEnv():
         log_filepath = os.path.join(self.docker_environment_manager.filepath,
                                     "test.log")
         self.docker_environment_manager.build(image_name, path)
-
+        # keeping stdin_open and tty as False
         run_options = {
             "command": ["sh", "-c", "echo yo"],
             "ports": ["8888:9999", "5000:5001"],
-            "name": "cooltest",
+            "name": "datmotest_dockerenv_1",
             "volumes": {
                 self.docker_environment_manager.filepath: {
                     'bind': '/home/',
@@ -205,9 +207,8 @@ class TestDockerEnv():
                 }
             },
             "detach": True,
-            "stdin_open": True,
-            "tty": True,
-            "gpu": True,
+            "stdin_open": False,
+            "tty": False,
             "api": False
         }
         return_code, run_id, logs = \
@@ -216,8 +217,36 @@ class TestDockerEnv():
         assert return_code == 0
         assert run_id
         assert logs
+
         # teardown
         self.docker_environment_manager.stop(run_id, force=True)
+
+        # TODO: Adding test with stdin_open and tty as True for `interactive` argument and terminate inside container
+        # # keeping stdin_open, tty as True
+        # run_options = {
+        #     "command": [],
+        #     "ports": ["8888:9999", "5000:5001"],
+        #     "name": "datmotest_dockerenv_2",
+        #     "volumes": {
+        #         self.docker_environment_manager.filepath: {
+        #             'bind': '/home/',
+        #             'mode': 'rw'
+        #         }
+        #     },
+        #     "detach": True,
+        #     "stdin_open": True,
+        #     "tty": True,
+        #     "api": False
+        # }
+        # return_code, run_id, logs = \
+        #     self.docker_environment_manager.run(image_name, run_options, log_filepath)
+        #
+        # assert return_code == 0
+        # assert run_id
+        # assert not logs
+        #
+        # # teardown
+        # self.docker_environment_manager.stop(run_id, force=True)
 
         # Test default values for run options
         run_options = {"command": ["sh", "-c", "echo yo"]}
@@ -246,12 +275,11 @@ class TestDockerEnv():
         run_options = {
             "command": ["sh", "-c", "echo yo"],
             "ports": ["8888:9999", "5000:5001"],
-            "name": "my_container_name_2",
+            "name": "datmotest_dockerenv_5",
             "volumes": None,
             "detach": False,
             "stdin_open": False,
             "tty": False,
-            "gpu": False,
             "api": False
         }
         _, run_id, _ = \

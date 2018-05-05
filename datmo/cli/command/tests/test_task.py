@@ -13,6 +13,7 @@ from __future__ import unicode_literals
 #     import builtins as __builtin__
 
 import os
+import time
 import tempfile
 import platform
 from io import open
@@ -82,42 +83,37 @@ class TestTaskCommand():
         assert not result
 
     def test_task_run(self):
+        # TODO: Adding test with `--interactive` argument and terminate inside container
         self.__set_variables()
         # Test success case
         test_command = ["sh", "-c", "echo accuracy:0.45"]
-        test_gpu = True  # TODO: implement in controller
         test_ports = ["8888:8888", "9999:9999"]
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-        test_interactive = True
 
         # test for single set of ports
         self.task.parse([
-            "task", "run", "--gpu", "--ports", test_ports[0], "--env-def",
-            test_dockerfile, "--interactive", test_command
+            "task", "run", "--ports", test_ports[0], "--env-def",
+            test_dockerfile,  test_command
         ])
 
         # test for desired side effects
         assert self.task.args.cmd == test_command
-        assert self.task.args.gpu == test_gpu
         assert self.task.args.ports == [test_ports[0]]
         assert self.task.args.environment_definition_filepath == test_dockerfile
-        assert self.task.args.interactive == test_interactive
 
         self.task.parse([
-            "task", "run", "--gpu", "--ports", test_ports[0], "--ports",
-            test_ports[1], "--env-def", test_dockerfile, "--interactive",
+            "task", "run", "-p", test_ports[0], "-p",
+            test_ports[1], "--env-def", test_dockerfile,
             test_command
         ])
-
         # test for desired side effects
         assert self.task.args.cmd == test_command
-        assert self.task.args.gpu == test_gpu
         assert self.task.args.ports == test_ports
         assert self.task.args.environment_definition_filepath == test_dockerfile
-        assert self.task.args.interactive == test_interactive
 
         # test proper execution of task run command
         result = self.task.execute()
+        time.sleep(1)
         assert result
         assert isinstance(result, CoreTask)
         assert result.logs
@@ -127,26 +123,22 @@ class TestTaskCommand():
         assert result.status == "SUCCESS"
 
     def test_task_run_string_command(self):
+        # TODO: Adding test with `--interactive` argument and terminate inside container
         self.__set_variables()
         # Test success case
         test_command = "sh -c 'echo accuracy:0.45'"
-        test_gpu = True  # TODO: implement in controller
         test_ports = ["8888:8888", "9999:9999"]
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-        test_interactive = True
-
         self.task.parse([
-            "task", "run", "--gpu", "--ports", test_ports[0], "--ports",
-            test_ports[1], "--env-def", test_dockerfile, "--interactive",
+            "task", "run",  "--ports", test_ports[0], "--ports",
+            test_ports[1], "--env-def", test_dockerfile,
             test_command
         ])
 
         # test for desired side effects
         assert self.task.args.cmd == test_command
-        assert self.task.args.gpu == test_gpu
         assert self.task.args.ports == test_ports
         assert self.task.args.environment_definition_filepath == test_dockerfile
-        assert self.task.args.interactive == test_interactive
 
         # test proper execution of task run command
         result = self.task.execute()
@@ -228,8 +220,8 @@ class TestTaskCommand():
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
 
         self.task.parse([
-            "task", "run", "--gpu", "--ports", test_ports, "--env-def",
-            test_dockerfile, "--interactive", test_command
+            "task", "run", "--ports", test_ports, "--env-def",
+            test_dockerfile, test_command
         ])
 
         test_task_obj = self.task.execute()
