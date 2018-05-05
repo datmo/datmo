@@ -1,8 +1,9 @@
+import os
 from setuptools import setup, find_packages
+from version import __version__
 
-from datmo import __version__
-
-with open('README.md') as file:
+project_root = os.path.dirname(os.path.abspath(__file__))
+with open(os.path.join(project_root, 'README.md')) as file:
     long_description = file.read()
 
 setup(
