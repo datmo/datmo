@@ -17,6 +17,7 @@ from datmo.config import Config
 def get_parser():
     return parser
 
+
 def main():
     cli_helper = Helper()
     # Config is required to run first so it can

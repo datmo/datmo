@@ -13,11 +13,11 @@ from __future__ import unicode_literals
 #     import builtins as __builtin__
 
 import os
-import shutil
 import tempfile
 import platform
 
 from datmo.cli.driver.helper import Helper
+from datmo.cli.parser import parser
 from datmo.cli.command.project import ProjectCommand
 
 
@@ -29,8 +29,8 @@ class TestProject():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.cli = Helper()
-        self.init = ProjectCommand(self.temp_dir, self.cli)
+        self.cli_helper = Helper()
+        self.init = ProjectCommand(self.temp_dir, self.cli_helper, parser)
 
     def teardown_class(self):
         pass
