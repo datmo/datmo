@@ -11,7 +11,6 @@ class BlitzDBDALDriver(DALDriver):
     def __init__(self, driver_type, connection_string):
         super(BlitzDBDALDriver, self).__init__()
         self.database_name = 'datmo_db'
-
         if driver_type == "file":
             from blitzdb import FileBackend
             self.backend = FileBackend(connection_string)
