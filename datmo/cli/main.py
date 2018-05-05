@@ -38,6 +38,11 @@ def main():
         command_name = sys.argv[1]
         if command_name == "init":
             command_name = "project"
+        elif command_name == "version" or \
+            command_name == "--version" or \
+            command_name == "-v":
+            command_name = "project"
+            sys.argv[1] = "version"
         command_class = \
             cli_helper.get_command_class(command_name)
     else:

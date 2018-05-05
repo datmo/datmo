@@ -1,3 +1,4 @@
+from datmo import __version__
 from datmo.core.util.i18n import get as __
 from datmo.cli.command.base import BaseCommand
 from datmo.core.controller.project import ProjectController
@@ -23,3 +24,6 @@ class ProjectCommand(BaseCommand):
                 "path": self.home
             }))
         self.project_controller.init(name, description)
+
+    def version(self):
+        return self.cli_helper.echo("datmo version: %s" % __version__)
