@@ -4,6 +4,7 @@ import os
 import sys
 
 from datmo.cli.command.base import BaseCommand
+from datmo.cli.parser import parser
 from datmo.cli.driver.helper import Helper
 from datmo.core.util.exceptions import CLIArgumentException
 from datmo.core.util.i18n import get as __
@@ -11,6 +12,10 @@ from datmo.core.util.logger import DatmoLogger
 from datmo.config import Config
 
 #from datmo.core.util.misc_functions import get_logger, create_logger
+
+
+def get_parser():
+    return parser
 
 
 def main():
@@ -38,23 +43,23 @@ def main():
     else:
         command_class = BaseCommand
 
+    # instantiate the command class
     try:
-        command_instance = command_class(os.getcwd(), cli_helper)
+        command_instance = command_class(os.getcwd(), cli_helper, parser)
     except TypeError as ex:
         cli_helper.echo(__("error", "cli.general", str(ex)))
-        sys.exit()
+        return 1
 
+    # parse the command line arguments
     try:
         command_instance.parse(sys.argv[1:])
     except CLIArgumentException as ex:
         cli_helper.echo(__("error", "cli.general", str(ex)))
-        sys.exit()
+        return 1
 
     try:
         command_instance.execute()
+        return 0
     except Exception as ex:
         cli_helper.echo(__("error", "cli.general", str(ex)))
-
-
-if __name__ == "__main__":
-    main()
+        return 1

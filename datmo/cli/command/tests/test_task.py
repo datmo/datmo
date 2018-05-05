@@ -22,6 +22,7 @@ except NameError:
     to_unicode = str
 
 from datmo.cli.driver.helper import Helper
+from datmo.cli.parser import parser
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
 from datmo.core.entity.task import Task as CoreTask
@@ -42,11 +43,11 @@ class TestTaskCommand():
         pass
 
     def __set_variables(self):
-        init = ProjectCommand(self.temp_dir, self.cli_helper)
+        init = ProjectCommand(self.temp_dir, self.cli_helper, parser)
         init.parse(["init", "--name", "foobar", "--description", "test model"])
         init.execute()
 
-        self.task = TaskCommand(self.temp_dir, self.cli_helper)
+        self.task = TaskCommand(self.temp_dir, self.cli_helper, parser)
 
         # Create environment_driver definition
         env_def_path = os.path.join(self.temp_dir, "Dockerfile")
@@ -56,7 +57,7 @@ class TestTaskCommand():
     def test_task_project_not_init(self):
         failed = False
         try:
-            self.task = TaskCommand(self.temp_dir, self.cli_helper)
+            self.task = TaskCommand(self.temp_dir, self.cli_helper, parser)
         except ProjectNotInitializedException:
             failed = True
         assert failed

@@ -8,36 +8,10 @@ from datmo.cli.command.project import ProjectCommand
 
 
 class SessionCommand(ProjectCommand):
-    def __init__(self, home, cli_helper):
-        super(SessionCommand, self).__init__(home, cli_helper)
+    def __init__(self, home, cli_helper, parser):
+        super(SessionCommand, self).__init__(home, cli_helper, parser)
         # dest="subcommand" argument will populate a "subcommand" property with the subparsers name
         # example  "subcommand"="create"  or "subcommand"="ls"
-        snapshot_parser = self.subparsers.add_parser(
-            "session", help="Session module")
-        subcommand_parsers = snapshot_parser.add_subparsers(
-            title="subcommands", dest="subcommand")
-
-        create = subcommand_parsers.add_parser("create", help="Create session")
-        create.add_argument(
-            "--name", "-m", dest="name", default="", help="Session name")
-        create.add_argument(
-            "--current",
-            dest="current",
-            action="store_false",
-            help="Boolean if you want to switch to this session")
-
-        delete = subcommand_parsers.add_parser(
-            "delete", help="Delete a snapshot by id")
-        delete.add_argument(
-            "--name", dest="name", help="Name of session to delete")
-
-        ls = subcommand_parsers.add_parser("ls", help="List sessions")
-
-        checkout = subcommand_parsers.add_parser(
-            "select", help="Select a session")
-        checkout.add_argument(
-            "--name", dest="name", help="Name of session to select")
-
         self.session_controller = SessionController(home=home)
 
     def create(self, **kwargs):
