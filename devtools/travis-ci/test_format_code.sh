@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-CHANGED_FILES=`git diff --name-only $TRAVIS_COMMIT_RANGE | grep .py$ | grep -v contrib/ | grep -v examples/ | grep -v templates/`
+CHANGED_FILES=`git diff --name-only $TRAVIS_COMMIT_RANGE | grep .py$ | grep -v docs/ | grep -v examples/ | grep -v templates/`
 
 exit_success () {
     echo "Passed Formatting Test"

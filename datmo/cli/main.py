@@ -11,6 +11,7 @@ from datmo.core.util.exceptions import CLIArgumentException
 def get_parser():
     return parser
 
+
 def main():
     cli_helper = Helper()
 

@@ -1,9 +1,8 @@
 from datmo.cli.driver.parser import Parser
 
 parser = Parser(
-prog="datmo",
-usage=
-"""
+    prog="datmo",
+    usage="""
 datmo COMMAND [SUBCOMMANDS] ARGS 
 
 Datmo is a command line utility to enable tracking of data science projects. 
@@ -19,22 +18,20 @@ which allows you to keep track of 5 components at once
 command: 
 """)
 
-subparsers = parser.add_subparsers(
-    title="commands", dest="command")
+subparsers = parser.add_subparsers(title="commands", dest="command")
 
 # Project
-init_parser = subparsers.add_parser(
-            "init", help="Initialize project")
+init_parser = subparsers.add_parser("init", help="Initialize project")
 init_parser.add_argument("--name", default=None)
 init_parser.add_argument("--description", default=None)
 
 # Session
-session_parser = subparsers.add_parser(
-            "session", help="Session module")
+session_parser = subparsers.add_parser("session", help="Session module")
 session_subcommand_parsers = session_parser.add_subparsers(
     title="subcommands", dest="subcommand")
 
-session_create = session_subcommand_parsers.add_parser("create", help="Create session")
+session_create = session_subcommand_parsers.add_parser(
+    "create", help="Create session")
 session_create.add_argument(
     "--name", "-m", dest="name", default="", help="Session name")
 session_create.add_argument(
@@ -56,8 +53,7 @@ session_select.add_argument(
     "--name", dest="name", help="Name of session to select")
 
 # Snapshot
-snapshot_parser = subparsers.add_parser(
-            "snapshot", help="Snapshot module")
+snapshot_parser = subparsers.add_parser("snapshot", help="Snapshot module")
 snapshot_subcommand_parsers = snapshot_parser.add_subparsers(
     title="subcommands", dest="subcommand")
 
@@ -88,10 +84,7 @@ snapshot_create.add_argument(
     help="Specify task id to pull information from")
 
 snapshot_create.add_argument(
-    "--code-id",
-    dest="code_id",
-    default=None,
-    help="code id from code object")
+    "--code-id", dest="code_id", default=None, help="code id from code object")
 snapshot_create.add_argument(
     "--commit-id",
     dest="commit_id",
@@ -151,7 +144,8 @@ snapshot_delete = snapshot_subcommand_parsers.add_parser(
     "delete", help="Delete a snapshot by id")
 snapshot_delete.add_argument("--id", dest="id", help="snapshot id to delete")
 
-snapshot_ls = snapshot_subcommand_parsers.add_parser("ls", help="List snapshots")
+snapshot_ls = snapshot_subcommand_parsers.add_parser(
+    "ls", help="List snapshots")
 snapshot_ls.add_argument(
     "--session-id",
     dest="session_id",
@@ -197,9 +191,7 @@ task_run.add_argument(
     dest="environment_definition_filepath",
     default=None,
     type=str,
-    help=
-    "Pass in the Dockerfile with which you want to build the environment"
-)
+    help="Pass in the Dockerfile with which you want to build the environment")
 task_run.add_argument(
     "--interactive",
     dest="interactive",
