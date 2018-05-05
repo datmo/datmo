@@ -78,8 +78,10 @@ class TestLogger():
         # LOGGING_LEVEL=DEBUG before pytest
         # or add as an environment variable
         if hasattr(logging, 'handlers'):
+
             @DatmoLogger.timeit
             def slow_fn():
                 sleep(1)
+
             slow_fn()
             assert len(DatmoLogger.find_text_in_logs("slow_fn")) == 1
