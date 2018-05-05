@@ -136,7 +136,7 @@ def create(message,
     snapshot with the `datmo snapshot ls` cli command
 
     >>> import datmo
-    >>> datmo.snapshot.create(message="my first snapshot", filepaths=["/path/to/a/large/file"], config={"test": 0.4, "test2": "string"}, stats={"accuracy": 0.94})
+    >>> datmo.sdk.python.snapshot.create(message="my first snapshot", filepaths=["/path/to/a/large/file"], config={"test": 0.4, "test2": "string"}, stats={"accuracy": 0.94})
     """
     if not home:
         home = os.getcwd()
@@ -191,7 +191,7 @@ def create_from_task(message, task_id, home=None):
     snapshot with the `datmo snapshot ls` cli command
 
     >>> import datmo
-    >>> datmo.snapshot.create_from_task(message="my first snapshot from task", task_id="1jfkshg049")
+    >>> datmo.sdk.python.snapshot.create_from_task(message="my first snapshot from task", task_id="1jfkshg049")
     """
     if not home:
         home = os.getcwd()
@@ -237,7 +237,7 @@ def ls(session_id=None, filter=None, home=None):
     You can use this function within a project repository to list snapshots.
 
     >>> import datmo
-    >>> snapshots = datmo.snapshot.ls()
+    >>> snapshots = datmo.sdk.python.snapshot.ls()
     """
     if not home:
         home = os.getcwd()

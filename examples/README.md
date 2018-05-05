@@ -31,17 +31,17 @@ stable or development version.
 * CLI
 	* TBD
 * Python
-	* [sklearn iris classifier](/examples/python/snapshot_create_iris_sklearn.py)
+	* [sklearn iris classifier](https://github.com/datmo/datmo/blob/master/examples/python/snapshot_create_iris_sklearn.py)
 * Jupyter notebook
-	* [sklearn iris classifier](/examples/jupyter_notebook/snapshot_create_iris_sklearn.ipynb)
+	* [sklearn iris classifier](https://github.com/datmo/datmo/blob/master/examples/jupyter_notebook/snapshot_create_iris_sklearn.ipynb)
 
 #### Running a containerized task (with option to create Snapshot)
 * CLI
 	* Run a training script (any language) (Coming soon)
 	* Run an inference script (any language) (Coming soon)
 * Python
-	* [Train a basic sklearn iris classifier](/examples/python/task_run_iris_sklearn/basic_task.py)
-	* [Run multiple tasks and snapshot the best result](/examples/python/task_run_iris_sklearn/basic_task.py)
+	* [Train a basic sklearn iris classifier](https://github.com/datmo/datmo/blob/master/examples/python/task_run_iris_sklearn/basic_task.py)
+	* [Run multiple tasks and snapshot the best result](https://github.com/datmo/datmo/blob/master/examples/python/task_run_iris_sklearn/basic_task.py)
     * Perform inference on saved model (iris sklearn) (Coming soon)
 * Jupyter notebook
     * TBD
