@@ -3,8 +3,8 @@ import os
 from datmo.core.util.i18n import get as __
 from datmo.core.util import get_class_contructor
 from datmo.core.util.json_store import JSONStore
-from datmo.core.util.exceptions import InvalidProjectPathException, \
-    DatmoModelNotInitializedException
+from datmo.core.util.exceptions import (InvalidProjectPathException,
+                                        DatmoModelNotInitializedException)
 
 
 class BaseController(object):

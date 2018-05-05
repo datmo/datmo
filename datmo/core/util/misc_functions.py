@@ -1,6 +1,8 @@
+#!/usr/bin/python
+
 import os
 import hashlib
-import logging
+
 import textwrap
 import datetime
 from io import open
@@ -11,8 +13,20 @@ except NameError:
 from glob import glob
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import PathDoesNotExist, \
-    MutuallyExclusiveArguments
+from datmo.core.util.exceptions import (PathDoesNotExist,
+                                        MutuallyExclusiveArguments)
+
+import re
+
+
+def grep(pattern, fileObj):
+    r = []
+    linenumber = 0
+    for line in fileObj:
+        linenumber += 1
+        if re.search(pattern, line):
+            r.append((linenumber, line))
+    return r
 
 
 def printable_dict(input_dictionary):
@@ -42,17 +56,6 @@ def which(program):
             if is_exe(exe_file):
                 return exe_file
     return None
-
-
-def create_logger(logfile_location):
-    logger = logging.getLogger('datmo')
-    logger.setLevel(logging.INFO)
-    handler = logging.FileHandler(logfile_location)
-    handler.setLevel(logging.INFO)
-    formatter = logging.Formatter('%(asctime)s - %(message)s')
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    return logger
 
 
 def get_nvidia_devices():
@@ -106,3 +109,24 @@ def mutually_exclusive(mutually_exclusive_args, arguments_dictionary,
             __("error", "util.misc_functions.mutually_exclusive",
                ' '.join(mutually_exclusive_args)))
     return
+
+
+def find_project_dir(starting_path=os.getcwd()):
+    if starting_path == "/":
+        raise Exception("project not found")
+
+    if os.path.expanduser("~") == starting_path:
+        raise Exception("project not found")
+
+    if is_project_dir(starting_path):
+        return starting_path
+    else:
+        # Remove last dir, walking down the tree, testing each dir
+        # os.path.split creates a tuple of the basepath and last directory
+        # take the first part
+        return find_project_dir(os.path.split(starting_path)[0])
+
+
+def is_project_dir(path):
+    return ".datmo" in os.listdir(path) and os.path.isdir(
+        os.path.join(path, ".datmo"))

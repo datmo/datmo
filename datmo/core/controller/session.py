@@ -1,7 +1,6 @@
 from datmo.core.controller.base import BaseController
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import EntityNotFound, \
-    InvalidOperation
+from datmo.core.util.exceptions import (EntityNotFound, InvalidOperation)
 
 
 class SessionController(BaseController):

@@ -16,9 +16,9 @@ except NameError:
     to_unicode = str
 
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
-from datmo.core.util.exceptions import EnvironmentInitFailed, \
-    FileAlreadyExistsException, EnvironmentRequirementsCreateException, \
-    EnvironmentDoesNotExist
+from datmo.core.util.exceptions import (
+    EnvironmentInitFailed, FileAlreadyExistsException,
+    EnvironmentRequirementsCreateException, EnvironmentDoesNotExist)
 
 
 class TestDockerEnv():

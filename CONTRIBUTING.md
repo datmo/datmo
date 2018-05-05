@@ -1,6 +1,6 @@
 # Datmo
 
-Guidelines for contributors coming soon. 
+Guidelines for contributors coming soon.
 
 ## Code Style Guidelines
 Datmo uses [yapf](https://github.com/google/yapf) to autoformat code.
@@ -9,6 +9,19 @@ Datmo uses [yapf](https://github.com/google/yapf) to autoformat code.
 pip install yapf==0.20.0
 cd <git_root>
 yapf -i <python_files changed>
+```
+
+If you're using Visual Studio Code and want to run `yapf -i [filename]` on save,  install the [Run on Save] extension.(https://marketplace.visualstudio.com/items?itemName=emeraldwalk.RunOnSave)
+
+```json
+"emeraldwalk.runonsave": {
+  "commands": [
+    {
+      "match":"\\.py$",
+      "cmd":"yapf -i ${file}"
+    }
+  ]
+}
 ```
 
 Our integration tests will fail if code is not formatted correctly

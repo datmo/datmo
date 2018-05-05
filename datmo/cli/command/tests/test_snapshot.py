@@ -23,8 +23,8 @@ except NameError:
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
-from datmo.core.util.exceptions import ProjectNotInitializedException, \
-    MutuallyExclusiveArguments
+from datmo.core.util.exceptions import (ProjectNotInitializedException,
+                                        MutuallyExclusiveArguments)
 
 
 class TestSnapshot():
