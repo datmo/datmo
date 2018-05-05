@@ -80,12 +80,12 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             self.docker_socket = docker_socket
             if self.docker_socket:
                 self.client = DockerClient(base_url=self.docker_socket)
-                self.cpu_prefix = [
+                self.prefix = [
                     self.docker_execpath, "-H", self.docker_socket
                 ]
             else:
                 self.client = DockerClient()
-                self.cpu_prefix = [self.docker_execpath]
+                self.prefix = [self.docker_execpath]
             self.info = self.client.info()
         except Exception:
             raise EnvironmentInitFailed(
@@ -96,13 +96,6 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
         self._is_initialized = self.is_initialized
         self.type = "docker"
-
-        # execute a docker info command
-        # make sure it passed
-        # if gpu_requested == True:
-        #     pass
-        # if gpu is requested then
-        # make sure docker info confirms that it"s available
 
     @property
     def is_initialized(self):
@@ -227,7 +220,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
         """
         try:
-            docker_shell_cmd_list = list(self.cpu_prefix)
+            docker_shell_cmd_list = list(self.prefix)
             docker_shell_cmd_list.append("build")
 
             # Passing tag name for the image
@@ -268,10 +261,10 @@ class DockerEnvironmentDriver(EnvironmentDriver):
     def remove_image(self, image_id_or_name, force=False):
         try:
             if force:
-                docker_image_remove_cmd = list(self.cpu_prefix)
+                docker_image_remove_cmd = list(self.prefix)
                 docker_image_remove_cmd.extend(["rmi", "-f", image_id_or_name])
             else:
-                docker_image_remove_cmd = list(self.cpu_prefix)
+                docker_image_remove_cmd = list(self.prefix)
                 docker_image_remove_cmd.extend(["rmi", image_id_or_name])
             subprocess.check_output(docker_image_remove_cmd).decode().strip()
         except Exception as e:
@@ -305,7 +298,6 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                       detach=False,
                       stdin_open=False,
                       tty=False,
-                      gpu=False,
                       api=False):
         """Run Docker container with parameters given as defined below
 
@@ -333,8 +325,6 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             True if stdin is open else False
         tty : bool, optional
             True to connect pseudo-terminal with stdin / stdout else False
-        gpu : bool, optional
-            True if GPU should be enabled else False
         api : bool, optional
             True if Docker python client should be used else use subprocess
 
@@ -386,10 +376,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                         stdin_open=stdin_open)
                     return logs.decode()
             else:  # if calling run function with the shell commands
-                if gpu:
-                    docker_shell_cmd_list = list(self.cpu_prefix)
-                else:
-                    docker_shell_cmd_list = list(self.cpu_prefix)
+                docker_shell_cmd_list = list(self.prefix)
                 docker_shell_cmd_list.append("run")
 
                 if name:
@@ -429,7 +416,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                         __("error",
                            "controller.environment.driver.docker.run_container",
                            docker_shell_cmd_list))
-                list_process_cmd = list(self.cpu_prefix)
+                list_process_cmd = list(self.prefix)
                 list_process_cmd.extend(["ps", "-q", "-l"])
                 container_id = subprocess.check_output(list_process_cmd)
                 container_id = container_id.decode().strip()
@@ -455,7 +442,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
     def stop_container(self, container_id):
         try:
-            docker_container_stop_cmd = list(self.cpu_prefix)
+            docker_container_stop_cmd = list(self.prefix)
             docker_container_stop_cmd.extend(["stop", container_id])
             subprocess.check_output(docker_container_stop_cmd).decode().strip()
         except Exception as e:
@@ -467,7 +454,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
     def remove_container(self, container_id, force=False):
         try:
-            docker_container_remove_cmd_list = list(self.cpu_prefix)
+            docker_container_remove_cmd_list = list(self.prefix)
             if force:
                 docker_container_remove_cmd_list.extend(
                     ["rm", "-f", container_id])
@@ -510,7 +497,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                         stream=True):
                     log_file.write(to_unicode(line.strip() + "\n"))
         else:
-            command = list(self.cpu_prefix)
+            command = list(self.prefix)
             if follow:
                 command.extend(["logs", "--follow", str(container_id)])
             else:
@@ -534,7 +521,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         """Stops and removes containers by term
         """
         try:
-            running_docker_container_cmd_list = list(self.cpu_prefix)
+            running_docker_container_cmd_list = list(self.prefix)
             running_docker_container_cmd_list.extend([
                 "ps", "-a", "|", "grep", "'", term, "'", "|",
                 "awk '{print $1}'"
@@ -549,7 +536,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
             # checking for running container id before stopping any
             if out_list_cmd:
-                docker_container_stop_cmd_list = list(self.cpu_prefix)
+                docker_container_stop_cmd_list = list(self.prefix)
                 docker_container_stop_cmd_list = docker_container_stop_cmd_list + \
                                                  ["stop", "$("] + running_docker_container_cmd_list + \
                                                  [")"]
@@ -567,7 +554,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                     stdout=subprocess.PIPE)
                 out_list_cmd, _ = output.communicate()
                 if out_list_cmd:
-                    docker_container_remove_cmd_list = list(self.cpu_prefix)
+                    docker_container_remove_cmd_list = list(self.prefix)
                     if force:
                         docker_container_remove_cmd_list = docker_container_remove_cmd_list + \
                                                            ["rm", "-f", "$("] + running_docker_container_cmd_list + \

@@ -8,7 +8,7 @@ from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.entity.task import Task
 from datmo.core.util.exceptions import TaskRunException, RequiredArgumentMissing, \
-    ProjectNotInitializedException, PathDoesNotExist
+    ProjectNotInitializedException, PathDoesNotExist, TaskInteractiveDetachException
 
 
 class TaskController(BaseController):
@@ -70,20 +70,20 @@ class TaskController(BaseController):
             "model_id": self.model.id,
             "session_id": self.current_session.id
         }
-        import pdb; pdb.set_trace()
+        # Appending dictionary to create dictionary
+        create_dict.update(dictionary.copy())
         # Required args
-        required_args = ["command", "interactive"]
+        mutually_required_args = ["command", "interactive"]
+        count = 0
+        for arg in mutually_required_args:
+            if arg in dictionary and dictionary[arg]:
+                count += 1
+            elif arg in dictionary:
+                del dictionary[arg]
 
-        for required_arg in required_args:
-            # Add in any values that are
-            if required_arg in dictionary and dictionary[required_arg] is not None:
-                create_dict[required_arg] = dictionary[required_arg]
-            else:
-                raise RequiredArgumentMissing(
-                    __("error", "controller.task.create.arg", required_arg))
-
-        mutually_exclusive_args = ["command", "interactive"]
-        mutually_exclusive(mutually_exclusive_args, dictionary, create_dict)
+        if count == 0:
+            raise RequiredArgumentMissing(
+                __("error", "controller.task.create.arg", " or ".join(mutually_required_args)))
 
         # Create Task
         return self.dal.task.create(Task(create_dict))
@@ -111,7 +111,6 @@ class TaskController(BaseController):
             detach : bool
             stdin_open : bool
             tty : bool
-            gpu : bool
         log_filepath : str
             absolute filepath to the log file
 
@@ -133,7 +132,6 @@ class TaskController(BaseController):
             "detach": options.get('detach', False),
             "stdin_open": options.get('stdin_open', False),
             "tty": options.get('tty', False),
-            "gpu": options.get('gpu', False),
             "api": False
         }
 
@@ -212,7 +210,7 @@ class TaskController(BaseController):
         # Obtain Task to run
         task_obj = self.dal.task.get_by_id(task_id)
 
-        if task_obj.status == None:
+        if task_obj.status is None:
             task_obj.status = 'RUNNING'
         else:
             raise TaskRunException(
@@ -241,8 +239,6 @@ class TaskController(BaseController):
                 task_dict.get('before_snapshot_id', before_snapshot_obj.id),
             "ports":
                 task_dict.get('ports', task_obj.ports),
-            "gpu":
-                task_dict.get('gpu', task_obj.gpu),
             "interactive":
                 task_dict.get('interactive', task_obj.interactive),
             "task_dirpath":
@@ -262,10 +258,12 @@ class TaskController(BaseController):
             os.path.join(self.home, task_obj.task_dirpath))
 
         # Set the parameters set in the task
+        if task_obj.detach and task_obj.interactive:
+            raise TaskInteractiveDetachException(
+                __("error", "controller.task.run.args.detach.interactive"))
         environment_run_options = {
             "command": task_obj.command,
             "ports": [] if task_obj.ports is None else task_obj.ports,
-            "gpu": task_obj.gpu,
             "name": "datmo-task-" + task_obj.id,
             "volumes": {
                 os.path.join(self.home, task_obj.task_dirpath): {
@@ -277,10 +275,10 @@ class TaskController(BaseController):
                     'mode': 'rw'
                 }
             },
-            "detach": task_obj.interactive,
+            "detach": task_obj.detach,
             "stdin_open": task_obj.interactive,
-            "tty": False,
-            "api": not task_obj.interactive
+            "tty": task_obj.interactive,
+            "api": False
         }
 
         # Run environment via the helper function

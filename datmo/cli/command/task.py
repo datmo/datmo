@@ -20,12 +20,8 @@ class TaskCommand(ProjectCommand):
         # Task run arguments
         run = subcommand_parsers.add_parser("run", help="Run task")
         run.add_argument(
-            "--gpu",
-            dest="gpu",
-            action="store_true",
-            help="Boolean if you want to run using GPUs")
-        run.add_argument(
             "--ports",
+            "-p",
             dest="ports",
             default=None,
             action="append",
@@ -84,7 +80,6 @@ class TaskCommand(ProjectCommand):
                 kwargs['cmd'] = shlex.split(kwargs['cmd'])
 
         task_dict = {
-            "gpu": kwargs['gpu'],
             "ports": kwargs['ports'],
             "interactive": kwargs['interactive'],
             "command": kwargs['cmd']
@@ -106,12 +101,12 @@ class TaskCommand(ProjectCommand):
         session_id = kwargs.get('session_id',
                                 self.task_controller.current_session.id)
         # Get all snapshot meta information
-        header_list = ["id", "command", "status", "gpu", "created at"]
+        header_list = ["id", "command", "status", "created at"]
         t = prettytable.PrettyTable(header_list)
         task_objs = self.task_controller.list(session_id)
         for task_obj in task_objs:
             t.add_row([
-                task_obj.id, task_obj.command, task_obj.status, task_obj.gpu,
+                task_obj.id, task_obj.command, task_obj.status,
                 task_obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
             ])
         self.cli_helper.echo(t)
