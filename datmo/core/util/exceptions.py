@@ -143,3 +143,7 @@ class MutuallyExclusiveArguments(Exception):
 
 class TaskNotComplete(ArgumentException):
     pass
+
+
+class TaskInteractiveDetachException(ArgumentException):
+    pass
