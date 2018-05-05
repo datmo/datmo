@@ -4,8 +4,8 @@ from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
 from datmo.core.entity.model import Model
 from datmo.core.entity.session import Session
-from datmo.core.util.exceptions import SessionDoesNotExistException, \
-    RequiredArgumentMissing
+from datmo.core.util.exceptions import (SessionDoesNotExistException,
+                                        RequiredArgumentMissing)
 
 
 class ProjectController(BaseController):

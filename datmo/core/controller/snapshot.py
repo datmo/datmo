@@ -7,9 +7,9 @@ from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.util.i18n import get as __
 from datmo.core.util.json_store import JSONStore
-from datmo.core.util.exceptions import FileIOException, RequiredArgumentMissing, \
-    ProjectNotInitializedException, SessionDoesNotExistException, EntityNotFound, \
-    TaskNotComplete
+from datmo.core.util.exceptions import (
+    FileIOException, RequiredArgumentMissing, ProjectNotInitializedException,
+    SessionDoesNotExistException, EntityNotFound, TaskNotComplete)
 
 
 class SnapshotController(BaseController):

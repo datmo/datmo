@@ -11,10 +11,8 @@ except NameError:
     to_unicode = str
 
 from datmo.core.controller.project import ProjectController
-from datmo.core.controller.code.code import \
-    CodeController
-from datmo.core.util.exceptions import EntityNotFound, \
-    GitCommitDoesNotExist
+from datmo.core.controller.code.code import CodeController
+from datmo.core.util.exceptions import (EntityNotFound, GitCommitDoesNotExist)
 
 
 class TestCodeController():

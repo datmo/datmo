@@ -7,11 +7,13 @@ import prettytable
 from datmo.core.util.i18n import get as __
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
+from datmo.core.util.logger import DatmoLogger
 
 
 class TaskCommand(ProjectCommand):
     def __init__(self, home, cli_helper, parser):
         super(TaskCommand, self).__init__(home, cli_helper, parser)
+        self.logger = DatmoLogger.get_logger(__name__)
         self.task_controller = TaskController(home=home)
 
     def run(self, **kwargs):
@@ -44,7 +46,8 @@ class TaskCommand(ProjectCommand):
         try:
             updated_task_obj = self.task_controller.run(
                 task_obj.id, snapshot_dict=snapshot_dict)
-        except:
+        except Exception as e:
+            self.logger.error("%s %s" % (e, task_dict))
             self.cli_helper.echo(__("error", "cli.task.run", task_obj.id))
             return False
         return updated_task_obj

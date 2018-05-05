@@ -13,8 +13,8 @@ except NameError:
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import \
     EnvironmentController
-from datmo.core.util.exceptions import EntityNotFound, \
-    PathDoesNotExist, EnvironmentDoesNotExist
+from datmo.core.util.exceptions import (EntityNotFound, PathDoesNotExist,
+                                        EnvironmentDoesNotExist)
 
 
 class TestEnvironmentController():
