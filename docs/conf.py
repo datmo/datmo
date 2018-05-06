@@ -157,7 +157,7 @@ man_pages = [(master_doc, 'datmo', u'Datmo Documentation', [author], 1)]
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'Datmo', u'Datmo Documentation', author, 'Datmo',
-     'One line description of project.', 'Miscellaneous'),
+     'Open source model tracking for developers.', 'Miscellaneous'),
 ]
 
 github_doc_root = 'https://github.com/datmo/datmo/tree/master/docs/'
@@ -168,3 +168,18 @@ def setup(app):
             'auto_toc_tree_section': 'Contents',
             }, True)
     app.add_transform(AutoStructify)
+    app.connect('builder-inited', run_apidoc)
+
+def run_apidoc(_):
+    from sphinx.apidoc import main
+    import os
+    import sys
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+    cur_dir = os.path.abspath(os.path.dirname(__file__))
+    src_dir = os.path.join(cur_dir, "source")
+    module = os.path.join(cur_dir,"..","datmo")
+    main(['-e', '-f', '-o', src_dir, module,
+          os.path.join(module, "core"),
+          os.path.join(module, "tests"),
+          os.path.join(module, "cli", "command"),
+          os.path.join(module, "cli", "driver")])
