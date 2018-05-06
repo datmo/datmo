@@ -15,9 +15,7 @@ $ pip install sphinx-argparse
 $ cd docs
 $ rm -rf source/*
 $ make clean
-$ sphinx-apidoc -o source/ ../datmo ../datmo/core ../datmo/tests ../datmo/cli/command ../datmo/cli/driver
-$ ln -s ../examples/README.md examples.md
-$ make html
+$ sphinx-build -b html . _build/html # emulates readthedocs build
 $ pip install sphinx-rtd-theme
 $ pip install recommonmark
 ```
