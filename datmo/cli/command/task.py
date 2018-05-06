@@ -101,12 +101,12 @@ class TaskCommand(ProjectCommand):
         session_id = kwargs.get('session_id',
                                 self.task_controller.current_session.id)
         # Get all snapshot meta information
-        header_list = ["id", "command", "status", "created at"]
+        header_list = ["id", "command", "results", "created at"]
         t = prettytable.PrettyTable(header_list)
         task_objs = self.task_controller.list(session_id)
         for task_obj in task_objs:
             t.add_row([
-                task_obj.id, task_obj.command, task_obj.status,
+                task_obj.id, task_obj.command, task_obj.results,
                 task_obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
             ])
         self.cli_helper.echo(t)
