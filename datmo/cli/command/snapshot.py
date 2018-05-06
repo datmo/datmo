@@ -18,7 +18,7 @@ class SnapshotCommand(ProjectCommand):
     def create(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.create"))
 
-        snapshot_dict = {}
+        snapshot_dict = {"visible": True}
 
         # Code
         mutually_exclusive_args = ["code_id", "commit_id"]
@@ -60,6 +60,8 @@ class SnapshotCommand(ProjectCommand):
                                 self.snapshot_controller.current_session.id)
         # Get all snapshot meta information
         detailed_info = kwargs.get('details', None)
+        # List of ids shown
+        listed_snapshot_ids = []
         if detailed_info:
             header_list = [
                 "id", "created at", "config", "stats", "message", "label",
@@ -80,6 +82,7 @@ class SnapshotCommand(ProjectCommand):
                     snapshot_obj.code_id, snapshot_obj.environment_id,
                     snapshot_obj.file_collection_id
                 ])
+                listed_snapshot_ids.append(snapshot_obj.id)
         else:
             header_list = [
                 "id", "created at", "config", "stats", "message", "label"
@@ -94,9 +97,10 @@ class SnapshotCommand(ProjectCommand):
                     snapshot_obj.config, snapshot_obj.stats,
                     snapshot_obj.message, snapshot_obj.label
                 ])
+                listed_snapshot_ids.append(snapshot_obj.id)
 
         self.cli_helper.echo(t)
-        return True
+        return listed_snapshot_ids
 
     def checkout(self, **kwargs):
         snapshot_id = kwargs.get("id", None)
