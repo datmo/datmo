@@ -16,6 +16,8 @@ import os
 import time
 import tempfile
 import platform
+
+from multiprocessing import Process, Manager
 from io import open
 try:
     to_unicode = unicode
@@ -93,7 +95,7 @@ class TestTaskCommand():
         # test for single set of ports
         self.task.parse([
             "task", "run", "--ports", test_ports[0], "--env-def",
-            test_dockerfile,  test_command
+            test_dockerfile, test_command
         ])
 
         # test for desired side effects
@@ -102,9 +104,8 @@ class TestTaskCommand():
         assert self.task.args.environment_definition_filepath == test_dockerfile
 
         self.task.parse([
-            "task", "run", "-p", test_ports[0], "-p",
-            test_ports[1], "--env-def", test_dockerfile,
-            test_command
+            "task", "run", "-p", test_ports[0], "-p", test_ports[1],
+            "--env-def", test_dockerfile, test_command
         ])
         # test for desired side effects
         assert self.task.args.cmd == test_command
@@ -130,9 +131,8 @@ class TestTaskCommand():
         test_ports = ["8888:8888", "9999:9999"]
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         self.task.parse([
-            "task", "run",  "--ports", test_ports[0], "--ports",
-            test_ports[1], "--env-def", test_dockerfile,
-            test_command
+            "task", "run", "--ports", test_ports[0], "--ports", test_ports[1],
+            "--env-def", test_dockerfile, test_command
         ])
 
         # test for desired side effects
@@ -149,6 +149,48 @@ class TestTaskCommand():
         assert result.results
         assert result.results == {"accuracy": "0.45"}
         assert result.status == "SUCCESS"
+
+    def test_multiple_concurrent_task_run_command(self):
+        test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
+        test_command = ["sh", "-c", "echo accuracy:0.45"]
+        manager = Manager()
+        return_dict = manager.dict()
+
+        def task_exec_func(procnum, return_dict):
+            print("Creating Task object")
+            task = TaskCommand(self.temp_dir, self.cli_helper)
+            print("Parsing command")
+            task.parse(
+                ["task", "run", "--env-def", test_dockerfile, test_command])
+            print("Executing command")
+            result = task.execute()
+            return_dict[procnum] = result
+
+        self.__set_variables()
+        test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
+
+        # Run all three tasks in parallel
+        jobs = []
+        number_tasks = 3
+        for i in range(number_tasks):
+            p = Process(target=task_exec_func, args=(i, return_dict))
+            jobs.append(p)
+            p.start()
+
+        # Join
+        for proc in jobs:
+            proc.join()
+
+        results = return_dict.values()
+        assert len(results) == number_tasks
+        for result in results:
+            assert result
+            assert isinstance(result, CoreTask)
+            assert result.logs
+            assert "accuracy" in result.logs
+            assert result.results
+            assert result.results == {"accuracy": "0.45"}
+            assert result.status == "SUCCESS"
 
     def test_task_run_notebook(self):
         self.__set_variables()
@@ -220,8 +262,8 @@ class TestTaskCommand():
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
 
         self.task.parse([
-            "task", "run", "--ports", test_ports, "--env-def",
-            test_dockerfile, test_command
+            "task", "run", "--ports", test_ports, "--env-def", test_dockerfile,
+            test_command
         ])
 
         test_task_obj = self.task.execute()

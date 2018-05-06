@@ -44,7 +44,8 @@ class TestDockerEnv():
             f.write(to_unicode(str("RUN echo " + random_text)))
 
     def teardown_method(self):
-        self.docker_environment_manager.stop_remove_containers_by_term(term='cooltest', force=True)
+        self.docker_environment_manager.stop_remove_containers_by_term(
+            term='cooltest', force=True)
 
     def test_instantiation_and_connected(self):
         assert self.docker_environment_manager.is_connected
