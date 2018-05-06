@@ -80,9 +80,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             self.docker_socket = docker_socket
             if self.docker_socket:
                 self.client = DockerClient(base_url=self.docker_socket)
-                self.prefix = [
-                    self.docker_execpath, "-H", self.docker_socket
-                ]
+                self.prefix = [self.docker_execpath, "-H", self.docker_socket]
             else:
                 self.client = DockerClient()
                 self.prefix = [self.docker_execpath]
