@@ -1,5 +1,4 @@
-build:
-    image: latest
+conda:
+    file: docs/environment.yml
 python:
-    version: 2.7
     setup_py_install: true
