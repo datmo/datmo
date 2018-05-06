@@ -22,7 +22,9 @@ from recommonmark.transform import AutoStructify
 
 sys.path.insert(0, os.path.abspath("../"))
 
-from version import __version__
+project_root = "../"
+with open(os.path.join(project_root, 'datmo', 'VERSION')) as file:
+    __version__ = file.read()
 
 # -- General configuration ------------------------------------------------
 

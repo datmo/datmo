@@ -21,39 +21,41 @@ command:
 subparsers = parser.add_subparsers(title="commands", dest="command")
 
 # Project
-init_parser = subparsers.add_parser("init", help="Initialize project")
+init_parser = subparsers.add_parser("init", help="initialize project")
 init_parser.add_argument("--name", default=None)
 init_parser.add_argument("--description", default=None)
 
+version_parser = subparsers.add_parser("version", help="datmo version")
+
 # Session
-session_parser = subparsers.add_parser("session", help="Session module")
+session_parser = subparsers.add_parser("session", help="session module")
 session_subcommand_parsers = session_parser.add_subparsers(
     title="subcommands", dest="subcommand")
 
 session_create = session_subcommand_parsers.add_parser(
-    "create", help="Create session")
+    "create", help="create session")
 session_create.add_argument(
-    "--name", "-m", dest="name", default="", help="Session name")
+    "--name", "-m", dest="name", default="", help="session name")
 session_create.add_argument(
     "--current",
     dest="current",
     action="store_false",
-    help="Boolean if you want to switch to this session")
+    help="boolean if you want to switch to this session")
 
 session_delete = session_subcommand_parsers.add_parser(
-    "delete", help="Delete a snapshot by id")
+    "delete", help="delete a snapshot by id")
 session_delete.add_argument(
-    "--name", dest="name", help="Name of session to delete")
+    "--name", dest="name", help="name of session to delete")
 
-session_ls = session_subcommand_parsers.add_parser("ls", help="List sessions")
+session_ls = session_subcommand_parsers.add_parser("ls", help="list sessions")
 
 session_select = session_subcommand_parsers.add_parser(
-    "select", help="Select a session")
+    "select", help="select a session")
 session_select.add_argument(
-    "--name", dest="name", help="Name of session to select")
+    "--name", dest="name", help="name of session to select")
 
 # Snapshot
-snapshot_parser = subparsers.add_parser("snapshot", help="Snapshot module")
+snapshot_parser = subparsers.add_parser("snapshot", help="snapshot module")
 snapshot_subcommand_parsers = snapshot_parser.add_subparsers(
     title="subcommands", dest="subcommand")
 
@@ -70,7 +72,7 @@ snapshot_create.add_argument(
     "-l",
     dest="label",
     default=None,
-    help="Label snapshots with a category (e.g. best)")
+    help="label snapshots with a category (e.g. best)")
 snapshot_create.add_argument(
     "--session-id",
     dest="session_id",
@@ -81,7 +83,7 @@ snapshot_create.add_argument(
     "--task-id",
     dest="task_id",
     default=None,
-    help="Specify task id to pull information from")
+    help="specify task id to pull information from")
 
 snapshot_create.add_argument(
     "--code-id", dest="code_id", default=None, help="code id from code object")
@@ -150,26 +152,26 @@ snapshot_ls.add_argument(
     "--session-id",
     dest="session_id",
     default=None,
-    help="Session ID to filter")
+    help="session id to filter")
 snapshot_ls.add_argument(
     "--all",
     "-a",
     dest="details",
     action="store_true",
-    help="Show detailed snapshot information")
+    help="show detailed snapshot information")
 
 snapshot_checkout = snapshot_subcommand_parsers.add_parser(
-    "checkout", help="Checkout a snapshot by id")
+    "checkout", help="checkout a snapshot by id")
 snapshot_checkout.add_argument(
-    "--id", dest="id", default=None, help="Snapshot ID")
+    "--id", dest="id", default=None, help="snapshot id")
 
 # Task
-task_parser = subparsers.add_parser("task", help="Task module")
+task_parser = subparsers.add_parser("task", help="task module")
 task_subcommand_parsers = task_parser.add_subparsers(
     title="subcommands", dest="subcommand")
 
 # Task run arguments
-task_run = task_subcommand_parsers.add_parser("run", help="Run task")
+task_run = task_subcommand_parsers.add_parser("run", help="run task")
 task_run.add_argument(
     "--gpu",
     dest="gpu",
@@ -182,7 +184,7 @@ task_run.add_argument(
     action="append",
     type=str,
     help="""
-    Network port mapping during task (e.g. 8888:8888). Left is the host machine port and right
+    network port mapping during task (e.g. 8888:8888). Left is the host machine port and right
     is the environment port available during a run.
 """)
 # run.add_argument("--data", nargs="*", dest="data", type=str, help="Path for data to be used during the Task")
@@ -191,25 +193,25 @@ task_run.add_argument(
     dest="environment_definition_filepath",
     default=None,
     type=str,
-    help="Pass in the Dockerfile with which you want to build the environment")
+    help="pass in the Dockerfile with which you want to build the environment")
 task_run.add_argument(
     "--interactive",
     dest="interactive",
     action="store_true",
-    help="Run the environment in interactive mode (keeps STDIN open)")
+    help="run the environment in interactive mode (keeps STDIN open)")
 task_run.add_argument("cmd", nargs="?", default=None)
 
 # Task list arguments
-task_ls = task_subcommand_parsers.add_parser("ls", help="List tasks")
+task_ls = task_subcommand_parsers.add_parser("ls", help="list tasks")
 task_ls.add_argument(
     "--session-id",
     dest="session_id",
     default=None,
     nargs="?",
     type=str,
-    help="Pass in the session id to list the tasks in that session")
+    help="pass in the session id to list the tasks in that session")
 
 # Task stop arguments
-task_stop = task_subcommand_parsers.add_parser("stop", help="Stop tasks")
+task_stop = task_subcommand_parsers.add_parser("stop", help="stop tasks")
 task_stop.add_argument(
-    "--id", dest="id", default=None, type=str, help="Task ID to stop")
+    "--id", dest="id", default=None, type=str, help="task id to stop")
