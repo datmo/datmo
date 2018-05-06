@@ -11,7 +11,8 @@ $ python setup.py clean --all install
 
 ## Local Documentation Build
 ```
-$ pip install sphinx-argparse
+$ pip install sphinx==1.7.4
+$ pip install sphinx-argparse==0.2.2
 $ cd docs
 $ rm -rf source/*
 $ make clean

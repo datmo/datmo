@@ -163,18 +163,14 @@ texinfo_documents = [
 github_doc_root = 'https://github.com/datmo/datmo/tree/master/docs/'
 
 def setup(app):
-    print("running sphinx-api-doc")
     app.connect('builder-inited', run_apidoc)
-    print("added config value for markdown")
     app.add_config_value('recommonmark_config', {
             'url_resolver': lambda url: github_doc_root + url,
             'auto_toc_tree_section': 'Contents',
             }, True)
-    print("add autostructify transform")
-    app.add_transform(AutoStructify)
 
 def run_apidoc(_):
-    from sphinx.apidoc import main
+    from sphinx.ext.apidoc import main
     import os
     import sys
     sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
