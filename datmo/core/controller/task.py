@@ -275,6 +275,7 @@ class TaskController(BaseController):
             "tty": task_obj.interactive,
             "api": False
         }
+
         # Run environment via the helper function
         return_code, run_id, logs =  \
             self._run_helper(before_snapshot_obj.environment_id,
