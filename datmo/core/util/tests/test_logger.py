@@ -12,21 +12,21 @@ from datmo.core.util.logger import DatmoLogger
 class TestLogger():
     def test_logger(self):
         logger = DatmoLogger.get_logger()
-        logger.warn("testing")
+        logger.warning("testing")
         logger.error("WHAT?")
         assert logger.level == DatmoLogger().logging_level
 
     def test_datmo_logger_get_logfiles(self):
         if hasattr(logging, 'handlers'):
             files = DatmoLogger.get_logfiles()
-            assert len(files) > 0
+            assert len(list(files)) > 0
             for f in files:
                 assert DatmoLogger().logging_path in f
 
     def test_find_text_in_logs(self):
         if hasattr(logging, 'handlers'):
             logger = DatmoLogger.get_logger()
-            logger.warn("can you find this")
+            logger.warning("can you find this")
             results = DatmoLogger.find_text_in_logs("can you find this")
             assert len(results) == 1
             for r in results:
@@ -43,8 +43,8 @@ class TestLogger():
         if hasattr(logging, 'handlers'):
             l1 = DatmoLogger.get_logger("logger1")
             l2 = DatmoLogger.get_logger("logger2")
-            l1.warn("pizza")
-            l2.warn("party")
+            l1.warning("pizza")
+            l2.warning("party")
             assert len(DatmoLogger.find_text_in_logs("pizza")) == 1
             assert len(DatmoLogger.find_text_in_logs("logger2")) == 1
 
@@ -52,8 +52,8 @@ class TestLogger():
         if hasattr(logging, 'handlers'):
             l1 = DatmoLogger.get_logger("logger3", "debug.txt")
             l2 = DatmoLogger.get_logger("logger3", "info.txt")
-            l1.warn("green")
-            l2.warn("purple")
+            l1.warning("green")
+            l2.warning("purple")
             r = DatmoLogger.find_text_in_logs("green")
             assert len(r) == 1
             assert r[0]["file"].find("debug.txt")
@@ -67,10 +67,10 @@ class TestLogger():
             shutil.rmtree(log_path)
             assert not os.path.exists(log_path)
             logger = DatmoLogger.get_logger("logger3", "new.txt")
-            logger.warn("testing")
+            logger.warning("testing")
             assert len(DatmoLogger.find_text_in_logs("testing")) == 1
             default_logger = DatmoLogger.get_logger()
-            default_logger.warn("default-logger")
+            default_logger.warning("default-logger")
             assert len(DatmoLogger.find_text_in_logs("default-logger")) == 1
 
     def test_timeit_decorator(self):
