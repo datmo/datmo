@@ -24,6 +24,7 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.parser import parser
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
+from datmo.cli.command.task import TaskCommand
 from datmo.core.util.exceptions import (ProjectNotInitializedException,
                                         MutuallyExclusiveArguments)
 
@@ -96,6 +97,16 @@ class TestSnapshot():
 
         # try single filepath
         self.snapshot.parse([
+            "snapshot", "create", "--message", test_message, "--task-id",
+            test_task_id
+        ])
+
+        # test for desired side effects
+        assert self.snapshot.args.message == test_message
+        assert self.snapshot.args.task_id == test_task_id
+
+        # try single filepath
+        self.snapshot.parse([
             "snapshot",
             "create",
             "--message",
@@ -104,8 +115,6 @@ class TestSnapshot():
             test_label,
             "--session-id",
             test_session_id,
-            "--task-id",
-            test_task_id,
             "--code-id",
             test_code_id,
             "--environment-def-path",
@@ -122,7 +131,6 @@ class TestSnapshot():
         assert self.snapshot.args.message == test_message
         assert self.snapshot.args.label == test_label
         assert self.snapshot.args.session_id == test_session_id
-        assert self.snapshot.args.task_id == test_task_id
         assert self.snapshot.args.code_id == test_code_id
         assert self.snapshot.args.environment_def_path == test_environment_def_path
         assert self.snapshot.args.config_filepath == test_config_filepath
@@ -132,18 +140,17 @@ class TestSnapshot():
         # test multiple filepaths
         self.snapshot.parse([
             "snapshot", "create", "--message", test_message, "--label",
-            test_label, "--session-id", test_session_id, "--task-id",
-            test_task_id, "--code-id", test_code_id, "--environment-def-path",
-            test_environment_def_path, "--config-filepath",
-            test_config_filepath, "--stats-filepath", test_stats_filepath,
-            "--filepaths", test_filepaths[0], "--filepaths", test_filepaths[1]
+            test_label, "--session-id", test_session_id, "--code-id",
+            test_code_id, "--environment-def-path", test_environment_def_path,
+            "--config-filepath", test_config_filepath, "--stats-filepath",
+            test_stats_filepath, "--filepaths", test_filepaths[0],
+            "--filepaths", test_filepaths[1]
         ])
 
         # test for desired side effects
         assert self.snapshot.args.message == test_message
         assert self.snapshot.args.label == test_label
         assert self.snapshot.args.session_id == test_session_id
-        assert self.snapshot.args.task_id == test_task_id
         assert self.snapshot.args.code_id == test_code_id
         assert self.snapshot.args.environment_def_path == test_environment_def_path
         assert self.snapshot.args.config_filepath == test_config_filepath
@@ -152,6 +159,34 @@ class TestSnapshot():
 
         snapshot_id_1 = self.snapshot.execute()
         assert snapshot_id_1
+
+    def test_datmo_snapshot_create_from_task(self):
+        self.__set_variables()
+        test_message = "this is a test message"
+
+        # create task
+        test_command = "sh -c 'echo accuracy:0.45'"
+        test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
+        self.task = TaskCommand(self.temp_dir, self.cli_helper, parser)
+        self.task.parse(
+            ["task", "run", "--env-def", test_dockerfile, test_command])
+
+        # test proper execution of task run command
+        task_obj = self.task.execute()
+
+        task_id = task_obj.id
+
+        # test multiple filepaths
+        self.snapshot.parse([
+            "snapshot", "create", "--message", test_message, "--task-id",
+            task_id
+        ])
+
+        # test for desired side effects
+        assert self.snapshot.args.message == test_message
+
+        snapshot_id = self.snapshot.execute()
+        assert snapshot_id
 
     def test_datmo_snapshot_create_fail_mutually_exclusive_args(self):
         self.__set_variables()
@@ -175,9 +210,8 @@ class TestSnapshot():
         try:
             self.snapshot.parse([
                 "snapshot", "create", "--message", test_message, "--label",
-                test_label, "--session-id", test_session_id, "--task-id",
-                test_task_id, "--code-id", test_code_id, "--commit-id",
-                test_commit_id
+                test_label, "--session-id", test_session_id, "--code-id",
+                test_code_id, "--commit-id", test_commit_id
             ])
             _ = self.snapshot.execute()
         except MutuallyExclusiveArguments:
@@ -196,8 +230,6 @@ class TestSnapshot():
                 test_label,
                 "--session-id",
                 test_session_id,
-                "--task-id",
-                test_task_id,
                 "--environment-id",
                 test_environment_id,
                 "--environment-def-path",
@@ -220,8 +252,6 @@ class TestSnapshot():
                 test_label,
                 "--session-id",
                 test_session_id,
-                "--task-id",
-                test_task_id,
                 "--file-collection-id",
                 test_file_collection_id,
                 "--filepaths",
@@ -244,8 +274,6 @@ class TestSnapshot():
                 test_label,
                 "--session-id",
                 test_session_id,
-                "--task-id",
-                test_task_id,
                 "--config-filename",
                 test_config_filename,
                 "--config-filepath",
@@ -268,8 +296,6 @@ class TestSnapshot():
                 test_label,
                 "--session-id",
                 test_session_id,
-                "--task-id",
-                test_task_id,
                 "--stats-filename",
                 test_stats_filename,
                 "--stats-filepath",

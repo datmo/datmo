@@ -18,37 +18,49 @@ class SnapshotCommand(ProjectCommand):
     def create(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.create"))
 
-        snapshot_dict = {"visible": True}
+        task_id = kwargs.get("task_id", None)
+        # creating snapshot with task id if it exists
+        if task_id is not None:
+            message = kwargs.get("message", None)
+            # Create a new core snapshot object
+            snapshot_task_obj = self.snapshot_controller.create_from_task(
+                message, task_id)
+            return snapshot_task_obj.id
+        else:
+            # creating snapshot without task id
+            snapshot_dict = {"visible": True}
 
-        # Code
-        mutually_exclusive_args = ["code_id", "commit_id"]
-        mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+            # Code
+            mutually_exclusive_args = ["code_id", "commit_id"]
+            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
 
-        # Environment
-        mutually_exclusive_args = ["environment_id", "environment_def_path"]
-        mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+            # Environment
+            mutually_exclusive_args = [
+                "environment_id", "environment_def_path"
+            ]
+            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
 
-        # File
-        mutually_exclusive_args = ["file_collection_id", "filepaths"]
-        mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+            # File
+            mutually_exclusive_args = ["file_collection_id", "filepaths"]
+            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
 
-        # Config
-        mutually_exclusive_args = ["config_filepath", "config_filename"]
-        mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+            # Config
+            mutually_exclusive_args = ["config_filepath", "config_filename"]
+            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
 
-        # Stats
-        mutually_exclusive_args = ["stats_filepath", "stats_filename"]
-        mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+            # Stats
+            mutually_exclusive_args = ["stats_filepath", "stats_filename"]
+            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
 
-        optional_args = ["session_id", "task_id", "message", "label"]
+            optional_args = ["session_id", "message", "label"]
 
-        for arg in optional_args:
-            if arg in kwargs and kwargs[arg] is not None:
-                snapshot_dict[arg] = kwargs[arg]
+            for arg in optional_args:
+                if arg in kwargs and kwargs[arg] is not None:
+                    snapshot_dict[arg] = kwargs[arg]
 
-        snapshot_obj = self.snapshot_controller.create(snapshot_dict)
+            snapshot_obj = self.snapshot_controller.create(snapshot_dict)
 
-        return snapshot_obj.id
+            return snapshot_obj.id
 
     def delete(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.delete"))
@@ -89,7 +101,10 @@ class SnapshotCommand(ProjectCommand):
             ]
             t = prettytable.PrettyTable(header_list)
             snapshot_objs = self.snapshot_controller.list(
-                session_id=session_id, visible=True)
+                session_id=session_id,
+                visible=True,
+                sort_key='created_at',
+                sort_order='descending')
             for snapshot_obj in snapshot_objs:
                 t.add_row([
                     snapshot_obj.id,
