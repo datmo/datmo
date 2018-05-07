@@ -2,6 +2,7 @@
 
 import hashlib
 import logging
+import logging.handlers
 import os
 import tempfile
 import time
@@ -10,8 +11,8 @@ from datmo.core.util.misc_functions import grep
 
 class DatmoLogger(object):
     """ Datmo Logging singleton
-    Good info https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
 
+    Good info https://fangpenlin.com/posts/2012/08/26/good-logging-practice-in-python/
     """
 
     instance = None
@@ -75,16 +76,14 @@ class DatmoLogger(object):
         Parameters
         ----------
         name : string
-          Name of the logger.  eg datmo.core.snapshot or __name__
-
+            Name of the logger.  eg datmo.core.snapshot or __name__
         file_name : string
-          Log file name. default = log.txt
+            Log file name. default = log.txt
 
         Returns
         -------
         logging.Logger
-          Python logger
-
+            Python logger
         """
 
         # get or create logging path
