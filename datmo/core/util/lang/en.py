@@ -225,7 +225,8 @@ MESSAGES = {
             "Project has not been initialized",
         "controller.task._run_helper.env_dne":
             "Environment specified does not exist: %s",
-        "controller.task.run.arg": "Required argument is missing to run task: %s",
+        "controller.task.run.arg":
+            "Required argument is missing to run task: %s",
         "controller.task.run":
             "Error creating task directory for run: %s",
         "controller.task.run.args.detach.interactive":

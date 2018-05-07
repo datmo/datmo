@@ -79,7 +79,7 @@ class TestTaskController():
             "detach": False,
             "stdin_open": False,
             "tty": False,
-            "api": False,''
+            "api": False,
             "interactive": False
         }
 
@@ -171,7 +171,13 @@ class TestTaskController():
 
         failed = False
         try:
-            self.task.run(task_obj.id, task_dict={"command": None, "interactive": False, "ports": None})
+            self.task.run(
+                task_obj.id,
+                task_dict={
+                    "command": None,
+                    "interactive": False,
+                    "ports": None
+                })
         except RequiredArgumentMissing:
             failed = True
         assert failed
@@ -257,8 +263,7 @@ class TestTaskController():
 
         # Run another task in the project
         updated_task_obj_2 = self.task.run(
-            task_obj_2.id, task_dict=task_dict,
-            snapshot_dict=snapshot_dict)
+            task_obj_2.id, task_dict=task_dict, snapshot_dict=snapshot_dict)
 
         assert task_obj_2.id == updated_task_obj_2.id
 
@@ -440,12 +445,12 @@ class TestTaskController():
         for item in result:
             assert isinstance(item, TextIOWrapper)
             assert item.mode == "r"
-        assert os.path.join(
-            self.task.home, ".datmo", "collections",
-            file_collection_obj.filehash, "task.log") in file_names
-        assert os.path.join(
-            self.task.home, ".datmo", "collections",
-            file_collection_obj.filehash, "filepath1") in file_names
+        assert os.path.join(self.task.home, ".datmo", "collections",
+                            file_collection_obj.filehash,
+                            "task.log") in file_names
+        assert os.path.join(self.task.home, ".datmo", "collections",
+                            file_collection_obj.filehash,
+                            "filepath1") in file_names
 
         # Get files for the task after run is complete for different mode
         result = self.task.get_files(updated_task_obj.id, mode="a")
@@ -454,12 +459,12 @@ class TestTaskController():
         for item in result:
             assert isinstance(item, TextIOWrapper)
             assert item.mode == "a"
-        assert os.path.join(
-            self.task.home, ".datmo", "collections",
-            file_collection_obj.filehash, "task.log") in file_names
-        assert os.path.join(
-            self.task.home, ".datmo", "collections",
-            file_collection_obj.filehash, "filepath1") in file_names
+        assert os.path.join(self.task.home, ".datmo", "collections",
+                            file_collection_obj.filehash,
+                            "task.log") in file_names
+        assert os.path.join(self.task.home, ".datmo", "collections",
+                            file_collection_obj.filehash,
+                            "filepath1") in file_names
 
     def test_delete(self):
         # Create tasks in the project
