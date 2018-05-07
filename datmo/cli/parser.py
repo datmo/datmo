@@ -179,6 +179,7 @@ task_run.add_argument(
     help="Boolean if you want to run using GPUs")
 task_run.add_argument(
     "--ports",
+    "-p",
     dest="ports",
     default=None,
     action="append",

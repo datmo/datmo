@@ -503,7 +503,7 @@ class TestGitHostDriver():
 
     def test_ssh_git(self):
         hostm = GitHostDriver(self.ssh_temp_dir)
-        assert hostm.ssh_enabled == False
+        assert hostm.ssh_enabled == hostm._check_for_ssh()
         # If id_rsa already synced with remote account
         # if os.path.join(os.path.expanduser("~"), ".ssh", "id_rsa"):
         #     shutil.copytree(

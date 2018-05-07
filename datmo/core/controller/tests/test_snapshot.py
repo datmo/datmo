@@ -271,12 +271,8 @@ class TestSnapshotController():
         # 1) Test if fails with TaskNotComplete error
         # 2) Test if success with task files, results, and message
 
-        # Setup task
-        task_command = ["sh", "-c", "echo accuracy:0.45"]
-        input_dict = {"command": task_command}
-
         # Create task in the project
-        task_obj = self.task.create(input_dict)
+        task_obj = self.task.create()
 
         # 1) Test option 1
         failed = False
@@ -287,13 +283,17 @@ class TestSnapshotController():
             failed = True
         assert failed
 
+        # Create task_dict
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
+        task_dict = {"command": task_command}
+
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         # Test the default values
-        updated_task_obj = self.task.run(task_obj.id)
+        updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)
 
         # 2) Test option 2
         snapshot_obj = self.snapshot.create_from_task(

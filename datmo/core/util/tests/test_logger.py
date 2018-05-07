@@ -1,3 +1,4 @@
+#!/usr/bin/python
 """
 Tests for logger.py
 """
@@ -6,16 +7,17 @@ import os
 from time import sleep
 from datmo.core.util.logger import DatmoLogger
 
+
 class TestLogger():
     def test_logger(self):
         logger = DatmoLogger.get_logger()
-        logger.info("testing")
+        logger.warning("testing")
         logger.error("WHAT?")
         assert logger.level == DatmoLogger().logging_level
 
     def test_datmo_logger_get_logfiles(self):
         files = DatmoLogger.get_logfiles()
-        assert len(files) > 0
+        assert len(list(files)) > 0
         for f in files:
             assert DatmoLogger().logging_path in f
 

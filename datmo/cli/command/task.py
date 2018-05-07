@@ -41,13 +41,13 @@ class TaskCommand(ProjectCommand):
             "command": kwargs['cmd']
         }
 
-        # Create the task object
-        task_obj = self.task_controller.create(task_dict)
+        # Create the task object)
+        task_obj = self.task_controller.create()
 
         # Pass in the task
         try:
             updated_task_obj = self.task_controller.run(
-                task_obj.id, snapshot_dict=snapshot_dict)
+                task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
         except Exception as e:
             self.logger.error("%s %s" % (e, task_dict))
             self.cli_helper.echo(__("error", "cli.task.run", task_obj.id))

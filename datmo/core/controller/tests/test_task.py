@@ -6,7 +6,6 @@ import random
 import string
 import tempfile
 import platform
-import datetime
 from io import open, TextIOWrapper
 try:
     to_unicode = unicode
@@ -16,7 +15,8 @@ except NameError:
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.task import TaskController
-from datmo.core.util.exceptions import EntityNotFound, TaskRunException, InvalidArgumentType
+from datmo.core.util.exceptions import EntityNotFound, TaskRunException, \
+    InvalidArgumentType, RequiredArgumentMissing
 
 
 class TestTaskController():
@@ -36,14 +36,12 @@ class TestTaskController():
         pass
 
     def test_create(self):
-        task_command = ["sh", "-c", "echo accuracy:0.45"]
-        input_dict = {"command": task_command}
-
         # Create task in the project
-        task_obj = self.task.create(input_dict)
+        task_obj = self.task.create()
 
         assert task_obj
-        assert task_obj.command == task_command
+        assert task_obj.created_at
+        assert task_obj.updated_at
 
     def test_run_helper(self):
         # TODO: Try out more options (see below)
@@ -146,6 +144,7 @@ class TestTaskController():
         assert result['model_type'] == "logistic regression"
 
     def test_run(self):
+        # 0) Test failure case without command and without interactive
         # 1) Test success case with default values and env def file
         # 2) Test failure case if running same task (conflicting containers)
         # 3) Test failure case if running same task with snapshot_dict (conflicting containers)
@@ -153,11 +152,9 @@ class TestTaskController():
         # 5) Test success case with saved file during task run
 
         # TODO: look into log filepath randomness, sometimes logs are not written
-        task_command = ["sh", "-c", "echo accuracy:0.45"]
-        input_dict = {"command": task_command}
 
         # Create task in the project
-        task_obj = self.task.create(input_dict)
+        task_obj = self.task.create()
 
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
@@ -190,7 +187,7 @@ class TestTaskController():
         task_dict = {"command": task_command}
 
         # 1) Test option 1
-        updated_task_obj = self.task.run(task_obj.id)
+        updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)
 
         assert task_obj.id == updated_task_obj.id
 
@@ -245,7 +242,7 @@ class TestTaskController():
 
         # Test when the specific task id is already RUNNING
         # Create task in the project
-        task_obj_1 = self.task.create(input_dict)
+        task_obj_1 = self.task.create()
         self.task.dal.task.update({"id": task_obj_1.id, "status": "RUNNING"})
         # Create environment_driver definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
@@ -254,7 +251,7 @@ class TestTaskController():
 
         failed = False
         try:
-            self.task.run(task_obj_1.id)
+            self.task.run(task_obj_1.id, task_dict=task_dict)
         except TaskRunException:
             failed = True
         assert failed
@@ -262,7 +259,7 @@ class TestTaskController():
         # 4) Test option 4
 
         # Create a new task in the project
-        task_obj_2 = self.task.create(input_dict)
+        task_obj_2 = self.task.create()
 
         # Run another task in the project
         updated_task_obj_2 = self.task.run(
@@ -304,18 +301,19 @@ class TestTaskController():
                 ))
             f.write(to_unicode("    f.write('my test file')\n"))
 
-        task_command = ["python", "script.py"]
-        input_dict = {"command": task_command}
-
         # Create task in the project
-        task_obj_2 = self.task.create(input_dict)
+        task_obj_2 = self.task.create()
+
+        # Create task_dict
+        task_command = ["python", "script.py"]
+        task_dict = {"command": task_command}
 
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
-        updated_task_obj_2 = self.task.run(task_obj_2.id)
+        updated_task_obj_2 = self.task.run(task_obj_2.id, task_dict=task_dict)
 
         assert updated_task_obj_2.before_snapshot_id
         assert updated_task_obj_2.ports == None
@@ -347,20 +345,9 @@ class TestTaskController():
             os.path.join(files_absolute_path, "new_file.txt"))
 
     def test_list(self):
-        task_command = ["sh", "-c", "echo accuracy:0.45"]
-        input_dict_1 = {
-            "command": task_command,
-            "created_at": datetime.datetime(2017, 2, 1)
-        }
-
-        input_dict_2 = {
-            "command": task_command,
-            "created_at": datetime.datetime(2017, 3, 1)
-        }
-
         # Create tasks in the project
-        task_obj_1 = self.task.create(input_dict_1)
-        task_obj_2 = self.task.create(input_dict_2)
+        task_obj_1 = self.task.create()
+        task_obj_2 = self.task.create()
 
         # List all tasks regardless of filters
         result = self.task.list()
@@ -416,11 +403,8 @@ class TestTaskController():
                task_obj_2 in result
 
     def test_get_files(self):
-        task_command = ["sh", "-c", "echo accuracy:0.45"]
-        input_dict = {"command": task_command}
-
         # Create task in the project
-        task_obj = self.task.create(input_dict)
+        task_obj = self.task.create()
 
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
@@ -438,9 +422,13 @@ class TestTaskController():
             ],
         }
 
+        # Create task_dict
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
+        task_dict = {"command": task_command}
+
         # Test the default values
         updated_task_obj = self.task.run(
-            task_obj.id, snapshot_dict=snapshot_dict)
+            task_obj.id, task_dict=task_dict, snapshot_dict=snapshot_dict)
 
         # TODO: Test case for during run and before_snapshot run
         # Get files for the task after run is complete (default)
@@ -450,6 +438,8 @@ class TestTaskController():
             updated_task_obj.after_snapshot_id)
         file_collection_obj = self.task.dal.file_collection.get_by_id(
             after_snapshot_obj.file_collection_id)
+
+        file_names = [item.name for item in result]
 
         assert len(result) == 2
         for item in result:
@@ -477,11 +467,8 @@ class TestTaskController():
                             "filepath1") in file_names
 
     def test_delete(self):
-        task_command = ["sh", "-c", "echo accuracy:0.45"]
-        input_dict = {"command": task_command}
-
         # Create tasks in the project
-        task_obj = self.task.create(input_dict)
+        task_obj = self.task.create()
 
         # Delete task from the project
         result = self.task.delete(task_obj.id)
@@ -497,19 +484,20 @@ class TestTaskController():
                thrown == True
 
     def test_stop(self):
-        task_command = ["sh", "-c", "echo accuracy:0.45"]
-        input_dict = {"command": task_command}
-
         # Create task in the project
-        task_obj = self.task.create(input_dict)
+        task_obj = self.task.create()
 
         # Create environment driver definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
+        # Create task_dict
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
+        task_dict = {"command": task_command}
+
         # Test the default values
-        updated_task_obj = self.task.run(task_obj.id)
+        updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)
 
         # Stop the task
         task_id = updated_task_obj.id

@@ -109,6 +109,14 @@ class FileStructureException(FileExecutionException):
     pass
 
 
+class EnvironmentImageNotFound(Exception):
+    pass
+
+
+class EnvironmentContainerNotFound(Exception):
+    pass
+
+
 class EnvironmentExecutionException(Exception):
     pass
 

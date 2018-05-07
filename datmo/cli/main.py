@@ -4,8 +4,8 @@ import os
 import sys
 
 from datmo.cli.command.base import BaseCommand
-from datmo.cli.driver.helper import Helper
 from datmo.cli.parser import parser
+from datmo.cli.driver.helper import Helper
 from datmo.core.util.exceptions import CLIArgumentException
 from datmo.core.util.i18n import get as __
 from datmo.core.util.logger import DatmoLogger

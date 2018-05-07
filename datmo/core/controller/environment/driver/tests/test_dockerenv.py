@@ -18,7 +18,8 @@ except NameError:
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.core.util.exceptions import (
     EnvironmentInitFailed, FileAlreadyExistsException,
-    EnvironmentRequirementsCreateException, EnvironmentDoesNotExist)
+    EnvironmentRequirementsCreateException, EnvironmentDoesNotExist,
+    EnvironmentImageNotFound, EnvironmentContainerNotFound)
 
 
 class TestDockerEnv():
@@ -292,6 +293,10 @@ class TestDockerEnv():
 
     def test_remove(self):
         name = str(uuid.uuid1())
+        # Test if no image present and no containers
+        result = self.docker_environment_manager.remove(name)
+        assert result == True
+
         path = os.path.join(self.docker_environment_manager.filepath,
                             "Dockerfile")
         random_text = str(uuid.uuid1())
@@ -302,6 +307,7 @@ class TestDockerEnv():
         self.docker_environment_manager.build(name, path)
         result = self.docker_environment_manager.remove(name)
         assert result == True
+
         # With force
         self.docker_environment_manager.build(name, path)
         # teardown
@@ -331,6 +337,13 @@ class TestDockerEnv():
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_get_image(self):
+        failed = False
+        try:
+            self.docker_environment_manager.get_image("random")
+        except EnvironmentImageNotFound:
+            failed = True
+        assert failed
+
         image_name = str(uuid.uuid1())
         dockerfile_path = os.path.join(
             self.docker_environment_manager.filepath, "Dockerfile")
@@ -456,6 +469,13 @@ class TestDockerEnv():
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_get_container(self):
+        failed = False
+        try:
+            self.docker_environment_manager.get_container("random")
+        except EnvironmentContainerNotFound:
+            failed = True
+        assert failed
+
         image_name = str(uuid.uuid1())
         dockerfile_path = os.path.join(
             self.docker_environment_manager.filepath, "Dockerfile")

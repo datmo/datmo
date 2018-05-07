@@ -2,6 +2,8 @@
 Tests for EnvironmentController
 """
 import os
+import random
+import string
 import tempfile
 import platform
 from io import open
@@ -286,10 +288,14 @@ class TestEnvironmentController():
         with open(definition_filepath, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
+        random_name = ''.join([
+            random.choice(string.ascii_letters + string.digits)
+            for _ in range(32)
+        ])
         run_options = {
             "command": ["sh", "-c", "echo yo"],
             "ports": ["8888:8888"],
-            "name": "coolcontainername",
+            "name": random_name,
             "volumes": None,
             "detach": False,
             "stdin_open": False,
@@ -334,10 +340,14 @@ class TestEnvironmentController():
         environment_obj = self.environment.create({})
         self.environment.build(environment_obj.id)
 
+        random_name = ''.join([
+            random.choice(string.ascii_letters + string.digits)
+            for _ in range(32)
+        ])
         run_options = {
             "command": ["python", "script.py"],
             "ports": ["8888:8888"],
-            "name": "coolcontainername1",
+            "name": random_name,
             "volumes": {
                 self.environment.home: {
                     'bind': '/home/',
