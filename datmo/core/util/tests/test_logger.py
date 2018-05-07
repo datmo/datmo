@@ -45,8 +45,8 @@ class TestLogger():
         assert len(DatmoLogger.find_text_in_logs("logger2")) == 1
 
     def test_multiple_log_files(self):
-        l1 = DatmoLogger.get_logger("logger3","debug.txt")
-        l2 = DatmoLogger.get_logger("logger3","info.txt")
+        l1 = DatmoLogger.get_logger("logger3", "debug.txt")
+        l2 = DatmoLogger.get_logger("logger3", "info.txt")
         l1.info("green")
         l2.info("purple")
         r = DatmoLogger.find_text_in_logs("green")
@@ -60,7 +60,7 @@ class TestLogger():
         log_path = os.path.join(os.path.expanduser("~"), '.datmo')
         shutil.rmtree(log_path)
         assert not os.path.exists(log_path)
-        logger = DatmoLogger.get_logger("logger3","new.txt")
+        logger = DatmoLogger.get_logger("logger3", "new.txt")
         logger.info("testing")
         assert len(DatmoLogger.find_text_in_logs("testing")) == 1
         default_logger = DatmoLogger.get_logger()
@@ -74,5 +74,6 @@ class TestLogger():
         @DatmoLogger.timeit
         def slow_fn():
             sleep(1)
+
         slow_fn()
         assert len(DatmoLogger.find_text_in_logs("slow_fn")) == 1

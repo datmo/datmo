@@ -91,7 +91,6 @@ class JSONStore():
             outfile.write(to_unicode(str_))
         return
 
-
     def to_dict(self):
         output_dict = dict()
         # reading json file to stats

@@ -687,7 +687,8 @@ class GitHostDriver(object):
         else:
             return False
 
-    @Config.cache_setting(key="git.ssh_enabled", expires_min=1440, ignore_values=[False])
+    @Config.cache_setting(
+        key="git.ssh_enabled", expires_min=1440, ignore_values=[False])
     def _check_for_ssh(self):
         cmd = "ssh-keyscan %s >> ~/.ssh/known_hosts" % (self.host)
         p = subprocess.Popen(

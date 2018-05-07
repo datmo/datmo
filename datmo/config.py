@@ -31,7 +31,8 @@ class Config(object):
             self._home = None
             self.logging_level = logging.DEBUG
             DatmoLogger.get_logger(__name__).info("initalizing")
-            self.data_cache = JSONStore(os.path.join(os.path.expanduser("~"), ".datmo", "cache.json"))
+            self.data_cache = JSONStore(
+                os.path.join(os.path.expanduser("~"), ".datmo", "cache.json"))
 
         @property
         def home(self):
@@ -49,7 +50,8 @@ class Config(object):
             if cache_expire_val == None:
                 return None
             # return value if item has not expired
-            elif int(cache_expire_val) > int(datetime.datetime.now().strftime('%s')):
+            elif int(cache_expire_val) > int(
+                    datetime.datetime.now().strftime('%s')):
                 return self.data_cache.get(cache_key)
             # expire item and return None
             else:
@@ -60,12 +62,12 @@ class Config(object):
         def set_cache_item(self, key, value, duration=60):
             cache_expire_key = 'cache_key_expires.' + key
             cache_key = 'cache_key.' + key
-            expire_val = (duration * 60) +  int(datetime.datetime.now().strftime('%s'))
+            expire_val = (duration * 60) + int(
+                datetime.datetime.now().strftime('%s'))
             self.data_cache.save(cache_expire_key, expire_val)
             self.data_cache.save(cache_key, value)
 
-
-    def __new__(cls): # __new__ always a classmethod
+    def __new__(cls):  # __new__ always a classmethod
         if not Config.instance:
             Config.instance = Config.__InternalConfig()
         return Config.instance
@@ -81,6 +83,7 @@ class Config(object):
     def cache_setting(method, key=None, expires_min=60, ignore_values=[]):
         name = key if key is not None else method.__module__ + '.' + method.__name__
         config = Config()
+
         def fn(*args, **kw):
             cached_val = config.get_cache_item(name)
             if cached_val is not None:
@@ -89,4 +92,5 @@ class Config(object):
             if not result in ignore_values:
                 config.set_cache_item(name, result, expires_min)
             return result
+
         return fn
