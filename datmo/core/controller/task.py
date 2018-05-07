@@ -232,6 +232,12 @@ class TaskController(BaseController):
                 task_obj.id,
             "before_snapshot_id":
                 task_dict.get('before_snapshot_id', before_snapshot_obj.id),
+            "command":
+                task_dict.get('command', task_obj.command),
+            "interactive":
+                task_dict.get('interactive', task_obj.interactive),
+            "detach":
+                task_dict.get('detach', task_obj.detach),
             "ports":
                 task_dict.get('ports', task_obj.ports),
             "interactive":

@@ -164,6 +164,31 @@ class TestTaskController():
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
+        # 0) Test option 0
+        failed = False
+        try:
+            self.task.run(task_obj.id)
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
+
+        failed = False
+        try:
+            self.task.run(
+                task_obj.id,
+                task_dict={
+                    "command": None,
+                    "interactive": False,
+                    "ports": None
+                })
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
+
+        # Create task_dict
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
+        task_dict = {"command": task_command}
+
         # 1) Test option 1
         updated_task_obj = self.task.run(task_obj.id)
 
@@ -241,7 +266,7 @@ class TestTaskController():
 
         # Run another task in the project
         updated_task_obj_2 = self.task.run(
-            task_obj_2.id, snapshot_dict=snapshot_dict)
+            task_obj_2.id, task_dict=task_dict, snapshot_dict=snapshot_dict)
 
         assert task_obj_2.id == updated_task_obj_2.id
 
@@ -427,31 +452,29 @@ class TestTaskController():
             after_snapshot_obj.file_collection_id)
 
         assert len(result) == 2
-        assert isinstance(result[0], TextIOWrapper)
-        assert result[0].name == os.path.join(
-            self.task.home, ".datmo", "collections",
-            file_collection_obj.filehash, "task.log")
-        assert result[0].mode == "r"
-        assert isinstance(result[1], TextIOWrapper)
-        assert result[1].name == os.path.join(
-            self.task.home, ".datmo", "collections",
-            file_collection_obj.filehash, "filepath1")
-        assert result[1].mode == "r"
+        for item in result:
+            assert isinstance(item, TextIOWrapper)
+            assert item.mode == "r"
+        assert os.path.join(self.task.home, ".datmo", "collections",
+                            file_collection_obj.filehash,
+                            "task.log") in file_names
+        assert os.path.join(self.task.home, ".datmo", "collections",
+                            file_collection_obj.filehash,
+                            "filepath1") in file_names
 
         # Get files for the task after run is complete for different mode
         result = self.task.get_files(updated_task_obj.id, mode="a")
 
         assert len(result) == 2
-        assert isinstance(result[0], TextIOWrapper)
-        assert result[0].name == os.path.join(
-            self.task.home, ".datmo", "collections",
-            file_collection_obj.filehash, "task.log")
-        assert result[0].mode == "a"
-        assert isinstance(result[1], TextIOWrapper)
-        assert result[1].name == os.path.join(
-            self.task.home, ".datmo", "collections",
-            file_collection_obj.filehash, "filepath1")
-        assert result[1].mode == "a"
+        for item in result:
+            assert isinstance(item, TextIOWrapper)
+            assert item.mode == "a"
+        assert os.path.join(self.task.home, ".datmo", "collections",
+                            file_collection_obj.filehash,
+                            "task.log") in file_names
+        assert os.path.join(self.task.home, ".datmo", "collections",
+                            file_collection_obj.filehash,
+                            "filepath1") in file_names
 
     def test_delete(self):
         task_command = ["sh", "-c", "echo accuracy:0.45"]
