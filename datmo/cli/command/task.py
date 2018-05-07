@@ -3,6 +3,10 @@ from __future__ import print_function
 import shlex
 import platform
 import prettytable
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.core.util.i18n import get as __
 from datmo.cli.command.project import ProjectCommand
@@ -28,8 +32,7 @@ class TaskCommand(ProjectCommand):
         if not isinstance(kwargs['cmd'], list):
             if platform.system() == "Windows":
                 kwargs['cmd'] = kwargs['cmd']
-            elif isinstance(kwargs['cmd'], str) or isinstance(
-                    kwargs['cmd'], unicode):
+            elif isinstance(kwargs['cmd'], to_unicode):
                 kwargs['cmd'] = shlex.split(kwargs['cmd'])
 
         task_dict = {
