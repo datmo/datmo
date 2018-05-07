@@ -4,6 +4,7 @@ import prettytable
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.misc_functions import mutually_exclusive
+from datmo.core.util.exceptions import (SnapshotCreateFromTaskArgs)
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.snapshot import SnapshotController
 
@@ -21,10 +22,22 @@ class SnapshotCommand(ProjectCommand):
         task_id = kwargs.get("task_id", None)
         # creating snapshot with task id if it exists
         if task_id is not None:
+            unrequired_args = [
+                "code_id", "commit_id", "environment_id",
+                "environment_def_path", "file_collection_id", "filepaths",
+                "config_filepath", "config_filename", "stats_filepath",
+                "stats_filename"
+            ]
+            for arg in unrequired_args:
+                if arg in kwargs and kwargs[arg] is not None:
+                    raise SnapshotCreateFromTaskArgs(
+                        "error", "cli.snapshot.create.task.args", arg)
+
             message = kwargs.get("message", None)
+            label = kwargs.get("label", None)
             # Create a new core snapshot object
             snapshot_task_obj = self.snapshot_controller.create_from_task(
-                message, task_id)
+                message, task_id, label=label)
             return snapshot_task_obj.id
         else:
             # creating snapshot without task id

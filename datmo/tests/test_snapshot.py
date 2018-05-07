@@ -10,7 +10,7 @@ try:
 except NameError:
     to_unicode = str
 
-from datmo.snapshot import create, create_from_task, ls
+from datmo.snapshot import create, ls
 from datmo.snapshot import Snapshot
 from datmo.task import run
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
@@ -118,13 +118,17 @@ class TestSnapshotModule():
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         task_obj = run("sh -c echo accuracy:0.45", home=self.temp_dir)
-        snapshot_obj = create_from_task(
+        snapshot_obj = create(
             message="my test snapshot",
             task_id=task_obj.id,
-            home=self.temp_dir)
+            home=self.temp_dir,
+            label="best",
+            config={"foo": "bar"})
 
         assert isinstance(snapshot_obj, Snapshot)
         assert snapshot_obj.message == "my test snapshot"
+        assert snapshot_obj.label == "best"
+        assert snapshot_obj.config == {"foo": "bar"}
         assert snapshot_obj.stats == task_obj.results
 
     def test_ls(self):

@@ -26,7 +26,8 @@ from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
 from datmo.cli.command.task import TaskCommand
 from datmo.core.util.exceptions import (ProjectNotInitializedException,
-                                        MutuallyExclusiveArguments)
+                                        MutuallyExclusiveArguments,
+                                        SnapshotCreateFromTaskArgs)
 
 
 class TestSnapshot():
@@ -163,6 +164,7 @@ class TestSnapshot():
     def test_datmo_snapshot_create_from_task(self):
         self.__set_variables()
         test_message = "this is a test message"
+        test_code_id = "test_code_id"
 
         # create task
         test_command = "sh -c 'echo accuracy:0.45'"
@@ -176,7 +178,7 @@ class TestSnapshot():
 
         task_id = task_obj.id
 
-        # test multiple filepaths
+        # test task id
         self.snapshot.parse([
             "snapshot", "create", "--message", test_message, "--task-id",
             task_id
@@ -188,12 +190,24 @@ class TestSnapshot():
         snapshot_id = self.snapshot.execute()
         assert snapshot_id
 
+        failed = False
+        try:
+            # test task id with code id
+            self.snapshot.parse([
+                "snapshot", "create", "--message", test_message, "--task-id",
+                task_id, "--code-id", test_code_id
+            ])
+            _ = self.snapshot.execute()
+        except SnapshotCreateFromTaskArgs:
+            failed = True
+
+        assert failed
+
     def test_datmo_snapshot_create_fail_mutually_exclusive_args(self):
         self.__set_variables()
         test_message = "this is a test message"
         test_label = "test label"
         test_session_id = "test_session_id"
-        test_task_id = "test_task_id"
         test_code_id = "test_code_id"
         test_commit_id = "test_commit_id"
         test_environment_id = "test_environment_id"

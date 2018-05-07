@@ -84,12 +84,13 @@ class Snapshot():
 
 def create(message,
            label=None,
+           home=None,
+           task_id=None,
            commit_id=None,
            environment_id=None,
            filepaths=None,
            config=None,
-           stats=None,
-           home=None):
+           stats=None):
     """Create a snapshot within a project
 
     The project must be created before this is implemented. You can do that by using
@@ -100,11 +101,42 @@ def create(message,
 
     Parameters
     ----------
+
     message : str
         a description of the snapshot for later reference
     label : str, optional
         a short description of the snapshot for later reference
         (default is None, which means a blank label is stored)
+    home : str, optional
+        absolute home path of the project
+        (default is None, which will use the CWD as the project path)
+    task_id : str, optional
+        task object id to use to create snapshot
+        if task id is passed then subsequent parameters would be ignored.
+        when using task id, it will overwrite the following inputs
+
+        commmit_id
+        ----------
+        the commit id is taken form the source code after the task is run
+
+        environment_id
+        --------------
+        environment_id used to run the task,
+
+        filepaths
+        ---------
+        this is the set of all files saved during the task
+
+        config
+        ------
+        nothing is passed into this variable. the user may add
+        something to the config by passing in a dict for the config
+
+        stats
+        -----
+        the task.results are added into the stats variable of the
+        snapshot.
+
     commit_id : str, optional
         provide the exact commit hash associated with the snapshot
         (default is None, which means it automatically creates a commit)
@@ -120,9 +152,6 @@ def create(message,
     stats : dict, optional
         provide the dictionary of relevant statistics or metrics
         (default is None, which means it is empty)
-    home : str, optional
-        absolute home path of the project
-        (default is None, which will use the CWD as the project path)
 
     Returns
     -------
@@ -136,74 +165,51 @@ def create(message,
     snapshot with the `datmo snapshot ls` cli command
 
     >>> import datmo
-    >>> datmo.sdk.python.snapshot.create(message="my first snapshot", filepaths=["/path/to/a/large/file"], config={"test": 0.4, "test2": "string"}, stats={"accuracy": 0.94})
+    >>> datmo.snapshot.create(message="my first snapshot", filepaths=["/path/to/a/large/file"], config={"test": 0.4, "test2": "string"}, stats={"accuracy": 0.94})
+
+    You can also use the result of a task run in order to create a snapshot
+
+    >>> datmo.snapshot.create(message="my first snapshot from task", task_id="1jfkshg049")
     """
     if not home:
         home = os.getcwd()
     snapshot_controller = SnapshotController(home=home)
 
-    snapshot_create_dict = {"message": message}
+    if task_id is not None:
+        # Create a new core snapshot object
+        core_snapshot_obj = snapshot_controller.create_from_task(
+            message, task_id, label=label, config=config, stats=None)
 
-    # add arguments if they are not None
-    if label:
-        snapshot_create_dict['label'] = label
-    if commit_id:
-        snapshot_create_dict['commit_id'] = commit_id
-    if environment_id:
-        snapshot_create_dict['environment_id'] = environment_id
-    if filepaths:
-        snapshot_create_dict['filepaths'] = filepaths
-    if config:
-        snapshot_create_dict['config'] = config
-    if stats:
-        snapshot_create_dict['stats'] = stats
-    if label:
-        snapshot_create_dict['label'] = label
+        # Create a new snapshot object
+        client_snapshot_obj = Snapshot(core_snapshot_obj, home=home)
 
-    # Create a new core snapshot object
-    core_snapshot_obj = snapshot_controller.create(snapshot_create_dict)
+        return client_snapshot_obj
+    else:
+        snapshot_create_dict = {"message": message}
 
-    # Create a new snapshot object
-    client_snapshot_obj = Snapshot(core_snapshot_obj, home=home)
+        # add arguments if they are not None
+        if label:
+            snapshot_create_dict['label'] = label
+        if commit_id:
+            snapshot_create_dict['commit_id'] = commit_id
+        if environment_id:
+            snapshot_create_dict['environment_id'] = environment_id
+        if filepaths:
+            snapshot_create_dict['filepaths'] = filepaths
+        if config:
+            snapshot_create_dict['config'] = config
+        if stats:
+            snapshot_create_dict['stats'] = stats
+        if label:
+            snapshot_create_dict['label'] = label
 
-    return client_snapshot_obj
+        # Create a new core snapshot object
+        core_snapshot_obj = snapshot_controller.create(snapshot_create_dict)
 
+        # Create a new snapshot object
+        client_snapshot_obj = Snapshot(core_snapshot_obj, home=home)
 
-def create_from_task(message, task_id, home=None):
-    """Create a snapshot within a project from a completed task
-
-    Parameters
-    ----------
-    message : str
-        a description of the snapshot for later reference
-    task_id : str
-        task object id to use to create snapshot
-
-    Returns
-    -------
-    Snapshot
-        returns a Snapshot entity as defined above
-
-    Examples
-    --------
-    You can use this function within a project repository to save snapshots
-    for later use. Once you have created this, you will be able to view the
-    snapshot with the `datmo snapshot ls` cli command
-
-    >>> import datmo
-    >>> datmo.sdk.python.snapshot.create_from_task(message="my first snapshot from task", task_id="1jfkshg049")
-    """
-    if not home:
-        home = os.getcwd()
-    snapshot_controller = SnapshotController(home=home)
-
-    # Create a new core snapshot object
-    core_snapshot_obj = snapshot_controller.create_from_task(message, task_id)
-
-    # Create a new snapshot object
-    client_snapshot_obj = Snapshot(core_snapshot_obj, home=home)
-
-    return client_snapshot_obj
+        return client_snapshot_obj
 
 
 def ls(session_id=None, filter=None, home=None):
@@ -237,7 +243,7 @@ def ls(session_id=None, filter=None, home=None):
     You can use this function within a project repository to list snapshots.
 
     >>> import datmo
-    >>> snapshots = datmo.sdk.python.snapshot.ls()
+    >>> snapshots = datmo.snapshot.ls()
     """
     if not home:
         home = os.getcwd()

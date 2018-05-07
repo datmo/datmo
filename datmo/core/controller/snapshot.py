@@ -196,7 +196,12 @@ class SnapshotController(BaseController):
         # Create snapshot and return
         return self.dal.snapshot.create(Snapshot(create_dict))
 
-    def create_from_task(self, message, task_id):
+    def create_from_task(self,
+                         message,
+                         task_id,
+                         label=None,
+                         config=None,
+                         stats=None):
         """Create snapshot from a completed task.
         # TODO: enable create from task DURING a run
 
@@ -206,7 +211,12 @@ class SnapshotController(BaseController):
             long description of snapshot
         task_id : str
             task object to use to create snapshot
-
+        label: str, optional
+            short description of snapshot
+        config : dict, optional
+            key, value pairs of configurations
+        stats : dict, optional
+            key, value pairs of metrics and statistics
         Returns
         -------
         Snapshot
@@ -224,12 +234,24 @@ class SnapshotController(BaseController):
                 __("error", "controller.snapshot.create_from_task",
                    str(task_obj.id)))
 
-        return self.dal.snapshot.update({
+        snapshot_dict = {
             "id": task_obj.after_snapshot_id,
             "message": message,
-            "stats": task_obj.results,
             "visible": True
-        })
+        }
+
+        if label:
+            snapshot_dict["label"] = label
+
+        if config:
+            snapshot_dict["config"] = config
+
+        if stats:
+            snapshot_dict["stats"] = stats
+        else:
+            snapshot_dict["stats"] = task_obj.results
+
+        return self.dal.snapshot.update(snapshot_dict)
 
     def checkout(self, snapshot_id):
         # Get snapshot object

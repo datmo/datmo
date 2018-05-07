@@ -270,6 +270,7 @@ class TestSnapshotController():
     def test_create_from_task(self):
         # 1) Test if fails with TaskNotComplete error
         # 2) Test if success with task files, results, and message
+        # 3) Test if success with message, label, config and stats
 
         # Create task in the project
         task_obj = self.task.create()
@@ -302,6 +303,23 @@ class TestSnapshotController():
         assert snapshot_obj.id == updated_task_obj.after_snapshot_id
         assert snapshot_obj.message == "my test snapshot"
         assert snapshot_obj.stats == updated_task_obj.results
+        assert snapshot_obj.visible == True
+
+        # 3) Test option 3
+        test_config = {"algo": "regression"}
+        test_stats = {"accuracy": 0.9}
+        snapshot_obj = self.snapshot.create_from_task(
+            message="my test snapshot",
+            task_id=updated_task_obj.id,
+            label="best",
+            config=test_config,
+            stats=test_stats)
+
+        assert snapshot_obj.id == updated_task_obj.after_snapshot_id
+        assert snapshot_obj.message == "my test snapshot"
+        assert snapshot_obj.label == "best"
+        assert snapshot_obj.config == test_config
+        assert snapshot_obj.stats == test_stats
         assert snapshot_obj.visible == True
 
     def __default_create(self):
