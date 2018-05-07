@@ -109,6 +109,14 @@ class FileStructureException(FileExecutionException):
     pass
 
 
+class EnvironmentImageNotFound(Exception):
+    pass
+
+
+class EnvironmentContainerNotFound(Exception):
+    pass
+
+
 class EnvironmentExecutionException(Exception):
     pass
 
@@ -142,4 +150,8 @@ class MutuallyExclusiveArguments(Exception):
 
 
 class TaskNotComplete(ArgumentException):
+    pass
+
+
+class TaskInteractiveDetachException(ArgumentException):
     pass

@@ -211,7 +211,6 @@ class EnvironmentController(BaseController):
             detach : bool, optional
             stdin_open : bool, optional
             tty : bool, optional
-            gpu : bool, optional
         log_filepath : str
             filepath to the log file
 

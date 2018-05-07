@@ -3,6 +3,10 @@ from __future__ import print_function
 import shlex
 import platform
 import prettytable
+try:
+    to_unicode = unicode
+except NameError:
+    to_unicode = str
 
 from datmo.core.util.i18n import get as __
 from datmo.cli.command.project import ProjectCommand
@@ -28,24 +32,22 @@ class TaskCommand(ProjectCommand):
         if not isinstance(kwargs['cmd'], list):
             if platform.system() == "Windows":
                 kwargs['cmd'] = kwargs['cmd']
-            elif isinstance(kwargs['cmd'], str) or isinstance(
-                    kwargs['cmd'], unicode):
+            elif isinstance(kwargs['cmd'], to_unicode):
                 kwargs['cmd'] = shlex.split(kwargs['cmd'])
 
         task_dict = {
-            "gpu": kwargs['gpu'],
             "ports": kwargs['ports'],
             "interactive": kwargs['interactive'],
             "command": kwargs['cmd']
         }
 
-        # Create the task object
-        task_obj = self.task_controller.create(task_dict)
+        # Create the task object)
+        task_obj = self.task_controller.create()
 
         # Pass in the task
         try:
             updated_task_obj = self.task_controller.run(
-                task_obj.id, snapshot_dict=snapshot_dict)
+                task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
         except Exception as e:
             self.logger.error("%s %s" % (e, task_dict))
             self.cli_helper.echo(__("error", "cli.task.run", task_obj.id))
@@ -56,13 +58,13 @@ class TaskCommand(ProjectCommand):
         session_id = kwargs.get('session_id',
                                 self.task_controller.current_session.id)
         # Get all snapshot meta information
-        header_list = ["id", "command", "status", "gpu", "created at"]
+        header_list = ["id", "command", "results", "created at"]
         t = prettytable.PrettyTable(header_list)
         task_objs = self.task_controller.list(
             session_id, sort_key='created_at', sort_order='descending')
         for task_obj in task_objs:
             t.add_row([
-                task_obj.id, task_obj.command, task_obj.status, task_obj.gpu,
+                task_obj.id, task_obj.command, task_obj.results,
                 task_obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
             ])
         self.cli_helper.echo(t)

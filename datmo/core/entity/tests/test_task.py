@@ -20,8 +20,8 @@ class TestTask():
         assert task_entity.id == None
         assert task_entity.before_snapshot_id == None
         assert task_entity.ports == None
-        assert task_entity.gpu == False
         assert task_entity.interactive == False
+        assert task_entity.detach == False
         assert task_entity.task_dirpath == None
         assert task_entity.log_filepath == None
         assert task_entity.start_time == None
@@ -45,8 +45,8 @@ class TestTask():
             assert getattr(task_entity, k) == v
         assert task_entity.before_snapshot_id == None
         assert task_entity.ports == None
-        assert task_entity.gpu == False
         assert task_entity.interactive == False
+        assert task_entity.detach == False
         assert task_entity.task_dirpath == None
         assert task_entity.log_filepath == None
         assert task_entity.start_time == None

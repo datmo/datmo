@@ -18,7 +18,8 @@ except NameError:
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.core.util.exceptions import (
     EnvironmentInitFailed, FileAlreadyExistsException,
-    EnvironmentRequirementsCreateException, EnvironmentDoesNotExist)
+    EnvironmentRequirementsCreateException, EnvironmentDoesNotExist,
+    EnvironmentImageNotFound, EnvironmentContainerNotFound)
 
 
 class TestDockerEnv():
@@ -44,7 +45,8 @@ class TestDockerEnv():
             f.write(to_unicode(str("RUN echo " + random_text)))
 
     def teardown_method(self):
-        pass
+        self.docker_environment_manager.stop_remove_containers_by_term(
+            term='cooltest', force=True)
 
     def test_instantiation_and_connected(self):
         assert self.docker_environment_manager.is_connected
@@ -183,6 +185,8 @@ class TestDockerEnv():
 
     def test_run(self):
         # TODO: add more options for run w/ volumes etc
+        # Keeping stdin_open and tty as either (True, True) or (False, False).
+        # other combination are not used
         image_name = str(uuid.uuid1())
         path = os.path.join(self.docker_environment_manager.filepath,
                             "Dockerfile")
@@ -193,11 +197,11 @@ class TestDockerEnv():
         log_filepath = os.path.join(self.docker_environment_manager.filepath,
                                     "test.log")
         self.docker_environment_manager.build(image_name, path)
-
+        # keeping stdin_open and tty as False
         run_options = {
             "command": ["sh", "-c", "echo yo"],
             "ports": ["8888:9999", "5000:5001"],
-            "name": "cooltest",
+            "name": "datmotest_dockerenv_1",
             "volumes": {
                 self.docker_environment_manager.filepath: {
                     'bind': '/home/',
@@ -205,9 +209,8 @@ class TestDockerEnv():
                 }
             },
             "detach": True,
-            "stdin_open": True,
-            "tty": True,
-            "gpu": True,
+            "stdin_open": False,
+            "tty": False,
             "api": False
         }
         return_code, run_id, logs = \
@@ -216,8 +219,36 @@ class TestDockerEnv():
         assert return_code == 0
         assert run_id
         assert logs
+
         # teardown
         self.docker_environment_manager.stop(run_id, force=True)
+
+        # TODO: Adding test with stdin_open and tty as True for `interactive` argument and terminate inside container
+        # # keeping stdin_open, tty as True
+        # run_options = {
+        #     "command": [],
+        #     "ports": ["8888:9999", "5000:5001"],
+        #     "name": "datmotest_dockerenv_2",
+        #     "volumes": {
+        #         self.docker_environment_manager.filepath: {
+        #             'bind': '/home/',
+        #             'mode': 'rw'
+        #         }
+        #     },
+        #     "detach": True,
+        #     "stdin_open": True,
+        #     "tty": True,
+        #     "api": False
+        # }
+        # return_code, run_id, logs = \
+        #     self.docker_environment_manager.run(image_name, run_options, log_filepath)
+        #
+        # assert return_code == 0
+        # assert run_id
+        # assert not logs
+        #
+        # # teardown
+        # self.docker_environment_manager.stop(run_id, force=True)
 
         # Test default values for run options
         run_options = {"command": ["sh", "-c", "echo yo"]}
@@ -246,12 +277,11 @@ class TestDockerEnv():
         run_options = {
             "command": ["sh", "-c", "echo yo"],
             "ports": ["8888:9999", "5000:5001"],
-            "name": "my_container_name_2",
+            "name": "datmotest_dockerenv_5",
             "volumes": None,
             "detach": False,
             "stdin_open": False,
             "tty": False,
-            "gpu": False,
             "api": False
         }
         _, run_id, _ = \
@@ -263,6 +293,10 @@ class TestDockerEnv():
 
     def test_remove(self):
         name = str(uuid.uuid1())
+        # Test if no image present and no containers
+        result = self.docker_environment_manager.remove(name)
+        assert result == True
+
         path = os.path.join(self.docker_environment_manager.filepath,
                             "Dockerfile")
         random_text = str(uuid.uuid1())
@@ -273,6 +307,7 @@ class TestDockerEnv():
         self.docker_environment_manager.build(name, path)
         result = self.docker_environment_manager.remove(name)
         assert result == True
+
         # With force
         self.docker_environment_manager.build(name, path)
         # teardown
@@ -302,6 +337,13 @@ class TestDockerEnv():
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_get_image(self):
+        failed = False
+        try:
+            self.docker_environment_manager.get_image("random")
+        except EnvironmentImageNotFound:
+            failed = True
+        assert failed
+
         image_name = str(uuid.uuid1())
         dockerfile_path = os.path.join(
             self.docker_environment_manager.filepath, "Dockerfile")
@@ -427,6 +469,13 @@ class TestDockerEnv():
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_get_container(self):
+        failed = False
+        try:
+            self.docker_environment_manager.get_container("random")
+        except EnvironmentContainerNotFound:
+            failed = True
+        assert failed
+
         image_name = str(uuid.uuid1())
         dockerfile_path = os.path.join(
             self.docker_environment_manager.filepath, "Dockerfile")
