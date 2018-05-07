@@ -31,6 +31,12 @@ $ export LOGGING_LEVEL=DEBUG # sets logging level to debug for tests
 $ python -m pytest --cov-config .coveragerc --cov=datmo
 ```
 
+If you run into issues with testing on docker, you might want to clean up your open docker containers 
+with the following command
+```
+$ docker rm -f $(docker ps -a -q)
+```
+
 ## Cleaning Up Code
 We use [yapf](https://github.com/google/yapf) to clean code and have added a pre-commit hook to
 ensure any changed files adhere to the styles specified in `.style.yapf` in the root of the project. 

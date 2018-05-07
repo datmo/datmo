@@ -1,11 +1,11 @@
 import os
 from datetime import datetime
 
-from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
-from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.snapshot import SnapshotController
+from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.entity.task import Task
+from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     TaskRunException, RequiredArgumentMissing, ProjectNotInitializedException,
     PathDoesNotExist, TaskInteractiveDetachException)

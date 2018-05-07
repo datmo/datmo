@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 import os
+import re
 import hashlib
-
 import textwrap
 import datetime
 from io import open
@@ -15,8 +15,6 @@ from glob import glob
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (PathDoesNotExist,
                                         MutuallyExclusiveArguments)
-
-import re
 
 
 def grep(pattern, fileObj):
@@ -125,6 +123,27 @@ def find_project_dir(starting_path=os.getcwd()):
         # os.path.split creates a tuple of the basepath and last directory
         # take the first part
         return find_project_dir(os.path.split(starting_path)[0])
+
+
+def parameterized(dec):
+    """Lifted from https://stackoverflow.com/questions/5929107/decorators-with-parameters
+
+    Parameters
+    ----------
+    dec : function
+
+    Returns
+    -------
+    function
+    """
+
+    def layer(*args, **kwargs):
+        def repl(f):
+            return dec(f, *args, **kwargs)
+
+        return repl
+
+    return layer
 
 
 def is_project_dir(path):
