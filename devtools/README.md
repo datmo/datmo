@@ -22,10 +22,12 @@ $ pip install recommonmark
 ```
 
 ## Testing
+The testing done below emulates what is done in the build on [travis](https://travis-ci.org/datmo/datmo)
 ```
 $ pip install pytest pytest-cov
 $ pip install coveralls
 $ export TEST_DATMO_DIR="/mydir" # Must be an absolute path
+$ export LOGGING_LEVEL=DEBUG # sets logging level to debug for tests
 $ python -m pytest --cov-config .coveragerc --cov=datmo
 ```
 
@@ -50,3 +52,13 @@ else
     git diff --name-only --cached | xargs -l git add
 fi
 ```
+
+## Upload to PyPi
+Versions of datmo are uploaded to [PyPI](https://pypi.org/project/datmo/) with the following steps
+1) Ensure the `VERSION` file in the `datmo/` module is updated to the desired version to upload 
+(must be later than the previous version on PyPI based on semver)
+2) Run the following commands
+
+        $ rm -rf dist/
+        $ python setup.py bdist_wheel
+        $ twine upload dist/*
