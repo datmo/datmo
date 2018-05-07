@@ -17,6 +17,7 @@ class Helper():
 
     def echo(self, message):
         print(message)
+        return message
 
     def prompt(self, msg, default=None):
         try:
@@ -71,4 +72,4 @@ class Helper():
         return command_class[1]
 
     def get_command_choices(self):
-        return ["init", "snapshot", "task"]
+        return ["init", "version", "--version", "-v", "snapshot", "task"]

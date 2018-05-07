@@ -3,7 +3,7 @@ channels:
     - conda-forge
 dependencies:
     - python=2.7
-    - sphinx
-    - sphinx-argparse
+    - sphinx=1.7.4
+    - sphinx-argparse=0.2.2
     - pip:
         - autodocsumm

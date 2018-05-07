@@ -1,8 +1,9 @@
-from blitzdb import Document
+from blitzdb import Document, queryset
 from datetime import datetime
 
-from datmo.core.util.exceptions import EntityNotFound, \
-    EntityCollectionNotFound, IncorrectTypeException
+from datmo.core.util.exceptions import (
+    EntityNotFound, EntityCollectionNotFound, IncorrectTypeException,
+    InvalidArgumentType, RequiredArgumentMissing)
 from datmo.core.storage.driver import DALDriver
 
 
@@ -10,7 +11,6 @@ class BlitzDBDALDriver(DALDriver):
     def __init__(self, driver_type, connection_string):
         super(BlitzDBDALDriver, self).__init__()
         self.database_name = 'datmo_db'
-
         if driver_type == "file":
             from blitzdb import FileBackend
             self.backend = FileBackend(connection_string)
@@ -103,16 +103,37 @@ class BlitzDBDALDriver(DALDriver):
         results = self.backend.filter(collection, {'pk': entity_id})
         return len(results) == 1
 
-    def query(self, collection, query_params):
+    def query(self, collection, query_params, sort_key=None, sort_order=None):
         self.__reload()
-        if query_params.get('id', None) != None:
+        if query_params.get('id', None) is not None:
             query_params['pk'] = query_params['id']
             del query_params['id']
-        return list(
-            map(normalize_entity, [
-                item.attributes.copy()
-                for item in self.backend.filter(collection, query_params)
-            ]))
+        if sort_key is not None and sort_order is not None:
+            if sort_order == 'ascending':
+                return list(
+                    map(normalize_entity, [
+                        item.attributes.copy() for item in self.backend.filter(
+                            collection, query_params).sort(
+                                sort_key, queryset.QuerySet.ASCENDING)
+                    ]))
+            elif sort_order == 'descending':
+                return list(
+                    map(normalize_entity, [
+                        item.attributes.copy() for item in self.backend.filter(
+                            collection, query_params).sort(
+                                sort_key, queryset.QuerySet.DESCENDING)
+                    ]))
+            else:
+                raise InvalidArgumentType()
+        else:
+            if sort_key is not None and sort_order is None or \
+                sort_key is None and sort_order is not None:
+                raise RequiredArgumentMissing()
+            return list(
+                map(normalize_entity, [
+                    item.attributes.copy()
+                    for item in self.backend.filter(collection, query_params)
+                ]))
 
     def delete(self, collection, entity_id):
         self.__reload()

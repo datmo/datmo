@@ -15,7 +15,7 @@ from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.entity.model import Model
 from datmo.core.entity.session import Session
 from datmo.core.entity.task import Task
-from datmo.core.util.exceptions import EntityNotFound
+from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
 
 
 class TestLocalDAL():
@@ -44,7 +44,18 @@ class TestLocalDAL():
             "command": "task_1",
             "start_time": datetime.utcnow(),
             "end_time": datetime.utcnow(),
-            "duration": 0.004
+            "duration": 0.004,
+            "created_at": datetime(2017, 2, 1)
+        }
+
+        self.task_input_dict_1 = {
+            "model_id": model.id,
+            "session_id": session.id,
+            "command": "task_1",
+            "start_time": datetime.utcnow(),
+            "end_time": datetime.utcnow(),
+            "duration": 0.004,
+            "created_at": datetime(2017, 3, 1)
         }
 
     def teardown_class(self):
@@ -139,3 +150,68 @@ class TestLocalDAL():
             self.dal.task.query({
                 "command": self.task_input_dict['command']
             })) == 6
+
+    def test_sort_tasks(self):
+        self.dal.task.create(Task(self.task_input_dict))
+        self.dal.task.create(Task(self.task_input_dict_1))
+
+        # Sorting of snapshot in descending
+        items = self.dal.task.query(
+            {
+                "model_id": self.task_input_dict["model_id"]
+            },
+            sort_key='created_at',
+            sort_order='descending')
+        assert items[0].created_at == self.task_input_dict_1["created_at"]
+
+        # Sorting of snapshot in ascending
+        items = self.dal.task.query(
+            {
+                "model_id": self.task_input_dict["model_id"]
+            },
+            sort_key='created_at',
+            sort_order='ascending')
+        assert items[0].created_at == self.task_input_dict["created_at"]
+
+        # Wrong order being passed in
+        failed = False
+        try:
+            _ = self.dal.task.query(
+                {
+                    "model_id": self.task_input_dict["model_id"]
+                },
+                sort_key='created_at',
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # Wrong key and order being passed in
+        failed = False
+        try:
+            _ = self.dal.task.query(
+                {
+                    "model_id": self.task_input_dict["model_id"]
+                },
+                sort_key='wrong_key',
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_items = self.dal.task.query(
+            {
+                "model_id": self.task_input_dict["model_id"]
+            },
+            sort_key='created_at',
+            sort_order='ascending')
+        items = self.dal.task.query(
+            {
+                "model_id": self.task_input_dict["model_id"]
+            },
+            sort_key='wrong_key',
+            sort_order='ascending')
+        expected_ids = [item.id for item in expected_items]
+        ids = [item.id for item in items]
+        assert set(expected_ids) == set(ids)

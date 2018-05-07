@@ -9,12 +9,14 @@ try:
 except NameError:
     to_unicode = str
 from docker import DockerClient
+from docker import errors
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import PathDoesNotExist, \
-    EnvironmentDoesNotExist, EnvironmentInitFailed, \
-    EnvironmentExecutionException, FileAlreadyExistsException, \
-    EnvironmentRequirementsCreateException
+from datmo.core.util.exceptions import (
+    PathDoesNotExist, EnvironmentDoesNotExist, EnvironmentInitFailed,
+    EnvironmentExecutionException, FileAlreadyExistsException,
+    EnvironmentRequirementsCreateException, EnvironmentImageNotFound,
+    EnvironmentContainerNotFound)
 from datmo.core.controller.environment.driver import EnvironmentDriver
 
 
@@ -158,7 +160,11 @@ class DockerEnvironmentDriver(EnvironmentDriver):
     def remove(self, name, force=False):
         stop_and_remove_containers_result = \
             self.stop_remove_containers_by_term(name, force=force)
-        remove_image_result = self.remove_image(name, force=force)
+        try:
+            self.get_image(name)
+            remove_image_result = self.remove_image(name, force=force)
+        except EnvironmentImageNotFound:
+            remove_image_result = True
         return stop_and_remove_containers_result and \
                remove_image_result
 
@@ -247,7 +253,10 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                    str(e)))
 
     def get_image(self, image_name):
-        return self.client.images.get(image_name)
+        try:
+            return self.client.images.get(image_name)
+        except errors.ImageNotFound:
+            raise EnvironmentImageNotFound()
 
     def list_images(self, name=None, all_images=False, filters=None):
         return self.client.images.list(
@@ -427,7 +436,10 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         return return_code, container_id
 
     def get_container(self, container_id):
-        return self.client.containers.get(container_id)
+        try:
+            return self.client.containers.get(container_id)
+        except errors.NotFound:
+            raise EnvironmentContainerNotFound()
 
     def list_containers(self,
                         all=False,

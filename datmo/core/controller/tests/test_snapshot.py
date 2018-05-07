@@ -13,10 +13,10 @@ except NameError:
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.controller.task import TaskController
-from datmo.core.util.exceptions import EntityNotFound, \
-    EnvironmentDoesNotExist, GitCommitDoesNotExist, \
-    SessionDoesNotExistException, RequiredArgumentMissing, \
-    TaskNotComplete
+from datmo.core.util.exceptions import (
+    EntityNotFound, EnvironmentDoesNotExist, GitCommitDoesNotExist,
+    SessionDoesNotExistException, RequiredArgumentMissing, TaskNotComplete,
+    InvalidArgumentType)
 
 
 class TestSnapshotController():
@@ -271,12 +271,8 @@ class TestSnapshotController():
         # 1) Test if fails with TaskNotComplete error
         # 2) Test if success with task files, results, and message
 
-        # Setup task
-        task_command = ["sh", "-c", "echo accuracy:0.45"]
-        input_dict = {"command": task_command}
-
         # Create task in the project
-        task_obj = self.task.create(input_dict)
+        task_obj = self.task.create()
 
         # 1) Test option 1
         failed = False
@@ -287,13 +283,17 @@ class TestSnapshotController():
             failed = True
         assert failed
 
+        # Create task_dict
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
+        task_dict = {"command": task_command}
+
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         # Test the default values
-        updated_task_obj = self.task.run(task_obj.id)
+        updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)
 
         # 2) Test option 2
         snapshot_obj = self.snapshot.create_from_task(
@@ -398,6 +398,50 @@ class TestSnapshotController():
         assert len(result) == 2 and \
             snapshot_obj_1 in result and \
             snapshot_obj_2 in result
+
+        # List all tasks regardless of filters in ascending
+        result = self.snapshot.list(
+            sort_key='created_at', sort_order='ascending')
+
+        assert len(result) == 2 and \
+               snapshot_obj_1 in result and \
+               snapshot_obj_2 in result
+        assert result[0].created_at <= result[-1].created_at
+
+        # List all tasks regardless of filters in descending
+        result = self.snapshot.list(
+            sort_key='created_at', sort_order='descending')
+        assert len(result) == 2 and \
+               snapshot_obj_1 in result and \
+               snapshot_obj_2 in result
+        assert result[0].created_at >= result[-1].created_at
+
+        # Wrong order being passed in
+        failed = False
+        try:
+            _ = self.snapshot.list(
+                sort_key='created_at', sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # Wrong key and order being passed in
+        failed = False
+        try:
+            _ = self.snapshot.list(
+                sort_key='wrong_key', sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_result = self.snapshot.list(
+            sort_key='created_at', sort_order='ascending')
+        result = self.snapshot.list(
+            sort_key='wrong_key', sort_order='ascending')
+        expected_ids = [item.id for item in expected_result]
+        ids = [item.id for item in result]
+        assert set(expected_ids) == set(ids)
 
         # List all snapshots with session filter
         result = self.snapshot.list(session_id=self.project.current_session.id)

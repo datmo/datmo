@@ -7,60 +7,13 @@ import prettytable
 from datmo.core.util.i18n import get as __
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
+from datmo.core.util.logger import DatmoLogger
 
 
 class TaskCommand(ProjectCommand):
-    def __init__(self, home, cli_helper):
-        super(TaskCommand, self).__init__(home, cli_helper)
-
-        task_parser = self.subparsers.add_parser("task", help="Task module")
-        subcommand_parsers = task_parser.add_subparsers(
-            title="subcommands", dest="subcommand")
-
-        # Task run arguments
-        run = subcommand_parsers.add_parser("run", help="Run task")
-        run.add_argument(
-            "--ports",
-            "-p",
-            dest="ports",
-            default=None,
-            action="append",
-            type=str,
-            help="""
-            Network port mapping during task (e.g. 8888:8888). Left is the host machine port and right
-            is the environment port available during a run.
-        """)
-        # run.add_argument("--data", nargs="*", dest="data", type=str, help="Path for data to be used during the Task")
-        run.add_argument(
-            "--env-def",
-            dest="environment_definition_filepath",
-            default=None,
-            type=str,
-            help=
-            "Pass in the Dockerfile with which you want to build the environment"
-        )
-        run.add_argument(
-            "--interactive",
-            dest="interactive",
-            action="store_true",
-            help="Run the environment in interactive mode (keeps STDIN open)")
-        run.add_argument("cmd", nargs="?", default=None)
-
-        # Task list arguments
-        ls = subcommand_parsers.add_parser("ls", help="List tasks")
-        ls.add_argument(
-            "--session-id",
-            dest="session_id",
-            default=None,
-            nargs="?",
-            type=str,
-            help="Pass in the session id to list the tasks in that session")
-
-        # Task stop arguments
-        stop = subcommand_parsers.add_parser("stop", help="Stop tasks")
-        stop.add_argument(
-            "--id", dest="id", default=None, type=str, help="Task ID to stop")
-
+    def __init__(self, home, cli_helper, parser):
+        super(TaskCommand, self).__init__(home, cli_helper, parser)
+        self.logger = DatmoLogger.get_logger(__name__)
         self.task_controller = TaskController(home=home)
 
     def run(self, **kwargs):
@@ -85,14 +38,15 @@ class TaskCommand(ProjectCommand):
             "command": kwargs['cmd']
         }
 
-        # Create the task object
-        task_obj = self.task_controller.create(task_dict)
+        # Create the task object)
+        task_obj = self.task_controller.create()
 
         # Pass in the task
         try:
             updated_task_obj = self.task_controller.run(
-                task_obj.id, snapshot_dict=snapshot_dict)
-        except:
+                task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
+        except Exception as e:
+            self.logger.error("%s %s" % (e, task_dict))
             self.cli_helper.echo(__("error", "cli.task.run", task_obj.id))
             return False
         return updated_task_obj
@@ -103,7 +57,8 @@ class TaskCommand(ProjectCommand):
         # Get all snapshot meta information
         header_list = ["id", "command", "results", "created at"]
         t = prettytable.PrettyTable(header_list)
-        task_objs = self.task_controller.list(session_id)
+        task_objs = self.task_controller.list(
+            session_id, sort_key='created_at', sort_order='descending')
         for task_obj in task_objs:
             t.add_row([
                 task_obj.id, task_obj.command, task_obj.results,

@@ -8,13 +8,14 @@ from __future__ import unicode_literals
 import os
 import tempfile
 import platform
+from datetime import datetime
 
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.entity.model import Model
 from datmo.core.entity.session import Session
 from datmo.core.entity.snapshot import Snapshot
-from datmo.core.util.exceptions import EntityNotFound
+from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
 
 
 class TestLocalDAL():
@@ -49,7 +50,24 @@ class TestLocalDAL():
             },
             "stats": {
                 "test": 0.98
-            }
+            },
+            "created_at": datetime(2017, 2, 1)
+        }
+
+        self.snapshot_input_dict_1 = {
+            "model_id": model.id,
+            "session_id": session.id,
+            "message": "my message for 1",
+            "code_id": "code_id",
+            "environment_id": "environment_id",
+            "file_collection_id": "file_collection_id",
+            "config": {
+                "test": 0.90
+            },
+            "stats": {
+                "test": 1.23
+            },
+            "created_at": datetime(2017, 3, 1)
         }
 
     def teardown_class(self):
@@ -140,3 +158,68 @@ class TestLocalDAL():
                 "code_id": self.snapshot_input_dict['code_id']
             })) == 7
         assert len(self.dal.snapshot.query({"visible": True})) == 7
+
+    def test_sort_snapshots(self):
+        self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
+        self.dal.snapshot.create(Snapshot(self.snapshot_input_dict_1))
+
+        # Sorting of snapshot in descending
+        items = self.dal.snapshot.query(
+            {
+                "model_id": self.snapshot_input_dict["model_id"]
+            },
+            sort_key='created_at',
+            sort_order='descending')
+        assert items[0].created_at == self.snapshot_input_dict_1["created_at"]
+
+        # Sorting of snapshot in ascending
+        items = self.dal.snapshot.query(
+            {
+                "model_id": self.snapshot_input_dict["model_id"]
+            },
+            sort_key='created_at',
+            sort_order='ascending')
+        assert items[0].created_at == self.snapshot_input_dict["created_at"]
+
+        # Wrong order being passed in
+        failed = False
+        try:
+            _ = self.dal.snapshot.query(
+                {
+                    "model_id": self.snapshot_input_dict["model_id"]
+                },
+                sort_key='created_at',
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # Wrong key and order being passed in
+        failed = False
+        try:
+            _ = self.dal.snapshot.query(
+                {
+                    "model_id": self.snapshot_input_dict["model_id"]
+                },
+                sort_key='wrong_key',
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_items = self.dal.snapshot.query(
+            {
+                "model_id": self.snapshot_input_dict["model_id"]
+            },
+            sort_key='created_at',
+            sort_order='ascending')
+        items = self.dal.snapshot.query(
+            {
+                "model_id": self.snapshot_input_dict["model_id"]
+            },
+            sort_key='wrong_key',
+            sort_order='ascending')
+        expected_ids = [item.id for item in expected_items]
+        ids = [item.id for item in items]
+        assert set(expected_ids) == set(ids)

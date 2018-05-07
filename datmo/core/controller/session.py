@@ -1,9 +1,6 @@
-import os
-
 from datmo.core.controller.base import BaseController
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import RequiredArgumentMissing, \
-  SessionDoesNotExistException, EntityNotFound, InvalidOperation
+from datmo.core.util.exceptions import (EntityNotFound, InvalidOperation)
 
 
 class SessionController(BaseController):
@@ -86,8 +83,8 @@ class SessionController(BaseController):
             "current": True
         })
 
-    def list(self, query={}):
-        return self.dal.session.query(query)
+    def list(self, query={}, sort_key=None, sort_order=None):
+        return self.dal.session.query(query, sort_key, sort_order)
 
     def delete_by_name(self, name):
         if name == 'default':

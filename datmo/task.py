@@ -152,11 +152,11 @@ def run(command, env=None, home=None):
             task_dict["command"] = shlex.split(command)
 
     # Create the task object
-    core_task_obj = task_controller.create(task_dict)
+    core_task_obj = task_controller.create()
 
     # Pass in the task
     updated_core_task_obj = task_controller.run(
-        core_task_obj.id, snapshot_dict=snapshot_dict)
+        core_task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
 
     # Create a new task object for the
     client_task_obj = Task(updated_core_task_obj, home=home)

@@ -3,12 +3,12 @@ from datetime import datetime
 
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
-from datmo.core.util.misc_functions import mutually_exclusive
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.entity.task import Task
-from datmo.core.util.exceptions import TaskRunException, RequiredArgumentMissing, \
-    ProjectNotInitializedException, PathDoesNotExist, TaskInteractiveDetachException
+from datmo.core.util.exceptions import (
+    TaskRunException, RequiredArgumentMissing, ProjectNotInitializedException,
+    PathDoesNotExist, TaskInteractiveDetachException)
 
 
 class TaskController(BaseController):
@@ -50,14 +50,8 @@ class TaskController(BaseController):
             raise ProjectNotInitializedException(
                 __("error", "controller.task.__init__"))
 
-    def create(self, dictionary):
+    def create(self):
         """Create Task object
-
-        Parameters
-        ----------
-        dictionary : dict
-            command : str
-                full command used
 
         Returns
         -------
@@ -70,21 +64,6 @@ class TaskController(BaseController):
             "model_id": self.model.id,
             "session_id": self.current_session.id
         }
-        # Appending dictionary to create dictionary
-        create_dict.update(dictionary.copy())
-        # Required args
-        mutually_required_args = ["command", "interactive"]
-        count = 0
-        for arg in mutually_required_args:
-            if arg in dictionary and dictionary[arg]:
-                count += 1
-            elif arg in dictionary:
-                del dictionary[arg]
-
-        if count == 0:
-            raise RequiredArgumentMissing(
-                __("error", "controller.task.create.arg",
-                   " or ".join(mutually_required_args)))
 
         # Create Task
         return self.dal.task.create(Task(create_dict))
@@ -209,6 +188,15 @@ class TaskController(BaseController):
             task_dict = {}
         # Obtain Task to run
         task_obj = self.dal.task.get_by_id(task_id)
+
+        # Ensure that at least 1 of command or interactive is present in task_dict
+        important_task_args = ["command", "interactive"]
+        if not task_dict.get('command', task_obj.command) and \
+            not task_dict.get('interactive', task_obj.interactive):
+            raise RequiredArgumentMissing(
+                __("error", "controller.task.run.arg",
+                   " or ".join(important_task_args)))
+
         if task_obj.status is None:
             task_obj.status = 'RUNNING'
         else:
@@ -233,10 +221,11 @@ class TaskController(BaseController):
                 task_obj.id,
             "before_snapshot_id":
                 task_dict.get('before_snapshot_id', before_snapshot_obj.id),
+            "command": task_dict.get('command', task_obj.command),
+            "interactive": task_dict.get('interactive', task_obj.interactive),
+            "detach": task_dict.get('detach', task_obj.detach),
             "ports":
                 task_dict.get('ports', task_obj.ports),
-            "interactive":
-                task_dict.get('interactive', task_obj.interactive),
             "task_dirpath":
                 task_dict.get('task_dirpath', task_dirpath),
             "log_filepath":
@@ -310,18 +299,18 @@ class TaskController(BaseController):
             "after_snapshot_id": after_snapshot_obj.id,
             "run_id": run_id,
             "logs": logs,
+            "status": "SUCCESS" if return_code == 0 else "FAILED",
             "results": self._parse_logs_for_results(logs),
             # "results": task_obj.results, # TODO: update during run
-            "status": "SUCCESS" if return_code == 0 else "FAILED",
             "end_time": end_time,
             "duration": duration
         })
 
-    def list(self, session_id=None):
+    def list(self, session_id=None, sort_key=None, sort_order=None):
         query = {}
         if session_id:
             query['session_id'] = session_id
-        return self.dal.task.query(query)
+        return self.dal.task.query(query, sort_key, sort_order)
 
     def get_files(self, task_id, mode="r"):
         """Get list of file objects for task id. It will look in the following areas in the following order

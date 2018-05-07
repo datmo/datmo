@@ -15,6 +15,7 @@ except NameError:
 
 import os
 from datmo.cli.driver.helper import Helper
+from datmo.cli.parser import parser
 from datmo.cli.command.session import SessionCommand
 from datmo.cli.command.project import ProjectCommand
 
@@ -27,9 +28,10 @@ class TestSession():
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
-        self.session_command = SessionCommand(self.temp_dir, self.cli_helper)
+        self.session_command = SessionCommand(self.temp_dir, self.cli_helper,
+                                              parser)
 
-        init = ProjectCommand(self.temp_dir, self.cli_helper)
+        init = ProjectCommand(self.temp_dir, self.cli_helper, parser)
         init.parse(["init", "--name", "foobar", "--description", "test model"])
         init.execute()
 

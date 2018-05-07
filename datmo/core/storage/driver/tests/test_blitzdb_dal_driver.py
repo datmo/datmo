@@ -11,7 +11,8 @@ import datetime
 import platform
 
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
-from datmo.core.util.exceptions import EntityNotFound
+from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType, \
+    RequiredArgumentMissing
 
 
 class TestBlitzDBDALDriverInit():
@@ -226,3 +227,322 @@ class TestBlitzDBDALDriver():
         except:
             failed = True
         assert failed
+
+    def test_query_sort_date_str(self):
+        collection = 'snapshot'
+        self.database.set(
+            collection, {
+                "range_query4":
+                    datetime.datetime(2017, 1, 1)
+                    .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            })
+        self.database.set(
+            collection, {
+                "range_query4":
+                    datetime.datetime(2017, 2, 1)
+                    .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            })
+        self.database.set(
+            collection, {
+                "range_query4":
+                    datetime.datetime(2017, 3, 1)
+                    .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            })
+        # ascending
+        items = self.database.query(
+            collection, {
+                "range_query4": {
+                    "$gte":
+                        datetime.datetime(2017, 2, 1)
+                        .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                }
+            },
+            sort_key="range_query4",
+            sort_order='ascending')
+        assert items[0]['range_query4'] == datetime.datetime(
+            2017, 2, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        # descending
+        items = self.database.query(
+            collection, {
+                "range_query4": {
+                    "$gte":
+                        datetime.datetime(2017, 2, 1)
+                        .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                }
+            },
+            sort_key="range_query4",
+            sort_order='descending')
+        assert items[0]['range_query4'] == datetime.datetime(
+            2017, 3, 1).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+
+        # only sort_key is passed in with no sort_order
+        failed = False
+        try:
+            _ = self.database.query(
+                collection, {
+                    "range_query4": {
+                        "$gte":
+                            datetime.datetime(2017, 2, 1)
+                            .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                    }
+                },
+                sort_key="range_query4")
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
+
+        # only sort_order is passed in with no sort_key
+        failed = False
+        try:
+            _ = self.database.query(
+                collection, {
+                    "range_query4": {
+                        "$gte":
+                            datetime.datetime(2017, 2, 1)
+                            .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                    }
+                },
+                sort_order='descending')
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
+
+        # both passed and wrong sort order
+        failed = False
+        try:
+            _ = self.database.query(
+                collection, {
+                    "range_query4": {
+                        "$gte":
+                            datetime.datetime(2017, 2, 1)
+                            .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                    }
+                },
+                sort_key="range_query4",
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # both passed and both are wrong
+        failed = False
+        try:
+            _ = self.database.query(
+                collection, {
+                    "range_query4": {
+                        "$gte":
+                            datetime.datetime(2017, 2, 1)
+                            .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                    }
+                },
+                sort_key="wrong_key",
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_items = self.database.query(
+            collection, {
+                "range_query4": {
+                    "$gte":
+                        datetime.datetime(2017, 2, 1)
+                        .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                }
+            },
+            sort_key="range_query4",
+            sort_order='ascending')
+        items = self.database.query(
+            collection, {
+                "range_query4": {
+                    "$gte":
+                        datetime.datetime(2017, 2, 1)
+                        .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                }
+            },
+            sort_key="wrong_key",
+            sort_order='ascending')
+        expected_ids = [item['id'] for item in expected_items]
+        ids = [item['id'] for item in items]
+        assert set(expected_ids) == set(ids)
+
+    def test_query_sort_int(self):
+        collection = 'snapshot'
+        self.database.set(collection, {"range_query5": 1})
+        self.database.set(collection, {"range_query5": 2})
+        self.database.set(collection, {"range_query5": 3})
+
+        # ascending
+        items = self.database.query(
+            collection, {"range_query5": {
+                "$gte": 2
+            }},
+            sort_key="range_query5",
+            sort_order='ascending')
+        assert items[0]['range_query5'] == 2
+
+        # descending
+        items = self.database.query(
+            collection, {"range_query5": {
+                "$gte": 2
+            }},
+            sort_key="range_query5",
+            sort_order='descending')
+        assert items[0]['range_query5'] == 3
+
+        # sort_key passed in but sort_order missing
+        failed = False
+        try:
+            _ = self.database.query(
+                collection, {"range_query5": {
+                    "$gte": 2
+                }},
+                sort_key="range_query5")
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
+
+        # sort_order passed in but sort_key missing
+        failed = False
+        try:
+            _ = self.database.query(
+                collection, {"range_query5": {
+                    "$gte": 2
+                }},
+                sort_order='descending')
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
+
+        # both passed but wrong sort_order
+        failed = False
+        try:
+            _ = self.database.query(
+                collection, {"range_query5": {
+                    "$gte": 2
+                }},
+                sort_key="range_query5",
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # both passed and both wrong key and order
+        failed = False
+        try:
+            _ = self.database.query(
+                collection, {"range_query5": {
+                    "$gte": 2
+                }},
+                sort_key="wrong_key",
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_items = self.database.query(collection,
+                                             {"range_query5": {
+                                                 "$gte": 2
+                                             }})
+        items = self.database.query(
+            collection, {"range_query5": {
+                "$gte": 2
+            }},
+            sort_key="wrong_key",
+            sort_order='ascending')
+        expected_ids = [item['id'] for item in expected_items]
+        ids = [item['id'] for item in items]
+        assert set(expected_ids) == set(ids)
+
+    def test_query_sort_bool(self):
+        collection = 'snapshot'
+        self.database.set(collection, {"range_query6": 1, "bool_query": True})
+        self.database.set(collection, {"range_query6": 2, "bool_query": False})
+        self.database.set(collection, {"range_query6": 3, "bool_query": True})
+        self.database.set(collection, {"range_query6": 4, "bool_query": True})
+
+        # ascending
+        items = self.database.query(
+            collection, {"range_query6": {
+                "$gte": 2
+            }},
+            sort_key="bool_query",
+            sort_order='ascending')
+        assert items[0]['range_query6'] == 2
+        assert items[0]['bool_query'] == False
+
+        # descending
+        items = self.database.query(
+            collection, {"range_query6": {
+                "$gte": 2
+            }},
+            sort_key="bool_query",
+            sort_order='descending')
+        assert items[0]['range_query6'] == 3
+        assert items[0]['bool_query'] == True
+
+        # sort_key passed in but sort_order missing
+        failed = False
+        try:
+            _ = self.database.query(
+                collection, {"range_query6": {
+                    "$gte": 2
+                }},
+                sort_key="bool_query")
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
+
+        # sort_order passed in but sort_key missing
+        failed = False
+        try:
+            _ = self.database.query(
+                collection, {"range_query6": {
+                    "$gte": 2
+                }},
+                sort_order='descending')
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
+
+        # wrong order being passed in
+        failed = False
+        try:
+            _ = self.database.query(
+                collection, {"range_query6": {
+                    "$gte": 2
+                }},
+                sort_key="range_query6",
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and order being passed in
+        failed = False
+        try:
+            _ = self.database.query(
+                collection, {"range_query6": {
+                    "$gte": 2
+                }},
+                sort_key="wrong_key",
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_items = self.database.query(collection,
+                                             {"range_query6": {
+                                                 "$gte": 2
+                                             }})
+        items = self.database.query(
+            collection, {"range_query6": {
+                "$gte": 2
+            }},
+            sort_key="wrong_key",
+            sort_order='ascending')
+        expected_ids = [item['id'] for item in expected_items]
+        ids = [item['id'] for item in items]
+        assert set(expected_ids) == set(ids)

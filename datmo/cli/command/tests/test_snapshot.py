@@ -21,10 +21,11 @@ except NameError:
     to_unicode = str
 
 from datmo.cli.driver.helper import Helper
+from datmo.cli.parser import parser
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
-from datmo.core.util.exceptions import ProjectNotInitializedException, \
-    MutuallyExclusiveArguments
+from datmo.core.util.exceptions import (ProjectNotInitializedException,
+                                        MutuallyExclusiveArguments)
 
 
 class TestSnapshot():
@@ -41,11 +42,11 @@ class TestSnapshot():
         pass
 
     def __set_variables(self):
-        self.init = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.init = ProjectCommand(self.temp_dir, self.cli_helper, parser)
         self.init.parse(
             ["init", "--name", "foobar", "--description", "test model"])
         self.init.execute()
-        self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
+        self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper, parser)
 
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
@@ -75,7 +76,8 @@ class TestSnapshot():
     def test_snapshot_project_not_init(self):
         failed = False
         try:
-            self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
+            self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper,
+                                            parser)
         except ProjectNotInitializedException:
             failed = True
         assert failed

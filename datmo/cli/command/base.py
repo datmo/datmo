@@ -1,32 +1,14 @@
+#!/usr/bin/python
+
 from datmo.core.util.i18n import get as __
-from datmo.cli.driver.parser import Parser
 from datmo.core.util.exceptions import ClassMethodNotFound
 
 
 class BaseCommand(object):
-    def __init__(self, home, cli_helper):
+    def __init__(self, home, cli_helper, parser):
         self.home = home
         self.cli_helper = cli_helper
-        self.parser = Parser(
-            prog="datmo",
-            usage="""
-        
-        datmo COMMAND [SUBCOMMANDS] ARGS 
-
-        Datmo is a command line utility to enable tracking of data science projects. 
-        It uses many of the tools you are already familiar with and combines them into a snapshot
-        which allows you to keep track of 5 components at once
-
-        1) Source Code
-        2) Dependency Environment
-        3) Large Files
-        4) Configurations
-        5) Metrics
-        
-        command: 
-        """)
-        self.subparsers = self.parser.add_subparsers(
-            title="commands", dest="command")
+        self.parser = parser
 
     def parse(self, args):
         self.args = self.parser.parse_args(args)
