@@ -83,7 +83,8 @@ class SessionController(BaseController):
             "current": True
         })
 
-    def list(self, query={}, sort_key=None, sort_order=None):
+    def list(self, sort_key=None, sort_order=None):
+        query = {}
         return self.dal.session.query(query, sort_key, sort_order)
 
     def delete_by_name(self, name):

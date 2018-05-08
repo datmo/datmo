@@ -58,7 +58,7 @@ class TestSessionController():
         assert current_sess
         assert current_sess.current == True
 
-    def test_get_session_sort(self):
+    def test_list_session_sort(self):
         # Sort ascending
         sessions = self.session.list(
             sort_key='created_at', sort_order='ascending')
