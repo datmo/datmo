@@ -15,7 +15,6 @@ from __future__ import unicode_literals
 import os
 import tempfile
 import platform
-import timeout_decorator
 
 from datmo import __version__
 from datmo.cli.driver.helper import Helper

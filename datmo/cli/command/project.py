@@ -60,7 +60,7 @@ class ProjectCommand(BaseCommand):
         else:  # Update the current project
             self.cli_helper.echo(
                 __("info", "cli.project.init.update", {
-                    "name": name,
+                    "name": self.project_controller.model.name,
                     "path": self.home
                 }))
             if not name:
@@ -90,8 +90,14 @@ class ProjectCommand(BaseCommand):
                         "path": self.home
                     }))
                 return None
+
+        self.cli_helper.echo("")
+
         # Print out simple project meta data
-        self.cli_helper.echo(self.project_controller.model.to_dictionary())
+        for k, v in self.project_controller.model.to_dictionary().items():
+            if k != "config":
+                self.cli_helper.echo(str(k) + ": " + str(v))
+
         return self.project_controller.model
 
     def version(self):
