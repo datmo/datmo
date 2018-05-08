@@ -12,18 +12,83 @@ class ProjectCommand(BaseCommand):
         self.project_controller = ProjectController(home=home)
 
     def init(self, name, description):
-        if not name:
-            name = self.cli_helper.prompt(
-                __("prompt", "cli.project.init.name"))
-        if not description:
-            description = self.cli_helper.prompt(
-                __("prompt", "cli.project.init.description"))
-        self.cli_helper.echo(
-            __("info", "cli.project.init", {
-                "name": name,
-                "path": self.home
-            }))
-        self.project_controller.init(name, description)
+        """Initialize command
+
+        Parameters
+        ----------
+        name : str
+            name for the project
+        description : str
+            description of the project
+
+        Returns
+        -------
+        datmo.core.entity.model.Model
+        """
+        # Check if project already exists
+        is_new_model = False
+        if not self.project_controller.model:
+            is_new_model = True
+
+        if is_new_model: # Initialize a new project
+            self.cli_helper.echo(
+                __("info", "cli.project.init.create", {
+                    "name": name,
+                    "path": self.home
+                }))
+            if not name:
+                name = self.cli_helper.prompt(
+                    __("prompt", "cli.project.init.name"))
+            if not description:
+                description = self.cli_helper.prompt(
+                    __("prompt", "cli.project.init.description"))
+            try:
+                success = self.project_controller.init(name, description)
+                if success:
+                    self.cli_helper.echo(__("info", "cli.project.init.create.success", {
+                        "name": name,
+                        "path": self.home
+                    }))
+            except:
+                self.cli_helper.echo(__("info", "cli.project.init.create.failure", {
+                    "name": name,
+                    "path": self.home
+                }))
+                return None
+        else: # Update the current project
+            self.cli_helper.echo(
+                __("info", "cli.project.init.update", {
+                    "name": name,
+                    "path": self.home
+                }))
+            if not name:
+                name = self.cli_helper.prompt(
+                    __("prompt", "cli.project.init.name"))
+            if not description:
+                description = self.cli_helper.prompt(
+                    __("prompt", "cli.project.init.description"))
+            # Update project parameter if given parameter is not falsy and different
+            if not name or name == self.project_controller.model.name:
+                name = self.project_controller.model.name
+            if not description or description == self.project_controller.model.description:
+                description = self.project_controller.model.description
+            # Update the project with the values given
+            try:
+                success = self.project_controller.init(name, description)
+                if success:
+                    self.cli_helper.echo(__("info", "cli.project.init.update.success", {
+                        "name": name,
+                        "path": self.home
+                    }))
+            except:
+                self.cli_helper.echo(__("info", "cli.project.init.update.failure", {
+                    "name": name,
+                    "path": self.home
+                }))
+                return None
+        # Print out the project meta data
+        self.cli_helper.echo(self.project_controller.model.to_dictionary())
+        return self.project_controller.model
 
     def version(self):
         return self.cli_helper.echo("datmo version: %s" % __version__)
