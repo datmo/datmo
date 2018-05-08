@@ -99,9 +99,10 @@ snapshot_create.add_argument(
     default=None,
     help="environment id from environment object")
 snapshot_create.add_argument(
-    "--environment-def-path",
-    dest="environment_def_path",
+    "--environment-def",
+    dest="environment_definition_filepath",
     default=None,
+    type=str,
     help=
     "absolute filepath to environment definition file (e.g. /path/to/Dockerfile)"
 )
@@ -190,11 +191,13 @@ task_run.add_argument(
 """)
 # run.add_argument("--data", nargs="*", dest="data", type=str, help="Path for data to be used during the Task")
 task_run.add_argument(
-    "--env-def",
+    "--environment-def",
     dest="environment_definition_filepath",
     default=None,
     type=str,
-    help="pass in the Dockerfile with which you want to build the environment")
+    help=
+    "absolute filepath to environment definition file (e.g. /path/to/Dockerfile)"
+)
 task_run.add_argument(
     "--interactive",
     dest="interactive",

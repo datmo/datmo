@@ -155,3 +155,7 @@ class TaskNotComplete(ArgumentException):
 
 class TaskInteractiveDetachException(ArgumentException):
     pass
+
+
+class SnapshotCreateFromTaskArgs(ArgumentException):
+    pass
