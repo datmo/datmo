@@ -86,9 +86,44 @@ class ProjectCommand(BaseCommand):
                     "path": self.home
                 }))
                 return None
-        # Print out the project meta data
+        # Print out simple project meta data
         self.cli_helper.echo(self.project_controller.model.to_dictionary())
         return self.project_controller.model
 
     def version(self):
         return self.cli_helper.echo("datmo version: %s" % __version__)
+
+    def status(self):
+        status_dict, latest_snapshot, ascending_unstaged_tasks= self.project_controller.status()
+
+        # Print out simple project meta data
+        for k, v in status_dict.items():
+            if k != "config":
+                self.cli_helper.echo(str(k) + ": " + str(v))
+
+        self.cli_helper.echo("")
+
+        # Print out project config meta data
+        self.cli_helper.echo("config: ")
+        self.cli_helper.echo(status_dict['config'])
+
+        self.cli_helper.echo("")
+
+        # Print out latest snapshot info
+        self.cli_helper.echo("latest snapshot id: ")
+        if latest_snapshot:
+            self.cli_helper.echo(latest_snapshot.id)
+        else:
+            self.cli_helper.echo("no snapshots created yet")
+
+        self.cli_helper.echo("")
+
+        # Print out unstaged tasks
+        self.cli_helper.echo("unstaged task ids:")
+        if ascending_unstaged_tasks:
+            for task in ascending_unstaged_tasks:
+                self.cli_helper.echo(task.id)
+        else:
+            self.cli_helper.echo("no unstaged tasks")
+
+        return status_dict, latest_snapshot, ascending_unstaged_tasks

@@ -21,9 +21,9 @@ class Helper():
     def __init__(self):
         pass
 
-    def echo(self, message):
-        print(message)
-        return message
+    def echo(self, value):
+        print(to_unicode(value))
+        return value
 
     def input(self, input_msg):
         def input_decorator(func):
@@ -92,4 +92,4 @@ class Helper():
         return command_class[1]
 
     def get_command_choices(self):
-        return ["init", "version", "--version", "-v", "snapshot", "task"]
+        return ["init", "version", "--version", "-v", "status", "snapshot", "task"]

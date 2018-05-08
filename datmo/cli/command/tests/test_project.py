@@ -134,3 +134,25 @@ class TestProject():
         except Exception:
             exception_thrown = True
         assert exception_thrown
+
+    def test_status(self):
+        test_name = "foobar"
+        test_description = "test model"
+        self.project.parse(
+            ["init", "--name", test_name, "--description", test_description])
+        _ = self.project.execute()
+
+        self.project.parse(["status"])
+        result = self.project.execute()
+        assert isinstance(result[0], dict)
+        assert not result[1]
+        assert not result[2]
+
+    def test_status_invalid_arg(self):
+        exception_thrown = False
+        try:
+            self.project.parse(["status", "--foobar"])
+        except Exception:
+            exception_thrown = True
+        assert exception_thrown
+
