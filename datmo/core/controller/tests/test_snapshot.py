@@ -327,8 +327,13 @@ class TestSnapshotController():
         test_config = {"algo": "regression"}
         test_stats = {"new_key": 0.9}
         task_obj_2 = self.task.create()
-        updated_task_obj_2 = self.task.run(task_obj_2.id, task_dict=task_dict,
-                                         snapshot_dict={"config": test_config, "stats": test_stats})
+        updated_task_obj_2 = self.task.run(
+            task_obj_2.id,
+            task_dict=task_dict,
+            snapshot_dict={
+                "config": test_config,
+                "stats": test_stats
+            })
 
         snapshot_obj = self.snapshot.create_from_task(
             message="my test snapshot",

@@ -259,8 +259,8 @@ class TestTaskCommand():
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
 
         self.task.parse([
-            "task", "run", "--ports", test_ports, "--environment-def", test_dockerfile,
-            test_command
+            "task", "run", "--ports", test_ports, "--environment-def",
+            test_dockerfile, test_command
         ])
 
         test_task_obj = self.task.execute()

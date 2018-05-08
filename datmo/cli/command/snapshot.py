@@ -24,9 +24,9 @@ class SnapshotCommand(ProjectCommand):
         if task_id is not None:
             excluded_args = [
                 "code_id", "commit_id", "environment_id",
-                "environment_definition_filepath", "file_collection_id", "filepaths",
-                "config_filepath", "config_filename", "stats_filepath",
-                "stats_filename"
+                "environment_definition_filepath", "file_collection_id",
+                "filepaths", "config_filepath", "config_filename",
+                "stats_filepath", "stats_filename"
             ]
             for arg in excluded_args:
                 if arg in kwargs and kwargs[arg] is not None:

@@ -142,10 +142,10 @@ class TestSnapshot():
         self.snapshot.parse([
             "snapshot", "create", "--message", test_message, "--label",
             test_label, "--session-id", test_session_id, "--code-id",
-            test_code_id, "--environment-def", test_environment_definition_filepath,
-            "--config-filepath", test_config_filepath, "--stats-filepath",
-            test_stats_filepath, "--filepaths", test_filepaths[0],
-            "--filepaths", test_filepaths[1]
+            test_code_id, "--environment-def",
+            test_environment_definition_filepath, "--config-filepath",
+            test_config_filepath, "--stats-filepath", test_stats_filepath,
+            "--filepaths", test_filepaths[0], "--filepaths", test_filepaths[1]
         ])
 
         # test for desired side effects
@@ -170,8 +170,9 @@ class TestSnapshot():
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         self.task = TaskCommand(self.temp_dir, self.cli_helper, parser)
-        self.task.parse(
-            ["task", "run", "--environment-def", test_dockerfile, test_command])
+        self.task.parse([
+            "task", "run", "--environment-def", test_dockerfile, test_command
+        ])
 
         # test proper execution of task run command
         task_obj = self.task.execute()
@@ -198,8 +199,9 @@ class TestSnapshot():
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         self.task = TaskCommand(self.temp_dir, self.cli_helper, parser)
-        self.task.parse(
-            ["task", "run", "--environment-def", test_dockerfile, test_command])
+        self.task.parse([
+            "task", "run", "--environment-def", test_dockerfile, test_command
+        ])
 
         # test proper execution of task run command
         task_obj = self.task.execute()

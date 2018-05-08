@@ -235,7 +235,8 @@ class SnapshotController(BaseController):
                 __("error", "controller.snapshot.create_from_task",
                    str(task_obj.id)))
 
-        after_snapshot_obj = self.dal.snapshot.get_by_id(task_obj.after_snapshot_id)
+        after_snapshot_obj = self.dal.snapshot.get_by_id(
+            task_obj.after_snapshot_id)
 
         snapshot_update_dict = {
             "id": task_obj.after_snapshot_id,

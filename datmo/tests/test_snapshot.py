@@ -15,10 +15,9 @@ from datmo.snapshot import Snapshot
 from datmo.task import run
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.controller.project import ProjectController
-from datmo.core.util.exceptions import (GitCommitDoesNotExist,
-                                        InvalidProjectPathException,
-                                        SessionDoesNotExistException,
-                                        SnapshotCreateFromTaskArgs)
+from datmo.core.util.exceptions import (
+    GitCommitDoesNotExist, InvalidProjectPathException,
+    SessionDoesNotExistException, SnapshotCreateFromTaskArgs)
 
 
 class TestSnapshotModule():

@@ -177,9 +177,7 @@ def create(message,
     snapshot_controller = SnapshotController(home=home)
 
     if task_id is not None:
-        excluded_args = [
-            "commit_id", "environment_id", "filepaths"
-        ]
+        excluded_args = ["commit_id", "environment_id", "filepaths"]
         for arg in excluded_args:
             if eval(arg) is not None:
                 raise SnapshotCreateFromTaskArgs(
