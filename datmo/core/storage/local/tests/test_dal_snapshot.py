@@ -107,6 +107,12 @@ class TestLocalDAL():
         result = self.dal.snapshot.get_by_id(snapshot.id)
         assert snapshot.id == result.id
 
+    def test_get_by_shortened_id_snapshot(self):
+        snapshot = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
+
+        result = self.dal.snapshot.get_by_shortened_id(snapshot.id[:10])
+        assert snapshot.id == result.id
+
     def test_get_by_id_snapshot_new_driver_instance(self):
         snapshot = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
 
@@ -156,8 +162,8 @@ class TestLocalDAL():
         assert len(
             self.dal.snapshot.query({
                 "code_id": self.snapshot_input_dict['code_id']
-            })) == 7
-        assert len(self.dal.snapshot.query({"visible": True})) == 7
+            })) == 8
+        assert len(self.dal.snapshot.query({"visible": True})) == 8
 
     def test_sort_snapshots(self):
         self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))

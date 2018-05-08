@@ -53,6 +53,11 @@ class TestLocalDAL():
         result = self.dal.model.get_by_id(model.id)
         assert model.id == result.id
 
+    def test_get_by_shortened_id_model(self):
+        model = self.dal.model.create(Model(self.model_input_dict))
+        result = self.dal.model.get_by_shortened_id(model.id[:10])
+        assert model.id == result.id
+
     def test_get_by_id_model_same_dir(self):
         test_dir = "test-dir"
         datadriver = BlitzDBDALDriver("file", test_dir)
@@ -124,4 +129,4 @@ class TestLocalDAL():
         assert len(
             self.dal.model.query({
                 "name": self.model_input_dict['name']
-            })) == 6
+            })) == 7

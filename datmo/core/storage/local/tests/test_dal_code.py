@@ -66,6 +66,11 @@ class TestLocalDAL():
         result = self.dal.code.get_by_id(code.id)
         assert code.id == result.id
 
+    def test_get_by_shotened_id_code(self):
+        code = self.dal.code.create(Code(self.code_input_dict))
+        result = self.dal.code.get_by_shortened_id(code.id[:10])
+        assert code.id == result.id
+
     def test_get_by_id_code_new_driver_instance(self):
         code = self.dal.code.create(Code(self.code_input_dict))
 

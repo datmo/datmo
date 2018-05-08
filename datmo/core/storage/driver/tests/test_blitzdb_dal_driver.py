@@ -73,13 +73,16 @@ class TestBlitzDBDALDriver():
         assert result.get('id') != None
 
     def test_db_get(self):
-        test_obj = {"foo": "bar_1"}
+        test_obj = {"foo": "bar_0"}
         result = self.database.set(self.collection, test_obj)
         result1 = self.database.get(self.collection, result.get('id'))
         assert result1.get('id') == result.get('id')
+
+    def test_db_get_by_shortened_id(self):
+        test_obj = {"foo": "bar_1"}
+        result = self.database.set(self.collection, test_obj)
         # Test with substring to get with regex
-        result2 = self.database.get(
-            self.collection, result.get('id')[:10], regex=True)
+        result2 = self.database.get_by_shortened_id(self.collection, result.get('id')[:10])
         assert result2.get('id') == result.get('id')
 
     def test_db_update(self):
@@ -109,7 +112,7 @@ class TestBlitzDBDALDriver():
 
     def test_db_query_all(self):
         results = self.database.query(self.collection, {})
-        assert len(results) == 5
+        assert len(results) == 6
         # ensure each entity returns an 'id'
         for entity in results:
             assert entity['id'] != None

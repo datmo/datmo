@@ -61,16 +61,25 @@ class BlitzDBDALDriver(DALDriver):
                     if nested_index[index]._store:
                         nested_index[index].load_from_store()
 
-    def get(self, collection, entity_id, regex=False):
+    def get(self, collection, entity_id):
         self.__reload()
         try:
-            if regex:
-                results = self.backend.filter(collection,
-                                              {'pk': {
-                                                  '$regex': entity_id
-                                              }})
+            results = self.backend.filter(collection, {'pk': entity_id})
+            if len(results) == 1:
+                item_dict = results[0].attributes
+                return normalize_entity(item_dict)
             else:
-                results = self.backend.filter(collection, {'pk': entity_id})
+                raise EntityNotFound()
+        except AttributeError as err:
+            raise EntityCollectionNotFound(err.message)
+
+    def get_by_shortened_id(self, collection, shortened_entity_id):
+        self.__reload()
+        try:
+            results = self.backend.filter(collection,
+                                          {'pk': {
+                                              '$regex': shortened_entity_id
+                                          }})
             if len(results) == 1:
                 item_dict = results[0].attributes
                 return normalize_entity(item_dict)

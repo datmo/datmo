@@ -56,6 +56,12 @@ class TestLocalDAL():
         result = self.dal.user.get_by_id(user.id)
         assert user.id == result.id
 
+    def test_get_by_shortened_id_user(self):
+        user = self.dal.user.create(User(self.user_input_dict))
+
+        result = self.dal.user.get_by_shortened_id(user.id[:10])
+        assert user.id == result.id
+
     def test_get_by_id_user_new_driver_instance(self):
         user = self.dal.user.create(User(self.user_input_dict))
 
@@ -102,4 +108,4 @@ class TestLocalDAL():
         assert len(
             self.dal.user.query({
                 "name": self.user_input_dict['name']
-            })) == 6
+            })) == 7
