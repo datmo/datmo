@@ -42,7 +42,7 @@ class JSONStore():
         self.in_memory_settings = False
         settings_dict = {}
         if not os.path.exists(self.filepath):
-            open(self.filepath, 'w').close()
+            open(self.filepath, 'w+').close()
         else:
             settings_dict = json.load(open(self.filepath, 'r'))
         settings_dict[key] = value
@@ -74,6 +74,22 @@ class JSONStore():
                 return settings[name]
             else:
                 return None
+
+    def remove(self, name):
+        if not os.path.exists(self.filepath):
+            return None
+        else:
+            settings_dict = json.load(open(self.filepath, 'r'))
+        settings_dict.pop(name, None)
+        with open(self.filepath, 'w', encoding='utf8') as outfile:
+            str_ = json.dumps(
+                settings_dict,
+                indent=4,
+                sort_keys=True,
+                separators=(',', ': '),
+                ensure_ascii=False)
+            outfile.write(to_unicode(str_))
+        return
 
     def to_dict(self):
         output_dict = dict()

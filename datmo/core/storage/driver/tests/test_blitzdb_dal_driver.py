@@ -219,7 +219,7 @@ class TestBlitzDBDALDriver():
 
         failed = False
         try:
-            items = self.database.query(
+            _ = self.database.query(
                 collection,
                 {"range_query2": {
                     "$gte": datetime.datetime(2017, 2, 1)

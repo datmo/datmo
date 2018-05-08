@@ -14,6 +14,7 @@ from datmo.core.util.exceptions import (
     PathDoesNotExist, GitUrlArgumentException, GitExecutionException,
     FileIOException, GitCommitDoesNotExist, DatmoFolderInWorkTree)
 from datmo.core.controller.code.driver import CodeDriver
+from datmo.config import Config
 
 
 class GitCodeDriver(CodeDriver):
@@ -686,6 +687,8 @@ class GitHostDriver(object):
         else:
             return False
 
+    @Config.cache_setting(
+        key="git.ssh_enabled", expires_min=1440, ignore_values=[False])
     def _check_for_ssh(self):
         cmd = "ssh-keyscan %s >> ~/.ssh/known_hosts" % (self.host)
         p = subprocess.Popen(
