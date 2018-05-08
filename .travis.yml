@@ -14,7 +14,7 @@ install:
 script:
 - pytest --cov-config .coveragerc --cov=datmo
 - echo $TRAVIS_COMMIT_RANGE
-- bash devtools/travis-ci/test_format_code.sh
+- bash devtools/travis-ci/test_format_code_simple.sh
 after_success:
 - echo $TRAVIS_SECURE_ENV_VARS
 - coveralls
