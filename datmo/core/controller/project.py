@@ -31,11 +31,6 @@ class ProjectController(BaseController):
         super(ProjectController, self).__init__(home)
 
     def init(self, name, description):
-        # Error if name is not given
-        if not name:
-            raise RequiredArgumentMissing(
-                __("error", "controller.project.init.arg", "name"))
-
         # Create the Model, is it new or update?
         is_new_model = False
         if not self.model:
@@ -51,6 +46,17 @@ class ProjectController(BaseController):
                 "name": name,
                 "description": description
             })
+
+        # If model is new validate inputs
+        if is_new_model:
+            # Error if name is blank or not given
+            if not name:
+                raise RequiredArgumentMissing(
+                    __("error", "controller.project.init.arg", "name"))
+            # Error if description is None
+            if description is None:
+                raise RequiredArgumentMissing(
+                    __("error", "controller.project.init.arg", "description"))
 
         # Initialize Code Manager if needed
         if not self.code_driver.is_initialized:
