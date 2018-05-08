@@ -32,7 +32,8 @@ class SessionCommand(ProjectCommand):
         return self.session_controller.select(name)
 
     def ls(self, **kwargs):
-        sessions = self.session_controller.list()
+        sessions = self.session_controller.list(
+            sort_key="created_at", sort_order="descending")
         header_list = ["name", "selected", "tasks", "snapshots"]
         t = prettytable.PrettyTable(header_list)
         for sess in sessions:
