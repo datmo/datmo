@@ -4,12 +4,14 @@ Tests for Datmo CLI Helper
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
+from future import standard_library
+standard_library.install_aliases()
+from builtins import input
 
 import os
 import sys
 import tempfile
 import platform
-from io import open
 try:
     to_unicode = unicode
 except NameError:
