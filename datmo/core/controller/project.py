@@ -5,7 +5,8 @@ from datmo.core.controller.base import BaseController
 from datmo.core.entity.model import Model
 from datmo.core.entity.session import Session
 from datmo.core.util.exceptions import (SessionDoesNotExistException,
-                                        RequiredArgumentMissing)
+                                        RequiredArgumentMissing,
+                                        ProjectNotInitializedException)
 
 
 class ProjectController(BaseController):
@@ -34,18 +35,7 @@ class ProjectController(BaseController):
         # Create the Model, is it new or update?
         is_new_model = False
         if not self.model:
-            _ = self.dal.model.create(
-                Model({
-                    "name": name,
-                    "description": description
-                }))
             is_new_model = True
-        else:
-            self._model = self.dal.model.update({
-                "id": self.model.id,
-                "name": name,
-                "description": description
-            })
 
         # If model is new validate inputs
         if is_new_model:
@@ -57,6 +47,20 @@ class ProjectController(BaseController):
             if description is None:
                 raise RequiredArgumentMissing(
                     __("error", "controller.project.init.arg", "description"))
+
+        # Create model if new else update
+        if is_new_model:
+            _ = self.dal.model.create(
+                Model({
+                    "name": name,
+                    "description": description
+                }))
+        else:
+            self._model = self.dal.model.update({
+                "id": self.model.id,
+                "name": name,
+                "description": description
+            })
 
         # Initialize Code Manager if needed
         if not self.code_driver.is_initialized:
@@ -128,27 +132,51 @@ class ProjectController(BaseController):
         return True
 
     def status(self):
-        # TODO: Convert pseudocode
+        """Return the project status information if initialized
 
-        status_dict = {}
+        Returns
+        -------
+        status_dict : dict
+            dictionary with project metadata and config
+        latest_snapshot : datmo.core.entity.snapshot.Snapshot
+            snapshot object of the latest snapshot if present else None
+        unstaged_tasks : list
+            list of datmo.core.entity.task.Task objects in ascending order of created_at time
+        """
+        if not self.is_initialized:
+            raise ProjectNotInitializedException(
+                __("error", "controller.project.status"))
 
-        # Ensure structure is good
-        status_dict["is_owner"] = True \
-            if self.model.user_id == self.logged_in_user_id \
-            else False
-        status_dict["code_initialized"] = self.code_driver.is_initialized
-        status_dict["file_initialized"] = self.file_driver.is_initialized
-        status_dict[
-            "environment_initialized"] = self.environment_driver.is_initialized
+        # Add in project metadata
+        status_dict = self.model.to_dictionary().copy()
 
         # Show all project settings
-        status_dict["settings"] = self.settings.driver.to_dict()
-
-        # Find the current time
-        current_timestamp = datetime.datetime.now()
+        status_dict["config"] = self.config.to_dict()
 
         # Show the latest snapshot
-        latest_snapshot = self.dal.snapshot.get_latest()
+        descending_snapshot_list = self.dal.snapshot.query({}, sort_key="created_at", sort_order="descending")
+        latest_snapshot = descending_snapshot_list[0] if descending_snapshot_list else None
 
-        # Show unstaged tasks
-        self.dal.task.query("created_at < " + latest_snapshot.created_at)
+        # Show unstaged tasks (created after latest snapshot)
+        # TODO: use DB querying, currently returning randomly anomalous values for range queries
+        # if latest_snapshot:
+        #     task_query = {
+        #         "updated_at": {
+        #             "$gte":
+        #                 latest_snapshot.created_at
+        #                 .strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        #         }
+        #     }
+        # else:
+        #     task_query = {}
+
+        descending_task_list = self.dal.task.query({}, sort_key="updated_at", sort_order="descending")
+
+        ascending_unstaged_task_list = []
+        for task in descending_task_list:
+            if task.updated_at >= latest_snapshot.created_at:
+                ascending_unstaged_task_list.insert(0, task)
+            else:
+                break
+
+        return status_dict, latest_snapshot, ascending_unstaged_task_list

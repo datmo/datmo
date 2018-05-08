@@ -221,6 +221,8 @@ MESSAGES = {
             "Required argument %s not present in input",
         "controller.project.init":
             "Session does not exist",
+        "controller.project.status":
+            "Project has not been initialized",
         "controller.snapshot.__init__":
             "Project has not been initialized",
         "controller.snapshot.create.arg":
