@@ -17,7 +17,7 @@ from datmo.core.util.exceptions import EntityNotFound
 
 
 class TestLocalDAL():
-    def setup_class(self):
+    def setup_method(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = "/tmp" if not platform.system(
         ) == "Windows" else None
@@ -32,7 +32,7 @@ class TestLocalDAL():
             "email": "test@test.com",
         }
 
-    def teardown_class(self):
+    def teardown_method(self):
         pass
 
     def test_create_user_by_dictionary(self):
@@ -99,7 +99,22 @@ class TestLocalDAL():
         user = self.dal.user.create(User(self.user_input_dict))
 
         assert len(self.dal.user.query({"id": user.id})) == 1
+        _ = self.dal.user.create(User(self.user_input_dict))
         assert len(
             self.dal.user.query({
                 "name": self.user_input_dict['name']
-            })) == 6
+            })) == 2
+
+    def test_query_users_range_query(self):
+        _ = self.dal.user.create(User(self.user_input_dict))
+        _ = self.dal.user.create(User(self.user_input_dict))
+        _ = self.dal.user.create(User(self.user_input_dict))
+        users = self.dal.user.query({}, sort_key="created_at", sort_order="descending")
+        result = self.dal.user.query({
+            "created_at": {
+                "$lt":
+                    users[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            }
+        })
+        assert len(users) == 3
+        assert len(result) == 1

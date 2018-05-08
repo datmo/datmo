@@ -17,7 +17,7 @@ from datmo.core.util.exceptions import EntityNotFound
 
 
 class TestLocalDAL():
-    def setup_class(self):
+    def setup_method(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = "/tmp" if not platform.system(
         ) == "Windows" else None
@@ -30,7 +30,7 @@ class TestLocalDAL():
         model_name = "model_1"
         self.model_input_dict = {"name": model_name}
 
-    def teardown_class(self):
+    def teardown_method(self):
         pass
 
     def test_create_model_by_dictionary(self):
@@ -121,7 +121,22 @@ class TestLocalDAL():
     def test_query_models(self):
         model = self.dal.model.create(Model(self.model_input_dict))
         assert len(self.dal.model.query({"id": model.id})) == 1
+        _ = self.dal.model.create(Model(self.model_input_dict))
         assert len(
             self.dal.model.query({
                 "name": self.model_input_dict['name']
-            })) == 6
+            })) == 2
+
+    def test_query_models_range_query(self):
+        _ = self.dal.model.create(Model(self.model_input_dict))
+        _ = self.dal.model.create(Model(self.model_input_dict))
+        _ = self.dal.model.create(Model(self.model_input_dict))
+        models = self.dal.model.query({}, sort_key="created_at", sort_order="descending")
+        result = self.dal.model.query({
+            "created_at": {
+                "$lt":
+                    models[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            }
+        })
+        assert len(models) == 3
+        assert len(result) == 1

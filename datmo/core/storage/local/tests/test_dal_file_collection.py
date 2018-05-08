@@ -18,7 +18,7 @@ from datmo.core.util.exceptions import EntityNotFound
 
 
 class TestLocalDAL():
-    def setup_class(self):
+    def setup_method(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = "/tmp" if not platform.system(
         ) == "Windows" else None
@@ -38,7 +38,7 @@ class TestLocalDAL():
             "path": "test_path",
         }
 
-    def teardown_class(self):
+    def teardown_method(self):
         pass
 
     def test_create_file_collection_by_dictionary(self):
@@ -131,3 +131,17 @@ class TestLocalDAL():
         assert len(self.dal.file_collection.query({
             "id": file_collection.id
         })) == 1
+
+    def test_query_file_collections_range_query(self):
+        _ = self.dal.file_collection.create(FileCollection(self.file_collection_input_dict))
+        _ = self.dal.file_collection.create(FileCollection(self.file_collection_input_dict))
+        _ = self.dal.file_collection.create(FileCollection(self.file_collection_input_dict))
+        file_collections = self.dal.file_collection.query({}, sort_key="created_at", sort_order="descending")
+        result = self.dal.file_collection.query({
+            "created_at": {
+                "$lt":
+                    file_collections[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            }
+        })
+        assert len(file_collections) == 3
+        assert len(result) == 1
