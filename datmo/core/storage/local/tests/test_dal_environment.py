@@ -18,7 +18,7 @@ from datmo.core.util.exceptions import EntityNotFound
 
 
 class TestLocalDAL():
-    def setup_class(self):
+    def setup_method(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = "/tmp" if not platform.system(
         ) == "Windows" else None
@@ -43,7 +43,7 @@ class TestLocalDAL():
             "language": "python3"
         }
 
-    def teardown_class(self):
+    def teardown_method(self):
         pass
 
     # TODO: Add tests for other variables once figured out.
@@ -137,3 +137,22 @@ class TestLocalDAL():
             Environment(self.environment_input_dict))
 
         assert len(self.dal.environment.query({"id": environment.id})) == 1
+
+    def test_query_environments_range_query(self):
+        _ = self.dal.environment.create(
+            Environment(self.environment_input_dict))
+        _ = self.dal.environment.create(
+            Environment(self.environment_input_dict))
+        _ = self.dal.environment.create(
+            Environment(self.environment_input_dict))
+        environments = self.dal.environment.query(
+            {}, sort_key="created_at", sort_order="descending")
+        result = self.dal.environment.query({
+            "created_at": {
+                "$lt":
+                    environments[1]
+                    .created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            }
+        })
+        assert len(environments) == 3
+        assert len(result) == 1

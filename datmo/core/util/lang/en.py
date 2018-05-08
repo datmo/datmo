@@ -2,8 +2,18 @@ MESSAGES = {
     "info": {
         "cli.general.line":
             "==============================================================",
-        "cli.project.init":
+        "cli.project.init.create":
             "Initializing project {name} @ ({path}) ",
+        "cli.project.init.create.success":
+            "Created project {name} @ ({path}) ",
+        "cli.project.init.create.failure":
+            "Failed to create project {name} @ ({path}) ",
+        "cli.project.init.update":
+            "Updating project {name} @ ({path}) ",
+        "cli.project.init.update.success":
+            "Updated project {name} @ ({path}) ",
+        "cli.project.init.update.failure":
+            "Failed to update project {name} @ ({path}) ",
         "cli.project.pull":
             "Pulling information from the Datmo project url and adding it to local...",
         "cli.project.update":
@@ -211,6 +221,8 @@ MESSAGES = {
             "Required argument %s not present in input",
         "controller.project.init":
             "Session does not exist",
+        "controller.project.status":
+            "Project has not been initialized",
         "controller.snapshot.__init__":
             "Project has not been initialized",
         "controller.snapshot.create.arg":

@@ -23,7 +23,7 @@ from datmo.cli.command.project import ProjectCommand
 
 
 class TestProject():
-    def setup_class(self):
+    def setup_method(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = "/tmp" if not platform.system(
         ) == "Windows" else None
@@ -33,17 +33,92 @@ class TestProject():
         self.cli_helper = Helper()
         self.project = ProjectCommand(self.temp_dir, self.cli_helper, parser)
 
-    def teardown_class(self):
+    def teardown_method(self):
         pass
 
-    def test_datmo_init(self):
+    def test_init_create_success(self):
+        test_name = "foobar"
+        test_description = "test model"
         self.project.parse(
-            ["init", "--name", "foobar", "--description", "test model"])
-        self.project.execute()
+            ["init", "--name", test_name, "--description", test_description])
+        result = self.project.execute()
         # test for desired side effects
         assert os.path.exists(os.path.join(self.temp_dir, '.datmo'))
+        assert result.name == test_name
+        assert result.description == test_description
 
-    def test_datmo_init_invalid_arg(self):
+    def test_init_create_failure(self):
+        self.project.parse(["init", "--name", "", "--description", ""])
+        # test if prompt opens
+        @self.project.cli_helper.input("\n\n")
+        def dummy(self):
+            return self.project.execute()
+
+        result = dummy(self)
+        assert not result
+
+    def test_init_update_success(self):
+        test_name = "foobar"
+        test_description = "test model"
+        self.project.parse(
+            ["init", "--name", test_name, "--description", test_description])
+        result_1 = self.project.execute()
+        updated_name = "foobar2"
+        updated_description = "test model 2"
+        self.project.parse([
+            "init", "--name", updated_name, "--description",
+            updated_description
+        ])
+        result_2 = self.project.execute()
+        # test for desired side effects
+        assert os.path.exists(os.path.join(self.temp_dir, '.datmo'))
+        assert result_2.id == result_1.id
+        assert result_2.name == updated_name
+        assert result_2.description == updated_description
+
+    def test_init_update_success_only_name(self):
+        test_name = "foobar"
+        test_description = "test model"
+        self.project.parse(
+            ["init", "--name", test_name, "--description", test_description])
+        result_1 = self.project.execute()
+        updated_name = "foobar2"
+        self.project.parse(
+            ["init", "--name", updated_name, "--description", ""])
+
+        @self.project.cli_helper.input("\n")
+        def dummy(self):
+            return self.project.execute()
+
+        result_2 = dummy(self)
+        # test for desired side effects
+        assert os.path.exists(os.path.join(self.temp_dir, '.datmo'))
+        assert result_2.id == result_1.id
+        assert result_2.name == updated_name
+        assert result_2.description == result_1.description
+
+    def test_init_update_success_only_description(self):
+        test_name = "foobar"
+        test_description = "test model"
+        self.project.parse(
+            ["init", "--name", test_name, "--description", test_description])
+        result_1 = self.project.execute()
+        updated_description = "test model 2"
+        self.project.parse(
+            ["init", "--name", "", "--description", updated_description])
+
+        @self.project.cli_helper.input("\n")
+        def dummy(self):
+            return self.project.execute()
+
+        result_2 = dummy(self)
+        # test for desired side effects
+        assert os.path.exists(os.path.join(self.temp_dir, '.datmo'))
+        assert result_2.id == result_1.id
+        assert result_2.name == result_1.name
+        assert result_2.description == updated_description
+
+    def test_init_invalid_arg(self):
         exception_thrown = False
         try:
             self.project.parse(["init", "--foobar", "foobar"])
@@ -51,16 +126,37 @@ class TestProject():
             exception_thrown = True
         assert exception_thrown
 
-    def test_datmo_version(self):
+    def test_version(self):
         self.project.parse(["version"])
         result = self.project.execute()
         # test for desired side effects
         assert __version__ in result
 
-    def test_datmo_version_invalid_arg(self):
+    def test_version_invalid_arg(self):
         exception_thrown = False
         try:
             self.project.parse(["version", "--foobar"])
+        except Exception:
+            exception_thrown = True
+        assert exception_thrown
+
+    def test_status(self):
+        test_name = "foobar"
+        test_description = "test model"
+        self.project.parse(
+            ["init", "--name", test_name, "--description", test_description])
+        _ = self.project.execute()
+
+        self.project.parse(["status"])
+        result = self.project.execute()
+        assert isinstance(result[0], dict)
+        assert not result[1]
+        assert not result[2]
+
+    def test_status_invalid_arg(self):
+        exception_thrown = False
+        try:
+            self.project.parse(["status", "--foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown
