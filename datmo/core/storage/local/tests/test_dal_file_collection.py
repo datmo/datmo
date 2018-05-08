@@ -18,7 +18,7 @@ from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
 
 
 class TestLocalDAL():
-    def setup_class(self):
+    def setup_method(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = "/tmp" if not platform.system(
         ) == "Windows" else None
@@ -38,7 +38,7 @@ class TestLocalDAL():
             "path": "test_path",
         }
 
-    def teardown_class(self):
+    def teardown_method(self):
         pass
 
     def test_create_file_collection_by_dictionary(self):
@@ -124,7 +124,7 @@ class TestLocalDAL():
             deleted = True
         assert deleted
 
-    def test_query_file_collections(self):
+    def test_query_file_collections_basic(self):
         file_collection = self.dal.file_collection.create(
             FileCollection(self.file_collection_input_dict))
 
@@ -132,66 +132,32 @@ class TestLocalDAL():
             "id": file_collection.id
         })) == 1
 
-        # Query for multiple models
-        model_name = "model_sort"
-        model = self.dal.model.create(Model({"name": model_name}))
+    def test_query_file_collections_multiple(self):
+        file_collection_1 = self.dal.file_collection.create(
+            FileCollection(self.file_collection_input_dict))
+        file_collection_2 = self.dal.file_collection.create(
+            FileCollection(self.file_collection_input_dict))
+        file_collection_3 = self.dal.file_collection.create(
+            FileCollection(self.file_collection_input_dict))
 
-        file_collection_input_dict_1 = {
-            "model_id": model.id,
-            "driver_type": "local",
-            "filehash": "myhash",
-            "path": "test_path",
-            "created_at": datetime(2017, 1, 1)
-        }
-        file_collection_input_dict_2 = {
-            "model_id": model.id,
-            "driver_type": "local",
-            "filehash": "myhash",
-            "path": "test_path",
-            "created_at": datetime(2017, 2, 1)
-        }
-        file_collection_input_dict_3 = {
-            "model_id": model.id,
-            "driver_type": "local",
-            "filehash": "myhash",
-            "path": "test_path",
-            "created_at": datetime(2017, 3, 1)
-        }
-
-        self.dal.file_collection.create(
-            FileCollection(file_collection_input_dict_1))
-        self.dal.file_collection.create(
-            FileCollection(file_collection_input_dict_2))
-        self.dal.file_collection.create(
-            FileCollection(file_collection_input_dict_3))
-
-        results = self.dal.file_collection.query(
-            {
-                "model_id": model.id
-            },
+        results = self.dal.file_collection.query({},
             sort_key="created_at",
             sort_order="ascending")
         assert len(results) == 3
-        assert results[0].created_at == file_collection_input_dict_1[
-            "created_at"]
+        assert results[0].created_at == file_collection_1.created_at
+        assert results[1].created_at == file_collection_2.created_at
 
-        results = self.dal.file_collection.query(
-            {
-                "model_id": model.id
-            },
+        results = self.dal.file_collection.query({},
             sort_key="created_at",
             sort_order="descending")
         assert len(results) == 3
-        assert results[0].created_at == file_collection_input_dict_3[
-            "created_at"]
+        assert results[0].created_at == file_collection_3.created_at
+        assert results[1].created_at == file_collection_2.created_at
 
         # Wrong order being passed in
         failed = False
         try:
-            _ = self.dal.file_collection.query(
-                {
-                    "model_id": model.id
-                },
+            _ = self.dal.file_collection.query({},
                 sort_key='created_at',
                 sort_order='wrong_order')
         except InvalidArgumentType:
@@ -201,10 +167,7 @@ class TestLocalDAL():
         # Wrong key and order being passed in
         failed = False
         try:
-            _ = self.dal.file_collection.query(
-                {
-                    "model_id": model.id
-                },
+            _ = self.dal.file_collection.query({},
                 sort_key='wrong_key',
                 sort_order='wrong_order')
         except InvalidArgumentType:
@@ -212,18 +175,31 @@ class TestLocalDAL():
         assert failed
 
         # wrong key and right order being passed in
-        expected_items = self.dal.file_collection.query(
-            {
-                "model_id": model.id
-            },
+        expected_items = self.dal.file_collection.query({},
             sort_key='created_at',
             sort_order='ascending')
-        items = self.dal.file_collection.query(
-            {
-                "model_id": model.id
-            },
+        items = self.dal.file_collection.query({},
             sort_key='wrong_key',
             sort_order='ascending')
         expected_ids = [item.id for item in expected_items]
         ids = [item.id for item in items]
         assert set(expected_ids) == set(ids)
+
+    def test_query_file_collections_range_query(self):
+        _ = self.dal.file_collection.create(
+            FileCollection(self.file_collection_input_dict))
+        _ = self.dal.file_collection.create(
+            FileCollection(self.file_collection_input_dict))
+        _ = self.dal.file_collection.create(
+            FileCollection(self.file_collection_input_dict))
+        file_collections = self.dal.file_collection.query(
+            {}, sort_key="created_at", sort_order="descending")
+        result = self.dal.file_collection.query({
+            "created_at": {
+                "$lt":
+                    file_collections[1]
+                    .created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            }
+        })
+        assert len(file_collections) == 3
+        assert len(result) == 1

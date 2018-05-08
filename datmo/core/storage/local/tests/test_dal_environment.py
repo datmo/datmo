@@ -18,7 +18,7 @@ from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
 
 
 class TestLocalDAL():
-    def setup_class(self):
+    def setup_method(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = "/tmp" if not platform.system(
         ) == "Windows" else None
@@ -43,7 +43,7 @@ class TestLocalDAL():
             "language": "python3"
         }
 
-    def teardown_class(self):
+    def teardown_method(self):
         pass
 
     # TODO: Add tests for other variables once figured out.
@@ -132,81 +132,35 @@ class TestLocalDAL():
             deleted = True
         assert deleted
 
-    def test_query_environments(self):
+    def test_query_environments_basic(self):
         environment = self.dal.environment.create(
             Environment(self.environment_input_dict))
 
         assert len(self.dal.environment.query({"id": environment.id})) == 1
-        # Query for multiple models
-        model_name = "model_sort"
-        model = self.dal.model.create(Model({"name": model_name}))
 
-        environment_input_dict_1 = {
-            "model_id": model.id,
-            "driver_type": "docker",
-            "file_collection_id": "test_file_id",
-            "definition_filename": "Dockerfile",
-            "hardware_info": {
-                "system": "macosx"
-            },
-            "unique_hash": "slkdjfa23dk",
-            "language": "python3",
-            "created_at": datetime(2017, 1, 1)
-        }
-        environment_input_dict_2 = {
-            "model_id": model.id,
-            "driver_type": "docker",
-            "file_collection_id": "test_file_id",
-            "definition_filename": "Dockerfile",
-            "hardware_info": {
-                "system": "macosx"
-            },
-            "unique_hash": "slkdjfa23dk",
-            "language": "python3",
-            "created_at": datetime(2017, 2, 1)
-        }
-        environment_input_dict_3 = {
-            "model_id": model.id,
-            "driver_type": "docker",
-            "file_collection_id": "test_file_id",
-            "definition_filename": "Dockerfile",
-            "hardware_info": {
-                "system": "macosx"
-            },
-            "unique_hash": "slkdjfa23dk",
-            "language": "python3",
-            "created_at": datetime(2017, 3, 1)
-        }
+    def test_query_environments_multiple(self):
+        environment_1 = self.dal.environment.create(Environment(self.environment_input_dict))
+        environment_2 = self.dal.environment.create(Environment(self.environment_input_dict))
+        environment_3 = self.dal.environment.create(Environment(self.environment_input_dict))
 
-        self.dal.environment.create(Environment(environment_input_dict_1))
-        self.dal.environment.create(Environment(environment_input_dict_2))
-        self.dal.environment.create(Environment(environment_input_dict_3))
-
-        results = self.dal.environment.query(
-            {
-                "model_id": model.id
-            },
+        results = self.dal.environment.query({},
             sort_key="created_at",
             sort_order="ascending")
         assert len(results) == 3
-        assert results[0].created_at == environment_input_dict_1["created_at"]
+        assert results[0].created_at == environment_1.created_at
+        assert results[1].created_at == environment_2.created_at
 
-        results = self.dal.environment.query(
-            {
-                "model_id": model.id
-            },
+        results = self.dal.environment.query({},
             sort_key="created_at",
             sort_order="descending")
         assert len(results) == 3
-        assert results[0].created_at == environment_input_dict_3["created_at"]
+        assert results[0].created_at == environment_3.created_at
+        assert results[1].created_at == environment_2.created_at
 
         # Wrong order being passed in
         failed = False
         try:
-            _ = self.dal.environment.query(
-                {
-                    "model_id": model.id
-                },
+            _ = self.dal.environment.query({},
                 sort_key='created_at',
                 sort_order='wrong_order')
         except InvalidArgumentType:
@@ -216,10 +170,7 @@ class TestLocalDAL():
         # Wrong key and order being passed in
         failed = False
         try:
-            _ = self.dal.environment.query(
-                {
-                    "model_id": model.id
-                },
+            _ = self.dal.environment.query({},
                 sort_key='wrong_key',
                 sort_order='wrong_order')
         except InvalidArgumentType:
@@ -227,18 +178,31 @@ class TestLocalDAL():
         assert failed
 
         # wrong key and right order being passed in
-        expected_items = self.dal.environment.query(
-            {
-                "model_id": model.id
-            },
+        expected_items = self.dal.environment.query({},
             sort_key='created_at',
             sort_order='ascending')
-        items = self.dal.environment.query(
-            {
-                "model_id": model.id
-            },
+        items = self.dal.environment.query({},
             sort_key='wrong_key',
             sort_order='ascending')
         expected_ids = [item.id for item in expected_items]
         ids = [item.id for item in items]
         assert set(expected_ids) == set(ids)
+
+    def test_query_environments_range_query(self):
+        _ = self.dal.environment.create(
+            Environment(self.environment_input_dict))
+        _ = self.dal.environment.create(
+            Environment(self.environment_input_dict))
+        _ = self.dal.environment.create(
+            Environment(self.environment_input_dict))
+        environments = self.dal.environment.query(
+            {}, sort_key="created_at", sort_order="descending")
+        result = self.dal.environment.query({
+            "created_at": {
+                "$lt":
+                    environments[1]
+                    .created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            }
+        })
+        assert len(environments) == 3
+        assert len(result) == 1
