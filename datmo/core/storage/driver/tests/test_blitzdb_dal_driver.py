@@ -13,6 +13,7 @@ import platform
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType, \
     RequiredArgumentMissing
+from datmo.core.util.misc_functions import create_unique_hash
 
 
 class TestBlitzDBDALDriverInit():
@@ -76,6 +77,10 @@ class TestBlitzDBDALDriver():
         result = self.database.set(self.collection, test_obj)
         result1 = self.database.get(self.collection, result.get('id'))
         assert result1.get('id') == result.get('id')
+        # Test with substring to get with regex
+        result2 = self.database.get(
+            self.collection, result.get('id')[:10], regex=True)
+        assert result2.get('id') == result.get('id')
 
     def test_db_update(self):
         test_obj = {"foo": "bar_2"}
@@ -108,6 +113,15 @@ class TestBlitzDBDALDriver():
         # ensure each entity returns an 'id'
         for entity in results:
             assert entity['id'] != None
+
+    def test_db_wildcard_query(self):
+        random_id = create_unique_hash()
+        test_obj = {"random_id": random_id}
+        self.database.set(self.collection, test_obj)
+        wildcard_query_obj = {"random_id": {"$regex": "%s" % random_id[:10]}}
+        results = self.database.query(self.collection, wildcard_query_obj)
+        assert len(results) == 1
+        assert results[0].get('random_id') == random_id
 
     def test_raise_entity_not_found(self):
         exp_thrown = False
