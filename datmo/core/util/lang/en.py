@@ -45,6 +45,8 @@ MESSAGES = {
             "user is not logged into datmo. use `datmo setup` or `datmo login` to login",
     },
     "error": {
+        "sdk.snapshot.create.task.args":
+            "Error due to passing excluded args while creating snapshot from task: %s",
         "cli.general":
             "An exception occurred: %s",
         "cli.general.method.not_found":
@@ -58,7 +60,7 @@ MESSAGES = {
         "cli.task.stop":
             "Error while stopping the task: %s",
         "cli.snapshot.create.task.args":
-            "Error due to passing unrequired args while creating snapshot from task: %s",
+            "Error due to passing excluded args while creating snapshot from task: %s",
         "util.misc_functions.get_filehash":
             "Filepath does not point to a valid file: %s",
         "util.misc_functions.mutually_exclusive":

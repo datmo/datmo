@@ -91,7 +91,7 @@ class TestTaskCommand():
 
         # test for single set of ports
         self.task.parse([
-            "task", "run", "--ports", test_ports[0], "--env-def",
+            "task", "run", "--ports", test_ports[0], "--environment-def",
             test_dockerfile, test_command
         ])
 
@@ -102,7 +102,7 @@ class TestTaskCommand():
 
         self.task.parse([
             "task", "run", "-p", test_ports[0], "-p", test_ports[1],
-            "--env-def", test_dockerfile, test_command
+            "--environment-def", test_dockerfile, test_command
         ])
         # test for desired side effects
         assert self.task.args.cmd == test_command
@@ -129,7 +129,7 @@ class TestTaskCommand():
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         self.task.parse([
             "task", "run", "--ports", test_ports[0], "--ports", test_ports[1],
-            "--env-def", test_dockerfile, test_command
+            "--environment-def", test_dockerfile, test_command
         ])
 
         # test for desired side effects
@@ -158,7 +158,7 @@ class TestTaskCommand():
     #         task = TaskCommand(self.temp_dir, self.cli_helper)
     #         print("Parsing command")
     #         task.parse(
-    #             ["task", "run", "--env-def", test_dockerfile, test_command])
+    #             ["task", "run", "--environment-def", test_dockerfile, test_command])
     #         print("Executing command")
     #         result = task.execute()
     #         return_dict[procnum] = result
@@ -259,7 +259,7 @@ class TestTaskCommand():
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
 
         self.task.parse([
-            "task", "run", "--ports", test_ports, "--env-def", test_dockerfile,
+            "task", "run", "--ports", test_ports, "--environment-def", test_dockerfile,
             test_command
         ])
 

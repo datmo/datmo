@@ -22,13 +22,13 @@ class SnapshotCommand(ProjectCommand):
         task_id = kwargs.get("task_id", None)
         # creating snapshot with task id if it exists
         if task_id is not None:
-            unrequired_args = [
+            excluded_args = [
                 "code_id", "commit_id", "environment_id",
-                "environment_def_path", "file_collection_id", "filepaths",
+                "environment_definition_filepath", "file_collection_id", "filepaths",
                 "config_filepath", "config_filename", "stats_filepath",
                 "stats_filename"
             ]
-            for arg in unrequired_args:
+            for arg in excluded_args:
                 if arg in kwargs and kwargs[arg] is not None:
                     raise SnapshotCreateFromTaskArgs(
                         "error", "cli.snapshot.create.task.args", arg)
@@ -49,7 +49,7 @@ class SnapshotCommand(ProjectCommand):
 
             # Environment
             mutually_exclusive_args = [
-                "environment_id", "environment_def_path"
+                "environment_id", "environment_definition_filepath"
             ]
             mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
 

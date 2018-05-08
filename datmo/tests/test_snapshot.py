@@ -17,7 +17,8 @@ from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.controller.project import ProjectController
 from datmo.core.util.exceptions import (GitCommitDoesNotExist,
                                         InvalidProjectPathException,
-                                        SessionDoesNotExistException)
+                                        SessionDoesNotExistException,
+                                        SnapshotCreateFromTaskArgs)
 
 
 class TestSnapshotModule():
@@ -108,6 +109,7 @@ class TestSnapshotModule():
 
     def test_create_from_task(self):
         # 1) Test if success with task files, results, and message
+        # 2) Test if success with user given config and stats
         # TODO: test for failure case where tasks is not complete
 
         # Setup task
@@ -118,6 +120,8 @@ class TestSnapshotModule():
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         task_obj = run("sh -c echo accuracy:0.45", home=self.temp_dir)
+
+        # 1) Test option 1
         snapshot_obj = create(
             message="my test snapshot",
             task_id=task_obj.id,
@@ -130,6 +134,74 @@ class TestSnapshotModule():
         assert snapshot_obj.label == "best"
         assert snapshot_obj.config == {"foo": "bar"}
         assert snapshot_obj.stats == task_obj.results
+
+        # Test option 2
+        snapshot_obj_2 = create(
+            message="my test snapshot",
+            task_id=task_obj.id,
+            home=self.temp_dir,
+            label="best",
+            config={"foo": "bar"},
+            stats={"foo": "bar"})
+
+        assert isinstance(snapshot_obj, Snapshot)
+        assert snapshot_obj_2.message == "my test snapshot"
+        assert snapshot_obj_2.label == "best"
+        assert snapshot_obj_2.config == {"foo": "bar"}
+        assert snapshot_obj_2.stats == {"foo": "bar"}
+
+    def test_create_from_task_fail_user_inputs(self):
+        # Setup task
+
+        # Create environment definition
+        env_def_path = os.path.join(self.temp_dir, "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        task_obj = run("sh -c echo accuracy:0.45", home=self.temp_dir)
+
+        # Test if failure if user gives other parameters
+        failed = False
+        try:
+            _ = create(
+                message="my test snapshot",
+                task_id=task_obj.id,
+                home=self.temp_dir,
+                label="best",
+                config={"foo": "bar"},
+                stats={"foo": "bar"},
+                commit_id="test_id")
+        except SnapshotCreateFromTaskArgs:
+            failed = True
+        assert failed
+
+        failed = False
+        try:
+            _ = create(
+                message="my test snapshot",
+                task_id=task_obj.id,
+                home=self.temp_dir,
+                label="best",
+                config={"foo": "bar"},
+                stats={"foo": "bar"},
+                environment_id="test_id")
+        except SnapshotCreateFromTaskArgs:
+            failed = True
+        assert failed
+
+        failed = False
+        try:
+            _ = create(
+                message="my test snapshot",
+                task_id=task_obj.id,
+                home=self.temp_dir,
+                label="best",
+                config={"foo": "bar"},
+                stats={"foo": "bar"},
+                filepaths=["mypath"])
+        except SnapshotCreateFromTaskArgs:
+            failed = True
+        assert failed
 
     def test_ls(self):
         # check project is not initialized if wrong home

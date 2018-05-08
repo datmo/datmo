@@ -2,7 +2,8 @@ import os
 
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
-from datmo.core.util.exceptions import InvalidArgumentType
+from datmo.core.util.exceptions import InvalidArgumentType, \
+    SnapshotCreateFromTaskArgs
 
 
 class Snapshot():
@@ -115,7 +116,7 @@ def create(message,
         if task id is passed then subsequent parameters would be ignored.
         when using task id, it will overwrite the following inputs
 
-        commmit_id
+        commit_id
         ----------
         the commit id is taken form the source code after the task is run
 
@@ -176,9 +177,17 @@ def create(message,
     snapshot_controller = SnapshotController(home=home)
 
     if task_id is not None:
+        excluded_args = [
+            "commit_id", "environment_id", "filepaths"
+        ]
+        for arg in excluded_args:
+            if eval(arg) is not None:
+                raise SnapshotCreateFromTaskArgs(
+                    "error", "sdk.snapshot.create.task.args", arg)
+
         # Create a new core snapshot object
         core_snapshot_obj = snapshot_controller.create_from_task(
-            message, task_id, label=label, config=config, stats=None)
+            message, task_id, label=label, config=config, stats=stats)
 
         # Create a new snapshot object
         client_snapshot_obj = Snapshot(core_snapshot_obj, home=home)

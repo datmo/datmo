@@ -217,6 +217,7 @@ class SnapshotController(BaseController):
             key, value pairs of configurations
         stats : dict, optional
             key, value pairs of metrics and statistics
+
         Returns
         -------
         Snapshot
@@ -234,24 +235,29 @@ class SnapshotController(BaseController):
                 __("error", "controller.snapshot.create_from_task",
                    str(task_obj.id)))
 
-        snapshot_dict = {
+        after_snapshot_obj = self.dal.snapshot.get_by_id(task_obj.after_snapshot_id)
+
+        snapshot_update_dict = {
             "id": task_obj.after_snapshot_id,
             "message": message,
             "visible": True
         }
 
         if label:
-            snapshot_dict["label"] = label
+            snapshot_update_dict["label"] = label
 
         if config:
-            snapshot_dict["config"] = config
+            snapshot_update_dict["config"] = config
 
         if stats:
-            snapshot_dict["stats"] = stats
+            snapshot_update_dict["stats"] = stats
         else:
-            snapshot_dict["stats"] = task_obj.results
+            # Append to any existing stats already present
+            snapshot_update_dict["stats"] = {}
+            snapshot_update_dict["stats"].update(after_snapshot_obj.stats)
+            snapshot_update_dict["stats"].update(task_obj.results)
 
-        return self.dal.snapshot.update(snapshot_dict)
+        return self.dal.snapshot.update(snapshot_update_dict)
 
     def checkout(self, snapshot_id):
         # Get snapshot object
