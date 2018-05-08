@@ -30,7 +30,7 @@ class ProjectCommand(BaseCommand):
         if not self.project_controller.model:
             is_new_model = True
 
-        if is_new_model: # Initialize a new project
+        if is_new_model:  # Initialize a new project
             self.cli_helper.echo(
                 __("info", "cli.project.init.create", {
                     "name": name,
@@ -45,17 +45,19 @@ class ProjectCommand(BaseCommand):
             try:
                 success = self.project_controller.init(name, description)
                 if success:
-                    self.cli_helper.echo(__("info", "cli.project.init.create.success", {
+                    self.cli_helper.echo(
+                        __("info", "cli.project.init.create.success", {
+                            "name": name,
+                            "path": self.home
+                        }))
+            except:
+                self.cli_helper.echo(
+                    __("info", "cli.project.init.create.failure", {
                         "name": name,
                         "path": self.home
                     }))
-            except:
-                self.cli_helper.echo(__("info", "cli.project.init.create.failure", {
-                    "name": name,
-                    "path": self.home
-                }))
                 return None
-        else: # Update the current project
+        else:  # Update the current project
             self.cli_helper.echo(
                 __("info", "cli.project.init.update", {
                     "name": name,
@@ -76,15 +78,17 @@ class ProjectCommand(BaseCommand):
             try:
                 success = self.project_controller.init(name, description)
                 if success:
-                    self.cli_helper.echo(__("info", "cli.project.init.update.success", {
+                    self.cli_helper.echo(
+                        __("info", "cli.project.init.update.success", {
+                            "name": name,
+                            "path": self.home
+                        }))
+            except:
+                self.cli_helper.echo(
+                    __("info", "cli.project.init.update.failure", {
                         "name": name,
                         "path": self.home
                     }))
-            except:
-                self.cli_helper.echo(__("info", "cli.project.init.update.failure", {
-                    "name": name,
-                    "path": self.home
-                }))
                 return None
         # Print out simple project meta data
         self.cli_helper.echo(self.project_controller.model.to_dictionary())
@@ -94,7 +98,8 @@ class ProjectCommand(BaseCommand):
         return self.cli_helper.echo("datmo version: %s" % __version__)
 
     def status(self):
-        status_dict, latest_snapshot, ascending_unstaged_tasks= self.project_controller.status()
+        status_dict, latest_snapshot, ascending_unstaged_tasks = self.project_controller.status(
+        )
 
         # Print out simple project meta data
         for k, v in status_dict.items():

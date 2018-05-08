@@ -145,11 +145,11 @@ class TestLocalDAL():
         _ = self.dal.task.create(Task(self.task_input_dict))
         _ = self.dal.task.create(Task(self.task_input_dict))
         _ = self.dal.task.create(Task(self.task_input_dict))
-        tasks = self.dal.task.query({}, sort_key="created_at", sort_order="descending")
+        tasks = self.dal.task.query(
+            {}, sort_key="created_at", sort_order="descending")
         result = self.dal.task.query({
             "created_at": {
-                "$lt":
-                    tasks[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                "$lt": tasks[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
             }
         })
         assert len(tasks) == 3
@@ -159,11 +159,11 @@ class TestLocalDAL():
         _ = self.dal.task.create(self.task_input_dict)
         _ = self.dal.task.create(self.task_input_dict)
         _ = self.dal.task.create(self.task_input_dict)
-        tasks = self.dal.task.query({}, sort_key="created_at", sort_order="descending")
+        tasks = self.dal.task.query(
+            {}, sort_key="created_at", sort_order="descending")
         result = self.dal.task.query({
             "created_at": {
-                "$lt":
-                    tasks[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                "$lt": tasks[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
             }
         })
         assert len(tasks) == 3

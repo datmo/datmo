@@ -36,7 +36,9 @@ class Helper():
                     result = func(*args, **kwargs)
                 os.remove(os.path.join("input"))
                 return result
+
             return wrapper
+
         return input_decorator
 
     def prompt(self, msg, default=None):
@@ -92,4 +94,6 @@ class Helper():
         return command_class[1]
 
     def get_command_choices(self):
-        return ["init", "version", "--version", "-v", "status", "snapshot", "task"]
+        return [
+            "init", "version", "--version", "-v", "status", "snapshot", "task"
+        ]

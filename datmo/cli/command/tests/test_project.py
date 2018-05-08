@@ -49,12 +49,12 @@ class TestProject():
         assert result.description == test_description
 
     def test_init_create_failure(self):
-        self.project.parse(
-            ["init", "--name", "", "--description", ""])
+        self.project.parse(["init", "--name", "", "--description", ""])
         # test if prompt opens
         @self.project.cli_helper.input("\n\n")
         def dummy(self):
             return self.project.execute()
+
         result = dummy(self)
         assert not result
 
@@ -66,8 +66,10 @@ class TestProject():
         result_1 = self.project.execute()
         updated_name = "foobar2"
         updated_description = "test model 2"
-        self.project.parse(
-            ["init", "--name", updated_name, "--description", updated_description])
+        self.project.parse([
+            "init", "--name", updated_name, "--description",
+            updated_description
+        ])
         result_2 = self.project.execute()
         # test for desired side effects
         assert os.path.exists(os.path.join(self.temp_dir, '.datmo'))
@@ -84,9 +86,11 @@ class TestProject():
         updated_name = "foobar2"
         self.project.parse(
             ["init", "--name", updated_name, "--description", ""])
+
         @self.project.cli_helper.input("\n")
         def dummy(self):
             return self.project.execute()
+
         result_2 = dummy(self)
         # test for desired side effects
         assert os.path.exists(os.path.join(self.temp_dir, '.datmo'))
@@ -103,9 +107,11 @@ class TestProject():
         updated_description = "test model 2"
         self.project.parse(
             ["init", "--name", "", "--description", updated_description])
+
         @self.project.cli_helper.input("\n")
         def dummy(self):
             return self.project.execute()
+
         result_2 = dummy(self)
         # test for desired side effects
         assert os.path.exists(os.path.join(self.temp_dir, '.datmo'))
@@ -155,4 +161,3 @@ class TestProject():
         except Exception:
             exception_thrown = True
         assert exception_thrown
-

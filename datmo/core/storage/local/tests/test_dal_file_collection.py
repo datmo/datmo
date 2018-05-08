@@ -133,14 +133,19 @@ class TestLocalDAL():
         })) == 1
 
     def test_query_file_collections_range_query(self):
-        _ = self.dal.file_collection.create(FileCollection(self.file_collection_input_dict))
-        _ = self.dal.file_collection.create(FileCollection(self.file_collection_input_dict))
-        _ = self.dal.file_collection.create(FileCollection(self.file_collection_input_dict))
-        file_collections = self.dal.file_collection.query({}, sort_key="created_at", sort_order="descending")
+        _ = self.dal.file_collection.create(
+            FileCollection(self.file_collection_input_dict))
+        _ = self.dal.file_collection.create(
+            FileCollection(self.file_collection_input_dict))
+        _ = self.dal.file_collection.create(
+            FileCollection(self.file_collection_input_dict))
+        file_collections = self.dal.file_collection.query(
+            {}, sort_key="created_at", sort_order="descending")
         result = self.dal.file_collection.query({
             "created_at": {
                 "$lt":
-                    file_collections[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                    file_collections[1]
+                    .created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
             }
         })
         assert len(file_collections) == 3

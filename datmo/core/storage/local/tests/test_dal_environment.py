@@ -139,14 +139,19 @@ class TestLocalDAL():
         assert len(self.dal.environment.query({"id": environment.id})) == 1
 
     def test_query_environments_range_query(self):
-        _ = self.dal.environment.create(Environment(self.environment_input_dict))
-        _ = self.dal.environment.create(Environment(self.environment_input_dict))
-        _ = self.dal.environment.create(Environment(self.environment_input_dict))
-        environments = self.dal.environment.query({}, sort_key="created_at", sort_order="descending")
+        _ = self.dal.environment.create(
+            Environment(self.environment_input_dict))
+        _ = self.dal.environment.create(
+            Environment(self.environment_input_dict))
+        _ = self.dal.environment.create(
+            Environment(self.environment_input_dict))
+        environments = self.dal.environment.query(
+            {}, sort_key="created_at", sort_order="descending")
         result = self.dal.environment.query({
             "created_at": {
                 "$lt":
-                    environments[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                    environments[1]
+                    .created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
             }
         })
         assert len(environments) == 3

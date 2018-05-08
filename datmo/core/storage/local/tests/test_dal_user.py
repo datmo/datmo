@@ -109,11 +109,11 @@ class TestLocalDAL():
         _ = self.dal.user.create(User(self.user_input_dict))
         _ = self.dal.user.create(User(self.user_input_dict))
         _ = self.dal.user.create(User(self.user_input_dict))
-        users = self.dal.user.query({}, sort_key="created_at", sort_order="descending")
+        users = self.dal.user.query(
+            {}, sort_key="created_at", sort_order="descending")
         result = self.dal.user.query({
             "created_at": {
-                "$lt":
-                    users[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                "$lt": users[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
             }
         })
         assert len(users) == 3

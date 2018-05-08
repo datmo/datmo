@@ -140,8 +140,8 @@ class ProjectController(BaseController):
             dictionary with project metadata and config
         latest_snapshot : datmo.core.entity.snapshot.Snapshot
             snapshot object of the latest snapshot if present else None
-        unstaged_tasks : list
-            list of datmo.core.entity.task.Task objects in ascending order of created_at time
+        ascending_unstaged_tasks : list
+            list of datmo.core.entity.task.Task objects in ascending order of updated_at time
         """
         if not self.is_initialized:
             raise ProjectNotInitializedException(
@@ -154,8 +154,10 @@ class ProjectController(BaseController):
         status_dict["config"] = self.config.to_dict()
 
         # Show the latest snapshot
-        descending_snapshot_list = self.dal.snapshot.query({}, sort_key="created_at", sort_order="descending")
-        latest_snapshot = descending_snapshot_list[0] if descending_snapshot_list else None
+        descending_snapshots = self.dal.snapshot.query(
+            {}, sort_key="created_at", sort_order="descending")
+        latest_snapshot = descending_snapshots[
+            0] if descending_snapshots else None
 
         # Show unstaged tasks (created after latest snapshot)
         # TODO: use DB querying, currently returning randomly anomalous values for range queries
@@ -170,13 +172,14 @@ class ProjectController(BaseController):
         # else:
         #     task_query = {}
 
-        descending_task_list = self.dal.task.query({}, sort_key="updated_at", sort_order="descending")
+        descending_tasks = self.dal.task.query(
+            {}, sort_key="updated_at", sort_order="descending")
 
-        ascending_unstaged_task_list = []
-        for task in descending_task_list:
+        ascending_unstaged_tasks = []
+        for task in descending_tasks:
             if task.updated_at >= latest_snapshot.created_at:
-                ascending_unstaged_task_list.insert(0, task)
+                ascending_unstaged_tasks.insert(0, task)
             else:
                 break
 
-        return status_dict, latest_snapshot, ascending_unstaged_task_list
+        return status_dict, latest_snapshot, ascending_unstaged_tasks

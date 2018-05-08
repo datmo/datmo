@@ -114,11 +114,11 @@ class TestLocalDAL():
         _ = self.dal.code.create(Code(self.code_input_dict))
         _ = self.dal.code.create(Code(self.code_input_dict))
         _ = self.dal.code.create(Code(self.code_input_dict))
-        codes = self.dal.code.query({}, sort_key="created_at", sort_order="descending")
+        codes = self.dal.code.query(
+            {}, sort_key="created_at", sort_order="descending")
         result = self.dal.code.query({
             "created_at": {
-                "$lt":
-                    codes[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                "$lt": codes[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
             }
         })
         assert len(codes) == 3

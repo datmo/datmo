@@ -47,18 +47,22 @@ class TestHelper():
     def test_input(self):
         cli = Helper()
         test_msg = "test"
+
         @cli.input(test_msg)
         def dummy():
             return input("test")
+
         result = dummy()
         assert test_msg in result
 
     def test_prompt(self):
         cli = Helper()
         test_message = 'foobar'
+
         @cli.input(test_message)
         def dummy():
             return cli.prompt("what is this test?")
+
         i = dummy()
         assert i == test_message
 

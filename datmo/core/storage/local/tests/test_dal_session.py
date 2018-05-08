@@ -183,11 +183,11 @@ class TestLocalDAL():
         _ = self.dal.session.create(Session(self.session_input_dict))
         _ = self.dal.session.create(Session(self.session_input_dict))
         _ = self.dal.session.create(Session(self.session_input_dict))
-        sessions = self.dal.session.query({}, sort_key="created_at", sort_order="descending")
+        sessions = self.dal.session.query(
+            {}, sort_key="created_at", sort_order="descending")
         result = self.dal.session.query({
             "created_at": {
-                "$lt":
-                    sessions[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+                "$lt": sessions[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
             }
         })
         assert len(sessions) == 3

@@ -144,8 +144,10 @@ class TestLocalDAL():
         assert len(self.dal.snapshot.query({"visible": True})) == 2
 
     def test_sort_snapshots(self):
-        snapshot_1 = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
-        snapshot_2 = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
+        snapshot_1 = self.dal.snapshot.create(
+            Snapshot(self.snapshot_input_dict))
+        snapshot_2 = self.dal.snapshot.create(
+            Snapshot(self.snapshot_input_dict))
 
         # Sorting of snapshot in descending
         items = self.dal.snapshot.query(
@@ -212,7 +214,8 @@ class TestLocalDAL():
         _ = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
         _ = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
         _ = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
-        snapshots = self.dal.snapshot.query({}, sort_key="created_at", sort_order="descending")
+        snapshots = self.dal.snapshot.query(
+            {}, sort_key="created_at", sort_order="descending")
         result = self.dal.snapshot.query({
             "created_at": {
                 "$lt":
