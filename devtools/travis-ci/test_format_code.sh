@@ -21,7 +21,7 @@ then
     echo ""
     echo "Failing Formatting Test"
     echo "Please run yapf over the files changed"
-    echo "pip install yapf"
+    echo "pip install yapf==0.20.0"
     echo "yapf -i $CHANGED_FILES"
     exit 1
 else
