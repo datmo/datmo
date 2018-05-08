@@ -66,6 +66,11 @@ class TestTaskCommand():
             failed = True
         assert failed
 
+    def test_snapshot_command(self):
+        self.__set_variables()
+        self.task.parse(["task"])
+        assert self.task.execute()
+
     def test_task_run_should_fail1(self):
         self.__set_variables()
         # Test failure case

@@ -84,7 +84,7 @@ class TestSnapshot():
             failed = True
         assert failed
 
-    def test_datmo_snapshot_create(self):
+    def test_snapshot_command(self):
         self.__set_variables()
         test_message = "this is a test message"
         test_label = "test label"

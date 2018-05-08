@@ -38,6 +38,10 @@ class TestSession():
     def teardown_class(self):
         shutil.rmtree(self.temp_dir)
 
+    def test_session_no_subcommand(self):
+        self.session_command.parse(["session"])
+        assert self.session_command.execute()
+
     def test_session_create(self):
         self.session_command.parse(["session", "create", "--name", "pizza"])
         assert self.session_command.execute()

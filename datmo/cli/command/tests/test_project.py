@@ -20,6 +20,7 @@ from datmo import __version__
 from datmo.cli.driver.helper import Helper
 from datmo.cli.parser import parser
 from datmo.cli.command.project import ProjectCommand
+from datmo.core.util.exceptions import UnrecognizedCLIArgument
 
 
 class TestProject():
@@ -157,6 +158,6 @@ class TestProject():
         exception_thrown = False
         try:
             self.project.parse(["status", "--foobar"])
-        except Exception:
+        except UnrecognizedCLIArgument:
             exception_thrown = True
         assert exception_thrown
