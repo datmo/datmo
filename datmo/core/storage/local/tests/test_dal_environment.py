@@ -14,7 +14,7 @@ from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.entity.model import Model
 from datmo.core.entity.environment import Environment
-from datmo.core.util.exceptions import EntityNotFound
+from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
 
 
 class TestLocalDAL():
@@ -137,3 +137,108 @@ class TestLocalDAL():
             Environment(self.environment_input_dict))
 
         assert len(self.dal.environment.query({"id": environment.id})) == 1
+        # Query for multiple models
+        model_name = "model_sort"
+        model = self.dal.model.create(Model({"name": model_name}))
+
+        environment_input_dict_1 = {
+            "model_id": model.id,
+            "driver_type": "docker",
+            "file_collection_id": "test_file_id",
+            "definition_filename": "Dockerfile",
+            "hardware_info": {
+                "system": "macosx"
+            },
+            "unique_hash": "slkdjfa23dk",
+            "language": "python3",
+            "created_at": datetime(2017, 1, 1)
+        }
+        environment_input_dict_2 = {
+            "model_id": model.id,
+            "driver_type": "docker",
+            "file_collection_id": "test_file_id",
+            "definition_filename": "Dockerfile",
+            "hardware_info": {
+                "system": "macosx"
+            },
+            "unique_hash": "slkdjfa23dk",
+            "language": "python3",
+            "created_at": datetime(2017, 2, 1)
+        }
+        environment_input_dict_3 = {
+            "model_id": model.id,
+            "driver_type": "docker",
+            "file_collection_id": "test_file_id",
+            "definition_filename": "Dockerfile",
+            "hardware_info": {
+                "system": "macosx"
+            },
+            "unique_hash": "slkdjfa23dk",
+            "language": "python3",
+            "created_at": datetime(2017, 3, 1)
+        }
+
+        self.dal.environment.create(Environment(environment_input_dict_1))
+        self.dal.environment.create(Environment(environment_input_dict_2))
+        self.dal.environment.create(Environment(environment_input_dict_3))
+
+        results = self.dal.environment.query(
+            {
+                "model_id": model.id
+            },
+            sort_key="created_at",
+            sort_order="ascending")
+        assert len(results) == 3
+        assert results[0].created_at == environment_input_dict_1["created_at"]
+
+        results = self.dal.environment.query(
+            {
+                "model_id": model.id
+            },
+            sort_key="created_at",
+            sort_order="descending")
+        assert len(results) == 3
+        assert results[0].created_at == environment_input_dict_3["created_at"]
+
+        # Wrong order being passed in
+        failed = False
+        try:
+            _ = self.dal.environment.query(
+                {
+                    "model_id": model.id
+                },
+                sort_key='created_at',
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # Wrong key and order being passed in
+        failed = False
+        try:
+            _ = self.dal.environment.query(
+                {
+                    "model_id": model.id
+                },
+                sort_key='wrong_key',
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_items = self.dal.environment.query(
+            {
+                "model_id": model.id
+            },
+            sort_key='created_at',
+            sort_order='ascending')
+        items = self.dal.environment.query(
+            {
+                "model_id": model.id
+            },
+            sort_key='wrong_key',
+            sort_order='ascending')
+        expected_ids = [item.id for item in expected_items]
+        ids = [item.id for item in items]
+        assert set(expected_ids) == set(ids)

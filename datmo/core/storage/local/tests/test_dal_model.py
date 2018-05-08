@@ -10,10 +10,12 @@ import shutil
 import tempfile
 import platform
 
+from datetime import datetime
+
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.entity.model import Model
-from datmo.core.util.exceptions import EntityNotFound
+from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
 
 
 class TestLocalDAL():
@@ -125,3 +127,82 @@ class TestLocalDAL():
             self.dal.model.query({
                 "name": self.model_input_dict['name']
             })) == 6
+
+        # Query for multiple models
+        model_input_dict_1 = {
+            "name": "model_sort",
+            "created_at": datetime(2017, 1, 1)
+        }
+        model_input_dict_2 = {
+            "name": "model_sort",
+            "created_at": datetime(2017, 2, 1)
+        }
+        model_input_dict_3 = {
+            "name": "model_sort",
+            "created_at": datetime(2017, 3, 1)
+        }
+
+        self.dal.model.create(Model(model_input_dict_1))
+        self.dal.model.create(Model(model_input_dict_2))
+        self.dal.model.create(Model(model_input_dict_3))
+
+        results = self.dal.model.query(
+            {
+                "name": "model_sort"
+            },
+            sort_key="created_at",
+            sort_order="ascending")
+        assert len(results) == 3
+        assert results[0].created_at == model_input_dict_1["created_at"]
+
+        results = self.dal.model.query(
+            {
+                "name": "model_sort"
+            },
+            sort_key="created_at",
+            sort_order="descending")
+        assert len(results) == 3
+        assert results[0].created_at == model_input_dict_3["created_at"]
+
+        # Wrong order being passed in
+        failed = False
+        try:
+            _ = self.dal.model.query(
+                {
+                    "name": "model_sort"
+                },
+                sort_key='created_at',
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # Wrong key and order being passed in
+        failed = False
+        try:
+            _ = self.dal.model.query(
+                {
+                    "name": "model_sort"
+                },
+                sort_key='wrong_key',
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_items = self.dal.model.query(
+            {
+                "name": "model_sort"
+            },
+            sort_key='created_at',
+            sort_order='ascending')
+        items = self.dal.model.query(
+            {
+                "name": "model_sort"
+            },
+            sort_key='wrong_key',
+            sort_order='ascending')
+        expected_ids = [item.id for item in expected_items]
+        ids = [item.id for item in items]
+        assert set(expected_ids) == set(ids)

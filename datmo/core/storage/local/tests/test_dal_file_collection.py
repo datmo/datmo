@@ -14,7 +14,7 @@ from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.entity.model import Model
 from datmo.core.entity.file_collection import FileCollection
-from datmo.core.util.exceptions import EntityNotFound
+from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
 
 
 class TestLocalDAL():
@@ -131,3 +131,99 @@ class TestLocalDAL():
         assert len(self.dal.file_collection.query({
             "id": file_collection.id
         })) == 1
+
+        # Query for multiple models
+        model_name = "model_sort"
+        model = self.dal.model.create(Model({"name": model_name}))
+
+        file_collection_input_dict_1 = {
+            "model_id": model.id,
+            "driver_type": "local",
+            "filehash": "myhash",
+            "path": "test_path",
+            "created_at": datetime(2017, 1, 1)
+        }
+        file_collection_input_dict_2 = {
+            "model_id": model.id,
+            "driver_type": "local",
+            "filehash": "myhash",
+            "path": "test_path",
+            "created_at": datetime(2017, 2, 1)
+        }
+        file_collection_input_dict_3 = {
+            "model_id": model.id,
+            "driver_type": "local",
+            "filehash": "myhash",
+            "path": "test_path",
+            "created_at": datetime(2017, 3, 1)
+        }
+
+        self.dal.file_collection.create(
+            FileCollection(file_collection_input_dict_1))
+        self.dal.file_collection.create(
+            FileCollection(file_collection_input_dict_2))
+        self.dal.file_collection.create(
+            FileCollection(file_collection_input_dict_3))
+
+        results = self.dal.file_collection.query(
+            {
+                "model_id": model.id
+            },
+            sort_key="created_at",
+            sort_order="ascending")
+        assert len(results) == 3
+        assert results[0].created_at == file_collection_input_dict_1[
+            "created_at"]
+
+        results = self.dal.file_collection.query(
+            {
+                "model_id": model.id
+            },
+            sort_key="created_at",
+            sort_order="descending")
+        assert len(results) == 3
+        assert results[0].created_at == file_collection_input_dict_3[
+            "created_at"]
+
+        # Wrong order being passed in
+        failed = False
+        try:
+            _ = self.dal.file_collection.query(
+                {
+                    "model_id": model.id
+                },
+                sort_key='created_at',
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # Wrong key and order being passed in
+        failed = False
+        try:
+            _ = self.dal.file_collection.query(
+                {
+                    "model_id": model.id
+                },
+                sort_key='wrong_key',
+                sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_items = self.dal.file_collection.query(
+            {
+                "model_id": model.id
+            },
+            sort_key='created_at',
+            sort_order='ascending')
+        items = self.dal.file_collection.query(
+            {
+                "model_id": model.id
+            },
+            sort_key='wrong_key',
+            sort_order='ascending')
+        expected_ids = [item.id for item in expected_items]
+        ids = [item.id for item in items]
+        assert set(expected_ids) == set(ids)
