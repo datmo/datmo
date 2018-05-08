@@ -146,7 +146,8 @@ class EntityMethodsCRUD(object):
         return self.entity_class(obj)
 
     def get_by_shortened_id(self, shortened_entity_id):
-        obj = self.driver.get_by_shortened_id(self.collection, shortened_entity_id)
+        obj = self.driver.get_by_shortened_id(self.collection,
+                                              shortened_entity_id)
         return self.entity_class(obj)
 
     def create(self, datmo_entity):

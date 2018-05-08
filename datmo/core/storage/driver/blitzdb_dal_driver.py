@@ -76,10 +76,10 @@ class BlitzDBDALDriver(DALDriver):
     def get_by_shortened_id(self, collection, shortened_entity_id):
         self.__reload()
         try:
-            results = self.backend.filter(collection,
-                                          {'pk': {
-                                              '$regex': shortened_entity_id
-                                          }})
+            results = self.backend.filter(
+                collection, {'pk': {
+                    '$regex': shortened_entity_id
+                }})
             if len(results) == 1:
                 item_dict = results[0].attributes
                 return normalize_entity(item_dict)

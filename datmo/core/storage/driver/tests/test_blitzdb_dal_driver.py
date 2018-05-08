@@ -82,7 +82,8 @@ class TestBlitzDBDALDriver():
         test_obj = {"foo": "bar_1"}
         result = self.database.set(self.collection, test_obj)
         # Test with substring to get with regex
-        result2 = self.database.get_by_shortened_id(self.collection, result.get('id')[:10])
+        result2 = self.database.get_by_shortened_id(self.collection,
+                                                    result.get('id')[:10])
         assert result2.get('id') == result.get('id')
 
     def test_db_update(self):
