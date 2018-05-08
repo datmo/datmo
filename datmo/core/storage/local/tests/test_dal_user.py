@@ -126,9 +126,7 @@ class TestLocalDAL():
         failed = False
         try:
             _ = self.dal.user.query(
-                {},
-                sort_key='created_at',
-                sort_order='wrong_order')
+                {}, sort_key='created_at', sort_order='wrong_order')
         except InvalidArgumentType:
             failed = True
         assert failed
@@ -137,9 +135,7 @@ class TestLocalDAL():
         failed = False
         try:
             _ = self.dal.user.query(
-                {},
-                sort_key='wrong_key',
-                sort_order='wrong_order')
+                {}, sort_key='wrong_key', sort_order='wrong_order')
         except InvalidArgumentType:
             failed = True
         assert failed

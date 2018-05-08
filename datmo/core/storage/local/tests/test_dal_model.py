@@ -135,16 +135,14 @@ class TestLocalDAL():
         model_2 = self.dal.model.create(Model(self.model_input_dict))
         model_3 = self.dal.model.create(Model(self.model_input_dict))
 
-        results = self.dal.model.query({},
-            sort_key="created_at",
-            sort_order="ascending")
+        results = self.dal.model.query(
+            {}, sort_key="created_at", sort_order="ascending")
         assert len(results) == 3
         assert results[0].created_at == model_1.created_at
         assert results[1].created_at == model_2.created_at
 
-        results = self.dal.model.query({},
-            sort_key="created_at",
-            sort_order="descending")
+        results = self.dal.model.query(
+            {}, sort_key="created_at", sort_order="descending")
         assert len(results) == 3
         assert results[0].created_at == model_3.created_at
         assert results[1].created_at == model_2.created_at
@@ -152,9 +150,8 @@ class TestLocalDAL():
         # Wrong order being passed in
         failed = False
         try:
-            _ = self.dal.model.query({},
-                sort_key='created_at',
-                sort_order='wrong_order')
+            _ = self.dal.model.query(
+                {}, sort_key='created_at', sort_order='wrong_order')
         except InvalidArgumentType:
             failed = True
         assert failed
@@ -162,20 +159,17 @@ class TestLocalDAL():
         # Wrong key and order being passed in
         failed = False
         try:
-            _ = self.dal.model.query({},
-                sort_key='wrong_key',
-                sort_order='wrong_order')
+            _ = self.dal.model.query(
+                {}, sort_key='wrong_key', sort_order='wrong_order')
         except InvalidArgumentType:
             failed = True
         assert failed
 
         # wrong key and right order being passed in
-        expected_items = self.dal.model.query({},
-            sort_key='created_at',
-            sort_order='ascending')
-        items = self.dal.model.query({},
-            sort_key='wrong_key',
-            sort_order='ascending')
+        expected_items = self.dal.model.query(
+            {}, sort_key='created_at', sort_order='ascending')
+        items = self.dal.model.query(
+            {}, sort_key='wrong_key', sort_order='ascending')
         expected_ids = [item.id for item in expected_items]
         ids = [item.id for item in items]
         assert set(expected_ids) == set(ids)
