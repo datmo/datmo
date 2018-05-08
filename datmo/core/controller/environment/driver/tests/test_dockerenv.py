@@ -201,7 +201,7 @@ class TestDockerEnv():
         run_options = {
             "command": ["sh", "-c", "echo yo"],
             "ports": ["8888:9999", "5000:5001"],
-            "name": "datmotest_dockerenv_1",
+            "name": str(uuid.uuid1()),
             "volumes": {
                 self.docker_environment_manager.filepath: {
                     'bind': '/home/',
@@ -228,7 +228,7 @@ class TestDockerEnv():
         # run_options = {
         #     "command": [],
         #     "ports": ["8888:9999", "5000:5001"],
-        #     "name": "datmotest_dockerenv_2",
+        #     "name": str(uuid.uuid1()),
         #     "volumes": {
         #         self.docker_environment_manager.filepath: {
         #             'bind': '/home/',
@@ -277,7 +277,7 @@ class TestDockerEnv():
         run_options = {
             "command": ["sh", "-c", "echo yo"],
             "ports": ["8888:9999", "5000:5001"],
-            "name": "datmotest_dockerenv_5",
+            "name": str(uuid.uuid1()),
             "volumes": None,
             "detach": False,
             "stdin_open": False,
