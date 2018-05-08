@@ -44,17 +44,23 @@ class TestHelper():
         cli = Helper()
         assert cli != None
 
+    def test_input(self):
+        cli = Helper()
+        test_msg = "test"
+        @cli.input(test_msg)
+        def dummy():
+            return input("test")
+        result = dummy()
+        assert test_msg in result
+
     def test_prompt(self):
         cli = Helper()
         test_message = 'foobar'
-        with open(os.path.join(self.temp_dir, "test.txt"), "w") as f:
-            f.write(to_unicode(test_message))
-
-        with open(os.path.join(self.temp_dir, "test.txt"), "r") as f:
-            sys.stdin = f
-            i = cli.prompt("what is this test?")
-            assert i == test_message
-        os.remove(os.path.join(self.temp_dir, "test.txt"))
+        @cli.input(test_message)
+        def dummy():
+            return cli.prompt("what is this test?")
+        i = dummy()
+        assert i == test_message
 
         # TODO: figure out how to replace "print" with a testable function
         # https://stackoverflow.com/questions/4219717/how-to-assert-output-with-nosetest-unittest-in-python
