@@ -32,7 +32,7 @@ def get_datmo_parser():
         help="boolean if you want to switch to this session")
 
     session_delete = session_subcommand_parsers.add_parser(
-        "delete", help="delete a snapshot by id")
+        "delete", help="delete a session by id")
     session_delete.add_argument(
         "--name", dest="name", help="name of session to delete")
 
@@ -139,12 +139,12 @@ def get_datmo_parser():
         help="absolute filepath to use to search for metrics JSON")
 
     snapshot_delete = snapshot_subcommand_parsers.add_parser(
-        "delete", help="Delete a snapshot by id")
+        "delete", help="delete a snapshot by id")
     snapshot_delete.add_argument(
         "--id", dest="id", help="snapshot id to delete")
 
     snapshot_ls = snapshot_subcommand_parsers.add_parser(
-        "ls", help="List snapshots")
+        "ls", help="list snapshots")
     snapshot_ls.add_argument(
         "--session-id",
         dest="session_id",
@@ -173,7 +173,7 @@ def get_datmo_parser():
         "--gpu",
         dest="gpu",
         action="store_true",
-        help="Boolean if you want to run using GPUs")
+        help="boolean if you want to run using GPUs")
     task_run.add_argument(
         "--ports",
         "-p",

@@ -281,16 +281,17 @@ which allows you to keep track of 5 components at once
 5) Metrics
         """,
         "cli.snapshot.usage":
-            """ USAGE
-Datmo Snapshots allow you to save the state of your model and experiements
+            """""",
+        "cli.snapshot.description":
+            """ 
+Datmo snapshots allow you to save the state of your model and experiments
 by keeping track of your source code, environment, configuration, metrics
 and large files.
-        """,
-        "cli.snapshot.description":
-            """ DESCRIPTION """,
+            """,
         "cli.snapshot.create.description":
             """
-Creating a snapshot is super easy.
+Run snapshot create any time you want to save the results of your 
+experiments. You can then view all snapshots with the `snapshot ls` command.
         """
     }
 }
