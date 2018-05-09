@@ -18,10 +18,10 @@ import tempfile
 import platform
 
 from datmo.cli.driver.helper import Helper
-from datmo.cli.command.datmo import DatmoCommand
+from datmo.cli.command.datmo_command import DatmoCommand
 
 
-class TestProject():
+class TestDatmo():
     def setup_class(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = "/tmp" if not platform.system(
