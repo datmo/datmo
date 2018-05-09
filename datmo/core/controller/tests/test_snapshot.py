@@ -13,6 +13,7 @@ except NameError:
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.controller.task import TaskController
+from datmo.core.entity.snapshot import Snapshot
 from datmo.core.util.exceptions import (
     EntityNotFound, EnvironmentDoesNotExist, GitCommitDoesNotExist,
     SessionDoesNotExistException, RequiredArgumentMissing, TaskNotComplete,
@@ -88,7 +89,7 @@ class TestSnapshotController():
 
         snapshot_obj_1 = self.snapshot.create({"message": "my test snapshot"})
 
-        assert snapshot_obj_1
+        assert isinstance(snapshot_obj_1, Snapshot)
         assert snapshot_obj_1.code_id
         assert snapshot_obj_1.environment_id
         assert snapshot_obj_1.file_collection_id
@@ -104,7 +105,7 @@ class TestSnapshotController():
         # Test default values for snapshot, success
         snapshot_obj = self.snapshot.create({"message": "my test snapshot"})
 
-        assert snapshot_obj
+        assert isinstance(snapshot_obj, Snapshot)
         assert snapshot_obj.code_id
         assert snapshot_obj.environment_id
         assert snapshot_obj.file_collection_id
@@ -301,6 +302,7 @@ class TestSnapshotController():
         snapshot_obj = self.snapshot.create_from_task(
             message="my test snapshot", task_id=updated_task_obj.id)
 
+        assert isinstance(snapshot_obj, Snapshot)
         assert snapshot_obj.id == updated_task_obj.after_snapshot_id
         assert snapshot_obj.message == "my test snapshot"
         assert snapshot_obj.stats == updated_task_obj.results
@@ -316,6 +318,7 @@ class TestSnapshotController():
             config=test_config,
             stats=test_stats)
 
+        assert isinstance(snapshot_obj, Snapshot)
         assert snapshot_obj.id == updated_task_obj.after_snapshot_id
         assert snapshot_obj.message == "my test snapshot"
         assert snapshot_obj.label == "best"
@@ -344,6 +347,7 @@ class TestSnapshotController():
         updated_stats_dict.update(test_stats)
         updated_stats_dict.update(updated_task_obj.results)
 
+        assert isinstance(snapshot_obj, Snapshot)
         assert snapshot_obj.id == updated_task_obj_2.after_snapshot_id
         assert snapshot_obj.message == "my test snapshot"
         assert snapshot_obj.label == "best"

@@ -18,7 +18,7 @@ from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
 
 
 class TestLocalDAL():
-    def setup_class(self):
+    def setup_method(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = "/tmp" if not platform.system(
         ) == "Windows" else None
@@ -36,19 +36,7 @@ class TestLocalDAL():
             "model_id": model.id,
         }
 
-        self.session_input_dict_1 = {
-            "name": "session_2",
-            "model_id": model.id,
-            "created_at": datetime(2017, 2, 1)
-        }
-
-        self.session_input_dict_2 = {
-            "name": "session_2",
-            "model_id": model.id,
-            "created_at": datetime(2017, 3, 1)
-        }
-
-    def teardown_class(self):
+    def teardown_method(self):
         pass
 
     def test_create_session_by_dictionary(self):
@@ -126,42 +114,43 @@ class TestLocalDAL():
         session = self.dal.session.create(Session(self.session_input_dict))
 
         assert len(self.dal.session.query({"id": session.id})) == 1
+        _ = self.dal.session.create(Session(self.session_input_dict))
         assert len(
             self.dal.session.query({
                 "name": self.session_input_dict['name']
-            })) == 7
+            })) == 2
 
     def test_sort_sessions(self):
-        self.dal.session.create(Session(self.session_input_dict_1))
-        self.dal.session.create(Session(self.session_input_dict_2))
+        session_1 = self.dal.session.create(Session(self.session_input_dict))
+        session_2 = self.dal.session.create(Session(self.session_input_dict))
 
         # Sorting of snapshot in descending
         items = self.dal.session.query(
             {
-                "name": self.session_input_dict_1["name"]
+                "name": self.session_input_dict['name']
             },
-            sort_key='created_at',
-            sort_order='descending')
-        assert items[0].created_at == self.session_input_dict_2["created_at"]
+            sort_key="created_at",
+            sort_order="descending")
+        assert items[0].created_at == session_2.created_at
 
         # Sorting of snapshot in ascending
         items = self.dal.session.query(
             {
-                "name": self.session_input_dict_1["name"]
+                "name": self.session_input_dict["name"]
             },
-            sort_key='created_at',
-            sort_order='ascending')
-        assert items[0].created_at == self.session_input_dict_1["created_at"]
+            sort_key="created_at",
+            sort_order="ascending")
+        assert items[0].created_at == session_1.created_at
 
         # Wrong order being passed in
         failed = False
         try:
             _ = self.dal.session.query(
                 {
-                    "name": self.session_input_dict_1["name"]
+                    "name": self.session_input_dict['name']
                 },
-                sort_key='created_at',
-                sort_order='wrong_order')
+                sort_key="created_at",
+                sort_order="wrong_order")
         except InvalidArgumentType:
             failed = True
         assert failed
@@ -171,10 +160,10 @@ class TestLocalDAL():
         try:
             _ = self.dal.session.query(
                 {
-                    "name": self.session_input_dict_1["name"]
+                    "name": self.session_input_dict["name"]
                 },
-                sort_key='wrong_key',
-                sort_order='wrong_order')
+                sort_key="wrong_key",
+                sort_order="wrong_order")
         except InvalidArgumentType:
             failed = True
         assert failed
@@ -182,16 +171,30 @@ class TestLocalDAL():
         # wrong key and right order being passed in
         expected_items = self.dal.session.query(
             {
-                "name": self.session_input_dict_1["name"]
+                "name": self.session_input_dict["name"]
             },
-            sort_key='created_at',
-            sort_order='ascending')
+            sort_key="created_at",
+            sort_order="ascending")
         items = self.dal.session.query(
             {
-                "name": self.session_input_dict_1["name"]
+                "name": self.session_input_dict["name"]
             },
-            sort_key='wrong_key',
-            sort_order='ascending')
+            sort_key="wrong_key",
+            sort_order="ascending")
         expected_ids = [item.id for item in expected_items]
         ids = [item.id for item in items]
         assert set(expected_ids) == set(ids)
+
+    def test_query_sessions_range_query(self):
+        _ = self.dal.session.create(Session(self.session_input_dict))
+        _ = self.dal.session.create(Session(self.session_input_dict))
+        _ = self.dal.session.create(Session(self.session_input_dict))
+        sessions = self.dal.session.query(
+            {}, sort_key="created_at", sort_order="descending")
+        result = self.dal.session.query({
+            "created_at": {
+                "$lt": sessions[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            }
+        })
+        assert len(sessions) == 3
+        assert len(result) == 1

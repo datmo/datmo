@@ -10,14 +10,16 @@ import shutil
 import tempfile
 import platform
 
+from datetime import datetime
+
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.entity.model import Model
-from datmo.core.util.exceptions import EntityNotFound
+from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
 
 
 class TestLocalDAL():
-    def setup_class(self):
+    def setup_method(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = "/tmp" if not platform.system(
         ) == "Windows" else None
@@ -30,7 +32,7 @@ class TestLocalDAL():
         model_name = "model_1"
         self.model_input_dict = {"name": model_name}
 
-    def teardown_class(self):
+    def teardown_method(self):
         pass
 
     def test_create_model_by_dictionary(self):
@@ -123,10 +125,70 @@ class TestLocalDAL():
             deleted = True
         assert deleted
 
-    def test_query_models(self):
+    def test_query_models_basic(self):
         model = self.dal.model.create(Model(self.model_input_dict))
         assert len(self.dal.model.query({"id": model.id})) == 1
+        _ = self.dal.model.create(Model(self.model_input_dict))
         assert len(
             self.dal.model.query({
                 "name": self.model_input_dict['name']
-            })) == 7
+            })) == 2
+
+    def test_query_models_multiple(self):
+        # Query for multiple models
+        model_1 = self.dal.model.create(Model(self.model_input_dict))
+        model_2 = self.dal.model.create(Model(self.model_input_dict))
+        model_3 = self.dal.model.create(Model(self.model_input_dict))
+
+        results = self.dal.model.query(
+            {}, sort_key="created_at", sort_order="ascending")
+        assert len(results) == 3
+        assert results[0].created_at == model_1.created_at
+        assert results[1].created_at == model_2.created_at
+
+        results = self.dal.model.query(
+            {}, sort_key="created_at", sort_order="descending")
+        assert len(results) == 3
+        assert results[0].created_at == model_3.created_at
+        assert results[1].created_at == model_2.created_at
+
+        # Wrong order being passed in
+        failed = False
+        try:
+            _ = self.dal.model.query(
+                {}, sort_key='created_at', sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # Wrong key and order being passed in
+        failed = False
+        try:
+            _ = self.dal.model.query(
+                {}, sort_key='wrong_key', sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_items = self.dal.model.query(
+            {}, sort_key='created_at', sort_order='ascending')
+        items = self.dal.model.query(
+            {}, sort_key='wrong_key', sort_order='ascending')
+        expected_ids = [item.id for item in expected_items]
+        ids = [item.id for item in items]
+        assert set(expected_ids) == set(ids)
+
+    def test_query_models_range_query(self):
+        _ = self.dal.model.create(Model(self.model_input_dict))
+        _ = self.dal.model.create(Model(self.model_input_dict))
+        _ = self.dal.model.create(Model(self.model_input_dict))
+        models = self.dal.model.query(
+            {}, sort_key="created_at", sort_order="descending")
+        result = self.dal.model.query({
+            "created_at": {
+                "$lt": models[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            }
+        })
+        assert len(models) == 3
+        assert len(result) == 1

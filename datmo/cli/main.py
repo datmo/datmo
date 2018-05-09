@@ -43,6 +43,9 @@ def main():
             command_name == "-v":
             command_name = "project"
             sys.argv[1] = "version"
+        elif command_name == "status":
+            command_name = "project"
+            sys.argv[1] = "status"
         command_class = \
             cli_helper.get_command_class(command_name)
     else:

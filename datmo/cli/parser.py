@@ -27,6 +27,8 @@ init_parser.add_argument("--description", default=None)
 
 version_parser = subparsers.add_parser("version", help="datmo version")
 
+status_parser = subparsers.add_parser("status", help="project status")
+
 # Session
 session_parser = subparsers.add_parser("session", help="session module")
 session_subcommand_parsers = session_parser.add_subparsers(

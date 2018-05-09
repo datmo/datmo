@@ -3,7 +3,7 @@ from datetime import datetime
 
 from datmo.core.util.exceptions import (
     EntityNotFound, EntityCollectionNotFound, IncorrectTypeException,
-    InvalidArgumentType, RequiredArgumentMissing)
+    InvalidArgumentType, RequiredArgumentMissing, MoreThanOneEntityFound)
 from datmo.core.storage.driver import DALDriver
 
 
@@ -78,11 +78,13 @@ class BlitzDBDALDriver(DALDriver):
         try:
             results = self.backend.filter(
                 collection, {'pk': {
-                    '$regex': shortened_entity_id
+                    '$regex': '^%s' % shortened_entity_id
                 }})
             if len(results) == 1:
                 item_dict = results[0].attributes
                 return normalize_entity(item_dict)
+            elif len(results) > 1:
+                raise MoreThanOneEntityFound()
             else:
                 raise EntityNotFound()
         except AttributeError as err:

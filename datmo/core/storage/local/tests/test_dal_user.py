@@ -13,11 +13,11 @@ from datetime import datetime
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.entity.user import User
-from datmo.core.util.exceptions import EntityNotFound
+from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
 
 
 class TestLocalDAL():
-    def setup_class(self):
+    def setup_method(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = "/tmp" if not platform.system(
         ) == "Windows" else None
@@ -32,7 +32,7 @@ class TestLocalDAL():
             "email": "test@test.com",
         }
 
-    def teardown_class(self):
+    def teardown_method(self):
         pass
 
     def test_create_user_by_dictionary(self):
@@ -101,11 +101,70 @@ class TestLocalDAL():
             deleted = True
         assert deleted
 
-    def test_query_users(self):
+    def test_query_users_basic(self):
         user = self.dal.user.create(User(self.user_input_dict))
 
         assert len(self.dal.user.query({"id": user.id})) == 1
+        _ = self.dal.user.create(User(self.user_input_dict))
         assert len(
             self.dal.user.query({
                 "name": self.user_input_dict['name']
-            })) == 7
+            })) == 2
+
+    def test_query_users_multiple(self):
+        user_1 = self.dal.user.create(User(self.user_input_dict))
+        user_2 = self.dal.user.create(User(self.user_input_dict))
+        user_3 = self.dal.user.create(User(self.user_input_dict))
+
+        results = self.dal.user.query(
+            {}, sort_key="created_at", sort_order="ascending")
+        assert len(results) == 3
+        assert results[0].created_at == user_1.created_at
+        assert results[1].created_at == user_2.created_at
+
+        results = self.dal.user.query(
+            {}, sort_key="created_at", sort_order="descending")
+        assert len(results) == 3
+        assert results[0].created_at == user_3.created_at
+        assert results[1].created_at == user_2.created_at
+
+        # Wrong order being passed in
+        failed = False
+        try:
+            _ = self.dal.user.query(
+                {}, sort_key='created_at', sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # Wrong key and order being passed in
+        failed = False
+        try:
+            _ = self.dal.user.query(
+                {}, sort_key='wrong_key', sort_order='wrong_order')
+        except InvalidArgumentType:
+            failed = True
+        assert failed
+
+        # wrong key and right order being passed in
+        expected_items = self.dal.user.query(
+            {}, sort_key='created_at', sort_order='ascending')
+        items = self.dal.user.query(
+            {}, sort_key='wrong_key', sort_order='ascending')
+        expected_ids = [item.id for item in expected_items]
+        ids = [item.id for item in items]
+        assert set(expected_ids) == set(ids)
+
+    def test_query_users_range_query(self):
+        _ = self.dal.user.create(User(self.user_input_dict))
+        _ = self.dal.user.create(User(self.user_input_dict))
+        _ = self.dal.user.create(User(self.user_input_dict))
+        users = self.dal.user.query(
+            {}, sort_key="created_at", sort_order="descending")
+        result = self.dal.user.query({
+            "created_at": {
+                "$lt": users[1].created_at.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+            }
+        })
+        assert len(users) == 3
+        assert len(result) == 1

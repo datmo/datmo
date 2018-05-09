@@ -15,6 +15,7 @@ except NameError:
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.task import TaskController
+from datmo.core.entity.task import Task
 from datmo.core.util.exceptions import EntityNotFound, TaskRunException, \
     InvalidArgumentType, RequiredArgumentMissing
 
@@ -39,7 +40,7 @@ class TestTaskController():
         # Create task in the project
         task_obj = self.task.create()
 
-        assert task_obj
+        assert isinstance(task_obj, Task)
         assert task_obj.created_at
         assert task_obj.updated_at
 
@@ -189,6 +190,7 @@ class TestTaskController():
         # 1) Test option 1
         updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)
 
+        assert isinstance(updated_task_obj, Task)
         assert task_obj.id == updated_task_obj.id
 
         assert updated_task_obj.before_snapshot_id
@@ -265,6 +267,7 @@ class TestTaskController():
         updated_task_obj_2 = self.task.run(
             task_obj_2.id, task_dict=task_dict, snapshot_dict=snapshot_dict)
 
+        assert isinstance(updated_task_obj_2, Task)
         assert task_obj_2.id == updated_task_obj_2.id
 
         assert updated_task_obj_2.before_snapshot_id
@@ -315,6 +318,7 @@ class TestTaskController():
 
         updated_task_obj_2 = self.task.run(task_obj_2.id, task_dict=task_dict)
 
+        assert isinstance(updated_task_obj_2, Task)
         assert updated_task_obj_2.before_snapshot_id
         assert updated_task_obj_2.ports == None
         assert updated_task_obj_2.interactive == False
