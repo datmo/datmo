@@ -251,6 +251,8 @@ MESSAGES = {
             "Stop argument %s not present in input",
         "controller.task.delete.arg":
             "Delete argument %s not present in input",
+        "controller.session.__init__":
+            "Project has not been initialized",
         "controller.session.delete.default":
             "Can not delete default session",
         "storage.local.dal.update":
