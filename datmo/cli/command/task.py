@@ -15,8 +15,8 @@ from datmo.core.util.logger import DatmoLogger
 
 
 class TaskCommand(ProjectCommand):
-    def __init__(self, home, cli_helper, parser):
-        super(TaskCommand, self).__init__(home, cli_helper, parser)
+    def __init__(self, home, cli_helper):
+        super(TaskCommand, self).__init__(home, cli_helper)
         self.logger = DatmoLogger.get_logger(__name__)
         self.task_controller = TaskController(home=home)
 

@@ -21,7 +21,6 @@ except NameError:
     to_unicode = str
 
 from datmo.cli.driver.helper import Helper
-from datmo.cli.parser import parser
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
 from datmo.cli.command.task import TaskCommand
@@ -44,11 +43,11 @@ class TestSnapshot():
         pass
 
     def __set_variables(self):
-        self.init = ProjectCommand(self.temp_dir, self.cli_helper, parser)
+        self.init = ProjectCommand(self.temp_dir, self.cli_helper)
         self.init.parse(
             ["init", "--name", "foobar", "--description", "test model"])
         self.init.execute()
-        self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper, parser)
+        self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
 
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")

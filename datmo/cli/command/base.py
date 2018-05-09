@@ -2,13 +2,14 @@
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import ClassMethodNotFound
+from datmo.cli.parser import get_datmo_parser
 
 
 class BaseCommand(object):
-    def __init__(self, home, cli_helper, parser):
+    def __init__(self, home, cli_helper):
         self.home = home
         self.cli_helper = cli_helper
-        self.parser = parser
+        self.parser = get_datmo_parser()
 
     def parse(self, args):
         self.args = self.parser.parse_args(args)
