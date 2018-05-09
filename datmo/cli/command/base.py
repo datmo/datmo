@@ -62,16 +62,10 @@ class BaseCommand(object):
         if getattr(self.args, 'command') is None:
             self.args.command = 'datmo'
 
-        # print(self.__class__)
-
-        # print(self.args)
-
         command_args = vars(self.args).copy()
         # use command name if it exists,
         # otherwise use the module name
         method = None
-
-        # print(command_args)
 
         if "subcommand" in command_args and command_args['subcommand'] is not None:
             method = getattr(self,
@@ -91,10 +85,6 @@ class BaseCommand(object):
             raise ClassMethodNotFound(
                 __("error", "cli.general.method.not_found",
                    (self.args.command, method)))
-
-        # print("DEUBGGG")
-        # print(method)
-        # print(command_args)
 
         method_result = method(**command_args)
         return method_result
