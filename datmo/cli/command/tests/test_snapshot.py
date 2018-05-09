@@ -74,6 +74,14 @@ class TestSnapshot():
         with open(self.filepath_2, "w") as f:
             f.write(to_unicode(str("test")))
 
+    def test_snapshot_project_not_init(self):
+        failed = False
+        try:
+            self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
+        except ProjectNotInitializedException:
+            failed = True
+        assert failed
+
     def test_snapshot_help(self):
         self.__set_variables()
         print(
@@ -96,14 +104,6 @@ class TestSnapshot():
 
         self.snapshot.parse(["snapshot", "create", "--help"])
         assert self.snapshot.execute()
-
-    def test_snapshot_project_not_init(self):
-        failed = False
-        try:
-            self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
-        except ProjectNotInitializedException:
-            failed = True
-        assert failed
 
     def test_snapshot_command(self):
         self.__set_variables()
