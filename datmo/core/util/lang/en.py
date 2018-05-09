@@ -265,29 +265,30 @@ MESSAGES = {
         "cli.project.init.git": "Enter remote git url for the Datmo project",
         "cli.general.confirm": "Is it okay?",
     },
-    "description": {
-        "cli.datmo":
+    "argparser": {
+        "cli.datmo.usage":
             """
-        datmo COMMAND [SUBCOMMANDS] ARGS
+Datmo is a command line utility to enable tracking of data science projects.
+It uses many of the tools you are already familiar with and combines them into a snapshot
+which allows you to keep track of 5 components at once
 
-        Datmo is a command line utility to enable tracking of data science projects.
-        It uses many of the tools you are already familiar with and combines them into a snapshot
-        which allows you to keep track of 5 components at once
-
-        1) Source Code
-        2) Dependency Environment
-        3) Large Files
-        4) Configurations
-        5) Metrics
+1) Source Code
+2) Dependency Environment
+3) Large Files
+4) Configurations
+5) Metrics
         """,
-        "cli.snapshot":
+        "cli.snapshot.usage":
+            """ USAGE
+Datmo Snapshots allow you to save the state of your model and experiements
+by keeping track of your source code, environment, configuration, metrics
+and large files.
+        """,
+        "cli.snapshot.description":
+            """ DESCRIPTION """,
+        "cli.snapshot.create.description":
             """
-            datmo snapshot [create|delete|ls|checkout]
-
-            Snapshots allow you to save the state of your model and experiements
-            by keeping track of your source code, environment, configuration, metrics
-            and large files.
-
+Creating a snapshot is super easy.
         """
     }
 }

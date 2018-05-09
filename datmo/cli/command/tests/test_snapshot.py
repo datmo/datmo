@@ -74,11 +74,33 @@ class TestSnapshot():
         with open(self.filepath_2, "w") as f:
             f.write(to_unicode(str("test")))
 
+    def test_snapshot_help(self):
+        self.__set_variables()
+        print(
+            "\n====================================== datmo snapshot ==========================\n"
+        )
+
+        self.snapshot.parse(["snapshot"])
+        assert self.snapshot.execute()
+
+        print(
+            "\n====================================== datmo snapshot --help ==========================\n"
+        )
+
+        self.snapshot.parse(["snapshot", "--help"])
+        assert self.snapshot.execute()
+
+        print(
+            "\n====================================== datmo snapshot create --help ==========================\n"
+        )
+
+        self.snapshot.parse(["snapshot", "create", "--help"])
+        assert self.snapshot.execute()
+
     def test_snapshot_project_not_init(self):
         failed = False
         try:
-            self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper,
-                                            parser)
+            self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
         except ProjectNotInitializedException:
             failed = True
         assert failed
@@ -168,7 +190,7 @@ class TestSnapshot():
         # create task
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-        self.task = TaskCommand(self.temp_dir, self.cli_helper, parser)
+        self.task = TaskCommand(self.temp_dir, self.cli_helper)
         self.task.parse([
             "task", "run", "--environment-def", test_dockerfile, test_command
         ])
@@ -197,7 +219,7 @@ class TestSnapshot():
         # create task
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-        self.task = TaskCommand(self.temp_dir, self.cli_helper, parser)
+        self.task = TaskCommand(self.temp_dir, self.cli_helper)
         self.task.parse([
             "task", "run", "--environment-def", test_dockerfile, test_command
         ])

@@ -35,10 +35,11 @@ class TestProject():
         pass
 
     def test_datmo_base(self):
-        """Test simple `datmo` command being ran
-
-        """
-
         base = DatmoCommand(self.temp_dir, self.cli)
         base.parse([])
+        assert base.execute()
+
+    def test_datmo_help(self):
+        base = DatmoCommand(self.temp_dir, self.cli)
+        base.parse(["--help"])
         assert base.execute()

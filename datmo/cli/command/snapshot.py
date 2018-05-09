@@ -16,6 +16,13 @@ class SnapshotCommand(ProjectCommand):
         # example  "subcommand"="create"  or "subcommand"="ls"
         self.snapshot_controller = SnapshotController(home=home)
 
+    def usage(self):
+        self.cli_helper.echo(__("argparser", "cli.snapshot.usage"))
+
+    def snapshot(self):
+        self.parse(["snapshot", "--help"])
+        return True
+
     def create(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.create"))
 
