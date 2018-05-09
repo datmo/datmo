@@ -14,6 +14,10 @@ class SessionCommand(ProjectCommand):
         # example  "subcommand"="create"  or "subcommand"="ls"
         self.session_controller = SessionController(home=home)
 
+    def session(self):
+        self.parse(["--help"])
+        return True
+
     def create(self, **kwargs):
         name = kwargs.get('name')
         self.session_controller.create(kwargs)

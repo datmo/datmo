@@ -20,6 +20,10 @@ class TaskCommand(ProjectCommand):
         self.logger = DatmoLogger.get_logger(__name__)
         self.task_controller = TaskController(home=home)
 
+    def task(self):
+        self.parse(["--help"])
+        return True
+
     def run(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.task.run"))
 
