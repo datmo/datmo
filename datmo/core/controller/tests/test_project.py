@@ -35,7 +35,7 @@ class TestProjectController():
     def teardown_method(self):
         pass
 
-    def test_init(self):
+    def test_init_none(self):
         # Test failed case
         failed = False
         try:
@@ -43,6 +43,17 @@ class TestProjectController():
         except ValidationFailed:
             failed = True
         assert failed
+
+    def test_init_empty_str(self):
+        # Test failed case
+        failed = False
+        try:
+            self.project.init("", "")
+        except ValidationFailed:
+            failed = True
+        assert failed
+
+    def test_init(self):
 
         result = self.project.init("test1", "test description")
 

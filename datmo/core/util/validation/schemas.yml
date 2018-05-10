@@ -2,6 +2,7 @@
 
 create_project:
   name:
+    empty: False
     required: True
     type: string
   description:
