@@ -2,6 +2,6 @@ Command Line Utility
 ****************************
 
 .. argparse::
-   :module: datmo.cli.main
-   :func: get_parser
+   :module: datmo.cli.parser
+   :func: get_datmo_parser
    :prog: datmo

@@ -90,6 +90,12 @@ class TestLocalDAL():
         result = self.dal.snapshot.get_by_id(snapshot.id)
         assert snapshot.id == result.id
 
+    def test_get_by_shortened_id_snapshot(self):
+        snapshot = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
+
+        result = self.dal.snapshot.get_by_shortened_id(snapshot.id[:10])
+        assert snapshot.id == result.id
+
     def test_get_by_id_snapshot_new_driver_instance(self):
         snapshot = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
 

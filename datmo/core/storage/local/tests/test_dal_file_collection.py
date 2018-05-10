@@ -77,6 +77,14 @@ class TestLocalDAL():
         result = self.dal.file_collection.get_by_id(file_collection.id)
         assert file_collection.id == result.id
 
+    def test_get_by_shortened_id_file_collection(self):
+        file_collection = self.dal.file_collection.create(
+            FileCollection(self.file_collection_input_dict))
+
+        result = self.dal.file_collection.get_by_shortened_id(
+            file_collection.id[:10])
+        assert file_collection.id == result.id
+
     def test_get_by_id_file_collection_new_driver_instance(self):
         file_collection = self.dal.file_collection.create(
             FileCollection(self.file_collection_input_dict))

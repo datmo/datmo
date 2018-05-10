@@ -3,15 +3,18 @@ from __future__ import print_function
 import shlex
 import platform
 import prettytable
+# https://stackoverflow.com/questions/11301138/how-to-check-if-variable-is-string-with-python-2-and-3-compatibility/11301392?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
 try:
-    to_unicode = unicode
+    basestring
 except NameError:
-    to_unicode = str
+    basestring = str
 
 from datmo.core.util.i18n import get as __
+from datmo.core.util.misc_functions import mutually_exclusive
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
 from datmo.core.util.logger import DatmoLogger
+from datmo.core.util.exceptions import RequiredArgumentMissing
 
 
 class TaskCommand(ProjectCommand):
@@ -32,11 +35,10 @@ class TaskCommand(ProjectCommand):
         if kwargs['environment_definition_filepath']:
             snapshot_dict["environment_definition_filepath"] =\
                 kwargs['environment_definition_filepath']
-
         if not isinstance(kwargs['cmd'], list):
             if platform.system() == "Windows":
                 kwargs['cmd'] = kwargs['cmd']
-            elif isinstance(kwargs['cmd'], to_unicode):
+            elif isinstance(kwargs['cmd'], basestring):
                 kwargs['cmd'] = shlex.split(kwargs['cmd'])
 
         task_dict = {
@@ -56,19 +58,21 @@ class TaskCommand(ProjectCommand):
             self.logger.error("%s %s" % (e, task_dict))
             self.cli_helper.echo(__("error", "cli.task.run", task_obj.id))
             return False
+        self.cli_helper.echo("Ran task id: %s" % updated_task_obj.id)
         return updated_task_obj
 
     def ls(self, **kwargs):
         session_id = kwargs.get('session_id',
                                 self.task_controller.current_session.id)
         # Get all snapshot meta information
-        header_list = ["id", "command", "results", "created at"]
+        header_list = ["id", "command", "status", "results", "created at"]
         t = prettytable.PrettyTable(header_list)
         task_objs = self.task_controller.list(
             session_id, sort_key='created_at', sort_order='descending')
         for task_obj in task_objs:
             t.add_row([
-                task_obj.id, task_obj.command, task_obj.results,
+                task_obj.id, task_obj.command, task_obj.status,
+                task_obj.results,
                 task_obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
             ])
         self.cli_helper.echo(t)
@@ -76,13 +80,35 @@ class TaskCommand(ProjectCommand):
         return True
 
     def stop(self, **kwargs):
-        task_id = kwargs.get('id', None)
-        self.cli_helper.echo(__("info", "cli.task.stop", task_id))
+        input_dict = {}
+        mutually_exclusive(["id", "all"], kwargs, input_dict)
+        if "id" in input_dict:
+            self.cli_helper.echo(__("info", "cli.task.stop", input_dict['id']))
+        elif "all" in input_dict:
+            self.cli_helper.echo(__("info", "cli.task.stop.all"))
+        else:
+            raise RequiredArgumentMissing()
         try:
-            result = self.task_controller.stop(task_id)
-            if not result:
-                self.cli_helper.echo(__("error", "cli.task.stop", task_id))
+            if "id" in input_dict:
+                result = self.task_controller.stop(task_id=input_dict['id'])
+                if not result:
+                    self.cli_helper.echo(
+                        __("error", "cli.task.stop", input_dict['id']))
+                else:
+                    self.cli_helper.echo(
+                        __("info", "cli.task.stop.success", input_dict['id']))
+            if "all" in input_dict:
+                result = self.task_controller.stop(all=input_dict['all'])
+                if not result:
+                    self.cli_helper.echo(__("error", "cli.task.stop.all"))
+                else:
+                    self.cli_helper.echo(
+                        __("info", "cli.task.stop.all.success"))
             return result
         except:
-            self.cli_helper.echo(__("error", "cli.task.stop", task_id))
+            if "id" in input_dict:
+                self.cli_helper.echo(
+                    __("error", "cli.task.stop", input_dict['id']))
+            if "all" in input_dict:
+                self.cli_helper.echo(__("error", "cli.task.stop.all"))
             return False

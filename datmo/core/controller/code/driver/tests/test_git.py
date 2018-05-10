@@ -258,7 +258,7 @@ class TestGitCodeDriver():
     # def test_stash_apply(self):
     #     pass
     #
-    def test_latest_commit(self):
+    def test_latest_commit(self, capsys):
         self.git_code_manager.init()
         # Check if properly returns error without commit
         failed = False
@@ -267,6 +267,7 @@ class TestGitCodeDriver():
         except:
             failed = True
         assert failed
+
         # Check if properly returns latest commit
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
@@ -279,6 +280,15 @@ class TestGitCodeDriver():
 
     def test_reset(self):
         self.git_code_manager.init()
+        # Check if failed with non-existant commit
+        failed = False
+        try:
+            self.git_code_manager.reset(git_commit="nonexistant_commit_id")
+        except GitExecutionException:
+            failed = True
+        assert failed
+
+        # Check if success with real commit
         test_filepath = os.path.join(self.git_code_manager.filepath,
                                      "test.txt")
         with open(test_filepath, "w") as f:

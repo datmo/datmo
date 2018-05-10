@@ -64,6 +64,12 @@ class TestLocalDAL():
         result = self.dal.session.get_by_id(session.id)
         assert session.id == result.id
 
+    def test_get_by_shortened_id_session(self):
+        session = self.dal.session.create(Session(self.session_input_dict))
+
+        result = self.dal.session.get_by_shortened_id(session.id[:10])
+        assert session.id == result.id
+
     def test_get_by_id_session_new_driver_instance(self):
         session = self.dal.session.create(Session(self.session_input_dict))
 

@@ -92,6 +92,17 @@ class TestLocalDAL():
         assert task.end_time == result.end_time
         assert task.duration == result.duration
 
+    def test_get_by_shortened_id_task(self):
+        task = self.dal.task.create(Task(self.task_input_dict))
+        result = self.dal.task.get_by_shortened_id(task.id[:10])
+        assert task.id == result.id
+        assert task.model_id == result.model_id
+        assert task.session_id == result.session_id
+        assert task.command == result.command
+        assert task.start_time == result.start_time
+        assert task.end_time == result.end_time
+        assert task.duration == result.duration
+
     def test_get_by_id_task_new_driver_instance(self):
         task = self.dal.task.create(Task(self.task_input_dict))
 

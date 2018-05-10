@@ -69,6 +69,10 @@ class GitUrlArgumentException(ArgumentException):
     pass
 
 
+class TooManyArgumentsFound(ArgumentException):
+    pass
+
+
 class GitExecutionException(Exception):
     pass
 

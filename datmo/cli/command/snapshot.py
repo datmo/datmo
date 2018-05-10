@@ -25,7 +25,6 @@ class SnapshotCommand(ProjectCommand):
 
     def create(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.create"))
-
         task_id = kwargs.get("task_id", None)
         # creating snapshot with task id if it exists
         if task_id is not None:
@@ -45,32 +44,50 @@ class SnapshotCommand(ProjectCommand):
             # Create a new core snapshot object
             snapshot_task_obj = self.snapshot_controller.create_from_task(
                 message, task_id, label=label)
+            self.cli_helper.echo(
+                "Created snapshot id: %s" % snapshot_task_obj.id)
             return snapshot_task_obj.id
         else:
             # creating snapshot without task id
             snapshot_dict = {"visible": True}
 
             # Code
-            mutually_exclusive_args = ["code_id", "commit_id"]
-            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+            if kwargs.get("code_id", None) or kwargs.get("commit_id", None):
+                mutually_exclusive_args = ["code_id", "commit_id"]
+                mutually_exclusive(mutually_exclusive_args, kwargs,
+                                   snapshot_dict)
 
             # Environment
-            mutually_exclusive_args = [
-                "environment_id", "environment_definition_filepath"
-            ]
-            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+            if kwargs.get("environment_id", None) or kwargs.get(
+                    "environment_definition_filepath", None):
+                mutually_exclusive_args = [
+                    "environment_id", "environment_definition_filepath"
+                ]
+                mutually_exclusive(mutually_exclusive_args, kwargs,
+                                   snapshot_dict)
 
             # File
-            mutually_exclusive_args = ["file_collection_id", "filepaths"]
-            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+            if kwargs.get("file_collection_id", None) or kwargs.get(
+                    "filepaths", None):
+                mutually_exclusive_args = ["file_collection_id", "filepaths"]
+                mutually_exclusive(mutually_exclusive_args, kwargs,
+                                   snapshot_dict)
 
             # Config
-            mutually_exclusive_args = ["config_filepath", "config_filename"]
-            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+            if kwargs.get("config_filepath", None) or kwargs.get(
+                    "config_filename", None):
+                mutually_exclusive_args = [
+                    "config_filepath", "config_filename"
+                ]
+                mutually_exclusive(mutually_exclusive_args, kwargs,
+                                   snapshot_dict)
 
             # Stats
-            mutually_exclusive_args = ["stats_filepath", "stats_filename"]
-            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+            if kwargs.get("stats_filepath", None) or kwargs.get(
+                    "stats_filename", None):
+                mutually_exclusive_args = ["stats_filepath", "stats_filename"]
+                mutually_exclusive(mutually_exclusive_args, kwargs,
+                                   snapshot_dict)
 
             optional_args = ["session_id", "message", "label"]
 
@@ -79,12 +96,15 @@ class SnapshotCommand(ProjectCommand):
                     snapshot_dict[arg] = kwargs[arg]
 
             snapshot_obj = self.snapshot_controller.create(snapshot_dict)
-
+            self.cli_helper.echo(
+                __("info", "cli.snapshot.create.success", snapshot_obj.id))
             return snapshot_obj.id
 
     def delete(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.delete"))
         snapshot_id = kwargs.get("id", None)
+        self.cli_helper.echo(
+            __("info", "cli.snapshot.delete.success", snapshot_id))
         return self.snapshot_controller.delete(snapshot_id)
 
     def ls(self, **kwargs):
@@ -134,4 +154,8 @@ class SnapshotCommand(ProjectCommand):
 
     def checkout(self, **kwargs):
         snapshot_id = kwargs.get("id", None)
+        checkout_success = self.snapshot_controller.checkout(snapshot_id)
+        if checkout_success:
+            self.cli_helper.echo(
+                __("info", "cli.snapshot.checkout.success", snapshot_id))
         return self.snapshot_controller.checkout(snapshot_id)

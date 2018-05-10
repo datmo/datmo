@@ -524,7 +524,8 @@ class TestDockerEnv():
         container_obj = self.docker_environment_manager.run_container(
             image_name, api=True, detach=True)
         assert container_obj
-        self.docker_environment_manager.stop(container_obj.id, force=True)
+        self.docker_environment_manager.stop_remove_containers_by_term(
+            image_name, force=True)
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_get_container(self):
@@ -548,6 +549,8 @@ class TestDockerEnv():
             image_name)
         result = self.docker_environment_manager.get_container(container_id)
         assert result
+        self.docker_environment_manager.stop_remove_containers_by_term(
+            image_name, force=True)
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_list_containers(self):
@@ -565,7 +568,8 @@ class TestDockerEnv():
             image_name, detach=True)
         result = self.docker_environment_manager.list_containers()
         assert container_id and len(result) > 0
-        self.docker_environment_manager.stop(container_id, force=True)
+        self.docker_environment_manager.stop_remove_containers_by_term(
+            image_name, force=True)
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_stop_container(self):
@@ -584,6 +588,8 @@ class TestDockerEnv():
         assert result == True
         result = self.docker_environment_manager.get_container(container_id)
         assert result.__dict__['attrs']['State']['Status'] == "exited"
+        self.docker_environment_manager.stop_remove_containers_by_term(
+            image_name, force=True)
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_remove_container(self):
@@ -635,23 +641,19 @@ class TestDockerEnv():
         with open(log_filepath, "r") as f:
             assert f.readline() != ""
 
-        self.docker_environment_manager.stop_container(container_id)
-        self.docker_environment_manager.remove_container(
-            container_id, force=True)
+        self.docker_environment_manager.stop_remove_containers_by_term(
+            image_name, force=True)
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_create_requirements_file(self):
         # 1) Test failure EnvironmentDoesNotExist
         # 2) Test success
         # 3) Test failure EnvironmentRequirementsCreateException
+        # 4) When there are no install requirements
 
         # 1) Test option 1
-        failed = False
-        try:
-            _ = self.docker_environment_manager.create_requirements_file()
-        except EnvironmentDoesNotExist:
-            failed = True
-        assert failed
+        result = self.docker_environment_manager.create_requirements_file()
+        assert result is None
 
         # 2) Test option 2
         script_path = os.path.join(self.docker_environment_manager.filepath,
@@ -676,7 +678,19 @@ class TestDockerEnv():
 
         assert exception_thrown
 
+        # 4) Test option 4
+        os.remove(script_path)
+        with open(script_path, "w") as f:
+            f.write(to_unicode("import os\n"))
+            f.write(to_unicode("import sys\n"))
+        result = self.docker_environment_manager.create_requirements_file()
+        assert result is None
+
     def test_create_default_dockerfile(self):
+        # 1) Create default dockerfile for default script present
+        # 2) Create default dockerfile with no requirements present
+
+        # 1) Test option 1
         script_path = os.path.join(self.docker_environment_manager.filepath,
                                    "script.py")
         with open(script_path, "w") as f:
@@ -685,16 +699,32 @@ class TestDockerEnv():
         requirements_filepath = \
             self.docker_environment_manager.create_requirements_file()
         result = self.docker_environment_manager.\
-            create_default_dockerfile(requirements_filepath,
-                                      language="python3")
+            create_default_dockerfile(language="python3",
+                                      requirements_filepath=requirements_filepath)
 
         assert result
         assert os.path.isfile(result)
         assert "python" in open(result, "r").read()
         assert "requirements.txt" in open(result, "r").read()
 
+        # 2) Test option 2
+        os.remove(script_path)
+        with open(script_path, "w") as f:
+            f.write(to_unicode("import os\n"))
+            f.write(to_unicode("import sys\n"))
+        requirements_filepath = \
+            self.docker_environment_manager.create_requirements_file()
+        result = self.docker_environment_manager. \
+            create_default_dockerfile(language="python3",
+                                      requirements_filepath=requirements_filepath)
+
+        assert result
+        assert os.path.isfile(result)
+        assert "python" in open(result, "r").read()
+
     def test_stop_remove_containers_by_term(self):
-        # TODO: add more robust tests
+        # 1) Test with image_name (random container name), match with image_name
+        # 2) Test with image_name and name given, match with name
         image_name = str(uuid.uuid1())
         dockerfile_path = os.path.join(
             self.docker_environment_manager.filepath, "Dockerfile")
@@ -704,6 +734,8 @@ class TestDockerEnv():
             f.write(to_unicode(str("RUN echo " + random_text)))
         self.docker_environment_manager.build_image(image_name,
                                                     dockerfile_path)
+        # 1) Test option 1
+
         # Test without force
         self.docker_environment_manager.run_container(image_name)
         result = self.docker_environment_manager.stop_remove_containers_by_term(
@@ -713,6 +745,19 @@ class TestDockerEnv():
         self.docker_environment_manager.run_container(image_name)
         result = self.docker_environment_manager.stop_remove_containers_by_term(
             image_name, force=True)
+        assert result == True
+
+        # 2) Test option 2
+        self.docker_environment_manager.run_container(
+            image_name, name="datmo_test")
+        result = self.docker_environment_manager.stop_remove_containers_by_term(
+            "datmo_test")
+        assert result == True
+        # Test with force
+        self.docker_environment_manager.run_container(
+            image_name, name="datmo_test")
+        result = self.docker_environment_manager.stop_remove_containers_by_term(
+            "datmo_test", force=True)
         assert result == True
         self.docker_environment_manager.remove_image(image_name, force=True)
 

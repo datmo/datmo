@@ -19,7 +19,8 @@ from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.task import TaskController
 from datmo.core.entity.task import Task
 from datmo.core.util.exceptions import EntityNotFound, TaskRunException, \
-    InvalidArgumentType, RequiredArgumentMissing, ProjectNotInitializedException, InvalidProjectPathException
+    InvalidArgumentType, RequiredArgumentMissing, ProjectNotInitializedException, \
+    InvalidProjectPathException, TooManyArgumentsFound
 
 
 class TestTaskController():
@@ -235,6 +236,8 @@ class TestTaskController():
         assert updated_task_obj.end_time
         assert updated_task_obj.duration
 
+        self.task.stop(task_obj.id)
+
         # 2) Test option 2
         failed = False
         try:
@@ -312,6 +315,8 @@ class TestTaskController():
         assert updated_task_obj_2.end_time
         assert updated_task_obj_2.duration
 
+        self.task.stop(task_obj_2.id)
+
         # 5) Test option 5
 
         # Create a basic script
@@ -360,6 +365,8 @@ class TestTaskController():
         assert updated_task_obj_2.status == "SUCCESS"
         assert updated_task_obj_2.end_time
         assert updated_task_obj_2.duration
+
+        self.task.stop(task_obj_2.id)
 
         # test if after snapshot has the file written
         after_snapshot_obj = self.task.dal.snapshot.get_by_id(
@@ -497,6 +504,8 @@ class TestTaskController():
                             file_collection_obj.filehash,
                             "filepath1") in file_names
 
+        self.task.stop(task_obj.id)
+
     def test_delete(self):
         self.__setup()
         # Create tasks in the project
@@ -515,8 +524,41 @@ class TestTaskController():
         assert result == True and \
                thrown == True
 
-    def test_stop(self):
+    def test_stop_failure(self):
         self.__setup()
+        # 1) Test required arguments not provided
+        # 2) Test too many arguments found
+        # 3) Test incorrect task id given
+
+        # 1) Test option 1
+        failed = False
+        try:
+            self.task.stop()
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
+
+        # 2) Test option 2
+        failed = False
+        try:
+            self.task.stop(task_id="test_task_id", all=True)
+        except TooManyArgumentsFound:
+            failed = True
+        assert failed
+
+        # 3) Test option 3
+        thrown = False
+        try:
+            self.task.stop(task_id="incorrect_task_id")
+        except EntityNotFound:
+            thrown = True
+        assert thrown
+
+    def test_stop_success(self):
+        self.__setup()
+        # 1) Test stop with task_id
+        # 2) Test stop with all given
+
         # Create task in the project
         task_obj = self.task.create()
 
@@ -529,19 +571,21 @@ class TestTaskController():
         task_command = ["sh", "-c", "echo accuracy:0.45"]
         task_dict = {"command": task_command}
 
-        # Test the default values
+        # 1) Test option 1
         updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)
-
-        # Stop the task
         task_id = updated_task_obj.id
-        result = self.task.stop(task_id)
+        result = self.task.stop(task_id=task_id)
+        after_task_obj = self.task.dal.task.get_by_id(task_id)
 
-        # Check if task stop throws error when wrong task id is given
-        thrown = False
-        try:
-            self.task.dal.snapshot.get_by_id(task_obj.id)
-        except EntityNotFound:
-            thrown = True
+        assert result
+        assert after_task_obj.status == "STOPPED"
 
-        assert result == True and \
-               thrown == True
+        # 2) Test option 2
+        task_obj_2 = self.task.create()
+        _ = self.task.run(task_obj_2.id, task_dict=task_dict)
+        result = self.task.stop(all=True)
+        all_task_objs = self.task.dal.task.query({})
+
+        assert result
+        for task_obj in all_task_objs:
+            assert task_obj.status == "STOPPED"

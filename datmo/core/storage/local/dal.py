@@ -145,6 +145,11 @@ class EntityMethodsCRUD(object):
         obj = self.driver.get(self.collection, entity_id)
         return self.entity_class(obj)
 
+    def get_by_shortened_id(self, shortened_entity_id):
+        obj = self.driver.get_by_shortened_id(self.collection,
+                                              shortened_entity_id)
+        return self.entity_class(obj)
+
     def create(self, datmo_entity):
         # translate datmo_entity to a standard dictionary (document) to be stored
         if hasattr(datmo_entity, 'to_dictionary'):

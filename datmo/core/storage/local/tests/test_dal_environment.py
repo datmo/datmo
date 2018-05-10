@@ -86,6 +86,13 @@ class TestLocalDAL():
         result = self.dal.environment.get_by_id(environment.id)
         assert environment.id == result.id
 
+    def test_get_by_shortened_id_environment(self):
+        environment = self.dal.environment.create(
+            Environment(self.environment_input_dict))
+
+        result = self.dal.environment.get_by_shortened_id(environment.id[:10])
+        assert environment.id == result.id
+
     def test_get_by_id_environment_new_driver_instance(self):
         environment = self.dal.environment.create(
             Environment(self.environment_input_dict))

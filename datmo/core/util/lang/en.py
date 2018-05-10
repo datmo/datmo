@@ -33,12 +33,24 @@ MESSAGES = {
             "%s, %s",
         "cli.snapshot.create":
             "Creating a new snapshot",
+        "cli.snapshot.create.success":
+            "Created snapshot with id: %s",
         "cli.snapshot.delete":
             "Deleting a snapshot",
+        "cli.snapshot.delete.success":
+            "Deleted snapshot with id: %s",
+        "cli.snapshot.checkout.success":
+            "Moved to snapshot with id: %s",
         "cli.task.run":
             "Running a new task",
         "cli.task.stop":
             "Stopping task: %s",
+        "cli.task.stop.all":
+            "Stopping all tasks",
+        "cli.task.stop.success":
+            "Stopped task: %s",
+        "cli.task.stop.all.success":
+            "Stopped all tasks",
         "cli.session.create":
             "Created session '%s'",
         "cli.session.select":
@@ -69,6 +81,8 @@ MESSAGES = {
             "Already task running with id: %s",
         "cli.task.stop":
             "Error while stopping the task: %s",
+        "cli.task.stop.all":
+            "Error while stopping all tasks",
         "cli.snapshot.create.task.args":
             "Error due to passing excluded args while creating snapshot from task: %s",
         "util.misc_functions.get_filehash":
@@ -249,6 +263,8 @@ MESSAGES = {
             "Error in running tasks since both detach and interactive is used",
         "controller.task.stop.arg":
             "Stop argument %s not present in input",
+        "controller.task.stop.arg.missing":
+            "Stop argument %s unable to stop environment. please use -a to stop all running tasks",
         "controller.task.delete.arg":
             "Delete argument %s not present in input",
         "controller.session.__init__":

@@ -25,7 +25,8 @@ setup(
         "rsfile>=2.1", "humanfriendly>=3.6.1", "python-slugify>=1.2.4",
         "giturlparse.py>=0.0.5", "blitzdb>=0.2.12", "kids.cache>=0.0.7",
         "pymongo>=3.6.0", "checksumdir>=1.1.4", "semver>=2.7.8",
-        "pipreqs>=0.4.9", "backports.ssl-match-hostname>=3.5.0.1", "timeout-decorator==0.4.0"
+        "pipreqs>=0.4.9", "backports.ssl-match-hostname>=3.5.0.1",
+        "timeout-decorator==0.4.0"
     ],
     tests_require=["pytest==3.0.4"],
     entry_points={'console_scripts': ['datmo = datmo.cli.main:main']},
