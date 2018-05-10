@@ -1,6 +1,10 @@
 import os
 import shlex
 import platform
+try:
+    basestring
+except NameError:
+    basestring = str
 
 from datmo.core.controller.task import TaskController
 from datmo.core.entity.task import Task as CoreTask
@@ -149,6 +153,14 @@ def run(command, env=None, home=None):
         if platform.system() == "Windows":
             task_dict["command"] = command
         else:
+            task_dict["command"] = shlex.split(command)
+
+    if isinstance(command, list):
+        task_dict["command"] = command
+    else:
+        if platform.system() == "Windows":
+            task_dict["command"] = command
+        elif isinstance(command, basestring):
             task_dict["command"] = shlex.split(command)
 
     # Create the task object

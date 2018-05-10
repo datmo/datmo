@@ -3,10 +3,11 @@ from __future__ import print_function
 import shlex
 import platform
 import prettytable
+# https://stackoverflow.com/questions/11301138/how-to-check-if-variable-is-string-with-python-2-and-3-compatibility/11301392?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
 try:
-    to_unicode = unicode
+    basestring
 except NameError:
-    to_unicode = str
+    basestring = str
 
 from datmo.core.util.i18n import get as __
 from datmo.cli.command.project import ProjectCommand
@@ -28,11 +29,10 @@ class TaskCommand(ProjectCommand):
         if kwargs['environment_definition_filepath']:
             snapshot_dict["environment_definition_filepath"] =\
                 kwargs['environment_definition_filepath']
-
         if not isinstance(kwargs['cmd'], list):
             if platform.system() == "Windows":
                 kwargs['cmd'] = kwargs['cmd']
-            elif isinstance(kwargs['cmd'], to_unicode):
+            elif isinstance(kwargs['cmd'], basestring):
                 kwargs['cmd'] = shlex.split(kwargs['cmd'])
 
         task_dict = {
@@ -52,6 +52,7 @@ class TaskCommand(ProjectCommand):
             self.logger.error("%s %s" % (e, task_dict))
             self.cli_helper.echo(__("error", "cli.task.run", task_obj.id))
             return False
+        self.cli_helper.echo("Ran task id: %s" % updated_task_obj.id)
         return updated_task_obj
 
     def ls(self, **kwargs):
@@ -73,11 +74,17 @@ class TaskCommand(ProjectCommand):
 
     def stop(self, **kwargs):
         task_id = kwargs.get('id', None)
-        self.cli_helper.echo(__("info", "cli.task.stop", task_id))
+        all = kwargs.get('all', False)
+        if task_id:
+            self.cli_helper.echo(__("info", "cli.task.stop", task_id))
+        elif all:
+            self.cli_helper.echo(__("info", "cli.task.stop.all"))
         try:
-            result = self.task_controller.stop(task_id)
+            result = self.task_controller.stop(task_id, all)
             if not result:
                 self.cli_helper.echo(__("error", "cli.task.stop", task_id))
+            if task_id:
+                self.cli_helper.echo("Stopped task id: %s" % task_id)
             return result
         except:
             self.cli_helper.echo(__("error", "cli.task.stop", task_id))

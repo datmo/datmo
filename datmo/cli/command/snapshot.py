@@ -38,6 +38,8 @@ class SnapshotCommand(ProjectCommand):
             # Create a new core snapshot object
             snapshot_task_obj = self.snapshot_controller.create_from_task(
                 message, task_id, label=label)
+            self.cli_helper.echo(
+                "Created snapshot id: %s" % snapshot_task_obj.id)
             return snapshot_task_obj.id
         else:
             # creating snapshot without task id
@@ -72,12 +74,13 @@ class SnapshotCommand(ProjectCommand):
                     snapshot_dict[arg] = kwargs[arg]
 
             snapshot_obj = self.snapshot_controller.create(snapshot_dict)
-
+            self.cli_helper.echo("Created snapshot id: %s" % snapshot_obj.id)
             return snapshot_obj.id
 
     def delete(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.delete"))
         snapshot_id = kwargs.get("id", None)
+        self.cli_helper.echo("Deleted snapshot id: %s" % snapshot_id)
         return self.snapshot_controller.delete(snapshot_id)
 
     def ls(self, **kwargs):
@@ -127,4 +130,7 @@ class SnapshotCommand(ProjectCommand):
 
     def checkout(self, **kwargs):
         snapshot_id = kwargs.get("id", None)
+        checkout_success = self.snapshot_controller.checkout(snapshot_id)
+        if checkout_success:
+            self.cli_helper.echo("Moved to snapshot id: %s" % snapshot_id)
         return self.snapshot_controller.checkout(snapshot_id)

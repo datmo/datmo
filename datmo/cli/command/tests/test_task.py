@@ -131,7 +131,6 @@ class TestTaskCommand():
             "task", "run", "--ports", test_ports[0], "--ports", test_ports[1],
             "--environment-def", test_dockerfile, test_command
         ])
-
         # test for desired side effects
         assert self.task.args.cmd == test_command
         assert self.task.args.ports == test_ports
