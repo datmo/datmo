@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100px" height="20px" viewBox="0 0 100 20" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 44.1 (41455) - http://www.bohemiancoding.com/sketch -->
+    <title>datmo_badge</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="100" height="20" rx="3"></rect>
+        <linearGradient x1="0%" y1="0%" x2="0%" y2="100%" id="linearGradient-3">
+            <stop stop-color="#BBBBBB" stop-opacity="0.1" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0.1" offset="100%"></stop>
+        </linearGradient>
+        <filter x="-8.4%" y="-42.9%" width="116.9%" height="207.1%" filterUnits="objectBoundingBox" id="filter-4">
+            <feOffset dx="0" dy="2" in="SourceAlpha" result="shadowOffsetOuter1"></feOffset>
+            <feGaussianBlur stdDeviation="2" in="shadowOffsetOuter1" result="shadowBlurOuter1"></feGaussianBlur>
+            <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.5 0" type="matrix" in="shadowBlurOuter1" result="shadowMatrixOuter1"></feColorMatrix>
+            <feMerge>
+                <feMergeNode in="shadowMatrixOuter1"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+            </feMerge>
+        </filter>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="datmo_badge">
+            <g id="Clipped">
+                <mask id="mask-2" fill="white">
+                    <use xlink:href="#path-1"></use>
+                </mask>
+                <use id="Rectangle-path" fill="#D8D8D8" xlink:href="#path-1"></use>
+                <g id="Group" mask="url(#mask-2)" fill-rule="nonzero">
+                    <polygon id="Shape" fill="#3F93EB" points="0 0 50 0 50 20 0 20"></polygon>
+                    <polygon id="Shape" fill="#555555" points="50 0 100 0 100 20 50 20"></polygon>
+                    <polygon id="Shape" fill="url(#linearGradient-3)" points="0 0 100 0 100 20 0 20"></polygon>
+                </g>
+            </g>
+            <g id="Group" filter="url(#filter-4)" transform="translate(9.000000, 3.000000)" font-family="Verdana" font-size="11" font-weight="normal">
+                <text id="datmo" fill-opacity="0.3" fill="#010101">
+                    <tspan x="0" y="11">datmo</tspan>
+                </text>
+                <text id="datmo" fill="#FFFFFF">
+                    <tspan x="0" y="10">datmo</tspan>
+                </text>
+                <text id="model" fill-opacity="0.3" fill="#010101">
+                    <tspan x="49" y="11">model</tspan>
+                </text>
+                <text id="model" fill="#FFFFFF">
+                    <tspan x="49" y="10">model</tspan>
+                </text>
+            </g>
+        </g>
+    </g>
+</svg>
