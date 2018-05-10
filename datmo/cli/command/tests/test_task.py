@@ -72,17 +72,16 @@ class TestTaskCommand():
         result = self.task.execute()
         assert not result
 
-    def test_task_run_should_fail2(self):
-        self.__set_variables()
-        # Test failure case execute
-        test_command = ["yo", "yo"]
-        self.task.parse(["task", "run", test_command])
-        result = self.task.execute()
-        assert not result
-
     def test_task_run(self):
         # TODO: Adding test with `--interactive` argument and terminate inside container
         self.__set_variables()
+
+        # Test failure command execute
+        test_command = ["yo", "yo"]
+        self.task.parse(["task", "run", test_command])
+        result = self.task.execute()
+        assert result
+
         # Test success case
         test_command = ["sh", "-c", "echo accuracy:0.45"]
         test_ports = ["8888:8888", "9999:9999"]

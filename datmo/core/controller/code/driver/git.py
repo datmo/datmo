@@ -127,10 +127,17 @@ class GitCodeDriver(CodeDriver):
         """
         self.ensure_code_refs_dir()
         if not commit_id:
-            # add files and commit changes on current branch
-            self.add("-A")
-            new_commit_bool = self.commit(
-                options=["-m", "auto commit by datmo"])
+            try:
+                previous_commit_id = self.latest_commit()
+                # add files and commit changes on current branch
+                self.add("-A")
+                new_commit_bool = self.commit(
+                    options=["-m", "auto commit by datmo"])
+            except:
+                self.add("-A")
+                new_commit_bool = self.commit(
+                    options=["-m", "auto initial commit by datmo"])
+                previous_commit_id = None
             try:
                 commit_id = self.latest_commit()
             except GitExecutionException as e:
@@ -139,13 +146,16 @@ class GitCodeDriver(CodeDriver):
                        "controller.code.driver.git.create_ref.cannot_commit",
                        str(e)))
             # revert back to the original commit
-            if new_commit_bool:
+            if new_commit_bool and previous_commit_id:
+                self.reset(previous_commit_id)
+            else:
                 self.reset(commit_id)
         # writing git commit into ref if exists
         if not self.exists_commit(commit_id):
             raise GitCommitDoesNotExist(
                 __("error", "controller.code.driver.git.create_ref.no_commit",
                    commit_id))
+        # git refs for datmo for the latest commit id is created
         code_ref_path = os.path.join(self.filepath, ".git/refs/datmo/",
                                      commit_id)
         with open(code_ref_path, "w") as f:
@@ -371,7 +381,7 @@ class GitCodeDriver(CodeDriver):
                 stderr=subprocess.PIPE,
                 cwd=self.filepath)
             out, err = p.communicate()
-            out, err = out.decode(), err.decode()
+            out, err = out.decode('utf-8'), err.decode('utf-8')
             if err or "fatal" in out:
                 return False
         except Exception:

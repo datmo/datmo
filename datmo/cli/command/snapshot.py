@@ -18,7 +18,6 @@ class SnapshotCommand(ProjectCommand):
 
     def create(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.create"))
-
         task_id = kwargs.get("task_id", None)
         # creating snapshot with task id if it exists
         if task_id is not None:

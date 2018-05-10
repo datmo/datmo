@@ -318,7 +318,6 @@ class SnapshotController(BaseController):
         create_dict : dict
             dictionary for creating the Snapshot entity
         """
-
         if "code_id" in incoming_dictionary:
             create_dict['code_id'] = incoming_dictionary['code_id']
         elif "commit_id" in incoming_dictionary:

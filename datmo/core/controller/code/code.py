@@ -49,7 +49,6 @@ class CodeController(BaseController):
         create_dict = {
             "model_id": self.model.id,
         }
-
         ## Required args for Code entity
         required_args = ["driver_type", "commit_id"]
         for required_arg in required_args:
