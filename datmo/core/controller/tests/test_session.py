@@ -7,7 +7,7 @@ import tempfile
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.session import SessionController
-from datmo.core.util.exceptions import InvalidArgumentType
+from datmo.core.util.exceptions import InvalidArgumentType, ProjectNotInitializedException, InvalidProjectPathException
 
 
 class TestSessionController():
@@ -18,14 +18,33 @@ class TestSessionController():
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
 
+    def teardown_method(self):
+        shutil.rmtree(self.temp_dir)
+
+    def __setup(self):
         self.project = ProjectController(self.temp_dir)
         self.project.init("test", "test description")
         self.session = SessionController(self.temp_dir)
 
-    def teardown_method(self):
-        shutil.rmtree(self.temp_dir)
+    def test_init_fail_project_not_init(self):
+        failed = False
+        try:
+            SessionController(self.temp_dir)
+        except ProjectNotInitializedException:
+            failed = True
+        assert failed
+
+    def test_init_fail_invalid_path(self):
+        test_home = "some_random_dir"
+        failed = False
+        try:
+            SessionController(test_home)
+        except InvalidProjectPathException:
+            failed = True
+        assert failed
 
     def test_find_default_session(self):
+        self.__setup()
         sessions = self.session.list()
         has_default = False
         for s in sessions:
@@ -35,11 +54,13 @@ class TestSessionController():
         assert has_default
 
     def test_create_session(self):
+        self.__setup()
         test_sess = self.session.create({"name": "test1"})
         assert test_sess.id
         assert test_sess.model_id == self.project.model.id
 
     def test_select_session(self):
+        self.__setup()
         self.session.create({"name": "test2"})
         new_current = self.session.select("test2")
         assert new_current.current == True
@@ -54,11 +75,13 @@ class TestSessionController():
         assert current_was_updated == True
 
     def test_get_current(self):
+        self.__setup()
         current_sess = self.session.get_current()
         assert current_sess
         assert current_sess.current == True
 
     def test_list_session_sort(self):
+        self.__setup()
         # Sort ascending
         sessions = self.session.list(
             sort_key='created_at', sort_order='ascending')
@@ -97,12 +120,13 @@ class TestSessionController():
         assert set(expected_ids) == set(ids)
 
     def test_delete_session(self):
+        self.__setup()
         self.session.create({"name": "test3"})
-        new_current = self.session.select("test3")
+        _ = self.session.select("test3")
         self.session.delete_by_name("test3")
         entity_exists = False
         try:
-            session_still_exists = self.session.findOne({"name": "test3"})
+            _ = self.session.findOne({"name": "test3"})
             entity_exists = True
         except:
             pass

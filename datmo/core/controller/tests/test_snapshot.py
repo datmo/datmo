@@ -17,7 +17,8 @@ from datmo.core.entity.snapshot import Snapshot
 from datmo.core.util.exceptions import (
     EntityNotFound, EnvironmentDoesNotExist, GitCommitDoesNotExist,
     SessionDoesNotExistException, RequiredArgumentMissing, TaskNotComplete,
-    InvalidArgumentType)
+    InvalidArgumentType, ProjectNotInitializedException,
+    InvalidProjectPathException)
 
 
 class TestSnapshotController():
@@ -28,15 +29,35 @@ class TestSnapshotController():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+
+    def teardown_method(self):
+        pass
+
+    def __setup(self):
         self.project = ProjectController(self.temp_dir)
         self.project.init("test", "test description")
         self.task = TaskController(self.temp_dir)
         self.snapshot = SnapshotController(self.temp_dir)
 
-    def teardown_method(self):
-        pass
+    def test_init_fail_project_not_init(self):
+        failed = False
+        try:
+            SnapshotController(self.temp_dir)
+        except ProjectNotInitializedException:
+            failed = True
+        assert failed
+
+    def test_init_fail_invalid_path(self):
+        test_home = "some_random_dir"
+        failed = False
+        try:
+            SnapshotController(test_home)
+        except InvalidProjectPathException:
+            failed = True
+        assert failed
 
     def test_create_fail_no_message(self):
+        self.__setup()
         # Test no message
         failed = False
         try:
@@ -46,6 +67,7 @@ class TestSnapshotController():
         assert failed
 
     def test_create_fail_no_code(self):
+        self.__setup()
         # Test default values for snapshot, fail due to code
         failed = False
         try:
@@ -55,6 +77,7 @@ class TestSnapshotController():
         assert failed
 
     def test_create_fail_no_environment_with_language(self):
+        self.__setup()
         # Test default values for snapshot, fail due to environment with other than default
         self.snapshot.file_driver.create("filepath1")
         failed = False
@@ -68,11 +91,13 @@ class TestSnapshotController():
         assert failed
 
     def test_create_no_environment_detected_in_file(self):
+        self.__setup()
+
         # Test default values for snapshot, fail due to no environment from file
         self.snapshot.file_driver.create("filepath1")
         snapshot_obj_0 = self.snapshot.create({
-                "message": "my test snapshot",
-            })
+            "message": "my test snapshot",
+        })
         assert isinstance(snapshot_obj_0, Snapshot)
         assert snapshot_obj_0.code_id
         assert snapshot_obj_0.environment_id
@@ -81,6 +106,7 @@ class TestSnapshotController():
         assert snapshot_obj_0.stats == {}
 
     def test_create_success_default_detected_in_file(self):
+        self.__setup()
         # Test default values for snapshot when there is no environment
         test_filepath = os.path.join(self.snapshot.home, "script.py")
         with open(test_filepath, "w") as f:
@@ -98,6 +124,7 @@ class TestSnapshotController():
         assert snapshot_obj_1.stats == {}
 
     def test_create_success_default_env_def(self):
+        self.__setup()
         # Create environment definition
         env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
         with open(env_def_path, "w") as f:
@@ -114,6 +141,7 @@ class TestSnapshotController():
         assert snapshot_obj.stats == {}
 
     def test_create_success_default_env_def_duplicate(self):
+        self.__setup()
         # Test 2 snapshots with same parameters
         # Create environment definition
         env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
@@ -137,6 +165,7 @@ class TestSnapshotController():
                snapshot_obj.stats
 
     def test_create_success_given_files_env_def_config_file_stats_file(self):
+        self.__setup()
         # Create environment definition
         env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
         with open(env_def_path, "w") as f:
@@ -187,6 +216,7 @@ class TestSnapshotController():
         assert snapshot_obj_4.stats == {"foo": "bar"}
 
     def test_create_success_given_files_env_def_different_config_stats(self):
+        self.__setup()
         # Create environment definition
         env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
         with open(env_def_path, "w") as f:
@@ -234,6 +264,7 @@ class TestSnapshotController():
         assert snapshot_obj_1.stats == {}
 
     def test_create_success_given_files_env_def_direct_config_stats(self):
+        self.__setup()
         # Create environment definition
         env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
         with open(env_def_path, "w") as f:
@@ -270,6 +301,7 @@ class TestSnapshotController():
         assert snapshot_obj_6.stats == {"foo": "bar"}
 
     def test_create_from_task(self):
+        self.__setup()
         # 1) Test if fails with TaskNotComplete error
         # 2) Test if success with task files, results, and message
         # 3) Test if success with message, label, config and stats
@@ -396,6 +428,7 @@ class TestSnapshotController():
         return self.snapshot.create(input_dict)
 
     def test_checkout(self):
+        self.__setup()
         # Create snapshot
         snapshot_obj_1 = self.__default_create()
 
@@ -419,6 +452,7 @@ class TestSnapshotController():
                os.path.isdir(snapshot_obj_1_path)
 
     def test_list(self):
+        self.__setup()
         # Check for error if incorrect session given
         failed = False
         try:
@@ -511,6 +545,7 @@ class TestSnapshotController():
                snapshot_obj_2 in result
 
     def test_delete(self):
+        self.__setup()
         # Create snapshot in the project
         snapshot_obj = self.__default_create()
 

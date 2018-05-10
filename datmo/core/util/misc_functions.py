@@ -13,8 +13,8 @@ except NameError:
 from glob import glob
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import (PathDoesNotExist,
-                                        MutuallyExclusiveArguments)
+from datmo.core.util.exceptions import (
+    PathDoesNotExist, MutuallyExclusiveArguments, RequiredArgumentMissing)
 
 
 def grep(pattern, fileObj):
@@ -99,7 +99,8 @@ def mutually_exclusive(mutually_exclusive_args, input_dictionary,
                        output_dictionary):
     """
     Goes through args to check for and adds them to a dictionary. The dictionary
-    is mutated in the function
+    is mutated in the function. This function will raise errors if at least
+    one of the arguments is not present or more than 1
 
     Parameters
     ----------
@@ -109,12 +110,19 @@ def mutually_exclusive(mutually_exclusive_args, input_dictionary,
         input dictionary of arguments and values to search through
     output_dictionary : dict
         output dictionary
+
+    Raises
+    ------
+    MutuallyExclusiveArguments
+    RequiredArgumentMissing
     """
     mutually_exclusive_arg_count = 0
     for arg in mutually_exclusive_args:
-        if input_dictionary[arg]:
+        if input_dictionary.get(arg, None):
             output_dictionary[arg] = input_dictionary[arg]
             mutually_exclusive_arg_count += 1
+    if mutually_exclusive_arg_count == 0 and len(mutually_exclusive_args) > 0:
+        raise RequiredArgumentMissing()
     if mutually_exclusive_arg_count > 1:
         raise MutuallyExclusiveArguments(
             __("error", "util.misc_functions.mutually_exclusive",

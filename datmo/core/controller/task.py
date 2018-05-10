@@ -8,7 +8,7 @@ from datmo.core.entity.task import Task
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     TaskRunException, RequiredArgumentMissing, ProjectNotInitializedException,
-    PathDoesNotExist, TaskInteractiveDetachException)
+    PathDoesNotExist, TaskInteractiveDetachException, TooManyArgumentsFound)
 
 
 class TaskController(BaseController):
@@ -198,7 +198,7 @@ class TaskController(BaseController):
                    " or ".join(important_task_args)))
 
         if task_obj.status is None:
-            task_obj.status = 'RUNNING'
+            task_obj.status = "RUNNING"
         else:
             raise TaskRunException(
                 __("error", "cli.task.run.already_running", task_obj.id))
@@ -235,7 +235,9 @@ class TaskController(BaseController):
                 task_dict.get('log_filepath',
                               os.path.join(task_dirpath, "task.log")),
             "start_time":
-                task_dict.get('start_time', datetime.utcnow())
+                task_dict.get('start_time', datetime.utcnow()),
+            "status":
+                task_obj.status
         })
 
         # Copy over files from the before_snapshot file collection to task dir
@@ -254,7 +256,7 @@ class TaskController(BaseController):
             environment_run_options = {
                 "command": task_obj.command,
                 "ports": [] if task_obj.ports is None else task_obj.ports,
-                "name": "datmo-task-" + task_obj.id,
+                "name": "datmo-task-" + self.model.id + "-" + task_obj.id,
                 "volumes": {
                     os.path.join(self.home, task_obj.task_dirpath): {
                         'bind': '/task/',
@@ -378,25 +380,48 @@ class TaskController(BaseController):
                 __("error", "controller.task.delete.arg", "id"))
         return self.dal.task.delete(task_id)
 
-    def stop(self, task_id, all=False):
-        """Stop and remove run for the task
+    def stop(self, task_id=None, all=False):
+        """Stop and remove run for the task and update task object statuses
 
         Parameters
         ----------
-        task_id : str
+        task_id : str, optional
             id for the task you would like to stop
+        all : bool, optional
+            if specified, will stop all tasks within project
 
         Returns
         -------
         return_code : bool
             system return code of the stop
+
+        Raises
+        ------
+        RequiredArgumentMissing
+        TooManyArgumentsFound
         """
         if task_id is None and all is False:
             raise RequiredArgumentMissing(
                 __("error", "controller.task.stop.arg.missing", "id"))
-        run_id = None
+        if task_id and all:
+            raise TooManyArgumentsFound()
         if task_id:
-            task_obj = self.dal.task.get_by_id(task_id)
-            run_id = task_obj.run_id
-        return_code = self.environment.stop(run_id, all)
+            _ = self.dal.task.get_by_id(task_id)  # verify if task_id exists
+            task_match_string = "datmo-task-" + self.model.id + "-" + task_id
+            return_code = self.environment.stop(match_string=task_match_string)
+        if all:
+            return_code = self.environment.stop(all=True)
+
+        # Set stopped task statuses to STOPPED if return success
+        if return_code:
+            if task_id:
+                self.dal.task.update({"id": task_id, "status": "STOPPED"})
+            if all:
+                task_objs = self.dal.task.query({})
+                for task_obj in task_objs:
+                    self.dal.task.update({
+                        "id": task_obj.id,
+                        "status": "STOPPED"
+                    })
+
         return return_code

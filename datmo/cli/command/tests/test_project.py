@@ -18,8 +18,8 @@ import platform
 
 from datmo import __version__
 from datmo.cli.driver.helper import Helper
-from datmo.cli.parser import parser
 from datmo.cli.command.project import ProjectCommand
+from datmo.core.util.exceptions import UnrecognizedCLIArgument
 
 
 class TestProject():
@@ -31,7 +31,7 @@ class TestProject():
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
-        self.project = ProjectCommand(self.temp_dir, self.cli_helper, parser)
+        self.project = ProjectCommand(self.temp_dir, self.cli_helper)
 
     def teardown_method(self):
         pass
@@ -157,6 +157,6 @@ class TestProject():
         exception_thrown = False
         try:
             self.project.parse(["status", "--foobar"])
-        except Exception:
+        except UnrecognizedCLIArgument:
             exception_thrown = True
         assert exception_thrown

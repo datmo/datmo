@@ -14,7 +14,7 @@ except NameError:
 from datmo.core.util.misc_functions import (get_filehash, create_unique_hash,
                                             mutually_exclusive, is_project_dir,
                                             find_project_dir, grep)
-from datmo.core.util.exceptions import MutuallyExclusiveArguments
+from datmo.core.util.exceptions import MutuallyExclusiveArguments, RequiredArgumentMissing
 
 
 class TestMiscFunctions():
@@ -42,8 +42,8 @@ class TestMiscFunctions():
     def test_mutually_exclusive(self):
         mutually_exclusive_args = ["code_id", "commit_id"]
         arguments_dictionary = {
-            'code_id': 'test_code_id',
-            'environment_id': 'test_environment_id'
+            "code_id": "test_code_id",
+            "environment_id": "test_environment_id"
         }
         dictionary = {}
         mutually_exclusive(mutually_exclusive_args, arguments_dictionary,
@@ -51,12 +51,34 @@ class TestMiscFunctions():
         assert dictionary
         assert dictionary['code_id'] == arguments_dictionary['code_id']
 
+        failed = False
+        try:
+            mutually_exclusive_args = ["code_id", "commit_id"]
+            arguments_dictionary = {"code_id": None, "environment_id": None}
+            dictionary = {}
+            mutually_exclusive(mutually_exclusive_args, arguments_dictionary,
+                               dictionary)
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
+
+        failed = False
+        try:
+            mutually_exclusive_args = ["code_id", "commit_id"]
+            arguments_dictionary = {"code_id": None, "commit_id": None}
+            dictionary = {}
+            mutually_exclusive(mutually_exclusive_args, arguments_dictionary,
+                               dictionary)
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
+
         update_dictionary_failed = False
         try:
             mutually_exclusive_args = ["code_id", "commit_id"]
             arguments_dictionary = {
-                'code_id': 'test_code_id',
-                'commit_id': 'test_environment_id'
+                'code_id': "test_code_id",
+                'commit_id': "test_environment_id"
             }
             dictionary = {}
             mutually_exclusive(mutually_exclusive_args, arguments_dictionary,

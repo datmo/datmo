@@ -10,11 +10,18 @@ from datmo.core.controller.snapshot import SnapshotController
 
 
 class SnapshotCommand(ProjectCommand):
-    def __init__(self, home, cli_helper, parser):
-        super(SnapshotCommand, self).__init__(home, cli_helper, parser)
+    def __init__(self, home, cli_helper):
+        super(SnapshotCommand, self).__init__(home, cli_helper)
         # dest="subcommand" argument will populate a "subcommand" property with the subparsers name
         # example  "subcommand"="create"  or "subcommand"="ls"
         self.snapshot_controller = SnapshotController(home=home)
+
+    def usage(self):
+        self.cli_helper.echo(__("argparser", "cli.snapshot.usage"))
+
+    def snapshot(self):
+        self.parse(["snapshot", "--help"])
+        return True
 
     def create(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.create"))
@@ -45,26 +52,42 @@ class SnapshotCommand(ProjectCommand):
             snapshot_dict = {"visible": True}
 
             # Code
-            mutually_exclusive_args = ["code_id", "commit_id"]
-            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+            if kwargs.get("code_id", None) or kwargs.get("commit_id", None):
+                mutually_exclusive_args = ["code_id", "commit_id"]
+                mutually_exclusive(mutually_exclusive_args, kwargs,
+                                   snapshot_dict)
 
             # Environment
-            mutually_exclusive_args = [
-                "environment_id", "environment_definition_filepath"
-            ]
-            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+            if kwargs.get("environment_id", None) or kwargs.get(
+                    "environment_definition_filepath", None):
+                mutually_exclusive_args = [
+                    "environment_id", "environment_definition_filepath"
+                ]
+                mutually_exclusive(mutually_exclusive_args, kwargs,
+                                   snapshot_dict)
 
             # File
-            mutually_exclusive_args = ["file_collection_id", "filepaths"]
-            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+            if kwargs.get("file_collection_id", None) or kwargs.get(
+                    "filepaths", None):
+                mutually_exclusive_args = ["file_collection_id", "filepaths"]
+                mutually_exclusive(mutually_exclusive_args, kwargs,
+                                   snapshot_dict)
 
             # Config
-            mutually_exclusive_args = ["config_filepath", "config_filename"]
-            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+            if kwargs.get("config_filepath", None) or kwargs.get(
+                    "config_filename", None):
+                mutually_exclusive_args = [
+                    "config_filepath", "config_filename"
+                ]
+                mutually_exclusive(mutually_exclusive_args, kwargs,
+                                   snapshot_dict)
 
             # Stats
-            mutually_exclusive_args = ["stats_filepath", "stats_filename"]
-            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+            if kwargs.get("stats_filepath", None) or kwargs.get(
+                    "stats_filename", None):
+                mutually_exclusive_args = ["stats_filepath", "stats_filename"]
+                mutually_exclusive(mutually_exclusive_args, kwargs,
+                                   snapshot_dict)
 
             optional_args = ["session_id", "message", "label"]
 
