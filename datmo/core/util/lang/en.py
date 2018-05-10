@@ -67,6 +67,8 @@ MESSAGES = {
             "user is not logged into datmo. use `datmo setup` or `datmo login` to login",
     },
     "error": {
+        "exception.validationfailed":
+            "Validation failed: %s",
         "sdk.snapshot.create.task.args":
             "Error due to passing excluded args while creating snapshot from task: %s",
         "cli.general":
