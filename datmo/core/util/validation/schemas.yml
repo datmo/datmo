@@ -12,6 +12,8 @@ create_session:
   name:
     required: True
     type: string
+  current:
+    type: boolean
 
 create_snapshot:
   code_id:

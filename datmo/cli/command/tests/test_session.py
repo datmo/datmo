@@ -58,7 +58,8 @@ class TestSession():
         assert self.session_command.execute()
 
     def test_session_select(self):
-        self.__set_variables()
+        self.test_session_create()
+
         self.session_command.parse(["session", "select", "--name", "pizza"])
         assert self.session_command.execute()
         current = 0
@@ -69,12 +70,14 @@ class TestSession():
         assert current == 1
 
     def test_session_ls(self):
-        self.__set_variables()
+        self.test_session_create()
+
         self.session_command.parse(["session", "ls"])
         assert self.session_command.execute()
 
     def test_session_delete(self):
-        self.__set_variables()
+        self.test_session_create()
+
         self.session_command.parse(["session", "delete", "--name", "pizza"])
         assert self.session_command.execute()
         session_removed = True
