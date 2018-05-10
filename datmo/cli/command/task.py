@@ -18,10 +18,14 @@ from datmo.core.util.exceptions import RequiredArgumentMissing
 
 
 class TaskCommand(ProjectCommand):
-    def __init__(self, home, cli_helper, parser):
-        super(TaskCommand, self).__init__(home, cli_helper, parser)
+    def __init__(self, home, cli_helper):
+        super(TaskCommand, self).__init__(home, cli_helper)
         self.logger = DatmoLogger.get_logger(__name__)
         self.task_controller = TaskController(home=home)
+
+    def task(self):
+        self.parse(["--help"])
+        return True
 
     def run(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.task.run"))

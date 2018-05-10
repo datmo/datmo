@@ -56,7 +56,7 @@ MESSAGES = {
         "cli.session.select":
             "Selecting new session '%s'",
         "cli.session.delete":
-            "Removed session '%s'",
+            "Removed session '%s'"
     },
     "warn": {
         "cli.general.internet":
@@ -267,6 +267,8 @@ MESSAGES = {
             "Stop argument %s unable to stop environment. please use -a to stop all running tasks",
         "controller.task.delete.arg":
             "Delete argument %s not present in input",
+        "controller.session.__init__":
+            "Project has not been initialized",
         "controller.session.delete.default":
             "Can not delete default session",
         "storage.local.dal.update":
@@ -280,6 +282,33 @@ MESSAGES = {
         "cli.project.init.description": "Enter description for the project",
         "cli.project.init.git": "Enter remote git url for the Datmo project",
         "cli.general.confirm": "Is it okay?",
+    },
+    "argparser": {
+        "cli.datmo.usage":
+            """
+Datmo is a command line utility to enable tracking of data science projects.
+It uses many of the tools you are already familiar with and combines them into a snapshot
+which allows you to keep track of 5 components at once
+
+1) Source Code
+2) Dependency Environment
+3) Large Files
+4) Configurations
+5) Metrics
+        """,
+        "cli.snapshot.usage":
+            """""",
+        "cli.snapshot.description":
+            """ 
+Datmo snapshots allow you to save the state of your model and experiments
+by keeping track of your source code, environment, configuration, metrics
+and large files.
+            """,
+        "cli.snapshot.create.description":
+            """
+Run snapshot create any time you want to save the results of your 
+experiments. You can then view all snapshots with the `snapshot ls` command.
+        """
     }
 }
 

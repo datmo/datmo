@@ -79,8 +79,12 @@ class Helper():
         try:
             command_class = importlib.import_module(command_path)
         except ImportError as ex:
-            self.echo(__("error", "cli.general", ex.message))
-            sys.exit()
+            try:
+                command_path = "datmo.cli.command." + command_name + "_command"
+                command_class = importlib.import_module(command_path)
+            except ImportError as ex:
+                self.echo(__("error", "cli.general", ex.message))
+                sys.exit()
 
         all_members = inspect.getmembers(command_class)
 

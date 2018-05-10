@@ -19,7 +19,8 @@ from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.task import TaskController
 from datmo.core.entity.task import Task
 from datmo.core.util.exceptions import EntityNotFound, TaskRunException, \
-    InvalidArgumentType, RequiredArgumentMissing, TooManyArgumentsFound
+    InvalidArgumentType, RequiredArgumentMissing, ProjectNotInitializedException, \
+    InvalidProjectPathException, TooManyArgumentsFound
 
 
 class TestTaskController():
@@ -30,15 +31,35 @@ class TestTaskController():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+
+    def teardown_method(self):
+        pass
+
+    def __setup(self):
         self.project = ProjectController(self.temp_dir)
         self.project.init("test", "test description")
         self.environment = EnvironmentController(self.temp_dir)
         self.task = TaskController(self.temp_dir)
 
-    def teardown_method(self):
-        pass
+    def test_init_fail_project_not_init(self):
+        failed = False
+        try:
+            TaskController(self.temp_dir)
+        except ProjectNotInitializedException:
+            failed = True
+        assert failed
+
+    def test_init_fail_invalid_path(self):
+        test_home = "some_random_dir"
+        failed = False
+        try:
+            TaskController(test_home)
+        except InvalidProjectPathException:
+            failed = True
+        assert failed
 
     def test_create(self):
+        self.__setup()
         # Create task in the project
         task_obj = self.task.create()
 
@@ -47,6 +68,7 @@ class TestTaskController():
         assert task_obj.updated_at
 
     def test_run_helper(self):
+        self.__setup()
         # TODO: Try out more options (see below)
         # Create environment_driver id
         env_def_path = os.path.join(self.project.home, "Dockerfile")
@@ -131,6 +153,7 @@ class TestTaskController():
             term=random_name_2)
 
     def test_parse_logs_for_results(self):
+        self.__setup()
         test_logs = """
         this is a log
         accuracy is good
@@ -147,6 +170,7 @@ class TestTaskController():
         assert result['model_type'] == "logistic regression"
 
     def test_run(self):
+        self.__setup()
         # 0) Test failure case without command and without interactive
         # 1) Test success case with default values and env def file
         # 2) Test failure case if running same task (conflicting containers)
@@ -357,6 +381,7 @@ class TestTaskController():
             os.path.join(files_absolute_path, "new_file.txt"))
 
     def test_list(self):
+        self.__setup()
         # Create tasks in the project
         task_obj_1 = self.task.create()
         task_obj_2 = self.task.create()
@@ -415,6 +440,7 @@ class TestTaskController():
                task_obj_2 in result
 
     def test_get_files(self):
+        self.__setup()
         # Create task in the project
         task_obj = self.task.create()
 
@@ -481,6 +507,7 @@ class TestTaskController():
         self.task.stop(task_obj.id)
 
     def test_delete(self):
+        self.__setup()
         # Create tasks in the project
         task_obj = self.task.create()
 
@@ -498,6 +525,7 @@ class TestTaskController():
                thrown == True
 
     def test_stop_failure(self):
+        self.__setup()
         # 1) Test required arguments not provided
         # 2) Test too many arguments found
         # 3) Test incorrect task id given
@@ -527,6 +555,7 @@ class TestTaskController():
         assert thrown
 
     def test_stop_success(self):
+        self.__setup()
         # 1) Test stop with task_id
         # 2) Test stop with all given
 
