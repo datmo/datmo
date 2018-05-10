@@ -33,14 +33,24 @@ MESSAGES = {
             "%s, %s",
         "cli.snapshot.create":
             "Creating a new snapshot",
+        "cli.snapshot.create.success":
+            "Created snapshot with id: %s",
         "cli.snapshot.delete":
             "Deleting a snapshot",
+        "cli.snapshot.delete.success":
+            "Deleted snapshot with id: %s",
+        "cli.snapshot.checkout.success":
+            "Moved to snapshot with id: %s",
         "cli.task.run":
             "Running a new task",
         "cli.task.stop":
             "Stopping task: %s",
         "cli.task.stop.all":
             "Stopping all tasks",
+        "cli.task.stop.success":
+            "Stopped task: %s",
+        "cli.task.stop.all.success":
+            "Stopped all tasks",
         "cli.session.create":
             "Created session '%s'",
         "cli.session.select":

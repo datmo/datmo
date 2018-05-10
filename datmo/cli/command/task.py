@@ -10,9 +10,11 @@ except NameError:
     basestring = str
 
 from datmo.core.util.i18n import get as __
+from datmo.core.util.misc_functions import mutually_exclusive
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
 from datmo.core.util.logger import DatmoLogger
+from datmo.core.util.exceptions import RequiredArgumentMissing
 
 
 class TaskCommand(ProjectCommand):
@@ -73,19 +75,23 @@ class TaskCommand(ProjectCommand):
         return True
 
     def stop(self, **kwargs):
-        task_id = kwargs.get('id', None)
-        all = kwargs.get('all', False)
-        if task_id:
-            self.cli_helper.echo(__("info", "cli.task.stop", task_id))
-        elif all:
+        input_dict = {}
+        mutually_exclusive(["id", "all"], kwargs, input_dict)
+        if "id" in input_dict:
+            self.cli_helper.echo(__("info", "cli.task.stop", input_dict['id']))
+        elif "all" in input_dict:
             self.cli_helper.echo(__("info", "cli.task.stop.all"))
+        else:
+            raise RequiredArgumentMissing()
         try:
-            result = self.task_controller.stop(task_id, all)
+            result = self.task_controller.stop(input_dict['id'], all)
             if not result:
-                self.cli_helper.echo(__("error", "cli.task.stop", task_id))
-            if task_id:
-                self.cli_helper.echo("Stopped task id: %s" % task_id)
+                self.cli_helper.echo(__("error", "cli.task.stop", input_dict['id']))
+            if input_dict['id']:
+                self.cli_helper.echo(__("info", "cli.task.stop.success", input_dict['id']))
+            if all:
+                self.cli_helper.echo(__("info", "cli.task.stop.all.success"))
             return result
         except:
-            self.cli_helper.echo(__("error", "cli.task.stop", task_id))
+            self.cli_helper.echo(__("error", "cli.task.stop", input_dict['id']))
             return False

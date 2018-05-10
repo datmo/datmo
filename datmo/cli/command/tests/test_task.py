@@ -29,8 +29,7 @@ from datmo.cli.parser import parser
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.util.exceptions import ProjectNotInitializedException, \
-    RequiredArgumentMissing
+from datmo.core.util.exceptions import ProjectNotInitializedException
 
 
 class TestTaskCommand():

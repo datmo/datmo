@@ -95,12 +95,25 @@ def create_unique_hash(base_hash=None, salt=None):
     return sha1.hexdigest()
 
 
-def mutually_exclusive(mutually_exclusive_args, arguments_dictionary,
-                       dictionary):
+def mutually_exclusive(mutually_exclusive_args, input_dictionary,
+                       output_dictionary):
+    """
+    Goes through args to check for and adds them to a dictionary. The dictionary
+    is mutated in the function
+
+    Parameters
+    ----------
+    mutually_exclusive_args : list
+        arg names to search for in input dictionary
+    input_dictionary : dict
+        input dictionary of arguments and values to search through
+    output_dictionary : dict
+        output dictionary
+    """
     mutually_exclusive_arg_count = 0
     for arg in mutually_exclusive_args:
-        if arg in arguments_dictionary and arguments_dictionary[arg] is not None:
-            dictionary[arg] = arguments_dictionary[arg]
+        if input_dictionary[arg]:
+            output_dictionary[arg] = input_dictionary[arg]
             mutually_exclusive_arg_count += 1
     if mutually_exclusive_arg_count > 1:
         raise MutuallyExclusiveArguments(

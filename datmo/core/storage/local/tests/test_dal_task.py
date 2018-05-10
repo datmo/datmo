@@ -124,12 +124,15 @@ class TestLocalDAL():
         updated_task_input_dict['id'] = task.id
         updated_task_input_dict['command'] = "task_new"
         updated_task_input_dict['ports'] = ["9000:9000"]
+        updated_task_input_dict['interactive'] = True
         updated_task = self.dal.task.update(updated_task_input_dict)
 
         assert task.id == updated_task.id
         assert task.updated_at < updated_task.updated_at
         assert updated_task.command == updated_task_input_dict['command']
         assert updated_task.ports == updated_task_input_dict['ports']
+        assert updated_task.interactive == updated_task_input_dict[
+            'interactive']
 
     def test_delete_task(self):
         task = self.dal.task.create(Task(self.task_input_dict))
