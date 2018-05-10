@@ -4,7 +4,6 @@ import os
 import sys
 
 from datmo.cli.command.base import BaseCommand
-from datmo.cli.parser import parser
 from datmo.cli.driver.helper import Helper
 from datmo.core.util.exceptions import CLIArgumentException
 from datmo.core.util.i18n import get as __
@@ -12,10 +11,6 @@ from datmo.core.util.logger import DatmoLogger
 from datmo.config import Config
 
 #from datmo.core.util.misc_functions import get_logger, create_logger
-
-
-def get_parser():
-    return parser
 
 
 def main():
@@ -46,14 +41,14 @@ def main():
         elif command_name == "status":
             command_name = "project"
             sys.argv[1] = "status"
-        command_class = \
-            cli_helper.get_command_class(command_name)
+
+        command_class = cli_helper.get_command_class(command_name)
     else:
         command_class = BaseCommand
 
     # instantiate the command class
     try:
-        command_instance = command_class(os.getcwd(), cli_helper, parser)
+        command_instance = command_class(os.getcwd(), cli_helper)
     except TypeError as ex:
         cli_helper.echo(__("error", "cli.general", str(ex)))
         return 1

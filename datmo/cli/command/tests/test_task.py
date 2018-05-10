@@ -25,12 +25,10 @@ except NameError:
     to_unicode = str
 
 from datmo.cli.driver.helper import Helper
-from datmo.cli.parser import parser
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.util.exceptions import ProjectNotInitializedException, \
-    RequiredArgumentMissing
+from datmo.core.util.exceptions import ProjectNotInitializedException
 
 
 class TestTaskCommand():
@@ -47,11 +45,12 @@ class TestTaskCommand():
         pass
 
     def __set_variables(self):
-        init = ProjectCommand(self.temp_dir, self.cli_helper, parser)
-        init.parse(["init", "--name", "foobar", "--description", "test model"])
-        init.execute()
+        self.project = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.project.parse(
+            ["init", "--name", "foobar", "--description", "test model"])
+        self.project.execute()
 
-        self.task = TaskCommand(self.temp_dir, self.cli_helper, parser)
+        self.task = TaskCommand(self.temp_dir, self.cli_helper)
 
         # Create environment_driver definition
         env_def_path = os.path.join(self.temp_dir, "Dockerfile")
@@ -61,10 +60,15 @@ class TestTaskCommand():
     def test_task_project_not_init(self):
         failed = False
         try:
-            self.task = TaskCommand(self.temp_dir, self.cli_helper, parser)
+            self.task = TaskCommand(self.temp_dir, self.cli_helper)
         except ProjectNotInitializedException:
             failed = True
         assert failed
+
+    def test_snapshot_command(self):
+        self.__set_variables()
+        self.task.parse(["task"])
+        assert self.task.execute()
 
     def test_task_run_should_fail1(self):
         self.__set_variables()

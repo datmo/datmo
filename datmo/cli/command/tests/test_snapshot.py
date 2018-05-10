@@ -21,7 +21,6 @@ except NameError:
     to_unicode = str
 
 from datmo.cli.driver.helper import Helper
-from datmo.cli.parser import parser
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
 from datmo.cli.command.task import TaskCommand
@@ -44,11 +43,11 @@ class TestSnapshot():
         pass
 
     def __set_variables(self):
-        self.init = ProjectCommand(self.temp_dir, self.cli_helper, parser)
-        self.init.parse(
+        self.project = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.project.parse(
             ["init", "--name", "foobar", "--description", "test model"])
-        self.init.execute()
-        self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper, parser)
+        self.project.execute()
+        self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
 
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
@@ -78,13 +77,35 @@ class TestSnapshot():
     def test_snapshot_project_not_init(self):
         failed = False
         try:
-            self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper,
-                                            parser)
+            self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
         except ProjectNotInitializedException:
             failed = True
         assert failed
 
-    def test_datmo_snapshot_create(self):
+    def test_snapshot_help(self):
+        self.__set_variables()
+        print(
+            "\n====================================== datmo snapshot ==========================\n"
+        )
+
+        self.snapshot.parse(["snapshot"])
+        assert self.snapshot.execute()
+
+        print(
+            "\n====================================== datmo snapshot --help ==========================\n"
+        )
+
+        self.snapshot.parse(["snapshot", "--help"])
+        assert self.snapshot.execute()
+
+        print(
+            "\n====================================== datmo snapshot create --help ==========================\n"
+        )
+
+        self.snapshot.parse(["snapshot", "create", "--help"])
+        assert self.snapshot.execute()
+
+    def test_snapshot_command(self):
         self.__set_variables()
         test_message = "this is a test message"
         test_label = "test label"
@@ -169,7 +190,7 @@ class TestSnapshot():
         # create task
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-        self.task = TaskCommand(self.temp_dir, self.cli_helper, parser)
+        self.task = TaskCommand(self.temp_dir, self.cli_helper)
         self.task.parse([
             "task", "run", "--environment-def", test_dockerfile, test_command
         ])
@@ -198,7 +219,7 @@ class TestSnapshot():
         # create task
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-        self.task = TaskCommand(self.temp_dir, self.cli_helper, parser)
+        self.task = TaskCommand(self.temp_dir, self.cli_helper)
         self.task.parse([
             "task", "run", "--environment-def", test_dockerfile, test_command
         ])
