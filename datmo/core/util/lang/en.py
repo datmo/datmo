@@ -81,6 +81,8 @@ MESSAGES = {
             "Already task running with id: %s",
         "cli.task.stop":
             "Error while stopping the task: %s",
+        "cli.task.stop.all":
+            "Error while stopping all tasks",
         "cli.snapshot.create.task.args":
             "Error due to passing excluded args while creating snapshot from task: %s",
         "util.misc_functions.get_filehash":

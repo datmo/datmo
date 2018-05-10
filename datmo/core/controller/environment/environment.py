@@ -6,7 +6,7 @@ from datmo.core.controller.base import BaseController
 from datmo.core.controller.file.file_collection import FileCollectionController
 from datmo.core.entity.environment import Environment
 from datmo.core.util.json_store import JSONStore
-from datmo.core.util.exceptions import PathDoesNotExist
+from datmo.core.util.exceptions import PathDoesNotExist, RequiredArgumentMissing, TooManyArgumentsFound
 
 
 class EnvironmentController(BaseController):
@@ -36,7 +36,7 @@ class EnvironmentController(BaseController):
         self.file_collection = FileCollectionController(home)
 
     def create(self, dictionary):
-        """Create an Environment
+        """Create an environment
 
         Parameters
         ----------
@@ -157,7 +157,7 @@ class EnvironmentController(BaseController):
         return hardware_info_filepath
 
     def build(self, environment_id):
-        """Build Environment from definition file
+        """Build environment from definition file
 
         Parameters
         ----------
@@ -233,7 +233,7 @@ class EnvironmentController(BaseController):
         return self.dal.environment.query({})
 
     def delete(self, environment_id):
-        """Delete all traces of an Environment
+        """Delete all traces of an environment
 
         Parameters
         ----------
@@ -266,13 +266,24 @@ class EnvironmentController(BaseController):
         return file_collection_deleted and environment_artifacts_removed and \
                delete_success
 
-    def stop(self, run_id, all=False):
-        """Stop the trace of running Environment
+    def stop(self, run_id=None, match_string=None, all=False):
+        """Stop the trace of running environment
 
         Parameters
         ----------
-        run_id : str
-            run id with specific environment to be stopped
+        run_id : str, optional
+            stop environment with specific run id
+            (default is None, which means it is not used)
+        match_string : str, optional
+            stop environment with a string to match the environment name
+            (default is None, which means it is not used)
+        all : bool, optional
+            stop all environments
+
+        Notes
+        -----
+            The user must provide only one of the above, if multiple are given
+            or none are given the function will error
 
         Returns
         -------
@@ -281,14 +292,23 @@ class EnvironmentController(BaseController):
 
         Raises
         ------
-        PathDoesNotExist
-            if the specified Environment does not exist.
+        RequiredArgumentMissing
+        TooManyArguments
         """
-        if all:
-            stop_success = self.environment_driver.stop_remove_containers_by_term(
-                term='datmo-task', force=True)
-        else:
+        if not (run_id or match_string or all):
+            raise RequiredArgumentMissing()
+        if sum(map(bool, [run_id, match_string, all])) > 1:
+            raise TooManyArgumentsFound()
+        if run_id:
             # Stop the instance(e.g. container) running using environment driver(e.g. docker)
             stop_success = self.environment_driver.stop(run_id, force=True)
-
+        if match_string:
+            # Stop all tasks matching the string given
+            stop_success = self.environment_driver.stop_remove_containers_by_term(
+                term=match_string, force=True)
+        if all:
+            # Stop all tasks associated within the enclosed project
+            all_match_string = "datmo-task-" + self.model.id
+            stop_success = self.environment_driver.stop_remove_containers_by_term(
+                term=all_match_string, force=True)
         return stop_success

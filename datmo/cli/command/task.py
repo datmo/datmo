@@ -61,13 +61,14 @@ class TaskCommand(ProjectCommand):
         session_id = kwargs.get('session_id',
                                 self.task_controller.current_session.id)
         # Get all snapshot meta information
-        header_list = ["id", "command", "results", "created at"]
+        header_list = ["id", "command", "status", "results", "created at"]
         t = prettytable.PrettyTable(header_list)
         task_objs = self.task_controller.list(
             session_id, sort_key='created_at', sort_order='descending')
         for task_obj in task_objs:
             t.add_row([
-                task_obj.id, task_obj.command, task_obj.results,
+                task_obj.id, task_obj.command, task_obj.status,
+                task_obj.results,
                 task_obj.created_at.strftime("%Y-%m-%d %H:%M:%S")
             ])
         self.cli_helper.echo(t)
@@ -84,14 +85,26 @@ class TaskCommand(ProjectCommand):
         else:
             raise RequiredArgumentMissing()
         try:
-            result = self.task_controller.stop(input_dict['id'], all)
-            if not result:
-                self.cli_helper.echo(__("error", "cli.task.stop", input_dict['id']))
-            if input_dict['id']:
-                self.cli_helper.echo(__("info", "cli.task.stop.success", input_dict['id']))
-            if all:
-                self.cli_helper.echo(__("info", "cli.task.stop.all.success"))
+            if "id" in input_dict:
+                result = self.task_controller.stop(task_id=input_dict['id'])
+                if not result:
+                    self.cli_helper.echo(
+                        __("error", "cli.task.stop", input_dict['id']))
+                else:
+                    self.cli_helper.echo(
+                        __("info", "cli.task.stop.success", input_dict['id']))
+            if "all" in input_dict:
+                result = self.task_controller.stop(all=input_dict['all'])
+                if not result:
+                    self.cli_helper.echo(__("error", "cli.task.stop.all"))
+                else:
+                    self.cli_helper.echo(
+                        __("info", "cli.task.stop.all.success"))
             return result
         except:
-            self.cli_helper.echo(__("error", "cli.task.stop", input_dict['id']))
+            if "id" in input_dict:
+                self.cli_helper.echo(
+                    __("error", "cli.task.stop", input_dict['id']))
+            if "all" in input_dict:
+                self.cli_helper.echo(__("error", "cli.task.stop.all"))
             return False

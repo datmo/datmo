@@ -29,7 +29,7 @@ from datmo.cli.parser import parser
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.util.exceptions import ProjectNotInitializedException
+from datmo.core.util.exceptions import ProjectNotInitializedException, MutuallyExclusiveArguments, RequiredArgumentMissing
 
 
 class TestTaskCommand():
@@ -230,8 +230,13 @@ class TestTaskCommand():
 
     def test_task_ls(self):
         self.__set_variables()
-        test_session_id = 'test_session_id'
 
+        self.task.parse(["task", "ls"])
+        task_ls_command = self.task.execute()
+
+        assert task_ls_command == True
+
+        test_session_id = 'test_session_id'
         self.task.parse(["task", "ls", "--session-id", test_session_id])
 
         # test for desired side effects
@@ -249,7 +254,9 @@ class TestTaskCommand():
             exception_thrown = True
         assert exception_thrown
 
-    def test_task_stop(self):
+    def test_task_stop_success(self):
+        # 1) Test stop with task_id
+        # 2) Test stop with all
         self.__set_variables()
 
         test_command = ["sh", "-c", "echo yo"]
@@ -263,6 +270,7 @@ class TestTaskCommand():
 
         test_task_obj = self.task.execute()
 
+        # 1) Test option 1
         self.task.parse(["task", "stop", "--id", test_task_obj.id])
 
         # test for desired side effects
@@ -272,6 +280,44 @@ class TestTaskCommand():
         task_stop_command = self.task.execute()
         assert task_stop_command == True
 
+        # 2) Test option 2
+        self.task.parse(["task", "stop", "--all"])
+
+        # test when all is passed to stop all
+        task_stop_command = self.task.execute()
+        assert task_stop_command == True
+
+    def test_task_stop_failure_required_args(self):
+        self.__set_variables()
+        # Passing wrong task id
+        self.task.parse(["task", "stop"])
+        failed = False
+        try:
+            _ = self.task.execute()
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
+
+    def test_task_stop_failure_mutually_exclusive_vars(self):
+        self.__set_variables()
+        # Passing wrong task id
+        self.task.parse(["task", "stop", "--id", "invalid-task-id", "--all"])
+        failed = False
+        try:
+            _ = self.task.execute()
+        except MutuallyExclusiveArguments:
+            failed = True
+        assert failed
+
+    def test_task_stop_failure_invalid_arg(self):
+        self.__set_variables()
+        exception_thrown = False
+        try:
+            self.task.parse(["task", "stop" "--foobar", "foobar"])
+        except Exception:
+            exception_thrown = True
+        assert exception_thrown
+
     def test_task_stop_invalid_task_id(self):
         self.__set_variables()
         # Passing wrong task id
@@ -280,12 +326,3 @@ class TestTaskCommand():
         # test when wrong task id is passed to stop it
         result = self.task.execute()
         assert not result
-
-    def test_task_stop_invalid_arg(self):
-        self.__set_variables()
-        exception_thrown = False
-        try:
-            self.task.parse(["task", "stop" "--foobar", "foobar"])
-        except Exception:
-            exception_thrown = True
-        assert exception_thrown

@@ -422,7 +422,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                     raise EnvironmentExecutionException(
                         __("error",
                            "controller.environment.driver.docker.run_container",
-                           docker_shell_cmd_list))
+                           str(docker_shell_cmd_list)))
                 list_process_cmd = list(self.prefix)
                 list_process_cmd.extend(["ps", "-q", "-l"])
                 container_id = subprocess.check_output(list_process_cmd)
@@ -530,12 +530,14 @@ class DockerEnvironmentDriver(EnvironmentDriver):
     def stop_remove_containers_by_term(self, term, force=False):
         """Stops and removes containers by term
         """
+        # TODO: split out the find containers function from stop / remove
         try:
             running_docker_container_cmd_list = list(self.prefix)
             running_docker_container_cmd_list.extend([
-                "ps", "-a", "|", "grep", "'", term, "'", "|",
-                "awk '{print $1}'"
+                "ps", "-a", "|", "grep",
+                "'%s'" % term, "|", "awk '{print $1}'"
             ])
+
             running_docker_container_cmd_str = str(
                 " ".join(running_docker_container_cmd_list))
             output = subprocess.Popen(
