@@ -74,13 +74,13 @@ class SnapshotCommand(ProjectCommand):
                     snapshot_dict[arg] = kwargs[arg]
 
             snapshot_obj = self.snapshot_controller.create(snapshot_dict)
-            self.cli_helper.echo("Created snapshot id: %s" % snapshot_obj.id)
+            self.cli_helper.echo(__("info", "cli.snapshot.create.success", snapshot_obj.id))
             return snapshot_obj.id
 
     def delete(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.delete"))
         snapshot_id = kwargs.get("id", None)
-        self.cli_helper.echo("Deleted snapshot id: %s" % snapshot_id)
+        self.cli_helper.echo(__("info", "cli.snapshot.delete.success", snapshot_id))
         return self.snapshot_controller.delete(snapshot_id)
 
     def ls(self, **kwargs):
@@ -132,5 +132,5 @@ class SnapshotCommand(ProjectCommand):
         snapshot_id = kwargs.get("id", None)
         checkout_success = self.snapshot_controller.checkout(snapshot_id)
         if checkout_success:
-            self.cli_helper.echo("Moved to snapshot id: %s" % snapshot_id)
+            self.cli_helper.echo(__("info", "cli.snapshot.checkout.success", snapshot_id))
         return self.snapshot_controller.checkout(snapshot_id)
