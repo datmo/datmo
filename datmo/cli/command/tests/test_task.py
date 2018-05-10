@@ -28,8 +28,7 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.util.exceptions import ProjectNotInitializedException, \
-    RequiredArgumentMissing
+from datmo.core.util.exceptions import ProjectNotInitializedException
 
 
 class TestTaskCommand():
@@ -46,9 +45,10 @@ class TestTaskCommand():
         pass
 
     def __set_variables(self):
-        init = ProjectCommand(self.temp_dir, self.cli_helper)
-        init.parse(["init", "--name", "foobar", "--description", "test model"])
-        init.execute()
+        self.project = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.project.parse(
+            ["init", "--name", "foobar", "--description", "test model"])
+        self.project.execute()
 
         self.task = TaskCommand(self.temp_dir, self.cli_helper)
 

@@ -43,10 +43,10 @@ class TestSnapshot():
         pass
 
     def __set_variables(self):
-        self.init = ProjectCommand(self.temp_dir, self.cli_helper)
-        self.init.parse(
+        self.project = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.project.parse(
             ["init", "--name", "foobar", "--description", "test model"])
-        self.init.execute()
+        self.project.execute()
         self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
 
         # Create environment_driver definition
