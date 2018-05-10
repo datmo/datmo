@@ -9,6 +9,7 @@ import os
 import tempfile
 import platform
 import uuid
+import timeout_decorator
 from io import open
 try:
     to_unicode = unicode
@@ -223,33 +224,6 @@ class TestDockerEnv():
         # teardown
         self.docker_environment_manager.stop(run_id, force=True)
 
-        # TODO: Adding test with stdin_open and tty as True for `interactive` argument and terminate inside container
-        # # keeping stdin_open, tty as True
-        # run_options = {
-        #     "command": [],
-        #     "ports": ["8888:9999", "5000:5001"],
-        #     "name": str(uuid.uuid1()),
-        #     "volumes": {
-        #         self.docker_environment_manager.filepath: {
-        #             'bind': '/home/',
-        #             'mode': 'rw'
-        #         }
-        #     },
-        #     "detach": True,
-        #     "stdin_open": True,
-        #     "tty": True,
-        #     "api": False
-        # }
-        # return_code, run_id, logs = \
-        #     self.docker_environment_manager.run(image_name, run_options, log_filepath)
-        #
-        # assert return_code == 0
-        # assert run_id
-        # assert not logs
-        #
-        # # teardown
-        # self.docker_environment_manager.stop(run_id, force=True)
-
         # Test default values for run options
         run_options = {"command": ["sh", "-c", "echo yo"]}
         return_code, run_id, logs = \
@@ -259,6 +233,91 @@ class TestDockerEnv():
         assert logs
         # teardown container
         self.docker_environment_manager.stop(run_id, force=True)
+
+        # teardown image
+        self.docker_environment_manager.remove(image_name, force=True)
+
+    def test_interactive_run(self):
+        # keeping stdin_open, tty as True
+        # build image
+        image_name = str(uuid.uuid1())
+        path = os.path.join(self.docker_environment_manager.filepath,
+                            "Dockerfile")
+        random_text = str(uuid.uuid1())
+        with open(path, "w") as f:
+            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_unicode(str("RUN echo " + random_text)))
+        log_filepath = os.path.join(self.docker_environment_manager.filepath,
+                                    "test.log")
+        self.docker_environment_manager.build(image_name, path)
+
+        @timeout_decorator.timeout(10, use_signals=False)
+        def timed_run(container_name, timed_run_result):
+            run_options = {
+                "command": [],
+                "ports": ["8888:9999", "5000:5001"],
+                "name": container_name,
+                "volumes": {
+                    self.docker_environment_manager.filepath: {
+                        'bind': '/home/',
+                        'mode': 'rw'
+                    }
+                },
+                "detach": True,
+                "stdin_open": True,
+                "tty": True,
+                "api": False
+            }
+
+            self.docker_environment_manager.run(image_name, run_options,
+                                                log_filepath)
+            return timed_run_result
+
+        container_name = str(uuid.uuid1())
+        timed_run_result = False
+        try:
+            timed_run_result = timed_run(container_name, timed_run_result)
+        except timeout_decorator.timeout_decorator.TimeoutError:
+            timed_run_result = True
+
+        assert timed_run_result
+
+        # teardown container
+        self.docker_environment_manager.stop(container_name, force=True)
+
+        @timeout_decorator.timeout(10, use_signals=False)
+        def timed_run(container_name, timed_run_result):
+            run_options = {
+                "command": ["jupyter", "notebook"],
+                "ports": ["8888:8888"],
+                "name": container_name,
+                "volumes": {
+                    self.docker_environment_manager.filepath: {
+                        'bind': '/home/',
+                        'mode': 'rw'
+                    }
+                },
+                "detach": True,
+                "stdin_open": False,
+                "tty": False,
+                "api": False
+            }
+
+            self.docker_environment_manager.run(image_name, run_options,
+                                                log_filepath)
+            return timed_run_result
+
+        container_name = str(uuid.uuid1())
+        timed_run_result = False
+        try:
+            timed_run_result = timed_run(container_name, timed_run_result)
+        except timeout_decorator.timeout_decorator.TimeoutError:
+            timed_run_result = True
+        assert timed_run_result
+
+        # teardown container
+        self.docker_environment_manager.stop(container_name, force=True)
+
         # teardown image
         self.docker_environment_manager.remove(image_name, force=True)
 
