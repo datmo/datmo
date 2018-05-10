@@ -39,7 +39,7 @@ setup(
         "pipreqs>=0.4.9",
         "backports.ssl-match-hostname>=3.5.0.1",
         "timeout-decorator==0.4.0",
-        "cerberus=1.2",
+        "cerberus>=1.2",
     ],
     tests_require=["pytest==3.0.4"],
     entry_points={'console_scripts': ['datmo = datmo.cli.main:main']},
