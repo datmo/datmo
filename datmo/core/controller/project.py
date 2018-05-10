@@ -1,12 +1,13 @@
 import datetime
 
+from datmo.core.util.validation import validate
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
 from datmo.core.entity.model import Model
 from datmo.core.entity.session import Session
-from datmo.core.util.exceptions import (SessionDoesNotExistException,
-                                        RequiredArgumentMissing,
-                                        ProjectNotInitializedException)
+from datmo.core.util.exceptions import (
+    SessionDoesNotExistException, RequiredArgumentMissing,
+    ProjectNotInitializedException, ValidationFailed)
 
 
 class ProjectController(BaseController):
@@ -39,14 +40,10 @@ class ProjectController(BaseController):
 
         # If model is new validate inputs
         if is_new_model:
-            # Error if name is blank or not given
-            if not name:
-                raise RequiredArgumentMissing(
-                    __("error", "controller.project.init.arg", "name"))
-            # Error if description is None
-            if description is None:
-                raise RequiredArgumentMissing(
-                    __("error", "controller.project.init.arg", "description"))
+            validate("create_project", {
+                "name": name,
+                "description": description
+            })
 
         # Create model if new else update
         if is_new_model:

@@ -19,7 +19,7 @@ from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.controller.task import TaskController
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.entity.task import Task
-from datmo.core.util.exceptions import RequiredArgumentMissing
+from datmo.core.util.exceptions import ValidationFailed
 
 
 class TestProjectController():
@@ -40,7 +40,7 @@ class TestProjectController():
         failed = False
         try:
             self.project.init(None, None)
-        except RequiredArgumentMissing:
+        except ValidationFailed:
             failed = True
         assert failed
 
