@@ -20,7 +20,7 @@ powerhouse.
 
 As data scientists, machine learning engineers, and deep learning engineers, we faced a number of issues keeping track of our work and maintaining versions that could be put into production quicker. 
 
-In order to solve this challenge, we figured there were a few components we need to put together to make it work. 
+In order to solve this challenge, we found there were a few components we need to put together to make it work. 
 
 1) Source code should be managed with current source control management tools (of which git is the most popular currently) 
 2) Dependencies should be encoded in one place for your source code (e.g. requirements.txt in python and pre-built containers) 
@@ -28,7 +28,9 @@ In order to solve this challenge, we figured there were a few components we need
 4) Configurations and hyperparameters that define your experiments (e.g. data split, alpha, beta, etc)
 5) Performance metrics that evaluate your model (e.g. validation accuracy)
 
-We realized that we likely won't come up with the best solution on our own and thought it would make most sense to gather feedback from a community of like-minded individuals facing the same issue and develop an open protocol everyone can benefit from. 
+This framework has helped us keep track of our own models and keep consistency across our processes. 
+We wanted to share this with the community of like-minded people and teams and help develop an open 
+standard for keeping track of model versions. 
 
 ## Requirements
 
