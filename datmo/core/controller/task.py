@@ -300,17 +300,21 @@ class TaskController(BaseController):
             # Update the task with post-execution parameters
             end_time = datetime.utcnow()
             duration = (end_time - task_obj.start_time).total_seconds()
-            return self.dal.task.update({
+            update_task_dict = {
                 "id": task_obj.id,
                 "after_snapshot_id": after_snapshot_obj.id,
-                "run_id": run_id,
                 "logs": logs,
                 "status": "SUCCESS" if return_code == 0 else "FAILED",
-                "results": self._parse_logs_for_results(logs),
                 # "results": task_obj.results, # TODO: update during run
                 "end_time": end_time,
                 "duration": duration
-            })
+            }
+            if logs is not None:
+                update_task_dict["results"] = self._parse_logs_for_results(
+                    logs)
+            if run_id is not None:
+                update_task_dict["run_id"] = run_id
+            return self.dal.task.update(update_task_dict)
 
     def list(self, session_id=None, sort_key=None, sort_order=None):
         query = {}
