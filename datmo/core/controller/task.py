@@ -374,7 +374,7 @@ class TaskController(BaseController):
                 __("error", "controller.task.delete.arg", "id"))
         return self.dal.task.delete(task_id)
 
-    def stop(self, task_id):
+    def stop(self, task_id, all=False):
         """Stop and remove run for the task
 
         Parameters
@@ -387,10 +387,12 @@ class TaskController(BaseController):
         return_code : bool
             system return code of the stop
         """
-        if not task_id:
+        if task_id is None and all is False:
             raise RequiredArgumentMissing(
-                __("error", "controller.task.stop.arg", "id"))
-        task_obj = self.dal.task.get_by_id(task_id)
-        run_id = task_obj.run_id
-        return_code = self.environment.stop(run_id)
+                __("error", "controller.task.stop.arg.missing", "id"))
+        run_id = None
+        if task_id:
+            task_obj = self.dal.task.get_by_id(task_id)
+            run_id = task_obj.run_id
+        return_code = self.environment.stop(run_id, all)
         return return_code

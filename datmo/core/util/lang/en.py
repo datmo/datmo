@@ -39,6 +39,8 @@ MESSAGES = {
             "Running a new task",
         "cli.task.stop":
             "Stopping task: %s",
+        "cli.task.stop.all":
+            "Stopping all tasks",
         "cli.session.create":
             "Created session '%s'",
         "cli.session.select":
@@ -249,6 +251,8 @@ MESSAGES = {
             "Error in running tasks since both detach and interactive is used",
         "controller.task.stop.arg":
             "Stop argument %s not present in input",
+        "controller.task.stop.arg.missing":
+            "Stop argument %s unable to stop environment. please use -a to stop all running tasks",
         "controller.task.delete.arg":
             "Delete argument %s not present in input",
         "controller.session.delete.default":

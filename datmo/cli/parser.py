@@ -221,3 +221,9 @@ task_ls.add_argument(
 task_stop = task_subcommand_parsers.add_parser("stop", help="stop tasks")
 task_stop.add_argument(
     "--id", dest="id", default=None, type=str, help="task id to stop")
+task_stop.add_argument(
+    "--all",
+    "-a",
+    dest="all",
+    action="store_true",
+    help="To stop all datmo tasks")

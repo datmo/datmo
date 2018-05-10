@@ -266,7 +266,7 @@ class EnvironmentController(BaseController):
         return file_collection_deleted and environment_artifacts_removed and \
                delete_success
 
-    def stop(self, run_id):
+    def stop(self, run_id, all=False):
         """Stop the trace of running Environment
 
         Parameters
@@ -284,7 +284,11 @@ class EnvironmentController(BaseController):
         PathDoesNotExist
             if the specified Environment does not exist.
         """
-        # Stop the instance(e.g. container) running using environment driver(e.g. docker)
-        stop_success = self.environment_driver.stop(run_id, force=True)
+        if all:
+            stop_success = self.environment_driver.stop_remove_containers_by_term(
+                term='datmo-task', force=True)
+        else:
+            # Stop the instance(e.g. container) running using environment driver(e.g. docker)
+            stop_success = self.environment_driver.stop(run_id, force=True)
 
         return stop_success
