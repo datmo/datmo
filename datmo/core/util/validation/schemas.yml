@@ -1,0 +1,76 @@
+# http://docs.python-cerberus.org/en/stable/validation-rules.html
+
+create_project:
+  name:
+    empty: False
+    required: True
+    type: string
+  description:
+    required: True
+    type: string
+
+create_session:
+  name:
+    required: True
+    type: string
+  current:
+    type: boolean
+
+create_snapshot:
+  code_id:
+    type: string
+  commit_id:
+    type: string
+
+  environment_id:
+    type: string
+  environment_definition_filepath:
+    type: string
+
+  file_collection_id:
+    type: string
+  filepaths:
+    type: list
+
+  config:
+    type: dict
+  config_filepath:
+    type: string
+  config_filename:
+    type: string
+
+  stats:
+    type: dict
+  stats_filepath:
+    type: string
+  stats_filename:
+    type: string
+
+  message:
+    type: string
+  session_id:
+    type: string
+  task_id:
+    type: string
+  label:
+    type: string
+  language:
+    type: string
+
+  visible:
+    type: boolean
+
+create_snapshot_from_task:
+  message:
+    type: string
+  task_id:
+    type: string
+  label:
+    nullable: true
+    type: string
+  config:
+    nullable: true
+    type: dict
+  stats:
+    nullable: true
+    type: dict

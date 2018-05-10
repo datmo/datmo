@@ -2,6 +2,7 @@ from datmo.core.controller.base import BaseController
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (EntityNotFound, InvalidOperation,
                                         ProjectNotInitializedException)
+from datmo.core.util.validation import validate
 
 
 class SessionController(BaseController):
@@ -36,6 +37,9 @@ class SessionController(BaseController):
 
     def create(self, incoming_dictionary):
         # Look for existing session first and return if it exists
+
+        validate("create_session", incoming_dictionary)
+
         results = self.dal.session.query({
             "model_id": self.model.id,
             "name": incoming_dictionary['name']
