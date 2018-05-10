@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from datmo.core.util.i18n import get as __
 
 
 class InvalidProjectPathException(Exception):
@@ -162,4 +163,21 @@ class TaskInteractiveDetachException(ArgumentException):
 
 
 class SnapshotCreateFromTaskArgs(ArgumentException):
+    pass
+
+
+class ValidationFailed(Exception):
+    def __init__(self, error_obj):
+        self.errors = error_obj
+        super(ValidationFailed, self).__init__(
+            __("error", "exception.validationfailed", self.get_error_str()))
+
+    def get_error_str(self):
+        err_str = ''
+        for name in self.errors:
+            err_str += "'%s': %s\n" % (name, self.errors[name])
+        return err_str
+
+
+class ValidationSchemaMissing(Exception):
     pass

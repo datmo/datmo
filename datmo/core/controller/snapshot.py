@@ -6,6 +6,7 @@ from datmo.core.controller.file.file_collection import FileCollectionController
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.util.i18n import get as __
+from datmo.core.util.validation import validate
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import (
     FileIOException, RequiredArgumentMissing, ProjectNotInitializedException,
@@ -153,6 +154,8 @@ class SnapshotController(BaseController):
             "session_id": self.current_session.id,
         }
 
+        validate("create_snapshot", incoming_dictionary)
+
         # Message must be present
         if "message" in incoming_dictionary:
             create_dict['message'] = incoming_dictionary['message']
@@ -228,6 +231,16 @@ class SnapshotController(BaseController):
         TaskNotComplete
             if task specified has not been completed
         """
+
+        validate(
+            "create_snapshot_from_task", {
+                "message": message,
+                "task_id": task_id,
+                "label": label,
+                "config": config,
+                "stats": stats
+            })
+
         task_obj = self.dal.task.get_by_id(task_id)
 
         if not task_obj.status and not task_obj.after_snapshot_id:

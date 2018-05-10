@@ -19,7 +19,7 @@ from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.controller.task import TaskController
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.entity.task import Task
-from datmo.core.util.exceptions import RequiredArgumentMissing
+from datmo.core.util.exceptions import ValidationFailed
 
 
 class TestProjectController():
@@ -35,14 +35,25 @@ class TestProjectController():
     def teardown_method(self):
         pass
 
-    def test_init(self):
+    def test_init_none(self):
         # Test failed case
         failed = False
         try:
             self.project.init(None, None)
-        except RequiredArgumentMissing:
+        except ValidationFailed:
             failed = True
         assert failed
+
+    def test_init_empty_str(self):
+        # Test failed case
+        failed = False
+        try:
+            self.project.init("", "")
+        except ValidationFailed:
+            failed = True
+        assert failed
+
+    def test_init(self):
 
         result = self.project.init("test1", "test description")
 
