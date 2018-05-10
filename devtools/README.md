@@ -21,6 +21,14 @@ $ pip install sphinx-rtd-theme
 $ pip install recommonmark
 ```
 
+## Converting files to RST
+We use a mixture of markdown and rst files throughout the repo depending 
+on which works best. We will eventually just work with one, but for the timebeing
+the following command can be run to convert any markdown file to rst.
+```
+$ pandoc --from=markdown --to=rst --output=MY_FILE.rst MY_FILE.md
+```
+
 ## Testing
 The testing done below emulates what is done in the build on [travis](https://travis-ci.org/datmo/datmo)
 ```
