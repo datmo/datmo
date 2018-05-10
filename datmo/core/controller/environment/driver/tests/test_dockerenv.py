@@ -644,14 +644,11 @@ class TestDockerEnv():
         # 1) Test failure EnvironmentDoesNotExist
         # 2) Test success
         # 3) Test failure EnvironmentRequirementsCreateException
+        # 4) When there are no install requirements
 
         # 1) Test option 1
-        failed = False
-        try:
-            _ = self.docker_environment_manager.create_requirements_file()
-        except EnvironmentDoesNotExist:
-            failed = True
-        assert failed
+        result = self.docker_environment_manager.create_requirements_file()
+        assert result is None
 
         # 2) Test option 2
         script_path = os.path.join(self.docker_environment_manager.filepath,
@@ -676,7 +673,19 @@ class TestDockerEnv():
 
         assert exception_thrown
 
+        # 4) Test option 4
+        os.remove(script_path)
+        with open(script_path, "w") as f:
+            f.write(to_unicode("import os\n"))
+            f.write(to_unicode("import sys\n"))
+        result = self.docker_environment_manager.create_requirements_file()
+        assert result is None
+
     def test_create_default_dockerfile(self):
+        # 1) Create default dockerfile for default script present
+        # 2) Create default dockerfile with no requirements present
+
+        # 1) Test option 1
         script_path = os.path.join(self.docker_environment_manager.filepath,
                                    "script.py")
         with open(script_path, "w") as f:
@@ -685,13 +694,28 @@ class TestDockerEnv():
         requirements_filepath = \
             self.docker_environment_manager.create_requirements_file()
         result = self.docker_environment_manager.\
-            create_default_dockerfile(requirements_filepath,
-                                      language="python3")
+            create_default_dockerfile(language="python3",
+                                      requirements_filepath=requirements_filepath)
 
         assert result
         assert os.path.isfile(result)
         assert "python" in open(result, "r").read()
         assert "requirements.txt" in open(result, "r").read()
+
+        # 2) Test option 2
+        os.remove(script_path)
+        with open(script_path, "w") as f:
+            f.write(to_unicode("import os\n"))
+            f.write(to_unicode("import sys\n"))
+        requirements_filepath = \
+            self.docker_environment_manager.create_requirements_file()
+        result = self.docker_environment_manager. \
+            create_default_dockerfile(language="python3",
+                                      requirements_filepath=requirements_filepath)
+
+        assert result
+        assert os.path.isfile(result)
+        assert "python" in open(result, "r").read()
 
     def test_stop_remove_containers_by_term(self):
         # TODO: add more robust tests

@@ -86,12 +86,15 @@ class TaskCommand(ProjectCommand):
         try:
             result = self.task_controller.stop(input_dict['id'], all)
             if not result:
-                self.cli_helper.echo(__("error", "cli.task.stop", input_dict['id']))
+                self.cli_helper.echo(
+                    __("error", "cli.task.stop", input_dict['id']))
             if input_dict['id']:
-                self.cli_helper.echo(__("info", "cli.task.stop.success", input_dict['id']))
+                self.cli_helper.echo(
+                    __("info", "cli.task.stop.success", input_dict['id']))
             if all:
                 self.cli_helper.echo(__("info", "cli.task.stop.all.success"))
             return result
         except:
-            self.cli_helper.echo(__("error", "cli.task.stop", input_dict['id']))
+            self.cli_helper.echo(
+                __("error", "cli.task.stop", input_dict['id']))
             return False

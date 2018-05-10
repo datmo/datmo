@@ -54,12 +54,14 @@ class TestEnvironmentController():
         assert failed
 
         # 1) Test option 1
-        failed = False
-        try:
-            self.environment.create({})
-        except EnvironmentDoesNotExist:
-            failed = True
-        assert failed
+        # Creates environment with python3 based docker image
+        environment_obj_0 = self.environment.create({})
+        assert environment_obj_0
+        assert environment_obj_0.id
+        assert environment_obj_0.driver_type == "docker"
+        assert environment_obj_0.file_collection_id
+        assert environment_obj_0.definition_filename
+        assert environment_obj_0.hardware_info
 
         # Create environment definition
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")

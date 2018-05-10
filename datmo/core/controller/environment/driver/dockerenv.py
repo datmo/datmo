@@ -122,8 +122,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 requirements_filepath = self.create_requirements_file()
                 # Create Dockerfile for ubuntu
                 path = self.create_default_dockerfile(
-                    requirements_filepath=requirements_filepath,
-                    language=language)
+                    language=language,
+                    requirements_filepath=requirements_filepath)
             else:
                 raise EnvironmentDoesNotExist(
                     __("error",
@@ -619,15 +619,15 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 __("error", "controller.environment.requirements.create",
                    str(e)))
         if open(requirements_filepath, "r").read() == "\n":
-            raise EnvironmentDoesNotExist()
+            return None
         return requirements_filepath
 
-    def create_default_dockerfile(self, requirements_filepath, language):
+    def create_default_dockerfile(self, language, requirements_filepath=None):
         """Create a default Dockerfile for a given language
 
         Parameters
         ----------
-        requirements_filepath : str
+        requirements_filepath : str, optional
             path for the requirements txt file
         language : str
             programming language used ("python2" and "python3" currently supported)
@@ -642,18 +642,19 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             os.path.dirname(os.path.abspath(__file__)), "templates",
             language_dockerfile)
 
-        # Combine dockerfile
         destination_dockerfile = os.path.join(self.filepath, "Dockerfile")
         destination = open(destination_dockerfile, "w")
         shutil.copyfileobj(open(base_dockerfile_filepath, "r"), destination)
-        destination.write(
-            to_unicode(
-                str("COPY %s /tmp/requirements.txt\n") %
-                os.path.split(requirements_filepath)[-1]))
-        destination.write(
-            to_unicode(
-                str("RUN pip install --no-cache-dir -r /tmp/requirements.txt\n"
-                    )))
+        # Combine dockerfile if there exists requirements_filepath
+        if requirements_filepath:
+            destination.write(
+                to_unicode(
+                    str("COPY %s /tmp/requirements.txt\n") %
+                    os.path.split(requirements_filepath)[-1]))
+            destination.write(
+                to_unicode(
+                    str("RUN pip install --no-cache-dir -r /tmp/requirements.txt\n"
+                        )))
         destination.close()
 
         return destination_dockerfile

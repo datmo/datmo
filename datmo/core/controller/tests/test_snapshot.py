@@ -67,17 +67,18 @@ class TestSnapshotController():
             failed = True
         assert failed
 
-    def test_create_fail_no_environment_detected_in_file(self):
+    def test_create_no_environment_detected_in_file(self):
         # Test default values for snapshot, fail due to no environment from file
         self.snapshot.file_driver.create("filepath1")
-        failed = False
-        try:
-            self.snapshot.create({
+        snapshot_obj_0 = self.snapshot.create({
                 "message": "my test snapshot",
             })
-        except EnvironmentDoesNotExist:
-            failed = True
-        assert failed
+        assert isinstance(snapshot_obj_0, Snapshot)
+        assert snapshot_obj_0.code_id
+        assert snapshot_obj_0.environment_id
+        assert snapshot_obj_0.file_collection_id
+        assert snapshot_obj_0.config == {}
+        assert snapshot_obj_0.stats == {}
 
     def test_create_success_default_detected_in_file(self):
         # Test default values for snapshot when there is no environment
