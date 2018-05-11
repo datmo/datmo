@@ -98,8 +98,12 @@ class LocalFileDriver(FileDriver):
     @property
     def is_initialized(self):
         if self.exists_datmo_file_structure():
-            self._is_initialized = True
-            return self._is_initialized
+            if self.exists_collections_dir():
+                if os.path.isdir(
+                        os.path.join(self.filepath, ".datmo", "collections",
+                                     "d41d8cd98f00b204e9800998ecf8427e")):
+                    self._is_initialized = True
+                    return self._is_initialized
         self._is_initialized = False
         return self._is_initialized
 
@@ -109,6 +113,16 @@ class LocalFileDriver(FileDriver):
         try:
             # Ensure the Datmo file structure exists
             self.ensure_datmo_file_structure()
+            # Ensure the collections directory exists
+            self.ensure_collections_dir()
+            # Ensure the empty collection exists
+            if not os.path.isdir(
+                    os.path.join(self.filepath, ".datmo", "collections",
+                                 "d41d8cd98f00b204e9800998ecf8427e")):
+                self.create(
+                    os.path.join(".datmo", "collections",
+                                 "d41d8cd98f00b204e9800998ecf8427e"),
+                    directory=True)
         except Exception as e:
             raise FileIOException(
                 __("error", "controller.file.driver.local.init", str(e)))
@@ -232,6 +246,7 @@ class LocalFileDriver(FileDriver):
         collection_path = os.path.join(self.filepath, ".datmo", "collections",
                                        filehash)
         if os.path.isdir(collection_path):
+            shutil.rmtree(temp_collection_path)
             return filehash
             # raise FileStructureException("exception.file.create_collection", {
             #     "exception": "File collection with id already exists."

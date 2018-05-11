@@ -413,8 +413,7 @@ class GitCodeDriver(CodeDriver):
                 stderr=subprocess.PIPE,
                 cwd=self.filepath)
             stdout, stderr = process.communicate()
-            stdout, stderr = stdout.decode('utf-8'), stderr.decode('utf-8')
-            if process.returncode > 0 or "fatal" in stdout:
+            if process.returncode > 0 or "fatal" in str(stdout):
                 return False
         except subprocess.CalledProcessError:
             return False

@@ -170,7 +170,7 @@ class TestEnvironmentController():
         assert environment_obj_4.hardware_info
         assert environment_obj_4.unique_hash == file_collection_obj.filehash
         assert os.path.isfile(
-            os.path.join(file_collection_dir, "requirements.txt"))
+            os.path.join(file_collection_dir, "datmorequirements.txt"))
         assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
         assert os.path.isfile(
             os.path.join(file_collection_dir, "datmoDockerfile"))
