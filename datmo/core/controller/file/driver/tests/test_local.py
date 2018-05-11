@@ -263,7 +263,7 @@ class TestLocalFileManager():
         collections_path = os.path.join(self.local_file_driver.filepath,
                                         ".datmo", "collections")
 
-        # Test empty file collection
+        # Test empty file collection already exists
         filehash_empty = self.local_file_driver. \
             create_collection([])
         collection_path_empty = os.path.join(collections_path, filehash_empty)
@@ -271,14 +271,13 @@ class TestLocalFileManager():
         assert os.path.isdir(collection_path_empty)
         assert len(os.listdir(collections_path)) == 1
 
-        # Test creating another empty file collection (should not fail)
+        # Test creating another empty file collection (should not fail again)
         filehash_empty = self.local_file_driver. \
             create_collection([])
         collection_path_empty = os.path.join(collections_path, filehash_empty)
 
         assert os.path.isdir(collection_path_empty)
         assert len(os.listdir(collections_path)) == 1
-        self.local_file_driver.delete_collection(filehash_empty)
 
         # Create test directories to move
         self.local_file_driver.create("dirpath1", directory=True)
@@ -293,7 +292,7 @@ class TestLocalFileManager():
         collection_path = os.path.join(collections_path, filehash)
 
         assert os.path.isdir(collection_path)
-        assert len(os.listdir(collections_path)) == 1
+        assert len(os.listdir(collections_path)) == 2
         assert os.path.isdir(os.path.join(collection_path,
                                        "dirpath1")) and \
                (oct(os.stat(os.path.join(collection_path,

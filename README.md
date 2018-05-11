@@ -160,22 +160,35 @@ In order to run the above code you can do the following.
 
         $ datmo snapshot ls
 
-## Sharing (Beta)
+## Sharing (Workaround)
 Although datmo is made to track your changes locally, you can share a project with your
 friends by doing the following (this is shown only for git, if you are using another git 
 tracking tool, you can likely do something similar). NOTE: If your files are too big or 
 cannot be added to SCM then this may not work for you. 
+
+The below has been tested on BASH terminals only. If you are using another terminal, you 
+may run into some errors. 
+
+### Push to remote
 ```
-$ git add -f .datmo/*
-$ git commit -m "my_message"
-$ git push 
-$ git push origin +refs/datmo/*:refs/datmo/*
+$ git add -f .datmo/*  # add in .datmo to your scm
+$ git commit -m "adding .datmo to tracking"  # commit it to your scm
+$ git push  # push to remote
+$ git push origin +refs/datmo/*:refs/datmo/*  # push datmo refs to remote
 ```
 The above will allow you to share datmo results and entities with yourself or others on 
 other machines. NOTE: you will have to remove .datmo/ from tracking to start using datmo
-on the other machine. To do that you can use the commands below
+on the other machine or another location. See the instructions below to see how to replicate
+it at another location
+
+### Pull from remote
 ```
-$ git rm -r --cached
-$ git add .
-$ git commit -m "removed .datmo from tracking"
+$ git clone YOUR_REMOTE_URL
+$ cd YOUR_REPO 
+$ echo '.datmo/*' > .git/info/exclude  # include .datmo into your .git exclude
+$ git rm -r --cached .datmo  # remove cached versions of .datmo from scm
+$ git commit -m "removed .datmo from tracking"  # clean up your scm so datmo can work 
+$ git pull origin +refs/datmo/*:refs/datmo/*  # pull datmo refs from remote
+$ datmo init  # This enables datmo in the new location. If you enter blanks, no project information will be updated
 ```
+If you are interested in sharing using the datmo protocol, you can visit [Datmo's website](https://datmo.com/product)
