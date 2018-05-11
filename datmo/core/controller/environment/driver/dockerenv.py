@@ -152,12 +152,18 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
     # running daemon needed
     def run(self, name, options, log_filepath):
-        run_return_code, run_id = \
-            self.run_container(image_name=name, **options)
+        if "gpu" in options:
+            if options["gpu"] == True:
+                options.runtime = 'nvidia'
+            options.pop("gpu", None)
+
+        run_return_code, run_id = self.run_container(
+            image_name=name, **options)
+
         log_return_code, logs = self.log_container(
             run_id, filepath=log_filepath)
-        final_return_code = run_return_code and log_return_code
 
+        final_return_code = run_return_code and log_return_code
         return final_return_code, run_id, logs
 
     # running daemon needed
@@ -332,6 +338,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                       ports=None,
                       name=None,
                       volumes=None,
+                      runtime=None,
                       detach=False,
                       stdin_open=False,
                       tty=False,
@@ -390,87 +397,108 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         EnvironmentExecutionException
              error in running the environment command
         """
+
         try:
             container_id = None
             if api:  # calling the docker client via the API
                 # TODO: Test this out for the API (need to verify ports work)
+                command = " ".join(command) if command else command
                 if detach:
-                    command = " ".join(command) if command else command
-                    container = \
-                        self.client.containers.run(image_name, command, ports=ports,
-                                                   name=name, volumes=volumes,
-                                                   detach=detach, stdin_open=stdin_open)
+                    container = self.client.containers.run(
+                        image_name,
+                        command,
+                        ports=ports,
+                        name=name,
+                        volumes=volumes,
+                        runtime=runtime,
+                        detach=detach,
+                        stdin_open=stdin_open)
                     return container
                 else:
-                    command = " ".join(command) if command else command
                     logs = self.client.containers.run(
                         image_name,
                         command,
                         ports=ports,
                         name=name,
                         volumes=volumes,
+                        runtime=runtime,
                         detach=detach,
                         stdin_open=stdin_open)
                     return logs.decode()
             else:  # if calling run function with the shell commands
-                docker_shell_cmd_list = list(self.prefix)
-                docker_shell_cmd_list.append("run")
+                return_code, container_id = self.run_as_subprocess(
+                    name, stdin_open, tty, detach, runtime, volumes, ports,
+                    image_name, command)
 
-                if name:
-                    docker_shell_cmd_list.append("--name")
-                    docker_shell_cmd_list.append(name)
-
-                if stdin_open:
-                    docker_shell_cmd_list.append("-i")
-
-                if tty:
-                    docker_shell_cmd_list.append("-t")
-
-                if detach:
-                    docker_shell_cmd_list.append("-d")
-
-                # Volume
-                if volumes:
-                    # Mounting volumes
-                    for key in list(volumes):
-                        docker_shell_cmd_list.append("-v")
-                        volume_mount = key + ":" + volumes[key]["bind"] + ":" + \
-                                       volumes[key]["mode"]
-                        docker_shell_cmd_list.append(volume_mount)
-
-                if ports:
-                    # Mapping ports
-                    for mapping in ports:
-                        docker_shell_cmd_list.append("-p")
-                        docker_shell_cmd_list.append(mapping)
-
-                docker_shell_cmd_list.append(image_name)
-                if command:
-                    docker_shell_cmd_list.extend(command)
-                return_code = subprocess.call(docker_shell_cmd_list)
-                if return_code != 0:
-                    raise EnvironmentExecutionException(
-                        __("error",
-                           "controller.environment.driver.docker.run_container",
-                           str(docker_shell_cmd_list)))
-                list_process_cmd = list(self.prefix)
-                list_process_cmd.extend(["ps", "-q", "-l"])
-                process = subprocess.Popen(
-                    list_process_cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE)
-                stdout, stderr = process.communicate()
-                if process.returncode > 0:
-                    raise EnvironmentExecutionException(
-                        __("error",
-                           "controller.environment.driver.docker.run_container",
-                           str(stderr)))
-                container_id = stdout.decode().strip()
-        except subprocess.CalledProcessError as e:
+        except Exception as e:
             raise EnvironmentExecutionException(
                 __("error",
                    "controller.environment.driver.docker.run_container",
                    str(e)))
+        return return_code, container_id
+
+    def run_as_subprocess(self, name, stdin_open, tty, detach, runtime,
+                          volumes, ports, image_name, command):
+        docker_shell_cmd_list = list(self.prefix)
+        docker_shell_cmd_list.append("run")
+
+        if name:
+            docker_shell_cmd_list.append("--name")
+            docker_shell_cmd_list.append(name)
+
+            if detach:
+                docker_shell_cmd_list.append("-d")
+
+            if runtime:
+                docker_shell_cmd_list.append("--runtime")
+                docker_shell_cmd_list.append(runtime)
+
+            # Volume
+            if volumes:
+                # Mounting volumes
+                for key in list(volumes):
+                    docker_shell_cmd_list.append("-v")
+                    volume_mount = key + ":" + volumes[key]["bind"] + ":" + \
+                                    volumes[key]["mode"]
+                    docker_shell_cmd_list.append(volume_mount)
+
+            if ports:
+                # Mapping ports
+                for mapping in ports:
+                    docker_shell_cmd_list.append("-p")
+                    docker_shell_cmd_list.append(mapping)
+
+            docker_shell_cmd_list.append(image_name)
+            if command:
+                docker_shell_cmd_list.extend(command)
+            return_code = subprocess.call(docker_shell_cmd_list)
+            if return_code != 0:
+                raise EnvironmentExecutionException(
+                    __("error",
+                        "controller.environment.driver.docker.run_container",
+                        str(docker_shell_cmd_list)))
+            list_process_cmd = list(self.prefix)
+            list_process_cmd.extend(["ps", "-q", "-l"])
+            process = subprocess.Popen(
+                list_process_cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode > 0:
+                raise EnvironmentExecutionException(
+                    __("error",
+                        "controller.environment.driver.docker.run_container",
+                        str(stderr)))
+            container_id = stdout.decode().strip()
+        except subprocess.CalledProcessError as e:
+            raise EnvironmentExecutionException(
+                __("error",
+                   "controller.environment.driver.docker.run_container",
+                   str(docker_shell_cmd_list)))
+        list_process_cmd = list(self.prefix)
+        list_process_cmd.extend(["ps", "-q", "-l"])
+        container_id = subprocess.check_output(list_process_cmd)
+        container_id = container_id.decode().strip()
         return return_code, container_id
 
     # running daemon needed
