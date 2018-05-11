@@ -116,26 +116,16 @@ def create(message,
         if task id is passed then subsequent parameters would be ignored.
         when using task id, it will overwrite the following inputs
 
-        commit_id
-        ----------
-        the commit id is taken form the source code after the task is run
+        *commit_id*:  taken form the source code after the task is run
 
-        environment_id
-        --------------
-        environment_id used to run the task,
+        *environment_id*: used to run the task,
 
-        filepaths
-        ---------
-        this is the set of all files saved during the task
+        *filepaths*: this is the set of all files saved during the task
 
-        config
-        ------
-        nothing is passed into this variable. the user may add
+        *config*: nothing is passed into this variable. the user may add
         something to the config by passing in a dict for the config
 
-        stats
-        -----
-        the task.results are added into the stats variable of the
+        *stats*:  the task.results are added into the stats variable of the
         snapshot.
 
     commit_id : str, optional
