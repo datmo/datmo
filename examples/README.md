@@ -8,81 +8,32 @@ $ pip install datmo
 ```
 
 ## Using the Examples
-### CLI
-1. Navigate to desired project folder or create a new one 
+### CLI flow
+See [CLI flow examples](/examples/cli) for instructions
 
-        $ mkdir MY_DATMO_PROJECT
-        $ cd MY_DATMO_PROJECT
+### CLI + Python flow
+See [CLI + Python flow examples](/examples/python) for instructions
 
-2. Copy/save example files within project folder
-
-        $ cp /path/to/SCRIPT_NAME.sh .
-        $ cp /path/to/SCRIPT_NAME.py .
-
-3. Open the `SCRIPT_NAME.sh` file in a text editor and run the commands individually, or run
-
-        $ bash SCRIPT_NAME.sh
-
-### Python
-1. Navigate to desired project folder or create a new one 
-
-        $ mkdir MY_DATMO_PROJECT
-        $ cd MY_DATMO_PROJECT
-        
-2. Initialize the datmo project
-
-        $ datmo init
-
-3. Copy/save example files within project folder (if directory, copy the contents of the directory)
-
-        $ cp /path/to/SCRIPT_NAME.py .
-        $ cp /path/to/DIRECTORY/* .
-        
-4. Run 
-
-        $ python SCRIPT_NAME.py
-
-### Jupyter Notebook
-1. Navigate to desired project folder or create a new one 
-
-        $ mkdir MY_DATMO_PROJECT
-        $ cd MY_DATMO_PROJECT
-        
-2. Initialize the datmo project
-
-        $ datmo init
-
-3. Copy/save example files within project folder (if directory, copy the contents of the directory)
-
-        $ cp /path/to/SCRIPT_NAME.ipynb .
-        $ cp /path/to/DIRECTORY/* .
-        
-4. Run 
-
-        $ jupyter notebook SCRIPT_NAME.ipynb
-
-5. Run cells in order
+### CLI + Jupyter Notebook flow
+See [CLI + Jupyter Notebook flow examples](/examples/jupyter_notebook) for instructions
 
 
 ## Examples
-#### Creating a Snapshot
-* CLI
-	* TBD
-* Python
-	* [Snapshot create with sklearn iris classifier](https://github.com/datmo/datmo/blob/master/examples/python/snapshot_create_iris_sklearn.py)
-* Jupyter notebook
-	* [Snapshot create with sklearn iris classifier directory](https://github.com/datmo/datmo/blob/master/examples/jupyter_notebook/snapshot_create_iris_sklearn/)
-	    * [Snapshot create with sklearn iris classifier notebook](https://github.com/datmo/datmo/blob/master/examples/jupyter_notebook/snapshot_create_iris_sklearn/snapshot_create_iris_sklearn.ipynb)
+Listed below are actions you might want to take with Datmo. For each
+we have listed if there are any example for each type of flow. You can 
+navigate to the specific flow folder to find the exact instructions for
+each example. 
+
+#### Creating a Snapshot 
+* [CLI flow](/examples/cli/)
+    * snapshot_create_iris_sklearn
+* [CLI + Python flow](/examples/python)
+    * snapshot_create_iris_sklearn
+* [CLI + Jupyter Notebook flow](/examples/jupyter_notebook)
+    * snapshot_create_iris_sklearn
 
 #### Running a containerized task (with option to create Snapshot)
-* CLI
-	* Run a training script (any language) (Coming soon)
-	* Run an inference script (any language) (Coming soon)
-* Python
-    * [Task run example with sklearn iris classifier directory](https://github.com/datmo/datmo/blob/master/examples/python/task_run_iris_sklearn)
-	    * [Train a basic sklearn iris classifier](https://github.com/datmo/datmo/blob/master/examples/python/task_run_iris_sklearn/basic_task.py)
-	    * [Run multiple tasks and snapshot the best result](https://github.com/datmo/datmo/blob/master/examples/python/task_run_iris_sklearn/task_compare.py)
-    * Perform inference on saved model (iris sklearn) (Coming soon)
-* Jupyter notebook
-    * TBD
+* [CLI + Python flow](/examples/python)
+    * task_run_iris_sklearn_basic
+    * task_run_iris_sklearn_compare
 
