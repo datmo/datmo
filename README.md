@@ -49,6 +49,8 @@ Here's a comparison of a typical logistic regression model with one leveraging D
 <tr>
 <td class="tg-us36">
 <pre lang="python">
+# train.py
+#
 from sklearn import datasets
 from sklearn import linear_model as lm
 from sklearn import model_selection as ms
@@ -86,6 +88,8 @@ print(test_acc)
 </pre></td>
 <td class="tg-us36">
 <pre lang="python">
+# train.py
+#
 from sklearn import datasets
 from sklearn import linear_model as lm
 from sklearn import model_selection as ms

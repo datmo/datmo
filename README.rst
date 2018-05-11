@@ -1,11 +1,12 @@
-Datmo
-=====
+|Datmo Logo|
+============
 
 |PyPI version| |Build Status| |Build status| |Coverage Status|
 |Documentation Status| |Codacy Badge|
 
-Open source model tracking tool for developers. Use ``datmo init`` to
-turn any repository into a supercharged experiment tracking powerhouse.
+**Datmo** is an open source model tracking and reproducibility tool for
+developers. Use ``datmo init`` to turn any repository into a trackable
+task record with reusable environments and metrics logging.
 
 Table of Contents
 ~~~~~~~~~~~~~~~~~
@@ -13,34 +14,25 @@ Table of Contents
 -  `Introduction <#introduction>`__
 -  `Requirements <#requirements>`__
 -  `Installation <#installation>`__
+-  `Examples <#examples>`__
+-  `Documentation <#documentation>`__
+-  `Transform a Current Project <#transform>`__
+-  `Sharing <#sharing>`__
 -  `Contributing to Datmo </CONTRIBUTING.md>`__
--  `Testing <#testing>`__
 
 Introduction
 ------------
 
-As data scientists, machine learning engineers, and deep learning
-engineers, we faced a number of issues keeping track of our work and
-maintaining versions that could be put into production quicker.
+Tracking experiments in a unified manner for data science, machine
+learning, and artificial intelligence projects is difficult for many
+reasons, with one of the largest being the lack of interoperability
+between frameworks, languages, environments, and best practices.
 
-In order to solve this challenge, we found there were a few components
-we need to put together to make it work.
-
-1) Source code should be managed with current source control management
-   tools (of which git is the most popular currently)
-2) Dependencies should be encoded in one place for your source code
-   (e.g. requirements.txt in python and pre-built containers)
-3) Large files that cannot be stored in source code like weights files,
-   data files, etc should be stored separately
-4) Configurations and hyperparameters that define your experiments (e.g.
-   data split, alpha, beta, etc)
-5) Performance metrics that evaluate your model (e.g. validation
-   accuracy)
-
-This framework has helped us keep track of our own models and keep
-consistency across our processes. We wanted to share this with the
-community of like-minded people and teams and help develop an open
-standard for keeping track of model versions.
+Datmo's open source tool helps to alleviate some of the largest pain
+points of dealing with model-based projects by leveraging strong
+foundational technologies and enforcing a set of conventions in a
+framework, language, and platform-agnostic CLI, with additional SDKs for
+more granular control and workflow integration.
 
 Requirements
 ------------
@@ -56,23 +48,8 @@ Installation
 
     pip install datmo
 
-Project Structure
------------------
-
-Datmo adds ``.datmo`` directory which keeps track of all of the various
-entities into a repository to make it datmo-enabled.
-
-Project Templates
------------------
-
-In the ``/templates`` folder we have templates for those who will be
-starting their projects from scratch.
-
-Each folder includes a set of files that are not required by datmo but
-that augment your project and may be useful as you start new projects.
-
-Project Examples
-----------------
+Examples
+--------
 
 In the ``/examples`` folder we have a few scripts you can run to get a
 feel for datmo. You can navigate to `Examples </examples/README.md>`__
@@ -82,12 +59,12 @@ your own projects.
 Here's a comparison of a typical logistic regression model with one
 leveraging Datmo.
 
-Example
--------
 +----------------------------------------------+----------------------------------------------+
 | **Script to train a logistic regression**    | **The same script with Datmo**               |
 +----------------------------------------------+----------------------------------------------+
 | .. code:: python                             | .. code:: python                             |
+|                                              |                                              |
+|   # train.py                                 |   # train.py                                 |
 |                                              |                                              |
 |   from sklearn import datasets               |   from sklearn import datasets               |
 |   from sklearn import linear_model as lm     |   from sklearn import linear_model as lm     |
@@ -156,33 +133,178 @@ In order to run the above code you can do the following.
 
        $ datmo snapshot ls
 
-Sharing (Beta)
---------------
+How it works
+------------
 
-Although datmo is made to track your changes locally, you can share a
-project with your friends by doing the following (this is shown only for
-git, if you are using another git tracking tool, you can likely do
-something similar). NOTE: If your files are too big or cannot be added
-to SCM then this may not work for you.
+Project Structure
+~~~~~~~~~~~~~~~~~
+
+When running ``datmo init``, Datmo adds a hidden ``.datmo`` directory
+which keeps track of all of the various entities at play. This is
+ncessary to render a repository datmo-enabled.
+
+Snapshots
+~~~~~~~~~
+
+.. raw:: html
+
+   <p align="center">
 
 ::
 
-    $ git add -f .datmo/*
-    $ git commit -m "my_message"
-    $ git push 
-    $ git push origin +refs/datmo/*:refs/datmo/*
+    The fundamental unit of record in the Datmo ecosystem is a <b>Snapshot</b>, which contains 5 first-class components.
+    <br><br>
+    <img size="250px" src="https://raw.githubusercontent.com/datmo/datmo/docs-update/images/snapshot-badge-readme.png">
+
+.. raw:: html
+
+   </p>
+
+Code
+^^^^
+
+Source code should be managed with current source control management
+tools. Datmo currently is built on top of git, but could theoretically
+be ported to work with any similar SCM protocol. While datmo will track
+all of your local changes and experiments on your machine, you will
+still need to push changes to a remote repository for them to be
+continually synced with a manager of choice (like GitHub).
+
+For sharing Datmo entities directly with others (beta), see `this
+section <#sharing-beta>`__ of the README below.
+
+Environment
+^^^^^^^^^^^
+
+Dependencies should be encoded using standard best practices for your
+source code. Python packages should be enumerated in a
+``requirements.txt`` file, while system level dependencies (typically
+found during GPU workflows) should be written into a ``Dockerfile``.
+
+Configuration
+^^^^^^^^^^^^^
+
+Variables used in your experiment that are necessary for
+reproducibility. These typically include algorithm hyperparameter
+values, train/test data split, etc.
+
+Files
+^^^^^
+
+Large files that cannot be stored in source code (ie: untrackable in git
+due to size) should be stored separately. For data sources that are not
+discretizable into files (or are stored elsewhere), it is advised to
+write out the location/directory of these data sources/files as an entry
+in the ``stats`` property.
+
+Stats
+^^^^^
+
+Model metrics are written to the ``stats`` property of a snapshot. Datmo
+does not enforce any type of formal metric definition, the user is free
+to pass any key-value dictionary during snapshot creation. This enables
+users to abide by their own metric logging convention while having the
+flexibility of being able to natively compare metrics across algorithms
+or frameworks.
+
+Documentation
+-------------
+
+The full docs are hosted
+`here <https://datmo.readthedocs.io/en/latest/index.html>`__. If you
+wish to contribute to the docs (source code located here in ``/docs``),
+follow the procedure outlined in ``CONTRIBUTING.md``.
+
+Transform a Current Project
+---------------------------
+
+You can transform your existing repository into a datmo enabled
+repository with the following command
+
+::
+
+    $ datmo init
+
+If at any point you would like to remove datmo you can just remove the
+``.datmo`` directory from your repository or you can run the following
+command
+
+::
+
+    $ datmo cleanup
+
+Optional: Mark your GitHub repository as a Datmo project
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once you initialize your project, you can denote your repository as a
+datmo project by adding the following badge to your README file. This
+helps someone pulling the code to know how to setup and run Datmo
+commands, as the badge will link them to usage instructions here.
+
+Markdown
+^^^^^^^^
+
+.. code:: markdown
+
+    [![Datmo Model](https://github.com/datmo/datmo/blob/master/images/badge.svg)](https://github.com/datmo/datmo)
+
+ReStructuredText
+^^^^^^^^^^^^^^^^
+
+::
+
+    .. image:: https://github.com/datmo/datmo/blob/master/images/badge.svg
+        :target: https://github.com/datmo/datmo
+
+Sharing (Workaround)
+--------------------
+
+**DISCLAIMER:** This is not currently an officially supported option and
+only works for file-based storage layers (as set in the configuration)
+as a workaround to share datmo projects.
+
+Although datmo is made to track changes locally, you can share a project
+by pushing to a remote server by doing the following (this is shown only
+for git, if you are using another SCM tracking tool, you can likely do
+something similar). If your files are too big or cannot be added to SCM
+then this may not work for you.
+
+The below has been tested on BASH terminals only. If you are using
+another terminal, you may run into some errors.
+
+Push to remote
+~~~~~~~~~~~~~~
+
+::
+
+    $ git add -f .datmo/*  # add in .datmo to your scm
+    $ git commit -m "adding .datmo to tracking"  # commit it to your scm
+    $ git push  # push to remote
+    $ git push origin +refs/datmo/*:refs/datmo/*  # push datmo refs to remote
 
 The above will allow you to share datmo results and entities with
 yourself or others on other machines. NOTE: you will have to remove
-.datmo/ from tracking to start using datmo on the other machine. To do
-that you can use the commands below
+.datmo/ from tracking to start using datmo on the other machine or
+another location. See the instructions below to see how to replicate it
+at another location
+
+Pull from remote
+~~~~~~~~~~~~~~~~
 
 ::
 
-    $ git rm -r --cached
-    $ git add .
-    $ git commit -m "removed .datmo from tracking"
+    $ git clone YOUR_REMOTE_URL
+    $ cd YOUR_REPO 
+    $ echo '.datmo/*' > .git/info/exclude  # include .datmo into your .git exclude
+    $ git rm -r --cached .datmo  # remove cached versions of .datmo from scm
+    $ git commit -m "removed .datmo from tracking"  # clean up your scm so datmo can work 
+    $ git pull origin +refs/datmo/*:refs/datmo/*  # pull datmo refs from remote
+    $ datmo init  # This enables datmo in the new location. If you enter blanks, no project information will be updated
 
+If you are interested in sharing using the datmo protocol, you can visit
+`Datmo's website <https://datmo.com/product>`__
+
+.. |Datmo Logo| image:: images/datmo-logo.png
 .. |PyPI version| image:: https://badge.fury.io/py/datmo.svg
    :target: https://badge.fury.io/py/datmo
 .. |Build Status| image:: https://travis-ci.org/datmo/datmo.svg?branch=master
