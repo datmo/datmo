@@ -18,10 +18,9 @@
 * [Contributing to Datmo](/CONTRIBUTING.md)
 
 ## Introduction
-
 Tracking experiments in a unified manner for data science, machine learning, and artificial intelligence projects is difficult for many reasons, with one of the largest being the lack of interoperability between frameworks, languages, environments, and best practices.
 
-Datmo's open source tool helps to alleviate some of the largest pain points of dealing with model-based projects by leveraging strong foundational technologies and enforcing a mildly opinionated set of conventions in a framework, language, and platform-agnostic CLI, with additional SDKs for more granular/streamlined control. 
+Datmo's open source tool helps to alleviate some of the largest pain points of dealing with model-based projects by leveraging strong foundational technologies and enforcing a mildly opinionated set of conventions in a framework, language, and platform-agnostic CLI, with additional SDKs for more granular control and workflow integration.
 
 ## Requirements
 
@@ -157,8 +156,9 @@ When running `datmo init`, Datmo adds a hidden `.datmo` directory which keeps tr
 ### Snapshots
 
 <p align="center">
-    The fundamental unit of record in the Datmo ecosystem is a Snapshot, which contains 5 first-class components.
-    <img width="460" height="300" src="">
+    The fundamental unit of record in the Datmo ecosystem is a <b>Snapshot</b>, which contains 5 first-class components.
+    <br><br>
+    <img width="250px"src="https://raw.githubusercontent.com/datmo/datmo/docs-update/images/snapshot-badge.png">
 </p>
 
 

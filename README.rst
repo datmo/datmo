@@ -84,18 +84,46 @@ leveraging Datmo.
 
 Example
 -------
-+------------------------------------------------+--------------------------------------------+
-| **Script to train a logistic regression**      | **The same script with Datmo**             |
-+------------------------------------------------+--------------------------------------------+
-| .. code:: python                               | .. code:: python                           |
-|                                                |                                            |
-|   from sklearn import datasets                 |   from sklearn import datasets             |
-|   from sklearn import linear_model as lm       |   from sklearn import linear_model as lm   |
-|   from sklearn import model_selection as ms    |   from sklearn import model_selection as ms|
-|   from sklearn import externals as ex          |   from sklearn import externals as ex      |
-|                                                |   import datmo # extra line                |
-|                                                |                                            |
-|                                                |                                            |
++----------------------------------------------+----------------------------------------------+
+| **Script to train a logistic regression**    | **The same script with Datmo**               |
++----------------------------------------------+----------------------------------------------+
+| .. code:: python                             | .. code:: python                             |
+|                                              |                                              |
+|   from sklearn import datasets               |   from sklearn import datasets               |
+|   from sklearn import linear_model as lm     |   from sklearn import linear_model as lm     |
+|   from sklearn import model_selection as ms  |   from sklearn import model_selection as ms  |
+|   from sklearn import externals as ex        |   from sklearn import externals as ex        |
+|                                              |   import datmo # extra line                  |
+|                                              |                                              |
+|                                              |   config = {                                 |
+|                                              |       "solver": "newton-cg"                  |
+|                                              |   } # extra line                             |
+|                                              |                                              |
+|  iris_dataset = datasets.load_iris()         |   iris_dataset = datasets.load_iris()        |
+|  X = iris_dataset.data                       |   X = iris_dataset.data                      |
+|  y = iris_dataset.target                     |   y = iris_dataset.target                    |
+|  data = ms.train_test_split(X, y)            |   data = ms.train_test_split(X, y)           |
+|  X_train, X_test, y_train, y_test = data     |   X_train, X_test, y_train, y_test = data    |
+|                                              |                                              |
+|  model = lm.LogisticRegression(              |   model = lm.LogisticRegression(             |
+|                      solver="newton-cg")     |                           **config)          |
+|  model.fit(X_train, y_train)                 |   model.fit(X_train, y_train)                |
+|  ex.joblib.dump(model, 'model.pkl')          |   ex.joblib.dump(model, "model.pkl")         |
+|                                              |                                              |
+|  train_acc = model.score(X_train, y_train)   |   train_acc = model.score(X_train, y_train)  |
+|  test_acc = model.score(X_test, y_test)      |   test_acc = model.score(X_test, y_test)     |
+|                                              |                                              |
+|  print(train_acc)                            |   stats = {                                  |
+|  print(test_acc)                             |       "train_accuracy": train_acc,           |
+|                                              |       "test_accuracy": test_acc              |                                        |
+|                                              |   } # extra line                             |
+|                                              |                                              |
+|                                              |   datmo.snapshot.create(                     |
+|                                              |       message="my first snapshot",           |
+|                                              |       filepaths=["model.pkl"],               |
+|                                              |       config=config,                         |
+|                                              |       stats=stats,                           |
+|                                              |   ) # extra line                             |
 +------------------------------------------------+--------------------------------------------+
 
 In order to run the above code you can do the following.
