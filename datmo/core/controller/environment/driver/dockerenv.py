@@ -611,11 +611,16 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             error in running pipreqs command to extract python requirements
         """
         try:
-            subprocess.check_output(
-                [execpath, self.filepath, "--force"],
-                cwd=self.filepath).strip()
             requirements_filepath = os.path.join(self.filepath,
-                                                 "requirements.txt")
+                                                 "datmorequirements.txt")
+            subprocess.check_output(
+                [
+                    execpath, self.filepath, "--force", "--savepath",
+                    requirements_filepath
+                ],
+                cwd=self.filepath,
+                stderr=subprocess.STDOUT).strip()
+
         except Exception as e:
             raise EnvironmentRequirementsCreateException(
                 __("error", "controller.environment.requirements.create",
