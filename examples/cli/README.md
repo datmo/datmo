@@ -18,12 +18,10 @@ $ pip install datmo
         $ cp /path/to/SCRIPT_NAME.sh .
         $ cp /path/to/SCRIPT_NAME.py .
 
-3. Open the `SCRIPT_NAME.sh` file in a text editor and run the commands individually, or run
-
-        $ bash SCRIPT_NAME.sh
+3. Follow the instructions for a given example in the table below
 
 ### Examples
 
 | feature  | filename(s) | Instructions |
-| ------------- |:-------------:| -----:|
-| Create Snapshot | `snapshot_create_iris_sklearn.py`,`snapshot_create_iris_sklearn.sh` | (1) blah blah blah blah (2) blah blah blah blah |
+| ------------- |:-------------:| :-----|
+| Create Snapshot | `snapshot_create_iris_sklearn.py`, <br> `snapshot_create_iris_sklearn.sh` | (1) Read `snapshot_create_iris_sklearn.py` <br> (2) Run the commands in `snapshot_create_iris_sklearn.sh`in order |

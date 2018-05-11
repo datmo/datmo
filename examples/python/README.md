@@ -31,6 +31,6 @@ $ pip install datmo
 
 | feature  | filename(s) | Instructions |
 | ------------- |:-------------:| -----|
-| Create Snapshot | `snapshot_create_iris_sklearn.py`| (1) blah blah blah blah (2) blah blah blah blah |
-| Run standard task | `/task_run_iris_sklearn/`: `basic_task.py`,`train_model_1.py`| (1) blah blah blah blah (2) blah blah blah blah |
-| Run containerized tasks | `/task_run_iris_sklearn/:` `task_compare.py`, `train_model_1.py`, `train_model_2.py1` | (1) blah blah blah blah (2) blah blah blah blah |
+| Create Snapshot | `snapshot_create_iris_sklearn.py`| (1) Run `$ python snapshot_create_iris_sklearn.py` |
+| Run standard task | `/task_run_iris_sklearn/`: `basic_task.py`,`train_model_1.py`| (1) Read `'train_model_1.py` <br> (2) Run `$ python basic_task.py` |
+| Run containerized tasks (autogenerate python env) | `/task_run_iris_sklearn/:` `task_compare.py`, `train_model_1.py`, `train_model_2.py` | (1) Read `train_model_1.py` and `train_model_2.py` <br> (2) Run `$ python task_compare.py` |
