@@ -73,6 +73,19 @@ else
 fi
 ```
 
+If you're using Visual Studio Code and want to run `yapf -i [filename]` on save,  install the [Run on Save] extension.(https://marketplace.visualstudio.com/items?itemName=emeraldwalk.RunOnSave)
+
+```json
+"emeraldwalk.runonsave": {
+  "commands": [
+    {
+      "match":"\\.py$",
+      "cmd":"yapf -i ${file}"
+    }
+  ]
+}
+```
+
 ## Upload to PyPi
 Versions of datmo are uploaded to [PyPI](https://pypi.org/project/datmo/) with the following steps. NOTE:
 only those with credentials for the PyPI website will be able to upload new versions. 
