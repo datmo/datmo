@@ -33,4 +33,4 @@ $ pip install datmo
 
 | feature  | filename(s) | Instructions |
 | ------------- |:-------------:| -----|
-| Create Snapshot | `snapshot_create_iris_sklearn.ipynb`| (1) blah blah blah blah (2) blah blah blah blah |
+| Create Snapshot | `snapshot_create_iris_sklearn.ipynb`| (1) Run `$ jupyter notebook snapshot_create_iris_sklearn.ipynb` <br>(2) Run cells in order |
