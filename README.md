@@ -181,3 +181,16 @@ $ git rm -r --cached
 $ git add .
 $ git commit -m "removed .datmo from tracking"
 ```
+
+## Getting Started
+Once you initialize you project, you can reference the datmo project by adding in the following into your README file.
+
+#### Markdown
+```markdown
+[![Datmo Model](https://github.com/datmo/datmo/blob/master/images/badge.svg)](https://github.com/datmo/datmo)
+```
+#### ReStructuredText
+```
+.. image:: https://github.com/datmo/datmo/blob/master/images/badge.svg
+    :target: https://github.com/datmo/datmo
+```
