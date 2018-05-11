@@ -194,9 +194,23 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             List of tags available for that docker repo
         """
         docker_repository_tag_cmd = "wget -q https://registry.hub.docker.com/v1/repositories/" + repo_name + "/tags -O -"
-        string_repository_tags = subprocess.check_output(
-            docker_repository_tag_cmd, shell=True)
-        string_repository_tags = string_repository_tags.decode().strip()
+        try:
+            process = subprocess.Popen(
+                docker_repository_tag_cmd,
+                shell=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode > 0:
+                raise EnvironmentExecutionException(
+                    __("error",
+                       "controller.environment.driver.docker.get_tags",
+                       str(stderr)))
+            string_repository_tags = stdout.decode().strip()
+        except subprocess.CalledProcessError as e:
+            raise EnvironmentExecutionException(
+                __("error", "controller.environment.driver.docker.get_tags",
+                   str(e)))
         repository_tags = ast.literal_eval(string_repository_tags)
         list_tag_names = []
         for repository_tag in repository_tags:
@@ -273,8 +287,17 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             else:
                 docker_image_remove_cmd = list(self.prefix)
                 docker_image_remove_cmd.extend(["rmi", image_id_or_name])
-            subprocess.check_output(docker_image_remove_cmd).decode().strip()
-        except Exception as e:
+            process = subprocess.Popen(
+                docker_image_remove_cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode > 0:
+                raise EnvironmentExecutionException(
+                    __("error",
+                       "controller.environment.driver.docker.remove_image",
+                       str(stderr)))
+        except subprocess.CalledProcessError as e:
             raise EnvironmentExecutionException(
                 __("error",
                    "controller.environment.driver.docker.remove_image",
@@ -425,10 +448,18 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                            str(docker_shell_cmd_list)))
                 list_process_cmd = list(self.prefix)
                 list_process_cmd.extend(["ps", "-q", "-l"])
-                container_id = subprocess.check_output(list_process_cmd)
-                container_id = container_id.decode().strip()
-
-        except Exception as e:
+                process = subprocess.Popen(
+                    list_process_cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+                stdout, stderr = process.communicate()
+                if process.returncode > 0:
+                    raise EnvironmentExecutionException(
+                        __("error",
+                           "controller.environment.driver.docker.run_container",
+                           str(stderr)))
+                container_id = stdout.decode().strip()
+        except subprocess.CalledProcessError as e:
             raise EnvironmentExecutionException(
                 __("error",
                    "controller.environment.driver.docker.run_container",
@@ -454,8 +485,17 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         try:
             docker_container_stop_cmd = list(self.prefix)
             docker_container_stop_cmd.extend(["stop", container_id])
-            subprocess.check_output(docker_container_stop_cmd).decode().strip()
-        except Exception as e:
+            process = subprocess.Popen(
+                docker_container_stop_cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode > 0:
+                raise EnvironmentExecutionException(
+                    __("error",
+                       "controller.environment.driver.docker.stop_container",
+                       str(stderr)))
+        except subprocess.CalledProcessError as e:
             raise EnvironmentExecutionException(
                 __("error",
                    "controller.environment.driver.docker.stop_container",
@@ -470,9 +510,17 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                     ["rm", "-f", container_id])
             else:
                 docker_container_remove_cmd_list.extend(["rm", container_id])
-            subprocess.check_output(
-                docker_container_remove_cmd_list).decode().strip()
-        except Exception as e:
+            process = subprocess.Popen(
+                docker_container_remove_cmd_list,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode > 0:
+                raise EnvironmentExecutionException(
+                    __("error",
+                       "controller.environment.driver.docker.remove_container",
+                       str(stderr)))
+        except subprocess.CalledProcessError as e:
             raise EnvironmentExecutionException(
                 __("error",
                    "controller.environment.driver.docker.remove_container",
@@ -540,12 +588,17 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
             running_docker_container_cmd_str = str(
                 " ".join(running_docker_container_cmd_list))
-            output = subprocess.Popen(
+            process = subprocess.Popen(
                 running_docker_container_cmd_str,
                 shell=True,
-                stdout=subprocess.PIPE)
-            out_list_cmd, err_list_cmd = output.communicate()
-
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+            out_list_cmd, err_list_cmd = process.communicate()
+            if process.returncode > 0:
+                raise EnvironmentExecutionException(
+                    __("error",
+                       "controller.environment.driver.docker.stop_remove_containers_by_term",
+                       str(err_list_cmd)))
             # checking for running container id before stopping any
             if out_list_cmd:
                 docker_container_stop_cmd_list = list(self.prefix)
@@ -554,17 +607,24 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                                                  [")"]
                 docker_container_stop_cmd_str = str(
                     " ".join(docker_container_stop_cmd_list))
-                output = subprocess.Popen(
+                process = subprocess.Popen(
                     docker_container_stop_cmd_str,
                     shell=True,
-                    stdout=subprocess.PIPE)
-                _, _ = output.communicate()
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+                _, _ = process.communicate()
                 # rechecking for container id after stopping them to ensure no errors
-                output = subprocess.Popen(
+                process = subprocess.Popen(
                     running_docker_container_cmd_str,
                     shell=True,
-                    stdout=subprocess.PIPE)
-                out_list_cmd, _ = output.communicate()
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+                out_list_cmd, err_list_cmd = process.communicate()
+                if process.returncode > 0:
+                    raise EnvironmentExecutionException(
+                        __("error",
+                           "controller.environment.driver.docker.stop_remove_containers_by_term",
+                           str(err_list_cmd)))
                 if out_list_cmd:
                     docker_container_remove_cmd_list = list(self.prefix)
                     if force:
@@ -577,12 +637,18 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                                                            [")"]
                     docker_container_remove_cmd_str = str(
                         " ".join(docker_container_remove_cmd_list))
-                    output = subprocess.Popen(
+                    process = subprocess.Popen(
                         docker_container_remove_cmd_str,
                         shell=True,
-                        stdout=subprocess.PIPE)
-                    _, _ = output.communicate()
-        except Exception as e:
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE)
+                    _, err_list_cmd = process.communicate()
+                    if process.returncode > 0:
+                        raise EnvironmentExecutionException(
+                            __("error",
+                               "controller.environment.driver.docker.stop_remove_containers_by_term",
+                               str(err_list_cmd)))
+        except subprocess.CalledProcessError as e:
             raise EnvironmentExecutionException(
                 __("error",
                    "controller.environment.driver.docker.stop_remove_containers_by_term",
@@ -605,22 +671,25 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
         Raises
         ------
-        EnvironmentDoesNotExist
-            no python requirements found for environment
         EnvironmentRequirementsCreateException
             error in running pipreqs command to extract python requirements
         """
         try:
             requirements_filepath = os.path.join(self.filepath,
                                                  "datmorequirements.txt")
-            subprocess.check_output(
+            process = subprocess.Popen(
                 [
                     execpath, self.filepath, "--force", "--savepath",
                     requirements_filepath
                 ],
                 cwd=self.filepath,
-                stderr=subprocess.STDOUT).strip()
-
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode > 0:
+                raise EnvironmentRequirementsCreateException(
+                    __("error", "controller.environment.requirements.create",
+                       str(stderr)))
         except Exception as e:
             raise EnvironmentRequirementsCreateException(
                 __("error", "controller.environment.requirements.create",
