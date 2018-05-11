@@ -163,7 +163,9 @@ When running `datmo init`, Datmo adds a hidden `.datmo` directory which keeps tr
 
 
 #### Code
-Source code should be managed with current source control management tools. Datmo currently is built on top of git, but could theoretically be ported to work with any similar SCM protocol.
+Source code should be managed with current source control management tools. Datmo currently is built on top of git, but could theoretically be ported to work with any similar SCM protocol. While datmo will track all of your local changes and experiments on your machine, you will still need to push changes to a remote repository for them to be continually synced with a manager of choice (like GitHub).
+
+For sharing Datmo entities directly with others (beta), see [this section](#sharing-beta) of the README below.
 
 #### Environment
 Dependencies should be encoded using standard best practices for your source code. Python packages should be enumerated in a `requirements.txt` file, while system level dependencies (typically found during GPU workflows) should be written into a `Dockerfile`. 
@@ -172,10 +174,10 @@ Dependencies should be encoded using standard best practices for your source cod
 Variables used in your experiment that are necessary for reproducibility. These typically include algorithm hyperparameter values, train/test data split, etc.
 
 #### Files
-Large files that cannot be stored in source code (ie: untrackable in git due to size) should be stored separately. For data sources that are not discretizable into files (or are stored elsewhere), it is advised to write out the location/directory of these files as an entry in the `stats` property. 
+Large files that cannot be stored in source code (ie: untrackable in git due to size) should be stored separately. For data sources that are not discretizable into files (or are stored elsewhere), it is advised to write out the location/directory of these data sources/files as an entry in the `stats` property. 
 
 #### Stats
-Model metrics are written to the `stats` property of a snapshot. Datmo does not enforce any type of formal metric definition, the user is free to pass any key-value dictionary during snapshot creation. This enables users to abide by their own metric logging convention while simultaneously being able to track cross-algorithm or cross-framework model metrics in one place.
+Model metrics are written to the `stats` property of a snapshot. Datmo does not enforce any type of formal metric definition, the user is free to pass any key-value dictionary during snapshot creation. This enables users to abide by their own metric logging convention while having the flexibility of being able to natively compare metrics across algorithms or frameworks.
 
 
 ## Documentation
