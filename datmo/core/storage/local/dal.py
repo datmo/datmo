@@ -21,21 +21,21 @@ class LocalDAL():
 
     Parameters
     ----------
-    driver : DALDriver
+    driver : datmo.core.storage.driver.DALDriver
         backend driver to use to store entities
 
     Attributes
     ----------
-    driver : DALDriver
+    driver : datmo.core.storage.driver.DALDriver
         DAL driver which determines the backend used for entity storage
-    model
-    code
-    environment
-    file_collection
-    session
-    task
-    snapshot
-    user
+    model : datmo.core.entity.model.Model
+    code : EntityMethodsCRUD
+    environment : EntityMethodsCRUD
+    file_collection : EntityMethodsCRUD
+    session : EntityMethodsCRUD
+    task : EntityMethodsCRUD
+    snapshot : EntityMethodsCRUD
+    user : EntityMethodsCRUD
 
     """
 

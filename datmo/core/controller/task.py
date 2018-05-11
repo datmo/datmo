@@ -22,9 +22,9 @@ class TaskController(BaseController):
 
     Attributes
     ----------
-    environment : EnvironmentController
+    environment : datmo.core.controller.environment.environment.EnvironmentController
         used to create environment if new definition file
-    snapshot : SnapshotController
+    snapshot : datmo.core.controller.snapshot.SnapshotController
         used to create snapshots before and after tasks
 
     Methods
@@ -39,7 +39,6 @@ class TaskController(BaseController):
         lists all tasks within the project given filters
     delete(id)
         deletes the specified task from the project
-
     """
 
     def __init__(self, home):

@@ -14,24 +14,20 @@ class BaseController(object):
     ----------
     home : str
         home path of the project
-    dal_driver : DALDriver
-        an instance of a DALDriver to use while accessing the DAL
 
     Attributes
     ----------
     home : str
         Filepath for the location of the project
-    dal_driver : DALDriver object
-        This is an instance of a storage DAL driver
     config : JSONStore
         This is the set of configurations used to create a project
-    dal
-    model
-    current_session
-    code_driver
-    file_driver
-    environment_driver
-    is_initialized
+    dal : datmo.core.storage.DAL
+    model : datmo.core.entity.model.Model
+    current_session : datmo.core.entity.session.Session
+    code_driver : datmo.core.controller.code.driver.CodeDriver
+    file_driver : datmo.core.controller.file.driver.FileDriver
+    environment_driver : datmo.core.controller.environment.driver.EnvironmentDriver
+    is_initialized : bool
 
     Methods
     -------
@@ -65,24 +61,12 @@ class BaseController(object):
     # Currently pass dal_driver down from controller to controller to ensure syncing dals
     # TODO: To fix dal from different controllers so they sync within one session; they do NOT currently
     def dal(self):
-        """Property that is maintained in memory
-
-        Returns
-        -------
-        DAL
-        """
         if self._dal == None:
             self._dal = self.dal_instantiate()
         return self._dal
 
     @property
     def model(self):
-        """Property that is maintained in memory
-
-        Returns
-        -------
-        Model
-        """
         if self._model == None:
             models = self.dal.model.query({})
             self._model = models[0] if models else None
@@ -90,12 +74,6 @@ class BaseController(object):
 
     @property
     def current_session(self):
-        """Property that is maintained in memory
-
-        Returns
-        -------
-        Session
-        """
         if not self.model:
             raise DatmoModelNotInitializedException(
                 __("error", "controller.base.current_session"))
@@ -106,12 +84,6 @@ class BaseController(object):
 
     @property
     def code_driver(self):
-        """Property that is maintained in memory
-
-        Returns
-        -------
-        CodeDriver
-        """
         if self._code_driver == None:
             module_details = self.config_loader("controller.code.driver")
             self._code_driver = module_details["constructor"](
@@ -120,12 +92,6 @@ class BaseController(object):
 
     @property
     def file_driver(self):
-        """Property that is maintained in memory
-
-        Returns
-        -------
-        FileDriver
-        """
         if self._file_driver == None:
             module_details = self.config_loader("controller.file.driver")
             self._file_driver = module_details["constructor"](
@@ -134,12 +100,6 @@ class BaseController(object):
 
     @property
     def environment_driver(self):
-        """Property that is maintained in memory
-
-        Returns
-        -------
-        EnvironmentDriver
-        """
         if self._environment_driver == None:
             module_details = self.config_loader(
                 "controller.environment.driver")
@@ -149,13 +109,6 @@ class BaseController(object):
 
     @property
     def is_initialized(self):
-        """Property that is maintained in memory
-
-        Returns
-        -------
-        bool
-            True if the project is property initialized else False
-        """
         if not self._is_initialized:
             if self.code_driver.is_initialized and \
                 self.environment_driver.is_initialized and \

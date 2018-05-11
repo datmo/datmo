@@ -23,9 +23,9 @@ class SnapshotController(BaseController):
 
     Attributes
     ----------
-    code : CodeController
-    file_collection : FileCollectionController
-    environment : EnvironmentController
+    code : datmo.core.controller.code.code.CodeController
+    file_collection : datmo.core.controller.file.file_collection.FileCollectionController
+    environment : datmo.core.controller.environment.environment.EnvironmentController
 
     Methods
     -------
@@ -138,8 +138,8 @@ class SnapshotController(BaseController):
 
         Returns
         -------
-        Snapshot
-            Snapshot object as specified in datmo.core.entity.snapshot
+        datmo.core.entity.snapshot.Snapshot
+            snapshot object with all relevant parameters
 
         Raises
         ------
@@ -223,8 +223,8 @@ class SnapshotController(BaseController):
 
         Returns
         -------
-        Snapshot
-            Snapshot object as specified in datmo.core.entity.snapshot
+        datmo.core.entity.snapshot.Snapshot
+            snapshot object with all relevant parameters
 
         Raises
         ------
