@@ -6,7 +6,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import shutil
 import tempfile
 import platform
 from io import TextIOWrapper
@@ -261,24 +260,24 @@ class TestLocalFileManager():
 
     def test_create_collection(self):
         self.local_file_driver.init()
+        collections_path = os.path.join(self.local_file_driver.filepath,
+                                        ".datmo", "collections")
 
         # Test empty file collection
         filehash_empty = self.local_file_driver. \
             create_collection([])
-        collection_path_empty = os.path.join(self.local_file_driver.filepath,
-                                             ".datmo", "collections",
-                                             filehash_empty)
+        collection_path_empty = os.path.join(collections_path, filehash_empty)
 
         assert os.path.isdir(collection_path_empty)
+        assert len(os.listdir(collections_path)) == 1
 
         # Test creating another empty file collection (should not fail)
         filehash_empty = self.local_file_driver. \
             create_collection([])
-        collection_path_empty = os.path.join(self.local_file_driver.filepath,
-                                             ".datmo", "collections",
-                                             filehash_empty)
+        collection_path_empty = os.path.join(collections_path, filehash_empty)
 
         assert os.path.isdir(collection_path_empty)
+        assert len(os.listdir(collections_path)) == 1
         self.local_file_driver.delete_collection(filehash_empty)
 
         # Create test directories to move
@@ -291,10 +290,10 @@ class TestLocalFileManager():
         filepath1 = os.path.join(self.local_file_driver.filepath, "filepath1")
         filehash = self.local_file_driver.\
             create_collection([dirpath1, dirpath2, filepath1])
-        collection_path = os.path.join(self.local_file_driver.filepath,
-                                       ".datmo", "collections", filehash)
+        collection_path = os.path.join(collections_path, filehash)
 
         assert os.path.isdir(collection_path)
+        assert len(os.listdir(collections_path)) == 1
         assert os.path.isdir(os.path.join(collection_path,
                                        "dirpath1")) and \
                (oct(os.stat(os.path.join(collection_path,

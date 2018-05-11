@@ -232,6 +232,7 @@ class LocalFileDriver(FileDriver):
         collection_path = os.path.join(self.filepath, ".datmo", "collections",
                                        filehash)
         if os.path.isdir(collection_path):
+            shutil.rmtree(temp_collection_path)
             return filehash
             # raise FileStructureException("exception.file.create_collection", {
             #     "exception": "File collection with id already exists."
