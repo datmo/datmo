@@ -24,4 +24,4 @@ $ pip install datmo
 
 | feature  | filename(s) | Instructions |
 | ------------- |:-------------:| :-----|
-| Create Snapshot | `snapshot_create_iris_sklearn.py`, <br> `snapshot_create_iris_sklearn.sh` | (1) Read `snapshot_create_iris_sklearn.py` <br> (2) Run the commands in `snapshot_create_iris_sklearn.sh`in order |
+| Create Snapshot | `snapshot_create_iris_sklearn.py`, <br> `snapshot_create_iris_sklearn.sh` | (1) Read `snapshot_create_iris_sklearn.py` <br> (2) Run the command `bash snapshot_create_iris_sklearn.sh` |

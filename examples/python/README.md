@@ -20,17 +20,18 @@ $ pip install datmo
 3. Copy/save example files within project folder (if directory, copy the contents of the directory)
 
         $ cp /path/to/SCRIPT_NAME.py .
+        
+   If the filename for the example is a directory then you can run the following
+   
         $ cp /path/to/DIRECTORY/* .
         
-4. Run 
-
-        $ python SCRIPT_NAME.py
+4. Follow the instructions for a given example in the table below
 
 
 ### Examples
 
 | feature  | filename(s) | Instructions |
 | ------------- |:-------------:| -----|
-| Create Snapshot | `snapshot_create_iris_sklearn.py`| (1) Run `$ python snapshot_create_iris_sklearn.py` |
-| Run standard task | `/task_run_iris_sklearn/`: `basic_task.py`,`train_model_1.py`| (1) Read `'train_model_1.py` <br> (2) Run `$ python basic_task.py` |
-| Run containerized tasks (autogenerate python env) | `/task_run_iris_sklearn/:` `task_compare.py`, `train_model_1.py`, `train_model_2.py` | (1) Read `train_model_1.py` and `train_model_2.py` <br> (2) Run `$ python task_compare.py` |
+| Create Snapshot | `snapshot_create_iris_sklearn.py`| (1) Run `$ python snapshot_create_iris_sklearn.py` <br> (2) See snapshots created with `$ datmo snapshot ls` |
+| Run a single task | `/task_run_iris_sklearn_basic/`: `basic_task.py`,`train_model_1.py`| (1) Read `'train_model_1.py` <br> (2) Run `$ python basic_task.py` <br> (3) See task results with `$ datmo task ls`|
+| Run multiple tasks (autogenerate python env) | `/task_run_iris_sklearn_compare/:` `task_compare.py`, `train_model_1.py`, `train_model_2.py` | (1) Read `train_model_1.py` and `train_model_2.py` <br> (2) Run `$ python task_compare.py` <br> (3) See task results with `$ datmo task ls` <br> (4) See snapshots created with `$ datmo snapshot ls`|

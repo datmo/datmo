@@ -1,5 +1,4 @@
 import datmo
-
 """
 WHAT IT DOES: 
     Instantiates a new task object, and runs the task inside of local container.
@@ -19,8 +18,8 @@ INSTRUCTIONS
 
 task = datmo.task.run(command="python train_model_1.py")
 
-print(task.files())
-print(task.results)
+print("files: ", task.files())
+print("results: ", task.results)
 
 # create a snapshot from the task id directly
-snapshot = datmo.snapshot.create_from_task(message="my great snapshot", task_id=task.id)
+snapshot = datmo.snapshot.create(message="my great snapshot", task_id=task.id)

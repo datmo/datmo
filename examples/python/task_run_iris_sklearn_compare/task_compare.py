@@ -1,5 +1,4 @@
 import datmo
-
 """
 WHAT IT DOES: 
 	Instantiates new task objects, and runs tasks inside of local container.
@@ -22,10 +21,12 @@ task_2 = datmo.task.run(command="python train_model_2.py")
 
 # create a single snapshot from the task id directly, depending on which model was more accurate
 if task_1.results['test accuracy'] > task_2.results['test accuracy']:
+    print("found test accuracy of model 1 to be best")
     print("creating a snapshot with model 1")
-    snapshot = datmo.snapshot.create_from_task(
+    snapshot = datmo.snapshot.create(
         message="my great snapshot", task_id=task_1.id)
 else:
+    print("found test accuracy of model 2 to be best")
     print("creating a snapshot with model 2")
-    snapshot = datmo.snapshot.create_from_task(
+    snapshot = datmo.snapshot.create(
         message="my great snapshot", task_id=task_2.id)

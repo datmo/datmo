@@ -19,14 +19,9 @@ $ pip install datmo
 
 3. Copy/save example files within project folder (if directory, copy the contents of the directory)
 
-        $ cp /path/to/SCRIPT_NAME.ipynb .
         $ cp /path/to/DIRECTORY/* .
         
-4. Run 
-
-        $ jupyter notebook SCRIPT_NAME.ipynb
-
-5. Run cells in order
+4. Follow the instructions for a given example in the table below
 
 
 ### Examples
