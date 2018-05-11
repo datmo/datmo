@@ -1,4 +1,4 @@
-# Jupyter notebook examples
+# CLI + Jupyter Notebook Flow Examples
 
 In order to run the examples, make sure that you have datmo properly installed with the latest 
 stable or development version. You can install it with the following command:

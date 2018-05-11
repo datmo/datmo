@@ -1,4 +1,4 @@
-# Python script examples
+# CLI + Python Flow Examples
 
 In order to run the examples, make sure that you have datmo properly installed with the latest 
 stable or development version. You can install it with the following command:
@@ -34,4 +34,4 @@ $ pip install datmo
 | ------------- |:-------------:| -----|
 | Create Snapshot | `snapshot_create_iris_sklearn.py`| (1) Run `$ python snapshot_create_iris_sklearn.py` <br> (2) See snapshots created with `$ datmo snapshot ls` |
 | Run a single task | `/task_run_iris_sklearn_basic/`: `basic_task.py`,`train_model_1.py`| (1) Read `'train_model_1.py` <br> (2) Run `$ python basic_task.py` <br> (3) See task results with `$ datmo task ls`|
-| Run multiple tasks (autogenerate python env) | `/task_run_iris_sklearn_compare/:` `task_compare.py`, `train_model_1.py`, `train_model_2.py` | (1) Read `train_model_1.py` and `train_model_2.py` <br> (2) Run `$ python task_compare.py` <br> (3) See task results with `$ datmo task ls` <br> (4) See snapshots created with `$ datmo snapshot ls`|
+| Run multiple tasks and compare | `/task_run_iris_sklearn_compare/:` `task_compare.py`, `train_model_1.py`, `train_model_2.py` | (1) Read `train_model_1.py` and `train_model_2.py` <br> (2) Run `$ python task_compare.py` <br> (3) See task results with `$ datmo task ls` <br> (4) See snapshots created with `$ datmo snapshot ls`|

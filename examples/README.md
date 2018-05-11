@@ -8,14 +8,14 @@ $ pip install datmo
 ```
 
 ## Using the Examples
-### CLI automated flow
-See [CLI examples](/examples/cli/README.md) for instructions
+### CLI flow
+See [CLI flow examples](/examples/cli) for instructions
 
 ### CLI + Python flow
-See [Python examples](/examples/python/README.md) for instructions
+See [CLI + Python flow examples](/examples/python) for instructions
 
 ### CLI + Jupyter Notebook flow
-See [Jupyter Notebook examples](/examples/jupyter_notebook/README.md) for instructions
+See [CLI + Jupyter Notebook flow examples](/examples/jupyter_notebook) for instructions
 
 
 ## Examples
@@ -25,7 +25,7 @@ navigate to the specific flow folder to find the exact instructions for
 each example. 
 
 #### Creating a Snapshot 
-* [CLI automated flow](/examples/cli/)
+* [CLI flow](/examples/cli/)
     * snapshot_create_iris_sklearn
 * [CLI + Python flow](/examples/python)
     * snapshot_create_iris_sklearn

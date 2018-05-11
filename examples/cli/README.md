@@ -1,4 +1,4 @@
-# CLI Examples
+# CLI Flow Examples
 
 In order to run the examples, make sure that you have datmo properly installed with the latest 
 stable or development version. You can install it with the following command:
@@ -24,4 +24,4 @@ $ pip install datmo
 
 | feature  | filename(s) | Instructions |
 | ------------- |:-------------:| :-----|
-| Create Snapshot | `snapshot_create_iris_sklearn.py`, <br> `snapshot_create_iris_sklearn.sh` | (1) Read `snapshot_create_iris_sklearn.py` <br> (2) Run the command `bash snapshot_create_iris_sklearn.sh` |
+| Create Snapshot | `snapshot_create_iris_sklearn.py`, <br> `snapshot_create_iris_sklearn.sh` | (1) Read `snapshot_create_iris_sklearn.py` <br> (2) Run the command `bash snapshot_create_iris_sklearn.sh` or run all of the commands one-by-one |
