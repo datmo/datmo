@@ -161,9 +161,12 @@ In order to run the above code you can do the following.
         $ datmo snapshot ls
 
 ## Sharing (Workaround)
-Although datmo is made to track your changes locally, you can share a project with your
-friends by doing the following (this is shown only for git, if you are using another git 
-tracking tool, you can likely do something similar). NOTE: If your files are too big or 
+**DISCLAIMER:** This is not currently an officially supported option and only works for 
+file-based storage layers (as set in the configuration) as a workaround to share datmo projects. 
+
+Although datmo is made to track changes locally, you can share a project by pushing to a remote 
+server by doing the following (this is shown only for git, if you are using another SCM 
+tracking tool, you can likely do something similar). If your files are too big or 
 cannot be added to SCM then this may not work for you. 
 
 The below has been tested on BASH terminals only. If you are using another terminal, you 
