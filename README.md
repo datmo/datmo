@@ -209,8 +209,9 @@ or you can run the following command
 ```
 $ datmo cleanup
 ```
-Once you initialize you project, you can reference the datmo project by adding in the following into your README file
-which helps someone pulling the code to know how to setup and run datmo commands.
+### Optional: Mark your GitHub repository as a Datmo project
+Once you initialize your project, you can denote your repository as a datmo project by adding the following badge to your README file.
+This helps someone pulling the code to know how to setup and run Datmo commands, as the badge will link them to usage instructions here.
 
 #### Markdown
 ```markdown
