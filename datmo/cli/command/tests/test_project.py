@@ -160,3 +160,29 @@ class TestProject():
         except UnrecognizedCLIArgument:
             exception_thrown = True
         assert exception_thrown
+
+    def test_cleanup(self):
+        test_name = "foobar"
+        test_description = "test model"
+        self.project.parse(
+            ["init", "--name", test_name, "--description", test_description])
+        _ = self.project.execute()
+
+        self.project.parse(["cleanup"])
+
+        @self.project.cli_helper.input("y\n")
+        def dummy(self):
+            return self.project.execute()
+
+        result = dummy(self)
+        assert not os.path.exists(os.path.join(self.temp_dir, '.datmo'))
+        assert isinstance(result, bool)
+        assert result
+
+    def test_cleanup_invalid_arg(self):
+        exception_thrown = False
+        try:
+            self.project.parse(["cleanup", "--foobar"])
+        except UnrecognizedCLIArgument:
+            exception_thrown = True
+        assert exception_thrown

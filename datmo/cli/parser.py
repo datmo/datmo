@@ -16,6 +16,8 @@ def get_datmo_parser():
 
     status_parser = subparsers.add_parser("status", help="project status")
 
+    cleanup_parser = subparsers.add_parser("cleanup", help="remove project")
+
     # Session
     session_parser = subparsers.add_parser("session", help="session module")
     session_subcommand_parsers = session_parser.add_subparsers(

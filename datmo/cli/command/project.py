@@ -138,3 +138,35 @@ class ProjectCommand(BaseCommand):
             self.cli_helper.echo("no unstaged tasks")
 
         return status_dict, latest_snapshot, ascending_unstaged_tasks
+
+    def cleanup(self):
+        # Prompt user to ensure they would like to remove all datmo information
+        response = self.cli_helper.prompt_bool(
+            __("prompt", "cli.project.cleanup.confirm"))
+
+        # Cleanup datmo project if user specifies
+        if response:
+            self.cli_helper.echo(
+                __(
+                    "info", "cli.project.cleanup", {
+                        "name": self.project_controller.model.name,
+                        "path": self.project_controller.home
+                    }))
+            try:
+                success = self.project_controller.cleanup()
+                if success:
+                    self.cli_helper.echo(
+                        __(
+                            "info", "cli.project.cleanup.success", {
+                                "name": self.project_controller.model.name,
+                                "path": self.project_controller.home
+                            }))
+                return success
+            except Exception:
+                self.cli_helper.echo(
+                    __(
+                        "info", "cli.project.cleanup.failure", {
+                            "name": self.project_controller.model.name,
+                            "path": self.project_controller.home
+                        }))
+        return False

@@ -41,7 +41,9 @@ def main():
         elif command_name == "status":
             command_name = "project"
             sys.argv[1] = "status"
-
+        elif command_name == "cleanup":
+            command_name = "project"
+            sys.argv[1] = "cleanup"
         command_class = cli_helper.get_command_class(command_name)
     else:
         command_class = BaseCommand

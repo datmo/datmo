@@ -51,6 +51,7 @@ class Helper():
             pass
 
     def prompt_bool(self, msg):
+        msg = msg + ": "
         val = input(msg).lower()
         return val in [
             'true', '1', 't', 'y', 'yes', 'yeah', 'yup', 'certainly', 'uh-huh'
@@ -99,5 +100,6 @@ class Helper():
 
     def get_command_choices(self):
         return [
-            "init", "version", "--version", "-v", "status", "snapshot", "task"
+            "init", "version", "--version", "-v", "status", "cleanup",
+            "snapshot", "task"
         ]

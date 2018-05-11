@@ -18,6 +18,12 @@ MESSAGES = {
             "Pulling information from the Datmo project url and adding it to local...",
         "cli.project.update":
             "Update Datmo project",
+        "cli.project.cleanup":
+            "Cleaning up project {name} @ ({path}) ",
+        "cli.project.cleanup.success":
+            "Removed project {name} @ ({path}) ",
+        "cli.project.cleanup.failure":
+            "Failed to remove project {name} @ ({path}) ",
         "cli.general.abort":
             u'\u274c' + "  Your changes have been aborted!",
         "cli.general.success":
@@ -282,10 +288,16 @@ MESSAGES = {
     "trace": {},
     "fatal": {},
     "prompt": {
-        "cli.project.init.name": "Enter name for the project",
-        "cli.project.init.description": "Enter description for the project",
-        "cli.project.init.git": "Enter remote git url for the Datmo project",
-        "cli.general.confirm": "Is it okay?",
+        "cli.project.init.name":
+            "Enter name for the project",
+        "cli.project.init.description":
+            "Enter description for the project",
+        "cli.project.init.git":
+            "Enter remote git url for the Datmo project",
+        "cli.general.confirm":
+            "Is it okay?",
+        "cli.project.cleanup.confirm":
+            "Are you sure you want to delete all datmo project information? [yN]",
     },
     "argparser": {
         "cli.datmo.usage":
