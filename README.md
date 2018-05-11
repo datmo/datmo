@@ -13,14 +13,15 @@
 * [Requirements](#requirements)
 * [Installation](#installation)
 * [Examples](#examples)
-* [Project Templates](#templates)
 * [Documentation](#documentation)
+* [Sharing](#sharing)
+* [Transform a Current Project](#transform)
 * [Contributing to Datmo](/CONTRIBUTING.md)
 
 ## Introduction
 Tracking experiments in a unified manner for data science, machine learning, and artificial intelligence projects is difficult for many reasons, with one of the largest being the lack of interoperability between frameworks, languages, environments, and best practices.
 
-Datmo's open source tool helps to alleviate some of the largest pain points of dealing with model-based projects by leveraging strong foundational technologies and enforcing a mildly opinionated set of conventions in a framework, language, and platform-agnostic CLI, with additional SDKs for more granular control and workflow integration.
+Datmo's open source tool helps to alleviate some of the largest pain points of dealing with model-based projects by leveraging strong foundational technologies and enforcing a set of conventions in a framework, language, and platform-agnostic CLI, with additional SDKs for more granular control and workflow integration.
 
 ## Requirements
 
@@ -33,7 +34,7 @@ Datmo's open source tool helps to alleviate some of the largest pain points of d
 pip install datmo
 ```
 
-## Project Examples
+## Examples
 In the `/examples` folder we have a few scripts you can run to get a feel for datmo. You can 
 navigate to [Examples](/examples/README.md) to learn more about how you can run the examples 
 and get started with your own projects.
@@ -142,12 +143,7 @@ In order to run the above code you can do the following.
 5. Congrats! You just created your first snapshot :) Now run an ls command for snapshots to see your first snapshot.
 
         $ datmo snapshot ls
-
-## Project Templates
-In the `/templates` folder we have templates for those who will be starting their projects from scratch. 
-
-Each folder includes a set of files that are not required by datmo but that augment your project and may be useful
-as you start new projects. 
+        
 
 ## How it works
 ### Project Structure
@@ -181,7 +177,7 @@ Model metrics are written to the `stats` property of a snapshot. Datmo does not 
 
 
 ## Documentation
-The full docs are hosted [here](https://datmo.readthedocs.io/en/latest/index.html). If you wish to contribute to the docs (source code located here in `/docs`), follow the procedure outlined in `CONTRIBUTORS.md`.
+The full docs are hosted [here](https://datmo.readthedocs.io/en/latest/index.html). If you wish to contribute to the docs (source code located here in `/docs`), follow the procedure outlined in `CONTRIBUTING.md`.
 
 ## Sharing (Beta)
 Although datmo is made to track your changes locally, you can share a project with your
@@ -203,8 +199,18 @@ $ git add .
 $ git commit -m "removed .datmo from tracking"
 ```
 
-## Getting Started
-Once you initialize you project, you can reference the datmo project by adding in the following into your README file.
+## Transform a Current Project
+You can transform your existing repository into a datmo enabled repository with the following command
+```
+$ datmo init
+```
+If at any point you would like to remove datmo you can just remove the `.datmo` directory from your repository
+or you can run the following command
+```
+$ datmo cleanup
+```
+Once you initialize you project, you can reference the datmo project by adding in the following into your README file
+which helps someone pulling the code to know how to setup and run datmo commands.
 
 #### Markdown
 ```markdown
