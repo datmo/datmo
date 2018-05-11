@@ -181,3 +181,7 @@ class ValidationFailed(Exception):
 
 class ValidationSchemaMissing(Exception):
     pass
+
+
+class GPUSupportNotEnabled(Exception):
+    pass

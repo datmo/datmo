@@ -801,4 +801,17 @@ class TestDockerEnv():
     def test_gpu_enabled(self):
         if self.docker_environment_manager.gpu_enabled():
             print("GPU not available")
-            pass
+        else:
+            throw = False
+            try:
+                return_code, run_id, logs = self.docker_environment_manager.run(
+                    "gpu_test1",
+                    run_options={
+                        "command": ["sh", "-c", "echo yo"],
+                        "name": str(uuid.uuid1()),
+                        "detach": True,
+                        "gpu": True
+                    })
+            except Exception:
+                throw = True
+            assert throw

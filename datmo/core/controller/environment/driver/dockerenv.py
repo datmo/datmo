@@ -16,7 +16,7 @@ from datmo.core.util.exceptions import (
     PathDoesNotExist, EnvironmentDoesNotExist, EnvironmentInitFailed,
     EnvironmentExecutionException, FileAlreadyExistsException,
     EnvironmentRequirementsCreateException, EnvironmentImageNotFound,
-    EnvironmentContainerNotFound)
+    EnvironmentContainerNotFound, GPUSupportNotEnabled)
 from datmo.core.controller.environment.driver import EnvironmentDriver
 
 
@@ -153,7 +153,9 @@ class DockerEnvironmentDriver(EnvironmentDriver):
     # running daemon needed
     def run(self, name, options, log_filepath):
         if "gpu" in options:
-            if options["gpu"] == True:
+            if not self.gpu_enabled():
+                raise GPUSupportNotEnabled('nvidia')
+            if options["gpu"] == True and self.gpu_enabled():
                 options.runtime = 'nvidia'
             options.pop("gpu", None)
 
