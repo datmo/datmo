@@ -1,4 +1,4 @@
-# Datmo
+# ![Datmo Logo](images/datmo-logo.png)
 [![PyPI version](https://badge.fury.io/py/datmo.svg)](https://badge.fury.io/py/datmo)
 [![Build Status](https://travis-ci.org/datmo/datmo.svg?branch=master)](https://travis-ci.org/datmo/datmo)
 [![Build status](https://ci.appveyor.com/api/projects/status/5302d8a23qr4ui4y/branch/master?svg=true)](https://ci.appveyor.com/project/asampat3090/datmo/branch/master)
@@ -6,29 +6,22 @@
 [![Documentation Status](https://readthedocs.org/projects/datmo/badge/?version=latest)](http://datmo.readthedocs.io/en/latest/?badge=latest)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/853b3d01b4424ac9aa72f9d5fead83b3)](https://www.codacy.com/app/datmo/datmo)
 
-Open source model tracking tool for developers. Use `datmo init` to turn any repository into a supercharged experiment tracking 
-powerhouse.
+**Datmo** is an open source model tracking and reproducibility tool for developers. Use `datmo init` to turn any repository into a trackable task record with reusable environments and metrics logging.
 
 ### Table of Contents
 * [Introduction](#introduction)
 * [Requirements](#requirements)
 * [Installation](#installation)
+* [Examples](#examples)
+* [Project Templates](#templates)
+* [Documentation](#documentation)
 * [Contributing to Datmo](/CONTRIBUTING.md)
-* [Testing](#testing)
 
 ## Introduction
 
-As data scientists, machine learning engineers, and deep learning engineers, we faced a number of issues keeping track of our work and maintaining versions that could be put into production quicker. 
+Tracking experiments in a unified manner for data science, machine learning, and artificial intelligence projects is difficult for many reasons, with one of the largest being the lack of interoperability between frameworks, languages, environments, and best practices.
 
-In order to solve this challenge, we figured there were a few components we need to put together to make it work. 
-
-1) Source code should be managed with current source control management tools (of which git is the most popular currently) 
-2) Dependencies should be encoded in one place for your source code (e.g. requirements.txt in python and pre-built containers) 
-3) Large files that cannot be stored in source code like weights files, data files, etc should be stored separately
-4) Configurations and hyperparameters that define your experiments (e.g. data split, alpha, beta, etc)
-5) Performance metrics that evaluate your model (e.g. validation accuracy)
-
-We realized that we likely won't come up with the best solution on our own and thought it would make most sense to gather feedback from a community of like-minded individuals facing the same issue and develop an open protocol everyone can benefit from. 
+Datmo's open source tool helps to alleviate some of the largest pain points of dealing with model-based projects by leveraging strong foundational technologies and enforcing a mildly opinionated set of conventions in a framework, language, and platform-agnostic CLI, with additional SDKs for more granular/streamlined control. 
 
 ## Requirements
 
@@ -40,15 +33,6 @@ We realized that we likely won't come up with the best solution on our own and t
 ```
 pip install datmo
 ```
-
-## Project Structure
-Datmo adds `.datmo` directory which keeps track of all of the various entities into a repository to make it datmo-enabled. 
-
-## Project Templates
-In the `/templates` folder we have templates for those who will be starting their projects from scratch. 
-
-Each folder includes a set of files that are not required by datmo but that augment your project and may be useful
-as you start new projects. 
 
 ## Project Examples
 In the `/examples` folder we have a few scripts you can run to get a feel for datmo. You can 
@@ -159,6 +143,43 @@ In order to run the above code you can do the following.
 5. Congrats! You just created your first snapshot :) Now run an ls command for snapshots to see your first snapshot.
 
         $ datmo snapshot ls
+
+## Project Templates
+In the `/templates` folder we have templates for those who will be starting their projects from scratch. 
+
+Each folder includes a set of files that are not required by datmo but that augment your project and may be useful
+as you start new projects. 
+
+## How it works
+### Project Structure
+When running `datmo init`, Datmo adds a hidden `.datmo` directory which keeps track of all of the various entities at play. This is ncessary to render a repository datmo-enabled. 
+
+### Snapshots
+
+<p align="center">
+    The fundamental unit of record in the Datmo ecosystem is a Snapshot, which contains 5 first-class components.
+    <img width="460" height="300" src="">
+</p>
+
+
+#### Code
+Source code should be managed with current source control management tools. Datmo currently is built on top of git, but could theoretically be ported to work with any similar SCM protocol.
+
+#### Environment
+Dependencies should be encoded using standard best practices for your source code. Python packages should be enumerated in a `requirements.txt` file, while system level dependencies (typically found during GPU workflows) should be written into a `Dockerfile`. 
+
+#### Configuration
+Variables used in your experiment that are necessary for reproducibility. These typically include algorithm hyperparameter values, train/test data split, etc.
+
+#### Files
+Large files that cannot be stored in source code (ie: untrackable in git due to size) should be stored separately. For data sources that are not discretizable into files (or are stored elsewhere), it is advised to write out the location/directory of these files as an entry in the `stats` property. 
+
+#### Stats
+Model metrics are written to the `stats` property of a snapshot. Datmo does not enforce any type of formal metric definition, the user is free to pass any key-value dictionary during snapshot creation. This enables users to abide by their own metric logging convention while simultaneously being able to track cross-algorithm or cross-framework model metrics in one place.
+
+
+## Documentation
+The full docs are hosted [here](https://datmo.readthedocs.io/en/latest/index.html). If you wish to contribute to the docs (source code located here in `/docs`), follow the procedure outlined in `CONTRIBUTORS.md`.
 
 ## Sharing (Beta)
 Although datmo is made to track your changes locally, you can share a project with your
