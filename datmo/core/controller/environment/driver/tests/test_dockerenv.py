@@ -797,3 +797,8 @@ class TestDockerEnv():
         assert result and \
             os.path.isfile(output_dockerfile_path) and \
             "datmo" in open(output_dockerfile_path, "r").read()
+
+    def test_gpu_enabled(self):
+        if self.docker_environment_manager.gpu_enabled():
+            print("GPU not available")
+            pass

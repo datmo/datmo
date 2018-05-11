@@ -184,6 +184,41 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         return stop_and_remove_containers_result and \
                remove_image_result
 
+    def init(self):
+        # TODO: Fill in to start up Docker
+        try:
+            # Startup Docker
+            pass
+        except Exception as e:
+            raise EnvironmentExecutionException(
+                __("error", "controller.environment.driver.docker.init",
+                   str(e)))
+        return True
+
+    def gpu_enabled(self):
+        # test if this images works
+        # docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
+        process = subprocess.Popen(
+            [
+                "docker",
+                "run",
+                "--runtime=nvidia",
+                "--rm",
+                "nvidia/cuda",
+                "nvidia-smi",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        stderr = stderr.decode("utf-8")
+        if "Unknown runtime specified nvidia" in stderr:
+            return False
+        if "OCI runtime create failed" in stderr:
+            return False
+
+        # this may mean we're good to go.   Untested though.
+        return True
+
     # running daemon needed
     def get_tags_for_docker_repository(self, repo_name):
         # TODO: Use more common CLI command (e.g. curl instead of wget)
@@ -442,9 +477,10 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         docker_shell_cmd_list = list(self.prefix)
         docker_shell_cmd_list.append("run")
 
-        if name:
-            docker_shell_cmd_list.append("--name")
-            docker_shell_cmd_list.append(name)
+        try:
+            if name:
+                docker_shell_cmd_list.append("--name")
+                docker_shell_cmd_list.append(name)
 
             if detach:
                 docker_shell_cmd_list.append("-d")
@@ -475,8 +511,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             if return_code != 0:
                 raise EnvironmentExecutionException(
                     __("error",
-                        "controller.environment.driver.docker.run_container",
-                        str(docker_shell_cmd_list)))
+                       "controller.environment.driver.docker.run_container",
+                       str(docker_shell_cmd_list)))
             list_process_cmd = list(self.prefix)
             list_process_cmd.extend(["ps", "-q", "-l"])
             process = subprocess.Popen(
@@ -487,8 +523,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             if process.returncode > 0:
                 raise EnvironmentExecutionException(
                     __("error",
-                        "controller.environment.driver.docker.run_container",
-                        str(stderr)))
+                       "controller.environment.driver.docker.run_container",
+                       str(stderr)))
             container_id = stdout.decode().strip()
         except subprocess.CalledProcessError as e:
             raise EnvironmentExecutionException(
