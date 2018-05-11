@@ -14,8 +14,8 @@
 * [Installation](#installation)
 * [Examples](#examples)
 * [Documentation](#documentation)
-* [Sharing](#sharing)
 * [Transform a Current Project](#transform)
+* [Sharing](#sharing)
 * [Contributing to Datmo](/CONTRIBUTING.md)
 
 ## Introduction
@@ -179,26 +179,6 @@ Model metrics are written to the `stats` property of a snapshot. Datmo does not 
 ## Documentation
 The full docs are hosted [here](https://datmo.readthedocs.io/en/latest/index.html). If you wish to contribute to the docs (source code located here in `/docs`), follow the procedure outlined in `CONTRIBUTING.md`.
 
-## Sharing (Beta)
-Although datmo is made to track your changes locally, you can share a project with your
-friends by doing the following (this is shown only for git, if you are using another git 
-tracking tool, you can likely do something similar). NOTE: If your files are too big or 
-cannot be added to SCM then this may not work for you. 
-```
-$ git add -f .datmo/*
-$ git commit -m "my_message"
-$ git push 
-$ git push origin +refs/datmo/*:refs/datmo/*
-```
-The above will allow you to share datmo results and entities with yourself or others on 
-other machines. NOTE: you will have to remove .datmo/ from tracking to start using datmo
-on the other machine. To do that you can use the commands below
-```
-$ git rm -r --cached
-$ git add .
-$ git commit -m "removed .datmo from tracking"
-```
-
 ## Transform a Current Project
 You can transform your existing repository into a datmo enabled repository with the following command
 ```
@@ -222,3 +202,39 @@ This helps someone pulling the code to know how to setup and run Datmo commands,
 .. image:: https://github.com/datmo/datmo/blob/master/images/badge.svg
     :target: https://github.com/datmo/datmo
 ```
+
+## Sharing (Workaround)
+**DISCLAIMER:** This is not currently an officially supported option and only works for 
+file-based storage layers (as set in the configuration) as a workaround to share datmo projects. 
+
+Although datmo is made to track changes locally, you can share a project by pushing to a remote 
+server by doing the following (this is shown only for git, if you are using another SCM 
+tracking tool, you can likely do something similar). If your files are too big or 
+cannot be added to SCM then this may not work for you. 
+
+The below has been tested on BASH terminals only. If you are using another terminal, you 
+may run into some errors. 
+
+### Push to remote
+```
+$ git add -f .datmo/*  # add in .datmo to your scm
+$ git commit -m "adding .datmo to tracking"  # commit it to your scm
+$ git push  # push to remote
+$ git push origin +refs/datmo/*:refs/datmo/*  # push datmo refs to remote
+```
+The above will allow you to share datmo results and entities with yourself or others on 
+other machines. NOTE: you will have to remove .datmo/ from tracking to start using datmo
+on the other machine or another location. See the instructions below to see how to replicate
+it at another location
+
+### Pull from remote
+```
+$ git clone YOUR_REMOTE_URL
+$ cd YOUR_REPO 
+$ echo '.datmo/*' > .git/info/exclude  # include .datmo into your .git exclude
+$ git rm -r --cached .datmo  # remove cached versions of .datmo from scm
+$ git commit -m "removed .datmo from tracking"  # clean up your scm so datmo can work 
+$ git pull origin +refs/datmo/*:refs/datmo/*  # pull datmo refs from remote
+$ datmo init  # This enables datmo in the new location. If you enter blanks, no project information will be updated
+```
+If you are interested in sharing using the datmo protocol, you can visit [Datmo's website](https://datmo.com/product)

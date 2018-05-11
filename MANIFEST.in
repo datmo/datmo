@@ -1,6 +1,7 @@
 include datmo/core/controller/environment/driver/templates/baseDockerfile
 include datmo/core/controller/environment/driver/templates/python2Dockerfile
 include datmo/core/controller/environment/driver/templates/python3Dockerfile
+include datmo/core/util/validation/schemas.yml
 include datmo/VERSION
 prune examples
 prune docs
