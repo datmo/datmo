@@ -393,7 +393,8 @@ class SnapshotController(BaseController):
         """ Fills in snapshot config by having one of the following:
             1. config = JSON object
             2. config_filepath = some location where a json file exists
-            3. config_filename = just the file nam
+            3. config_filename = just the file name
+
         Parameters
         ----------
         incoming_dictionary : dict
@@ -416,12 +417,13 @@ class SnapshotController(BaseController):
                 incoming_dictionary['config_filepath'])
             create_dict['config'] = config_json_driver.to_dict()
         elif "config_filename" in incoming_dictionary:
-            config_filename = incoming_dictionary['config_filename'] \
-                if "config_filename" in incoming_dictionary else "config.json"
+            config_filename = incoming_dictionary['config_filename']
             create_dict['config'] = self._find_in_filecollection(
                 config_filename, create_dict['file_collection_id'])
         else:
-            create_dict['config'] = {}
+            config_filename = "config.json"
+            create_dict['config'] = self._find_in_filecollection(
+                config_filename, create_dict['file_collection_id'])
 
     def _stats_setup(self, incoming_dictionary, create_dict):
         """Fills in snapshot stats by having one of the following:
@@ -452,12 +454,13 @@ class SnapshotController(BaseController):
                 incoming_dictionary['stats_filepath'])
             create_dict['stats'] = stats_json_driver.to_dict()
         elif "stats_filename" in incoming_dictionary:
-            stats_filename = incoming_dictionary['stats_filename'] \
-                if "stats_filename" in incoming_dictionary else "stats.json"
+            stats_filename = incoming_dictionary['stats_filename']
             create_dict['stats'] = self._find_in_filecollection(
                 stats_filename, create_dict['file_collection_id'])
         else:
-            create_dict['stats'] = {}
+            stats_filename = "stats.json"
+            create_dict['stats'] = self._find_in_filecollection(
+                stats_filename, create_dict['file_collection_id'])
 
     def _find_in_filecollection(self, file_to_find, file_collection_id):
         """ Attempts to find a file within the file collection
