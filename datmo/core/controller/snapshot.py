@@ -394,6 +394,7 @@ class SnapshotController(BaseController):
             1. config = JSON object
             2. config_filepath = some location where a json file exists
             3. config_filename = just the file name
+
         Parameters
         ----------
         incoming_dictionary : dict
