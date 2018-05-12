@@ -1,10 +1,13 @@
 # ![Datmo Logo](images/datmo-logo.png)
 [![PyPI version](https://badge.fury.io/py/datmo.svg)](https://badge.fury.io/py/datmo)
-[![Build Status](https://travis-ci.org/datmo/datmo.svg?branch=master)](https://travis-ci.org/datmo/datmo)
-[![Build status](https://ci.appveyor.com/api/projects/status/5302d8a23qr4ui4y/branch/master?svg=true)](https://ci.appveyor.com/project/asampat3090/datmo/branch/master)
 [![Coverage Status](https://coveralls.io/repos/github/datmo/datmo/badge.svg?branch=master)](https://coveralls.io/github/datmo/datmo?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/datmo/badge/?version=latest)](http://datmo.readthedocs.io/en/latest/?badge=latest)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/853b3d01b4424ac9aa72f9d5fead83b3)](https://www.codacy.com/app/datmo/datmo)
+
+| OS | CI testing on `master` |
+|----|--------------------|
+| <img height="20" src="http://icons.iconarchive.com/icons/dakirby309/simply-styled/256/OS-Linux-icon.png"> | [![Linux](https://travis-ci.org/datmo/datmo.svg?branch=master)](https://travis-ci.org/datmo/datmo) |
+| <img height="20" src="http://icons.iconarchive.com/icons/dakirby309/windows-8-metro/128/Folders-OS-Windows-8-Metro-icon.png"> | [![Windows](https://ci.appveyor.com/api/projects/status/5302d8a23qr4ui4y/branch/master?svg=true)](https://ci.appveyor.com/project/asampat3090/datmo/branch/master) |
 
 **Datmo** is an open source model tracking and reproducibility tool for developers. Use `datmo init` to turn any repository into a trackable task record with reusable environments and metrics logging.
 

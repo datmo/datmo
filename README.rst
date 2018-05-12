@@ -1,8 +1,15 @@
 |Datmo Logo|
 ============
 
-|PyPI version| |Build Status| |Build status| |Coverage Status|
-|Documentation Status| |Codacy Badge|
+|PyPI version| |Coverage Status| |Documentation Status| |Codacy Badge|
+
++------+----------------------------+
+| OS   | CI testing on ``master``   |
++======+============================+
+|      | |Linux|                    |
++------+----------------------------+
+|      | |Windows|                  |
++------+----------------------------+
 
 **Datmo** is an open source model tracking and reproducibility tool for
 developers. Use ``datmo init`` to turn any repository into a trackable
@@ -101,7 +108,7 @@ leveraging Datmo.
 |                                              |       config=config,                         |
 |                                              |       stats=stats,                           |
 |                                              |   ) # extra line                             |
-+------------------------------------------------+--------------------------------------------+
++----------------------------------------------+----------------------------------------------+
 
 In order to run the above code you can do the following.
 
@@ -304,16 +311,17 @@ Pull from remote
 If you are interested in sharing using the datmo protocol, you can visit
 `Datmo's website <https://datmo.com/product>`__
 
-.. |Datmo Logo| image:: images/datmo-logo.png
+.. |Datmo Logo| image:: ../images/datmo-logo.png
 .. |PyPI version| image:: https://badge.fury.io/py/datmo.svg
    :target: https://badge.fury.io/py/datmo
-.. |Build Status| image:: https://travis-ci.org/datmo/datmo.svg?branch=master
-   :target: https://travis-ci.org/datmo/datmo
-.. |Build status| image:: https://ci.appveyor.com/api/projects/status/5302d8a23qr4ui4y/branch/master?svg=true
-   :target: https://ci.appveyor.com/project/asampat3090/datmo/branch/master
 .. |Coverage Status| image:: https://coveralls.io/repos/github/datmo/datmo/badge.svg?branch=master
    :target: https://coveralls.io/github/datmo/datmo?branch=master
 .. |Documentation Status| image:: https://readthedocs.org/projects/datmo/badge/?version=latest
    :target: http://datmo.readthedocs.io/en/latest/?badge=latest
 .. |Codacy Badge| image:: https://api.codacy.com/project/badge/Grade/853b3d01b4424ac9aa72f9d5fead83b3
    :target: https://www.codacy.com/app/datmo/datmo
+.. |Linux| image:: https://travis-ci.org/datmo/datmo.svg?branch=master
+   :target: https://travis-ci.org/datmo/datmo
+.. |Windows| image:: https://ci.appveyor.com/api/projects/status/5302d8a23qr4ui4y/branch/master?svg=true
+   :target: https://ci.appveyor.com/project/asampat3090/datmo/branch/master
+
