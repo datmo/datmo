@@ -6,8 +6,7 @@ from datmo.core.util.exceptions import ValidationFailed, ValidationSchemaMissing
 
 # http://docs.python-cerberus.org/en/stable/usage.html
 
-schema_yaml = open(
-    os.path.join(os.path.split(__file__)[0], "validation/schemas.yml"))
+schema_yaml = open(os.path.join(os.path.split(__file__)[0], "schemas.yml"))
 
 schemas = yaml.load(schema_yaml)
 

@@ -14,6 +14,7 @@ from datmo.core.entity.model import Model
 from datmo.core.entity.session import Session
 from datmo.core.util.exceptions import  \
     DatmoModelNotInitializedException, InvalidProjectPathException
+from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 
 class TestBaseController():
@@ -93,6 +94,7 @@ class TestBaseController():
         assert self.base.file_driver != None
         assert self.base.file_driver.filepath == self.base.home
 
+    @pytest_docker_environment_failed_instantiation
     def test_environment(self):
         assert self.base.environment_driver != None
         assert self.base.environment_driver.filepath == self.base.home

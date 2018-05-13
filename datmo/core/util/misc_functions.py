@@ -5,6 +5,7 @@ import re
 import hashlib
 import textwrap
 import datetime
+import pytest
 from io import open
 try:
     to_unicode = unicode
@@ -12,6 +13,7 @@ except NameError:
     to_unicode = str
 from glob import glob
 
+from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     PathDoesNotExist, MutuallyExclusiveArguments, RequiredArgumentMissing)
@@ -170,3 +172,15 @@ def parameterized(dec):
 def is_project_dir(path):
     return ".datmo" in os.listdir(path) and os.path.isdir(
         os.path.join(path, ".datmo"))
+
+
+def __helper():
+    try:
+        DockerEnvironmentDriver()
+        return False
+    except:
+        return True
+
+
+pytest_docker_environment_failed_instantiation = pytest.mark.skipif(
+    __helper(), reason="a running environment could not be instantiated")
