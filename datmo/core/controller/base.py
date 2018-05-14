@@ -1,6 +1,7 @@
 import os
 
 from datmo.core.util.i18n import get as __
+from datmo.core.util.logger import DatmoLogger
 from datmo.core.util import get_class_contructor
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import (InvalidProjectPathException,
@@ -47,6 +48,7 @@ class BaseController(object):
             raise InvalidProjectPathException(
                 __("error", "controller.base.__init__", home))
         self.config = JSONStore(os.path.join(self.home, ".datmo", ".config"))
+        self.logger = DatmoLogger.get_logger(__name__)
         # property caches and initial values
         self._dal = None
         self._model = None
@@ -111,10 +113,9 @@ class BaseController(object):
     def is_initialized(self):
         if not self._is_initialized:
             if self.code_driver.is_initialized and \
-                self.environment_driver.is_initialized and \
-                    self.file_driver.is_initialized:
-                if self.model:
-                    self._is_initialized = True
+                self.file_driver.is_initialized and \
+                 self.model:
+                self._is_initialized = True
         return self._is_initialized
 
     def dal_instantiate(self):

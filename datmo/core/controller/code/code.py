@@ -1,7 +1,7 @@
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
 from datmo.core.entity.code import Code
-from datmo.core.util.exceptions import PathDoesNotExist
+from datmo.core.util.exceptions import PathDoesNotExist, EnvironmentInitFailed
 
 
 class CodeController(BaseController):
@@ -24,7 +24,11 @@ class CodeController(BaseController):
     """
 
     def __init__(self, home):
-        super(CodeController, self).__init__(home)
+        try:
+            super(CodeController, self).__init__(home)
+        except EnvironmentInitFailed:
+            self.logger.warning(
+                __("warn", "controller.general.environment.failed"))
 
     def create(self, commit_id=None):
         """Create a Code object

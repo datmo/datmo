@@ -19,6 +19,7 @@ from datmo.core.util.exceptions import (
     SessionDoesNotExistException, RequiredArgumentMissing, TaskNotComplete,
     InvalidArgumentType, ProjectNotInitializedException,
     InvalidProjectPathException)
+from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 
 class TestSnapshotController():
@@ -300,6 +301,7 @@ class TestSnapshotController():
         assert snapshot_obj_6.config == {"foo": "bar"}
         assert snapshot_obj_6.stats == {"foo": "bar"}
 
+    @pytest_docker_environment_failed_instantiation
     def test_create_from_task(self):
         self.__setup()
         # 1) Test if fails with TaskNotComplete error

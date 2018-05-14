@@ -21,6 +21,7 @@ from datmo.core.entity.task import Task
 from datmo.core.util.exceptions import EntityNotFound, TaskRunException, \
     InvalidArgumentType, RequiredArgumentMissing, ProjectNotInitializedException, \
     InvalidProjectPathException, TooManyArgumentsFound
+from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 
 class TestTaskController():
@@ -67,6 +68,7 @@ class TestTaskController():
         assert task_obj.created_at
         assert task_obj.updated_at
 
+    @pytest_docker_environment_failed_instantiation
     def test_run_helper(self):
         self.__setup()
         # TODO: Try out more options (see below)
@@ -169,6 +171,7 @@ class TestTaskController():
         assert result['validation'] == "0.32"
         assert result['model_type'] == "logistic regression"
 
+    @pytest_docker_environment_failed_instantiation
     def test_run(self):
         self.__setup()
         # 0) Test failure case without command and without interactive
@@ -439,6 +442,7 @@ class TestTaskController():
                task_obj_1 in result and \
                task_obj_2 in result
 
+    @pytest_docker_environment_failed_instantiation
     def test_get_files(self):
         self.__setup()
         # Create task in the project
@@ -506,6 +510,7 @@ class TestTaskController():
 
         self.task.stop(task_obj.id)
 
+    @pytest_docker_environment_failed_instantiation
     def test_delete(self):
         self.__setup()
         # Create tasks in the project
@@ -524,6 +529,7 @@ class TestTaskController():
         assert result == True and \
                thrown == True
 
+    @pytest_docker_environment_failed_instantiation
     def test_stop_failure(self):
         self.__setup()
         # 1) Test required arguments not provided
@@ -554,6 +560,7 @@ class TestTaskController():
             thrown = True
         assert thrown
 
+    @pytest_docker_environment_failed_instantiation
     def test_stop_success(self):
         self.__setup()
         # 1) Test stop with task_id

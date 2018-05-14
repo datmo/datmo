@@ -99,6 +99,11 @@ class TestBaseController():
         assert self.base.environment_driver != None
         assert self.base.environment_driver.filepath == self.base.home
 
+    def test_is_initialized(self):
+        assert self.base.is_initialized == \
+               (self.base.code_driver.is_initialized and \
+               self.base.file_driver.is_initialized and self.base.model)
+
     def test_dal(self):
         assert self.base.dal != None
         assert self.base.dal.model != None

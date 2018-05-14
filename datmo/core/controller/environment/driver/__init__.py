@@ -24,6 +24,20 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
+    def init(self):
+        """Initialize the environment driver
+
+        Returns
+        -------
+        bool
+            returns True if success else False
+
+        Raises
+        ------
+        EnvironmentInitFailed
+        """
+
+    @abstractmethod
     def create(self, path=None, output_path=None, language=None):
         """Create datmo environment definition
 

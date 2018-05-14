@@ -19,8 +19,9 @@ except NameError:
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.core.util.exceptions import (
     EnvironmentInitFailed, FileAlreadyExistsException,
-    EnvironmentRequirementsCreateException, EnvironmentDoesNotExist,
-    EnvironmentImageNotFound, EnvironmentContainerNotFound)
+    EnvironmentRequirementsCreateException, EnvironmentImageNotFound,
+    EnvironmentContainerNotFound)
+from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 
 class TestDockerEnv():
@@ -39,7 +40,7 @@ class TestDockerEnv():
         # Test the default parameters
         self.docker_environment_manager = \
             DockerEnvironmentDriver(self.temp_dir)
-        self.init_result = self.docker_environment_manager.init()
+
         random_text = str(uuid.uuid1())
         with open(os.path.join(self.temp_dir, "Dockerfile"), "a+") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
@@ -49,15 +50,26 @@ class TestDockerEnv():
         self.docker_environment_manager.stop_remove_containers_by_term(
             term='cooltest', force=True)
 
-    def test_instantiation_and_connected(self):
-        assert self.docker_environment_manager.is_connected
+    def test_instantiation(self):
         assert self.docker_environment_manager != None
+        assert self.docker_environment_manager.docker_socket == None or "unix:///var/run/docker.sock"
+        assert self.docker_environment_manager.docker_execpath == "docker"
+        assert self.docker_environment_manager.client
+        assert self.docker_environment_manager.prefix
+        assert self.docker_environment_manager.type
 
-    def test_instantiation_not_connected(self):
+    @pytest_docker_environment_failed_instantiation
+    def test_init_success(self):
+        init_result = self.docker_environment_manager.init()
+        assert init_result and \
+               self.docker_environment_manager.is_initialized == True
+
+    def test_init_failed(self):
         thrown = False
         try:
-            DockerEnvironmentDriver(
+            test = DockerEnvironmentDriver(
                 self.temp_dir, docker_socket="unix:///var/run/fooo")
+            test.init()
         except EnvironmentInitFailed:
             thrown = True
         assert thrown
@@ -148,6 +160,7 @@ class TestDockerEnv():
             failed = True
         assert failed
 
+    @pytest_docker_environment_failed_instantiation
     def test_build(self):
         name = str(uuid.uuid1())
         path = os.path.join(self.docker_environment_manager.filepath,
@@ -184,6 +197,7 @@ class TestDockerEnv():
         # teardown
         self.docker_environment_manager.remove(name, force=True)
 
+    @pytest_docker_environment_failed_instantiation
     def test_run(self):
         # TODO: add more options for run w/ volumes etc
         # Keeping stdin_open and tty as either (True, True) or (False, False).
@@ -237,6 +251,7 @@ class TestDockerEnv():
         # teardown image
         self.docker_environment_manager.remove(image_name, force=True)
 
+    @pytest_docker_environment_failed_instantiation
     def test_interactive_run(self):
         # keeping stdin_open, tty as True
         # build image
@@ -321,6 +336,7 @@ class TestDockerEnv():
         # teardown image
         self.docker_environment_manager.remove(image_name, force=True)
 
+    @pytest_docker_environment_failed_instantiation
     def test_stop(self):
         name = str(uuid.uuid1())
         path = os.path.join(self.docker_environment_manager.filepath,
@@ -350,6 +366,7 @@ class TestDockerEnv():
         # teardown
         self.docker_environment_manager.remove(name, force=True)
 
+    @pytest_docker_environment_failed_instantiation
     def test_remove(self):
         name = str(uuid.uuid1())
         # Test if no image present and no containers
@@ -373,15 +390,13 @@ class TestDockerEnv():
         result = self.docker_environment_manager.remove(name, force=True)
         assert result == True
 
-    def test_init(self):
-        assert self.init_result and \
-               self.docker_environment_manager.is_initialized == True
-
+    @pytest_docker_environment_failed_instantiation
     def test_get_tags_for_docker_repository(self):
         result = self.docker_environment_manager.get_tags_for_docker_repository(
             "hello-world")
         assert 'latest' in result
 
+    @pytest_docker_environment_failed_instantiation
     def test_build_image(self):
         image_name = str(uuid.uuid1())
         dockerfile_path = os.path.join(
@@ -395,6 +410,7 @@ class TestDockerEnv():
         assert result == True
         self.docker_environment_manager.remove_image(image_name, force=True)
 
+    @pytest_docker_environment_failed_instantiation
     def test_get_image(self):
         failed = False
         try:
@@ -418,6 +434,7 @@ class TestDockerEnv():
         assert image_name + ":latest" in tags
         self.docker_environment_manager.remove_image(image_name, force=True)
 
+    @pytest_docker_environment_failed_instantiation
     def test_list_images(self):
         # TODO: Test out all input permutations
         image_name = str(uuid.uuid1())
@@ -443,6 +460,7 @@ class TestDockerEnv():
         assert image_name + ":latest" in group_flat
         self.docker_environment_manager.remove_image(image_name, force=True)
 
+    @pytest_docker_environment_failed_instantiation
     def test_search_images(self):
         image_name = str(uuid.uuid1())
         dockerfile_path = os.path.join(
@@ -457,6 +475,7 @@ class TestDockerEnv():
         assert len(result) > 0
         self.docker_environment_manager.remove_image(image_name, force=True)
 
+    @pytest_docker_environment_failed_instantiation
     def test_remove_image(self):
         image_name = str(uuid.uuid1())
         dockerfile_path = os.path.join(
@@ -477,6 +496,7 @@ class TestDockerEnv():
             image_name, force=True)
         assert result == True
 
+    @pytest_docker_environment_failed_instantiation
     def test_remove_images(self):
         # TODO: Test out all input permutations
         image_name = str(uuid.uuid1())
@@ -498,6 +518,7 @@ class TestDockerEnv():
             name=image_name, force=True)
         assert result == True
 
+    @pytest_docker_environment_failed_instantiation
     def test_run_container(self):
         # TODO: test with all variables provided
         image_name = str(uuid.uuid1())
@@ -528,6 +549,7 @@ class TestDockerEnv():
             image_name, force=True)
         self.docker_environment_manager.remove_image(image_name, force=True)
 
+    @pytest_docker_environment_failed_instantiation
     def test_get_container(self):
         failed = False
         try:
@@ -553,6 +575,7 @@ class TestDockerEnv():
             image_name, force=True)
         self.docker_environment_manager.remove_image(image_name, force=True)
 
+    @pytest_docker_environment_failed_instantiation
     def test_list_containers(self):
         # TODO: Test out all input permutations
         image_name = str(uuid.uuid1())
@@ -572,6 +595,7 @@ class TestDockerEnv():
             image_name, force=True)
         self.docker_environment_manager.remove_image(image_name, force=True)
 
+    @pytest_docker_environment_failed_instantiation
     def test_stop_container(self):
         image_name = str(uuid.uuid1())
         dockerfile_path = os.path.join(
@@ -592,6 +616,7 @@ class TestDockerEnv():
             image_name, force=True)
         self.docker_environment_manager.remove_image(image_name, force=True)
 
+    @pytest_docker_environment_failed_instantiation
     def test_remove_container(self):
         image_name = str(uuid.uuid1())
         dockerfile_path = os.path.join(
@@ -615,6 +640,7 @@ class TestDockerEnv():
         assert result == True
         self.docker_environment_manager.remove_image(image_name, force=True)
 
+    @pytest_docker_environment_failed_instantiation
     def test_log_container(self):
         # TODO: Do a more comprehensive test, test out optional variables
         # TODO: Test out more commands at the system level
@@ -643,6 +669,46 @@ class TestDockerEnv():
 
         self.docker_environment_manager.stop_remove_containers_by_term(
             image_name, force=True)
+        self.docker_environment_manager.remove_image(image_name, force=True)
+
+    @pytest_docker_environment_failed_instantiation
+    def test_stop_remove_containers_by_term(self):
+        # 1) Test with image_name (random container name), match with image_name
+        # 2) Test with image_name and name given, match with name
+        image_name = str(uuid.uuid1())
+        dockerfile_path = os.path.join(
+            self.docker_environment_manager.filepath, "Dockerfile")
+        random_text = str(uuid.uuid1())
+        with open(dockerfile_path, "w") as f:
+            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_unicode(str("RUN echo " + random_text)))
+        self.docker_environment_manager.build_image(image_name,
+                                                    dockerfile_path)
+        # 1) Test option 1
+
+        # Test without force
+        self.docker_environment_manager.run_container(image_name)
+        result = self.docker_environment_manager.stop_remove_containers_by_term(
+            image_name)
+        assert result == True
+        # Test with force
+        self.docker_environment_manager.run_container(image_name)
+        result = self.docker_environment_manager.stop_remove_containers_by_term(
+            image_name, force=True)
+        assert result == True
+
+        # 2) Test option 2
+        self.docker_environment_manager.run_container(
+            image_name, name="datmo_test")
+        result = self.docker_environment_manager.stop_remove_containers_by_term(
+            "datmo_test")
+        assert result == True
+        # Test with force
+        self.docker_environment_manager.run_container(
+            image_name, name="datmo_test")
+        result = self.docker_environment_manager.stop_remove_containers_by_term(
+            "datmo_test", force=True)
+        assert result == True
         self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_create_requirements_file(self):
@@ -721,45 +787,6 @@ class TestDockerEnv():
         assert result
         assert os.path.isfile(result)
         assert "python" in open(result, "r").read()
-
-    def test_stop_remove_containers_by_term(self):
-        # 1) Test with image_name (random container name), match with image_name
-        # 2) Test with image_name and name given, match with name
-        image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
-        random_text = str(uuid.uuid1())
-        with open(dockerfile_path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name,
-                                                    dockerfile_path)
-        # 1) Test option 1
-
-        # Test without force
-        self.docker_environment_manager.run_container(image_name)
-        result = self.docker_environment_manager.stop_remove_containers_by_term(
-            image_name)
-        assert result == True
-        # Test with force
-        self.docker_environment_manager.run_container(image_name)
-        result = self.docker_environment_manager.stop_remove_containers_by_term(
-            image_name, force=True)
-        assert result == True
-
-        # 2) Test option 2
-        self.docker_environment_manager.run_container(
-            image_name, name="datmo_test")
-        result = self.docker_environment_manager.stop_remove_containers_by_term(
-            "datmo_test")
-        assert result == True
-        # Test with force
-        self.docker_environment_manager.run_container(
-            image_name, name="datmo_test")
-        result = self.docker_environment_manager.stop_remove_containers_by_term(
-            "datmo_test", force=True)
-        assert result == True
-        self.docker_environment_manager.remove_image(image_name, force=True)
 
     def test_form_datmo_dockerfile(self):
         input_dockerfile_path = os.path.join(

@@ -28,7 +28,6 @@ class EnvironmentController(BaseController):
         List all environments within the project
     delete(id)
         Delete the specified environment from the project
-
     """
 
     def __init__(self, home):
@@ -174,6 +173,7 @@ class EnvironmentController(BaseController):
         PathDoesNotExist
             if the specified Environment does not exist.
         """
+        self.environment_driver.init()
         environment_obj = self.dal.environment.get_by_id(environment_id)
         if not environment_obj:
             raise PathDoesNotExist(
@@ -223,6 +223,7 @@ class EnvironmentController(BaseController):
         logs : str
             string version of output logs for the container
         """
+        self.environment_driver.init()
         # TODO: Check hardware info here if different from creation time
         final_return_code, run_id, logs = \
             self.environment_driver.run(environment_id, options, log_filepath)
@@ -250,6 +251,7 @@ class EnvironmentController(BaseController):
         PathDoesNotExist
             if the specified Environment does not exist.
         """
+        self.environment_driver.init()
         environment_obj = self.dal.environment.get_by_id(environment_id)
         if not environment_obj:
             raise PathDoesNotExist(
@@ -295,6 +297,7 @@ class EnvironmentController(BaseController):
         RequiredArgumentMissing
         TooManyArguments
         """
+        self.environment_driver.init()
         if not (run_id or match_string or all):
             raise RequiredArgumentMissing()
         if sum(map(bool, [run_id, match_string, all])) > 1:

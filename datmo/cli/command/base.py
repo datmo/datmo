@@ -3,6 +3,7 @@
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import ClassMethodNotFound
 from datmo.cli.parser import get_datmo_parser
+from datmo.core.util.logger import DatmoLogger
 from datmo.core.util.misc_functions import parameterized
 
 
@@ -10,6 +11,7 @@ class BaseCommand(object):
     def __init__(self, home, cli_helper):
         self.home = home
         self.cli_helper = cli_helper
+        self.logger = DatmoLogger.get_logger(__name__)
         self.parser = get_datmo_parser()
 
     def parse(self, args):
