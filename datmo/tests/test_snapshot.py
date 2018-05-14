@@ -18,6 +18,7 @@ from datmo.core.controller.project import ProjectController
 from datmo.core.util.exceptions import (
     GitCommitDoesNotExist, InvalidProjectPathException,
     SessionDoesNotExistException, SnapshotCreateFromTaskArgs)
+from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 
 class TestSnapshotModule():
@@ -106,6 +107,7 @@ class TestSnapshotModule():
         assert snapshot_obj_2.stats == {}
         assert snapshot_obj_2 != snapshot_obj_1
 
+    @pytest_docker_environment_failed_instantiation
     def test_create_from_task(self):
         # 1) Test if success with task files, results, and message
         # 2) Test if success with user given config and stats

@@ -29,6 +29,7 @@ from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.util.exceptions import ProjectNotInitializedException, MutuallyExclusiveArguments, RequiredArgumentMissing
+from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 
 class TestTaskCommand():
@@ -65,7 +66,7 @@ class TestTaskCommand():
             failed = True
         assert failed
 
-    def test_snapshot_command(self):
+    def test_task_command(self):
         self.__set_variables()
         self.task.parse(["task"])
         assert self.task.execute()
@@ -77,6 +78,7 @@ class TestTaskCommand():
         result = self.task.execute()
         assert not result
 
+    @pytest_docker_environment_failed_instantiation
     def test_task_run(self):
         # TODO: Adding test with `--interactive` argument and terminate inside container
         self.__set_variables()
@@ -123,6 +125,7 @@ class TestTaskCommand():
         assert result.results == {"accuracy": "0.45"}
         assert result.status == "SUCCESS"
 
+    @pytest_docker_environment_failed_instantiation
     def test_task_run_string_command(self):
         # TODO: Adding test with `--interactive` argument and terminate inside container
         self.__set_variables()
@@ -191,6 +194,7 @@ class TestTaskCommand():
     #         assert result.results == {"accuracy": "0.45"}
     #         assert result.status == "SUCCESS"
 
+    @pytest_docker_environment_failed_instantiation
     def test_task_run_notebook(self):
         self.__set_variables()
         # Test success case
@@ -258,6 +262,7 @@ class TestTaskCommand():
             exception_thrown = True
         assert exception_thrown
 
+    @pytest_docker_environment_failed_instantiation
     def test_task_stop_success(self):
         # 1) Test stop with task_id
         # 2) Test stop with all

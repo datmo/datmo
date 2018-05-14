@@ -28,6 +28,7 @@ from datmo.cli.command.task import TaskCommand
 from datmo.core.util.exceptions import (ProjectNotInitializedException,
                                         MutuallyExclusiveArguments,
                                         SnapshotCreateFromTaskArgs)
+from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 
 class TestSnapshot():
@@ -106,7 +107,7 @@ class TestSnapshot():
         self.snapshot.parse(["snapshot", "create", "--help"])
         assert self.snapshot.execute()
 
-    def test_snapshot_command(self):
+    def test_snapshot_create(self):
         self.__set_variables()
         test_message = "this is a test message"
         test_label = "test label"
@@ -183,10 +184,10 @@ class TestSnapshot():
         snapshot_id_1 = self.snapshot.execute()
         assert snapshot_id_1
 
-    def test_datmo_snapshot_create_from_task(self):
+    @pytest_docker_environment_failed_instantiation
+    def test_snapshot_create_from_task(self):
         self.__set_variables()
         test_message = "this is a test message"
-        test_code_id = "test_code_id"
 
         # create task
         test_command = "sh -c 'echo accuracy:0.45'"
@@ -213,6 +214,7 @@ class TestSnapshot():
         snapshot_id = self.snapshot.execute()
         assert snapshot_id
 
+    @pytest_docker_environment_failed_instantiation
     def test_snapshot_create_from_task_fail_user_inputs(self):
         self.__set_variables()
         test_message = "this is a test message"
@@ -546,7 +548,8 @@ class TestSnapshot():
 
         # remove datmo_task folder to have no changes before checkout
         datmo_tasks_dirpath = os.path.join(self.snapshot.home, "datmo_tasks")
-        shutil.rmtree(datmo_tasks_dirpath)
+        if os.path.exists(datmo_tasks_dirpath):
+            shutil.rmtree(datmo_tasks_dirpath)
 
         # Test when optional parameters are not given
         self.snapshot.parse(["snapshot", "checkout", "--id", snapshot_id])

@@ -15,6 +15,7 @@ from datmo.task import Task
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.controller.project import ProjectController
 from datmo.core.util.exceptions import (GitCommitDoesNotExist, EntityNotFound)
+from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 
 class TestTaskModule():
@@ -50,6 +51,7 @@ class TestTaskModule():
         assert task_entity.logs == None
         assert task_entity.results == None
 
+    @pytest_docker_environment_failed_instantiation
     def test_run(self):
         # 1) Run task with no commit or code available (cannot save states before), string command
         # 2) Run task with simple python file, no environment definition, string command (auto generate env)
@@ -103,6 +105,7 @@ class TestTaskModule():
         assert 'hello' in task_obj_2.logs
         assert task_obj_2.results == {"accuracy": "0.56"}
 
+    @pytest_docker_environment_failed_instantiation
     def test_task_entity_files(self):
         input_dict = {
             "id": "test",
