@@ -32,8 +32,8 @@ test:
     # Avoiding loop here, so that each test shown in separate tab in circle-ci
     - echo "Running Test with 2.7.10"
     - export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env2.7.10 && $TEST_PACKAGE  && source deactivate datmo_env2.7.10;
-    - echo "Running Test with 3.4.1"
-    - export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.4.1 && $TEST_PACKAGE  && source deactivate datmo_env3.4.1;
+#    - echo "Running Test with 3.4.1"
+#    - export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.4.1 && $TEST_PACKAGE  && source deactivate datmo_env3.4.1;
     - echo "Running Test with 3.5.1"
     - export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.5.1 && $TEST_PACKAGE && source deactivate datmo_env3.5.1;
     - echo "Running Test with 3.6.1"

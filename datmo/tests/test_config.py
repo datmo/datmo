@@ -11,10 +11,6 @@ except NameError:
     to_unicode = str
 
 from datmo.config import Config
-from datmo.core.controller.project import ProjectController
-from datmo.core.util.exceptions import (GitCommitDoesNotExist,
-                                        InvalidProjectPathException,
-                                        SessionDoesNotExistException)
 
 
 class TestConfigModule():

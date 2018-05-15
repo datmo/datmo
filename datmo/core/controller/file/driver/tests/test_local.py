@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
+import stat
 import tempfile
 import platform
 from io import TextIOWrapper
@@ -14,7 +15,7 @@ from datmo.core.controller.file.driver.local import LocalFileDriver
 from datmo.core.util.exceptions import PathDoesNotExist
 
 
-class TestLocalFileManager():
+class TestLocalFileDriver():
     # TODO: Add more cases for each test
     """
     Checks all functions of the LocalFileDriver
