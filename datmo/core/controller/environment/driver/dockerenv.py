@@ -188,17 +188,6 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         return stop_and_remove_containers_result and \
                remove_image_result
 
-    def init(self):
-        # TODO: Fill in to start up Docker
-        try:
-            # Startup Docker
-            pass
-        except Exception as e:
-            raise EnvironmentExecutionException(
-                __("error", "controller.environment.driver.docker.init",
-                   str(e)))
-        return True
-
     def gpu_enabled(self):
         # test if this images works
         # docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
