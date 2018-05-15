@@ -805,8 +805,8 @@ class TestDockerEnv():
             log_filepath = os.path.join(
                 self.docker_environment_manager.filepath, "test.log")
             return_code, run_id, logs = self.docker_environment_manager.run(
-                "gpu_test1", {
-                    "command": ["sh", "-c", "echo yo"],
+                "nvidia/cuda", {
+                    "command": ["nvidia-smi"],
                     "name": str(uuid.uuid1()),
                     "detach": True,
                     "gpu": True
