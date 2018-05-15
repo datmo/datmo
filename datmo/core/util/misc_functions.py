@@ -17,7 +17,7 @@ from datmo.core.controller.environment.driver.dockerenv import DockerEnvironment
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     PathDoesNotExist, MutuallyExclusiveArguments, RequiredArgumentMissing,
-    EnvironmentInitFailed)
+    EnvironmentInitFailed, EnvironmentExecutionException)
 
 
 def grep(pattern, fileObj):
@@ -179,8 +179,13 @@ def __helper(filepath):
     try:
         test = DockerEnvironmentDriver(filepath=filepath)
         test.init()
+        definition_path = os.path.join(filepath, "Dockerfile")
+        with open(definition_path, "a+") as f:
+            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_unicode(str("RUN echo hello")))
+        test.build("docker-test", definition_path)
         return False
-    except EnvironmentInitFailed:
+    except (EnvironmentInitFailed, EnvironmentExecutionException):
         return True
 
 
