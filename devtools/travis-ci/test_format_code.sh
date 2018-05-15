@@ -23,8 +23,10 @@ then
     echo "Please run yapf over the files changed"
     echo "pip install yapf==0.20.0"
     echo "yapf -i $CHANGED_FILES"
-    exit 1
+#    exit 1
+    exit 0 # shows errors but does not stop travis build
 else
     exit_success
 fi
-exit 1
+#exit 1
+exit 0 # shows errors but does not stop travis build
