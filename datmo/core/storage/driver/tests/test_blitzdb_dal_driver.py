@@ -158,7 +158,7 @@ class TestBlitzDBDALDriver():
         thrown = False
         try:
             result = self.database.set(collection_2, test_obj)
-        except:
+        except Exception:
             thrown = True
         assert thrown
 
@@ -242,7 +242,7 @@ class TestBlitzDBDALDriver():
                 {"range_query2": {
                     "$gte": datetime.datetime(2017, 2, 1)
                 }})
-        except:
+        except Exception:
             failed = True
         assert failed
 

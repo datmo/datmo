@@ -221,7 +221,7 @@ class TestLocalFileDriver():
         thrown = False
         try:
             self.local_file_driver.create_collections_dir()
-        except:
+        except Exception:
             thrown = True
         assert thrown == True and \
             not os.path.isdir(collections_path)

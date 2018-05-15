@@ -264,7 +264,7 @@ class TestGitCodeDriver():
         failed = False
         try:
             self.git_code_manager.latest_commit()
-        except:
+        except Exception:
             failed = True
         assert failed
 

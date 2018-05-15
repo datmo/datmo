@@ -103,7 +103,7 @@ class TaskCommand(ProjectCommand):
                     self.cli_helper.echo(
                         __("info", "cli.task.stop.all.success"))
             return result
-        except:
+        except Exception:
             if "id" in input_dict:
                 self.cli_helper.echo(
                     __("error", "cli.task.stop", input_dict['id']))

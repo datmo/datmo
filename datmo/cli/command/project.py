@@ -50,7 +50,7 @@ class ProjectCommand(BaseCommand):
                             "name": name,
                             "path": self.home
                         }))
-            except:
+            except Exception:
                 self.cli_helper.echo(
                     __("info", "cli.project.init.create.failure", {
                         "name": name,
@@ -83,7 +83,7 @@ class ProjectCommand(BaseCommand):
                             "name": name,
                             "path": self.home
                         }))
-            except:
+            except Exception:
                 self.cli_helper.echo(
                     __("info", "cli.project.init.update.failure", {
                         "name": name,

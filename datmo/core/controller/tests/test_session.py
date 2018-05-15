@@ -130,7 +130,7 @@ class TestSessionController():
         try:
             _ = self.session.findOne({"name": "test3"})
             entity_exists = True
-        except:
+        except Exception:
             pass
         assert not entity_exists
         # current session should be "default"

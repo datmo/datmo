@@ -37,7 +37,7 @@ class TestFileCollectionController():
         failed = False
         try:
             self.file_collection.create()
-        except:
+        except Exception:
             failed = True
         assert failed
 

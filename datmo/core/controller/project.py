@@ -130,7 +130,7 @@ class ProjectController(BaseController):
                 # Stop and remove all running environments with image_id
                 self.environment_driver.stop_remove_containers_by_term(
                     image_id, force=True)
-        except:
+        except Exception:
             self.logger.warning(
                 __("warn", "controller.general.environment.failed"))
 
