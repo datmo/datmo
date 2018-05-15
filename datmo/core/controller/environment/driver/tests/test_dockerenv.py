@@ -799,19 +799,16 @@ class TestDockerEnv():
             "datmo" in open(output_dockerfile_path, "r").read()
 
     def test_gpu_enabled(self):
-        if self.docker_environment_manager.gpu_enabled():
+        if not self.docker_environment_manager.gpu_enabled():
             print("GPU not available")
         else:
-            throw = False
-            try:
-                return_code, run_id, logs = self.docker_environment_manager.run(
-                    "gpu_test1",
-                    run_options={
-                        "command": ["sh", "-c", "echo yo"],
-                        "name": str(uuid.uuid1()),
-                        "detach": True,
-                        "gpu": True
-                    })
-            except Exception:
-                throw = True
-            assert throw
+            log_filepath = os.path.join(
+                self.docker_environment_manager.filepath, "test.log")
+            return_code, run_id, logs = self.docker_environment_manager.run(
+                "gpu_test1", {
+                    "command": ["sh", "-c", "echo yo"],
+                    "name": str(uuid.uuid1()),
+                    "detach": True,
+                    "gpu": True
+                }, log_filepath)
+            assert return_code == 0
