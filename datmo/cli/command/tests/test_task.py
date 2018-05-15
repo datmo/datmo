@@ -31,14 +31,13 @@ from datmo.core.entity.task import Task as CoreTask
 from datmo.core.util.exceptions import ProjectNotInitializedException, MutuallyExclusiveArguments, RequiredArgumentMissing
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
+# provide mountable tmp directory for docker
+tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
+
 
 class TestTaskCommand():
     def setup_class(self):
-        # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system(
-        ) == "Windows" else None
-        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
-                                        tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
 
@@ -78,7 +77,7 @@ class TestTaskCommand():
         result = self.task.execute()
         assert not result
 
-    @pytest_docker_environment_failed_instantiation
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_run(self):
         # TODO: Adding test with `--interactive` argument and terminate inside container
         self.__set_variables()
@@ -125,7 +124,7 @@ class TestTaskCommand():
         assert result.results == {"accuracy": "0.45"}
         assert result.status == "SUCCESS"
 
-    @pytest_docker_environment_failed_instantiation
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_run_string_command(self):
         # TODO: Adding test with `--interactive` argument and terminate inside container
         self.__set_variables()
@@ -194,7 +193,7 @@ class TestTaskCommand():
     #         assert result.results == {"accuracy": "0.45"}
     #         assert result.status == "SUCCESS"
 
-    @pytest_docker_environment_failed_instantiation
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_run_notebook(self):
         self.__set_variables()
         # Test success case
@@ -262,7 +261,7 @@ class TestTaskCommand():
             exception_thrown = True
         assert exception_thrown
 
-    @pytest_docker_environment_failed_instantiation
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_stop_success(self):
         # 1) Test stop with task_id
         # 2) Test stop with all

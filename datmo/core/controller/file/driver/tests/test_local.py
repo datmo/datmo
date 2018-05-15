@@ -6,7 +6,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import stat
 import tempfile
 import platform
 from io import TextIOWrapper
@@ -294,24 +293,45 @@ class TestLocalFileDriver():
 
         assert os.path.isdir(collection_path)
         assert len(os.listdir(collections_path)) == 2
-        assert os.path.isdir(os.path.join(collection_path,
-                                       "dirpath1")) and \
-               (oct(os.stat(os.path.join(collection_path,
-                                        "dirpath1")).st_mode & 0o777) == '0o755' or
-                oct(os.stat(os.path.join(collection_path,
-                                         "dirpath1")).st_mode & 0o777) == '0755')
-        assert os.path.isdir(os.path.join(collection_path,
-                                       "dirpath2")) and \
-               (oct(os.stat(os.path.join(collection_path,
-                                        "dirpath2")).st_mode & 0o777) == '0o755' or
-                oct(os.stat(os.path.join(collection_path,
-                                         "dirpath2")).st_mode & 0o777) == '0755')
-        assert os.path.isfile(os.path.join(collection_path,
-                                        "filepath1")) and \
-               (oct(os.stat(os.path.join(collection_path,
-                                        "filepath1")).st_mode & 0o777) == '0o755' or
-                oct(os.stat(os.path.join(collection_path,
-                                         "filepath1")).st_mode & 0o777) == '0755')
+        # Run these for all platforms
+        assert os.path.isdir(os.path.join(collection_path, "dirpath1"))
+        assert os.path.isdir(os.path.join(collection_path, "dirpath2"))
+        assert os.path.isfile(os.path.join(collection_path, "filepath1"))
+
+        # Only assume success for non-Windows platforms
+        if not platform.system() == "Windows":
+            assert (oct(
+                os.stat(os.path.join(collection_path, "dirpath1")).st_mode &
+                0o777) == '0o755' or oct(
+                    os.stat(os.path.join(collection_path, "dirpath1")).st_mode
+                    & 0o777) == '0755')
+            assert (oct(
+                os.stat(os.path.join(collection_path, "dirpath2")).st_mode &
+                0o777) == '0o755' or oct(
+                    os.stat(os.path.join(collection_path, "dirpath2")).st_mode
+                    & 0o777) == '0755')
+            assert (oct(
+                os.stat(os.path.join(collection_path, "filepath1")).st_mode &
+                0o777) == '0o755' or oct(
+                    os.stat(os.path.join(collection_path, "filepath1")).st_mode
+                    & 0o777) == '0755')
+        else:
+            assert (oct(
+                os.stat(os.path.join(collection_path, "dirpath1")).st_mode &
+                0o777) == '0o777' or oct(
+                    os.stat(os.path.join(collection_path, "dirpath1")).st_mode
+                    & 0o777) == '0777')
+            assert (oct(
+                os.stat(os.path.join(collection_path, "dirpath2")).st_mode &
+                0o777) == '0o777' or oct(
+                    os.stat(os.path.join(collection_path, "dirpath2")).st_mode
+                    & 0o777) == '0777')
+            assert (oct(
+                os.stat(os.path.join(collection_path, "filepath1")).st_mode &
+                0o777) == '0o777' or oct(
+                    os.stat(os.path.join(collection_path, "filepath1")).st_mode
+                    & 0o777) == '0777')
+
         self.local_file_driver.delete_collection(filehash)
 
     def test_get_absolute_collection_path(self):

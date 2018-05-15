@@ -22,14 +22,13 @@ from datmo.core.util.exceptions import (
     TooManyArgumentsFound)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
+# provide mountable tmp directory for docker
+tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
+
 
 class TestEnvironmentController():
     def setup_method(self):
-        # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system(
-        ) == "Windows" else None
-        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
-                                        tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.project = ProjectController(self.temp_dir)
         self.environment = EnvironmentController(self.temp_dir)
@@ -216,7 +215,7 @@ class TestEnvironmentController():
         assert environment_obj_5.id != environment_obj_1.id
         assert environment_obj_5.id != environment_obj_4.id
 
-    @pytest_docker_environment_failed_instantiation
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_build(self):
         # 1) Test build when no environment given
         # 2) Test build when definition path exists and given
@@ -283,7 +282,7 @@ class TestEnvironmentController():
         self.environment.delete(environment_obj_1.id)
         self.environment.delete(environment_obj_4.id)
 
-    @pytest_docker_environment_failed_instantiation
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_run(self):
         # 1) Test run simple command with simple Dockerfile
         self.project.init("test5", "test description")
@@ -378,7 +377,7 @@ class TestEnvironmentController():
         # teardown
         self.environment.delete(environment_obj.id)
 
-    @pytest_docker_environment_failed_instantiation
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_interactive_run(self):
         # 1) Test run interactive terminal in environment
         # 2) Test run jupyter notebook in environment
@@ -506,7 +505,7 @@ class TestEnvironmentController():
             environment_obj_1 in result and \
             environment_obj_2 in result
 
-    @pytest_docker_environment_failed_instantiation
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_delete(self):
         self.project.init("test5", "test description")
 
@@ -535,7 +534,7 @@ class TestEnvironmentController():
         assert result == True and \
             thrown == True
 
-    @pytest_docker_environment_failed_instantiation
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_stop_failure(self):
         # 1) Test failure with RequiredArgumentMissing
         # 2) Test failure with TooManyArgumentsFound
@@ -556,7 +555,7 @@ class TestEnvironmentController():
             failed = True
         assert failed
 
-    @pytest_docker_environment_failed_instantiation
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_stop_success(self):
         # TODO: test more run options
         # 1) Test run_id input to stop

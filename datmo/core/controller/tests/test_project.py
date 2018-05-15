@@ -22,14 +22,13 @@ from datmo.core.entity.task import Task
 from datmo.core.util.exceptions import ValidationFailed
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
+# provide mountable tmp directory for docker
+tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
+
 
 class TestProjectController():
     def setup_method(self):
-        # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system(
-        ) == "Windows" else None
-        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
-                                        tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.project = ProjectController(self.temp_dir)
 
@@ -88,7 +87,7 @@ class TestProjectController():
         # })
         assert result == True
 
-    @pytest_docker_environment_failed_instantiation
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_cleanup_with_environment(self):
         self.project.init("test2", "test description")
         result = self.project.cleanup()

@@ -16,14 +16,13 @@ from datmo.core.util.exceptions import  \
     DatmoModelNotInitializedException, InvalidProjectPathException
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
+# provide mountable tmp directory for docker
+tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
+
 
 class TestBaseController():
     def setup_method(self):
-        # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system(
-        ) == "Windows" else None
-        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
-                                        tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.base = BaseController(home=self.temp_dir)
 
@@ -94,7 +93,7 @@ class TestBaseController():
         assert self.base.file_driver != None
         assert self.base.file_driver.filepath == self.base.home
 
-    @pytest_docker_environment_failed_instantiation
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_environment(self):
         assert self.base.environment_driver != None
         assert self.base.environment_driver.filepath == self.base.home

@@ -16,7 +16,8 @@ from glob import glob
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
-    PathDoesNotExist, MutuallyExclusiveArguments, RequiredArgumentMissing)
+    PathDoesNotExist, MutuallyExclusiveArguments, RequiredArgumentMissing,
+    EnvironmentInitFailed)
 
 
 def grep(pattern, fileObj):
@@ -174,13 +175,16 @@ def is_project_dir(path):
         os.path.join(path, ".datmo"))
 
 
-def __helper():
+def __helper(filepath):
     try:
-        DockerEnvironmentDriver()
+        test = DockerEnvironmentDriver(filepath=filepath)
+        test.init()
         return False
-    except:
+    except EnvironmentInitFailed:
         return True
 
 
-pytest_docker_environment_failed_instantiation = pytest.mark.skipif(
-    __helper(), reason="a running environment could not be instantiated")
+def pytest_docker_environment_failed_instantiation(filepath):
+    return pytest.mark.skipif(
+        __helper(filepath),
+        reason="a running environment could not be instantiated")

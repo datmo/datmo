@@ -1,6 +1,4 @@
-from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
-from datmo.core.util.exceptions import EnvironmentInitFailed
 
 
 class ModelController(BaseController):

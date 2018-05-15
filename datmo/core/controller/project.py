@@ -109,7 +109,7 @@ class ProjectController(BaseController):
             images = self.environment_driver.list_images(name="datmo-" + \
                                                               self.model.name)
             image_id = images[0].id if images else None
-        except:
+        except Exception:
             self.logger.warning(
                 __("warn", "controller.general.environment.failed"))
 

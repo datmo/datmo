@@ -1,8 +1,7 @@
 from datmo.core.controller.base import BaseController
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (EntityNotFound, InvalidOperation,
-                                        ProjectNotInitializedException,
-                                        EnvironmentInitFailed)
+                                        ProjectNotInitializedException)
 from datmo.core.util.validation import validate
 
 

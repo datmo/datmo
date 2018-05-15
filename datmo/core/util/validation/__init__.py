@@ -8,7 +8,7 @@ from datmo.core.util.exceptions import ValidationFailed, ValidationSchemaMissing
 
 schema_yaml = open(os.path.join(os.path.split(__file__)[0], "schemas.yml"))
 
-schemas = yaml.load(schema_yaml)
+schemas = yaml.safe_load(schema_yaml)
 
 
 def validate(schema_name, values):

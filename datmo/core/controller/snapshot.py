@@ -10,8 +10,7 @@ from datmo.core.util.validation import validate
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import (
     FileIOException, RequiredArgumentMissing, ProjectNotInitializedException,
-    SessionDoesNotExistException, EntityNotFound, TaskNotComplete,
-    EnvironmentInitFailed)
+    SessionDoesNotExistException, EntityNotFound, TaskNotComplete)
 
 
 class SnapshotController(BaseController):

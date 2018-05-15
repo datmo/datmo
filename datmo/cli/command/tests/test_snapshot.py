@@ -30,14 +30,13 @@ from datmo.core.util.exceptions import (ProjectNotInitializedException,
                                         SnapshotCreateFromTaskArgs)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
+# provide mountable tmp directory for docker
+tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
+
 
 class TestSnapshot():
     def setup_class(self):
-        # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system(
-        ) == "Windows" else None
-        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
-                                        tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
 
@@ -184,7 +183,7 @@ class TestSnapshot():
         snapshot_id_1 = self.snapshot.execute()
         assert snapshot_id_1
 
-    @pytest_docker_environment_failed_instantiation
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_snapshot_create_from_task(self):
         self.__set_variables()
         test_message = "this is a test message"
@@ -214,7 +213,7 @@ class TestSnapshot():
         snapshot_id = self.snapshot.execute()
         assert snapshot_id
 
-    @pytest_docker_environment_failed_instantiation
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_snapshot_create_from_task_fail_user_inputs(self):
         self.__set_variables()
         test_message = "this is a test message"
