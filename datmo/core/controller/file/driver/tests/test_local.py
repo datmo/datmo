@@ -315,22 +315,23 @@ class TestLocalFileDriver():
                 0o777) == '0o755' or oct(
                     os.stat(os.path.join(collection_path, "filepath1")).st_mode
                     & 0o777) == '0755')
-        else:
-            assert (oct(
-                os.stat(os.path.join(collection_path, "dirpath1")).st_mode &
-                0o777) == '0o777' or oct(
-                    os.stat(os.path.join(collection_path, "dirpath1")).st_mode
-                    & 0o777) == '0777')
-            assert (oct(
-                os.stat(os.path.join(collection_path, "dirpath2")).st_mode &
-                0o777) == '0o777' or oct(
-                    os.stat(os.path.join(collection_path, "dirpath2")).st_mode
-                    & 0o777) == '0777')
-            assert (oct(
-                os.stat(os.path.join(collection_path, "filepath1")).st_mode &
-                0o777) == '0o777' or oct(
-                    os.stat(os.path.join(collection_path, "filepath1")).st_mode
-                    & 0o777) == '0777')
+        # TODO: Create test for Windows platform
+        # else:
+        #     assert (oct(
+        #         os.stat(os.path.join(collection_path, "dirpath1")).st_mode &
+        #         0o777) == '0o777' or oct(
+        #             os.stat(os.path.join(collection_path, "dirpath1")).st_mode
+        #             & 0o777) == '0777')
+        #     assert (oct(
+        #         os.stat(os.path.join(collection_path, "dirpath2")).st_mode &
+        #         0o777) == '0o777' or oct(
+        #             os.stat(os.path.join(collection_path, "dirpath2")).st_mode
+        #             & 0o777) == '0777')
+        #     assert (oct(
+        #         os.stat(os.path.join(collection_path, "filepath1")).st_mode &
+        #         0o777) == '0o777' or oct(
+        #             os.stat(os.path.join(collection_path, "filepath1")).st_mode
+        #             & 0o777) == '0777')
 
         self.local_file_driver.delete_collection(filehash)
 
