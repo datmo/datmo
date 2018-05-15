@@ -18,15 +18,15 @@ from datmo.core.controller.project import ProjectController
 from datmo.core.util.exceptions import (
     GitCommitDoesNotExist, InvalidProjectPathException,
     SessionDoesNotExistException, SnapshotCreateFromTaskArgs)
+from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
+
+# provide mountable tmp directory for docker
+tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 
 
 class TestSnapshotModule():
     def setup_method(self):
-        # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system(
-        ) == "Windows" else None
-        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
-                                        tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         _ = ProjectController(self.temp_dir).\
             init("test", "test description")
@@ -106,6 +106,7 @@ class TestSnapshotModule():
         assert snapshot_obj_2.stats == {}
         assert snapshot_obj_2 != snapshot_obj_1
 
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_create_from_task(self):
         # 1) Test if success with task files, results, and message
         # 2) Test if success with user given config and stats

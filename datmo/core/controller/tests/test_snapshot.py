@@ -19,15 +19,15 @@ from datmo.core.util.exceptions import (
     SessionDoesNotExistException, RequiredArgumentMissing, TaskNotComplete,
     InvalidArgumentType, ProjectNotInitializedException,
     InvalidProjectPathException)
+from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
+
+# provide mountable tmp directory for docker
+tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 
 
 class TestSnapshotController():
     def setup_method(self):
-        # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system(
-        ) == "Windows" else None
-        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
-                                        tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
 
     def teardown_method(self):
@@ -300,6 +300,7 @@ class TestSnapshotController():
         assert snapshot_obj_6.config == {"foo": "bar"}
         assert snapshot_obj_6.stats == {"foo": "bar"}
 
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_create_from_task(self):
         self.__setup()
         # 1) Test if fails with TaskNotComplete error

@@ -5,6 +5,8 @@ import re
 import hashlib
 import textwrap
 import datetime
+import pytest
+import platform
 from io import open
 try:
     to_unicode = unicode
@@ -12,9 +14,11 @@ except NameError:
     to_unicode = str
 from glob import glob
 
+from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
-    PathDoesNotExist, MutuallyExclusiveArguments, RequiredArgumentMissing)
+    PathDoesNotExist, MutuallyExclusiveArguments, RequiredArgumentMissing,
+    EnvironmentInitFailed, EnvironmentExecutionException)
 
 
 def grep(pattern, fileObj):
@@ -170,3 +174,24 @@ def parameterized(dec):
 def is_project_dir(path):
     return ".datmo" in os.listdir(path) and os.path.isdir(
         os.path.join(path, ".datmo"))
+
+
+def __helper(filepath):
+    try:
+        test = DockerEnvironmentDriver(filepath=filepath)
+        test.init()
+        definition_path = os.path.join(filepath, "Dockerfile")
+        if platform.system() == "Windows":
+            with open(definition_path, "w") as f:
+                f.write(to_unicode("FROM alpine:3.5" + "\n"))
+                f.write(to_unicode(str("RUN echo hello")))
+            test.build("docker-test", definition_path)
+        return False
+    except (EnvironmentInitFailed, EnvironmentExecutionException):
+        return True
+
+
+def pytest_docker_environment_failed_instantiation(filepath):
+    return pytest.mark.skipif(
+        __helper(filepath),
+        reason="a running environment could not be instantiated")

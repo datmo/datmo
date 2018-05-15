@@ -1,7 +1,7 @@
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
 from datmo.core.entity.file_collection import FileCollection
-from datmo.core.util.exceptions import PathDoesNotExist
+from datmo.core.util.exceptions import PathDoesNotExist, EnvironmentInitFailed
 
 
 class FileCollectionController(BaseController):
@@ -24,7 +24,11 @@ class FileCollectionController(BaseController):
     """
 
     def __init__(self, home):
-        super(FileCollectionController, self).__init__(home)
+        try:
+            super(FileCollectionController, self).__init__(home)
+        except EnvironmentInitFailed:
+            self.logger.warning(
+                __("warn", "controller.general.environment.failed"))
 
     def create(self, filepaths):
         """Create a FileCollection

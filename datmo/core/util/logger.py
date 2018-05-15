@@ -18,7 +18,7 @@ class DatmoLogger(object):
     instance = None
 
     class __InternalObj:
-        def __init__(self):
+        def __init__(self, dirpath):
             # CRITICAL	50
             # ERROR	40
             # WARNING	30
@@ -26,8 +26,8 @@ class DatmoLogger(object):
             # DEBUG	10
             # NOTSET 0
             self.logging_level = self.get_logging_level()
-            self.logging_path = os.path.join(
-                os.path.expanduser("~"), '.datmo', 'logs')
+            self.dirpath = dirpath
+            self.logging_path = os.path.join(self.dirpath, '.datmo', 'logs')
             self.loggers = {}
             if not os.path.exists(self.logging_path):
                 os.makedirs(self.logging_path)
@@ -40,9 +40,12 @@ class DatmoLogger(object):
                 # warning
                 return 30
 
-    def __new__(cls):  # __new__ always a classmethod
-        if not DatmoLogger.instance:
-            DatmoLogger.instance = DatmoLogger.__InternalObj()
+    def __new__(cls, dirpath=None):  # __new__ always a classmethod
+        if not dirpath:
+            dirpath = os.path.expanduser("~")
+        if not hasattr(DatmoLogger, "instance") or \
+            (hasattr(DatmoLogger, "instance") and not DatmoLogger.instance):
+            DatmoLogger.instance = DatmoLogger.__InternalObj(dirpath)
         return DatmoLogger.instance
 
     def __getattr__(self, name):

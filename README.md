@@ -7,6 +7,7 @@
 | OS | CI testing on `master` |
 |----|--------------------|
 | <img height="20" src="http://icons.iconarchive.com/icons/dakirby309/simply-styled/256/OS-Linux-icon.png"> | [![Linux](https://travis-ci.org/datmo/datmo.svg?branch=master)](https://travis-ci.org/datmo/datmo) |
+| <img height="20" src="http://icons.iconarchive.com/icons/icons8/windows-8/128/Systems-Mac-Os-icon.png"> | [![CircleCI branch](https://circleci.com/gh/datmo/datmo.svg?style=shield)](https://circleci.com/gh/datmo/datmo) |
 | <img height="20" src="http://icons.iconarchive.com/icons/dakirby309/windows-8-metro/128/Folders-OS-Windows-8-Metro-icon.png"> | [![Windows](https://ci.appveyor.com/api/projects/status/5302d8a23qr4ui4y/branch/master?svg=true)](https://ci.appveyor.com/project/asampat3090/datmo/branch/master) |
 
 **Datmo** is an open source model tracking and reproducibility tool for developers. Use `datmo init` to turn any repository into a trackable task record with reusable environments and metrics logging.

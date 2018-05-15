@@ -69,8 +69,8 @@ MESSAGES = {
             "Internet connectivity doesn't exist",
         "cli.general.git":
             "git isn't setup. please install git",
-        "cli.general.login":
-            "user is not logged into datmo. use `datmo setup` or `datmo login` to login",
+        "controller.general.environment.failed":
+            "Environment driver not initialized"
     },
     "error": {
         "exception.validationfailed":

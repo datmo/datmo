@@ -5,9 +5,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import shutil
 import tempfile
-from io import open
+import platform
 try:
     to_unicode = unicode
 except NameError:
@@ -23,7 +22,8 @@ from datmo.core.util.exceptions import ProjectNotInitializedException
 class TestSession():
     def setup_class(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)

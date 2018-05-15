@@ -206,7 +206,7 @@ class TaskController(BaseController):
         try:
             _ = self.file_driver.create(
                 os.path.join("datmo_tasks", task_obj.id), directory=True)
-        except:
+        except Exception:
             raise TaskRunException(
                 __("error", "controller.task.run", task_dirpath))
         # Create the before snapshot prior to execution

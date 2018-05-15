@@ -13,14 +13,12 @@ from datmo.core.util.i18n import get as __
 from datmo.core.util.misc_functions import mutually_exclusive
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
-from datmo.core.util.logger import DatmoLogger
 from datmo.core.util.exceptions import RequiredArgumentMissing
 
 
 class TaskCommand(ProjectCommand):
     def __init__(self, home, cli_helper):
         super(TaskCommand, self).__init__(home, cli_helper)
-        self.logger = DatmoLogger.get_logger(__name__)
         self.task_controller = TaskController(home=home)
 
     def task(self):
@@ -105,7 +103,7 @@ class TaskCommand(ProjectCommand):
                     self.cli_helper.echo(
                         __("info", "cli.task.stop.all.success"))
             return result
-        except:
+        except Exception:
             if "id" in input_dict:
                 self.cli_helper.echo(
                     __("error", "cli.task.stop", input_dict['id']))

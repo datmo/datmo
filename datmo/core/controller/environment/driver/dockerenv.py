@@ -61,11 +61,10 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                  filepath="",
                  docker_execpath="docker",
                  docker_socket=None):
+        super(DockerEnvironmentDriver, self).__init__()
         if not docker_socket:
             if platform.system() != "Windows":
                 docker_socket = "unix:///var/run/docker.sock"
-
-        super(DockerEnvironmentDriver, self).__init__()
         self.filepath = filepath
         # Check if filepath exists
         if not os.path.exists(self.filepath):
@@ -73,27 +72,15 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 __("error",
                    "controller.environment.driver.docker.__init__.dne",
                    filepath))
-
-        # TODO: separate methods for instantiation into init function below
-
-        # Initiate Docker execution
         self.docker_execpath = docker_execpath
-        try:
-            self.docker_socket = docker_socket
-            if self.docker_socket:
-                self.client = DockerClient(base_url=self.docker_socket)
-                self.prefix = [self.docker_execpath, "-H", self.docker_socket]
-            else:
-                self.client = DockerClient()
-                self.prefix = [self.docker_execpath]
-            self.info = self.client.info()
-        except Exception:
-            raise EnvironmentInitFailed(
-                __("error", "controller.environment.driver.docker.__init__",
-                   platform.system()))
-
-        self.is_connected = True if self.info["Images"] != None else False
-
+        self.docker_socket = docker_socket
+        if self.docker_socket:
+            self.client = DockerClient(base_url=self.docker_socket)
+            self.prefix = [self.docker_execpath, "-H", self.docker_socket]
+        else:
+            self.client = DockerClient()
+            self.prefix = [self.docker_execpath]
+        self.is_connected = False
         self._is_initialized = self.is_initialized
         self.type = "docker"
 
@@ -105,6 +92,26 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             return self._is_initialized
         self._is_initialized = False
         return self._is_initialized
+
+    # running daemon needed
+    def init(self):
+        # TODO: Fill in to start up Docker
+        # Startup Docker
+        try:
+            pass
+        except Exception as e:
+            raise EnvironmentExecutionException(
+                __("error", "controller.environment.driver.docker.init",
+                   str(e)))
+        # Initiate Docker execution
+        try:
+            self.info = self.client.info()
+            self.is_connected = True if self.info["Images"] != None else False
+        except Exception:
+            raise EnvironmentInitFailed(
+                __("error", "controller.environment.driver.docker.__init__",
+                   platform.system()))
+        return True
 
     def create(self, path=None, output_path=None, language=None):
         if not path:
@@ -139,10 +146,11 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
         return success, path, output_path, requirements_filepath
 
+    # running daemon needed
     def build(self, name, path):
-
         return self.build_image(name, path)
 
+    # running daemon needed
     def run(self, name, options, log_filepath):
         run_return_code, run_id = \
             self.run_container(image_name=name, **options)
@@ -152,11 +160,13 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
         return final_return_code, run_id, logs
 
+    # running daemon needed
     def stop(self, run_id, force=False):
         stop_result = self.stop_container(run_id)
         remove_run_result = self.remove_container(run_id, force=force)
         return stop_result and remove_run_result
 
+    # running daemon needed
     def remove(self, name, force=False):
         stop_and_remove_containers_result = \
             self.stop_remove_containers_by_term(name, force=force)
@@ -168,17 +178,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         return stop_and_remove_containers_result and \
                remove_image_result
 
-    def init(self):
-        # TODO: Fill in to start up Docker
-        try:
-            # Startup Docker
-            pass
-        except Exception as e:
-            raise EnvironmentExecutionException(
-                __("error", "controller.environment.driver.docker.init",
-                   str(e)))
-        return True
-
+    # running daemon needed
     def get_tags_for_docker_repository(self, repo_name):
         # TODO: Use more common CLI command (e.g. curl instead of wget)
         """Method to get tags for docker repositories
@@ -217,6 +217,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             list_tag_names.append(repository_tag["name"])
         return list_tag_names
 
+    # running daemon needed
     def build_image(self, tag, definition_path="Dockerfile"):
         """Builds docker image
 
@@ -266,19 +267,23 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 __("error", "controller.environment.driver.docker.build_image",
                    str(e)))
 
+    # running daemon needed
     def get_image(self, image_name):
         try:
             return self.client.images.get(image_name)
         except errors.ImageNotFound:
             raise EnvironmentImageNotFound()
 
+    # running daemon needed
     def list_images(self, name=None, all_images=False, filters=None):
         return self.client.images.list(
             name=name, all=all_images, filters=filters)
 
+    # running daemon needed
     def search_images(self, term):
         return self.client.images.search(term=term)
 
+    # running daemon needed
     def remove_image(self, image_id_or_name, force=False):
         try:
             if force:
@@ -304,6 +309,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                    str(e)))
         return True
 
+    # running daemon needed
     def remove_images(self, name=None, all=False, filters=None, force=False):
         """Remove multiple images
         """
@@ -319,6 +325,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                    str(e)))
         return True
 
+    # running daemon needed
     def run_container(self,
                       image_name,
                       command=None,
@@ -466,12 +473,14 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                    str(e)))
         return return_code, container_id
 
+    # running daemon needed
     def get_container(self, container_id):
         try:
             return self.client.containers.get(container_id)
         except errors.NotFound:
             raise EnvironmentContainerNotFound()
 
+    # running daemon needed
     def list_containers(self,
                         all=False,
                         before=None,
@@ -481,6 +490,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         return self.client.containers.list(
             all=all, before=before, filters=filters, limit=limit, since=since)
 
+    # running daemon needed
     def stop_container(self, container_id):
         try:
             docker_container_stop_cmd = list(self.prefix)
@@ -502,6 +512,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                    str(e)))
         return True
 
+    # running daemon needed
     def remove_container(self, container_id, force=False):
         try:
             docker_container_remove_cmd_list = list(self.prefix)
@@ -527,6 +538,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                    str(e)))
         return True
 
+    # running daemon needed
     def log_container(self, container_id, filepath, api=False, follow=True):
         """Log capture at a particular point `docker logs`. Can also use `--follow` for real time logs
 
@@ -575,6 +587,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 logs = log_file.read()
             return return_code, logs
 
+    # running daemon needed
     def stop_remove_containers_by_term(self, term, force=False):
         """Stops and removes containers by term
         """

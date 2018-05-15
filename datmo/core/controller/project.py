@@ -1,13 +1,11 @@
-import datetime
-
 from datmo.core.util.validation import validate
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
 from datmo.core.entity.model import Model
 from datmo.core.entity.session import Session
-from datmo.core.util.exceptions import (
-    SessionDoesNotExistException, RequiredArgumentMissing,
-    ProjectNotInitializedException, ValidationFailed)
+from datmo.core.util.exceptions import (SessionDoesNotExistException,
+                                        ProjectNotInitializedException,
+                                        EnvironmentInitFailed)
 
 
 class ProjectController(BaseController):
@@ -68,15 +66,17 @@ class ProjectController(BaseController):
             self.file_driver.init()
 
         # Initialize Environment Manager if needed
-        if not self.environment_driver.is_initialized:
-            self.environment_driver.init()
+        # (not required but will warn if not present)
+        try:
+            if not self.environment_driver.is_initialized:
+                self.environment_driver.init()
+        except EnvironmentInitFailed:
+            self.logger.warning(
+                __("warn", "controller.general.environment.failed"))
 
         # Build the initial default Environment (NOT NECESSARY)
         # self.environment_driver.build_image(tag="datmo-" + \
         #                                  self.model.name)
-
-        # Add in Project template files if specified
-        # TODO: Add in project template files
 
         # Create and set current session
         if is_new_model:
@@ -104,10 +104,14 @@ class ProjectController(BaseController):
         return True
 
     def cleanup(self):
-        # Obtain image id before cleaning up if exists
-        images = self.environment_driver.list_images(name="datmo-" + \
-                                                          self.model.name)
-        image_id = images[0].id if images else None
+        try:
+            # Obtain image id before cleaning up if exists
+            images = self.environment_driver.list_images(name="datmo-" + \
+                                                              self.model.name)
+            image_id = images[0].id if images else None
+        except Exception:
+            self.logger.warning(
+                __("warn", "controller.general.environment.failed"))
 
         # Remove Datmo code_driver references
         self.code_driver.delete_code_refs_dir()
@@ -115,16 +119,20 @@ class ProjectController(BaseController):
         # Remove Datmo file structure
         self.file_driver.delete_datmo_file_structure()
 
-        if image_id:
-            # Remove image created during init
-            self.environment_driver.remove_image(
-                image_id_or_name=image_id, force=True)
+        try:
+            if image_id:
+                # Remove image created during init
+                self.environment_driver.remove_image(
+                    image_id_or_name=image_id, force=True)
 
-            # Remove any dangling images (optional)
+                # Remove any dangling images (optional)
 
-            # Stop and remove all running environments with image_id
-            self.environment_driver.stop_remove_containers_by_term(
-                image_id, force=True)
+                # Stop and remove all running environments with image_id
+                self.environment_driver.stop_remove_containers_by_term(
+                    image_id, force=True)
+        except Exception:
+            self.logger.warning(
+                __("warn", "controller.general.environment.failed"))
 
         return True
 
@@ -143,6 +151,7 @@ class ProjectController(BaseController):
         if not self.is_initialized:
             raise ProjectNotInitializedException(
                 __("error", "controller.project.status"))
+        # TODO: Add in note when environment is not setup or intialized
 
         # Add in project metadata
         status_dict = self.model.to_dictionary().copy()

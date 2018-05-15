@@ -14,7 +14,7 @@ from datmo.core.controller.file.driver.local import LocalFileDriver
 from datmo.core.util.exceptions import PathDoesNotExist
 
 
-class TestLocalFileManager():
+class TestLocalFileDriver():
     # TODO: Add more cases for each test
     """
     Checks all functions of the LocalFileDriver
@@ -221,7 +221,7 @@ class TestLocalFileManager():
         thrown = False
         try:
             self.local_file_driver.create_collections_dir()
-        except:
+        except Exception:
             thrown = True
         assert thrown == True and \
             not os.path.isdir(collections_path)
@@ -293,24 +293,46 @@ class TestLocalFileManager():
 
         assert os.path.isdir(collection_path)
         assert len(os.listdir(collections_path)) == 2
-        assert os.path.isdir(os.path.join(collection_path,
-                                       "dirpath1")) and \
-               (oct(os.stat(os.path.join(collection_path,
-                                        "dirpath1")).st_mode & 0o777) == '0o755' or
-                oct(os.stat(os.path.join(collection_path,
-                                         "dirpath1")).st_mode & 0o777) == '0755')
-        assert os.path.isdir(os.path.join(collection_path,
-                                       "dirpath2")) and \
-               (oct(os.stat(os.path.join(collection_path,
-                                        "dirpath2")).st_mode & 0o777) == '0o755' or
-                oct(os.stat(os.path.join(collection_path,
-                                         "dirpath2")).st_mode & 0o777) == '0755')
-        assert os.path.isfile(os.path.join(collection_path,
-                                        "filepath1")) and \
-               (oct(os.stat(os.path.join(collection_path,
-                                        "filepath1")).st_mode & 0o777) == '0o755' or
-                oct(os.stat(os.path.join(collection_path,
-                                         "filepath1")).st_mode & 0o777) == '0755')
+        # Run these for all platforms
+        assert os.path.isdir(os.path.join(collection_path, "dirpath1"))
+        assert os.path.isdir(os.path.join(collection_path, "dirpath2"))
+        assert os.path.isfile(os.path.join(collection_path, "filepath1"))
+
+        # Only assume success for non-Windows platforms
+        if not platform.system() == "Windows":
+            assert (oct(
+                os.stat(os.path.join(collection_path, "dirpath1")).st_mode &
+                0o777) == '0o755' or oct(
+                    os.stat(os.path.join(collection_path, "dirpath1")).st_mode
+                    & 0o777) == '0755')
+            assert (oct(
+                os.stat(os.path.join(collection_path, "dirpath2")).st_mode &
+                0o777) == '0o755' or oct(
+                    os.stat(os.path.join(collection_path, "dirpath2")).st_mode
+                    & 0o777) == '0755')
+            assert (oct(
+                os.stat(os.path.join(collection_path, "filepath1")).st_mode &
+                0o777) == '0o755' or oct(
+                    os.stat(os.path.join(collection_path, "filepath1")).st_mode
+                    & 0o777) == '0755')
+        # TODO: Create test for Windows platform
+        # else:
+        #     assert (oct(
+        #         os.stat(os.path.join(collection_path, "dirpath1")).st_mode &
+        #         0o777) == '0o777' or oct(
+        #             os.stat(os.path.join(collection_path, "dirpath1")).st_mode
+        #             & 0o777) == '0777')
+        #     assert (oct(
+        #         os.stat(os.path.join(collection_path, "dirpath2")).st_mode &
+        #         0o777) == '0o777' or oct(
+        #             os.stat(os.path.join(collection_path, "dirpath2")).st_mode
+        #             & 0o777) == '0777')
+        #     assert (oct(
+        #         os.stat(os.path.join(collection_path, "filepath1")).st_mode &
+        #         0o777) == '0o777' or oct(
+        #             os.stat(os.path.join(collection_path, "filepath1")).st_mode
+        #             & 0o777) == '0777')
+
         self.local_file_driver.delete_collection(filehash)
 
     def test_get_absolute_collection_path(self):

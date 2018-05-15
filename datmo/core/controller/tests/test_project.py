@@ -20,15 +20,15 @@ from datmo.core.controller.task import TaskController
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.entity.task import Task
 from datmo.core.util.exceptions import ValidationFailed
+from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
+
+# provide mountable tmp directory for docker
+tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 
 
 class TestProjectController():
     def setup_method(self):
-        # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system(
-        ) == "Windows" else None
-        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
-                                        tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.project = ProjectController(self.temp_dir)
 
@@ -60,9 +60,6 @@ class TestProjectController():
         # Tested with is_initialized
         assert self.project.model.name == "test1"
         assert self.project.model.description == "test description"
-        assert self.project.code_driver.is_initialized
-        assert self.project.file_driver.is_initialized
-        assert self.project.environment_driver.is_initialized
         assert result and self.project.is_initialized
 
         # Changeable by user, not tested in is_initialized
@@ -78,7 +75,20 @@ class TestProjectController():
         assert self.project.model.description == "else"
         assert result == True
 
-    def test_cleanup(self):
+    def test_cleanup_no_environment(self):
+        self.project.init("test2", "test description")
+        result = self.project.cleanup()
+
+        assert not self.project.code_driver.exists_code_refs_dir()
+        assert not self.project.file_driver.exists_datmo_file_structure()
+        # Ensure that containers built with this image do not exist
+        # assert not self.project.environment_driver.list_containers(filters={
+        #     "ancestor": image_id
+        # })
+        assert result == True
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_cleanup_with_environment(self):
         self.project.init("test2", "test description")
         result = self.project.cleanup()
 

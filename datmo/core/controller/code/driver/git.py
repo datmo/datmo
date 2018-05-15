@@ -133,7 +133,7 @@ class GitCodeDriver(CodeDriver):
                 self.add("-A")
                 new_commit_bool = self.commit(
                     options=["-m", "auto commit by datmo"])
-            except:
+            except Exception:
                 self.add("-A")
                 new_commit_bool = self.commit(
                     options=["-m", "auto initial commit by datmo"])

@@ -4,6 +4,7 @@ Tests for SessionController
 import os
 import shutil
 import tempfile
+import platform
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.session import SessionController
@@ -13,7 +14,8 @@ from datmo.core.util.exceptions import InvalidArgumentType, ProjectNotInitialize
 class TestSessionController():
     def setup_method(self):
         # provide mountable tmp directory for docker
-        tempfile.tempdir = '/tmp'
+        tempfile.tempdir = "/tmp" if not platform.system(
+        ) == "Windows" else None
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
@@ -128,7 +130,7 @@ class TestSessionController():
         try:
             _ = self.session.findOne({"name": "test3"})
             entity_exists = True
-        except:
+        except Exception:
             pass
         assert not entity_exists
         # current session should be "default"

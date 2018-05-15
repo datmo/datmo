@@ -1,4 +1,5 @@
 import os
+import stat
 import shutil
 import glob
 import hashlib
@@ -256,7 +257,7 @@ class LocalFileDriver(FileDriver):
         shutil.rmtree(temp_collection_path)
 
         # Change permissions to read only for collection_path. File collection is immutable
-        mode = 0o755
+        mode = stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH
 
         for root, dirs, files in os.walk(collection_path, topdown=False):
             for dir in [os.path.join(root, d) for d in dirs]:
