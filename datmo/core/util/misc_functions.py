@@ -6,6 +6,7 @@ import hashlib
 import textwrap
 import datetime
 import pytest
+import platform
 from io import open
 try:
     to_unicode = unicode
@@ -180,10 +181,11 @@ def __helper(filepath):
         test = DockerEnvironmentDriver(filepath=filepath)
         test.init()
         definition_path = os.path.join(filepath, "Dockerfile")
-        with open(definition_path, "a+") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo hello")))
-        test.build("docker-test", definition_path)
+        if platform.system() == "Windows":
+            with open(definition_path, "w") as f:
+                f.write(to_unicode("FROM alpine:3.5" + "\n"))
+                f.write(to_unicode(str("RUN echo hello")))
+            test.build("docker-test", definition_path)
         return False
     except (EnvironmentInitFailed, EnvironmentExecutionException):
         return True
