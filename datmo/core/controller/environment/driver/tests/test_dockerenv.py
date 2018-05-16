@@ -798,6 +798,7 @@ class TestDockerEnv():
             os.path.isfile(output_dockerfile_path) and \
             "datmo" in open(output_dockerfile_path, "r").read()
 
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_gpu_enabled(self):
         if not self.docker_environment_manager.gpu_enabled():
             print("GPU not available")
