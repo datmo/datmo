@@ -53,26 +53,19 @@ class CodeController(BaseController):
         create_dict = {
             "model_id": self.model.id,
         }
-        ## Required args for Code entity
-        required_args = ["driver_type", "commit_id"]
-        for required_arg in required_args:
-            # Handle Id if provided or not
-            if required_arg == "driver_type":
-                create_dict[required_arg] = self.code_driver.type
-            elif required_arg == "commit_id":
-                if commit_id:
-                    create_dict[required_arg] = commit_id
-                else:
-                    create_dict[required_arg] = \
-                        self.code_driver.create_ref()
-                # If code object with commit id exists, return it
-                results = self.dal.code.query({
-                    "commit_id": create_dict[required_arg],
-                    "model_id": self.model.id
-                })
-                if results: return results[0]
-            else:
-                raise NotImplementedError()
+
+        create_dict["driver_type"] = self.code_driver.type
+
+        if commit_id:
+            create_dict["commit_id"] = commit_id
+        else:
+            create_dict["commit_id"] = self.code_driver.create_ref()
+        # If code object with commit id exists, return it
+        results = self.dal.code.query({
+            "commit_id": create_dict["commit_id"],
+            "model_id": self.model.id
+        })
+        if results: return results[0]
 
         # Create code and return
         return self.dal.code.create(Code(create_dict))
