@@ -23,9 +23,9 @@ class FileCollectionController(BaseController):
         delete the specified file collection from the project
     """
 
-    def __init__(self, home):
+    def __init__(self):
         try:
-            super(FileCollectionController, self).__init__(home)
+            super(FileCollectionController, self).__init__()
         except EnvironmentInitFailed:
             self.logger.warning(
                 __("warn", "controller.general.environment.failed"))
@@ -54,31 +54,25 @@ class FileCollectionController(BaseController):
             "model_id": self.model.id,
         }
 
-        ## Required args for FileCollection entity
-        required_args = ["filehash", "path", "driver_type"]
-        for required_arg in required_args:
-            if required_arg == "filehash":
-                create_dict[required_arg] = \
-                    self.file_driver.create_collection(filepaths)
-                # If file collection with filehash exists, return it
-                results = self.dal.file_collection.query({
-                    "filehash": create_dict[required_arg]
-                })
-                if results: return results[0]
-            elif required_arg == "path":
-                create_dict[required_arg] = \
-                    self.file_driver.get_relative_collection_path(create_dict['filehash'])
-            elif required_arg == "driver_type":
-                create_dict[required_arg] = self.file_driver.type
-            else:
-                raise NotImplementedError()
+        create_dict["filehash"] = self.file_driver.create_collection(filepaths)
+        # If file collection with filehash exists, return it
+        results = self.dal.file_collection.query({
+            "model_id": self.model.id,
+            "filehash": create_dict["filehash"]
+        })
+        if results: return results[0]
+
+        create_dict["path"] = self.file_driver.get_relative_collection_path(
+            create_dict['filehash'])
+
+        create_dict["driver_type"] = self.file_driver.type
 
         # Create file collection and return
         return self.dal.file_collection.create(FileCollection(create_dict))
 
     def list(self):
         # TODO: Add time filters
-        return self.dal.file_collection.query({})
+        return self.dal.file_collection.query({"model_id": self.model.id})
 
     def delete(self, file_collection_id):
         """Delete all traces of FileCollection object

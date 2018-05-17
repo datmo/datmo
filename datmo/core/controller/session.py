@@ -29,8 +29,8 @@ class SessionController(BaseController):
 
     """
 
-    def __init__(self, home):
-        super(SessionController, self).__init__(home)
+    def __init__(self):
+        super(SessionController, self).__init__()
         if not self.is_initialized:
             raise ProjectNotInitializedException(
                 __("error", "controller.session.__init__"))
@@ -92,7 +92,7 @@ class SessionController(BaseController):
         })
 
     def list(self, sort_key=None, sort_order=None):
-        query = {}
+        query = {"model_id": self.model.id}
         return self.dal.session.query(query, sort_key, sort_order)
 
     def delete_by_name(self, name):

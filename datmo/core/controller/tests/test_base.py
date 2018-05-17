@@ -8,6 +8,7 @@ import os
 import tempfile
 import platform
 
+from datmo.config import Config
 from datmo.core.controller.base import BaseController
 from datmo.core.controller.code.driver.git import GitCodeDriver
 from datmo.core.entity.model import Model
@@ -24,15 +25,18 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestBaseController():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.base = BaseController(home=self.temp_dir)
+        Config().set_home(self.temp_dir)
+        self.base = BaseController()
 
     def teardown_method(self):
         pass
 
     def test_failed_controller_instantiation(self):
+
         failed = False
         try:
-            BaseController(home=os.path.join("does", "not", "exist"))
+            Config().set_home("does_not_exists")
+            BaseController()
         except InvalidProjectPathException:
             failed = True
         assert failed
@@ -45,16 +49,15 @@ class TestBaseController():
         assert self.base.model == None
 
         # Test success case
-        self.base.dal.model.create(
+        self.base._model = self.base.dal.model.create(
             Model({
                 "name": "test",
                 "description": "test"
             }))
-        model = self.base.model
 
-        assert model.id
-        assert model.name == "test"
-        assert model.description == "test"
+        assert self.base.model.id
+        assert self.base.model.name == "test"
+        assert self.base.model.description == "test"
 
     def test_current_session(self):
         # Test failure case
@@ -65,24 +68,23 @@ class TestBaseController():
             failed = True
         assert failed
 
-        # Test success case
-        self.base.dal.model.create(
+        self.base._model = self.base.dal.model.create(
             Model({
                 "name": "test",
                 "description": "test"
             }))
-        _ = self.base.model
+
         self.base.dal.session.create(
             Session({
                 "name": "test",
-                "model_id": "test",
+                "model_id": self.base.model_id,
                 "current": True
             }))
         session = self.base.current_session
 
         assert session.id
         assert session.name == "test"
-        assert session.model_id == "test"
+        assert session.model_id == self.base.model_id
         assert session.current == True
 
     def test_code_manager(self):

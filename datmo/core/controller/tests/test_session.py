@@ -6,6 +6,7 @@ import shutil
 import tempfile
 import platform
 
+from datmo.config import Config
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.session import SessionController
 from datmo.core.util.exceptions import InvalidArgumentType, ProjectNotInitializedException, InvalidProjectPathException
@@ -19,31 +20,15 @@ class TestSessionController():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        Config().set_home(self.temp_dir)
 
     def teardown_method(self):
         shutil.rmtree(self.temp_dir)
 
     def __setup(self):
-        self.project = ProjectController(self.temp_dir)
+        self.project = ProjectController()
         self.project.init("test", "test description")
-        self.session = SessionController(self.temp_dir)
-
-    def test_init_fail_project_not_init(self):
-        failed = False
-        try:
-            SessionController(self.temp_dir)
-        except ProjectNotInitializedException:
-            failed = True
-        assert failed
-
-    def test_init_fail_invalid_path(self):
-        test_home = "some_random_dir"
-        failed = False
-        try:
-            SessionController(test_home)
-        except InvalidProjectPathException:
-            failed = True
-        assert failed
+        self.session = SessionController()
 
     def test_find_default_session(self):
         self.__setup()

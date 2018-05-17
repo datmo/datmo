@@ -21,6 +21,7 @@ try:
 except NameError:
     to_unicode = str
 
+from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
@@ -38,17 +39,18 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestSnapshot():
     def setup_class(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        Config().set_home(self.temp_dir)
         self.cli_helper = Helper()
 
     def teardown_class(self):
         pass
 
     def __set_variables(self):
-        self.project = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.project = ProjectCommand(self.cli_helper)
         self.project.parse(
             ["init", "--name", "foobar", "--description", "test model"])
         self.project.execute()
-        self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
+        self.snapshot = SnapshotCommand(self.cli_helper)
 
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
@@ -78,7 +80,7 @@ class TestSnapshot():
     def test_snapshot_project_not_init(self):
         failed = False
         try:
-            self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
+            self.snapshot = SnapshotCommand(self.cli_helper)
         except ProjectNotInitializedException:
             failed = True
         assert failed
@@ -191,7 +193,7 @@ class TestSnapshot():
         # create task
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-        self.task = TaskCommand(self.temp_dir, self.cli_helper)
+        self.task = TaskCommand(self.cli_helper)
         self.task.parse([
             "task", "run", "--environment-def", test_dockerfile, test_command
         ])
@@ -221,7 +223,7 @@ class TestSnapshot():
         # create task
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-        self.task = TaskCommand(self.temp_dir, self.cli_helper)
+        self.task = TaskCommand(self.cli_helper)
         self.task.parse([
             "task", "run", "--environment-def", test_dockerfile, test_command
         ])

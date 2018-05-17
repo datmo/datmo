@@ -30,9 +30,9 @@ class EnvironmentController(BaseController):
         Delete the specified environment from the project
     """
 
-    def __init__(self, home):
-        super(EnvironmentController, self).__init__(home)
-        self.file_collection = FileCollectionController(home)
+    def __init__(self):
+        super(EnvironmentController, self).__init__()
+        self.file_collection = FileCollectionController()
 
     def create(self, dictionary):
         """Create an environment
@@ -118,12 +118,14 @@ class EnvironmentController(BaseController):
         os.remove(hardware_info_filepath)
 
         create_dict['unique_hash'] = file_collection_obj.filehash
+
         # Check if unique hash is unique or not.
         # If not, DO NOT CREATE Environment and return existing Environment object
         results = self.dal.environment.query({
             "unique_hash": file_collection_obj.filehash
         })
-        if results: return results[0]
+        if results:
+            return results[0]
 
         # Optional args for Environment entity
         for optional_arg in ["description"]:
@@ -231,7 +233,7 @@ class EnvironmentController(BaseController):
 
     def list(self):
         # TODO: Add time filters
-        return self.dal.environment.query({})
+        return self.dal.environment.query({"model_id": self.model.id})
 
     def delete(self, environment_id):
         """Delete all traces of an environment

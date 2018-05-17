@@ -17,9 +17,9 @@ from datmo.core.util.exceptions import RequiredArgumentMissing
 
 
 class TaskCommand(ProjectCommand):
-    def __init__(self, home, cli_helper):
-        super(TaskCommand, self).__init__(home, cli_helper)
-        self.task_controller = TaskController(home=home)
+    def __init__(self, cli_helper):
+        super(TaskCommand, self).__init__(cli_helper)
+        self.task_controller = TaskController()
 
     def task(self):
         self.parse(["--help"])

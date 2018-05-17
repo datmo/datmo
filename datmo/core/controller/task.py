@@ -41,10 +41,10 @@ class TaskController(BaseController):
         deletes the specified task from the project
     """
 
-    def __init__(self, home):
-        super(TaskController, self).__init__(home)
-        self.environment = EnvironmentController(home)
-        self.snapshot = SnapshotController(home)
+    def __init__(self):
+        super(TaskController, self).__init__()
+        self.environment = EnvironmentController()
+        self.snapshot = SnapshotController()
         if not self.is_initialized:
             raise ProjectNotInitializedException(
                 __("error", "controller.task.__init__"))
@@ -318,7 +318,7 @@ class TaskController(BaseController):
             return self.dal.task.update(update_task_dict)
 
     def list(self, session_id=None, sort_key=None, sort_order=None):
-        query = {}
+        query = {"model_id": self.model.id}
         if session_id:
             query['session_id'] = session_id
         return self.dal.task.query(query, sort_key, sort_order)

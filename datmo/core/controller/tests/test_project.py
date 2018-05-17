@@ -8,12 +8,14 @@ from __future__ import unicode_literals
 import os
 import tempfile
 import platform
+import shutil
 from io import open
 try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
 
+from datmo.config import Config
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.controller.task import TaskController
@@ -30,10 +32,11 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestProjectController():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.project = ProjectController(self.temp_dir)
+        Config().set_home(self.temp_dir)
+        self.project = ProjectController()
 
     def teardown_method(self):
-        pass
+        shutil.rmtree(self.temp_dir)
 
     def test_init_none(self):
         # Test failed case
@@ -116,8 +119,8 @@ class TestProjectController():
 
     def test_status_snapshot_task(self):
         self.project.init("test4", "test description")
-        self.snapshot = SnapshotController(self.temp_dir)
-        self.task = TaskController(self.temp_dir)
+        self.snapshot = SnapshotController()
+        self.task = TaskController()
 
         # Create files to add
         self.snapshot.file_driver.create("dirpath1", directory=True)
@@ -182,12 +185,18 @@ class TestProjectController():
         status_dict, latest_snapshot, ascending_unstaged_task_list = \
             self.project.status()
 
+        snapshots = self.project.dal.snapshot.query({
+            "model_id": self.project.model.id
+        })
+
+        assert len(snapshots) == 3
+
         assert status_dict
         assert isinstance(status_dict, dict)
         assert status_dict['name'] == "test4"
         assert status_dict['description'] == "test description"
         assert isinstance(status_dict['config'], dict)
         assert isinstance(latest_snapshot, Snapshot)
-        assert latest_snapshot.id == first_snapshot.id
+        assert latest_snapshot.id != first_snapshot.id
         assert isinstance(ascending_unstaged_task_list[0], Task)
         assert ascending_unstaged_task_list[0].id == updated_first_task.id

@@ -445,14 +445,20 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                         docker_shell_cmd_list.append(mapping)
 
                 docker_shell_cmd_list.append(image_name)
+
                 if command:
                     docker_shell_cmd_list.extend(command)
-                return_code = subprocess.call(docker_shell_cmd_list)
-                if return_code != 0:
+                process = subprocess.Popen(
+                    docker_shell_cmd_list,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+                stdout, stderr = process.communicate()
+                return_code = process.returncode
+                if process.returncode != 0:
                     raise EnvironmentExecutionException(
                         __("error",
-                           "controller.environment.driver.docker.run_container",
-                           str(docker_shell_cmd_list)))
+                           "controller.environment.driver.docker.run_command",
+                           stderr.decode('utf-8')))
                 list_process_cmd = list(self.prefix)
                 list_process_cmd.extend(["ps", "-q", "-l"])
                 process = subprocess.Popen(

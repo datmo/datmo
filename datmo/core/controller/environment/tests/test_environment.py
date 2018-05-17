@@ -14,6 +14,7 @@ try:
 except NameError:
     to_unicode = str
 
+from datmo.config import Config
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import \
     EnvironmentController
@@ -30,8 +31,9 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestEnvironmentController():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.project = ProjectController(self.temp_dir)
-        self.environment = EnvironmentController(self.temp_dir)
+        Config().set_home(self.temp_dir)
+        self.project = ProjectController()
+        self.environment = EnvironmentController()
 
     def teardown_method(self):
         pass

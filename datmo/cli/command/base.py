@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+from datmo.config import Config
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import ClassMethodNotFound
 from datmo.cli.parser import get_datmo_parser
@@ -8,8 +9,8 @@ from datmo.core.util.misc_functions import parameterized
 
 
 class BaseCommand(object):
-    def __init__(self, home, cli_helper):
-        self.home = home
+    def __init__(self, cli_helper):
+        self.home = Config().home
         self.cli_helper = cli_helper
         self.logger = DatmoLogger.get_logger(__name__)
         self.parser = get_datmo_parser()

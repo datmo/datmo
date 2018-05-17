@@ -14,6 +14,7 @@ try:
 except NameError:
     to_unicode = str
 
+from datmo.config import Config
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.task import TaskController
@@ -36,27 +37,11 @@ class TestTaskController():
         pass
 
     def __setup(self):
-        self.project = ProjectController(self.temp_dir)
+        Config().set_home(self.temp_dir)
+        self.project = ProjectController()
         self.project.init("test", "test description")
-        self.environment = EnvironmentController(self.temp_dir)
-        self.task = TaskController(self.temp_dir)
-
-    def test_init_fail_project_not_init(self):
-        failed = False
-        try:
-            TaskController(self.temp_dir)
-        except ProjectNotInitializedException:
-            failed = True
-        assert failed
-
-    def test_init_fail_invalid_path(self):
-        test_home = "some_random_dir"
-        failed = False
-        try:
-            TaskController(test_home)
-        except InvalidProjectPathException:
-            failed = True
-        assert failed
+        self.environment = EnvironmentController()
+        self.task = TaskController()
 
     def test_create(self):
         self.__setup()
