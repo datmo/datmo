@@ -299,7 +299,7 @@ class SnapshotController(BaseController):
              visible=None,
              sort_key=None,
              sort_order=None):
-        query = {}
+        query = {"model_id": self.model.id}
         if session_id:
             try:
                 self.dal.session.get_by_id(session_id)

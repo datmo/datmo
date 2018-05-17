@@ -72,7 +72,7 @@ class FileCollectionController(BaseController):
 
     def list(self):
         # TODO: Add time filters
-        return self.dal.file_collection.query({})
+        return self.dal.file_collection.query({"model_id": self.model.id})
 
     def delete(self, file_collection_id):
         """Delete all traces of FileCollection object

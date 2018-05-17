@@ -318,7 +318,7 @@ class TaskController(BaseController):
             return self.dal.task.update(update_task_dict)
 
     def list(self, session_id=None, sort_key=None, sort_order=None):
-        query = {}
+        query = {"model_id": self.model.id}
         if session_id:
             query['session_id'] = session_id
         return self.dal.task.query(query, sort_key, sort_order)

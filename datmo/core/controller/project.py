@@ -45,11 +45,13 @@ class ProjectController(BaseController):
 
         # Create model if new else update
         if is_new_model:
-            _ = self.dal.model.create(
+            self._model = self.dal.model.create(
                 Model({
                     "name": name,
                     "description": description
                 }))
+            # store model_id to prject config file
+            self.config.save("model_id", self.model.id)
         else:
             self._model = self.dal.model.update({
                 "id": self.model.id,
@@ -81,7 +83,7 @@ class ProjectController(BaseController):
         # Create and set current session
         if is_new_model:
             # Create new default session
-            _ = self.dal.session.create(
+            self._current_session = self.dal.session.create(
                 Session({
                     "name": "default",
                     "model_id": self.model.id,
@@ -161,7 +163,12 @@ class ProjectController(BaseController):
 
         # Show the latest snapshot
         descending_snapshots = self.dal.snapshot.query(
-            {}, sort_key="created_at", sort_order="descending")
+            {
+                "model_id": self.model.id
+            },
+            sort_key="created_at",
+            sort_order="descending")
+
         latest_snapshot = descending_snapshots[
             0] if descending_snapshots else None
 
@@ -179,7 +186,11 @@ class ProjectController(BaseController):
         #     task_query = {}
 
         descending_tasks = self.dal.task.query(
-            {}, sort_key="updated_at", sort_order="descending")
+            {
+                "model_id": self.model.id
+            },
+            sort_key="updated_at",
+            sort_order="descending")
 
         ascending_unstaged_tasks = []
         for task in descending_tasks:
