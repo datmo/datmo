@@ -26,6 +26,7 @@ class LocalFileDriver(FileDriver):
     def __init__(self, filepath):
         super(LocalFileDriver, self).__init__()
         self.filepath = filepath
+        self.model_id = Config().project_config.get('model_id')
         # Check if filepath exists
         if not os.path.exists(self.filepath):
             raise PathDoesNotExist(
@@ -221,41 +222,48 @@ class LocalFileDriver(FileDriver):
                        "controller.file.driver.local.create_collection.filepath",
                        filepath))
 
-        # Create temp hash and folder to move all contents from filepaths
-        temp_hash = hashlib.sha1(str(uuid.uuid4()). \
-                                 encode("UTF=8")).hexdigest()[:20]
-        self.ensure_collections_dir()
-        temp_collection_path = os.path.join(self.filepath, ".datmo",
-                                            "collections", temp_hash)
-        os.makedirs(temp_collection_path)
-
         # Populate collection
+        hashes = []
         for filepath in filepaths:
-            _, dirname = os.path.split(filepath)
             if os.path.isdir(filepath):
-                dst_dirpath = os.path.join(temp_collection_path, dirname)
-                self.create(dst_dirpath, directory=True)
-                # All contents of directory are copied into the dst_dirpath
-                self.copytree(filepath, dst_dirpath)
-            elif os.path.isfile(filepath):
-                # File is copied into the collection_path
-                self.copyfile(filepath, temp_collection_path)
+                hashes.append(checksumdir.dirhash(filepath))
+            else:
+                h = hashlib.sha256()
+                with open(filepath, 'rb', buffering=0) as f:
+                    for b in iter(lambda: f.read(128 * 1024), b''):
+                        h.update(b)
+                hashes.append(h.hexdigest())
 
-        # Hash the files to find filehash
-        filehash = checksumdir.dirhash(temp_collection_path)
+        # project directory can change, so we have to hash the relative path
+        # for this model_id instead of the self.filepath
+        def remove_base_path(path):
+            return path.replace(self.filepath, self.model_id)
+
+        # hash the contents(dirhash) and relative filepaths
+        thing_to_hash = str(''.join(hashes) + ','.join(
+            list(map(remove_base_path, filepaths)))).encode('utf-8')
+
+        filehash = hashlib.sha1(thing_to_hash).hexdigest()
 
         # Move contents to folder with filehash as name and remove temp_collection_path
         collection_path = os.path.join(self.filepath, ".datmo", "collections",
                                        filehash)
+
         if os.path.isdir(collection_path):
-            shutil.rmtree(temp_collection_path)
             return filehash
             # raise FileStructureException("exception.file.create_collection", {
             #     "exception": "File collection with id already exists."
             # })
         os.makedirs(collection_path)
-        self.copytree(temp_collection_path, collection_path)
-        shutil.rmtree(temp_collection_path)
+
+        for filepath in filepaths:
+            if os.path.isdir(filepath):
+                new_dir = os.path.join(collection_path,
+                                       os.path.split(filepath)[1])
+                os.makedirs(new_dir)
+                self.copytree(filepath, new_dir)
+            else:
+                self.copyfile(filepath, collection_path)
 
         # Change permissions to read only for collection_path. File collection is immutable
         mode = stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH
