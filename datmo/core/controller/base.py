@@ -185,9 +185,9 @@ class BaseController(object):
                     "datmo.core.storage.driver.blitzdb_dal_driver.BlitzDBDALDriver",
                 "options": {
                     "driver_type":
-                        "file",
+                        "mongo",
                     "connection_string":
-                        os.path.join(self.home, ".datmo/database")
+                        "mongodb://datmo:rox12345@localhost:27017/datmo_db"
                 }
             },
         }
