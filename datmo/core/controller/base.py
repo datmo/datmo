@@ -47,8 +47,10 @@ class BaseController(object):
         self.home = Config().home
         if not os.path.isdir(self.home):
             raise InvalidProjectPathException(
-                __("error", "controller.base.__init__", home))
-        self.config = JSONStore(os.path.join(self.home, ".datmo", ".config"))
+                __("error", "controller.base.__init__", self.home))
+        self.config = JSONStore(
+            os.path.join(self.home, ".datmo", "config.json"))
+        self.model_id = self.config.get("model_id")
         self.logger = DatmoLogger.get_logger(__name__)
         # property caches and initial values
         self._dal = None
@@ -64,15 +66,17 @@ class BaseController(object):
     # Currently pass dal_driver down from controller to controller to ensure syncing dals
     # TODO: To fix dal from different controllers so they sync within one session; they do NOT currently
     def dal(self):
-        if self._dal == None:
+        if self._dal is None:
             self._dal = self.dal_instantiate()
         return self._dal
 
     @property
     def model(self):
-        if self._model == None:
-            models = self.dal.model.query({})
-            self._model = models[0] if models else None
+        if self._model is None:
+            # model_id is stored in .datmo/config.json
+            model_id = self.config.get("model_id")
+            if model_id:
+                self._model = self.dal.model.get_by_id(model_id)
         return self._model
 
     @property
@@ -80,14 +84,17 @@ class BaseController(object):
         if not self.model:
             raise DatmoModelNotInitializedException(
                 __("error", "controller.base.current_session"))
-        if self._current_session == None:
-            sessions = self.dal.session.query({"current": True})
+        if self._current_session is None:
+            sessions = self.dal.session.query({
+                "model_id": self.model_id,
+                "current": True
+            })
             self._current_session = sessions[0] if sessions else None
         return self._current_session
 
     @property
     def code_driver(self):
-        if self._code_driver == None:
+        if self._code_driver is None:
             module_details = self.config_loader("controller.code.driver")
             self._code_driver = module_details["constructor"](
                 **module_details["options"])
@@ -95,7 +102,7 @@ class BaseController(object):
 
     @property
     def file_driver(self):
-        if self._file_driver == None:
+        if self._file_driver is None:
             module_details = self.config_loader("controller.file.driver")
             self._file_driver = module_details["constructor"](
                 **module_details["options"])
@@ -103,7 +110,7 @@ class BaseController(object):
 
     @property
     def environment_driver(self):
-        if self._environment_driver == None:
+        if self._environment_driver is None:
             module_details = self.config_loader(
                 "controller.environment.driver")
             self._environment_driver = module_details["constructor"](
@@ -114,8 +121,7 @@ class BaseController(object):
     def is_initialized(self):
         if not self._is_initialized:
             if self.code_driver.is_initialized and \
-                self.file_driver.is_initialized and \
-                 self.model:
+                self.file_driver.is_initialized:
                 self._is_initialized = True
         return self._is_initialized
 
