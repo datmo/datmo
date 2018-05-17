@@ -33,6 +33,7 @@ class Config(object):
             DatmoLogger.get_logger(__name__).info("initalizing")
             self.data_cache = JSONStore(
                 os.path.join(os.path.expanduser("~"), ".datmo", "cache.json"))
+            self._project_config = None
 
         @property
         def home(self):
@@ -40,6 +41,15 @@ class Config(object):
 
         def set_home(self, home_path):
             self._home = home_path
+
+        @property
+        def project_config(self):
+            if self._project_config is None:
+                if self._home is None:
+                    raise Exception("Config().home is not set")
+                self._project_config = JSONStore(
+                    os.path.join(self._home, ".datmo", "config.json"))
+            return self._project_config
 
         def get_cache_item(self, key):
             cache_expire_key = 'cache_key_expires.' + key
