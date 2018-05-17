@@ -10,6 +10,7 @@ try:
 except NameError:
     to_unicode = str
 
+from datmo.config import Config
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.file.file_collection import \
     FileCollectionController
@@ -24,8 +25,9 @@ class TestFileCollectionController():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.project = ProjectController(self.temp_dir)
-        self.file_collection = FileCollectionController(self.temp_dir)
+        Config().set_home(self.temp_dir)
+        self.project = ProjectController()
+        self.file_collection = FileCollectionController()
 
     def teardown_method(self):
         pass

@@ -20,6 +20,7 @@ def main():
     # This is required for logging to place the logs in a
     # place for the user.
     config = Config()
+    config.home = os.getcwd()
 
     log = DatmoLogger.get_logger(__name__)
     log.info("handling command %s", config.home)

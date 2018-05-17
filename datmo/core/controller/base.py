@@ -42,8 +42,8 @@ class BaseController(object):
         Return the configuration defaults
     """
 
-    def __init__(self, home):
-        self.home = home
+    def __init__(self):
+        self.home = Config().home
         if not os.path.isdir(self.home):
             raise InvalidProjectPathException(
                 __("error", "controller.base.__init__", home))

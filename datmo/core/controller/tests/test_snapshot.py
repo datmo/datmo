@@ -10,6 +10,7 @@ try:
 except NameError:
     to_unicode = str
 
+from datmo.config import Config
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.controller.task import TaskController
@@ -29,32 +30,17 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestSnapshotController():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        Config().set_home(self.temp_dir)
 
     def teardown_method(self):
         pass
 
     def __setup(self):
-        self.project = ProjectController(self.temp_dir)
+        Config().set_home(self.temp_dir)
+        self.project = ProjectController()
         self.project.init("test", "test description")
-        self.task = TaskController(self.temp_dir)
-        self.snapshot = SnapshotController(self.temp_dir)
-
-    def test_init_fail_project_not_init(self):
-        failed = False
-        try:
-            SnapshotController(self.temp_dir)
-        except ProjectNotInitializedException:
-            failed = True
-        assert failed
-
-    def test_init_fail_invalid_path(self):
-        test_home = "some_random_dir"
-        failed = False
-        try:
-            SnapshotController(test_home)
-        except InvalidProjectPathException:
-            failed = True
-        assert failed
+        self.task = TaskController()
+        self.snapshot = SnapshotController()
 
     def test_create_fail_no_message(self):
         self.__setup()

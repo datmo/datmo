@@ -38,8 +38,7 @@ class Config(object):
         def home(self):
             return self._home
 
-        @home.setter
-        def home(self, home_path):
+        def set_home(self, home_path):
             self._home = home_path
 
         def get_cache_item(self, key):

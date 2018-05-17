@@ -6,6 +6,7 @@ try:
 except NameError:
     basestring = str
 
+from datmo.config import Config
 from datmo.core.controller.task import TaskController
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.util.exceptions import InvalidArgumentType
@@ -18,9 +19,6 @@ class Task():
     ----------
     task_entity : datmo.core.entity.task.Task
         core task entity to reference
-    home : str, optional
-        root directory of the project
-        (default is CWD, if not provided)
 
     Attributes
     ----------
@@ -55,15 +53,12 @@ class Task():
     InvalidArgumentType
     """
 
-    def __init__(self, task_entity, home=None):
-        if not home:
-            home = os.getcwd()
+    def __init__(self, task_entity):
 
         if not isinstance(task_entity, CoreTask):
             raise InvalidArgumentType()
 
         self._core_task = task_entity
-        self._home = home
 
         self.id = self._core_task.id
         self.model_id = self._core_task.model_id
@@ -94,14 +89,14 @@ class Task():
         list
             list of file objects associated with the task
         """
-        task_controller = TaskController(home=self._home)
+        task_controller = TaskController()
         return task_controller.get_files(self.id, mode=mode)
 
     def __eq__(self, other):
         return self.id == other.id if other else False
 
 
-def run(command, env=None, home=None):
+def run(command, env=None):
     """Run the code or script inside
 
     The project must be created before this is implemented. You can do that by using
@@ -118,9 +113,6 @@ def run(command, env=None, home=None):
         the location for the environment definition path
         (default is None, which will defer to the environment to find a default environment,
         or will fail if not found)
-    home : str, optional
-        absolute home path of the project
-        (default is None, which will use the CWD as the project path)
 
     Returns
     -------
@@ -136,9 +128,8 @@ def run(command, env=None, home=None):
     >>> datmo.task.run(command="python script.py")
     >>> datmo.task.run(command="python script.py", env='Dockerfile')
     """
-    if not home:
-        home = os.getcwd()
-    task_controller = TaskController(home=home)
+
+    task_controller = TaskController()
 
     # Create input dictionaries
     snapshot_dict = {}
@@ -171,6 +162,6 @@ def run(command, env=None, home=None):
         core_task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
 
     # Create a new task object for the
-    client_task_obj = Task(updated_core_task_obj, home=home)
+    client_task_obj = Task(updated_core_task_obj)
 
     return client_task_obj

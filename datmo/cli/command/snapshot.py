@@ -10,11 +10,11 @@ from datmo.core.controller.snapshot import SnapshotController
 
 
 class SnapshotCommand(ProjectCommand):
-    def __init__(self, home, cli_helper):
-        super(SnapshotCommand, self).__init__(home, cli_helper)
+    def __init__(self, cli_helper):
+        super(SnapshotCommand, self).__init__(cli_helper)
         # dest="subcommand" argument will populate a "subcommand" property with the subparsers name
         # example  "subcommand"="create"  or "subcommand"="ls"
-        self.snapshot_controller = SnapshotController(home=home)
+        self.snapshot_controller = SnapshotController()
 
     def usage(self):
         self.cli_helper.echo(__("argparser", "cli.snapshot.usage"))

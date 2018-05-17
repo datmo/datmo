@@ -24,6 +24,7 @@ try:
 except NameError:
     to_unicode = str
 
+from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
@@ -39,18 +40,19 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestTaskCommand():
     def setup_class(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        Config().set_home(self.temp_dir)
         self.cli_helper = Helper()
 
     def teardown_class(self):
         pass
 
     def __set_variables(self):
-        self.project = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.project = ProjectCommand(self.cli_helper)
         self.project.parse(
             ["init", "--name", "foobar", "--description", "test model"])
         self.project.execute()
 
-        self.task = TaskCommand(self.temp_dir, self.cli_helper)
+        self.task = TaskCommand(self.cli_helper)
 
         # Create environment_driver definition
         env_def_path = os.path.join(self.temp_dir, "Dockerfile")
@@ -60,7 +62,7 @@ class TestTaskCommand():
     def test_task_project_not_init(self):
         failed = False
         try:
-            self.task = TaskCommand(self.temp_dir, self.cli_helper)
+            self.task = TaskCommand(self.cli_helper)
         except ProjectNotInitializedException:
             failed = True
         assert failed
@@ -159,7 +161,7 @@ class TestTaskCommand():
     #
     #     def task_exec_func(procnum, return_dict):
     #         print("Creating Task object")
-    #         task = TaskCommand(self.temp_dir, self.cli_helper)
+    #         task = TaskCommand(self.cli_helper)
     #         print("Parsing command")
     #         task.parse(
     #             ["task", "run", "--environment-def", test_dockerfile, test_command])

@@ -40,11 +40,11 @@ class SnapshotController(BaseController):
 
     """
 
-    def __init__(self, home):
-        super(SnapshotController, self).__init__(home)
-        self.code = CodeController(home)
-        self.file_collection = FileCollectionController(home)
-        self.environment = EnvironmentController(home)
+    def __init__(self):
+        super(SnapshotController, self).__init__()
+        self.code = CodeController()
+        self.file_collection = FileCollectionController()
+        self.environment = EnvironmentController()
         if not self.is_initialized:
             raise ProjectNotInitializedException(
                 __("error", "controller.snapshot.__init__"))

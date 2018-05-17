@@ -12,6 +12,8 @@ from io import TextIOWrapper
 
 from datmo.core.controller.file.driver.local import LocalFileDriver
 from datmo.core.util.exceptions import PathDoesNotExist
+from datmo.core.controller.project import ProjectController
+from datmo.config import Config
 
 
 class TestLocalFileDriver():
@@ -27,6 +29,9 @@ class TestLocalFileDriver():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        Config().set_home(self.temp_dir)
+        project = ProjectController()
+        project.init("testing", "test-project")
         self.local_file_driver = LocalFileDriver(filepath=self.temp_dir)
 
     def teardown_method(self):

@@ -7,9 +7,9 @@ from datmo.core.controller.project import ProjectController
 class ProjectCommand(BaseCommand):
     # NOTE: dal_driver is not passed into the project because it is created
     # first by ProjectController and then passed down to all other Controllers
-    def __init__(self, home, cli_helper):
-        super(ProjectCommand, self).__init__(home, cli_helper)
-        self.project_controller = ProjectController(home=home)
+    def __init__(self, cli_helper):
+        super(ProjectCommand, self).__init__(cli_helper)
+        self.project_controller = ProjectController()
 
     def init(self, name, description):
         """Initialize command

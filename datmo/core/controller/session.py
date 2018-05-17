@@ -29,8 +29,8 @@ class SessionController(BaseController):
 
     """
 
-    def __init__(self, home):
-        super(SessionController, self).__init__(home)
+    def __init__(self):
+        super(SessionController, self).__init__()
         if not self.is_initialized:
             raise ProjectNotInitializedException(
                 __("error", "controller.session.__init__"))

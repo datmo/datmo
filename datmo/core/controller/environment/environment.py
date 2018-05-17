@@ -30,9 +30,9 @@ class EnvironmentController(BaseController):
         Delete the specified environment from the project
     """
 
-    def __init__(self, home):
-        super(EnvironmentController, self).__init__(home)
-        self.file_collection = FileCollectionController(home)
+    def __init__(self):
+        super(EnvironmentController, self).__init__()
+        self.file_collection = FileCollectionController()
 
     def create(self, dictionary):
         """Create an environment

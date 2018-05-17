@@ -1,5 +1,6 @@
 import os
 
+from datmo.config import Config
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.util.exceptions import InvalidArgumentType, \
@@ -13,9 +14,6 @@ class Snapshot():
     ----------
     snapshot_entity : datmo.core.entity.snapshot.Snapshot
         core snapshot entity to reference
-    home : str, optional
-        root directory of the project
-        (default is CWD, if not provided)
 
     Attributes
     ----------
@@ -54,15 +52,11 @@ class Snapshot():
     InvalidArgumentType
     """
 
-    def __init__(self, snapshot_entity, home=None):
-        if not home:
-            home = os.getcwd()
-
+    def __init__(self, snapshot_entity):
         if not isinstance(snapshot_entity, CoreSnapshot):
             raise InvalidArgumentType()
 
         self._core_snapshot = snapshot_entity
-        self._home = home
 
         self.id = self._core_snapshot.id
         self.model_id = self._core_snapshot.model_id
@@ -85,7 +79,6 @@ class Snapshot():
 
 def create(message,
            label=None,
-           home=None,
            task_id=None,
            commit_id=None,
            environment_id=None,
@@ -108,9 +101,6 @@ def create(message,
     label : str, optional
         a short description of the snapshot for later reference
         (default is None, which means a blank label is stored)
-    home : str, optional
-        absolute home path of the project
-        (default is None, which will use the CWD as the project path)
     task_id : str, optional
         task object id to use to create snapshot
         if task id is passed then subsequent parameters would be ignored.
@@ -162,9 +152,8 @@ def create(message,
 
     >>> datmo.snapshot.create(message="my first snapshot from task", task_id="1jfkshg049")
     """
-    if not home:
-        home = os.getcwd()
-    snapshot_controller = SnapshotController(home=home)
+
+    snapshot_controller = SnapshotController()
 
     if task_id is not None:
         excluded_args = ["commit_id", "environment_id", "filepaths"]
@@ -178,7 +167,7 @@ def create(message,
             message, task_id, label=label, config=config, stats=stats)
 
         # Create a new snapshot object
-        client_snapshot_obj = Snapshot(core_snapshot_obj, home=home)
+        client_snapshot_obj = Snapshot(core_snapshot_obj)
 
         return client_snapshot_obj
     else:
@@ -204,12 +193,12 @@ def create(message,
         core_snapshot_obj = snapshot_controller.create(snapshot_create_dict)
 
         # Create a new snapshot object
-        client_snapshot_obj = Snapshot(core_snapshot_obj, home=home)
+        client_snapshot_obj = Snapshot(core_snapshot_obj)
 
         return client_snapshot_obj
 
 
-def ls(session_id=None, filter=None, home=None):
+def ls(session_id=None, filter=None):
     """List snapshots within a project
 
     The project must be created before this is implemented. You can do that by using
@@ -226,9 +215,6 @@ def ls(session_id=None, filter=None, home=None):
     filter : str, optional
         a string to use to filter from message and label
         (default is to give all snapshots, unless provided a specific string. eg: best)
-    home : str, optional
-        absolute home path of the project
-        (default is None, which will use the CWD as the project path)
 
     Returns
     -------
@@ -242,9 +228,8 @@ def ls(session_id=None, filter=None, home=None):
     >>> import datmo
     >>> snapshots = datmo.snapshot.ls()
     """
-    if not home:
-        home = os.getcwd()
-    snapshot_controller = SnapshotController(home=home)
+
+    snapshot_controller = SnapshotController()
 
     # add arguments if they are not None
     if not session_id:
@@ -273,6 +258,6 @@ def ls(session_id=None, filter=None, home=None):
 
     # Return Snapshot entities
     return [
-        Snapshot(filtered_core_snapshot_obj, home=home)
+        Snapshot(filtered_core_snapshot_obj)
         for filtered_core_snapshot_obj in filtered_core_snapshot_objs
     ]

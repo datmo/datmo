@@ -5,6 +5,7 @@ import os
 import tempfile
 import platform
 
+from datmo.config import Config
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
 
@@ -17,10 +18,11 @@ class TestSnapshotController():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        Config().set_home(self.temp_dir)
 
-        self.project = ProjectController(self.temp_dir)
+        self.project = ProjectController()
         self.project.init("test", "test description")
-        self.snapshot = SnapshotController(self.temp_dir)
+        self.snapshot = SnapshotController()
 
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")

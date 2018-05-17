@@ -10,6 +10,7 @@ try:
 except NameError:
     to_unicode = str
 
+from datmo.config import Config
 from datmo.snapshot import create, ls
 from datmo.snapshot import Snapshot
 from datmo.task import run
@@ -28,8 +29,8 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestSnapshotModule():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        _ = ProjectController(self.temp_dir).\
-            init("test", "test description")
+        Config().set_home(self.temp_dir)
+        _ = ProjectController().init("test", "test description")
 
     def teardown_method(self):
         pass
@@ -47,7 +48,7 @@ class TestSnapshotModule():
             "stats": {}
         }
         core_snapshot_entity = CoreSnapshot(input_dict)
-        snapshot_entity = Snapshot(core_snapshot_entity, home=self.temp_dir)
+        snapshot_entity = Snapshot(core_snapshot_entity)
 
         for k, v in input_dict.items():
             assert getattr(snapshot_entity, k) == v
@@ -59,7 +60,7 @@ class TestSnapshotModule():
         # check project is not initialized if wrong home
         failed = False
         try:
-            create(message="test", home=os.path.join("does", "not", "exist"))
+            create(message="test")
         except InvalidProjectPathException:
             failed = True
         assert failed
@@ -68,7 +69,7 @@ class TestSnapshotModule():
         # (fails w/ no commit)
         failed = False
         try:
-            _ = create(message="test", home=self.temp_dir)
+            _ = create(message="test")
         except GitCommitDoesNotExist:
             failed = True
         assert failed
@@ -79,7 +80,7 @@ class TestSnapshotModule():
             f.write(to_unicode("import numpy\n"))
             f.write(to_unicode("import sklearn\n"))
 
-        snapshot_obj_1 = create(message="test", home=self.temp_dir)
+        snapshot_obj_1 = create(message="test")
 
         assert snapshot_obj_1
         assert isinstance(snapshot_obj_1, Snapshot)
@@ -94,7 +95,7 @@ class TestSnapshotModule():
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu"))
-        snapshot_obj_2 = create(message="test", home=self.temp_dir)
+        snapshot_obj_2 = create(message="test")
 
         assert snapshot_obj_2
         assert isinstance(snapshot_obj_2, Snapshot)
@@ -119,13 +120,12 @@ class TestSnapshotModule():
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
-        task_obj = run("sh -c echo accuracy:0.45", home=self.temp_dir)
+        task_obj = run("sh -c echo accuracy:0.45")
 
         # 1) Test option 1
         snapshot_obj = create(
             message="my test snapshot",
             task_id=task_obj.id,
-            home=self.temp_dir,
             label="best",
             config={"foo": "bar"})
 
@@ -139,7 +139,6 @@ class TestSnapshotModule():
         snapshot_obj_2 = create(
             message="my test snapshot",
             task_id=task_obj.id,
-            home=self.temp_dir,
             label="best",
             config={"foo": "bar"},
             stats={"foo": "bar"})
@@ -158,7 +157,7 @@ class TestSnapshotModule():
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
-        task_obj = run("sh -c echo accuracy:0.45", home=self.temp_dir)
+        task_obj = run("sh -c echo accuracy:0.45")
 
         # Test if failure if user gives other parameters
         failed = False
@@ -166,7 +165,6 @@ class TestSnapshotModule():
             _ = create(
                 message="my test snapshot",
                 task_id=task_obj.id,
-                home=self.temp_dir,
                 label="best",
                 config={"foo": "bar"},
                 stats={"foo": "bar"},
@@ -180,7 +178,6 @@ class TestSnapshotModule():
             _ = create(
                 message="my test snapshot",
                 task_id=task_obj.id,
-                home=self.temp_dir,
                 label="best",
                 config={"foo": "bar"},
                 stats={"foo": "bar"},
@@ -194,7 +191,6 @@ class TestSnapshotModule():
             _ = create(
                 message="my test snapshot",
                 task_id=task_obj.id,
-                home=self.temp_dir,
                 label="best",
                 config={"foo": "bar"},
                 stats={"foo": "bar"},
@@ -204,18 +200,11 @@ class TestSnapshotModule():
         assert failed
 
     def test_ls(self):
-        # check project is not initialized if wrong home
-        failed = False
-        try:
-            ls(home=os.path.join("does", "not", "exist"))
-        except InvalidProjectPathException:
-            failed = True
-        assert failed
 
         # check session does not exist if wrong session
         failed = False
         try:
-            ls(session_id="does_not_exist", home=self.temp_dir)
+            ls(session_id="does_not_exist")
         except SessionDoesNotExistException:
             failed = True
         assert failed
@@ -226,10 +215,10 @@ class TestSnapshotModule():
             f.write(to_unicode("import numpy\n"))
             f.write(to_unicode("import sklearn\n"))
 
-        create(message="test1", home=self.temp_dir)
+        create(message="test1")
 
         # list all snapshots with no filters
-        snapshot_list_1 = ls(home=self.temp_dir)
+        snapshot_list_1 = ls()
 
         assert snapshot_list_1
         assert len(list(snapshot_list_1)) == 1
@@ -239,10 +228,10 @@ class TestSnapshotModule():
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu"))
-        create(message="test2", home=self.temp_dir)
+        create(message="test2")
 
         # list all snapshots with no filters (works when more than 1 snapshot)
-        snapshot_list_2 = ls(home=self.temp_dir)
+        snapshot_list_2 = ls()
 
         assert snapshot_list_2
         assert len(list(snapshot_list_2)) == 2
@@ -250,13 +239,13 @@ class TestSnapshotModule():
         assert isinstance(snapshot_list_2[1], Snapshot)
 
         # list snapshots with specific filter
-        snapshot_list_3 = ls(filter='test2', home=self.temp_dir)
+        snapshot_list_3 = ls(filter='test2')
 
         assert snapshot_list_3
         assert len(list(snapshot_list_3)) == 1
         assert isinstance(snapshot_list_3[0], Snapshot)
 
         # list snapshots with filter of none
-        snapshot_list_4 = ls(filter='test3', home=self.temp_dir)
+        snapshot_list_4 = ls(filter='test3')
 
         assert len(list(snapshot_list_4)) == 0

@@ -41,10 +41,10 @@ class TaskController(BaseController):
         deletes the specified task from the project
     """
 
-    def __init__(self, home):
-        super(TaskController, self).__init__(home)
-        self.environment = EnvironmentController(home)
-        self.snapshot = SnapshotController(home)
+    def __init__(self):
+        super(TaskController, self).__init__()
+        self.environment = EnvironmentController()
+        self.snapshot = SnapshotController()
         if not self.is_initialized:
             raise ProjectNotInitializedException(
                 __("error", "controller.task.__init__"))

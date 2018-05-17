@@ -10,6 +10,7 @@ try:
 except NameError:
     to_unicode = str
 
+from datmo.config import Config
 from datmo.task import run
 from datmo.task import Task
 from datmo.core.entity.task import Task as CoreTask
@@ -25,7 +26,8 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestTaskModule():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        _ = ProjectController(self.temp_dir).\
+        Config().set_home(self.temp_dir)
+        _ = ProjectController().\
             init("test", "test description")
 
     def teardown_method(self):
@@ -39,7 +41,7 @@ class TestTaskModule():
             "command": "python test.py"
         }
         core_task_entity = CoreTask(input_dict)
-        task_entity = Task(core_task_entity, home=self.temp_dir)
+        task_entity = Task(core_task_entity)
 
         for k, v in input_dict.items():
             assert getattr(task_entity, k) == v
@@ -60,7 +62,7 @@ class TestTaskModule():
         # 1) Test out option 1)
         failed = False
         try:
-            _ = run(command="test", home=self.temp_dir)
+            _ = run(command="test")
         except GitCommitDoesNotExist:
             failed = True
         assert failed
@@ -75,7 +77,7 @@ class TestTaskModule():
             f.write(to_unicode("print(' accuracy: 0.56 ')\n"))
 
         # 2) Test out option 2
-        task_obj_0 = run(command="python script.py", home=self.temp_dir)
+        task_obj_0 = run(command="python script.py")
         assert isinstance(task_obj_0, Task)
         assert task_obj_0.id
         assert 'hello' in task_obj_0.logs
@@ -87,18 +89,14 @@ class TestTaskModule():
             f.write(to_unicode("FROM datmo/xgboost:cpu"))
 
         # 3) Test out option 3
-        task_obj_1 = run(
-            command="python script.py", env=test_filepath, home=self.temp_dir)
+        task_obj_1 = run(command="python script.py", env=test_filepath)
         assert isinstance(task_obj_1, Task)
         assert task_obj_1.id
         assert 'hello' in task_obj_1.logs
         assert task_obj_1.results == {"accuracy": "0.56"}
 
         # 4) Test out option 4
-        task_obj_2 = run(
-            command=["python", "script.py"],
-            env=test_filepath,
-            home=self.temp_dir)
+        task_obj_2 = run(command=["python", "script.py"], env=test_filepath)
         assert isinstance(task_obj_2, Task)
         assert task_obj_2.id
         assert 'hello' in task_obj_2.logs
@@ -113,7 +111,7 @@ class TestTaskModule():
             "command": "python test.py"
         }
         core_task_entity = CoreTask(input_dict)
-        task_entity = Task(core_task_entity, home=self.temp_dir)
+        task_entity = Task(core_task_entity)
         # Test failure because entity has not been created by controller
         failed = False
         try:
@@ -133,8 +131,7 @@ class TestTaskModule():
         with open(test_filepath, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu"))
 
-        task_entity = run(
-            command="python script.py", env=test_filepath, home=self.temp_dir)
+        task_entity = run(command="python script.py", env=test_filepath)
         result = task_entity.files()
 
         assert len(result) == 1

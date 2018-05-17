@@ -13,6 +13,7 @@ except NameError:
     to_unicode = str
 
 import os
+from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.session import SessionCommand
 from datmo.cli.command.project import ProjectCommand
@@ -27,22 +28,23 @@ class TestSession():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        Config().set_home(self.temp_dir)
         self.cli_helper = Helper()
 
     def teardown_class(self):
         pass
 
     def __set_variables(self):
-        self.project = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.project = ProjectCommand(self.cli_helper)
         self.project.parse(
             ["init", "--name", "foobar", "--description", "test model"])
         self.project.execute()
-        self.session_command = SessionCommand(self.temp_dir, self.cli_helper)
+        self.session_command = SessionCommand(self.cli_helper)
 
     def test_session_project_not_init(self):
         failed = False
         try:
-            self.snapshot = SessionCommand(self.temp_dir, self.cli_helper)
+            self.snapshot = SessionCommand(self.cli_helper)
         except ProjectNotInitializedException:
             failed = True
         assert failed

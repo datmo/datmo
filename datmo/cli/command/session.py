@@ -8,11 +8,11 @@ from datmo.cli.command.project import ProjectCommand
 
 
 class SessionCommand(ProjectCommand):
-    def __init__(self, home, cli_helper):
-        super(SessionCommand, self).__init__(home, cli_helper)
+    def __init__(self, cli_helper):
+        super(SessionCommand, self).__init__(cli_helper)
         # dest="subcommand" argument will populate a "subcommand" property with the subparsers name
         # example  "subcommand"="create"  or "subcommand"="ls"
-        self.session_controller = SessionController(home=home)
+        self.session_controller = SessionController()
 
     def session(self):
         self.parse(["--help"])

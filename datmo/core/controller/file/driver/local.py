@@ -15,6 +15,7 @@ from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (PathDoesNotExist, FileIOException,
                                         FileStructureException)
 from datmo.core.controller.file.driver import FileDriver
+from datmo.config import Config
 
 
 class LocalFileDriver(FileDriver):

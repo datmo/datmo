@@ -27,8 +27,8 @@ class ProjectController(BaseController):
         Give the user a picture of the status of the project, snapshots, and tasks
     """
 
-    def __init__(self, home):
-        super(ProjectController, self).__init__(home)
+    def __init__(self):
+        super(ProjectController, self).__init__()
 
     def init(self, name, description):
         # Create the Model, is it new or update?

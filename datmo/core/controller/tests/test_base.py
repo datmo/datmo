@@ -8,6 +8,7 @@ import os
 import tempfile
 import platform
 
+from datmo.config import Config
 from datmo.core.controller.base import BaseController
 from datmo.core.controller.code.driver.git import GitCodeDriver
 from datmo.core.entity.model import Model
@@ -24,7 +25,8 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestBaseController():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.base = BaseController(home=self.temp_dir)
+        Config().set_home(self.temp_dir)
+        self.base = BaseController()
 
     def teardown_method(self):
         pass
@@ -32,7 +34,8 @@ class TestBaseController():
     def test_failed_controller_instantiation(self):
         failed = False
         try:
-            BaseController(home=os.path.join("does", "not", "exist"))
+            Config().set_home("does_not_exists")
+            BaseController()
         except InvalidProjectPathException:
             failed = True
         assert failed

@@ -23,9 +23,9 @@ class FileCollectionController(BaseController):
         delete the specified file collection from the project
     """
 
-    def __init__(self, home):
+    def __init__(self):
         try:
-            super(FileCollectionController, self).__init__(home)
+            super(FileCollectionController, self).__init__()
         except EnvironmentInitFailed:
             self.logger.warning(
                 __("warn", "controller.general.environment.failed"))
