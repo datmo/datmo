@@ -317,14 +317,14 @@ which allows you to keep track of 5 components at once
         "cli.snapshot.usage":
             """""",
         "cli.snapshot.description":
-            """ 
+            """
 Datmo snapshots allow you to save the state of your model and experiments
 by keeping track of your source code, environment, configuration, metrics
 and large files.
             """,
         "cli.snapshot.create.description":
             """
-Run snapshot create any time you want to save the results of your 
+Run snapshot create any time you want to save the results of your
 experiments. You can then view all snapshots with the `snapshot ls` command.
         """
     }

@@ -4,6 +4,7 @@ Tests for CodeController
 import os
 import tempfile
 import platform
+import shutil
 from io import open
 try:
     to_unicode = unicode
@@ -29,7 +30,7 @@ class TestCodeController():
         self.code = CodeController()
 
     def teardown_method(self):
-        pass
+        shutil.rmtree(self.temp_dir)
 
     def test_create(self):
         self.project.init("test3", "test description")
@@ -87,6 +88,8 @@ class TestCodeController():
 
         # List all code and ensure they exist
         result = self.code.list()
+
+
 
         assert len(result) == 2 and \
             code_obj_1 in result and \

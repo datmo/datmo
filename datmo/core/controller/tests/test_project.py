@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import os
 import tempfile
 import platform
+import shutil
 from io import open
 try:
     to_unicode = unicode
@@ -35,7 +36,7 @@ class TestProjectController():
         self.project = ProjectController()
 
     def teardown_method(self):
-        pass
+        shutil.rmtree(self.temp_dir)
 
     def test_init_none(self):
         # Test failed case
@@ -184,12 +185,18 @@ class TestProjectController():
         status_dict, latest_snapshot, ascending_unstaged_task_list = \
             self.project.status()
 
+        snapshots = self.project.dal.snapshot.query({
+            "model_id": self.project.model.id
+        })
+
+        assert len(snapshots) == 3
+
         assert status_dict
         assert isinstance(status_dict, dict)
         assert status_dict['name'] == "test4"
         assert status_dict['description'] == "test description"
         assert isinstance(status_dict['config'], dict)
         assert isinstance(latest_snapshot, Snapshot)
-        assert latest_snapshot.id == first_snapshot.id
+        assert latest_snapshot.id != first_snapshot.id
         assert isinstance(ascending_unstaged_task_list[0], Task)
         assert ascending_unstaged_task_list[0].id == updated_first_task.id

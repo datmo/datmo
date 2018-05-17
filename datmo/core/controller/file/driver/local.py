@@ -102,11 +102,8 @@ class LocalFileDriver(FileDriver):
     def is_initialized(self):
         if self.exists_datmo_file_structure():
             if self.exists_collections_dir():
-                if os.path.isdir(
-                        os.path.join(self.filepath, ".datmo", "collections",
-                                     "d41d8cd98f00b204e9800998ecf8427e")):
-                    self._is_initialized = True
-                    return self._is_initialized
+                self._is_initialized = True
+                return self._is_initialized
         self._is_initialized = False
         return self._is_initialized
 
@@ -118,14 +115,7 @@ class LocalFileDriver(FileDriver):
             self.ensure_datmo_file_structure()
             # Ensure the collections directory exists
             self.ensure_collections_dir()
-            # Ensure the empty collection exists
-            if not os.path.isdir(
-                    os.path.join(self.filepath, ".datmo", "collections",
-                                 "d41d8cd98f00b204e9800998ecf8427e")):
-                self.create(
-                    os.path.join(".datmo", "collections",
-                                 "d41d8cd98f00b204e9800998ecf8427e"),
-                    directory=True)
+            self.create_collection([])
         except Exception as e:
             raise FileIOException(
                 __("error", "controller.file.driver.local.init", str(e)))

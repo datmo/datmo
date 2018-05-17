@@ -32,6 +32,7 @@ class TestBaseController():
         pass
 
     def test_failed_controller_instantiation(self):
+
         failed = False
         try:
             Config().set_home("does_not_exists")
@@ -48,16 +49,15 @@ class TestBaseController():
         assert self.base.model == None
 
         # Test success case
-        self.base.dal.model.create(
+        self.base._model = self.base.dal.model.create(
             Model({
                 "name": "test",
                 "description": "test"
             }))
-        model = self.base.model
 
-        assert model.id
-        assert model.name == "test"
-        assert model.description == "test"
+        assert self.base.model.id
+        assert self.base.model.name == "test"
+        assert self.base.model.description == "test"
 
     def test_current_session(self):
         # Test failure case
@@ -68,24 +68,23 @@ class TestBaseController():
             failed = True
         assert failed
 
-        # Test success case
-        self.base.dal.model.create(
+        self.base._model = self.base.dal.model.create(
             Model({
                 "name": "test",
                 "description": "test"
             }))
-        _ = self.base.model
+
         self.base.dal.session.create(
             Session({
                 "name": "test",
-                "model_id": "test",
+                "model_id": self.base.model_id,
                 "current": True
             }))
         session = self.base.current_session
 
         assert session.id
         assert session.name == "test"
-        assert session.model_id == "test"
+        assert session.model_id == self.base.model_id
         assert session.current == True
 
     def test_code_manager(self):

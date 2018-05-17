@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import os
 import tempfile
 import platform
+import shutil
 from io import TextIOWrapper
 
 from datmo.core.controller.file.driver.local import LocalFileDriver
@@ -41,7 +42,6 @@ class TestLocalFileDriver():
         assert self.local_file_driver != None
 
     # Static Method Tests
-
     def test_get_safe_dst_filepath(self):
         # Create first file to copy
         relative_filepath = "test.json"
@@ -168,6 +168,7 @@ class TestLocalFileDriver():
                os.path.isdir(filepath)
 
     def test_exists_hidden_datmo_dir(self):
+        shutil.rmtree(self.temp_dir)
         result = self.local_file_driver.exists_hidden_datmo_dir()
         assert result == False
         self.local_file_driver.create_hidden_datmo_dir()
@@ -194,6 +195,7 @@ class TestLocalFileDriver():
                os.path.isdir(filepath)
 
     def test_exists_datmo_file_structure(self):
+        shutil.rmtree(self.temp_dir)
         result = self.local_file_driver.exists_datmo_file_structure()
         assert result == False
         self.local_file_driver.ensure_datmo_file_structure()
@@ -223,6 +225,7 @@ class TestLocalFileDriver():
     def test_create_collections_dir(self):
         collections_path = os.path.join(self.local_file_driver.filepath,
                                         ".datmo", "collections")
+        shutil.rmtree(collections_path)
         thrown = False
         try:
             self.local_file_driver.create_collections_dir()
@@ -238,6 +241,7 @@ class TestLocalFileDriver():
     def test_exists_collections_dir(self):
         collections_path = os.path.join(self.local_file_driver.filepath,
                                         ".datmo", "collections")
+        shutil.rmtree(collections_path)
         result = self.local_file_driver.exists_collections_dir()
         assert result == False and \
             not os.path.isdir(collections_path)
@@ -269,16 +273,16 @@ class TestLocalFileDriver():
                                         ".datmo", "collections")
 
         # Test empty file collection already exists
-        filehash_empty = self.local_file_driver. \
-            create_collection([])
+        filehash_empty = self.local_file_driver.create_collection([])
         collection_path_empty = os.path.join(collections_path, filehash_empty)
 
         assert os.path.isdir(collection_path_empty)
+        print("\nDEBUGUGGG")
+        print(collections_path, os.listdir(collections_path))
         assert len(os.listdir(collections_path)) == 1
 
         # Test creating another empty file collection (should not fail again)
-        filehash_empty = self.local_file_driver. \
-            create_collection([])
+        filehash_empty = self.local_file_driver.create_collection([])
         collection_path_empty = os.path.join(collections_path, filehash_empty)
 
         assert os.path.isdir(collection_path_empty)
@@ -292,8 +296,8 @@ class TestLocalFileDriver():
         dirpath1 = os.path.join(self.local_file_driver.filepath, "dirpath1")
         dirpath2 = os.path.join(self.local_file_driver.filepath, "dirpath2")
         filepath1 = os.path.join(self.local_file_driver.filepath, "filepath1")
-        filehash = self.local_file_driver.\
-            create_collection([dirpath1, dirpath2, filepath1])
+        filehash = self.local_file_driver.create_collection(
+            [dirpath1, dirpath2, filepath1])
         collection_path = os.path.join(collections_path, filehash)
 
         assert os.path.isdir(collection_path)
