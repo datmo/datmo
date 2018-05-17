@@ -10,9 +10,9 @@ from datmo.core.controller.task import TaskController
 class ProjectCommand(BaseCommand):
     # NOTE: dal_driver is not passed into the project because it is created
     # first by ProjectController and then passed down to all other Controllers
-    def __init__(self, home, cli_helper):
-        super(ProjectCommand, self).__init__(home, cli_helper)
-        self.project_controller = ProjectController(home=home)
+    def __init__(self, cli_helper):
+        super(ProjectCommand, self).__init__(cli_helper)
+        self.project_controller = ProjectController()
 
     def init(self, name, description):
         """Initialize command
@@ -37,7 +37,7 @@ class ProjectCommand(BaseCommand):
             self.cli_helper.echo(
                 __("info", "cli.project.init.create", {
                     "name": name,
-                    "path": self.home
+                    "path": self.project_controller.home
                 }))
             if not name:
                 name = self.cli_helper.prompt(
@@ -51,21 +51,22 @@ class ProjectCommand(BaseCommand):
                     self.cli_helper.echo(
                         __("info", "cli.project.init.create.success", {
                             "name": name,
-                            "path": self.home
+                            "path": self.project_controller.home
                         }))
             except Exception:
                 self.cli_helper.echo(
                     __("info", "cli.project.init.create.failure", {
                         "name": name,
-                        "path": self.home
+                        "path": self.project_controller.home
                     }))
                 return None
         else:  # Update the current project
             self.cli_helper.echo(
-                __("info", "cli.project.init.update", {
-                    "name": self.project_controller.model.name,
-                    "path": self.home
-                }))
+                __(
+                    "info", "cli.project.init.update", {
+                        "name": self.project_controller.model.name,
+                        "path": self.project_controller.home
+                    }))
             if not name:
                 name = self.cli_helper.prompt(
                     __("prompt", "cli.project.init.name"))
@@ -84,13 +85,13 @@ class ProjectCommand(BaseCommand):
                     self.cli_helper.echo(
                         __("info", "cli.project.init.update.success", {
                             "name": name,
-                            "path": self.home
+                            "path": self.project_controller.home
                         }))
             except Exception:
                 self.cli_helper.echo(
                     __("info", "cli.project.init.update.failure", {
                         "name": name,
-                        "path": self.home
+                        "path": self.project_controller.home
                     }))
                 return None
 
@@ -105,7 +106,7 @@ class ProjectCommand(BaseCommand):
             __("prompt", "cli.project.environment.setup"))
         if environment_setup:
             # Setting up the environment definition file
-            self.environment_controller = EnvironmentController(home=self.home)
+            self.environment_controller = EnvironmentController()
             available_environments = self.environment_controller.get_supported_environments(
             )
             input_environment_name = self.cli_helper.prompt_available_environments(
@@ -196,8 +197,7 @@ class ProjectCommand(BaseCommand):
 
     def notebook(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.project.notebook"))
-        self.task_controller = TaskController(
-            home=self.project_controller.home)
+        self.task_controller = TaskController()
 
         # Creating input dictionaries
         snapshot_dict = {}

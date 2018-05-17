@@ -15,13 +15,14 @@ try:
 except NameError:
     to_unicode = str
 
+from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.session import SessionCommand
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.util.exceptions import ProjectNotInitialized
 
 
-class TestSession():
+class TestSessionCommand():
     def setup_class(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = "/tmp" if not platform.system(
@@ -29,13 +30,14 @@ class TestSession():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        Config().set_home(self.temp_dir)
         self.cli_helper = Helper()
 
     def teardown_class(self):
         pass
 
     def __set_variables(self):
-        self.project_command = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.project_command = ProjectCommand(self.cli_helper)
         self.project_command.parse(
             ["init", "--name", "foobar", "--description", "test model"])
 
@@ -44,12 +46,12 @@ class TestSession():
             return self.project_command.execute()
 
         dummy(self)
-        self.session_command = SessionCommand(self.temp_dir, self.cli_helper)
+        self.session_command = SessionCommand(self.cli_helper)
 
     def test_session_project_not_init(self):
         failed = False
         try:
-            self.snapshot = SessionCommand(self.temp_dir, self.cli_helper)
+            self.snapshot = SessionCommand(self.cli_helper)
         except ProjectNotInitialized:
             failed = True
         assert failed

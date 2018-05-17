@@ -11,11 +11,11 @@ from datmo.core.util.misc_functions import printable_string
 
 
 class EnvironmentCommand(ProjectCommand):
-    def __init__(self, home, cli_helper):
-        super(EnvironmentCommand, self).__init__(home, cli_helper)
+    def __init__(self, cli_helper):
+        super(EnvironmentCommand, self).__init__(cli_helper)
         # dest="subcommand" argument will populate a "subcommand" property with the subparsers name
         # example  "subcommand"="create"  or "subcommand"="ls"
-        self.environment_controller = EnvironmentController(home=home)
+        self.environment_controller = EnvironmentController()
 
     def environment(self):
         self.parse(["--help"])

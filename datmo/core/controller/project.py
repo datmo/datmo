@@ -27,8 +27,8 @@ class ProjectController(BaseController):
         Give the user a picture of the status of the project, snapshots, and tasks
     """
 
-    def __init__(self, home):
-        super(ProjectController, self).__init__(home)
+    def __init__(self):
+        super(ProjectController, self).__init__()
 
     def init(self, name, description):
         """ Initialize the project
@@ -209,7 +209,7 @@ class ProjectController(BaseController):
         status_dict = self.model.to_dictionary().copy()
 
         # Show all project settings
-        status_dict["config"] = self.config.to_dict()
+        status_dict["config"] = self.config_store.to_dict()
 
         # Show the latest snapshot
         descending_snapshots = self.dal.snapshot.query(

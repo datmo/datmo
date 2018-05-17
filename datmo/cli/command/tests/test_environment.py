@@ -33,32 +33,33 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.command.environment import EnvironmentCommand
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
+from datmo.config import Config
 
 # provide mountable tmp directory for docker
 tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
 test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 
 
-class TestEnvironment():
+class TestEnvironmentCommand():
     def setup_class(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
+        Config().set_home(self.temp_dir)
 
     def teardown_class(self):
         pass
 
     def __set_variables(self):
-        self.project = ProjectCommand(self.temp_dir, self.cli_helper)
-        self.project.parse(
+        self.project_command = ProjectCommand(self.cli_helper)
+        self.project_command.parse(
             ["init", "--name", "foobar", "--description", "test model"])
 
-        @self.project.cli_helper.input("\n")
+        @self.project_command.cli_helper.input("\n")
         def dummy(self):
-            return self.project.execute()
+            return self.project_command.execute()
 
         dummy(self)
-        self.environment_command = EnvironmentCommand(self.temp_dir,
-                                                      self.cli_helper)
+        self.environment_command = EnvironmentCommand(self.cli_helper)
 
     def test_environment_setup_parameter(self):
         # Setup the environement by passing name
