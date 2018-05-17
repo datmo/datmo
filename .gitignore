@@ -98,3 +98,4 @@ ENV/
 # Rope project settings
 .ropeproject
 foo
+.pytest_cache
