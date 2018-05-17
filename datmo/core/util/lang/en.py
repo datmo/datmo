@@ -185,6 +185,8 @@ MESSAGES = {
             "Error in docker rmi: %s",
         "controller.environment.driver.docker.remove_images":
             "Error in running multiple rmi commands: %s",
+        "controller.environment.driver.docker.run_command":
+            "Error running command: %s",
         "controller.environment.driver.docker.run_container":
             "Error running docker container. Failed command: %s",
         "controller.environment.driver.docker.stop_container":
