@@ -89,15 +89,15 @@ class Snapshot():
 
     def __init__(self, dictionary):
         self.id = dictionary.get('id', None)
-        self.model_id = dictionary['model_id']
-        self.session_id = dictionary['session_id']
-        self.message = dictionary['message']
+        self.model_id = dictionary.get('model_id', None)
+        self.session_id = dictionary.get('session_id', None)
+        self.message = dictionary.get('message', None)
 
-        self.code_id = dictionary['code_id']
-        self.environment_id = dictionary['environment_id']
-        self.file_collection_id = dictionary['file_collection_id']
-        self.config = dictionary['config']
-        self.stats = dictionary['stats']
+        self.code_id = dictionary.get('code_id', None)
+        self.environment_id = dictionary.get('environment_id', None)
+        self.file_collection_id = dictionary.get('file_collection_id', None)
+        self.config = dictionary.get('config', None)
+        self.stats = dictionary.get('stats', None)
 
         self.task_id = dictionary.get('task_id', None)
         self.label = dictionary.get('label', None)
