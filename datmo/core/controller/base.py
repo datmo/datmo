@@ -1,5 +1,6 @@
 import os
 
+from datmo.config import Config
 from datmo.core.util.i18n import get as __
 from datmo.core.util.logger import DatmoLogger
 from datmo.core.util import get_class_contructor
