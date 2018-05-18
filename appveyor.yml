@@ -45,6 +45,7 @@ install:
   - "%PYTHON%/python.exe C:/get-pip.py"
   - "%PYTHON%/python.exe -m pip install pip==9.0.3"
   - "%PYTHON%/Scripts/pip.exe install pytest"
+  - "%PYTHON%/Scripts/pip.exe install pypiwin32"
   - "%PYTHON%/python.exe setup.py install"
 test_script:
   - "%PYTHON%/Scripts/pip.exe --version"

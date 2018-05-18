@@ -797,3 +797,19 @@ class TestDockerEnv():
         assert result and \
             os.path.isfile(output_dockerfile_path) and \
             "datmo" in open(output_dockerfile_path, "r").read()
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_gpu_enabled(self):
+        if not self.docker_environment_manager.gpu_enabled():
+            print("GPU not available")
+        else:
+            log_filepath = os.path.join(
+                self.docker_environment_manager.filepath, "test.log")
+            return_code, run_id, logs = self.docker_environment_manager.run(
+                "nvidia/cuda", {
+                    "command": ["nvidia-smi"],
+                    "name": str(uuid.uuid1()),
+                    "detach": True,
+                    "gpu": True
+                }, log_filepath)
+            assert return_code == 0

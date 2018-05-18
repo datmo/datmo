@@ -16,7 +16,7 @@ from datmo.core.util.exceptions import (
     PathDoesNotExist, EnvironmentDoesNotExist, EnvironmentInitFailed,
     EnvironmentExecutionException, FileAlreadyExistsException,
     EnvironmentRequirementsCreateException, EnvironmentImageNotFound,
-    EnvironmentContainerNotFound)
+    EnvironmentContainerNotFound, GPUSupportNotEnabled)
 from datmo.core.controller.environment.driver import EnvironmentDriver
 
 
@@ -152,12 +152,22 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
     # running daemon needed
     def run(self, name, options, log_filepath):
-        run_return_code, run_id = \
-            self.run_container(image_name=name, **options)
+        if "gpu" in options:
+            gpu_ready = self.gpu_enabled()
+            if options["gpu"] is True:
+                if not gpu_ready:
+                    raise GPUSupportNotEnabled('nvidia')
+                else:
+                    options['runtime'] = 'nvidia'
+            options.pop("gpu", None)
+
+        run_return_code, run_id = self.run_container(
+            image_name=name, **options)
+
         log_return_code, logs = self.log_container(
             run_id, filepath=log_filepath)
-        final_return_code = run_return_code and log_return_code
 
+        final_return_code = run_return_code and log_return_code
         return final_return_code, run_id, logs
 
     # running daemon needed
@@ -177,6 +187,32 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             remove_image_result = True
         return stop_and_remove_containers_result and \
                remove_image_result
+
+    def gpu_enabled(self):
+        # test if this images works
+        # docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
+        process = subprocess.Popen(
+            [
+                "docker",
+                "run",
+                "--runtime=nvidia",
+                "--rm",
+                "nvidia/cuda",
+                "nvidia-smi",
+            ],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        stderr = stderr.decode("utf-8")
+        if "Unknown runtime specified nvidia" in stderr:
+            return False
+        if "OCI runtime create failed" in stderr:
+            return False
+        if len(stderr) > 2:
+            raise GPUSupportNotEnabled(stderr)
+
+        # this may mean we're good to go.   Untested though.
+        return True
 
     # running daemon needed
     def get_tags_for_docker_repository(self, repo_name):
@@ -332,12 +368,12 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                       ports=None,
                       name=None,
                       volumes=None,
+                      runtime=None,
                       detach=False,
                       stdin_open=False,
                       tty=False,
                       api=False):
         """Run Docker container with parameters given as defined below
-
         Parameters
         ----------
         image_name : str
@@ -364,27 +400,19 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             True to connect pseudo-terminal with stdin / stdout else False
         api : bool, optional
             True if Docker python client should be used else use subprocess
-
         Returns
         -------
         if api=False:
-
         return_code: int
             integer success code of command
         container_id: str
             output container id
-
-
         if api=True & if detach=True:
-
         container_obj: Container
             object from Docker python api with details about container
-
         if api=True & if detach=False:
-
         logs: str
             output logs for the run function
-
         Raises
         ------
         EnvironmentExecutionException
@@ -419,6 +447,10 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 if name:
                     docker_shell_cmd_list.append("--name")
                     docker_shell_cmd_list.append(name)
+
+                if runtime:
+                    docker_shell_cmd_list.append("--runtime")
+                    docker_shell_cmd_list.append(runtime)
 
                 if stdin_open:
                     docker_shell_cmd_list.append("-i")
