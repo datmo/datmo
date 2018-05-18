@@ -208,6 +208,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             return False
         if "OCI runtime create failed" in stderr:
             return False
+        if len(stderr) > 2:
+            raise GPUSupportNotEnabled(stderr)
 
         # this may mean we're good to go.   Untested though.
         return True
