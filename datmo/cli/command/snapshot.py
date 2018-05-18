@@ -1,9 +1,10 @@
 from __future__ import print_function
 
+import yaml
 import prettytable
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.misc_functions import mutually_exclusive
+from datmo.core.util.misc_functions import mutually_exclusive, printable_dict, printable_string
 from datmo.core.util.exceptions import (SnapshotCreateFromTaskArgs)
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.snapshot import SnapshotController
@@ -126,12 +127,18 @@ class SnapshotCommand(ProjectCommand):
             ]
             t = prettytable.PrettyTable(header_list)
             for snapshot_obj in snapshot_objs:
+                snapshot_config_printable = printable_string(
+                    str(snapshot_obj.config))
+                snapshot_stats_printable = printable_string(
+                    str(snapshot_obj.stats))
+                snapshot_message = printable_string(snapshot_obj.message)
+                snapshot_created_at = printable_string(
+                    snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"))
                 t.add_row([
-                    snapshot_obj.id,
-                    snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                    snapshot_obj.config, snapshot_obj.stats,
-                    snapshot_obj.message, snapshot_obj.label,
-                    snapshot_obj.code_id, snapshot_obj.environment_id,
+                    snapshot_obj.id, snapshot_created_at,
+                    snapshot_config_printable, snapshot_stats_printable,
+                    snapshot_message, snapshot_obj.label, snapshot_obj.code_id,
+                    snapshot_obj.environment_id,
                     snapshot_obj.file_collection_id
                 ])
                 listed_snapshot_ids.append(snapshot_obj.id)
@@ -141,11 +148,17 @@ class SnapshotCommand(ProjectCommand):
             ]
             t = prettytable.PrettyTable(header_list)
             for snapshot_obj in snapshot_objs:
+                snapshot_config_printable = printable_string(
+                    str(snapshot_obj.config))
+                snapshot_stats_printable = printable_string(
+                    str(snapshot_obj.stats))
+                snapshot_message = printable_string(snapshot_obj.message)
+                snapshot_created_at = printable_string(
+                    snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"))
                 t.add_row([
-                    snapshot_obj.id,
-                    snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                    snapshot_obj.config, snapshot_obj.stats,
-                    snapshot_obj.message, snapshot_obj.label
+                    snapshot_obj.id, snapshot_created_at,
+                    snapshot_config_printable, snapshot_stats_printable,
+                    snapshot_message, snapshot_obj.label
                 ])
                 listed_snapshot_ids.append(snapshot_obj.id)
 
