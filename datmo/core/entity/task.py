@@ -87,6 +87,8 @@ class Task():
         boolean to signify if task should be run in interactive mode
     detach : bool
         boolean to signify if task should be run in detach mode
+    gpu : bool
+        boolean to signify gpu task
     ports : list or None
         list of string mappings from host system (left) to environment (right)
         (e.g. ["9999:9999", "8888:8888"])
@@ -128,6 +130,7 @@ class Task():
         self.task_dirpath = dictionary.get('task_dirpath', None)
         self.log_filepath = dictionary.get('log_filepath', None)
         self.start_time = dictionary.get('start_time', None)
+        self.gpu = dictionary.get('gpu', False)
 
         # Post-Execution
         self.after_snapshot_id = dictionary.get('after_snapshot_id', None)

@@ -101,7 +101,7 @@ class Task():
         return self.id == other.id if other else False
 
 
-def run(command, env=None, home=None):
+def run(command, env=None, home=None, gpu=False):
     """Run the code or script inside
 
     The project must be created before this is implemented. You can do that by using
@@ -121,6 +121,8 @@ def run(command, env=None, home=None):
     home : str, optional
         absolute home path of the project
         (default is None, which will use the CWD as the project path)
+    gpu: boolean
+        try to run task on GPU (if available)
 
     Returns
     -------
@@ -162,6 +164,8 @@ def run(command, env=None, home=None):
             task_dict["command"] = command
         elif isinstance(command, basestring):
             task_dict["command"] = shlex.split(command)
+
+    task_dict["gpu"] = gpu
 
     # Create the task object
     core_task_obj = task_controller.create()
