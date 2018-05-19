@@ -92,6 +92,111 @@ class TestGitCodeDriver():
             failed = True
         assert failed
 
+    def test_create_ref(self):
+        self.git_code_manager.init()
+        # Test failing case with no code_id and nothing to commit
+        failed = False
+        try:
+            self.git_code_manager.create_ref()
+        except GitCommitDoesNotExist:
+            failed = True
+        assert failed
+        # Test passing case with no code_id
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test.txt")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode(str("test")))
+        code_id = self.git_code_manager.create_ref()
+        code_ref_path = os.path.join(self.git_code_manager.filepath,
+                                     ".git/refs/datmo/", code_id)
+        assert code_id and \
+            os.path.isfile(code_ref_path)
+        # Test error raised with commit_id
+        random_commit_id = str("random")
+        failed = False
+        try:
+            self.git_code_manager.\
+                create_ref(commit_id=random_commit_id)
+        except GitCommitDoesNotExist:
+            failed = True
+        assert failed
+
+    def test_exists_ref(self):
+        self.git_code_manager.init()
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test.txt")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode(str("test")))
+        code_id = self.git_code_manager.create_ref()
+        code_ref_path = os.path.join(self.git_code_manager.filepath,
+                                     ".git/refs/datmo/", code_id)
+        result = self.git_code_manager.exists_ref(code_id)
+        assert result == True and \
+            os.path.isfile(code_ref_path)
+
+    def test_delete_ref(self):
+        self.git_code_manager.init()
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test.txt")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode(str("test")))
+        code_id = self.git_code_manager.create_ref()
+        code_ref_path = os.path.join(self.git_code_manager.filepath,
+                                     ".git/refs/datmo/", code_id)
+        result = self.git_code_manager.delete_ref(code_id)
+        assert result == True and \
+            not os.path.isfile(code_ref_path)
+
+    def test_list_refs(self):
+        self.git_code_manager.init()
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test.txt")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode(str("test")))
+        code_id = self.git_code_manager.create_ref()
+        code_refs = self.git_code_manager.list_refs()
+        assert code_refs and \
+            code_id in code_refs
+
+    # def test_push_ref(self):
+    #     pass
+    #
+    # def test_fetch_ref(self):
+    #     pass
+    #
+    def test_checkout_ref(self):
+        # TODO: Test remote checkout
+        self.git_code_manager.init()
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test.txt")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode(str("test1")))
+        # Create first ref
+        ref_id_1 = self.git_code_manager.create_ref()
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode(str("test2")))
+        # Add random file to .datmo directory before next ref
+        os.makedirs(os.path.join(self.git_code_manager.filepath, ".datmo"))
+        random_filepath = os.path.join(self.git_code_manager.filepath,
+                                       ".datmo", ".test")
+        with open(random_filepath, "w") as f:
+            f.write(to_unicode(str("test")))
+        # Check to make sure .datmo/.test exists and has contents
+        assert os.path.isfile(random_filepath) and \
+               "test" in open(random_filepath, "r").read()
+        # Create second ref
+        ref_id_2 = self.git_code_manager.create_ref()
+        # Checkout to previous ref, .datmo should be unaffected
+        result = self.git_code_manager.checkout_ref(ref_id_1)
+
+        # Check code was properly checked out
+        assert ref_id_1 != ref_id_2
+        assert result == True and \
+            self.git_code_manager.latest_commit() == ref_id_1
+        # Check to make sure .datmo is not affected
+        assert os.path.isfile(random_filepath) and \
+            "test" in open(random_filepath, "r").read()
+
     def test_exists_datmo_files_ignored(self):
         self.git_code_manager.init()
         result = self.git_code_manager.exists_datmo_files_ignored()
@@ -304,36 +409,36 @@ class TestGitCodeDriver():
         result = self.git_code_manager.check_git_work_tree()
         assert result == True
 
-    def test_remote(self):
-        # TODO: test all options
-        self.git_code_manager.init()
-        # Test remote add
-        if self.git_code_manager.git_host_manager.host == "github.com":
-            result = self.git_code_manager.remote(
-                "add", "origin", "https://github.com/datmo/test.git")
-            remote_url = self.git_code_manager.get_remote_url()
-            assert result == True and \
-                remote_url == "https://github.com/datmo/test.git"
-            # Test remote set-url
-            result = self.git_code_manager.remote(
-                "set-url", "origin", "https://github.com/datmo/test.git")
-            remote_url = self.git_code_manager.get_remote_url()
-            assert result == True and \
-                remote_url == "https://github.com/datmo/test.git"
+    # def test_remote(self):
+    #     # TODO: test all options
+    #     self.git_code_manager.init()
+    #     # Test remote add
+    #     if self.git_code_manager.git_host_manager.host == "github.com":
+    #         result = self.git_code_manager.remote(
+    #             "add", "origin", "https://github.com/datmo/test.git")
+    #         remote_url = self.git_code_manager.get_remote_url()
+    #         assert result == True and \
+    #             remote_url == "https://github.com/datmo/test.git"
+    #         # Test remote set-url
+    #         result = self.git_code_manager.remote(
+    #             "set-url", "origin", "https://github.com/datmo/test.git")
+    #         remote_url = self.git_code_manager.get_remote_url()
+    #         assert result == True and \
+    #             remote_url == "https://github.com/datmo/test.git"
 
-    def test_get_remote_url(self):
-        self.git_code_manager.init()
-        # Check if properly returns None
-        remote_url = self.git_code_manager.get_remote_url()
-        assert remote_url == None
-        # Check if properly returns value set
-        if self.git_code_manager.git_host_manager.host == "github.com":
-            self.git_code_manager.remote("add", "origin",
-                                         "https://github.com/datmo/test.git")
-            self.git_code_manager.remote("set-url", "origin",
-                                         "https://github.com/datmo/test.git")
-            remote_url = self.git_code_manager.get_remote_url()
-            assert remote_url == "https://github.com/datmo/test.git"
+    # def test_get_remote_url(self):
+    #     self.git_code_manager.init()
+    #     # Check if properly returns None
+    #     remote_url = self.git_code_manager.get_remote_url()
+    #     assert remote_url == None
+    #     # Check if properly returns value set
+    #     if self.git_code_manager.git_host_manager.host == "github.com":
+    #         self.git_code_manager.remote("add", "origin",
+    #                                      "https://github.com/datmo/test.git")
+    #         self.git_code_manager.remote("set-url", "origin",
+    #                                      "https://github.com/datmo/test.git")
+    #         remote_url = self.git_code_manager.get_remote_url()
+    #         assert remote_url == "https://github.com/datmo/test.git"
 
     # def test_fetch(self):
     #     pass
@@ -384,111 +489,6 @@ class TestGitCodeDriver():
                 os.path.join(self.git_code_manager.filepath,
                              ".git/refs/datmo")
             )
-
-    def test_create_ref(self):
-        self.git_code_manager.init()
-        # Test failing case with no code_id and nothing to commit
-        failed = False
-        try:
-            self.git_code_manager.create_ref()
-        except GitCommitDoesNotExist:
-            failed = True
-        assert failed
-        # Test passing case with no code_id
-        test_filepath = os.path.join(self.git_code_manager.filepath,
-                                     "test.txt")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode(str("test")))
-        code_id = self.git_code_manager.create_ref()
-        code_ref_path = os.path.join(self.git_code_manager.filepath,
-                                     ".git/refs/datmo/", code_id)
-        assert code_id and \
-            os.path.isfile(code_ref_path)
-        # Test error raised with commit_id
-        random_commit_id = str("random")
-        failed = False
-        try:
-            self.git_code_manager.\
-                create_ref(commit_id=random_commit_id)
-        except GitCommitDoesNotExist:
-            failed = True
-        assert failed
-
-    def test_exists_ref(self):
-        self.git_code_manager.init()
-        test_filepath = os.path.join(self.git_code_manager.filepath,
-                                     "test.txt")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode(str("test")))
-        code_id = self.git_code_manager.create_ref()
-        code_ref_path = os.path.join(self.git_code_manager.filepath,
-                                     ".git/refs/datmo/", code_id)
-        result = self.git_code_manager.exists_ref(code_id)
-        assert result == True and \
-            os.path.isfile(code_ref_path)
-
-    def test_delete_ref(self):
-        self.git_code_manager.init()
-        test_filepath = os.path.join(self.git_code_manager.filepath,
-                                     "test.txt")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode(str("test")))
-        code_id = self.git_code_manager.create_ref()
-        code_ref_path = os.path.join(self.git_code_manager.filepath,
-                                     ".git/refs/datmo/", code_id)
-        result = self.git_code_manager.delete_ref(code_id)
-        assert result == True and \
-            not os.path.isfile(code_ref_path)
-
-    def test_list_refs(self):
-        self.git_code_manager.init()
-        test_filepath = os.path.join(self.git_code_manager.filepath,
-                                     "test.txt")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode(str("test")))
-        code_id = self.git_code_manager.create_ref()
-        code_refs = self.git_code_manager.list_refs()
-        assert code_refs and \
-            code_id in code_refs
-
-    # def test_push_ref(self):
-    #     pass
-    #
-    # def test_fetch_ref(self):
-    #     pass
-    #
-    def test_checkout_ref(self):
-        # TODO: Test remote checkout
-        self.git_code_manager.init()
-        test_filepath = os.path.join(self.git_code_manager.filepath,
-                                     "test.txt")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode(str("test1")))
-        # Create first ref
-        ref_id_1 = self.git_code_manager.create_ref()
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode(str("test2")))
-        # Add random file to .datmo directory before next ref
-        os.makedirs(os.path.join(self.git_code_manager.filepath, ".datmo"))
-        random_filepath = os.path.join(self.git_code_manager.filepath,
-                                       ".datmo", ".test")
-        with open(random_filepath, "w") as f:
-            f.write(to_unicode(str("test")))
-        # Check to make sure .datmo/.test exists and has contents
-        assert os.path.isfile(random_filepath) and \
-               "test" in open(random_filepath, "r").read()
-        # Create second ref
-        ref_id_2 = self.git_code_manager.create_ref()
-        # Checkout to previous ref, .datmo should be unaffected
-        result = self.git_code_manager.checkout_ref(ref_id_1)
-
-        # Check code was properly checked out
-        assert ref_id_1 != ref_id_2
-        assert result == True and \
-            self.git_code_manager.latest_commit() == ref_id_1
-        # Check to make sure .datmo is not affected
-        assert os.path.isfile(random_filepath) and \
-            "test" in open(random_filepath, "r").read()
 
 
 class TestGitHostDriver():
