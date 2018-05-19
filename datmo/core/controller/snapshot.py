@@ -9,8 +9,8 @@ from datmo.core.util.i18n import get as __
 from datmo.core.util.validation import validate
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import (
-    FileIOException, RequiredArgumentMissing, ProjectNotInitializedException,
-    SessionDoesNotExistException, EntityNotFound, TaskNotComplete)
+    FileIOError, RequiredArgumentMissing, ProjectNotInitialized,
+    SessionDoesNotExist, EntityNotFound, TaskNotComplete)
 
 
 class SnapshotController(BaseController):
@@ -46,7 +46,7 @@ class SnapshotController(BaseController):
         self.file_collection = FileCollectionController(home)
         self.environment = EnvironmentController(home)
         if not self.is_initialized:
-            raise ProjectNotInitializedException(
+            raise ProjectNotInitialized(
                 __("error", "controller.snapshot.__init__"))
 
     def create(self, incoming_dictionary):
@@ -145,7 +145,7 @@ class SnapshotController(BaseController):
         ------
         RequiredArgumentMissing
             if required arguments are not given by the user
-        FileIOException
+        FileIOError
             if files are not present or there is an error in File IO
         """
         # Validate Inputs
@@ -304,7 +304,7 @@ class SnapshotController(BaseController):
             try:
                 self.dal.session.get_by_id(session_id)
             except EntityNotFound:
-                raise SessionDoesNotExistException(
+                raise SessionDoesNotExist(
                     __("error", "controller.snapshot.list", session_id))
             query['session_id'] = session_id
         if visible is not None and isinstance(visible, bool):
@@ -404,13 +404,13 @@ class SnapshotController(BaseController):
 
         Raises
         ------
-        FileIOException
+        FileIOError
         """
         if "config" in incoming_dictionary:
             create_dict['config'] = incoming_dictionary['config']
         elif "config_filepath" in incoming_dictionary:
             if not os.path.isfile(incoming_dictionary['config_filepath']):
-                raise FileIOException(
+                raise FileIOError(
                     __("error", "controller.snapshot.create.file_config"))
             # If path exists transform file to config dict
             config_json_driver = JSONStore(
@@ -440,14 +440,14 @@ class SnapshotController(BaseController):
 
         Raises
         ------
-        FileIOException
+        FileIOError
         """
 
         if "stats" in incoming_dictionary:
             create_dict['stats'] = incoming_dictionary['stats']
         elif "stats_filepath" in incoming_dictionary:
             if not os.path.isfile(incoming_dictionary['stats_filepath']):
-                raise FileIOException(
+                raise FileIOError(
                     __("error", "controller.snapshot.create.file_stat"))
             # If path exists transform file to config dict
             stats_json_driver = JSONStore(

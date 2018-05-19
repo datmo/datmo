@@ -14,8 +14,8 @@ from docker import errors
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     PathDoesNotExist, EnvironmentDoesNotExist, EnvironmentInitFailed,
-    EnvironmentExecutionException, FileAlreadyExistsException,
-    EnvironmentRequirementsCreateException, EnvironmentImageNotFound,
+    EnvironmentExecutionError, FileAlreadyExistsError,
+    EnvironmentRequirementsCreateError, EnvironmentImageNotFound,
     EnvironmentContainerNotFound, GPUSupportNotEnabled)
 from datmo.core.controller.environment.driver import EnvironmentDriver
 
@@ -100,7 +100,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         try:
             pass
         except Exception as e:
-            raise EnvironmentExecutionException(
+            raise EnvironmentExecutionError(
                 __("error", "controller.environment.driver.docker.init",
                    str(e)))
         # Initiate Docker execution
@@ -137,7 +137,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                        "controller.environment.driver.docker.create.dne",
                        path))
         if os.path.isfile(output_path):
-            raise FileAlreadyExistsException(
+            raise FileAlreadyExistsError(
                 __("error",
                    "controller.environment.driver.docker.create.exists",
                    output_path))
@@ -238,13 +238,13 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             if process.returncode > 0:
-                raise EnvironmentExecutionException(
+                raise EnvironmentExecutionError(
                     __("error",
                        "controller.environment.driver.docker.get_tags",
                        str(stderr)))
             string_repository_tags = stdout.decode().strip()
         except subprocess.CalledProcessError as e:
-            raise EnvironmentExecutionException(
+            raise EnvironmentExecutionError(
                 __("error", "controller.environment.driver.docker.get_tags",
                    str(e)))
         repository_tags = ast.literal_eval(string_repository_tags)
@@ -271,7 +271,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
         Raises
         ------
-        EnvironmentExecutionException
+        EnvironmentExecutionError
 
         """
         try:
@@ -294,12 +294,12 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             if process_returncode == 0:
                 return True
             elif process_returncode == 1:
-                raise EnvironmentExecutionException(
+                raise EnvironmentExecutionError(
                     __("error",
                        "controller.environment.driver.docker.build_image",
                        "Docker subprocess failed"))
         except Exception as e:
-            raise EnvironmentExecutionException(
+            raise EnvironmentExecutionError(
                 __("error", "controller.environment.driver.docker.build_image",
                    str(e)))
 
@@ -334,12 +334,12 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             if process.returncode > 0:
-                raise EnvironmentExecutionException(
+                raise EnvironmentExecutionError(
                     __("error",
                        "controller.environment.driver.docker.remove_image",
                        str(stderr)))
         except subprocess.CalledProcessError as e:
-            raise EnvironmentExecutionException(
+            raise EnvironmentExecutionError(
                 __("error",
                    "controller.environment.driver.docker.remove_image",
                    str(e)))
@@ -355,7 +355,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             for image in images:
                 self.remove_image(image.id, force=force)
         except Exception as e:
-            raise EnvironmentExecutionException(
+            raise EnvironmentExecutionError(
                 __("error",
                    "controller.environment.driver.docker.remove_images",
                    str(e)))
@@ -415,7 +415,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             output logs for the run function
         Raises
         ------
-        EnvironmentExecutionException
+        EnvironmentExecutionError
              error in running the environment command
         """
         try:
@@ -481,7 +481,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                     docker_shell_cmd_list.extend(command)
                 return_code = subprocess.call(docker_shell_cmd_list)
                 if return_code != 0:
-                    raise EnvironmentExecutionException(
+                    raise EnvironmentExecutionError(
                         __("error",
                            "controller.environment.driver.docker.run_container",
                            str(docker_shell_cmd_list)))
@@ -493,13 +493,13 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                     stderr=subprocess.PIPE)
                 stdout, stderr = process.communicate()
                 if process.returncode > 0:
-                    raise EnvironmentExecutionException(
+                    raise EnvironmentExecutionError(
                         __("error",
                            "controller.environment.driver.docker.run_container",
                            str(stderr)))
                 container_id = stdout.decode().strip()
         except subprocess.CalledProcessError as e:
-            raise EnvironmentExecutionException(
+            raise EnvironmentExecutionError(
                 __("error",
                    "controller.environment.driver.docker.run_container",
                    str(e)))
@@ -533,12 +533,12 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             if process.returncode > 0:
-                raise EnvironmentExecutionException(
+                raise EnvironmentExecutionError(
                     __("error",
                        "controller.environment.driver.docker.stop_container",
                        str(stderr)))
         except subprocess.CalledProcessError as e:
-            raise EnvironmentExecutionException(
+            raise EnvironmentExecutionError(
                 __("error",
                    "controller.environment.driver.docker.stop_container",
                    str(e)))
@@ -559,12 +559,12 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             if process.returncode > 0:
-                raise EnvironmentExecutionException(
+                raise EnvironmentExecutionError(
                     __("error",
                        "controller.environment.driver.docker.remove_container",
                        str(stderr)))
         except subprocess.CalledProcessError as e:
-            raise EnvironmentExecutionException(
+            raise EnvironmentExecutionError(
                 __("error",
                    "controller.environment.driver.docker.remove_container",
                    str(e)))
@@ -640,7 +640,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 stderr=subprocess.PIPE)
             out_list_cmd, err_list_cmd = process.communicate()
             if process.returncode > 0:
-                raise EnvironmentExecutionException(
+                raise EnvironmentExecutionError(
                     __("error",
                        "controller.environment.driver.docker.stop_remove_containers_by_term",
                        str(err_list_cmd)))
@@ -666,7 +666,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                     stderr=subprocess.PIPE)
                 out_list_cmd, err_list_cmd = process.communicate()
                 if process.returncode > 0:
-                    raise EnvironmentExecutionException(
+                    raise EnvironmentExecutionError(
                         __("error",
                            "controller.environment.driver.docker.stop_remove_containers_by_term",
                            str(err_list_cmd)))
@@ -689,12 +689,12 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                         stderr=subprocess.PIPE)
                     _, err_list_cmd = process.communicate()
                     if process.returncode > 0:
-                        raise EnvironmentExecutionException(
+                        raise EnvironmentExecutionError(
                             __("error",
                                "controller.environment.driver.docker.stop_remove_containers_by_term",
                                str(err_list_cmd)))
         except subprocess.CalledProcessError as e:
-            raise EnvironmentExecutionException(
+            raise EnvironmentExecutionError(
                 __("error",
                    "controller.environment.driver.docker.stop_remove_containers_by_term",
                    str(e)))
@@ -716,7 +716,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
         Raises
         ------
-        EnvironmentRequirementsCreateException
+        EnvironmentRequirementsCreateError
             error in running pipreqs command to extract python requirements
         """
         try:
@@ -732,11 +732,11 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             if process.returncode > 0:
-                raise EnvironmentRequirementsCreateException(
+                raise EnvironmentRequirementsCreateError(
                     __("error", "controller.environment.requirements.create",
                        str(stderr)))
         except Exception as e:
-            raise EnvironmentRequirementsCreateException(
+            raise EnvironmentRequirementsCreateError(
                 __("error", "controller.environment.requirements.create",
                    str(e)))
         if open(requirements_filepath, "r").read() == "\n":

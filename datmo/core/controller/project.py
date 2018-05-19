@@ -3,9 +3,9 @@ from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
 from datmo.core.entity.model import Model
 from datmo.core.entity.session import Session
-from datmo.core.util.exceptions import (SessionDoesNotExistException,
-                                        ProjectNotInitializedException,
-                                        EnvironmentInitFailed)
+from datmo.core.util.exceptions import (
+    SessionDoesNotExist, ProjectNotInitialized, EnvironmentInitFailed,
+    PathDoesNotExist, FileIOError)
 
 
 class ProjectController(BaseController):
@@ -31,79 +31,122 @@ class ProjectController(BaseController):
         super(ProjectController, self).__init__(home)
 
     def init(self, name, description):
+        """ Initialize the project
+
+        This function will initialize the project or reinitialize it the project is
+        already initialized.
+
+        Parameters
+        ----------
+        name : str
+        description : str
+
+        Returns
+        -------
+        bool
+
+        Raises
+        ------
+        SessionDoesNotExist
+        """
         # Create the Model, is it new or update?
         is_new_model = False
+        old_model = self.model
         if not self.model:
             is_new_model = True
 
-        # If model is new validate inputs
-        if is_new_model:
+        try:
+            # Always validate inputs to the init function
             validate("create_project", {
                 "name": name,
                 "description": description
             })
 
-        # Create model if new else update
-        if is_new_model:
-            _ = self.dal.model.create(
-                Model({
+            # Create model if new else update
+            if is_new_model:
+                _ = self.dal.model.create(
+                    Model({
+                        "name": name,
+                        "description": description
+                    }))
+            else:
+                self._model = self.dal.model.update({
+                    "id": self.model.id,
                     "name": name,
                     "description": description
-                }))
-        else:
-            self._model = self.dal.model.update({
-                "id": self.model.id,
-                "name": name,
-                "description": description
-            })
-
-        # Initialize Code Manager if needed
-        if not self.code_driver.is_initialized:
-            self.code_driver.init()
-
-        # Initialize File Manager if needed
-        if not self.file_driver.is_initialized:
-            self.file_driver.init()
-
-        # Initialize Environment Manager if needed
-        # (not required but will warn if not present)
-        try:
-            if not self.environment_driver.is_initialized:
-                self.environment_driver.init()
-        except EnvironmentInitFailed:
-            self.logger.warning(
-                __("warn", "controller.general.environment.failed"))
-
-        # Build the initial default Environment (NOT NECESSARY)
-        # self.environment_driver.build_image(tag="datmo-" + \
-        #                                  self.model.name)
-
-        # Create and set current session
-        if is_new_model:
-            # Create new default session
-            _ = self.dal.session.create(
-                Session({
-                    "name": "default",
-                    "model_id": self.model.id,
-                    "current": True
-                }))
-        else:
-            if not self.current_session:
-                default_session_obj = self.dal.session.query({
-                    "name": "default",
-                    "model_id": self.model.id
                 })
-                if not default_session_obj:
-                    raise SessionDoesNotExistException(
-                        __("error", "controller.project.init"))
-                # Update default session to be current
-                self.dal.session.update({
-                    "id": default_session_obj.id,
-                    "current": True
+
+            # Initialize Code Driver if needed
+            if not self.code_driver.is_initialized:
+                self.code_driver.init()
+
+            # Initialize File Driver if needed
+            if not self.file_driver.is_initialized:
+                self.file_driver.init()
+
+            # Initialize Environment Driver if needed
+            # (not required but will warn if not present)
+            try:
+                if not self.environment_driver.is_initialized:
+                    self.environment_driver.init()
+            except EnvironmentInitFailed:
+                self.logger.warning(
+                    __("warn", "controller.general.environment.failed"))
+
+            # Build the initial default Environment (NOT NECESSARY)
+            # self.environment_driver.build_image(tag="datmo-" + \
+            #                                  self.model.name)
+
+            # Create and set current session
+            if is_new_model:
+                # Create new default session
+                _ = self.dal.session.create(
+                    Session({
+                        "name": "default",
+                        "model_id": self.model.id,
+                        "current": True
+                    }))
+            else:
+                if not self.current_session:
+                    default_session_obj = self.dal.session.query({
+                        "name": "default",
+                        "model_id": self.model.id
+                    })
+                    if not default_session_obj:
+                        raise SessionDoesNotExist(
+                            __("error", "controller.project.init"))
+                    # Update default session to be current
+                    self.dal.session.update({
+                        "id": default_session_obj.id,
+                        "current": True
+                    })
+            return True
+        except Exception:
+            # if any error occurred with new model, ensure no initialize occurs and raise previous error
+            # if any error occurred with existing model, ensure no updates were made, raise previous error
+            if is_new_model:
+                self.cleanup()
+            else:
+                self._model = self.dal.model.update({
+                    "id": old_model.id,
+                    "name": old_model.name,
+                    "description": old_model.description
                 })
-        return True
+            raise
 
     def cleanup(self):
+        """Cleans the project structure completely
+
+        Notes
+        -----
+        This function will not error out but will gracefully exit, since
+        it is used in cases where init fails as a check against mid-initialized
+        projects
+
+        Returns
+        -------
+        bool
+        """
         try:
             # Obtain image id before cleaning up if exists
             images = self.environment_driver.list_images(name="datmo-" + \
@@ -114,10 +157,16 @@ class ProjectController(BaseController):
                 __("warn", "controller.general.environment.failed"))
 
         # Remove Datmo code_driver references
-        self.code_driver.delete_code_refs_dir()
+        try:
+            self.code_driver.delete_code_refs_dir()
+        except PathDoesNotExist:
+            self.logger.warning(__("warn", "controller.project.cleanup.refs"))
 
         # Remove Datmo file structure
-        self.file_driver.delete_datmo_file_structure()
+        try:
+            self.file_driver.delete_datmo_file_structure()
+        except FileIOError:
+            self.logger.warning(__("warn", "controller.project.cleanup.files"))
 
         try:
             if image_id:
@@ -149,7 +198,7 @@ class ProjectController(BaseController):
             list of datmo.core.entity.task.Task objects in ascending order of updated_at time
         """
         if not self.is_initialized:
-            raise ProjectNotInitializedException(
+            raise ProjectNotInitialized(
                 __("error", "controller.project.status"))
         # TODO: Add in note when environment is not setup or intialized
 

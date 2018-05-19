@@ -88,7 +88,7 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
 
         Raises
         ------
-        EnvironmentExecutionException
+        EnvironmentExecutionError
         """
         pass
 

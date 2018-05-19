@@ -28,7 +28,7 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.util.exceptions import ProjectNotInitializedException, MutuallyExclusiveArguments, RequiredArgumentMissing
+from datmo.core.util.exceptions import ProjectNotInitialized, MutuallyExclusiveArguments, RequiredArgumentMissing
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -61,7 +61,7 @@ class TestTaskCommand():
         failed = False
         try:
             self.task = TaskCommand(self.temp_dir, self.cli_helper)
-        except ProjectNotInitializedException:
+        except ProjectNotInitialized:
             failed = True
         assert failed
 
