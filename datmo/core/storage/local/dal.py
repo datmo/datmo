@@ -10,7 +10,7 @@ from datmo.core.entity.file_collection import FileCollection
 from datmo.core.entity.task import Task
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.entity.user import User
-from datmo.core.util.exceptions import InputException, EntityNotFound, MoreThanOneEntityFound, InvalidArgumentType
+from datmo.core.util.exceptions import InputError, EntityNotFound, MoreThanOneEntityFound, InvalidArgumentType
 from datmo.core.util.misc_functions import create_unique_hash
 
 
@@ -172,7 +172,7 @@ class EntityMethodsCRUD(object):
             dict_obj = datmo_entity.to_dictionary()
         else:
             if 'id' not in list(datmo_entity) or not datmo_entity['id']:
-                raise InputException(__("error", "storage.local.dal.update"))
+                raise InputError(__("error", "storage.local.dal.update"))
             # Aggregate original object and new object into dict_obj var
             new_dict_obj = datmo_entity
             original_datmo_entity = self.get_by_id(datmo_entity['id'])

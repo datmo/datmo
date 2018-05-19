@@ -11,8 +11,8 @@ from giturlparse import parse
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
-    PathDoesNotExist, GitUrlArgumentException, GitExecutionException,
-    FileIOException, GitCommitDoesNotExist, DatmoFolderInWorkTree)
+    PathDoesNotExist, GitUrlArgumentError, GitExecutionError, FileIOError,
+    GitCommitDoesNotExist, DatmoFolderInWorkTree)
 from datmo.core.controller.code.driver import CodeDriver
 from datmo.config import Config
 
@@ -43,17 +43,17 @@ class GitCodeDriver(CodeDriver):
             out, err = p.communicate()
             out, err = out.decode(), err.decode()
             if err:
-                raise GitExecutionException(
+                raise GitExecutionError(
                     __("error", "controller.code.driver.git.__init__.giterror",
                        err))
             version = str(out.split()[2].split(".windows")[0])
             if not semver.match(version, ">=1.9.7"):
-                raise GitExecutionException(
+                raise GitExecutionError(
                     __("error",
                        "controller.code.driver.git.__init__.gitversion",
                        out.split()[2]))
         except Exception as e:
-            raise GitExecutionException(
+            raise GitExecutionError(
                 __("error", "controller.code.driver.git.__init__.giterror",
                    str(e)))
 
@@ -91,7 +91,7 @@ class GitCodeDriver(CodeDriver):
     # def remote_url(self):
     #     try:
     #         self._remote_url = self.get_remote_url()
-    #     except GitExecutionException:
+    #     except GitExecutionError:
     #         self._remote_url = None
     #     return self._remote_url
 
@@ -116,21 +116,21 @@ class GitCodeDriver(CodeDriver):
                 stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             if process.returncode > 0:
-                raise GitExecutionException(
+                raise GitExecutionError(
                     __("error", "controller.code.driver.git.init",
                        str(stderr)))
         except subprocess.CalledProcessError as e:
-            raise GitExecutionException(
+            raise GitExecutionError(
                 __("error", "controller.code.driver.git.init", str(e)))
         try:
             code_refs_success = self.ensure_code_refs_dir()
         except Exception as e:
-            raise FileIOException(
+            raise FileIOError(
                 __("error", "controller.code.driver.git.init.file", str(e)))
         try:
             datmo_files_ignored_success = self.ensure_datmo_files_ignored()
         except Exception as e:
-            raise FileIOException(
+            raise FileIOError(
                 __("error", "controller.code.driver.git.init.file", str(e)))
         return code_refs_success and datmo_files_ignored_success
 
@@ -169,7 +169,7 @@ class GitCodeDriver(CodeDriver):
                 previous_commit_id = None
             try:
                 commit_id = self.latest_commit()
-            except GitExecutionException as e:
+            except GitExecutionError as e:
                 raise GitCommitDoesNotExist(
                     __("error",
                        "controller.code.driver.git.create_ref.cannot_commit",
@@ -203,7 +203,7 @@ class GitCodeDriver(CodeDriver):
         code_ref_path = os.path.join(self.filepath, ".git/refs/datmo/",
                                      commit_id)
         if not self.exists_ref(commit_id):
-            raise FileIOException(
+            raise FileIOError(
                 __("error", "controller.code.driver.git.delete_ref"))
         os.remove(code_ref_path)
         return True
@@ -221,7 +221,7 @@ class GitCodeDriver(CodeDriver):
     #     try:
     #         return self.push("origin", name=datmo_ref_map)
     #     except Exception as e:
-    #         raise GitExecutionException(
+    #         raise GitExecutionError(
     #             __("error", "controller.code.driver.git.push_ref", str(e)))
     #
     # def fetch_ref(self, commit_id):
@@ -230,11 +230,11 @@ class GitCodeDriver(CodeDriver):
     #         datmo_ref_map = "+" + datmo_ref + ":" + datmo_ref
     #         success, err = self.fetch("origin", datmo_ref_map, option="-fup")
     #         if not success:
-    #             raise GitExecutionException(
+    #             raise GitExecutionError(
     #                 __("error", "controller.code.driver.git.fetch_ref",
     #                    (commit_id, err)))
     #     except Exception as e:
-    #         raise GitExecutionException(
+    #         raise GitExecutionError(
     #             __("error", "controller.code.driver.git.fetch_ref",
     #                (commit_id, str(e))))
     #     return True
@@ -248,7 +248,7 @@ class GitCodeDriver(CodeDriver):
             checkout_result = self.checkout(datmo_ref)
             return checkout_result
         except Exception as e:
-            raise GitExecutionException(
+            raise GitExecutionError(
                 __("error", "controller.code.driver.git.checkout_ref",
                    (commit_id, str(e))))
 
@@ -260,7 +260,7 @@ class GitCodeDriver(CodeDriver):
             else:
                 return True
         except Exception as e:
-            raise FileIOException(
+            raise FileIOError(
                 __("error", "controller.code.driver.git.ensure_code_refs_dir",
                    str(e)))
 
@@ -271,7 +271,7 @@ class GitCodeDriver(CodeDriver):
                 with open(exclude_file, "a") as f:
                     f.write(to_unicode("\n.datmo/*\n"))
         except Exception as e:
-            raise FileIOException(
+            raise FileIOError(
                 __("error", "controller.code.driver.git.ensure_code_refs_dir",
                    str(e)))
         return True
@@ -285,13 +285,13 @@ class GitCodeDriver(CodeDriver):
                 stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             if process.returncode > 0:
-                raise GitExecutionException(
+                raise GitExecutionError(
                     __("error", "controller.code.driver.git.init",
                        str(stderr)))
             result = stdout.decode().strip()
             return True if result else False
         except subprocess.CalledProcessError as e:
-            raise GitExecutionException(
+            raise GitExecutionError(
                 __("error", "controller.code.driver.git.init", str(e)))
 
     # def clone(self, original_git_url, repo_name=None, mode="https"):
@@ -312,11 +312,11 @@ class GitCodeDriver(CodeDriver):
     #             stderr=subprocess.PIPE)
     #         stdout, stderr = process.communicate()
     #         if process.returncode > 0:
-    #             raise GitExecutionException(
+    #             raise GitExecutionError(
     #                 __("error", "controller.code.driver.git.clone",
     #                    (original_git_url, str(stderr))))
     #     except subprocess.CalledProcessError as e:
-    #         raise GitExecutionException(
+    #         raise GitExecutionError(
     #             __("error", "controller.code.driver.git.clone",
     #                (original_git_url, str(e))))
     #     return True
@@ -327,7 +327,7 @@ class GitCodeDriver(CodeDriver):
         p = parse(original_git_url)
 
         if not p.valid:
-            raise GitUrlArgumentException(
+            raise GitUrlArgumentError(
                 __("error", "controller.code.driver.git._parse_git_url.url",
                    original_git_url))
         if mode == "ssh":
@@ -338,7 +338,7 @@ class GitCodeDriver(CodeDriver):
             # If unsecured specified http connection used instead
             clone_git_url = "://".join(["http", p.url2https.split("://")[1]])
         else:
-            raise GitUrlArgumentException(
+            raise GitUrlArgumentError(
                 __("error", "controller.code.driver.git._parse_git_url.access",
                    original_git_url))
         return clone_git_url
@@ -359,11 +359,11 @@ class GitCodeDriver(CodeDriver):
                     stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             if process.returncode > 0:
-                raise GitExecutionException(
+                raise GitExecutionError(
                     __("error", "controller.code.driver.git.add",
                        (filepath, str(stderr))))
         except subprocess.CalledProcessError as e:
-            raise GitExecutionException(
+            raise GitExecutionError(
                 __("error", "controller.code.driver.git.add",
                    (filepath, str(e))))
         return True
@@ -383,7 +383,7 @@ class GitCodeDriver(CodeDriver):
 
         Raises
         ------
-        GitExecutionException
+        GitExecutionError
             If any errors occur in running git
         """
         try:
@@ -397,11 +397,11 @@ class GitCodeDriver(CodeDriver):
             if "nothing" in stdout:
                 return False
             if process.returncode > 0:
-                raise GitExecutionException(
+                raise GitExecutionError(
                     __("error", "controller.code.driver.git.commit",
                        (options, stderr)))
         except subprocess.CalledProcessError as e:
-            raise GitExecutionException(
+            raise GitExecutionError(
                 __("error", "controller.code.driver.git.commit",
                    (options, str(e))))
         return True
@@ -436,11 +436,11 @@ class GitCodeDriver(CodeDriver):
     #                 stderr=subprocess.PIPE)
     #         stdout, stderr = process.communicate()
     #         if process.returncode > 0:
-    #             raise GitExecutionException(
+    #             raise GitExecutionError(
     #                 __("error", "controller.code.driver.git.branch",
     #                    (name, str(stderr))))
     #     except subprocess.CalledProcessError as e:
-    #         raise GitExecutionException(
+    #         raise GitExecutionError(
     #             __("error", "controller.code.driver.git.branch",
     #                (name, str(e))))
     #     return True
@@ -461,11 +461,11 @@ class GitCodeDriver(CodeDriver):
                     stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             if process.returncode > 0:
-                raise GitExecutionException(
+                raise GitExecutionError(
                     __("error", "controller.code.driver.git.checkout",
                        (name, str(stderr))))
         except subprocess.CalledProcessError as e:
-            raise GitExecutionException(
+            raise GitExecutionError(
                 __("error", "controller.code.driver.git.checkout",
                    (name, str(e))))
         return True
@@ -487,11 +487,11 @@ class GitCodeDriver(CodeDriver):
     #                 stderr=subprocess.PIPE)
     #         stdout, stderr = process.communicate()
     #         if process.returncode > 0:
-    #             raise GitExecutionException(
+    #             raise GitExecutionError(
     #                 __("error", "controller.code.driver.git.stash_save",
     #                    str(stderr)))
     #     except subprocess.CalledProcessError as e:
-    #         raise GitExecutionException(
+    #         raise GitExecutionError(
     #             __("error", "controller.code.driver.git.stash_save", str(e)))
     #     return True
     #
@@ -508,12 +508,12 @@ class GitCodeDriver(CodeDriver):
     #             stderr=subprocess.PIPE)
     #         stdout, stderr = process.communicate()
     #         if process.returncode > 0:
-    #             raise GitExecutionException(
+    #             raise GitExecutionError(
     #                 __("error", "controller.code.driver.git.stash_list",
     #                    str(stderr)))
     #         git_stash_list = stdout.decode().strip()
     #     except subprocess.CalledProcessError as e:
-    #         raise GitExecutionException(
+    #         raise GitExecutionError(
     #             __("error", "controller.code.driver.git.stash_list", str(e)))
     #     return git_stash_list
     #
@@ -534,12 +534,12 @@ class GitCodeDriver(CodeDriver):
     #                 stderr=subprocess.PIPE)
     #         stdout, stderr = process.communicate()
     #         if process.returncode > 0:
-    #             raise GitExecutionException(
+    #             raise GitExecutionError(
     #                 __("error", "controller.code.driver.git.stash_pop",
     #                    str(stderr)))
     #         git_stash_pop = stdout.decode().strip()
     #     except subprocess.CalledProcessError as e:
-    #         raise GitExecutionException(
+    #         raise GitExecutionError(
     #             __("error", "controller.code.driver.git.stash_pop", str(e)))
     #     return git_stash_pop
     #
@@ -563,12 +563,12 @@ class GitCodeDriver(CodeDriver):
     #                 stderr=subprocess.PIPE)
     #         stdout, stderr = process.communicate()
     #         if process.returncode > 0:
-    #             raise GitExecutionException(
+    #             raise GitExecutionError(
     #                 __("error", "controller.code.driver.git.stash_apply",
     #                    str(stderr)))
     #         git_stash_apply = stdout.decode().strip()
     #     except subprocess.CalledProcessError as e:
-    #         raise GitExecutionException(
+    #         raise GitExecutionError(
     #             __("error", "controller.code.driver.git.stash_apply", str(e)))
     #     return git_stash_apply
 
@@ -581,12 +581,12 @@ class GitCodeDriver(CodeDriver):
                 stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             if process.returncode > 0:
-                raise GitExecutionException(
+                raise GitExecutionError(
                     __("error", "controller.code.driver.git.latest_commit",
                        str(stderr)))
             git_commit = stdout.decode().strip()
         except subprocess.CalledProcessError as e:
-            raise GitExecutionException(
+            raise GitExecutionError(
                 __("error", "controller.code.driver.git.latest_commit",
                    str(e)))
         return git_commit
@@ -601,11 +601,11 @@ class GitCodeDriver(CodeDriver):
             stdout, stderr = process.communicate()
             _ = stdout.decode().strip()
             if process.returncode > 0:
-                raise GitExecutionException(
+                raise GitExecutionError(
                     __("error", "controller.code.driver.git.reset",
                        str(stderr)))
         except subprocess.CalledProcessError as e:
-            raise GitExecutionException(
+            raise GitExecutionError(
                 __("error", "controller.code.driver.git.reset", str(e)))
         return True
 
@@ -619,12 +619,12 @@ class GitCodeDriver(CodeDriver):
             stdout, stderr = process.communicate()
             git_work_tree_exists = stdout.decode().strip()
             if process.returncode > 0:
-                raise GitExecutionException(
+                raise GitExecutionError(
                     __("error",
                        "controller.code.driver.git.check_git_work_tree",
                        str(stderr)))
         except subprocess.CalledProcessError as e:
-            raise GitExecutionException(
+            raise GitExecutionError(
                 __("error", "controller.code.driver.git.check_git_work_tree",
                    str(e)))
         return True if git_work_tree_exists == "true" else False
@@ -649,15 +649,15 @@ class GitCodeDriver(CodeDriver):
     #             stdout, stderr = process.communicate()
     #             stdout, stderr = stdout.decode(), stderr.decode()
     #         else:
-    #             raise GitExecutionException(
+    #             raise GitExecutionError(
     #                 __("error", "controller.code.driver.git.remote",
     #                    (mode, origin, git_url, "Incorrect mode specified")))
     #         if process.returncode > 0:
-    #             raise GitExecutionException(
+    #             raise GitExecutionError(
     #                 __("error", "controller.code.driver.git.remote",
     #                    (mode, origin, git_url, stderr)))
     #     except subprocess.CalledProcessError as e:
-    #         raise GitExecutionException(
+    #         raise GitExecutionError(
     #             __("error", "controller.code.driver.git.remote",
     #                (mode, origin, git_url, str(e))))
     #     return True
@@ -673,12 +673,12 @@ class GitCodeDriver(CodeDriver):
     #         stdout, stderr = process.communicate()
     #         if process.returncode > 0:
     #             return None
-    #             # raise GitExecutionException(__("error",
+    #             # raise GitExecutionError(__("error",
     #             #                                 "controller.code.driver.git.get_remote_url",
     #             #                                 str(stderr)))
     #         git_url = stdout.decode().strip()
     #     except subprocess.CalledProcessError as e:
-    #         raise GitExecutionException(
+    #         raise GitExecutionError(
     #             __("error", "controller.code.driver.git.get_remote_url",
     #                str(e)))
     #     return git_url
@@ -699,11 +699,11 @@ class GitCodeDriver(CodeDriver):
     #                 stderr=subprocess.PIPE)
     #         stdout, stderr = process.communicate()
     #         if process.returncode > 0:
-    #             raise GitExecutionException(
+    #             raise GitExecutionError(
     #                 __("error", "controller.code.driver.git.fetch",
     #                    (origin, name, str(stderr))))
     #     except subprocess.CalledProcessError as e:
-    #         raise GitExecutionException(
+    #         raise GitExecutionError(
     #             __("error", "controller.code.driver.git.fetch",
     #                (origin, name, str(e))))
     #     return True
@@ -739,11 +739,11 @@ class GitCodeDriver(CodeDriver):
     #         stdout, stderr = process.communicate()
     #         stdout, stderr = stdout.decode(), stderr.decode()
     #         if process.returncode > 0:
-    #             raise GitExecutionException(
+    #             raise GitExecutionError(
     #                 __("error", "controller.code.driver.git.push",
     #                    (origin, stderr)))
     #     except subprocess.CalledProcessError as e:
-    #         raise GitExecutionException(
+    #         raise GitExecutionError(
     #             __("error", "controller.code.driver.git.push",
     #                (origin, str(e))))
     #     return True
@@ -765,7 +765,7 @@ class GitCodeDriver(CodeDriver):
             if not os.path.isdir(os.path.join(self.filepath, dir)):
                 os.makedirs(os.path.join(self.filepath, dir))
         except Exception as e:
-            raise FileIOException(
+            raise FileIOError(
                 __("error", "controller.code.driver.git.ensure_code_refs_dir",
                    str(e)))
         return True
@@ -777,7 +777,7 @@ class GitCodeDriver(CodeDriver):
             if os.path.isdir(dir_path):
                 shutil.rmtree(dir_path)
         except Exception as e:
-            raise FileIOException(
+            raise FileIOError(
                 __("error", "controller.code.driver.git.delete_code_refs_dir",
                    str(e)))
         return True

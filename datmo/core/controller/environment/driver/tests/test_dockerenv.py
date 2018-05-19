@@ -18,8 +18,8 @@ except NameError:
 
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.core.util.exceptions import (
-    EnvironmentInitFailed, FileAlreadyExistsException,
-    EnvironmentRequirementsCreateException, EnvironmentImageNotFound,
+    EnvironmentInitFailed, FileAlreadyExistsError,
+    EnvironmentRequirementsCreateError, EnvironmentImageNotFound,
     EnvironmentContainerNotFound)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
@@ -155,7 +155,7 @@ class TestDockerEnv():
         try:
             self.docker_environment_manager.create(
                 output_path=output_dockerfile_path)
-        except FileAlreadyExistsException:
+        except FileAlreadyExistsError:
             failed = True
         assert failed
 
@@ -713,7 +713,7 @@ class TestDockerEnv():
     def test_create_requirements_file(self):
         # 1) Test failure EnvironmentDoesNotExist
         # 2) Test success
-        # 3) Test failure EnvironmentRequirementsCreateException
+        # 3) Test failure EnvironmentRequirementsCreateError
         # 4) When there are no install requirements
 
         # 1) Test option 1
@@ -738,7 +738,7 @@ class TestDockerEnv():
         try:
             _ = self.docker_environment_manager.\
                 create_requirements_file(execpath="does_not_work")
-        except EnvironmentRequirementsCreateException:
+        except EnvironmentRequirementsCreateError:
             exception_thrown = True
 
         assert exception_thrown

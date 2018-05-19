@@ -8,7 +8,7 @@ import platform
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.session import SessionController
-from datmo.core.util.exceptions import InvalidArgumentType, ProjectNotInitializedException, InvalidProjectPathException
+from datmo.core.util.exceptions import InvalidArgumentType, ProjectNotInitialized, InvalidProjectPath
 
 
 class TestSessionController():
@@ -32,7 +32,7 @@ class TestSessionController():
         failed = False
         try:
             SessionController(self.temp_dir)
-        except ProjectNotInitializedException:
+        except ProjectNotInitialized:
             failed = True
         assert failed
 
@@ -41,7 +41,7 @@ class TestSessionController():
         failed = False
         try:
             SessionController(test_home)
-        except InvalidProjectPathException:
+        except InvalidProjectPath:
             failed = True
         assert failed
 

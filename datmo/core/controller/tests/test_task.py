@@ -18,9 +18,9 @@ from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.task import TaskController
 from datmo.core.entity.task import Task
-from datmo.core.util.exceptions import EntityNotFound, TaskRunException, \
-    InvalidArgumentType, RequiredArgumentMissing, ProjectNotInitializedException, \
-    InvalidProjectPathException, TooManyArgumentsFound
+from datmo.core.util.exceptions import EntityNotFound, TaskRunError, \
+    InvalidArgumentType, RequiredArgumentMissing, ProjectNotInitialized, \
+    InvalidProjectPath, TooManyArgumentsFound
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -45,7 +45,7 @@ class TestTaskController():
         failed = False
         try:
             TaskController(self.temp_dir)
-        except ProjectNotInitializedException:
+        except ProjectNotInitialized:
             failed = True
         assert failed
 
@@ -54,7 +54,7 @@ class TestTaskController():
         failed = False
         try:
             TaskController(test_home)
-        except InvalidProjectPathException:
+        except InvalidProjectPath:
             failed = True
         assert failed
 
@@ -244,7 +244,7 @@ class TestTaskController():
         failed = False
         try:
             self.task.run(task_obj.id)
-        except TaskRunException:
+        except TaskRunError:
             failed = True
         assert failed
 
@@ -268,7 +268,7 @@ class TestTaskController():
         failed = False
         try:
             self.task.run(task_obj.id, snapshot_dict=snapshot_dict)
-        except TaskRunException:
+        except TaskRunError:
             failed = True
         assert failed
 
@@ -284,7 +284,7 @@ class TestTaskController():
         failed = False
         try:
             self.task.run(task_obj_1.id, task_dict=task_dict)
-        except TaskRunException:
+        except TaskRunError:
             failed = True
         assert failed
 

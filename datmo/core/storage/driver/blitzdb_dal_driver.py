@@ -2,7 +2,7 @@ from blitzdb import Document, queryset
 from datetime import datetime
 
 from datmo.core.util.exceptions import (
-    EntityNotFound, EntityCollectionNotFound, IncorrectTypeException,
+    EntityNotFound, EntityCollectionNotFound, IncorrectType,
     InvalidArgumentType, RequiredArgumentMissing, MoreThanOneEntityFound)
 from datmo.core.storage.driver import DALDriver
 
@@ -219,7 +219,7 @@ def denormalize_entity(in_dict):
         # if not a datetime object, throw error
         if in_dict['start_time'] and not isinstance(in_dict['start_time'],
                                                     datetime):
-            raise IncorrectTypeException()
+            raise IncorrectType()
         out_dict['start_time'] = \
             in_dict['start_time'].strftime('%Y-%m-%dT%H:%M:%S.%fZ') \
                 if in_dict['start_time'] else None
@@ -227,20 +227,20 @@ def denormalize_entity(in_dict):
         # if not a datetime object, throw error
         if in_dict['end_time'] and not isinstance(in_dict['end_time'],
                                                   datetime):
-            raise IncorrectTypeException()
+            raise IncorrectType()
         out_dict['end_time'] = \
             in_dict['end_time'].strftime('%Y-%m-%dT%H:%M:%S.%fZ') \
                 if in_dict['end_time'] else None
     if 'created_at' in list(in_dict):
         # if not a datetime object, throw error
         if not isinstance(in_dict['created_at'], datetime):
-            raise IncorrectTypeException()
+            raise IncorrectType()
         out_dict['created_at'] = in_dict['created_at'].strftime(
             '%Y-%m-%dT%H:%M:%S.%fZ')
     if 'updated_at' in list(in_dict):
         # if not a datetime object, throw error
         if not isinstance(in_dict['updated_at'], datetime):
-            raise IncorrectTypeException()
+            raise IncorrectType()
         out_dict['updated_at'] = in_dict['updated_at'].strftime(
             '%Y-%m-%dT%H:%M:%S.%fZ')
     return out_dict

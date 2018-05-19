@@ -44,7 +44,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
         Raises
         ------
-        FileIOException
+        FileIOError
         """
         pass
 

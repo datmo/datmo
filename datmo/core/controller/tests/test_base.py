@@ -13,7 +13,7 @@ from datmo.core.controller.code.driver.git import GitCodeDriver
 from datmo.core.entity.model import Model
 from datmo.core.entity.session import Session
 from datmo.core.util.exceptions import  \
-    DatmoModelNotInitializedException, InvalidProjectPathException
+    DatmoModelNotInitialized, InvalidProjectPath
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -33,7 +33,7 @@ class TestBaseController():
         failed = False
         try:
             BaseController(home=os.path.join("does", "not", "exist"))
-        except InvalidProjectPathException:
+        except InvalidProjectPath:
             failed = True
         assert failed
 
@@ -61,7 +61,7 @@ class TestBaseController():
         failed = False
         try:
             _ = self.base.current_session
-        except DatmoModelNotInitializedException:
+        except DatmoModelNotInitialized:
             failed = True
         assert failed
 

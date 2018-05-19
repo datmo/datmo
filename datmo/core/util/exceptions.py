@@ -2,19 +2,19 @@
 from datmo.core.util.i18n import get as __
 
 
-class InvalidProjectPathException(Exception):
+class InvalidProjectPath(Exception):
     pass
 
 
-class ProjectNotInitializedException(Exception):
+class ProjectNotInitialized(Exception):
     pass
 
 
-class DatmoModelNotInitializedException(Exception):
+class DatmoModelNotInitialized(Exception):
     pass
 
 
-class SessionDoesNotExistException(Exception):
+class SessionDoesNotExist(Exception):
     pass
 
 
@@ -26,19 +26,19 @@ class ClassMethodNotFound(Exception):
     pass
 
 
-class CLIArgumentException(Exception):
+class CLIArgumentError(Exception):
     pass
 
 
-class UnrecognizedCLIArgument(CLIArgumentException):
+class UnrecognizedCLIArgument(CLIArgumentError):
     pass
 
 
-class IncorrectTypeException(Exception):
+class IncorrectType(Exception):
     pass
 
 
-class InputException(Exception):
+class InputError(Exception):
     pass
 
 
@@ -54,27 +54,27 @@ class EntityCollectionNotFound(Exception):
     pass
 
 
-class SaveSettingException(Exception):
+class SaveSettingError(Exception):
     pass
 
 
-class ArgumentException(Exception):
+class ArgumentError(Exception):
     pass
 
 
-class RequiredArgumentMissing(ArgumentException):
+class RequiredArgumentMissing(ArgumentError):
     pass
 
 
-class GitUrlArgumentException(ArgumentException):
+class GitUrlArgumentError(ArgumentError):
     pass
 
 
-class TooManyArgumentsFound(ArgumentException):
+class TooManyArgumentsFound(ArgumentError):
     pass
 
 
-class GitExecutionException(Exception):
+class GitExecutionError(Exception):
     pass
 
 
@@ -82,11 +82,11 @@ class GitCommitDoesNotExist(Exception):
     pass
 
 
-class FileExecutionException(Exception):
+class FileExecutionError(Exception):
     pass
 
 
-class FileAlreadyExistsException(Exception):
+class FileAlreadyExistsError(Exception):
     pass
 
 
@@ -98,7 +98,7 @@ class EnvironmentDoesNotExist(DoesNotExist):
     pass
 
 
-class PathDoesNotExist(FileExecutionException):
+class PathDoesNotExist(FileExecutionError):
     pass
 
 
@@ -106,11 +106,11 @@ class LoggingPathDoesNotExist(PathDoesNotExist):
     pass
 
 
-class FileIOException(FileExecutionException):
+class FileIOError(FileExecutionError):
     pass
 
 
-class FileStructureException(FileExecutionException):
+class FileStructureError(FileExecutionError):
     pass
 
 
@@ -122,23 +122,23 @@ class EnvironmentContainerNotFound(Exception):
     pass
 
 
-class EnvironmentExecutionException(Exception):
+class EnvironmentExecutionError(Exception):
     pass
 
 
-class EnvironmentRequirementsCreateException(Exception):
+class EnvironmentRequirementsCreateError(Exception):
     pass
 
 
-class EnvironmentInitFailed(EnvironmentExecutionException):
+class EnvironmentInitFailed(EnvironmentExecutionError):
     pass
 
 
-class EnvironmentNotInitialized(EnvironmentExecutionException):
+class EnvironmentNotInitialized(EnvironmentExecutionError):
     pass
 
 
-class TaskRunException(Exception):
+class TaskRunError(Exception):
     pass
 
 
@@ -154,15 +154,15 @@ class MutuallyExclusiveArguments(Exception):
     pass
 
 
-class TaskNotComplete(ArgumentException):
+class TaskNotComplete(ArgumentError):
     pass
 
 
-class TaskInteractiveDetachException(ArgumentException):
+class TaskInteractiveDetachError(ArgumentError):
     pass
 
 
-class SnapshotCreateFromTaskArgs(ArgumentException):
+class SnapshotCreateFromTaskArgs(ArgumentError):
     pass
 
 
@@ -183,5 +183,5 @@ class ValidationSchemaMissing(Exception):
     pass
 
 
-class GPUSupportNotEnabled(Exception):
+class GPUSupportNotEnabled(EnvironmentExecutionError):
     pass

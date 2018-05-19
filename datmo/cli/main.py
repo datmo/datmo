@@ -5,7 +5,7 @@ import sys
 
 from datmo.cli.command.base import BaseCommand
 from datmo.cli.driver.helper import Helper
-from datmo.core.util.exceptions import CLIArgumentException
+from datmo.core.util.exceptions import CLIArgumentError
 from datmo.core.util.i18n import get as __
 from datmo.core.util.logger import DatmoLogger
 from datmo.config import Config
@@ -58,7 +58,7 @@ def main():
     # parse the command line arguments
     try:
         command_instance.parse(sys.argv[1:])
-    except CLIArgumentException as ex:
+    except CLIArgumentError as ex:
         cli_helper.echo(__("error", "cli.general", str(ex)))
         return 1
 

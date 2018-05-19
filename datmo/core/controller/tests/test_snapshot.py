@@ -16,9 +16,8 @@ from datmo.core.controller.task import TaskController
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.util.exceptions import (
     EntityNotFound, EnvironmentDoesNotExist, GitCommitDoesNotExist,
-    SessionDoesNotExistException, RequiredArgumentMissing, TaskNotComplete,
-    InvalidArgumentType, ProjectNotInitializedException,
-    InvalidProjectPathException)
+    SessionDoesNotExist, RequiredArgumentMissing, TaskNotComplete,
+    InvalidArgumentType, ProjectNotInitialized, InvalidProjectPath)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -43,7 +42,7 @@ class TestSnapshotController():
         failed = False
         try:
             SnapshotController(self.temp_dir)
-        except ProjectNotInitializedException:
+        except ProjectNotInitialized:
             failed = True
         assert failed
 
@@ -52,7 +51,7 @@ class TestSnapshotController():
         failed = False
         try:
             SnapshotController(test_home)
-        except InvalidProjectPathException:
+        except InvalidProjectPath:
             failed = True
         assert failed
 
@@ -458,7 +457,7 @@ class TestSnapshotController():
         failed = False
         try:
             self.snapshot.list(session_id="does_not_exist")
-        except SessionDoesNotExistException:
+        except SessionDoesNotExist:
             failed = True
         assert failed
 

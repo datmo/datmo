@@ -14,7 +14,7 @@ except NameError:
     to_unicode = str
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import ArgumentException
+from datmo.core.util.exceptions import ArgumentError
 
 
 class Helper():
@@ -63,8 +63,7 @@ class Helper():
                          tries=5,
                          error_message="Invalid input"):
         if not callable(validate_function):
-            raise ArgumentException(
-                'validate_function argument must be function')
+            raise ArgumentError('validate_function argument must be function')
         val = input(msg).lower()
         if not validate_function(val) and tries >= 0:
             tries -= 1

@@ -9,8 +9,8 @@ from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.entity.task import Task
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
-    TaskRunException, RequiredArgumentMissing, ProjectNotInitializedException,
-    PathDoesNotExist, TaskInteractiveDetachException, TooManyArgumentsFound)
+    TaskRunError, RequiredArgumentMissing, ProjectNotInitialized,
+    PathDoesNotExist, TaskInteractiveDetachError, TooManyArgumentsFound)
 
 
 class TaskController(BaseController):
@@ -48,7 +48,7 @@ class TaskController(BaseController):
         self.environment = EnvironmentController(home)
         self.snapshot = SnapshotController(home)
         if not self.is_initialized:
-            raise ProjectNotInitializedException(
+            raise ProjectNotInitialized(
                 __("error", "controller.task.__init__"))
 
     def create(self):
@@ -178,7 +178,7 @@ class TaskController(BaseController):
 
         Raises
         ------
-        TaskRunException
+        TaskRunError
             If there is any error in creating files for the task or downstream errors
         """
         # Ensure visible=False is present in the snapshot dictionary
@@ -203,7 +203,7 @@ class TaskController(BaseController):
         if task_obj.status is None:
             task_obj.status = "RUNNING"
         else:
-            raise TaskRunException(
+            raise TaskRunError(
                 __("error", "cli.task.run.already_running", task_obj.id))
         # Create Task directory for user during run
         task_dirpath = os.path.join("datmo_tasks", task_obj.id)
@@ -211,7 +211,7 @@ class TaskController(BaseController):
             _ = self.file_driver.create(
                 os.path.join("datmo_tasks", task_obj.id), directory=True)
         except Exception:
-            raise TaskRunException(
+            raise TaskRunError(
                 __("error", "controller.task.run", task_dirpath))
         # Create the before snapshot prior to execution
         before_snapshot_dict = snapshot_dict.copy()
@@ -257,7 +257,7 @@ class TaskController(BaseController):
         try:
             # Set the parameters set in the task
             if task_obj.detach and task_obj.interactive:
-                raise TaskInteractiveDetachException(
+                raise TaskInteractiveDetachError(
                     __("error", "controller.task.run.args.detach.interactive"))
 
             environment_run_options = {

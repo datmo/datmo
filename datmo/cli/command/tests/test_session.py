@@ -16,7 +16,7 @@ import os
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.session import SessionCommand
 from datmo.cli.command.project import ProjectCommand
-from datmo.core.util.exceptions import ProjectNotInitializedException
+from datmo.core.util.exceptions import ProjectNotInitialized
 
 
 class TestSession():
@@ -43,7 +43,7 @@ class TestSession():
         failed = False
         try:
             self.snapshot = SessionCommand(self.temp_dir, self.cli_helper)
-        except ProjectNotInitializedException:
+        except ProjectNotInitialized:
             failed = True
         assert failed
 
