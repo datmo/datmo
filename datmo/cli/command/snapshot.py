@@ -1,10 +1,9 @@
 from __future__ import print_function
 
-import yaml
 import prettytable
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.misc_functions import mutually_exclusive, printable_dict, printable_string
+from datmo.core.util.misc_functions import mutually_exclusive, printable_string
 from datmo.core.util.exceptions import (SnapshotCreateFromTaskArgs)
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.snapshot import SnapshotController
@@ -104,9 +103,21 @@ class SnapshotCommand(ProjectCommand):
     def delete(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.delete"))
         snapshot_id = kwargs.get("id", None)
+        result = self.snapshot_controller.delete(snapshot_id)
         self.cli_helper.echo(
             __("info", "cli.snapshot.delete.success", snapshot_id))
-        return self.snapshot_controller.delete(snapshot_id)
+        return result
+
+    def update(self, **kwargs):
+        self.cli_helper.echo(__("info", "cli.snapshot.update"))
+        snapshot_id = kwargs.get("id", None)
+        message = kwargs.get("message", None)
+        label = kwargs.get("label", None)
+        result = self.snapshot_controller.update(
+            snapshot_id, message=message, label=label)
+        self.cli_helper.echo(
+            __("info", "cli.snapshot.update.success", snapshot_id))
+        return result
 
     def ls(self, **kwargs):
         session_id = kwargs.get('session_id',

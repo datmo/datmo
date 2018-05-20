@@ -10,14 +10,14 @@ try:
 except NameError:
     to_unicode = str
 
-from datmo.snapshot import create, ls
+from datmo.snapshot import create, ls, update, delete
 from datmo.snapshot import Snapshot
 from datmo.task import run
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.controller.project import ProjectController
 from datmo.core.util.exceptions import (
     GitCommitDoesNotExist, InvalidProjectPathException,
-    SessionDoesNotExistException, SnapshotCreateFromTaskArgs)
+    SessionDoesNotExistException, SnapshotCreateFromTaskArgs, EntityNotFound)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -260,3 +260,99 @@ class TestSnapshotModule():
         snapshot_list_4 = ls(filter='test3', home=self.temp_dir)
 
         assert len(list(snapshot_list_4)) == 0
+
+    def test_update(self):
+        # check project is not initialized if wrong home
+        failed = False
+        try:
+            delete(home=os.path.join("does", "not", "exist"))
+        except InvalidProjectPathException:
+            failed = True
+        assert failed
+
+        # check for snapshot id that does not exist
+        failed = False
+        try:
+            update(snapshot_id="does_not_exist", home=self.temp_dir)
+        except EntityNotFound:
+            failed = True
+        assert failed
+
+        test_message = "new_message"
+        test_label = "new_label"
+        # update both message and label
+
+        test_filepath = os.path.join(self.temp_dir, "script.py")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode("import numpy\n"))
+            f.write(to_unicode("import sklearn\n"))
+
+        snapshot_obj = create(message="test", home=self.temp_dir)
+
+        updated_snapshot_obj = update(
+            snapshot_id=snapshot_obj.id,
+            message=test_message,
+            label=test_label,
+            home=self.temp_dir)
+
+        assert updated_snapshot_obj.id == snapshot_obj.id
+        assert updated_snapshot_obj.message == test_message
+        assert updated_snapshot_obj.label == test_label
+
+        # update message
+        snapshot_obj_1 = create(message="test", home=self.temp_dir)
+
+        updated_snapshot_obj_1 = update(
+            snapshot_id=snapshot_obj_1.id,
+            message=test_message,
+            home=self.temp_dir)
+
+        assert updated_snapshot_obj_1.id == snapshot_obj_1.id
+        assert updated_snapshot_obj_1.message == test_message
+
+        # update label
+        snapshot_obj_2 = create(message="test", home=self.temp_dir)
+
+        updated_snapshot_obj_2 = update(
+            snapshot_id=snapshot_obj_2.id,
+            label=test_label,
+            home=self.temp_dir)
+
+        assert updated_snapshot_obj_2.id == snapshot_obj_2.id
+        assert updated_snapshot_obj_2.message == test_message
+
+    def test_delete(self):
+        # check project is not initialized if wrong home
+        failed = False
+        try:
+            delete(home=os.path.join("does", "not", "exist"))
+        except InvalidProjectPathException:
+            failed = True
+        assert failed
+
+        # check for snapshot id that does not exist
+        failed = False
+        try:
+            delete(snapshot_id="does_not_exist", home=self.temp_dir)
+        except EntityNotFound:
+            failed = True
+        assert failed
+
+        # delete a snapshot
+        test_filepath = os.path.join(self.temp_dir, "script.py")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode("import numpy\n"))
+            f.write(to_unicode("import sklearn\n"))
+
+        snapshot_obj = create(message="delete_test", home=self.temp_dir)
+
+        snapshot_list_before_delete = ls(
+            filter='delete_test', home=self.temp_dir)
+
+        delete(snapshot_id=snapshot_obj.id, home=self.temp_dir)
+
+        snapshot_list_after_delete = ls(
+            filter='delete_test', home=self.temp_dir)
+
+        assert len(snapshot_list_before_delete) == 1
+        assert len(snapshot_list_after_delete) == 0

@@ -1,6 +1,5 @@
 from __future__ import print_function
 
-import yaml
 import shlex
 import platform
 import prettytable
@@ -11,7 +10,7 @@ except NameError:
     basestring = str
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.misc_functions import mutually_exclusive, printable_dict, printable_string
+from datmo.core.util.misc_functions import mutually_exclusive, printable_string
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
 from datmo.core.util.exceptions import RequiredArgumentMissing

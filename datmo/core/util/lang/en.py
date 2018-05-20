@@ -45,6 +45,10 @@ MESSAGES = {
             "Deleting a snapshot",
         "cli.snapshot.delete.success":
             "Deleted snapshot with id: %s",
+        "cli.snapshot.update":
+            "Updating a snapshot",
+        "cli.snapshot.update.success":
+            "Updated snapshot with id: %s",
         "cli.snapshot.checkout.success":
             "Moved to snapshot with id: %s",
         "cli.task.run":

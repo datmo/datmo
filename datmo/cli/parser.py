@@ -140,6 +140,15 @@ def get_datmo_parser():
         default=None,
         help="absolute filepath to use to search for metrics JSON")
 
+    snapshot_update = snapshot_subcommand_parsers.add_parser(
+        "update", help="update a snapshot by id")
+    snapshot_update.add_argument(
+        "--id", dest="id", help="snapshot id to update")
+    snapshot_update.add_argument(
+        "--message", dest="message", help="new message for the snapshot")
+    snapshot_update.add_argument(
+        "--label", dest="label", help="new label for the snapshot")
+
     snapshot_delete = snapshot_subcommand_parsers.add_parser(
         "delete", help="delete a snapshot by id")
     snapshot_delete.add_argument(

@@ -484,6 +484,53 @@ class TestSnapshot():
             exception_thrown = True
         assert exception_thrown
 
+    def test_datmo_snapshot_update(self):
+        self.__set_variables()
+
+        test_message = "test_message"
+        test_label = "test_label"
+
+        # 1. Updating both message and label
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
+        snapshot_id = self.snapshot.execute()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot", "update", "--id", snapshot_id, "--message",
+            test_message, "--label", test_label
+        ])
+
+        result = self.snapshot.execute()
+        assert result.id == snapshot_id
+        assert result.message == test_message
+        assert result.label == test_label
+
+        # 2. Updating only message
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
+        snapshot_id = self.snapshot.execute()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot", "update", "--id", snapshot_id, "--message",
+            test_message
+        ])
+
+        result = self.snapshot.execute()
+        assert result.id == snapshot_id
+        assert result.message == test_message
+
+        # Updating label
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
+        snapshot_id = self.snapshot.execute()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse(
+            ["snapshot", "update", "--id", snapshot_id, "--label", test_label])
+
+        result = self.snapshot.execute()
+        assert result.id == snapshot_id
+        assert result.label == test_label
+
     def test_datmo_snapshot_delete(self):
         self.__set_variables()
 

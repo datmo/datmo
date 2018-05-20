@@ -221,7 +221,7 @@ def ls(session_id=None, filter=None, home=None):
     Parameters
     ----------
     session_id : str, optional
-        a description of the snapshot for later reference
+        session id for which snapshots have to be listed
         (default is None, which means no session filter is given)
     filter : str, optional
         a string to use to filter from message and label
@@ -276,3 +276,82 @@ def ls(session_id=None, filter=None, home=None):
         Snapshot(filtered_core_snapshot_obj, home=home)
         for filtered_core_snapshot_obj in filtered_core_snapshot_objs
     ]
+
+
+def update(snapshot_id=None, message=None, label=None, home=None):
+    """Update a snapshot within a project
+
+    The project must be created before this is implemented. You can do that by using
+    the following command::
+
+        $ datmo init
+
+
+    Parameters
+    ----------
+    snapshot_id : str
+        snapshot id to be updated
+    message : str, optional
+        a string to use as a new message for the snapshot
+        (default is the already given message to that snapshot, unless provided a specific string.)
+    label : str, optional
+        a string to use as a new label for the snapshot
+        (default is the already given label to that snapshot, unless provided a specific string.)
+    home : str, optional
+        absolute home path of the project
+        (default is None, which will use the CWD as the project path)
+
+    Returns
+    -------
+    snapshot entity
+        returns a Snapshot entity
+
+    Examples
+    --------
+    You can use this function within a project repository to update a snapshot.
+
+    >>> import datmo
+    >>> snapshots = datmo.snapshot.update(snapshot_id="4L24adFfsa", message="new message", label="best")
+    """
+    if not home:
+        home = os.getcwd()
+    snapshot_controller = SnapshotController(home=home)
+
+    return snapshot_controller.update(
+        snapshot_id=snapshot_id, message=message, label=label)
+
+
+def delete(snapshot_id=None, home=None):
+    """Delete a snapshot within a project
+
+    The project must be created before this is implemented. You can do that by using
+    the following command::
+
+        $ datmo init
+
+
+    Parameters
+    ----------
+    snapshot_id : str
+        snapshot id to be updated
+    home : str, optional
+        absolute home path of the project
+        (default is None, which will use the CWD as the project path)
+
+    Returns
+    -------
+    snapshot entity
+        returns a Snapshot entity
+
+    Examples
+    --------
+    You can use this function within a project repository to delete a snapshot.
+
+    >>> import datmo
+    >>> datmo.snapshot.delete(snapshot_id="4L24adFfsa")
+    """
+    if not home:
+        home = os.getcwd()
+    snapshot_controller = SnapshotController(home=home)
+
+    snapshot_controller.delete(snapshot_id=snapshot_id)
