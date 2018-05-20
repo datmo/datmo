@@ -545,6 +545,52 @@ class TestSnapshotController():
                snapshot_obj_1 in result and \
                snapshot_obj_2 in result
 
+    def test_update(self):
+        self.__setup()
+        test_message = 'test_message'
+        test_label = 'test_label'
+
+        # Updating both message and label
+        # Create snapshot in the project
+        snapshot_obj = self.__default_create()
+
+        # Update snapshot in the project
+        self.snapshot.update(
+            snapshot_obj.id, message=test_message, label=test_label)
+
+        # Get the updated snapshot obj
+        updated_snapshot_obj = self.snapshot.dal.snapshot.get_by_id(
+            snapshot_obj.id)
+
+        assert updated_snapshot_obj.message == test_message
+        assert updated_snapshot_obj.label == test_label
+
+        # Updating only message
+        # Create snapshot in the project
+        snapshot_obj_1 = self.__default_create()
+
+        # Update snapshot in the project
+        self.snapshot.update(snapshot_obj_1.id, message=test_message)
+
+        # Get the updated snapshot obj
+        updated_snapshot_obj_1 = self.snapshot.dal.snapshot.get_by_id(
+            snapshot_obj_1.id)
+
+        assert updated_snapshot_obj_1.message == test_message
+
+        # Updating only label
+        # Create snapshot in the project
+        snapshot_obj_2 = self.__default_create()
+
+        # Update snapshot in the project
+        self.snapshot.update(snapshot_obj_2.id, label=test_label)
+
+        # Get the updated snapshot obj
+        updated_snapshot_obj_2 = self.snapshot.dal.snapshot.get_by_id(
+            snapshot_obj_2.id)
+
+        assert updated_snapshot_obj_2.label == test_label
+
     def test_delete(self):
         self.__setup()
         # Create snapshot in the project

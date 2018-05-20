@@ -312,6 +312,17 @@ class SnapshotController(BaseController):
 
         return self.dal.snapshot.query(query, sort_key, sort_order)
 
+    def update(self, snapshot_id, message=None, label=None):
+        if not snapshot_id:
+            raise RequiredArgumentMissing(
+                __("error", "controller.snapshot.delete.arg", "snapshot_id"))
+        update_snapshot_input_dict = {'id': snapshot_id}
+        if message:
+            update_snapshot_input_dict['message'] = message
+        if label:
+            update_snapshot_input_dict['label'] = label
+        return self.dal.snapshot.update(update_snapshot_input_dict)
+
     def delete(self, snapshot_id):
         if not snapshot_id:
             raise RequiredArgumentMissing(
