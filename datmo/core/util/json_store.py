@@ -7,7 +7,7 @@ try:
 except NameError:
     to_unicode = str
 
-from datmo.core.util.exceptions import (SaveSettingException, FileIOException)
+from datmo.core.util.exceptions import (SaveSettingError, FileIOError)
 
 
 class JSONStore():
@@ -69,7 +69,7 @@ class JSONStore():
                 # save in memory
                 self.in_memory_settings = settings
             except Exception as err:
-                raise SaveSettingException(err)
+                raise SaveSettingError(err)
             if name in settings:
                 return settings[name]
             else:
@@ -101,5 +101,5 @@ class JSONStore():
                 output_dict = json.loads(meta_data_string)
                 output_dict = yaml.safe_load(json.dumps(output_dict))
             except Exception as err:
-                raise FileIOException(err)
+                raise FileIOError(err)
         return output_dict

@@ -1,7 +1,7 @@
 from datmo.core.controller.base import BaseController
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (EntityNotFound, InvalidOperation,
-                                        ProjectNotInitializedException)
+                                        ProjectNotInitialized)
 from datmo.core.util.validation import validate
 
 
@@ -32,7 +32,7 @@ class SessionController(BaseController):
     def __init__(self, home):
         super(SessionController, self).__init__(home)
         if not self.is_initialized:
-            raise ProjectNotInitializedException(
+            raise ProjectNotInitialized(
                 __("error", "controller.session.__init__"))
 
     def create(self, incoming_dictionary):

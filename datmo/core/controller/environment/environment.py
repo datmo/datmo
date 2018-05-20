@@ -208,6 +208,7 @@ class EnvironmentController(BaseController):
                 which maps the running host port (right) to that of the environment (left)
             name : str, optional
             volumes : dict, optional
+            gpu : bool, default False
             detach : bool, optional
             stdin_open : bool, optional
             tty : bool, optional

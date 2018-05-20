@@ -1,4 +1,6 @@
 import os
+import traceback
+
 from datetime import datetime
 
 from datmo.core.controller.base import BaseController
@@ -7,8 +9,8 @@ from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.entity.task import Task
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
-    TaskRunException, RequiredArgumentMissing, ProjectNotInitializedException,
-    PathDoesNotExist, TaskInteractiveDetachException, TooManyArgumentsFound)
+    TaskRunError, RequiredArgumentMissing, ProjectNotInitialized,
+    PathDoesNotExist, TaskInteractiveDetachError, TooManyArgumentsFound)
 
 
 class TaskController(BaseController):
@@ -46,7 +48,7 @@ class TaskController(BaseController):
         self.environment = EnvironmentController(home)
         self.snapshot = SnapshotController(home)
         if not self.is_initialized:
-            raise ProjectNotInitializedException(
+            raise ProjectNotInitialized(
                 __("error", "controller.task.__init__"))
 
     def create(self):
@@ -108,17 +110,19 @@ class TaskController(BaseController):
             "ports": options.get('ports', None),
             "name": options.get('name', None),
             "volumes": options.get('volumes', None),
+            "gpu": options.get('gpu', False),
             "detach": options.get('detach', False),
             "stdin_open": options.get('stdin_open', False),
             "tty": options.get('tty', False),
-            "api": False
+            "api": False,
         }
 
         # Build image for environment
         self.environment.build(environment_id)
+
         # Run container with environment
-        return_code, run_id, logs = \
-            self.environment.run(environment_id, run_options, log_filepath)
+        return_code, run_id, logs = self.environment.run(
+            environment_id, run_options, log_filepath)
 
         return return_code, run_id, logs
 
@@ -174,7 +178,7 @@ class TaskController(BaseController):
 
         Raises
         ------
-        TaskRunException
+        TaskRunError
             If there is any error in creating files for the task or downstream errors
         """
         # Ensure visible=False is present in the snapshot dictionary
@@ -199,7 +203,7 @@ class TaskController(BaseController):
         if task_obj.status is None:
             task_obj.status = "RUNNING"
         else:
-            raise TaskRunException(
+            raise TaskRunError(
                 __("error", "cli.task.run.already_running", task_obj.id))
         # Create Task directory for user during run
         task_dirpath = os.path.join("datmo_tasks", task_obj.id)
@@ -207,7 +211,7 @@ class TaskController(BaseController):
             _ = self.file_driver.create(
                 os.path.join("datmo_tasks", task_obj.id), directory=True)
         except Exception:
-            raise TaskRunException(
+            raise TaskRunError(
                 __("error", "controller.task.run", task_dirpath))
         # Create the before snapshot prior to execution
         before_snapshot_dict = snapshot_dict.copy()
@@ -222,6 +226,8 @@ class TaskController(BaseController):
                 task_dict.get('before_snapshot_id', before_snapshot_obj.id),
             "command":
                 task_dict.get('command', task_obj.command),
+            "gpu":
+                task_dict.get('gpu', False),
             "interactive":
                 task_dict.get('interactive', task_obj.interactive),
             "detach":
@@ -247,11 +253,13 @@ class TaskController(BaseController):
             os.path.join(self.home, task_obj.task_dirpath))
 
         return_code, run_id, logs = 0, None, None
+
         try:
             # Set the parameters set in the task
             if task_obj.detach and task_obj.interactive:
-                raise TaskInteractiveDetachException(
+                raise TaskInteractiveDetachError(
                     __("error", "controller.task.run.args.detach.interactive"))
+
             environment_run_options = {
                 "command": task_obj.command,
                 "ports": [] if task_obj.ports is None else task_obj.ports,
@@ -266,6 +274,7 @@ class TaskController(BaseController):
                         'mode': 'rw'
                     }
                 },
+                "gpu": task_obj.gpu,
                 "detach": task_obj.detach,
                 "stdin_open": task_obj.interactive,
                 "tty": task_obj.interactive,
@@ -277,6 +286,10 @@ class TaskController(BaseController):
                 self._run_helper(before_snapshot_obj.environment_id,
                                  environment_run_options,
                                  os.path.join(self.home, task_obj.log_filepath))
+
+        except Exception as e:
+            return_code = 1
+            logs += "Error running task: %" % e.message
         finally:
             # Create the after snapshot after execution is completed with new filepaths
             after_snapshot_dict = snapshot_dict.copy()

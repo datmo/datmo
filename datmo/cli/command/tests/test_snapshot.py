@@ -25,7 +25,7 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
 from datmo.cli.command.task import TaskCommand
-from datmo.core.util.exceptions import (ProjectNotInitializedException,
+from datmo.core.util.exceptions import (ProjectNotInitialized,
                                         MutuallyExclusiveArguments,
                                         SnapshotCreateFromTaskArgs)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
@@ -79,7 +79,7 @@ class TestSnapshot():
         failed = False
         try:
             self.snapshot = SnapshotCommand(self.temp_dir, self.cli_helper)
-        except ProjectNotInitializedException:
+        except ProjectNotInitialized:
             failed = True
         assert failed
 

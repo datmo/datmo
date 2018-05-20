@@ -18,7 +18,7 @@ from datmo.core.controller.environment.driver.dockerenv import DockerEnvironment
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     PathDoesNotExist, MutuallyExclusiveArguments, RequiredArgumentMissing,
-    EnvironmentInitFailed, EnvironmentExecutionException)
+    EnvironmentInitFailed, EnvironmentExecutionError)
 
 
 def grep(pattern, fileObj):
@@ -187,7 +187,7 @@ def __helper(filepath):
                 f.write(to_unicode(str("RUN echo hello")))
             test.build("docker-test", definition_path)
         return False
-    except (EnvironmentInitFailed, EnvironmentExecutionException):
+    except (EnvironmentInitFailed, EnvironmentExecutionError):
         return True
 
 

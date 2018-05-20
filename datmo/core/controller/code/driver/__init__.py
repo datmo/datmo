@@ -91,38 +91,38 @@ class CodeDriver(with_metaclass(ABCMeta, object)):
         """
         pass
 
-    @abstractmethod
-    def push_ref(self, commit_id="*"):
-        """Push commit reference given
-
-        Parameters
-        ----------
-        commit_id : str, optional
-            commit id for commit ref (default is * to signify
-            all refs)
-
-        Returns
-        -------
-        bool
-            True if success
-        """
-        pass
-
-    @abstractmethod
-    def fetch_ref(self, commit_id):
-        """Fetch commit reference given
-
-        Parameters
-        ----------
-        commit_id : str
-            commit id for commit ref
-
-        Returns
-        -------
-        bool
-            True if success
-        """
-        pass
+    # @abstractmethod
+    # def push_ref(self, commit_id="*"):
+    #     """Push commit reference given
+    #
+    #     Parameters
+    #     ----------
+    #     commit_id : str, optional
+    #         commit id for commit ref (default is * to signify
+    #         all refs)
+    #
+    #     Returns
+    #     -------
+    #     bool
+    #         True if success
+    #     """
+    #     pass
+    #
+    # @abstractmethod
+    # def fetch_ref(self, commit_id):
+    #     """Fetch commit reference given
+    #
+    #     Parameters
+    #     ----------
+    #     commit_id : str
+    #         commit id for commit ref
+    #
+    #     Returns
+    #     -------
+    #     bool
+    #         True if success
+    #     """
+    #     pass
 
     @abstractmethod
     def checkout_ref(self, commit_id, remote=False):

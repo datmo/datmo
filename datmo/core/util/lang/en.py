@@ -74,7 +74,11 @@ MESSAGES = {
         "cli.general.git":
             "git isn't setup. please install git",
         "controller.general.environment.failed":
-            "Environment driver not initialized"
+            "Environment driver not initialized",
+        "controller.project.cleanup.refs":
+            "Project code refs do not exist",
+        "controller.project.cleanup.files":
+            "Project files do not exist"
     },
     "error": {
         "exception.validationfailed":

@@ -12,8 +12,8 @@ except NameError:
     to_unicode = str
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import (PathDoesNotExist, FileIOException,
-                                        FileStructureException)
+from datmo.core.util.exceptions import (PathDoesNotExist, FileIOError,
+                                        FileStructureError)
 from datmo.core.controller.file.driver import FileDriver
 
 
@@ -125,7 +125,7 @@ class LocalFileDriver(FileDriver):
                                  "d41d8cd98f00b204e9800998ecf8427e"),
                     directory=True)
         except Exception as e:
-            raise FileIOException(
+            raise FileIOError(
                 __("error", "controller.file.driver.local.init", str(e)))
         return True
 
@@ -207,7 +207,7 @@ class LocalFileDriver(FileDriver):
 
     def create_collection(self, filepaths):
         if not self.is_initialized:
-            raise FileStructureException(
+            raise FileStructureError(
                 __("error",
                    "controller.file.driver.local.create_collection.structure"))
 
@@ -249,7 +249,7 @@ class LocalFileDriver(FileDriver):
         if os.path.isdir(collection_path):
             shutil.rmtree(temp_collection_path)
             return filehash
-            # raise FileStructureException("exception.file.create_collection", {
+            # raise FileStructureError("exception.file.create_collection", {
             #     "exception": "File collection with id already exists."
             # })
         os.makedirs(collection_path)
@@ -345,7 +345,7 @@ class LocalFileDriver(FileDriver):
     # Other functions
     def create_collections_dir(self):
         if not self.is_initialized:
-            raise FileStructureException(
+            raise FileStructureError(
                 __("error",
                    "controller.file.driver.local.create_collections_dir"))
         collections_path = os.path.join(self.filepath, ".datmo", "collections")
@@ -367,7 +367,7 @@ class LocalFileDriver(FileDriver):
 
     def list_file_collections(self):
         if not self.is_initialized:
-            raise FileStructureException(
+            raise FileStructureError(
                 __("error",
                    "controller.file.driver.local.list_file_collections"))
         collections_path = os.path.join(self.filepath, ".datmo", "collections")

@@ -35,7 +35,7 @@ class TestProjectController():
     def teardown_method(self):
         pass
 
-    def test_init_none(self):
+    def test_init_failure_none(self):
         # Test failed case
         failed = False
         try:
@@ -44,7 +44,7 @@ class TestProjectController():
             failed = True
         assert failed
 
-    def test_init_empty_str(self):
+    def test_init_failure_empty_str(self):
         # Test failed case
         failed = False
         try:
@@ -52,9 +52,25 @@ class TestProjectController():
         except ValidationFailed:
             failed = True
         assert failed
+        assert not self.project.code_driver.exists_code_refs_dir()
+        assert not self.project.file_driver.exists_datmo_file_structure()
 
-    def test_init(self):
+    def test_init_failure_code_driver(self):
+        # Create a HEAD.lock file in .git to make GitCodeDriver.init() fail
+        git_dir = os.path.join(self.project.code_driver.filepath, ".git")
+        os.makedirs(git_dir)
+        with open(os.path.join(git_dir, "HEAD.lock"), "a+") as f:
+            f.write(to_unicode("test"))
+        failed = False
+        try:
+            self.project.init("test1", "test description")
+        except Exception:
+            failed = True
+        assert failed
+        assert not self.project.code_driver.exists_code_refs_dir()
+        assert not self.project.file_driver.exists_datmo_file_structure()
 
+    def test_init_success(self):
         result = self.project.init("test1", "test description")
 
         # Tested with is_initialized
@@ -65,9 +81,21 @@ class TestProjectController():
         # Changeable by user, not tested in is_initialized
         assert self.project.current_session.name == "default"
 
-        # Check Project template if user specified template
-        # TODO: Add in Project template if user specifies
+    def test_init_reinit_failure_empty_str(self):
+        _ = self.project.init("test1", "test description")
+        failed = True
+        try:
+            self.project.init("", "")
+        except Exception:
+            failed = True
+        assert failed
+        assert self.project.model.name == "test1"
+        assert self.project.model.description == "test description"
+        assert self.project.code_driver.exists_code_refs_dir()
+        assert self.project.file_driver.exists_datmo_file_structure()
 
+    def test_init_reinit_success(self):
+        _ = self.project.init("test1", "test description")
         # Test out functionality for re-initialize project
         result = self.project.init("anything", "else")
 

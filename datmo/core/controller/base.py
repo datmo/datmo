@@ -4,8 +4,8 @@ from datmo.core.util.i18n import get as __
 from datmo.core.util.logger import DatmoLogger
 from datmo.core.util import get_class_contructor
 from datmo.core.util.json_store import JSONStore
-from datmo.core.util.exceptions import (InvalidProjectPathException,
-                                        DatmoModelNotInitializedException)
+from datmo.core.util.exceptions import (InvalidProjectPath,
+                                        DatmoModelNotInitialized)
 
 
 class BaseController(object):
@@ -45,7 +45,7 @@ class BaseController(object):
     def __init__(self, home):
         self.home = home
         if not os.path.isdir(self.home):
-            raise InvalidProjectPathException(
+            raise InvalidProjectPath(
                 __("error", "controller.base.__init__", home))
         self.config = JSONStore(os.path.join(self.home, ".datmo", ".config"))
         self.logger = DatmoLogger.get_logger(__name__)
@@ -77,7 +77,7 @@ class BaseController(object):
     @property
     def current_session(self):
         if not self.model:
-            raise DatmoModelNotInitializedException(
+            raise DatmoModelNotInitialized(
                 __("error", "controller.base.current_session"))
         if self._current_session == None:
             sessions = self.dal.session.query({"current": True})
