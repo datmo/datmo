@@ -39,7 +39,7 @@ def printable_dict(input_dictionary):
     return printable_output
 
 
-def printable_string(string, max_width=60):
+def printable_string(string, max_width=40):
     return '\n'.join(textwrap.wrap(string, max_width))
 
 

@@ -718,7 +718,8 @@ class TestDockerEnv():
 
         # 1) Test option 1
         result = self.docker_environment_manager.create_requirements_file()
-        assert result is None
+        assert os.path.isfile(result) and \
+               "\n" in open(result, "r").read()
 
         # 2) Test option 2
         script_path = os.path.join(self.docker_environment_manager.filepath,
@@ -749,7 +750,8 @@ class TestDockerEnv():
             f.write(to_unicode("import os\n"))
             f.write(to_unicode("import sys\n"))
         result = self.docker_environment_manager.create_requirements_file()
-        assert result is None
+        assert os.path.isfile(result) and \
+               "\n" in open(result, "r").read()
 
     def test_create_default_dockerfile(self):
         # 1) Create default dockerfile for default script present

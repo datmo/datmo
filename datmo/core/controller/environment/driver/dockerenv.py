@@ -707,7 +707,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             raise EnvironmentRequirementsCreateException(
                 __("error", "controller.environment.requirements.create",
                    str(e)))
-        if open(requirements_filepath, "r").read() == "\n":
+        if not os.path.isfile(requirements_filepath):
             return None
         return requirements_filepath
 
