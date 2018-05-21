@@ -69,8 +69,8 @@ class TestTaskModule():
         # (fails w/ no environment)
         test_filepath = os.path.join(self.temp_dir, "script.py")
         with open(test_filepath, "w") as f:
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
+            f.write(to_unicode("import os\n"))
+            f.write(to_unicode("import sys\n"))
             f.write(to_unicode("print('hello')\n"))
             f.write(to_unicode("print(' accuracy: 0.56 ')\n"))
 
