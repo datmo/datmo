@@ -135,7 +135,7 @@ class TestDockerEnv():
         assert path == input_dockerfile_path
         assert output_path == output_dockerfile_path
         assert requirements_filepath and os.path.isfile(requirements_filepath) and \
-               "numpy" in open(requirements_filepath, "r").read()
+               "datmo" in open(requirements_filepath, "r").read()
 
         # Test exception for path does not exist
         os.remove(input_dockerfile_path)
