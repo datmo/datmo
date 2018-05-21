@@ -72,13 +72,46 @@ class Snapshot():
 
         self.code_id = self._core_snapshot.code_id
         self.environment_id = self._core_snapshot.environment_id
-        self.file_collection_id = self._core_snapshot.file_collection_id
         self.config = self._core_snapshot.config
         self.stats = self._core_snapshot.stats
+        self._files = None
 
         self.task_id = self._core_snapshot.task_id
         self.label = self._core_snapshot.label
         self.created_at = self._core_snapshot.created_at
+
+    @property
+    def files(self):
+        self._files = self.get_files()
+        return self._files
+
+    def __get_core_snapshot(self):
+        """Returns the latest core snapshot object for id
+
+        Returns
+        -------
+        datmo.core.entity.snapshot.Snapshot
+            core snapshot object for the snapshot
+        """
+        snapshot_controller = SnapshotController(home=self._home)
+        return snapshot_controller.get(self.id)
+
+    def get_files(self, mode="r"):
+        """Returns a list of file objects for the snapshot
+
+        Parameters
+        ----------
+        mode : str
+            file object mode
+            (default is "r" which signifies read mode)
+
+        Returns
+        -------
+        list
+            list of file objects associated with the snapshot
+        """
+        snapshot_controller = SnapshotController(home=self._home)
+        return snapshot_controller.get_files(self.id, mode=mode)
 
     def __eq__(self, other):
         return self.id == other.id if other else False

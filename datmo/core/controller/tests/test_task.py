@@ -2,12 +2,10 @@
 Tests for TaskController
 """
 import os
-import time
 import random
 import string
 import tempfile
 import platform
-import timeout_decorator
 from io import open, TextIOWrapper
 try:
     to_unicode = unicode

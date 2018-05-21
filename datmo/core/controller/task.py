@@ -342,7 +342,7 @@ class TaskController(BaseController):
         Parameters
         ----------
         task_id : str
-            id for the task you would like to get file objects for
+            id for the task you would like to get
 
         Returns
         -------
@@ -392,24 +392,16 @@ class TaskController(BaseController):
             raise DoesNotExist()
         if task_obj.after_snapshot_id:
             # perform number 1) and return file list
-            after_snapshot_obj = \
-                self.dal.snapshot.get_by_id(task_obj.after_snapshot_id)
-            file_collection_obj = \
-                self.dal.file_collection.get_by_id(after_snapshot_obj.file_collection_id)
-            return self.file_driver.\
-                get_collection_files(file_collection_obj.filehash, mode=mode)
+            return self.snapshot.get_files(
+                task_obj.after_snapshot_id, mode=mode)
         elif task_obj.task_dirpath:
             # perform number 2) and return file list
             return self.file_driver.get(
                 task_obj.task_dirpath, mode=mode, directory=True)
         elif task_obj.before_snapshot_id:
             # perform number 3) and return file list
-            before_snapshot_obj = \
-                self.dal.snapshot.get_by_id(task_obj.before_snapshot_id)
-            file_collection_obj = \
-                self.dal.file_collection.get_by_id(before_snapshot_obj.file_collection_id)
-            return self.file_driver. \
-                get_collection_files(file_collection_obj.filehash, mode=mode)
+            return self.snapshot.get_files(
+                task_obj.before_snapshot_id, mode=mode)
         else:
             # Error because the task does not have any files associated with it
             raise PathDoesNotExist()

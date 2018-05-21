@@ -4,7 +4,7 @@ Tests for snapshot module
 import os
 import tempfile
 import platform
-from io import open
+from io import open, TextIOWrapper
 try:
     to_unicode = unicode
 except NameError:
@@ -17,7 +17,7 @@ from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.controller.project import ProjectController
 from datmo.core.util.exceptions import (
     GitCommitDoesNotExist, InvalidProjectPath, SessionDoesNotExist,
-    SnapshotCreateFromTaskArgs)
+    SnapshotCreateFromTaskArgs, DoesNotExist)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -42,7 +42,7 @@ class TestSnapshotModule():
             "message": "my test snapshot",
             "code_id": "my_code",
             "environment_id": "my_environment",
-            "file_collection_id": "my_files",
+            "file_collection_id": "my_file_collection",
             "config": {},
             "stats": {}
         }
@@ -50,7 +50,8 @@ class TestSnapshotModule():
         snapshot_entity = Snapshot(core_snapshot_entity, home=self.temp_dir)
 
         for k, v in input_dict.items():
-            assert getattr(snapshot_entity, k) == v
+            if k != "file_collection_id":
+                assert getattr(snapshot_entity, k) == v
         assert snapshot_entity.task_id == None
         assert snapshot_entity.label == None
         assert snapshot_entity.created_at
@@ -86,7 +87,7 @@ class TestSnapshotModule():
         assert snapshot_obj_1.message == "test"
         assert snapshot_obj_1.code_id
         assert snapshot_obj_1.environment_id
-        assert snapshot_obj_1.file_collection_id
+        assert snapshot_obj_1.files == []
         assert snapshot_obj_1.config == {}
         assert snapshot_obj_1.stats == {}
 
@@ -101,7 +102,7 @@ class TestSnapshotModule():
         assert snapshot_obj_2.message == "test"
         assert snapshot_obj_2.code_id
         assert snapshot_obj_2.environment_id
-        assert snapshot_obj_2.file_collection_id
+        assert snapshot_obj_2.files == []
         assert snapshot_obj_2.config == {}
         assert snapshot_obj_2.stats == {}
         assert snapshot_obj_2 != snapshot_obj_1
@@ -132,6 +133,8 @@ class TestSnapshotModule():
         assert isinstance(snapshot_obj, Snapshot)
         assert snapshot_obj.message == "my test snapshot"
         assert snapshot_obj.label == "best"
+        assert len(snapshot_obj.files) == 1
+        assert "task.log" in snapshot_obj.files[0].name
         assert snapshot_obj.config == {"foo": "bar"}
         assert snapshot_obj.stats == task_obj.results
 
@@ -147,6 +150,8 @@ class TestSnapshotModule():
         assert isinstance(snapshot_obj, Snapshot)
         assert snapshot_obj_2.message == "my test snapshot"
         assert snapshot_obj_2.label == "best"
+        assert len(snapshot_obj.files) == 1
+        assert "task.log" in snapshot_obj.files[0].name
         assert snapshot_obj_2.config == {"foo": "bar"}
         assert snapshot_obj_2.stats == {"foo": "bar"}
 
@@ -260,3 +265,90 @@ class TestSnapshotModule():
         snapshot_list_4 = ls(filter='test3', home=self.temp_dir)
 
         assert len(list(snapshot_list_4)) == 0
+
+    def __setup(self):
+        # Create a snapshot with default params and files to commit
+        test_filepath = os.path.join(self.temp_dir, "script.py")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode("import numpy\n"))
+            f.write(to_unicode("import sklearn\n"))
+
+        return create(
+            message="test", home=self.temp_dir, filepaths=[test_filepath])
+
+    def test_snapshot_entity_files(self):
+        input_dict = {
+            "id": "test",
+            "model_id": "my_model",
+            "session_id": "my_session",
+            "message": "my message",
+            "code_id": "my_code_id",
+            "environment_id": "my_environment_id",
+            "file_collection_id": "my file collection",
+            "config": {
+                "test": 0.56
+            },
+            "stats": {
+                "test": 0.34
+            }
+        }
+        core_snapshot_entity = CoreSnapshot(input_dict)
+        snapshot_entity = Snapshot(core_snapshot_entity, home=self.temp_dir)
+        # Test failure because entity has not been created by controller
+        failed = False
+        try:
+            snapshot_entity.files
+        except DoesNotExist:
+            failed = True
+        assert failed
+        # Test success
+        snapshot_entity = self.__setup()
+        result = snapshot_entity.files
+
+        assert len(result) == 1
+        assert isinstance(result[0], TextIOWrapper)
+        assert result[0].mode == "r"
+        assert "script.py" in result[0].name
+
+    def test_task_entity_get_files(self):
+        input_dict = {
+            "id": "test",
+            "model_id": "my_model",
+            "session_id": "my_session",
+            "message": "my message",
+            "code_id": "my_code_id",
+            "environment_id": "my_environment_id",
+            "file_collection_id": "my file collection",
+            "config": {
+                "test": 0.56
+            },
+            "stats": {
+                "test": 0.34
+            }
+        }
+        core_snapshot_entity = CoreSnapshot(input_dict)
+        snapshot_entity = Snapshot(core_snapshot_entity, home=self.temp_dir)
+        # Test failure because entity has not been created by controller
+        failed = False
+        try:
+            snapshot_entity.get_files()
+        except DoesNotExist:
+            failed = True
+        assert failed
+
+        # Test success
+        snapshot_entity = self.__setup()
+        result = snapshot_entity.get_files()
+
+        assert len(result) == 1
+        assert isinstance(result[0], TextIOWrapper)
+        assert result[0].mode == "r"
+        assert "script.py" in result[0].name
+
+        snapshot_entity = self.__setup()
+        result = snapshot_entity.get_files(mode="a")
+
+        assert len(result) == 1
+        assert isinstance(result[0], TextIOWrapper)
+        assert result[0].mode == "a"
+        assert "script.py" in result[0].name
