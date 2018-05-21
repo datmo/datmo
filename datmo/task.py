@@ -9,6 +9,7 @@ except NameError:
 from datmo.core.controller.task import TaskController
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.util.exceptions import InvalidArgumentType
+from datmo.core.util.misc_functions import prettify_datetime
 
 
 class Task():
@@ -99,6 +100,27 @@ class Task():
 
     def __eq__(self, other):
         return self.id == other.id if other else False
+
+    def __str__(self):
+        final_str = '\033[94m' + "task " + self.id + "\n" + '\033[0m'
+        final_str = final_str + "Status: " + self.status + "\n"
+        final_str = final_str + "Start Time: " + prettify_datetime(
+            self.start_time) + "\n"
+        if self.end_time:
+            final_str = final_str + "End Time: " + prettify_datetime(
+                self.end_time) + "\n"
+        if self.duration:
+            final_str = final_str + "Duration: " + str(self.duration) + "\n"
+        if self.session_id:
+            final_str = final_str + "Session -> " + self.session_id + "\n"
+        # Outputs
+        # final_str = final_str + "logs: "  + self.logs + "\n"
+        final_str = final_str + "results: " + str(self.results) + "\n"
+        final_str = final_str + "\n" + "    " + self.command + "\n" + "\n"
+        return final_str
+
+    def __repr__(self):
+        return self.__str__()
 
 
 def run(command, env=None, home=None, gpu=False):

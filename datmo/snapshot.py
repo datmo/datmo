@@ -4,6 +4,7 @@ from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.util.exceptions import InvalidArgumentType, \
     SnapshotCreateFromTaskArgs
+from datmo.core.util.misc_functions import prettify_datetime
 
 
 class Snapshot():
@@ -81,6 +82,32 @@ class Snapshot():
 
     def __eq__(self, other):
         return self.id == other.id if other else False
+
+    def __str__(self):
+        if self.label:
+            final_str = '\033[94m' + "snapshot " + self.id + '\033[0m'
+            final_str = final_str + '\033[94m' + " (" + '\033[0m'
+            final_str = final_str + '\033[93m' + '\033[1m' + "label: " + self.label + '\033[0m'
+            final_str = final_str + '\033[94m' + ")" + '\033[0m' + "\n"
+        else:
+            final_str = '\033[94m' + "snapshot " + self.id + '\033[0m' + "\n"
+        final_str = final_str + "Date: " + prettify_datetime(
+            self.created_at) + "\n"
+        if self.session_id:
+            final_str = final_str + "Session -> " + self.session_id + "\n"
+        if self.task_id:
+            final_str = final_str + "Task -> " + self.task_id + "\n"
+        # Components
+        final_str = final_str + "Code -> " + self.code_id + "\n"
+        final_str = final_str + "Environment -> " + self.environment_id + "\n"
+        final_str = final_str + "Files -> " + self.file_collection_id + "\n"
+        final_str = final_str + "Configs: " + str(self.config) + "\n"
+        final_str = final_str + "Stats: " + str(self.stats) + "\n"
+        final_str = final_str + "\n" + "    " + self.message + "\n" + "\n"
+        return final_str
+
+    def __repr__(self):
+        return self.__str__()
 
 
 def create(message,

@@ -195,3 +195,9 @@ def pytest_docker_environment_failed_instantiation(filepath):
     return pytest.mark.skipif(
         __helper(filepath),
         reason="a running environment could not be instantiated")
+
+
+def prettify_datetime(datetime_obj):
+    return str(
+        datetime_obj.replace(tzinfo=datetime.timezone.utc).astimezone()
+        .strftime("%a %b %d %H:%M:%S %Y %z"))
