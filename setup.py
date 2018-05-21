@@ -36,7 +36,6 @@ setup(
         "pymongo>=3.6.0",
         "checksumdir>=1.1.4",
         "semver>=2.7.8",
-        "pipreqs>=0.4.9",
         "backports.ssl-match-hostname>=3.5.0.1",
         "timeout-decorator==0.4.0",
         "cerberus>=1.2",

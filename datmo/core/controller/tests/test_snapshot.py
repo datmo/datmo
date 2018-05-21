@@ -96,6 +96,7 @@ class TestSnapshotController():
         self.snapshot.file_driver.create("filepath1")
         snapshot_obj_0 = self.snapshot.create({
             "message": "my test snapshot",
+            "language": "python3"
         })
         assert isinstance(snapshot_obj_0, Snapshot)
         assert snapshot_obj_0.code_id

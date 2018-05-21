@@ -79,6 +79,10 @@ class SnapshotController(BaseController):
                 environment_definition_filepath : str, optional
                     absolute filepath for the environment definition file
                     (e.g. Dockerfile path for Docker)
+                language: str, optional
+                    programing language for the scripts
+                    (e.g. if the python sdk is being used in `python3`,
+                    then language is `python3`)
 
                 Default
                 -------
