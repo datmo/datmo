@@ -777,7 +777,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                     os.path.split(requirements_filepath)[-1]))
             destination.write(
                 to_unicode(
-                    str("RUN cat /tmp/requirements.txt | xargs -n 1 pip install --no-cache-dir\n"
+                    str("RUN cat /tmp/requirements.txt | xargs -n 1 pip install --no-cache-dir || true\n"
                         )))
         destination.close()
 
