@@ -20,7 +20,7 @@ from datmo.core.controller.task import TaskController
 from datmo.core.entity.task import Task
 from datmo.core.util.exceptions import EntityNotFound, TaskRunError, \
     InvalidArgumentType, RequiredArgumentMissing, ProjectNotInitialized, \
-    InvalidProjectPath, TooManyArgumentsFound
+    InvalidProjectPath, TooManyArgumentsFound, DoesNotExist
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -441,9 +441,32 @@ class TestTaskController():
                task_obj_1 in result and \
                task_obj_2 in result
 
+    def test_get(self):
+        self.__setup()
+        # Test failure for no task
+        failed = False
+        try:
+            self.task.get("random")
+        except DoesNotExist:
+            failed = True
+        assert failed
+
+        # Test success for task
+        task_obj = self.task.create()
+        task_obj_returned = self.task.get(task_obj.id)
+        assert task_obj == task_obj_returned
+
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_get_files(self):
         self.__setup()
+        # Test failure case
+        failed = False
+        try:
+            self.task.get_files("random")
+        except DoesNotExist:
+            failed = True
+        assert failed
+
         # Create task in the project
         task_obj = self.task.create()
 

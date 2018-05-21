@@ -4,6 +4,7 @@ Tests for task module
 import os
 import tempfile
 import platform
+import datetime
 from io import open, TextIOWrapper
 try:
     to_unicode = unicode
@@ -14,7 +15,7 @@ from datmo.task import run
 from datmo.task import Task
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.controller.project import ProjectController
-from datmo.core.util.exceptions import (GitCommitDoesNotExist, EntityNotFound)
+from datmo.core.util.exceptions import (GitCommitDoesNotExist, DoesNotExist)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -43,12 +44,6 @@ class TestTaskModule():
 
         for k, v in input_dict.items():
             assert getattr(task_entity, k) == v
-        assert task_entity.status == None
-        assert task_entity.start_time == None
-        assert task_entity.end_time == None
-        assert task_entity.duration == None
-        assert task_entity.logs == None
-        assert task_entity.results == None
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_run(self):
@@ -104,6 +99,165 @@ class TestTaskModule():
         assert 'hello' in task_obj_2.logs
         assert task_obj_2.results == {"accuracy": "0.56"}
 
+    def __setup(self):
+        # Create a basic task and run it with string command
+        test_filepath = os.path.join(self.temp_dir, "script.py")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode("import numpy\n"))
+            f.write(to_unicode("import sklearn\n"))
+            f.write(to_unicode("print 'hello'\n"))
+
+        test_filepath = os.path.join(self.temp_dir, "Dockerfile")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode("FROM datmo/xgboost:cpu"))
+
+        return run(
+            command="python script.py", env=test_filepath, home=self.temp_dir)
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_task_entity_status(self):
+        input_dict = {
+            "id": "test",
+            "model_id": "my_model",
+            "session_id": "my_session",
+            "command": "python test.py"
+        }
+        core_task_entity = CoreTask(input_dict)
+        task_entity = Task(core_task_entity, home=self.temp_dir)
+        # Test failure because entity has not been created by controller
+        failed = False
+        try:
+            task_entity.status
+        except DoesNotExist:
+            failed = True
+        assert failed
+        # Test success
+        task_entity = self.__setup()
+        result = task_entity.status
+
+        assert result
+        assert isinstance(result, to_unicode)
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_task_entity_start_time(self):
+        input_dict = {
+            "id": "test",
+            "model_id": "my_model",
+            "session_id": "my_session",
+            "command": "python test.py"
+        }
+        core_task_entity = CoreTask(input_dict)
+        task_entity = Task(core_task_entity, home=self.temp_dir)
+        # Test failure because entity has not been created by controller
+        failed = False
+        try:
+            task_entity.start_time
+        except DoesNotExist:
+            failed = True
+        assert failed
+        # Test success
+        task_entity = self.__setup()
+        result = task_entity.start_time
+
+        assert result
+        assert isinstance(result, datetime.datetime)
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_task_entity_end_time(self):
+        input_dict = {
+            "id": "test",
+            "model_id": "my_model",
+            "session_id": "my_session",
+            "command": "python test.py"
+        }
+        core_task_entity = CoreTask(input_dict)
+        task_entity = Task(core_task_entity, home=self.temp_dir)
+        # Test failure because entity has not been created by controller
+        failed = False
+        try:
+            task_entity.end_time
+        except DoesNotExist:
+            failed = True
+        assert failed
+        # Test success
+        task_entity = self.__setup()
+        result = task_entity.end_time
+
+        assert result
+        assert isinstance(result, datetime.datetime)
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_task_entity_duration(self):
+        input_dict = {
+            "id": "test",
+            "model_id": "my_model",
+            "session_id": "my_session",
+            "command": "python test.py"
+        }
+        core_task_entity = CoreTask(input_dict)
+        task_entity = Task(core_task_entity, home=self.temp_dir)
+        # Test failure because entity has not been created by controller
+        failed = False
+        try:
+            task_entity.duration
+        except DoesNotExist:
+            failed = True
+        assert failed
+        # Test success
+        task_entity = self.__setup()
+        result = task_entity.duration
+
+        assert result
+        assert isinstance(result, float)
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_task_entity_logs(self):
+        input_dict = {
+            "id": "test",
+            "model_id": "my_model",
+            "session_id": "my_session",
+            "command": "python test.py"
+        }
+        core_task_entity = CoreTask(input_dict)
+        task_entity = Task(core_task_entity, home=self.temp_dir)
+        # Test failure because entity has not been created by controller
+        failed = False
+        try:
+            task_entity.logs
+        except DoesNotExist:
+            failed = True
+        assert failed
+        # Test success
+        task_entity = self.__setup()
+        result = task_entity.logs
+
+        assert result
+        assert isinstance(result, to_unicode)
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_task_entity_results(self):
+        input_dict = {
+            "id": "test",
+            "model_id": "my_model",
+            "session_id": "my_session",
+            "command": "python test.py"
+        }
+        core_task_entity = CoreTask(input_dict)
+        task_entity = Task(core_task_entity, home=self.temp_dir)
+        # Test failure because entity has not been created by controller
+        failed = False
+        try:
+            task_entity.results
+        except DoesNotExist:
+            failed = True
+        assert failed
+        # Test success
+        task_entity = self.__setup()
+        result = task_entity.results
+
+        assert isinstance(result, dict)
+        assert result == {}
+
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_files(self):
         input_dict = {
@@ -117,26 +271,47 @@ class TestTaskModule():
         # Test failure because entity has not been created by controller
         failed = False
         try:
-            task_entity.files()
-        except EntityNotFound:
+            task_entity.files
+        except DoesNotExist:
             failed = True
         assert failed
-
-        # Create a basic task and run it with string command
-        test_filepath = os.path.join(self.temp_dir, "script.py")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
-            f.write(to_unicode("print 'hello'\n"))
-
-        test_filepath = os.path.join(self.temp_dir, "Dockerfile")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu"))
-
-        task_entity = run(
-            command="python script.py", env=test_filepath, home=self.temp_dir)
-        result = task_entity.files()
+        # Test success
+        task_entity = self.__setup()
+        result = task_entity.files
 
         assert len(result) == 1
         assert isinstance(result[0], TextIOWrapper)
+        assert result[0].mode == "r"
+        assert result[0].name
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_task_entity_get_files(self):
+        input_dict = {
+            "id": "test",
+            "model_id": "my_model",
+            "session_id": "my_session",
+            "command": "python test.py"
+        }
+        core_task_entity = CoreTask(input_dict)
+        task_entity = Task(core_task_entity, home=self.temp_dir)
+        # Test failure because entity has not been created by controller
+        failed = False
+        try:
+            task_entity.get_files()
+        except DoesNotExist:
+            failed = True
+        assert failed
+
+        task_entity = self.__setup()
+        result = task_entity.get_files()
+
+        assert len(result) == 1
+        assert isinstance(result[0], TextIOWrapper)
+        assert result[0].mode == "r"
+        assert result[0].name
+
+        result = task_entity.get_files(mode="a")
+        assert len(result) == 1
+        assert isinstance(result[0], TextIOWrapper)
+        assert result[0].mode == "a"
         assert result[0].name

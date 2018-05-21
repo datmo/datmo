@@ -39,16 +39,18 @@ class Task():
         timestamp for the beginning time of the task
     end_time : datetime.datetime or None
         timestamp for the end time of the task
-    duration : datetime.timedelta or None
-        delta between start and end times
+    duration : float or None
+        delta in seconds between start and end times
     logs : str or None
         string output of logs
     results : dict or None
         dictionary containing output results from the task
+    files : list
+        returns list of file objects for the task in read mode
 
     Methods
     -------
-    files(mode="r")
+    get_files(mode="r")
         Returns a list of file objects for the task
 
     Raises
@@ -74,14 +76,69 @@ class Task():
         self.command = self._core_task.command
 
         # Run parameters
-        self.status = self._core_task.status
-        self.start_time = self._core_task.start_time
-        self.end_time = self._core_task.end_time
-        self.duration = self._core_task.duration
-        self.logs = self._core_task.logs
-        self.results = self._core_task.results
+        self._status = self._core_task.status
+        self._start_time = self._core_task.start_time
+        self._end_time = self._core_task.end_time
+        self._duration = self._core_task.duration
 
-    def files(self, mode="r"):
+        # Outputs
+        self._logs = self._core_task.logs
+        self._results = self._core_task.results
+        self._files = None
+
+    @property
+    def status(self):
+        self._core_task = self.__get_core_task()
+        self._status = self._core_task.status
+        return self._status
+
+    @property
+    def start_time(self):
+        self._core_task = self.__get_core_task()
+        self._start_time = self._core_task.start_time
+        return self._start_time
+
+    @property
+    def end_time(self):
+        self._core_task = self.__get_core_task()
+        self._end_time = self._core_task.end_time
+        return self._end_time
+
+    @property
+    def duration(self):
+        self._core_task = self.__get_core_task()
+        self._duration = self._core_task.duration
+        return self._duration
+
+    @property
+    def logs(self):
+        self._core_task = self.__get_core_task()
+        self._logs = self._core_task.logs
+        return self._logs
+
+    @property
+    def results(self):
+        self._core_task = self.__get_core_task()
+        self._results = self._core_task.results
+        return self._results
+
+    @property
+    def files(self):
+        self._files = self.get_files()
+        return self._files
+
+    def __get_core_task(self):
+        """Returns the latest core task object for id
+
+        Returns
+        -------
+        datmo.core.entity.task.Task
+            core task object fo the task
+        """
+        task_controller = TaskController(home=self._home)
+        return task_controller.get(self.id)
+
+    def get_files(self, mode="r"):
         """Returns a list of file objects for the task
 
         Parameters

@@ -1,5 +1,4 @@
 import os
-import traceback
 
 from datetime import datetime
 
@@ -10,7 +9,8 @@ from datmo.core.entity.task import Task
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     TaskRunError, RequiredArgumentMissing, ProjectNotInitialized,
-    PathDoesNotExist, TaskInteractiveDetachError, TooManyArgumentsFound)
+    PathDoesNotExist, TaskInteractiveDetachError, TooManyArgumentsFound,
+    EntityNotFound, DoesNotExist)
 
 
 class TaskController(BaseController):
@@ -336,6 +336,29 @@ class TaskController(BaseController):
             query['session_id'] = session_id
         return self.dal.task.query(query, sort_key, sort_order)
 
+    def get(self, task_id):
+        """Get task object and return
+
+        Parameters
+        ----------
+        task_id : str
+            id for the task you would like to get file objects for
+
+        Returns
+        -------
+        datmo.core.entity.task.Task
+            core task object
+
+        Raises
+        ------
+        DoesNotExist
+            task does not exist
+        """
+        try:
+            return self.dal.task.get_by_id(task_id)
+        except EntityNotFound:
+            raise DoesNotExist()
+
     def get_files(self, task_id, mode="r"):
         """Get list of file objects for task id. It will look in the following areas in the following order
 
@@ -358,10 +381,15 @@ class TaskController(BaseController):
 
         Raises
         ------
+        DoesNotExist
+            task object does not exist
         PathDoesNotExist
             no file objects exist for the task
         """
-        task_obj = self.dal.task.get_by_id(task_id)
+        try:
+            task_obj = self.dal.task.get_by_id(task_id)
+        except EntityNotFound:
+            raise DoesNotExist()
         if task_obj.after_snapshot_id:
             # perform number 1) and return file list
             after_snapshot_obj = \
