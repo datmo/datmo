@@ -547,8 +547,41 @@ class TestSnapshotController():
 
     def test_update(self):
         self.__setup()
+        test_config = {"config_foo": "bar"}
+        test_stats = {"stats_foo": "bar"}
         test_message = 'test_message'
         test_label = 'test_label'
+
+        # Updating all config, stats, message and label
+        # Create snapshot in the project
+        snapshot_obj = self.__default_create()
+
+        # Update snapshot in the project
+        self.snapshot.update(
+            snapshot_obj.id, config=test_config, stats=test_stats,
+            message=test_message, label=test_label)
+
+        # Get the updated snapshot obj
+        updated_snapshot_obj = self.snapshot.dal.snapshot.get_by_id(
+            snapshot_obj.id)
+        assert updated_snapshot_obj.config == test_config
+        assert updated_snapshot_obj.stats == test_stats
+        assert updated_snapshot_obj.message == test_message
+        assert updated_snapshot_obj.label == test_label
+
+        # Updating config, stats
+        # Create snapshot in the project
+        snapshot_obj = self.__default_create()
+
+        # Update snapshot in the project
+        self.snapshot.update(
+            snapshot_obj.id, config=test_config, stats=test_stats)
+
+        # Get the updated snapshot obj
+        updated_snapshot_obj = self.snapshot.dal.snapshot.get_by_id(
+            snapshot_obj.id)
+        assert updated_snapshot_obj.config == test_config
+        assert updated_snapshot_obj.stats == test_stats
 
         # Updating both message and label
         # Create snapshot in the project
