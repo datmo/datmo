@@ -4,7 +4,7 @@ import prettytable
 import datetime
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.misc_functions import mutually_exclusive, prettify_datetime
+from datmo.core.util.misc_functions import mutually_exclusive, prettify_datetime, format_table
 from datmo.core.util.exceptions import (SnapshotCreateFromTaskArgs)
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.snapshot import SnapshotController
@@ -160,3 +160,27 @@ class SnapshotCommand(ProjectCommand):
             self.cli_helper.echo(
                 __("info", "cli.snapshot.checkout.success", snapshot_id))
         return self.snapshot_controller.checkout(snapshot_id)
+
+    def diff(self, **kwargs):
+        snapshot_id_1 = kwargs.get("id_1", None)
+        snapshot_id_2 = kwargs.get("id_2", None)
+        snapshot_obj_1 = self.snapshot_controller.get(snapshot_id_1)
+        snapshot_obj_2 = self.snapshot_controller.get(snapshot_id_2)
+        comparison_attributes = [
+            "id", "created_at", "message", "label", "code_id",
+            "environment_id", "file_collection_id"
+        ]
+        table_data = [["Attributes", "Snapshot 1", "", "Snapshot 2"],
+                      ["", "", "", ""]]
+        for attribute in comparison_attributes:
+            value_1 = getattr(snapshot_obj_1, attribute) if getattr(
+                snapshot_obj_1, attribute) else "N/A"
+            value_2 = getattr(snapshot_obj_2, attribute) if getattr(
+                snapshot_obj_2, attribute) else "N/A"
+            if isinstance(value_1, datetime.datetime):
+                value_1 = prettify_datetime(value_1)
+            if isinstance(value_2, datetime.datetime):
+                value_2 = prettify_datetime(value_2)
+            table_data.append([attribute, value_1, "->", value_2])
+        self.cli_helper.echo(format_table(table_data))
+        return True

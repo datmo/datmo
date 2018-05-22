@@ -555,3 +555,23 @@ class TestSnapshot():
 
         result = self.snapshot.execute()
         assert result
+
+    def test_datmo_snapshot_diff(self):
+        self.__set_variables()
+        # Create snapshots to test
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
+        snapshot_id_1 = self.snapshot.execute()
+
+        # Create another test file
+        self.filepath_3 = os.path.join(self.snapshot.home, "file3.txt")
+        with open(self.filepath_3, "w") as f:
+            f.write(to_unicode(str("test")))
+
+        self.snapshot.parse(["snapshot", "create", "-m", "my second snapshot"])
+        snapshot_id_2 = self.snapshot.execute()
+
+        # Test diff with the above two snapshots
+        self.snapshot.parse(["snapshot", "diff", snapshot_id_1, snapshot_id_2])
+
+        result = self.snapshot.execute()
+        assert result

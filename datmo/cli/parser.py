@@ -164,6 +164,11 @@ def get_datmo_parser():
     snapshot_checkout.add_argument(
         "--id", dest="id", default=None, help="snapshot id")
 
+    snapshot_diff = snapshot_subcommand_parsers.add_parser(
+        "diff", help="view diff between 2 snapshots")
+    snapshot_diff.add_argument("id_1", default=None, help="snapshot id 1")
+    snapshot_diff.add_argument("id_2", default=None, help="snapshot id 2")
+
     # Task
     task_parser = subparsers.add_parser("task", help="task module")
     task_subcommand_parsers = task_parser.add_subparsers(
