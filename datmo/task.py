@@ -163,9 +163,11 @@ class Task():
         table_data = []
         if self.session_id:
             table_data.append(["Session", "-> " + self.session_id])
-        table_data.append(["Status", "-> " + self.status])
-        table_data.append(
-            ["Start Time", "-> " + prettify_datetime(self.start_time)])
+        if self.status:
+            table_data.append(["Status", "-> " + self.status])
+        if self.start_time:
+            table_data.append(
+                ["Start Time", "-> " + prettify_datetime(self.start_time)])
         if self.end_time:
             table_data.append(
                 ["End Time", "-> " + prettify_datetime(self.end_time)])
@@ -173,8 +175,11 @@ class Task():
             table_data.append(
                 ["Duration", "-> " + str(self.duration) + " seconds"])
         # Outputs
-        table_data.append(["Logs", "-> Use task log to view or download logs"])
-        table_data.append(["Results", "-> " + str(self.results)])
+        if self.logs:
+            table_data.append(
+                ["Logs", "-> Use task log to view or download logs"])
+        if self.results:
+            table_data.append(["Results", "-> " + str(self.results)])
         if not self.files:
             table_data.append(["Files", "-> None"])
         else:
@@ -183,8 +188,7 @@ class Task():
                 for f in self.files[1:]:
                     table_data.append(["     ", "-> " + f.name])
         final_str = final_str + format_table(table_data)
-        final_str = final_str + "\n" + "    " + " ".join(
-            self.command) + "\n" + "\n"
+        final_str = final_str + "\n" + "    " + self.command + "\n" + "\n"
         return final_str
 
     def __repr__(self):
@@ -240,20 +244,12 @@ def run(command, env=None, home=None, gpu=False):
         snapshot_dict["environment_definition_filepath"] = env
 
     if isinstance(command, list):
-        task_dict["command"] = command
-    else:
-        if platform.system() == "Windows":
-            task_dict["command"] = command
-        else:
-            task_dict["command"] = shlex.split(command)
-
-    if isinstance(command, list):
-        task_dict["command"] = command
+        task_dict["command_list"] = command
     else:
         if platform.system() == "Windows":
             task_dict["command"] = command
         elif isinstance(command, basestring):
-            task_dict["command"] = shlex.split(command)
+            task_dict["command_list"] = shlex.split(command)
 
     task_dict["gpu"] = gpu
 

@@ -211,7 +211,7 @@ class TestTaskController():
 
         # Create task_dict
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        task_dict = {"command": task_command}
+        task_dict = {"command_list": task_command}
 
         # 1) Test option 1
         updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)
@@ -339,7 +339,7 @@ class TestTaskController():
 
         # Create task_dict
         task_command = ["python", "script.py"]
-        task_dict = {"command": task_command}
+        task_dict = {"command_list": task_command}
 
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
@@ -486,7 +486,7 @@ class TestTaskController():
 
         # Create task_dict
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        task_dict = {"command": task_command}
+        task_dict = {"command_list": task_command}
 
         # Test the default values
         updated_task_obj = self.task.run(
@@ -596,7 +596,7 @@ class TestTaskController():
 
         # Create task_dict
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        task_dict = {"command": task_command}
+        task_dict = {"command_list": task_command}
 
         # 1) Test option 1
         updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)

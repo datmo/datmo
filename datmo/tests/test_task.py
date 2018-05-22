@@ -30,21 +30,21 @@ class TestTaskModule():
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         _ = ProjectController(self.temp_dir).\
             init("test", "test description")
-
-    def teardown_method(self):
-        pass
-
-    def test_task_entity_instantiate(self):
-        input_dict = {
+        self.input_dict = {
             "id": "test",
             "model_id": "my_model",
             "session_id": "my_session",
             "command": "python test.py"
         }
-        core_task_entity = CoreTask(input_dict)
+
+    def teardown_method(self):
+        pass
+
+    def test_task_entity_instantiate(self):
+        core_task_entity = CoreTask(self.input_dict)
         task_entity = Task(core_task_entity, home=self.temp_dir)
 
-        for k, v in input_dict.items():
+        for k, v in self.input_dict.items():
             assert getattr(task_entity, k) == v
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
@@ -167,13 +167,7 @@ class TestTaskModule():
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_status(self):
-        input_dict = {
-            "id": "test",
-            "model_id": "my_model",
-            "session_id": "my_session",
-            "command": "python test.py"
-        }
-        core_task_entity = CoreTask(input_dict)
+        core_task_entity = CoreTask(self.input_dict)
         task_entity = Task(core_task_entity, home=self.temp_dir)
         # Test failure because entity has not been created by controller
         failed = False
@@ -191,13 +185,7 @@ class TestTaskModule():
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_start_time(self):
-        input_dict = {
-            "id": "test",
-            "model_id": "my_model",
-            "session_id": "my_session",
-            "command": "python test.py"
-        }
-        core_task_entity = CoreTask(input_dict)
+        core_task_entity = CoreTask(self.input_dict)
         task_entity = Task(core_task_entity, home=self.temp_dir)
         # Test failure because entity has not been created by controller
         failed = False
@@ -215,13 +203,7 @@ class TestTaskModule():
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_end_time(self):
-        input_dict = {
-            "id": "test",
-            "model_id": "my_model",
-            "session_id": "my_session",
-            "command": "python test.py"
-        }
-        core_task_entity = CoreTask(input_dict)
+        core_task_entity = CoreTask(self.input_dict)
         task_entity = Task(core_task_entity, home=self.temp_dir)
         # Test failure because entity has not been created by controller
         failed = False
@@ -239,13 +221,7 @@ class TestTaskModule():
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_duration(self):
-        input_dict = {
-            "id": "test",
-            "model_id": "my_model",
-            "session_id": "my_session",
-            "command": "python test.py"
-        }
-        core_task_entity = CoreTask(input_dict)
+        core_task_entity = CoreTask(self.input_dict)
         task_entity = Task(core_task_entity, home=self.temp_dir)
         # Test failure because entity has not been created by controller
         failed = False
@@ -263,13 +239,7 @@ class TestTaskModule():
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_logs(self):
-        input_dict = {
-            "id": "test",
-            "model_id": "my_model",
-            "session_id": "my_session",
-            "command": "python test.py"
-        }
-        core_task_entity = CoreTask(input_dict)
+        core_task_entity = CoreTask(self.input_dict)
         task_entity = Task(core_task_entity, home=self.temp_dir)
         # Test failure because entity has not been created by controller
         failed = False
@@ -287,13 +257,7 @@ class TestTaskModule():
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_results(self):
-        input_dict = {
-            "id": "test",
-            "model_id": "my_model",
-            "session_id": "my_session",
-            "command": "python test.py"
-        }
-        core_task_entity = CoreTask(input_dict)
+        core_task_entity = CoreTask(self.input_dict)
         task_entity = Task(core_task_entity, home=self.temp_dir)
         # Test failure because entity has not been created by controller
         failed = False
@@ -311,13 +275,7 @@ class TestTaskModule():
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_files(self):
-        input_dict = {
-            "id": "test",
-            "model_id": "my_model",
-            "session_id": "my_session",
-            "command": "python test.py"
-        }
-        core_task_entity = CoreTask(input_dict)
+        core_task_entity = CoreTask(self.input_dict)
         task_entity = Task(core_task_entity, home=self.temp_dir)
         # Test failure because entity has not been created by controller
         failed = False
@@ -337,13 +295,7 @@ class TestTaskModule():
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_get_files(self):
-        input_dict = {
-            "id": "test",
-            "model_id": "my_model",
-            "session_id": "my_session",
-            "command": "python test.py"
-        }
-        core_task_entity = CoreTask(input_dict)
+        core_task_entity = CoreTask(self.input_dict)
         task_entity = Task(core_task_entity, home=self.temp_dir)
         # Test failure because entity has not been created by controller
         failed = False
@@ -366,3 +318,10 @@ class TestTaskModule():
         assert isinstance(result[0], TextIOWrapper)
         assert result[0].mode == "a"
         assert result[0].name
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_task_entity_str(self):
+        task_entity = self.__setup()
+        for k in self.input_dict:
+            if k != "model_id":
+                assert str(task_entity.__dict__[k]) in str(task_entity)

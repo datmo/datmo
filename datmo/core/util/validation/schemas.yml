@@ -74,3 +74,26 @@ create_snapshot_from_task:
   stats:
     nullable: true
     type: dict
+
+create_task:
+  command:
+    nullable: true
+    type: string
+  command_list:
+    nullable: true
+    type: list
+  interactive:
+    type: boolean
+  detach:
+    type: boolean
+  gpu:
+    type: boolean
+  ports:
+    nullable: true
+    type: list
+  task_dirpath:
+    nullable: true
+    type: string
+  log_filepath:
+    nullable: true
+    type: string

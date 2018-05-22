@@ -143,7 +143,7 @@ class Snapshot():
                     table_data.append(["     ", "-> " + f.name])
         table_data.append(["Config", "-> " + str(self.config)])
         table_data.append(["Stats", "-> " + str(self.stats)])
-        final_str = final_str + format_table(data)
+        final_str = final_str + format_table(table_data)
         final_str = final_str + "\n" + "    " + self.message + "\n" + "\n"
         return final_str
 

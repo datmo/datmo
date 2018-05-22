@@ -33,17 +33,17 @@ class TaskCommand(ProjectCommand):
         if kwargs['environment_definition_filepath']:
             snapshot_dict["environment_definition_filepath"] =\
                 kwargs['environment_definition_filepath']
-        if not isinstance(kwargs['cmd'], list):
-            if platform.system() == "Windows":
-                kwargs['cmd'] = kwargs['cmd']
-            elif isinstance(kwargs['cmd'], basestring):
-                kwargs['cmd'] = shlex.split(kwargs['cmd'])
-
         task_dict = {
             "ports": kwargs['ports'],
-            "interactive": kwargs['interactive'],
-            "command": kwargs['cmd']
+            "interactive": kwargs['interactive']
         }
+        if not isinstance(kwargs['cmd'], list):
+            if platform.system() == "Windows":
+                task_dict['command'] = kwargs['cmd']
+            elif isinstance(kwargs['cmd'], basestring):
+                task_dict['command_list'] = shlex.split(kwargs['cmd'])
+        else:
+            task_dict['command_list'] = kwargs['cmd']
 
         # Create the task object)
         task_obj = self.task_controller.create()

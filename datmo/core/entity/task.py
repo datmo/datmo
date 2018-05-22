@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from datmo.core.util.misc_functions import prettify_datetime, format_table
+
 
 class Task():
     """Task is an entity object to represent an experiment run. A snapshot is taken before and after the task
@@ -25,6 +27,9 @@ class Task():
             (default is None, which means it isn't set yet)
         command : str, optional
             command that is used by the task
+            (default is None, which means it isn't set yet)
+        command_list : list or None
+            command that is used by the task in list form (same as above)
             (default is None, which means it isn't set yet)
         interactive : bool, optional
             boolean to signify if task should be run in interactive mode
@@ -83,6 +88,8 @@ class Task():
         snapshot created before the task is run
     command : str or None
         command that is used by the task
+    command_list : list or None
+        command that is used by the task in list form (same as above)
     interactive : bool
         boolean to signify if task should be run in interactive mode
     detach : bool
@@ -124,13 +131,14 @@ class Task():
         # Pre-Execution
         self.before_snapshot_id = dictionary.get('before_snapshot_id', None)
         self.command = dictionary.get('command', None)
+        self.command_list = dictionary.get('command_list', None)
         self.interactive = dictionary.get('interactive', False)
         self.detach = dictionary.get('detach', False)
+        self.gpu = dictionary.get('gpu', False)
         self.ports = dictionary.get('ports', None)
         self.task_dirpath = dictionary.get('task_dirpath', None)
         self.log_filepath = dictionary.get('log_filepath', None)
         self.start_time = dictionary.get('start_time', None)
-        self.gpu = dictionary.get('gpu', False)
 
         # Post-Execution
         self.after_snapshot_id = dictionary.get('after_snapshot_id', None)
@@ -146,6 +154,35 @@ class Task():
 
     def __eq__(self, other):
         return self.id == other.id if other else False
+
+    def __str__(self):
+        final_str = '\033[94m' + "task " + self.id + "\n" + '\033[0m'
+        table_data = []
+        if self.session_id:
+            table_data.append(["Session", "-> " + self.session_id])
+        if self.status:
+            table_data.append(["Status", "-> " + self.status])
+        if self.start_time:
+            table_data.append(
+                ["Start Time", "-> " + prettify_datetime(self.start_time)])
+        if self.end_time:
+            table_data.append(
+                ["End Time", "-> " + prettify_datetime(self.end_time)])
+        if self.duration:
+            table_data.append(
+                ["Duration", "-> " + str(self.duration) + " seconds"])
+        # Outputs
+        if self.logs:
+            table_data.append(
+                ["Logs", "-> Use task log to view or download logs"])
+        if self.results:
+            table_data.append(["Results", "-> " + str(self.results)])
+        final_str = final_str + format_table(table_data)
+        final_str = final_str + "\n" + "    " + self.command + "\n" + "\n"
+        return final_str
+
+    def __repr__(self):
+        return self.__str__()
 
     def to_dictionary(self):
         attr_dict = self.__dict__

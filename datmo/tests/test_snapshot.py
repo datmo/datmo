@@ -30,26 +30,30 @@ class TestSnapshotModule():
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         _ = ProjectController(self.temp_dir).\
             init("test", "test description")
+        self.input_dict = {
+            "id": "test",
+            "model_id": "my_model",
+            "session_id": "my_session",
+            "message": "my message",
+            "code_id": "my_code_id",
+            "environment_id": "my_environment_id",
+            "file_collection_id": "my file collection",
+            "config": {
+                "test": 0.56
+            },
+            "stats": {
+                "test": 0.34
+            }
+        }
 
     def teardown_method(self):
         pass
 
     def test_snapshot_entity_instantiate(self):
-        input_dict = {
-            "id": "test",
-            "model_id": "my_model",
-            "session_id": "my_session",
-            "message": "my test snapshot",
-            "code_id": "my_code",
-            "environment_id": "my_environment",
-            "file_collection_id": "my_file_collection",
-            "config": {},
-            "stats": {}
-        }
-        core_snapshot_entity = CoreSnapshot(input_dict)
+        core_snapshot_entity = CoreSnapshot(self.input_dict)
         snapshot_entity = Snapshot(core_snapshot_entity, home=self.temp_dir)
 
-        for k, v in input_dict.items():
+        for k, v in self.input_dict.items():
             if k != "file_collection_id":
                 assert getattr(snapshot_entity, k) == v
         assert snapshot_entity.task_id == None
@@ -277,22 +281,7 @@ class TestSnapshotModule():
             message="test", home=self.temp_dir, filepaths=[test_filepath])
 
     def test_snapshot_entity_files(self):
-        input_dict = {
-            "id": "test",
-            "model_id": "my_model",
-            "session_id": "my_session",
-            "message": "my message",
-            "code_id": "my_code_id",
-            "environment_id": "my_environment_id",
-            "file_collection_id": "my file collection",
-            "config": {
-                "test": 0.56
-            },
-            "stats": {
-                "test": 0.34
-            }
-        }
-        core_snapshot_entity = CoreSnapshot(input_dict)
+        core_snapshot_entity = CoreSnapshot(self.input_dict)
         snapshot_entity = Snapshot(core_snapshot_entity, home=self.temp_dir)
         # Test failure because entity has not been created by controller
         failed = False
@@ -311,22 +300,7 @@ class TestSnapshotModule():
         assert "script.py" in result[0].name
 
     def test_task_entity_get_files(self):
-        input_dict = {
-            "id": "test",
-            "model_id": "my_model",
-            "session_id": "my_session",
-            "message": "my message",
-            "code_id": "my_code_id",
-            "environment_id": "my_environment_id",
-            "file_collection_id": "my file collection",
-            "config": {
-                "test": 0.56
-            },
-            "stats": {
-                "test": 0.34
-            }
-        }
-        core_snapshot_entity = CoreSnapshot(input_dict)
+        core_snapshot_entity = CoreSnapshot(self.input_dict)
         snapshot_entity = Snapshot(core_snapshot_entity, home=self.temp_dir)
         # Test failure because entity has not been created by controller
         failed = False
@@ -352,3 +326,9 @@ class TestSnapshotModule():
         assert isinstance(result[0], TextIOWrapper)
         assert result[0].mode == "a"
         assert "script.py" in result[0].name
+
+    def test_snapshot_entity_str(self):
+        snapshot_entity = self.__setup()
+        for k in self.input_dict:
+            if k != "model_id" and k != "file_collection_id":
+                assert str(snapshot_entity.__dict__[k]) in str(snapshot_entity)
