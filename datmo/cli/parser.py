@@ -209,7 +209,11 @@ def get_datmo_parser():
         dest="interactive",
         action="store_true",
         help="run the environment in interactive mode (keeps STDIN open)")
-    task_run.add_argument("cmd", nargs="?", default=None)
+    task_run.add_argument(
+        "cmd",
+        nargs="?",
+        default=None,
+        help="command to run within environment")
 
     # Task list arguments
     task_ls = task_subcommand_parsers.add_parser("ls", help="list tasks")
