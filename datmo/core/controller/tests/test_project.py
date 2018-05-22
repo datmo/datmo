@@ -203,7 +203,7 @@ class TestProjectController():
 
         # Create task_dict
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        task_dict = {"command": task_command}
+        task_dict = {"command_list": task_command}
 
         updated_first_task = self.task.run(first_task.id, task_dict=task_dict)
 

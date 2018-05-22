@@ -9,7 +9,7 @@ class TestTask():
         self.input_dict = {
             "model_id": "my_model",
             "session_id": "my_session",
-            "command": "python test.py"
+            "command": "python test.py",
         }
 
     def test_init_no_id(self):
@@ -68,9 +68,14 @@ class TestTask():
 
         assert task_entity_1 == task_entity_2
 
+    def test_str(self):
+        task_entity = Task(self.input_dict)
+        for k, v in self.input_dict.items():
+            if k != "model_id":
+                assert str(v) in str(task_entity)
+
     def test_to_dictionary(self):
         task_entity = Task(self.input_dict)
         output_dict = task_entity.to_dictionary()
-
         for k, v in output_dict.items():
             assert v == getattr(task_entity, k)

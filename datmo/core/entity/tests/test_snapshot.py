@@ -51,6 +51,12 @@ class TestSnapshot():
 
         assert snapshot_entity_1 == snapshot_entity_2
 
+    def test_str(self):
+        snapshot_entity = Snapshot(self.input_dict)
+        for k, v in self.input_dict.items():
+            if k != "model_id":
+                assert str(v) in str(snapshot_entity)
+
     def test_to_dictionary(self):
         snapshot_entity = Snapshot(self.input_dict)
         output_dict = snapshot_entity.to_dictionary()
