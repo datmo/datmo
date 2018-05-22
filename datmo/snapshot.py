@@ -4,7 +4,7 @@ from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.util.exceptions import InvalidArgumentType, \
     SnapshotCreateFromTaskArgs
-from datmo.core.util.misc_functions import prettify_datetime
+from datmo.core.util.misc_functions import prettify_datetime, format_table
 
 
 class Snapshot():
@@ -126,16 +126,24 @@ class Snapshot():
             final_str = '\033[94m' + "snapshot " + self.id + '\033[0m' + "\n"
         final_str = final_str + "Date: " + prettify_datetime(
             self.created_at) + "\n"
+        table_data = []
         if self.session_id:
-            final_str = final_str + "Session -> " + self.session_id + "\n"
+            table_data.append(["Session", "-> " + self.session_id])
         if self.task_id:
-            final_str = final_str + "Task -> " + self.task_id + "\n"
+            table_data.append(["Task", "-> " + self.task_id])
         # Components
-        final_str = final_str + "Code -> " + self.code_id + "\n"
-        final_str = final_str + "Environment -> " + self.environment_id + "\n"
-        final_str = final_str + "Files -> " + self.file_collection_id + "\n"
-        final_str = final_str + "Configs: " + str(self.config) + "\n"
-        final_str = final_str + "Stats: " + str(self.stats) + "\n"
+        table_data.append(["Code", "-> " + self.code_id])
+        table_data.append(["Environment", "-> " + self.environment_id])
+        if not self.files:
+            table_data.append(["Files", "-> None"])
+        else:
+            table_data.append(["Files", "-> " + self.files[0].name])
+            if len(list(self.files)) > 1:
+                for f in self.files[1:]:
+                    table_data.append(["     ", "-> " + f.name])
+        table_data.append(["Config", "-> " + str(self.config)])
+        table_data.append(["Stats", "-> " + str(self.stats)])
+        final_str = final_str + format_table(data)
         final_str = final_str + "\n" + "    " + self.message + "\n" + "\n"
         return final_str
 
@@ -281,7 +289,7 @@ def ls(session_id=None, filter=None, home=None):
     Parameters
     ----------
     session_id : str, optional
-        a description of the snapshot for later reference
+        session to filter output snapshots
         (default is None, which means no session filter is given)
     filter : str, optional
         a string to use to filter from message and label
@@ -327,8 +335,8 @@ def ls(session_id=None, filter=None, home=None):
     for core_snapshot_obj in core_snapshot_objs:
         if core_snapshot_obj.visible:
             if filter and \
-                    (filter in core_snapshot_obj.message) \
-                    or (core_snapshot_obj.label != None and filter in core_snapshot_obj.label):
+                ((filter in core_snapshot_obj.message) \
+                    or (core_snapshot_obj.label != None and filter in core_snapshot_obj.label)):
                 filtered_core_snapshot_objs.append(core_snapshot_obj)
 
     # Return Snapshot entities

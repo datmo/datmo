@@ -201,3 +201,16 @@ def prettify_datetime(datetime_obj):
     return str(
         datetime_obj.replace(tzinfo=datetime.timezone.utc).astimezone()
         .strftime("%a %b %d %H:%M:%S %Y %z"))
+
+
+def format_table(data, padding=2):
+    num_col = max(len(row) for row in data)
+    col_widths = []
+    for i in range(num_col):
+        col_width = max(len(row[i]) for row in data) + padding
+        col_widths.append(col_width)
+    table_str = ""
+    for row in data:
+        table_str = table_str + "".join(
+            word.ljust(col_widths[idx]) for idx, word in enumerate(row)) + "\n"
+    return table_str

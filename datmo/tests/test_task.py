@@ -11,11 +11,13 @@ try:
 except NameError:
     to_unicode = str
 
-from datmo.task import run
+from datmo.task import run, ls
 from datmo.task import Task
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.controller.project import ProjectController
-from datmo.core.util.exceptions import (GitCommitDoesNotExist, DoesNotExist)
+from datmo.core.util.exceptions import (GitCommitDoesNotExist, DoesNotExist,
+                                        InvalidProjectPath,
+                                        SessionDoesNotExist)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -99,7 +101,57 @@ class TestTaskModule():
         assert 'hello' in task_obj_2.logs
         assert task_obj_2.results == {"accuracy": "0.56"}
 
-    def __setup(self):
+    def test_ls(self):
+        # check project is not initialized if wrong home
+        failed = False
+        try:
+            ls(home=os.path.join("does", "not", "exist"))
+        except InvalidProjectPath:
+            failed = True
+        assert failed
+
+        # check session does not exist if wrong session
+        failed = False
+        try:
+            ls(session_id="does_not_exist", home=self.temp_dir)
+        except SessionDoesNotExist:
+            failed = True
+        assert failed
+
+        # run a task with default params
+        self.__setup()
+
+        # list all tasks with no filters
+        task_list_1 = ls(home=self.temp_dir)
+
+        assert task_list_1
+        assert len(list(task_list_1)) == 1
+        assert isinstance(task_list_1[0], Task)
+
+        # run another task with default params
+        self.__setup(command="test")
+
+        # list all tasks with no filters (works when more than 1 task)
+        task_list_2 = ls(home=self.temp_dir)
+
+        assert task_list_2
+        assert len(list(task_list_2)) == 2
+        assert isinstance(task_list_2[0], Task)
+        assert isinstance(task_list_2[1], Task)
+
+        # list tasks with specific filter
+        task_list_3 = ls(filter="script.py", home=self.temp_dir)
+
+        assert task_list_3
+        assert len(list(task_list_3)) == 1
+        assert isinstance(task_list_3[0], Task)
+
+        # list snapshots with filter of none
+        task_list_4 = ls(filter="random", home=self.temp_dir)
+
+        assert len(list(task_list_4)) == 0
+
+    def __setup(self, command="python script.py"):
         # Create a basic task and run it with string command
         test_filepath = os.path.join(self.temp_dir, "script.py")
         with open(test_filepath, "w") as f:
@@ -111,8 +163,7 @@ class TestTaskModule():
         with open(test_filepath, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu"))
 
-        return run(
-            command="python script.py", env=test_filepath, home=self.temp_dir)
+        return run(command=command, env=test_filepath, home=self.temp_dir)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_status(self):

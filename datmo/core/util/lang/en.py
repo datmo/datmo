@@ -279,6 +279,8 @@ MESSAGES = {
             "Stop argument %s not present in input",
         "controller.task.stop.arg.missing":
             "Stop argument %s unable to stop environment. please use -a to stop all running tasks",
+        "controller.task.list":
+            "Session does not exist for id: %s",
         "controller.task.delete.arg":
             "Delete argument %s not present in input",
         "controller.session.__init__":

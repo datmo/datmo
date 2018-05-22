@@ -10,7 +10,7 @@ from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     TaskRunError, RequiredArgumentMissing, ProjectNotInitialized,
     PathDoesNotExist, TaskInteractiveDetachError, TooManyArgumentsFound,
-    EntityNotFound, DoesNotExist)
+    EntityNotFound, DoesNotExist, SessionDoesNotExist)
 
 
 class TaskController(BaseController):
@@ -333,6 +333,11 @@ class TaskController(BaseController):
     def list(self, session_id=None, sort_key=None, sort_order=None):
         query = {}
         if session_id:
+            try:
+                self.dal.session.get_by_id(session_id)
+            except EntityNotFound:
+                raise SessionDoesNotExist(
+                    __("error", "controller.task.list", session_id))
             query['session_id'] = session_id
         return self.dal.task.query(query, sort_key, sort_order)
 

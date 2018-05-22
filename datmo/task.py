@@ -9,7 +9,7 @@ except NameError:
 from datmo.core.controller.task import TaskController
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.util.exceptions import InvalidArgumentType
-from datmo.core.util.misc_functions import prettify_datetime
+from datmo.core.util.misc_functions import prettify_datetime, format_table
 
 
 class Task():
@@ -160,20 +160,31 @@ class Task():
 
     def __str__(self):
         final_str = '\033[94m' + "task " + self.id + "\n" + '\033[0m'
-        final_str = final_str + "Status: " + self.status + "\n"
-        final_str = final_str + "Start Time: " + prettify_datetime(
-            self.start_time) + "\n"
-        if self.end_time:
-            final_str = final_str + "End Time: " + prettify_datetime(
-                self.end_time) + "\n"
-        if self.duration:
-            final_str = final_str + "Duration: " + str(self.duration) + "\n"
+        table_data = []
         if self.session_id:
-            final_str = final_str + "Session -> " + self.session_id + "\n"
+            table_data.append(["Session", "-> " + self.session_id])
+        table_data.append(["Status", "-> " + self.status])
+        table_data.append(
+            ["Start Time", "-> " + prettify_datetime(self.start_time)])
+        if self.end_time:
+            table_data.append(
+                ["End Time", "-> " + prettify_datetime(self.end_time)])
+        if self.duration:
+            table_data.append(
+                ["Duration", "-> " + str(self.duration) + " seconds"])
         # Outputs
-        # final_str = final_str + "logs: "  + self.logs + "\n"
-        final_str = final_str + "results: " + str(self.results) + "\n"
-        final_str = final_str + "\n" + "    " + self.command + "\n" + "\n"
+        table_data.append(["Logs", "-> Use task log to view or download logs"])
+        table_data.append(["Results", "-> " + str(self.results)])
+        if not self.files:
+            table_data.append(["Files", "-> None"])
+        else:
+            table_data.append(["Files", "-> " + self.files[0].name])
+            if len(list(self.files)) > 1:
+                for f in self.files[1:]:
+                    table_data.append(["     ", "-> " + f.name])
+        final_str = final_str + format_table(table_data)
+        final_str = final_str + "\n" + "    " + " ".join(
+            self.command) + "\n" + "\n"
         return final_str
 
     def __repr__(self):
@@ -257,3 +268,66 @@ def run(command, env=None, home=None, gpu=False):
     client_task_obj = Task(updated_core_task_obj, home=home)
 
     return client_task_obj
+
+
+def ls(session_id=None, filter=None, home=None):
+    """List tasks within a project
+
+    The project must be created before this is implemented. You can do that by using
+    the following command::
+
+        $ datmo init
+
+
+    Parameters
+    ----------
+    session_id : str, optional
+        session to filter output tasks
+        (default is None, which means no session filter is given)
+    filter : str, optional
+        a string to use to filter from message and label
+        (default is to give all snapshots, unless provided a specific string. eg: best)
+    home : str, optional
+        absolute home path of the project
+        (default is None, which will use the CWD as the project path)
+
+    Returns
+    -------
+    list
+        returns a list of Task entities (as defined above)
+
+    Examples
+    --------
+    You can use this function within a project repository to list tasks.
+
+    >>> import datmo
+    >>> tasks = datmo.task.ls()
+    """
+    if not home:
+        home = os.getcwd()
+    task_controller = TaskController(home=home)
+
+    # add arguments if they are not None
+    if not session_id:
+        session_id = task_controller.current_session.id
+
+    core_task_objs = task_controller.list(
+        session_id, sort_key='created_at', sort_order='descending')
+
+    # Filtering Tasks
+    # TODO: move to list function in TaskController
+    # Add in preliminary tasks if no filter
+    filtered_core_task_objs = [
+        core_task_obj for core_task_obj in core_task_objs if not filter
+    ]
+    # If filter is present then use it and only add those that pass filter
+    for core_task_obj in core_task_objs:
+        if filter and \
+            (filter in core_task_obj.command):
+            filtered_core_task_objs.append(core_task_obj)
+
+    # Return Task entities
+    return [
+        Task(filtered_core_task_obj, home=home)
+        for filtered_core_task_obj in filtered_core_task_objs
+    ]

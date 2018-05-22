@@ -255,14 +255,14 @@ class TestSnapshotModule():
         assert isinstance(snapshot_list_2[1], Snapshot)
 
         # list snapshots with specific filter
-        snapshot_list_3 = ls(filter='test2', home=self.temp_dir)
+        snapshot_list_3 = ls(filter="test2", home=self.temp_dir)
 
         assert snapshot_list_3
         assert len(list(snapshot_list_3)) == 1
         assert isinstance(snapshot_list_3[0], Snapshot)
 
         # list snapshots with filter of none
-        snapshot_list_4 = ls(filter='test3', home=self.temp_dir)
+        snapshot_list_4 = ls(filter="test3", home=self.temp_dir)
 
         assert len(list(snapshot_list_4)) == 0
 
