@@ -5,15 +5,17 @@ Tests for misc_functions.py
 import os
 import tempfile
 import platform
+import datetime
+from pytz import timezone
 from io import open
 try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
 
-from datmo.core.util.misc_functions import (get_filehash, create_unique_hash,
-                                            mutually_exclusive, is_project_dir,
-                                            find_project_dir, grep)
+from datmo.core.util.misc_functions import (
+    get_filehash, create_unique_hash, mutually_exclusive, is_project_dir,
+    find_project_dir, grep, prettify_datetime, format_table)
 from datmo.core.util.exceptions import MutuallyExclusiveArguments, RequiredArgumentMissing
 
 
@@ -101,3 +103,17 @@ class TestMiscFunctions():
     def test_grep(self):
         # open current file and try to find this method in it
         assert len(grep("test_grep", open(__file__, "r"))) == 2
+
+    def test_prettify_datetime(self):
+        my_test_datetime = datetime.datetime(2018, 1, 1)
+        result = prettify_datetime(my_test_datetime)
+        # Ensure there is a result in the local timezone
+        assert result
+        tz = timezone('US/Eastern')
+        result = prettify_datetime(my_test_datetime, tz=tz)
+        assert result == "Sun Dec 31 19:00:00 2017 -0500"
+
+    def test_format_table(self):
+        test_data = [["row1", "row1"], ["row2", "row2"]]
+        result = format_table(test_data, padding=2)
+        assert result == "row1  row1  \nrow2  row2  \n"
