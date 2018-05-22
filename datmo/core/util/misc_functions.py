@@ -5,6 +5,8 @@ import re
 import hashlib
 import textwrap
 import datetime
+import pytz
+import tzlocal
 import pytest
 import platform
 from io import open
@@ -197,9 +199,11 @@ def pytest_docker_environment_failed_instantiation(filepath):
         reason="a running environment could not be instantiated")
 
 
-def prettify_datetime(datetime_obj):
+def prettify_datetime(datetime_obj, tz=None):
+    if not tz:
+        tz = tzlocal.get_localzone()
     return str(
-        datetime_obj.replace(tzinfo=datetime.timezone.utc).astimezone()
+        datetime_obj.replace(tzinfo=pytz.utc).astimezone(tz=tz)
         .strftime("%a %b %d %H:%M:%S %Y %z"))
 
 

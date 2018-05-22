@@ -4,7 +4,7 @@ import prettytable
 import datetime
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.misc_functions import mutually_exclusive
+from datmo.core.util.misc_functions import mutually_exclusive, prettify_datetime
 from datmo.core.util.exceptions import (SnapshotCreateFromTaskArgs)
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.snapshot import SnapshotController
@@ -129,12 +129,10 @@ class SnapshotCommand(ProjectCommand):
             for snapshot_obj in snapshot_objs:
                 t.add_row([
                     snapshot_obj.id,
-                    snapshot_obj.created_at.replace(
-                        tzinfo=datetime.timezone.utc).astimezone().strftime(
-                            "%a %b %d %H:%M:%S %Y %z"), snapshot_obj.config,
-                    snapshot_obj.stats, snapshot_obj.message,
-                    snapshot_obj.label, snapshot_obj.code_id,
-                    snapshot_obj.environment_id,
+                    prettify_datetime(snapshot_obj.created_at),
+                    snapshot_obj.config, snapshot_obj.stats,
+                    snapshot_obj.message, snapshot_obj.label,
+                    snapshot_obj.code_id, snapshot_obj.environment_id,
                     snapshot_obj.file_collection_id
                 ])
                 listed_snapshot_ids.append(snapshot_obj.id)
