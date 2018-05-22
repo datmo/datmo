@@ -4,7 +4,7 @@ channels:
 dependencies:
     - python=2.7
     - sphinx=1.7.4
-    - sphinx-argparse=0.2.2
     - pytest=3.0.4
     - pip:
+        - sphinx-argparse=0.2.2
         - autodocsumm
