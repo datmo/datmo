@@ -277,11 +277,11 @@ class TestSnapshotModule():
         except EntityNotFound:
             failed = True
         assert failed
-
+        test_config = {"config_foo": "bar"}
+        test_stats = {"stats_foo": "bar"}
         test_message = "new_message"
         test_label = "new_label"
         # update both message and label
-
         test_filepath = os.path.join(self.temp_dir, "script.py")
         with open(test_filepath, "w") as f:
             f.write(to_unicode("import numpy\n"))
@@ -320,6 +320,28 @@ class TestSnapshotModule():
 
         assert updated_snapshot_obj_2.id == snapshot_obj_2.id
         assert updated_snapshot_obj_2.message == test_message
+
+        # test config
+        snapshot_obj_3 = create(message="test", home=self.temp_dir)
+
+        updated_snapshot_obj_3 = update(
+            snapshot_id=snapshot_obj_3.id,
+            config=test_config,
+            home=self.temp_dir)
+
+        assert updated_snapshot_obj_3.id == snapshot_obj_3.id
+        assert updated_snapshot_obj_3.config == test_config
+
+        # test stats
+        snapshot_obj_4 = create(message="test", home=self.temp_dir)
+
+        updated_snapshot_obj_4 = update(
+            snapshot_id=snapshot_obj_4.id,
+            stats=test_stats,
+            home=self.temp_dir)
+
+        assert updated_snapshot_obj_4.id == snapshot_obj_4.id
+        assert updated_snapshot_obj_4.stats == test_stats
 
     def test_delete(self):
         # check project is not initialized if wrong home

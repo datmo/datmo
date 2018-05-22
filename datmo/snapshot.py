@@ -278,7 +278,7 @@ def ls(session_id=None, filter=None, home=None):
     ]
 
 
-def update(snapshot_id=None, message=None, label=None, home=None):
+def update(snapshot_id=None, config=None, stats=None, message=None, label=None, home=None):
     """Update a snapshot within a project
 
     The project must be created before this is implemented. You can do that by using
@@ -291,6 +291,12 @@ def update(snapshot_id=None, message=None, label=None, home=None):
     ----------
     snapshot_id : str
         snapshot id to be updated
+    config : dict, optional
+        provide the dictionary of configurations to update
+        (default is None, which means it is not being updated)
+    stats : dict, optional
+        provide the dictionary of relevant statistics or metrics to update
+        (default is None, which means it is not being updated)
     message : str, optional
         a string to use as a new message for the snapshot
         (default is the already given message to that snapshot, unless provided a specific string.)
@@ -311,14 +317,15 @@ def update(snapshot_id=None, message=None, label=None, home=None):
     You can use this function within a project repository to update a snapshot.
 
     >>> import datmo
-    >>> snapshots = datmo.snapshot.update(snapshot_id="4L24adFfsa", message="new message", label="best")
+    >>> snapshots = datmo.snapshot.update(snapshot_id="4L24adFfsa", config={"depth": "10", "learning_rate": "0.91"},
+    ...          stats={"acc": "91.34", "f1_score": "0.91"}, message="new message", label="best")
     """
     if not home:
         home = os.getcwd()
     snapshot_controller = SnapshotController(home=home)
 
     return snapshot_controller.update(
-        snapshot_id=snapshot_id, message=message, label=label)
+        snapshot_id=snapshot_id, config=config, stats=stats, message=message, label=label)
 
 
 def delete(snapshot_id=None, home=None):
