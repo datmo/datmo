@@ -13,7 +13,7 @@ except NameError:
 
 from datmo.core.util.misc_functions import (get_filehash, create_unique_hash,
                                             mutually_exclusive, is_project_dir,
-                                            find_project_dir, grep)
+                                            find_project_dir, grep, parse_cli_key_value)
 from datmo.core.util.exceptions import MutuallyExclusiveArguments, RequiredArgumentMissing
 
 
@@ -101,3 +101,28 @@ class TestMiscFunctions():
     def test_grep(self):
         # open current file and try to find this method in it
         assert len(grep("test_grep", open(__file__, "r"))) == 2
+
+    def test_parse_cli_key_value(self):
+        # passing in parsable json blob
+        cli_string = "{'foo1':'bar1', 'foo2':'bar2'}"
+        default_key = 'config'
+
+        dictionary = parse_cli_key_value(cli_string, default_key)
+
+        assert dictionary == {'foo1': 'bar1', 'foo2': 'bar2'}
+
+        # passing in unparsable json blob
+        cli_string = "this is a test blob"
+        default_key = 'config'
+
+        dictionary = parse_cli_key_value(cli_string, default_key)
+
+        assert dictionary == {'config': 'this is a test blob'}
+
+        # passing in key, value in dictionary
+        cli_string = 'foo:bar'
+        default_key = 'config'
+
+        dictionary = parse_cli_key_value(cli_string, default_key)
+
+        assert dictionary == {'foo': 'bar'}

@@ -2,6 +2,7 @@
 
 import os
 import re
+import ast
 import hashlib
 import textwrap
 import datetime
@@ -195,3 +196,24 @@ def pytest_docker_environment_failed_instantiation(filepath):
     return pytest.mark.skipif(
         __helper(filepath),
         reason="a running environment could not be instantiated")
+
+
+def parse_cli_key_value(cli_string, default_key):
+    dictionary = {}
+    # parse string for json blob
+    try:
+        item_dict = ast.literal_eval(cli_string)
+        parsed_dict = True
+        for item_key, item_value in item_dict.iteritems():
+            dictionary[item_key] = item_value.strip()
+    except:
+        parsed_dict = False
+
+    cli_string_split = cli_string.split(":")
+    if not parsed_dict and len(cli_string_split) == 2:
+        item_key, item_value = cli_string_split
+        dictionary[item_key.strip()] = item_value.strip()
+    elif not parsed_dict:
+        dictionary[default_key] = cli_string.strip()
+
+    return dictionary

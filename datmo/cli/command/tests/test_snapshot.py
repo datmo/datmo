@@ -489,6 +489,10 @@ class TestSnapshot():
 
         test_config = ["depth: 10", "learning_rate:0.91"]
         test_stats = ["acc: 91.34", "f1_score:0.91"]
+        test_config1 = "{'foo_config': 'bar_config'}"
+        test_stats1 = "{'foo_stats': 'bar_stats'}"
+        test_config2 = "this is a config blob"
+        test_stats2 = "this is a stats blob"
         test_message = "test_message"
         test_label = "test_label"
 
@@ -564,6 +568,34 @@ class TestSnapshot():
         assert result.stats == {"acc": "91.34", "f1_score": "0.91"}
         assert result.message == test_message
         assert result.label == test_label
+
+        # 5. Updating config, stats
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot", "update", "--id", snapshot_id, "--config", test_config1, "--stats", test_stats1])
+
+        result = self.snapshot.execute()
+        assert result.id == snapshot_id
+        # assert result.config == {"acc": "91.34", "f1_score": "0.91", 'foo_config': 'bar_config'}
+        # assert result.stats == {"acc": "91.34", "f1_score": "0.91", 'foo_stats': 'bar_stats'}
+        assert result.config == {'foo_config': 'bar_config'}
+        assert result.stats == {'foo_stats': 'bar_stats'}
+        assert result.message == test_message
+        assert result.label == test_label
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot", "update", "--id", snapshot_id, "--config", test_config2, "--stats", test_stats2])
+
+        result = self.snapshot.execute()
+        assert result.id == snapshot_id
+        # assert result.config == {"acc": "91.34", "f1_score": "0.91", 'foo_config': 'bar_config', 'config': test_config2}
+        # assert result.stats == {"acc": "91.34", "f1_score": "0.91", 'foo_stats': 'bar_stats', 'stats': test_stats2}
+        assert result.config == {'config': test_config2}
+        assert result.stats == {'stats': test_stats2}
+        assert result.message == test_message
+        assert result.label == test_label
+
 
     def test_datmo_snapshot_delete(self):
         self.__set_variables()
