@@ -28,7 +28,7 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.util.exceptions import ProjectNotInitialized, MutuallyExclusiveArguments, RequiredArgumentMissing
+from datmo.core.util.exceptions import ProjectNotInitialized, MutuallyExclusiveArguments, RequiredArgumentMissing, SessionDoesNotExist
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -249,8 +249,12 @@ class TestTaskCommand():
         # test for desired side effects
         assert self.task.args.session_id == test_session_id
 
-        task_ls_command = self.task.execute()
-        assert task_ls_command == True
+        failed = False
+        try:
+            task_ls_command = self.task.execute()
+        except SessionDoesNotExist:
+            failed = True
+        assert failed
 
     def test_task_ls_invalid_arg(self):
         self.__set_variables()
