@@ -184,3 +184,9 @@ class SnapshotCommand(ProjectCommand):
             table_data.append([attribute, value_1, "->", value_2])
         self.cli_helper.echo(format_table(table_data))
         return True
+
+    def inspect(self, **kwargs):
+        snapshot_id = kwargs.get("id", None)
+        snapshot_obj = self.snapshot_controller.get(snapshot_id)
+        self.cli_helper.echo(str(snapshot_obj))
+        return True

@@ -551,7 +551,7 @@ class TestSnapshot():
             shutil.rmtree(datmo_tasks_dirpath)
 
         # Test when optional parameters are not given
-        self.snapshot.parse(["snapshot", "checkout", "--id", snapshot_id])
+        self.snapshot.parse(["snapshot", "checkout", snapshot_id])
 
         result = self.snapshot.execute()
         assert result
@@ -572,6 +572,17 @@ class TestSnapshot():
 
         # Test diff with the above two snapshots
         self.snapshot.parse(["snapshot", "diff", snapshot_id_1, snapshot_id_2])
+
+        result = self.snapshot.execute()
+        assert result
+
+    def test_datmo_snapshot_inspect(self):
+        self.__set_variables()
+        # Create snapshot to test
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
+        snapshot_id = self.snapshot.execute()
+        # Test diff with the above two snapshots
+        self.snapshot.parse(["snapshot", "inspect", snapshot_id])
 
         result = self.snapshot.execute()
         assert result
