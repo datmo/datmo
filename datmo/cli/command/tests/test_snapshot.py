@@ -487,6 +487,8 @@ class TestSnapshot():
     def test_datmo_snapshot_update(self):
         self.__set_variables()
 
+        test_config = ["depth: 10", "learning_rate:0.91"]
+        test_stats = ["acc: 91.34", "f1_score:0.91"]
         test_message = "test_message"
         test_label = "test_label"
 
@@ -529,6 +531,38 @@ class TestSnapshot():
 
         result = self.snapshot.execute()
         assert result.id == snapshot_id
+        assert result.label == test_label
+
+        # 3. Updating config, message and label
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
+        snapshot_id = self.snapshot.execute()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot", "update", "--id", snapshot_id, "--config", test_config[0], "--config", test_config[1],
+            "--message", test_message, "--label", test_label
+        ])
+
+        result = self.snapshot.execute()
+        assert result.id == snapshot_id
+        assert result.config == {"depth": "10", "learning_rate": "0.91"}
+        assert result.message == test_message
+        assert result.label == test_label
+
+        # 4. Updating stats, message and label
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
+        snapshot_id = self.snapshot.execute()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot", "update", "--id", snapshot_id, "--stats", test_stats[0], "--stats", test_stats[1],
+            "--message", test_message, "--label", test_label
+        ])
+
+        result = self.snapshot.execute()
+        assert result.id == snapshot_id
+        assert result.stats == {"acc": "91.34", "f1_score": "0.91"}
+        assert result.message == test_message
         assert result.label == test_label
 
     def test_datmo_snapshot_delete(self):

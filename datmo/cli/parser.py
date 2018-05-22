@@ -145,6 +145,28 @@ def get_datmo_parser():
     snapshot_update.add_argument(
         "--id", dest="id", help="snapshot id to update")
     snapshot_update.add_argument(
+        "--config",
+        "-c",
+        dest="config",
+        default=None,
+        action="append",
+        type=str,
+        help="""
+        provide key, value pair for the config such as key:value, (e.g. accuracy:91.1). Left is the key and 
+        right is the value for it.
+    """)
+    snapshot_update.add_argument(
+        "--stats",
+        "-s",
+        dest="stats",
+        default=None,
+        action="append",
+        type=str,
+        help="""
+        provide key, value pair for the stats such as key:value, (e.g. accuracy:91.1). Left is the key and 
+        right is the value for it.
+    """)
+    snapshot_update.add_argument(
         "--message", dest="message", help="new message for the snapshot")
     snapshot_update.add_argument(
         "--label", dest="label", help="new label for the snapshot")

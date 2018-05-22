@@ -111,10 +111,28 @@ class SnapshotCommand(ProjectCommand):
     def update(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.update"))
         snapshot_id = kwargs.get("id", None)
+        # extracting config
+        config_list = kwargs.get("config", None)
+        if config_list:
+            config = {}
+            for item in config_list:
+                key, value = item.split(":")
+                config[key.strip()] = value.strip()
+        else:
+            config = None
+        # extracting stats
+        stats_list = kwargs.get("stats", None)
+        if stats_list:
+            stats = {}
+            for item in stats_list:
+                key, value = item.split(":")
+                stats[key.strip()] = value.strip()
+        else:
+            stats = None
         message = kwargs.get("message", None)
         label = kwargs.get("label", None)
         result = self.snapshot_controller.update(
-            snapshot_id, message=message, label=label)
+            snapshot_id, config=config, stats=stats, message=message, label=label)
         self.cli_helper.echo(
             __("info", "cli.snapshot.update.success", snapshot_id))
         return result
