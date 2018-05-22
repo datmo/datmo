@@ -55,12 +55,12 @@ class TestSnapshot():
         with open(self.env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
-        # Create config
+        # Create config file
         self.config_filepath = os.path.join(self.snapshot.home, "config.json")
         with open(self.config_filepath, "w") as f:
             f.write(to_unicode(str("{}")))
 
-        # Create stats
+        # Create stats file
         self.stats_filepath = os.path.join(self.snapshot.home, "stats.json")
         with open(self.stats_filepath, "w") as f:
             f.write(to_unicode(str("{}")))
@@ -74,6 +74,16 @@ class TestSnapshot():
         self.filepath_2 = os.path.join(self.snapshot.home, "file2.txt")
         with open(self.filepath_2, "w") as f:
             f.write(to_unicode(str("test")))
+
+        # Create config
+        self.config = 'foo:bar'
+        self.config1 = "{'foo1':'bar1'}"
+        self.config2 = "this is test config blob"
+
+        # Create stats
+        self.stats = 'foo:bar'
+        self.stats1 = "{'foo1':'bar1'}"
+        self.stats2 = "this is test stats blob"
 
     def test_snapshot_project_not_init(self):
         failed = False
@@ -182,6 +192,73 @@ class TestSnapshot():
 
         snapshot_id_1 = self.snapshot.execute()
         assert snapshot_id_1
+
+    def test_snapshot_create_config_stats(self):
+        self.__set_variables()
+        test_message = "this is a test message"
+        test_label = "test label"
+        test_config = self.config
+        test_stats = self.stats
+
+        # try config
+        self.snapshot.parse([
+            "snapshot",
+            "create",
+            "--message",
+            test_message,
+            "--label",
+            test_label,
+            "--config",
+            test_config,
+            "--stats",
+            test_stats
+        ])
+
+        # test for desired side effects
+        snapshot_id = self.snapshot.execute()
+        assert snapshot_id
+
+        test_config = self.config1
+        test_stats = self.stats1
+
+        # try config
+        self.snapshot.parse([
+            "snapshot",
+            "create",
+            "--message",
+            test_message,
+            "--label",
+            test_label,
+            "--config",
+            test_config,
+            "--stats",
+            test_stats
+        ])
+
+        # test for desired side effects
+        snapshot_id = self.snapshot.execute()
+        assert snapshot_id
+
+        test_config = self.config2
+        test_stats = self.stats2
+
+        # try config
+        result = self.snapshot.parse([
+            "snapshot",
+            "create",
+            "--message",
+            test_message,
+            "--label",
+            test_label,
+            "--config",
+            test_config,
+            "--stats",
+            test_stats
+        ])
+
+        # test for desired side effects
+        snapshot_id = self.snapshot.execute()
+        assert snapshot_id
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_snapshot_create_from_task(self):

@@ -128,6 +128,17 @@ def get_datmo_parser():
         dest="config_filepath",
         default=None,
         help="absolute filepath to use to search for configuration JSON")
+    snapshot_create.add_argument(
+        "--config",
+        "-c",
+        dest="config",
+        default=None,
+        action="append",
+        type=str,
+        help="""
+            provide key, value pair for the config such as key:value, (e.g. accuracy:91.1). Left is the key and 
+            right is the value for it.
+        """)
 
     snapshot_create.add_argument(
         "--stats-filename",
@@ -139,6 +150,17 @@ def get_datmo_parser():
         dest="stats_filepath",
         default=None,
         help="absolute filepath to use to search for metrics JSON")
+    snapshot_create.add_argument(
+        "--stats",
+        "-s",
+        dest="stats",
+        default=None,
+        action="append",
+        type=str,
+        help="""
+                provide key, value pair for the stats such as key:value, (e.g. accuracy:91.1). Left is the key and 
+                right is the value for it.
+        """)
 
     snapshot_update = snapshot_subcommand_parsers.add_parser(
         "update", help="update a snapshot by id")

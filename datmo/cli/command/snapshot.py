@@ -3,7 +3,7 @@ from __future__ import print_function
 import prettytable
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.misc_functions import mutually_exclusive, printable_string
+from datmo.core.util.misc_functions import mutually_exclusive, printable_string, parse_cli_key_value
 from datmo.core.util.exceptions import (SnapshotCreateFromTaskArgs)
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.snapshot import SnapshotController
@@ -75,19 +75,35 @@ class SnapshotCommand(ProjectCommand):
 
             # Config
             if kwargs.get("config_filepath", None) or kwargs.get(
-                    "config_filename", None):
+                    "config_filename", None) or kwargs.get("config", None):
                 mutually_exclusive_args = [
-                    "config_filepath", "config_filename"
+                    "config_filepath", "config_filename", "config"
                 ]
                 mutually_exclusive(mutually_exclusive_args, kwargs,
                                    snapshot_dict)
+            # parsing config
+            if "config" in snapshot_dict:
+                config = {}
+                config_list = snapshot_dict["config"]
+                for item in config_list:
+                    item_parsed_dict = parse_cli_key_value(item, 'config')
+                    config.update(item_parsed_dict)
+                snapshot_dict["config"] = config
 
             # Stats
             if kwargs.get("stats_filepath", None) or kwargs.get(
-                    "stats_filename", None):
-                mutually_exclusive_args = ["stats_filepath", "stats_filename"]
+                    "stats_filename", None) or kwargs.get("config", None):
+                mutually_exclusive_args = ["stats_filepath", "stats_filename", "stats"]
                 mutually_exclusive(mutually_exclusive_args, kwargs,
                                    snapshot_dict)
+            # parsing stats
+            if "stats" in snapshot_dict:
+                stats = {}
+                stats_list = snapshot_dict["stats"]
+                for item in stats_list:
+                    item_parsed_dict = parse_cli_key_value(item, 'stats')
+                    stats.update(item_parsed_dict)
+                snapshot_dict["stats"] = stats
 
             optional_args = ["session_id", "message", "label"]
 
@@ -140,7 +156,9 @@ class SnapshotCommand(ProjectCommand):
 
         # extracting message
         message = kwargs.get("message", None)
+        # extracting label
         label = kwargs.get("label", None)
+
         result = self.snapshot_controller.update(
             snapshot_id, config=config, stats=stats, message=message, label=label)
         self.cli_helper.echo(
