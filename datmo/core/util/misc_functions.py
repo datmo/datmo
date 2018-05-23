@@ -206,7 +206,7 @@ def parse_cli_key_value(cli_string, default_key):
     try:
         item_dict = ast.literal_eval(cli_string)
         parsed_dict = True
-        for item_key, item_value in item_dict.iteritems():
+        for item_key, item_value in item_dict.items():
             dictionary[item_key] = item_value.strip()
     except:
         parsed_dict = False
