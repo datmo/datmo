@@ -135,7 +135,7 @@ class TestDockerEnv():
         assert path == input_dockerfile_path
         assert output_path == output_dockerfile_path
         assert requirements_filepath and os.path.isfile(requirements_filepath) and \
-               "numpy" in open(requirements_filepath, "r").read()
+               "datmo" in open(requirements_filepath, "r").read()
 
         # Test exception for path does not exist
         os.remove(input_dockerfile_path)
@@ -189,7 +189,13 @@ class TestDockerEnv():
                os.path.isfile(path) and \
                "datmo" in open(output_path, "r").read()
         assert requirements_filepath and os.path.isfile(requirements_filepath) and \
-               "numpy" in open(requirements_filepath, "r").read()
+               "datmo" in open(requirements_filepath, "r").read()
+
+        # temporarily update requirements txt file after above assertion
+        # with just numpy as requirement
+        outfile_requirements = open(requirements_filepath, "w")
+        outfile_requirements.write('numpy')
+        outfile_requirements.close()
 
         result = self.docker_environment_manager.build(name, path)
         assert result == True
@@ -714,13 +720,14 @@ class TestDockerEnv():
         # 1) Test failure EnvironmentDoesNotExist
         # 2) Test success
         # 3) Test failure EnvironmentRequirementsCreateError
-        # 4) When there are no install requirements
-
         # 1) Test option 1
         result = self.docker_environment_manager.create_requirements_file()
-        assert result is None
+        assert os.path.isfile(result) and \
+               "datmo" in open(result, "r").read()
 
         # 2) Test option 2
+        # Since it uses pip as package manager, it doesn't extract any other package than what
+        # has already been installed in local
         script_path = os.path.join(self.docker_environment_manager.filepath,
                                    "script.py")
         with open(script_path, "w") as f:
@@ -730,26 +737,17 @@ class TestDockerEnv():
         result = self.docker_environment_manager.create_requirements_file()
         assert result
         assert os.path.isfile(result) and \
-               "numpy" in open(result, "r").read() and \
-               "scikit_learn" in open(result, "r").read()
+               "datmo" in open(result, "r").read()
 
         # 3) Test option 3
         exception_thrown = False
         try:
             _ = self.docker_environment_manager.\
-                create_requirements_file(execpath="does_not_work")
+                create_requirements_file(package_manager="does_not_work")
         except EnvironmentRequirementsCreateError:
             exception_thrown = True
 
         assert exception_thrown
-
-        # 4) Test option 4
-        os.remove(script_path)
-        with open(script_path, "w") as f:
-            f.write(to_unicode("import os\n"))
-            f.write(to_unicode("import sys\n"))
-        result = self.docker_environment_manager.create_requirements_file()
-        assert result is None
 
     def test_create_default_dockerfile(self):
         # 1) Create default dockerfile for default script present

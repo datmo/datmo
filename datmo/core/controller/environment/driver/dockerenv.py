@@ -700,14 +700,13 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                    str(e)))
         return True
 
-    def create_requirements_file(self, execpath="pipreqs"):
+    def create_requirements_file(self, package_manager="pip"):
         """Create python requirements txt file for the project
 
         Parameters
         ----------
-        execpath : str, optional
-            execpath for the pipreqs command to form requirements.txt file
-            (default is "pipreqs")
+        package_manager : str, optional
+            the package manager being used during the snapshot creation
 
         Returns
         -------
@@ -717,31 +716,35 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         Raises
         ------
         EnvironmentRequirementsCreateError
-            error in running pipreqs command to extract python requirements
+            error in running package manager command to extract environment requirements
         """
-        try:
-            requirements_filepath = os.path.join(self.filepath,
-                                                 "datmorequirements.txt")
-            process = subprocess.Popen(
-                [
-                    execpath, self.filepath, "--force", "--savepath",
-                    requirements_filepath
-                ],
-                cwd=self.filepath,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE)
-            stdout, stderr = process.communicate()
-            if process.returncode > 0:
+        if package_manager == "pip":
+            try:
+                requirements_filepath = os.path.join(self.filepath,
+                                                     "datmorequirements.txt")
+                outfile_requirements = open(requirements_filepath, "w")
+                process = subprocess.Popen(
+                    ["pip", "freeze"],
+                    cwd=self.filepath,
+                    stdout=outfile_requirements,
+                    stderr=subprocess.PIPE)
+                stdout, stderr = process.communicate()
+                if process.returncode > 0:
+                    raise EnvironmentRequirementsCreateError(
+                        __("error",
+                           "controller.environment.requirements.create",
+                           str(stderr)))
+            except Exception as e:
                 raise EnvironmentRequirementsCreateError(
                     __("error", "controller.environment.requirements.create",
-                       str(stderr)))
-        except Exception as e:
+                       str(e)))
+            if not os.path.isfile(requirements_filepath):
+                return None
+            return requirements_filepath
+        else:
             raise EnvironmentRequirementsCreateError(
                 __("error", "controller.environment.requirements.create",
-                   str(e)))
-        if open(requirements_filepath, "r").read() == "\n":
-            return None
-        return requirements_filepath
+                   "no such package manager"))
 
     def create_default_dockerfile(self, language, requirements_filepath=None):
         """Create a default Dockerfile for a given language
@@ -774,7 +777,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                     os.path.split(requirements_filepath)[-1]))
             destination.write(
                 to_unicode(
-                    str("RUN pip install --no-cache-dir -r /tmp/requirements.txt\n"
+                    str("RUN cat /tmp/requirements.txt | xargs -n 1 pip install --no-cache-dir || true\n"
                         )))
         destination.close()
 

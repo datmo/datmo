@@ -4,7 +4,7 @@ import prettytable
 import datetime
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.misc_functions import mutually_exclusive, prettify_datetime, format_table
+from datmo.core.util.misc_functions import mutually_exclusive, printable_string, prettify_datetime, parse_cli_key_value, format_table
 from datmo.core.util.exceptions import (SnapshotCreateFromTaskArgs)
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.snapshot import SnapshotController
@@ -76,19 +76,35 @@ class SnapshotCommand(ProjectCommand):
 
             # Config
             if kwargs.get("config_filepath", None) or kwargs.get(
-                    "config_filename", None):
+                    "config_filename", None) or kwargs.get("config", None):
                 mutually_exclusive_args = [
-                    "config_filepath", "config_filename"
+                    "config_filepath", "config_filename", "config"
                 ]
                 mutually_exclusive(mutually_exclusive_args, kwargs,
                                    snapshot_dict)
+            # parsing config
+            if "config" in snapshot_dict:
+                config = {}
+                config_list = snapshot_dict["config"]
+                for item in config_list:
+                    item_parsed_dict = parse_cli_key_value(item, 'config')
+                    config.update(item_parsed_dict)
+                snapshot_dict["config"] = config
 
             # Stats
             if kwargs.get("stats_filepath", None) or kwargs.get(
-                    "stats_filename", None):
-                mutually_exclusive_args = ["stats_filepath", "stats_filename"]
+                    "stats_filename", None) or kwargs.get("config", None):
+                mutually_exclusive_args = ["stats_filepath", "stats_filename", "stats"]
                 mutually_exclusive(mutually_exclusive_args, kwargs,
                                    snapshot_dict)
+            # parsing stats
+            if "stats" in snapshot_dict:
+                stats = {}
+                stats_list = snapshot_dict["stats"]
+                for item in stats_list:
+                    item_parsed_dict = parse_cli_key_value(item, 'stats')
+                    stats.update(item_parsed_dict)
+                snapshot_dict["stats"] = stats
 
             optional_args = ["session_id", "message", "label"]
 
@@ -104,9 +120,49 @@ class SnapshotCommand(ProjectCommand):
     def delete(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.delete"))
         snapshot_id = kwargs.get("id", None)
+        result = self.snapshot_controller.delete(snapshot_id)
         self.cli_helper.echo(
             __("info", "cli.snapshot.delete.success", snapshot_id))
-        return self.snapshot_controller.delete(snapshot_id)
+        return result
+
+    def update(self, **kwargs):
+        self.cli_helper.echo(__("info", "cli.snapshot.update"))
+        snapshot_id = kwargs.get("id", None)
+        # getting previous saved config and stats
+        snapshot_obj = self.snapshot_controller.get(snapshot_id)
+        config = snapshot_obj.config
+        stats = snapshot_obj.stats
+
+        # extracting config
+        update_config_list = kwargs.get("config", None)
+        if update_config_list:
+            update_config = {}
+            for item in update_config_list:
+                item_parsed_dict = parse_cli_key_value(item, 'config')
+                update_config.update(item_parsed_dict)
+            # updating config
+            config.update(update_config)
+
+        # extracting stats
+        update_stats_list = kwargs.get("stats", None)
+        if update_stats_list:
+            update_stats = {}
+            for item in update_stats_list:
+                item_parsed_dict = parse_cli_key_value(item, 'stats')
+                update_stats.update(item_parsed_dict)
+            # updating stats
+            stats.update(update_stats)
+
+        # extracting message
+        message = kwargs.get("message", None)
+        # extracting label
+        label = kwargs.get("label", None)
+
+        result = self.snapshot_controller.update(
+            snapshot_id, config=config, stats=stats, message=message, label=label)
+        self.cli_helper.echo(
+            __("info", "cli.snapshot.update.success", snapshot_id))
+        return result
 
     def ls(self, **kwargs):
         session_id = kwargs.get('session_id',
@@ -127,12 +183,16 @@ class SnapshotCommand(ProjectCommand):
             ]
             t = prettytable.PrettyTable(header_list)
             for snapshot_obj in snapshot_objs:
+                snapshot_config_printable = printable_string(
+                    str(snapshot_obj.config))
+                snapshot_stats_printable = printable_string(
+                    str(snapshot_obj.stats))
+                snapshot_message = printable_string(snapshot_obj.message)
                 t.add_row([
-                    snapshot_obj.id,
-                    prettify_datetime(snapshot_obj.created_at),
-                    snapshot_obj.config, snapshot_obj.stats,
-                    snapshot_obj.message, snapshot_obj.label,
-                    snapshot_obj.code_id, snapshot_obj.environment_id,
+                    snapshot_obj.id, prettify_datetime(snapshot_obj.created_at),
+                    snapshot_config_printable, snapshot_stats_printable,
+                    snapshot_message, snapshot_obj.label, snapshot_obj.code_id,
+                    snapshot_obj.environment_id,
                     snapshot_obj.file_collection_id
                 ])
                 listed_snapshot_ids.append(snapshot_obj.id)
@@ -142,11 +202,17 @@ class SnapshotCommand(ProjectCommand):
             ]
             t = prettytable.PrettyTable(header_list)
             for snapshot_obj in snapshot_objs:
+                snapshot_config_printable = printable_string(
+                    str(snapshot_obj.config))
+                snapshot_stats_printable = printable_string(
+                    str(snapshot_obj.stats))
+                snapshot_message = printable_string(snapshot_obj.message)
+                snapshot_created_at = printable_string(
+                    snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"))
                 t.add_row([
-                    snapshot_obj.id,
-                    snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-                    snapshot_obj.config, snapshot_obj.stats,
-                    snapshot_obj.message, snapshot_obj.label
+                    snapshot_obj.id, snapshot_created_at,
+                    snapshot_config_printable, snapshot_stats_printable,
+                    snapshot_message, snapshot_obj.label
                 ])
                 listed_snapshot_ids.append(snapshot_obj.id)
 

@@ -55,12 +55,12 @@ class TestSnapshot():
         with open(self.env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
-        # Create config
+        # Create config file
         self.config_filepath = os.path.join(self.snapshot.home, "config.json")
         with open(self.config_filepath, "w") as f:
             f.write(to_unicode(str("{}")))
 
-        # Create stats
+        # Create stats file
         self.stats_filepath = os.path.join(self.snapshot.home, "stats.json")
         with open(self.stats_filepath, "w") as f:
             f.write(to_unicode(str("{}")))
@@ -74,6 +74,16 @@ class TestSnapshot():
         self.filepath_2 = os.path.join(self.snapshot.home, "file2.txt")
         with open(self.filepath_2, "w") as f:
             f.write(to_unicode(str("test")))
+
+        # Create config
+        self.config = 'foo:bar'
+        self.config1 = "{'foo1':'bar1'}"
+        self.config2 = "this is test config blob"
+
+        # Create stats
+        self.stats = 'foo:bar'
+        self.stats1 = "{'foo1':'bar1'}"
+        self.stats2 = "this is test stats blob"
 
     def test_snapshot_project_not_init(self):
         failed = False
@@ -182,6 +192,73 @@ class TestSnapshot():
 
         snapshot_id_1 = self.snapshot.execute()
         assert snapshot_id_1
+
+    def test_snapshot_create_config_stats(self):
+        self.__set_variables()
+        test_message = "this is a test message"
+        test_label = "test label"
+        test_config = self.config
+        test_stats = self.stats
+
+        # try config
+        self.snapshot.parse([
+            "snapshot",
+            "create",
+            "--message",
+            test_message,
+            "--label",
+            test_label,
+            "--config",
+            test_config,
+            "--stats",
+            test_stats
+        ])
+
+        # test for desired side effects
+        snapshot_id = self.snapshot.execute()
+        assert snapshot_id
+
+        test_config = self.config1
+        test_stats = self.stats1
+
+        # try config
+        self.snapshot.parse([
+            "snapshot",
+            "create",
+            "--message",
+            test_message,
+            "--label",
+            test_label,
+            "--config",
+            test_config,
+            "--stats",
+            test_stats
+        ])
+
+        # test for desired side effects
+        snapshot_id = self.snapshot.execute()
+        assert snapshot_id
+
+        test_config = self.config2
+        test_stats = self.stats2
+
+        # try config
+        result = self.snapshot.parse([
+            "snapshot",
+            "create",
+            "--message",
+            test_message,
+            "--label",
+            test_label,
+            "--config",
+            test_config,
+            "--stats",
+            test_stats
+        ])
+
+        # test for desired side effects
+        snapshot_id = self.snapshot.execute()
+        assert snapshot_id
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_snapshot_create_from_task(self):
@@ -483,6 +560,114 @@ class TestSnapshot():
         except Exception:
             exception_thrown = True
         assert exception_thrown
+
+    def test_datmo_snapshot_update(self):
+        self.__set_variables()
+
+        test_config = ["depth: 10", "learning_rate:0.91"]
+        test_stats = ["acc: 91.34", "f1_score:0.91"]
+        test_config1 = "{'foo_config': 'bar_config'}"
+        test_stats1 = "{'foo_stats': 'bar_stats'}"
+        test_config2 = "this is a config blob"
+        test_stats2 = "this is a stats blob"
+        test_message = "test_message"
+        test_label = "test_label"
+
+        # 1. Updating both message and label
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
+        snapshot_id = self.snapshot.execute()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot", "update", "--id", snapshot_id, "--message",
+            test_message, "--label", test_label
+        ])
+
+        result = self.snapshot.execute()
+        assert result.id == snapshot_id
+        assert result.message == test_message
+        assert result.label == test_label
+
+        # 2. Updating only message
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
+        snapshot_id = self.snapshot.execute()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot", "update", "--id", snapshot_id, "--message",
+            test_message
+        ])
+
+        result = self.snapshot.execute()
+        assert result.id == snapshot_id
+        assert result.message == test_message
+
+        # Updating label
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
+        snapshot_id = self.snapshot.execute()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse(
+            ["snapshot", "update", "--id", snapshot_id, "--label", test_label])
+
+        result = self.snapshot.execute()
+        assert result.id == snapshot_id
+        assert result.label == test_label
+
+        # 3. Updating config, message and label
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
+        snapshot_id = self.snapshot.execute()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot", "update", "--id", snapshot_id, "--config", test_config[0], "--config", test_config[1],
+            "--message", test_message, "--label", test_label
+        ])
+
+        result = self.snapshot.execute()
+        assert result.id == snapshot_id
+        assert result.config == {"depth": "10", "learning_rate": "0.91"}
+        assert result.message == test_message
+        assert result.label == test_label
+
+        # 4. Updating stats, message and label
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
+        snapshot_id = self.snapshot.execute()
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot", "update", "--id", snapshot_id, "--stats", test_stats[0], "--stats", test_stats[1],
+            "--message", test_message, "--label", test_label
+        ])
+
+        result = self.snapshot.execute()
+        assert result.id == snapshot_id
+        assert result.stats == {"acc": "91.34", "f1_score": "0.91"}
+        assert result.message == test_message
+        assert result.label == test_label
+
+        # 5. Updating config, stats
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot", "update", "--id", snapshot_id, "--config", test_config1, "--stats", test_stats1])
+
+        result = self.snapshot.execute()
+        assert result.id == snapshot_id
+        assert result.config == {"depth": "10", "learning_rate": "0.91", 'foo_config': 'bar_config'}
+        assert result.stats == {"acc": "91.34", "f1_score": "0.91", 'foo_stats': 'bar_stats'}
+        assert result.message == test_message
+        assert result.label == test_label
+
+        # Test when optional parameters are not given
+        self.snapshot.parse([
+            "snapshot", "update", "--id", snapshot_id, "--config", test_config2, "--stats", test_stats2])
+
+        result = self.snapshot.execute()
+        assert result.id == snapshot_id
+        assert result.config == {"depth": "10", "learning_rate": "0.91", 'foo_config': 'bar_config', 'config': test_config2}
+        assert result.stats == {"acc": "91.34", "f1_score": "0.91", 'foo_stats': 'bar_stats', 'stats': test_stats2}
+        assert result.message == test_message
+        assert result.label == test_label
 
     def test_datmo_snapshot_delete(self):
         self.__set_variables()

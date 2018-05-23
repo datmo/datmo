@@ -79,6 +79,10 @@ class SnapshotController(BaseController):
                 environment_definition_filepath : str, optional
                     absolute filepath for the environment definition file
                     (e.g. Dockerfile path for Docker)
+                language: str, optional
+                    programing language for the scripts
+                    (e.g. if the python sdk is being used in `python3`,
+                    then language is `python3`)
 
                 Default
                 -------
@@ -311,6 +315,21 @@ class SnapshotController(BaseController):
             query['visible'] = visible
 
         return self.dal.snapshot.query(query, sort_key, sort_order)
+
+    def update(self, snapshot_id, config=None, stats=None, message=None, label=None):
+        if not snapshot_id:
+            raise RequiredArgumentMissing(
+                __("error", "controller.snapshot.delete.arg", "snapshot_id"))
+        update_snapshot_input_dict = {'id': snapshot_id}
+        if config:
+            update_snapshot_input_dict['config'] = config
+        if stats:
+            update_snapshot_input_dict['stats'] = stats
+        if message:
+            update_snapshot_input_dict['message'] = message
+        if label:
+            update_snapshot_input_dict['label'] = label
+        return self.dal.snapshot.update(update_snapshot_input_dict)
 
     def get(self, snapshot_id):
         """Get snapshot object and return

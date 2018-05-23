@@ -10,7 +10,7 @@ except NameError:
     basestring = str
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.misc_functions import mutually_exclusive, prettify_datetime
+from datmo.core.util.misc_functions import mutually_exclusive, printable_string, prettify_datetime
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
 from datmo.core.util.exceptions import RequiredArgumentMissing
@@ -68,9 +68,10 @@ class TaskCommand(ProjectCommand):
         task_objs = self.task_controller.list(
             session_id, sort_key='created_at', sort_order='descending')
         for task_obj in task_objs:
+            task_results_printable = printable_string(str(task_obj.results))
             t.add_row([
                 task_obj.id, task_obj.command, task_obj.status,
-                task_obj.results,
+                task_results_printable,
                 prettify_datetime(task_obj.created_at)
             ])
         self.cli_helper.echo(t)
