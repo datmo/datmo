@@ -162,7 +162,7 @@ When running `datmo init`, Datmo adds a hidden `.datmo` directory which keeps tr
 <p align="center">
     The fundamental unit of record in the Datmo ecosystem is a <b>Snapshot</b>, which contains 5 first-class components.
     <br><br>
-    <img size="250px" src="https://raw.githubusercontent.com/datmo/datmo/docs-update/images/snapshot-badge-readme.png">
+    <img size="250px" src="https://github.com/datmo/datmo/blob/master/images/snapshot-badge-readme.png">
 </p>
 
 
