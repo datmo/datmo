@@ -147,7 +147,7 @@ class GitCodeDriver(CodeDriver):
         Returns
         -------
         commit_id : str
-            code id for the ref created
+            commit id for the ref created
 
         Raises
         ------
@@ -239,11 +239,9 @@ class GitCodeDriver(CodeDriver):
     #                (commit_id, str(e))))
     #     return True
 
-    def checkout_ref(self, commit_id, remote=False):
+    def checkout_ref(self, commit_id):
         try:
             # Run checkout for the specific ref as usual
-            if remote:
-                self.fetch_ref(commit_id)
             datmo_ref = "refs/datmo/" + commit_id
             checkout_result = self.checkout(datmo_ref)
             return checkout_result

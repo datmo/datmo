@@ -125,15 +125,13 @@ class CodeDriver(with_metaclass(ABCMeta, object)):
     #     pass
 
     @abstractmethod
-    def checkout_ref(self, commit_id, remote=False):
+    def checkout_ref(self, commit_id):
         """Checkout commit reference given without affecting the .datmo directory
 
         Parameters
         ----------
         commit_id : str
             commit id for commit ref
-        remote : bool
-            signifies if commit id should be fetched before checkout
 
         Returns
         -------
