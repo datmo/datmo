@@ -25,6 +25,8 @@ setup(
         "glob2>=0.5",
         "docker>=2.2.1",
         "pyyaml>=3.12",
+        "pytz>=2017.3",
+        "tzlocal>=1.5.1",
         "requests>=2.11.1",
         "prettytable>=0.7.2",
         "rsfile>=2.1",

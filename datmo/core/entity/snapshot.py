@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 
 from datmo.core.util.json_store import JSONStore
+from datmo.core.util.misc_functions import prettify_datetime, format_table
 
 
 class Snapshot():
@@ -108,6 +109,35 @@ class Snapshot():
 
     def __eq__(self, other):
         return self.id == other.id if other else False
+
+    def __str__(self):
+        if self.label:
+            final_str = '\033[94m' + "snapshot " + self.id + '\033[0m'
+            final_str = final_str + '\033[94m' + " (" + '\033[0m'
+            final_str = final_str + '\033[93m' + '\033[1m' + "label: " + self.label + '\033[0m'
+            final_str = final_str + '\033[94m' + ")" + '\033[0m' + "\n"
+        else:
+            final_str = '\033[94m' + "snapshot " + self.id + '\033[0m' + "\n"
+        final_str = final_str + "Date: " + prettify_datetime(
+            self.created_at) + "\n"
+        table_data = []
+        if self.session_id:
+            table_data.append(["Session", "-> " + self.session_id])
+        if self.task_id:
+            table_data.append(["Task", "-> " + self.task_id])
+        table_data.append(["Visible", "-> " + str(self.visible)])
+        # Components
+        table_data.append(["Code", "-> " + self.code_id])
+        table_data.append(["Environment", "-> " + self.environment_id])
+        table_data.append(["Files", "-> " + self.file_collection_id])
+        table_data.append(["Config", "-> " + str(self.config)])
+        table_data.append(["Stats", "-> " + str(self.stats)])
+        final_str = final_str + format_table(table_data)
+        final_str = final_str + "\n" + "    " + self.message + "\n" + "\n"
+        return final_str
+
+    def __repr__(self):
+        return self.__str__()
 
     def save_config(self, filepath):
         JSONStore(os.path.join(filepath, 'config.json'), self.config)

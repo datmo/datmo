@@ -214,8 +214,16 @@ def get_datmo_parser():
 
     snapshot_checkout = snapshot_subcommand_parsers.add_parser(
         "checkout", help="checkout a snapshot by id")
-    snapshot_checkout.add_argument(
-        "--id", dest="id", default=None, help="snapshot id")
+    snapshot_checkout.add_argument("id", default=None, help="snapshot id")
+
+    snapshot_diff = snapshot_subcommand_parsers.add_parser(
+        "diff", help="view diff between 2 snapshots")
+    snapshot_diff.add_argument("id_1", default=None, help="snapshot id 1")
+    snapshot_diff.add_argument("id_2", default=None, help="snapshot id 2")
+
+    snapshot_inspect = snapshot_subcommand_parsers.add_parser(
+        "inspect", help="inspect a snapshot by id")
+    snapshot_inspect.add_argument("id", default=None, help="snapshot id")
 
     # Task
     task_parser = subparsers.add_parser("task", help="task module")
@@ -254,7 +262,11 @@ def get_datmo_parser():
         dest="interactive",
         action="store_true",
         help="run the environment in interactive mode (keeps STDIN open)")
-    task_run.add_argument("cmd", nargs="?", default=None)
+    task_run.add_argument(
+        "cmd",
+        nargs="?",
+        default=None,
+        help="command to run within environment")
 
     # Task list arguments
     task_ls = task_subcommand_parsers.add_parser("ls", help="list tasks")

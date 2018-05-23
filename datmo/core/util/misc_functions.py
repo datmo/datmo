@@ -6,6 +6,8 @@ import ast
 import hashlib
 import textwrap
 import datetime
+import pytz
+import tzlocal
 import pytest
 import platform
 from io import open
@@ -217,3 +219,24 @@ def parse_cli_key_value(cli_string, default_key):
         dictionary[default_key] = cli_string.strip()
 
     return dictionary
+
+
+def prettify_datetime(datetime_obj, tz=None):
+    if not tz:
+        tz = tzlocal.get_localzone()
+    return str(
+        datetime_obj.replace(tzinfo=pytz.utc).astimezone(tz=tz)
+        .strftime("%a %b %d %H:%M:%S %Y %z"))
+
+
+def format_table(data, padding=2):
+    num_col = max(len(row) for row in data)
+    col_widths = []
+    for i in range(num_col):
+        col_width = max(len(row[i]) for row in data) + padding
+        col_widths.append(col_width)
+    table_str = ""
+    for row in data:
+        table_str = table_str + "".join(
+            word.ljust(col_widths[idx]) for idx, word in enumerate(row)) + "\n"
+    return table_str

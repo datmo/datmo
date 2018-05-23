@@ -2,12 +2,10 @@
 Tests for TaskController
 """
 import os
-import time
 import random
 import string
 import tempfile
 import platform
-import timeout_decorator
 from io import open, TextIOWrapper
 try:
     to_unicode = unicode
@@ -20,7 +18,7 @@ from datmo.core.controller.task import TaskController
 from datmo.core.entity.task import Task
 from datmo.core.util.exceptions import EntityNotFound, TaskRunError, \
     InvalidArgumentType, RequiredArgumentMissing, ProjectNotInitialized, \
-    InvalidProjectPath, TooManyArgumentsFound
+    InvalidProjectPath, TooManyArgumentsFound, DoesNotExist
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -213,7 +211,7 @@ class TestTaskController():
 
         # Create task_dict
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        task_dict = {"command": task_command}
+        task_dict = {"command_list": task_command}
 
         # 1) Test option 1
         updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)
@@ -341,7 +339,7 @@ class TestTaskController():
 
         # Create task_dict
         task_command = ["python", "script.py"]
-        task_dict = {"command": task_command}
+        task_dict = {"command_list": task_command}
 
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
@@ -441,9 +439,32 @@ class TestTaskController():
                task_obj_1 in result and \
                task_obj_2 in result
 
+    def test_get(self):
+        self.__setup()
+        # Test failure for no task
+        failed = False
+        try:
+            self.task.get("random")
+        except DoesNotExist:
+            failed = True
+        assert failed
+
+        # Test success for task
+        task_obj = self.task.create()
+        task_obj_returned = self.task.get(task_obj.id)
+        assert task_obj == task_obj_returned
+
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_get_files(self):
         self.__setup()
+        # Test failure case
+        failed = False
+        try:
+            self.task.get_files("random")
+        except DoesNotExist:
+            failed = True
+        assert failed
+
         # Create task in the project
         task_obj = self.task.create()
 
@@ -465,7 +486,7 @@ class TestTaskController():
 
         # Create task_dict
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        task_dict = {"command": task_command}
+        task_dict = {"command_list": task_command}
 
         # Test the default values
         updated_task_obj = self.task.run(
@@ -575,7 +596,7 @@ class TestTaskController():
 
         # Create task_dict
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        task_dict = {"command": task_command}
+        task_dict = {"command_list": task_command}
 
         # 1) Test option 1
         updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)

@@ -9,6 +9,7 @@ except NameError:
 from datmo.core.controller.task import TaskController
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.util.exceptions import InvalidArgumentType
+from datmo.core.util.misc_functions import prettify_datetime, format_table
 
 
 class Task():
@@ -38,16 +39,18 @@ class Task():
         timestamp for the beginning time of the task
     end_time : datetime.datetime or None
         timestamp for the end time of the task
-    duration : datetime.timedelta or None
-        delta between start and end times
+    duration : float or None
+        delta in seconds between start and end times
     logs : str or None
         string output of logs
     results : dict or None
         dictionary containing output results from the task
+    files : list
+        returns list of file objects for the task in read mode
 
     Methods
     -------
-    files(mode="r")
+    get_files(mode="r")
         Returns a list of file objects for the task
 
     Raises
@@ -73,14 +76,69 @@ class Task():
         self.command = self._core_task.command
 
         # Run parameters
-        self.status = self._core_task.status
-        self.start_time = self._core_task.start_time
-        self.end_time = self._core_task.end_time
-        self.duration = self._core_task.duration
-        self.logs = self._core_task.logs
-        self.results = self._core_task.results
+        self._status = self._core_task.status
+        self._start_time = self._core_task.start_time
+        self._end_time = self._core_task.end_time
+        self._duration = self._core_task.duration
 
-    def files(self, mode="r"):
+        # Outputs
+        self._logs = self._core_task.logs
+        self._results = self._core_task.results
+        self._files = None
+
+    @property
+    def status(self):
+        self._core_task = self.__get_core_task()
+        self._status = self._core_task.status
+        return self._status
+
+    @property
+    def start_time(self):
+        self._core_task = self.__get_core_task()
+        self._start_time = self._core_task.start_time
+        return self._start_time
+
+    @property
+    def end_time(self):
+        self._core_task = self.__get_core_task()
+        self._end_time = self._core_task.end_time
+        return self._end_time
+
+    @property
+    def duration(self):
+        self._core_task = self.__get_core_task()
+        self._duration = self._core_task.duration
+        return self._duration
+
+    @property
+    def logs(self):
+        self._core_task = self.__get_core_task()
+        self._logs = self._core_task.logs
+        return self._logs
+
+    @property
+    def results(self):
+        self._core_task = self.__get_core_task()
+        self._results = self._core_task.results
+        return self._results
+
+    @property
+    def files(self):
+        self._files = self.get_files()
+        return self._files
+
+    def __get_core_task(self):
+        """Returns the latest core task object for id
+
+        Returns
+        -------
+        datmo.core.entity.task.Task
+            core task object fo the task
+        """
+        task_controller = TaskController(home=self._home)
+        return task_controller.get(self.id)
+
+    def get_files(self, mode="r"):
         """Returns a list of file objects for the task
 
         Parameters
@@ -99,6 +157,42 @@ class Task():
 
     def __eq__(self, other):
         return self.id == other.id if other else False
+
+    def __str__(self):
+        final_str = '\033[94m' + "task " + self.id + "\n" + '\033[0m'
+        table_data = []
+        if self.session_id:
+            table_data.append(["Session", "-> " + self.session_id])
+        if self.status:
+            table_data.append(["Status", "-> " + self.status])
+        if self.start_time:
+            table_data.append(
+                ["Start Time", "-> " + prettify_datetime(self.start_time)])
+        if self.end_time:
+            table_data.append(
+                ["End Time", "-> " + prettify_datetime(self.end_time)])
+        if self.duration:
+            table_data.append(
+                ["Duration", "-> " + str(self.duration) + " seconds"])
+        # Outputs
+        if self.logs:
+            table_data.append(
+                ["Logs", "-> Use task log to view or download logs"])
+        if self.results:
+            table_data.append(["Results", "-> " + str(self.results)])
+        if not self.files:
+            table_data.append(["Files", "-> None"])
+        else:
+            table_data.append(["Files", "-> " + self.files[0].name])
+            if len(list(self.files)) > 1:
+                for f in self.files[1:]:
+                    table_data.append(["     ", "-> " + f.name])
+        final_str = final_str + format_table(table_data)
+        final_str = final_str + "\n" + "    " + self.command + "\n" + "\n"
+        return final_str
+
+    def __repr__(self):
+        return self.__str__()
 
 
 def run(command, env=None, home=None, gpu=False):
@@ -150,20 +244,12 @@ def run(command, env=None, home=None, gpu=False):
         snapshot_dict["environment_definition_filepath"] = env
 
     if isinstance(command, list):
-        task_dict["command"] = command
-    else:
-        if platform.system() == "Windows":
-            task_dict["command"] = command
-        else:
-            task_dict["command"] = shlex.split(command)
-
-    if isinstance(command, list):
-        task_dict["command"] = command
+        task_dict["command_list"] = command
     else:
         if platform.system() == "Windows":
             task_dict["command"] = command
         elif isinstance(command, basestring):
-            task_dict["command"] = shlex.split(command)
+            task_dict["command_list"] = shlex.split(command)
 
     task_dict["gpu"] = gpu
 
@@ -178,3 +264,66 @@ def run(command, env=None, home=None, gpu=False):
     client_task_obj = Task(updated_core_task_obj, home=home)
 
     return client_task_obj
+
+
+def ls(session_id=None, filter=None, home=None):
+    """List tasks within a project
+
+    The project must be created before this is implemented. You can do that by using
+    the following command::
+
+        $ datmo init
+
+
+    Parameters
+    ----------
+    session_id : str, optional
+        session to filter output tasks
+        (default is None, which means no session filter is given)
+    filter : str, optional
+        a string to use to filter from message and label
+        (default is to give all snapshots, unless provided a specific string. eg: best)
+    home : str, optional
+        absolute home path of the project
+        (default is None, which will use the CWD as the project path)
+
+    Returns
+    -------
+    list
+        returns a list of Task entities (as defined above)
+
+    Examples
+    --------
+    You can use this function within a project repository to list tasks.
+
+    >>> import datmo
+    >>> tasks = datmo.task.ls()
+    """
+    if not home:
+        home = os.getcwd()
+    task_controller = TaskController(home=home)
+
+    # add arguments if they are not None
+    if not session_id:
+        session_id = task_controller.current_session.id
+
+    core_task_objs = task_controller.list(
+        session_id, sort_key='created_at', sort_order='descending')
+
+    # Filtering Tasks
+    # TODO: move to list function in TaskController
+    # Add in preliminary tasks if no filter
+    filtered_core_task_objs = [
+        core_task_obj for core_task_obj in core_task_objs if not filter
+    ]
+    # If filter is present then use it and only add those that pass filter
+    for core_task_obj in core_task_objs:
+        if filter and \
+            (filter in core_task_obj.command):
+            filtered_core_task_objs.append(core_task_obj)
+
+    # Return Task entities
+    return [
+        Task(filtered_core_task_obj, home=home)
+        for filtered_core_task_obj in filtered_core_task_objs
+    ]

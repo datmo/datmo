@@ -653,10 +653,8 @@ class TestSnapshot():
 
         result = self.snapshot.execute()
         assert result.id == snapshot_id
-        # assert result.config == {"acc": "91.34", "f1_score": "0.91", 'foo_config': 'bar_config'}
-        # assert result.stats == {"acc": "91.34", "f1_score": "0.91", 'foo_stats': 'bar_stats'}
-        assert result.config == {'foo_config': 'bar_config'}
-        assert result.stats == {'foo_stats': 'bar_stats'}
+        assert result.config == {"depth": "10", "learning_rate": "0.91", 'foo_config': 'bar_config'}
+        assert result.stats == {"acc": "91.34", "f1_score": "0.91", 'foo_stats': 'bar_stats'}
         assert result.message == test_message
         assert result.label == test_label
 
@@ -666,13 +664,10 @@ class TestSnapshot():
 
         result = self.snapshot.execute()
         assert result.id == snapshot_id
-        # assert result.config == {"acc": "91.34", "f1_score": "0.91", 'foo_config': 'bar_config', 'config': test_config2}
-        # assert result.stats == {"acc": "91.34", "f1_score": "0.91", 'foo_stats': 'bar_stats', 'stats': test_stats2}
-        assert result.config == {'config': test_config2}
-        assert result.stats == {'stats': test_stats2}
+        assert result.config == {"depth": "10", "learning_rate": "0.91", 'foo_config': 'bar_config', 'config': test_config2}
+        assert result.stats == {"acc": "91.34", "f1_score": "0.91", 'foo_stats': 'bar_stats', 'stats': test_stats2}
         assert result.message == test_message
         assert result.label == test_label
-
 
     def test_datmo_snapshot_delete(self):
         self.__set_variables()
@@ -741,7 +736,38 @@ class TestSnapshot():
             shutil.rmtree(datmo_tasks_dirpath)
 
         # Test when optional parameters are not given
-        self.snapshot.parse(["snapshot", "checkout", "--id", snapshot_id])
+        self.snapshot.parse(["snapshot", "checkout", snapshot_id])
+
+        result = self.snapshot.execute()
+        assert result
+
+    def test_datmo_snapshot_diff(self):
+        self.__set_variables()
+        # Create snapshots to test
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
+        snapshot_id_1 = self.snapshot.execute()
+
+        # Create another test file
+        self.filepath_3 = os.path.join(self.snapshot.home, "file3.txt")
+        with open(self.filepath_3, "w") as f:
+            f.write(to_unicode(str("test")))
+
+        self.snapshot.parse(["snapshot", "create", "-m", "my second snapshot"])
+        snapshot_id_2 = self.snapshot.execute()
+
+        # Test diff with the above two snapshots
+        self.snapshot.parse(["snapshot", "diff", snapshot_id_1, snapshot_id_2])
+
+        result = self.snapshot.execute()
+        assert result
+
+    def test_datmo_snapshot_inspect(self):
+        self.__set_variables()
+        # Create snapshot to test
+        self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
+        snapshot_id = self.snapshot.execute()
+        # Test diff with the above two snapshots
+        self.snapshot.parse(["snapshot", "inspect", snapshot_id])
 
         result = self.snapshot.execute()
         assert result

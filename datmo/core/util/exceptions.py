@@ -158,6 +158,10 @@ class TaskNotComplete(ArgumentError):
     pass
 
 
+class TaskNoCommandGiven(ArgumentError):
+    pass
+
+
 class TaskInteractiveDetachError(ArgumentError):
     pass
 

@@ -10,7 +10,7 @@ except NameError:
     basestring = str
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.misc_functions import mutually_exclusive, printable_string
+from datmo.core.util.misc_functions import mutually_exclusive, printable_string, prettify_datetime
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
 from datmo.core.util.exceptions import RequiredArgumentMissing
@@ -33,17 +33,17 @@ class TaskCommand(ProjectCommand):
         if kwargs['environment_definition_filepath']:
             snapshot_dict["environment_definition_filepath"] =\
                 kwargs['environment_definition_filepath']
-        if not isinstance(kwargs['cmd'], list):
-            if platform.system() == "Windows":
-                kwargs['cmd'] = kwargs['cmd']
-            elif isinstance(kwargs['cmd'], basestring):
-                kwargs['cmd'] = shlex.split(kwargs['cmd'])
-
         task_dict = {
             "ports": kwargs['ports'],
-            "interactive": kwargs['interactive'],
-            "command": kwargs['cmd']
+            "interactive": kwargs['interactive']
         }
+        if not isinstance(kwargs['cmd'], list):
+            if platform.system() == "Windows":
+                task_dict['command'] = kwargs['cmd']
+            elif isinstance(kwargs['cmd'], basestring):
+                task_dict['command_list'] = shlex.split(kwargs['cmd'])
+        else:
+            task_dict['command_list'] = kwargs['cmd']
 
         # Create the task object)
         task_obj = self.task_controller.create()
@@ -69,11 +69,10 @@ class TaskCommand(ProjectCommand):
             session_id, sort_key='created_at', sort_order='descending')
         for task_obj in task_objs:
             task_results_printable = printable_string(str(task_obj.results))
-            task_created_at = printable_string(
-                task_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"))
             t.add_row([
                 task_obj.id, task_obj.command, task_obj.status,
-                task_results_printable, task_created_at
+                task_results_printable,
+                prettify_datetime(task_obj.created_at)
             ])
         self.cli_helper.echo(t)
 

@@ -10,7 +10,7 @@ from datmo.core.util.validation import validate
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import (
     FileIOError, RequiredArgumentMissing, ProjectNotInitialized,
-    SessionDoesNotExist, EntityNotFound, TaskNotComplete)
+    SessionDoesNotExist, EntityNotFound, TaskNotComplete, DoesNotExist)
 
 
 class SnapshotController(BaseController):
@@ -330,6 +330,59 @@ class SnapshotController(BaseController):
         if label:
             update_snapshot_input_dict['label'] = label
         return self.dal.snapshot.update(update_snapshot_input_dict)
+
+    def get(self, snapshot_id):
+        """Get snapshot object and return
+
+        Parameters
+        ----------
+        snapshot_id : str
+            id for the snapshot you would like to get
+
+        Returns
+        -------
+        datmo.core.entity.snapshot.Snapshot
+            core snapshot object
+
+        Raises
+        ------
+        DoesNotExist
+            snapshot does not exist
+        """
+        try:
+            return self.dal.snapshot.get_by_id(snapshot_id)
+        except EntityNotFound:
+            raise DoesNotExist()
+
+    def get_files(self, snapshot_id, mode="r"):
+        """Get list of file objects for snapshot id.
+
+        Parameters
+        ----------
+        snapshot_id : str
+            id for the snapshot you would like to get file objects for
+        mode : str
+            file open mode
+            (default is "r" to open file for read)
+
+        Returns
+        -------
+        list
+            list of python file objects
+
+        Raises
+        ------
+        DoesNotExist
+            snapshot object does not exist
+        """
+        try:
+            snapshot_obj = self.dal.snapshot.get_by_id(snapshot_id)
+        except EntityNotFound:
+            raise DoesNotExist()
+        file_collection_obj = self.dal.file_collection.get_by_id(
+            snapshot_obj.file_collection_id)
+        return self.file_driver.get_collection_files(
+            file_collection_obj.filehash, mode=mode)
 
     def delete(self, snapshot_id):
         if not snapshot_id:

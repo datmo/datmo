@@ -4,6 +4,7 @@ from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.util.exceptions import InvalidArgumentType, \
     SnapshotCreateFromTaskArgs
+from datmo.core.util.misc_functions import prettify_datetime, format_table
 
 
 class Snapshot():
@@ -71,16 +72,83 @@ class Snapshot():
 
         self.code_id = self._core_snapshot.code_id
         self.environment_id = self._core_snapshot.environment_id
-        self.file_collection_id = self._core_snapshot.file_collection_id
         self.config = self._core_snapshot.config
         self.stats = self._core_snapshot.stats
+        self._files = None
 
         self.task_id = self._core_snapshot.task_id
         self.label = self._core_snapshot.label
         self.created_at = self._core_snapshot.created_at
 
+    @property
+    def files(self):
+        self._files = self.get_files()
+        return self._files
+
+    def __get_core_snapshot(self):
+        """Returns the latest core snapshot object for id
+
+        Returns
+        -------
+        datmo.core.entity.snapshot.Snapshot
+            core snapshot object for the snapshot
+        """
+        snapshot_controller = SnapshotController(home=self._home)
+        return snapshot_controller.get(self.id)
+
+    def get_files(self, mode="r"):
+        """Returns a list of file objects for the snapshot
+
+        Parameters
+        ----------
+        mode : str
+            file object mode
+            (default is "r" which signifies read mode)
+
+        Returns
+        -------
+        list
+            list of file objects associated with the snapshot
+        """
+        snapshot_controller = SnapshotController(home=self._home)
+        return snapshot_controller.get_files(self.id, mode=mode)
+
     def __eq__(self, other):
         return self.id == other.id if other else False
+
+    def __str__(self):
+        if self.label:
+            final_str = '\033[94m' + "snapshot " + self.id + '\033[0m'
+            final_str = final_str + '\033[94m' + " (" + '\033[0m'
+            final_str = final_str + '\033[93m' + '\033[1m' + "label: " + self.label + '\033[0m'
+            final_str = final_str + '\033[94m' + ")" + '\033[0m' + "\n"
+        else:
+            final_str = '\033[94m' + "snapshot " + self.id + '\033[0m' + "\n"
+        final_str = final_str + "Date: " + prettify_datetime(
+            self.created_at) + "\n"
+        table_data = []
+        if self.session_id:
+            table_data.append(["Session", "-> " + self.session_id])
+        if self.task_id:
+            table_data.append(["Task", "-> " + self.task_id])
+        # Components
+        table_data.append(["Code", "-> " + self.code_id])
+        table_data.append(["Environment", "-> " + self.environment_id])
+        if not self.files:
+            table_data.append(["Files", "-> None"])
+        else:
+            table_data.append(["Files", "-> " + self.files[0].name])
+            if len(list(self.files)) > 1:
+                for f in self.files[1:]:
+                    table_data.append(["     ", "-> " + f.name])
+        table_data.append(["Config", "-> " + str(self.config)])
+        table_data.append(["Stats", "-> " + str(self.stats)])
+        final_str = final_str + format_table(table_data)
+        final_str = final_str + "\n" + "    " + self.message + "\n" + "\n"
+        return final_str
+
+    def __repr__(self):
+        return self.__str__()
 
 
 def create(message,
@@ -221,7 +289,7 @@ def ls(session_id=None, filter=None, home=None):
     Parameters
     ----------
     session_id : str, optional
-        session id for which snapshots have to be listed
+        session id to filter output snapshots
         (default is None, which means no session filter is given)
     filter : str, optional
         a string to use to filter from message and label
@@ -267,8 +335,8 @@ def ls(session_id=None, filter=None, home=None):
     for core_snapshot_obj in core_snapshot_objs:
         if core_snapshot_obj.visible:
             if filter and \
-                    (filter in core_snapshot_obj.message) \
-                    or (core_snapshot_obj.label != None and filter in core_snapshot_obj.label):
+                ((filter in core_snapshot_obj.message) \
+                    or (core_snapshot_obj.label != None and filter in core_snapshot_obj.label)):
                 filtered_core_snapshot_objs.append(core_snapshot_obj)
 
     # Return Snapshot entities

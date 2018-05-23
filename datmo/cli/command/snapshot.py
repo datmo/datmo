@@ -1,9 +1,10 @@
 from __future__ import print_function
 
 import prettytable
+import datetime
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.misc_functions import mutually_exclusive, printable_string, parse_cli_key_value
+from datmo.core.util.misc_functions import mutually_exclusive, printable_string, prettify_datetime, parse_cli_key_value, format_table
 from datmo.core.util.exceptions import (SnapshotCreateFromTaskArgs)
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.snapshot import SnapshotController
@@ -128,11 +129,9 @@ class SnapshotCommand(ProjectCommand):
         self.cli_helper.echo(__("info", "cli.snapshot.update"))
         snapshot_id = kwargs.get("id", None)
         # getting previous saved config and stats
-        # snapshot_obj = self.snapshot_controller.get(snapshot_id)
-        # config = snapshot_obj.config
-        # stats = snapshot_obj.stats
-        config = {}
-        stats = {}
+        snapshot_obj = self.snapshot_controller.get(snapshot_id)
+        config = snapshot_obj.config
+        stats = snapshot_obj.stats
 
         # extracting config
         update_config_list = kwargs.get("config", None)
@@ -189,10 +188,8 @@ class SnapshotCommand(ProjectCommand):
                 snapshot_stats_printable = printable_string(
                     str(snapshot_obj.stats))
                 snapshot_message = printable_string(snapshot_obj.message)
-                snapshot_created_at = printable_string(
-                    snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"))
                 t.add_row([
-                    snapshot_obj.id, snapshot_created_at,
+                    snapshot_obj.id, prettify_datetime(snapshot_obj.created_at),
                     snapshot_config_printable, snapshot_stats_printable,
                     snapshot_message, snapshot_obj.label, snapshot_obj.code_id,
                     snapshot_obj.environment_id,
@@ -229,3 +226,33 @@ class SnapshotCommand(ProjectCommand):
             self.cli_helper.echo(
                 __("info", "cli.snapshot.checkout.success", snapshot_id))
         return self.snapshot_controller.checkout(snapshot_id)
+
+    def diff(self, **kwargs):
+        snapshot_id_1 = kwargs.get("id_1", None)
+        snapshot_id_2 = kwargs.get("id_2", None)
+        snapshot_obj_1 = self.snapshot_controller.get(snapshot_id_1)
+        snapshot_obj_2 = self.snapshot_controller.get(snapshot_id_2)
+        comparison_attributes = [
+            "id", "created_at", "message", "label", "code_id",
+            "environment_id", "file_collection_id"
+        ]
+        table_data = [["Attributes", "Snapshot 1", "", "Snapshot 2"],
+                      ["", "", "", ""]]
+        for attribute in comparison_attributes:
+            value_1 = getattr(snapshot_obj_1, attribute) if getattr(
+                snapshot_obj_1, attribute) else "N/A"
+            value_2 = getattr(snapshot_obj_2, attribute) if getattr(
+                snapshot_obj_2, attribute) else "N/A"
+            if isinstance(value_1, datetime.datetime):
+                value_1 = prettify_datetime(value_1)
+            if isinstance(value_2, datetime.datetime):
+                value_2 = prettify_datetime(value_2)
+            table_data.append([attribute, value_1, "->", value_2])
+        self.cli_helper.echo(format_table(table_data))
+        return True
+
+    def inspect(self, **kwargs):
+        snapshot_id = kwargs.get("id", None)
+        snapshot_obj = self.snapshot_controller.get(snapshot_id)
+        self.cli_helper.echo(str(snapshot_obj))
+        return True

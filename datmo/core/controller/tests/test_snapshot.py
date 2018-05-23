@@ -4,7 +4,7 @@ Tests for SnapshotController
 import os
 import tempfile
 import platform
-from io import open
+from io import open, TextIOWrapper
 try:
     to_unicode = unicode
 except NameError:
@@ -17,7 +17,8 @@ from datmo.core.entity.snapshot import Snapshot
 from datmo.core.util.exceptions import (
     EntityNotFound, EnvironmentDoesNotExist, GitCommitDoesNotExist,
     SessionDoesNotExist, RequiredArgumentMissing, TaskNotComplete,
-    InvalidArgumentType, ProjectNotInitialized, InvalidProjectPath)
+    InvalidArgumentType, ProjectNotInitialized, InvalidProjectPath,
+    DoesNotExist)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -322,7 +323,7 @@ class TestSnapshotController():
 
         # Create task_dict
         task_command = ["sh", "-c", "echo accuracy:0.45"]
-        task_dict = {"command": task_command}
+        task_dict = {"command_list": task_command}
 
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
@@ -623,6 +624,57 @@ class TestSnapshotController():
             snapshot_obj_2.id)
 
         assert updated_snapshot_obj_2.label == test_label
+
+    def test_get(self):
+        self.__setup()
+        # Test failure for no snapshot
+        failed = False
+        try:
+            self.snapshot.get("random")
+        except DoesNotExist:
+            failed = True
+        assert failed
+
+        # Test success for snapshot
+        snapshot_obj = self.__default_create()
+        snapshot_obj_returned = self.snapshot.get(snapshot_obj.id)
+        assert snapshot_obj == snapshot_obj_returned
+
+    def test_get_files(self):
+        self.__setup()
+        # Test failure case
+        failed = False
+        try:
+            self.snapshot.get_files("random")
+        except DoesNotExist:
+            failed = True
+        assert failed
+
+        # Test success case
+        snapshot_obj = self.__default_create()
+        result = self.snapshot.get_files(snapshot_obj.id)
+        file_collection_obj = self.task.dal.file_collection.get_by_id(
+            snapshot_obj.file_collection_id)
+
+        file_names = [item.name for item in result]
+
+        assert len(result) == 1
+        for item in result:
+            assert isinstance(item, TextIOWrapper)
+            assert item.mode == "r"
+        assert os.path.join(self.task.home, ".datmo", "collections",
+                            file_collection_obj.filehash,
+                            "filepath1") in file_names
+
+        result = self.snapshot.get_files(snapshot_obj.id, mode="a")
+
+        assert len(result) == 1
+        for item in result:
+            assert isinstance(item, TextIOWrapper)
+            assert item.mode == "a"
+        assert os.path.join(self.task.home, ".datmo", "collections",
+                            file_collection_obj.filehash,
+                            "filepath1") in file_names
 
     def test_delete(self):
         self.__setup()
