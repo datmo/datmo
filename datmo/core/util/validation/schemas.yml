@@ -24,8 +24,8 @@ create_snapshot:
 
   environment_id:
     type: string
-  environment_definition_filepath:
-    type: string
+  environment_definition_filepaths:
+    type: list
 
   file_collection_id:
     type: string
