@@ -157,6 +157,7 @@ def create(message,
            task_id=None,
            commit_id=None,
            environment_id=None,
+           env=None,
            filepaths=None,
            config=None,
            stats=None):
@@ -202,6 +203,11 @@ def create(message,
     environment_id : str, optional
         provide the environment object id to use with this snapshot
         (default is None, which means it creates a default environment)
+    env : str or list, optional
+        the absolute file path for the environment definition path. env is not used if environment_id is also passed.
+        this can be either a string or list
+        (default is None, environment_id is also not passed, which will defer to the environment to find a
+        default environment or will fail if not found)
     filepaths : list, optional
         provides a list of absolute filepaths to files or directories
         that are relevant (default is None, which means we have an empty
@@ -259,6 +265,10 @@ def create(message,
             snapshot_create_dict['commit_id'] = commit_id
         if environment_id:
             snapshot_create_dict['environment_id'] = environment_id
+        elif isinstance(env, list):
+            snapshot_create_dict["environment_definition_filepaths"] = env
+        elif env:
+            snapshot_create_dict["environment_definition_filepaths"] = [env]
         if filepaths:
             snapshot_create_dict['filepaths'] = filepaths
         if config:
