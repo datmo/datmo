@@ -97,8 +97,9 @@ def get_datmo_parser():
         help="environment id from environment object")
     snapshot_create.add_argument(
         "--environment-def",
-        dest="environment_definition_filepath",
+        dest="environment_definition_filepaths",
         default=None,
+        action="append",
         type=str,
         help=
         "absolute filepath to environment definition file (e.g. /path/to/Dockerfile)"
@@ -251,8 +252,9 @@ def get_datmo_parser():
     # run.add_argument("--data", nargs="*", dest="data", type=str, help="Path for data to be used during the Task")
     task_run.add_argument(
         "--environment-def",
-        dest="environment_definition_filepath",
+        dest="environment_definition_filepaths",
         default=None,
+        action="append",
         type=str,
         help=
         "absolute filepath to environment definition file (e.g. /path/to/Dockerfile)"

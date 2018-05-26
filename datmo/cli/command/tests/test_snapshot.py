@@ -165,7 +165,7 @@ class TestSnapshot():
         assert self.snapshot.args.label == test_label
         assert self.snapshot.args.session_id == test_session_id
         assert self.snapshot.args.code_id == test_code_id
-        assert self.snapshot.args.environment_definition_filepath == test_environment_definition_filepath
+        assert self.snapshot.args.environment_definition_filepaths == [test_environment_definition_filepath]
         assert self.snapshot.args.config_filepath == test_config_filepath
         assert self.snapshot.args.stats_filepath == test_stats_filepath
         assert self.snapshot.args.filepaths == [test_filepaths[0]]
@@ -185,7 +185,7 @@ class TestSnapshot():
         assert self.snapshot.args.label == test_label
         assert self.snapshot.args.session_id == test_session_id
         assert self.snapshot.args.code_id == test_code_id
-        assert self.snapshot.args.environment_definition_filepath == test_environment_definition_filepath
+        assert self.snapshot.args.environment_definition_filepaths == [test_environment_definition_filepath]
         assert self.snapshot.args.config_filepath == test_config_filepath
         assert self.snapshot.args.stats_filepath == test_stats_filepath
         assert self.snapshot.args.filepaths == test_filepaths

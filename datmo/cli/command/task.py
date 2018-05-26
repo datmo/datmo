@@ -30,9 +30,9 @@ class TaskCommand(ProjectCommand):
 
         # Create input dictionaries
         snapshot_dict = {}
-        if kwargs['environment_definition_filepath']:
-            snapshot_dict["environment_definition_filepath"] =\
-                kwargs['environment_definition_filepath']
+        if kwargs['environment_definition_filepaths']:
+            snapshot_dict["environment_definition_filepaths"] =\
+                kwargs['environment_definition_filepaths']
         task_dict = {
             "ports": kwargs['ports'],
             "interactive": kwargs['interactive']
