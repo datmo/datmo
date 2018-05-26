@@ -1,10 +1,13 @@
 import os
+import shutil
 import pathspec
+import tempfile
 try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
 
+from datmo.core.util.misc_functions import list_all_filepaths, dirhash
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (PathDoesNotExist)
 from datmo.core.controller.code.driver import CodeDriver
@@ -55,11 +58,7 @@ class FileCodeDriver(CodeDriver):
         list
             list of filepaths relative to the the root of the repo
         """
-        all_files = {
-            os.path.relpath(os.path.join(dirpath, file), self.filepath)
-            for (dirpath, dirnames, filenames) in os.walk(self.filepath)
-            for file in filenames
-        }
+        all_files = set(list_all_filepaths(self.filepath))
 
         # Ignore the datmo_environment/ folder and all contents within it
         spec = pathspec.PathSpec.from_lines('gitwildmatch',
@@ -83,7 +82,20 @@ class FileCodeDriver(CodeDriver):
         """Return the commit hash of the repository"""
         # Move tracked files to temp directory within _code_filepath
         # Hash files and return hash
-        pass
+        temp_dir = tempfile.mkdtemp(dir=self._code_filepath)
+        for rel_filepath in tracked_files:
+            # Ensure new directory will exist in the temp dir
+            filename = os.path.basename(rel_filepath)
+            rel_dirpath = rel_filepath.replace(filename, "")
+            new_dirpath = os.path.join(temp_dir, rel_dirpath)
+            # Ensure directory exists
+            if not os.path.isdir(new_dirpath):
+                os.makedirs(new_dirpath)
+            # Move individual file from old_filepath to new_filepath
+            old_filepath = os.path.join(self.filepath, rel_filepath)
+            new_filepath = os.path.join(new_dirpath, filename)
+            shutil.copy2(old_filepath, new_filepath)
+        return dirhash(temp_dir)
 
     def create_ref(self, commit_id=None):
         """Add all files except for those in .datmoignore, and make a commit
@@ -103,7 +115,7 @@ class FileCodeDriver(CodeDriver):
         Raises
         ------
         CommitDoesNotExist
-            commit id specified does not match a v  alid commit
+            commit id specified does not match a valid commit
         """
         # Find all tracked files (_tracked_files)
         # Create the hash of the files (_calculate_commit_hash)
@@ -115,7 +127,11 @@ class FileCodeDriver(CodeDriver):
         # 3) add file with file hash as name to folder for the file (if already exists, will overwrite file -- new ts)
         # 4) add a line into the new file for the commit hash with the following "filepath, filehash"
         # Return commit hash if success else ERROR
-        pass
+
+        tracked_files = self._tracked_files()
+        commit_hash = self._calculate_commit_hash(tracked_files)
+        if self.exists_ref(commit_hash):
+            return commit_hash
 
     def exists_ref(self, commit_id):
         """Returns a boolean if the commit exists

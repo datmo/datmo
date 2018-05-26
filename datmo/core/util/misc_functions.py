@@ -10,6 +10,7 @@ import pytz
 import tzlocal
 import pytest
 import platform
+import checksumdir
 from io import open
 try:
     to_unicode = unicode
@@ -240,3 +241,20 @@ def format_table(data, padding=2):
         table_str = table_str + "".join(
             word.ljust(col_widths[idx]) for idx, word in enumerate(row)) + "\n"
     return table_str
+
+
+def list_all_filepaths(absolute_dirpath):
+    """Returns all filepaths within dir relative to dir root"""
+    return [
+        os.path.relpath(os.path.join(dirpath, file), absolute_dirpath)
+        for (dirpath, dirnames, filenames) in os.walk(absolute_dirpath)
+        for file in filenames
+    ]
+
+
+def filehash(absolute_filepath):
+    pass
+
+
+def dirhash(absolute_dirpath):
+    return checksumdir.dirhash(absolute_dirpath)
