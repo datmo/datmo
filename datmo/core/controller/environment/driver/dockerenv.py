@@ -113,29 +113,13 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                    platform.system()))
         return True
 
-    def create(self, path=None, output_path=None, language=None):
+    def create(self, path=None, output_path=None):
         if not path:
             path = os.path.join(self.filepath, "Dockerfile")
         if not output_path:
             directory, filename = os.path.split(path)
             output_path = os.path.join(directory, "datmo" + filename)
-        if not language:
-            language = "python3"
 
-        requirements_filepath = None
-        if not os.path.isfile(path):
-            if language == "python3":
-                # Create requirements txt file for python
-                requirements_filepath = self.create_requirements_file()
-                # Create Dockerfile for ubuntu
-                path = self.create_default_dockerfile(
-                    language=language,
-                    requirements_filepath=requirements_filepath)
-            else:
-                raise EnvironmentDoesNotExist(
-                    __("error",
-                       "controller.environment.driver.docker.create.dne",
-                       path))
         if os.path.isfile(output_path):
             raise FileAlreadyExistsError(
                 __("error",
@@ -144,7 +128,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         success = self.form_datmo_definition_file(
             input_definition_path=path, output_definition_path=output_path)
 
-        return success, path, output_path, requirements_filepath
+        return success, path, output_path
 
     # running daemon needed
     def build(self, name, path):
@@ -746,43 +730,6 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 __("error", "controller.environment.requirements.create",
                    "no such package manager"))
 
-    def create_default_dockerfile(self, language, requirements_filepath=None):
-        """Create a default Dockerfile for a given language
-
-        Parameters
-        ----------
-        requirements_filepath : str, optional
-            path for the requirements txt file
-        language : str
-            programming language used ("python2" and "python3" currently supported)
-
-        Returns
-        -------
-        str
-            absolute path for the new Dockerfile using requirements txt file
-        """
-        language_dockerfile = "%sDockerfile" % language
-        base_dockerfile_filepath = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "templates",
-            language_dockerfile)
-
-        destination_dockerfile = os.path.join(self.filepath, "Dockerfile")
-        destination = open(destination_dockerfile, "w")
-        shutil.copyfileobj(open(base_dockerfile_filepath, "r"), destination)
-        # Combine dockerfile if there exists requirements_filepath
-        if requirements_filepath:
-            destination.write(
-                to_unicode(
-                    str("COPY %s /tmp/requirements.txt\n") %
-                    os.path.split(requirements_filepath)[-1]))
-            destination.write(
-                to_unicode(
-                    str("RUN cat /tmp/requirements.txt | xargs -n 1 pip install --no-cache-dir || true\n"
-                        )))
-        destination.close()
-
-        return destination_dockerfile
-
     def form_datmo_definition_file(self,
                                    input_definition_path="Dockerfile",
                                    output_definition_path="datmoDockerfile"):
@@ -801,3 +748,18 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         destination.close()
 
         return True
+
+    def default_environment_definition(self):
+        return os.path.join(self.filepath, "Dockerfile")
+
+    def create_default_dockerfile(self, directory, language="python3"):
+        language_dockerfile = "%sDockerfile" % language
+        base_dockerfile_filepath = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "templates",
+            language_dockerfile)
+
+        destination_dockerfile = os.path.join(directory, "Dockerfile")
+        destination = open(destination_dockerfile, "w")
+        shutil.copyfileobj(open(base_dockerfile_filepath, "r"), destination)
+        return destination_dockerfile
+

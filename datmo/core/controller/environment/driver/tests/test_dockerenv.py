@@ -79,7 +79,7 @@ class TestDockerEnv():
         output_dockerfile_path = os.path.join(
             self.docker_environment_manager.filepath, "datmoDockerfile")
         # Test both default values
-        success, path, output_path, requirements_filepath = \
+        success, path, output_path = \
             self.docker_environment_manager.create()
 
         assert success and \
@@ -87,13 +87,12 @@ class TestDockerEnv():
                "datmo" in open(output_dockerfile_path, "r").read()
         assert path == input_dockerfile_path
         assert output_path == output_dockerfile_path
-        assert requirements_filepath == None
 
         open(output_dockerfile_path, "r").close()
         os.remove(output_dockerfile_path)
 
         # Test default values for output
-        success, path, output_path, requirements_filepath = \
+        success, path, output_path = \
             self.docker_environment_manager.create(input_dockerfile_path)
 
         assert success and \
@@ -101,13 +100,12 @@ class TestDockerEnv():
                "datmo" in open(output_dockerfile_path, "r").read()
         assert path == input_dockerfile_path
         assert output_path == output_dockerfile_path
-        assert requirements_filepath == None
 
         open(output_dockerfile_path, "r").close()
         os.remove(output_dockerfile_path)
 
         # Test both values given
-        success, path, output_path, requirements_filepath = \
+        success, path, output_path = \
             self.docker_environment_manager.create(input_dockerfile_path,
                                                         output_dockerfile_path)
         assert success and \
@@ -115,40 +113,6 @@ class TestDockerEnv():
                "datmo" in open(output_dockerfile_path, "r").read()
         assert path == input_dockerfile_path
         assert output_path == output_dockerfile_path
-        assert requirements_filepath == None
-
-        # Test for language being passed in
-        os.remove(input_dockerfile_path)
-        open(output_dockerfile_path, "r").close()
-        os.remove(output_dockerfile_path)
-
-        script_path = os.path.join(self.docker_environment_manager.filepath,
-                                   "script.py")
-        with open(script_path, "w") as f:
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
-        success, path, output_path, requirements_filepath = \
-            self.docker_environment_manager.create(language="python3")
-        assert success and \
-               os.path.isfile(output_dockerfile_path) and \
-               "datmo" in open(output_dockerfile_path, "r").read()
-        assert path == input_dockerfile_path
-        assert output_path == output_dockerfile_path
-        assert requirements_filepath and os.path.isfile(requirements_filepath) and \
-               "datmo" in open(requirements_filepath, "r").read()
-
-        # Test exception for path does not exist
-        os.remove(input_dockerfile_path)
-        open(output_dockerfile_path, "r").close()
-        os.remove(output_dockerfile_path)
-        success, path, output_path, requirements_filepath =\
-            self.docker_environment_manager.create()
-        assert success and \
-               os.path.isfile(output_dockerfile_path) and \
-               "datmo" in open(output_dockerfile_path, "r").read()
-        assert path == input_dockerfile_path
-        assert output_path == output_dockerfile_path
-        assert requirements_filepath
 
         # Test exception for output path already exists
         failed = False
@@ -159,6 +123,11 @@ class TestDockerEnv():
             failed = True
         assert failed
 
+        # Test exception for path does not exist
+        os.remove(input_dockerfile_path)
+        open(output_dockerfile_path, "r").close()
+        os.remove(output_dockerfile_path)
+
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_build(self):
         name = str(uuid.uuid1())
@@ -168,35 +137,6 @@ class TestDockerEnv():
         with open(path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        result = self.docker_environment_manager.build(name, path)
-        assert result == True
-        # teardown
-        self.docker_environment_manager.remove(name, force=True)
-
-        # test
-        os.remove(path)
-        script_path = os.path.join(self.docker_environment_manager.filepath,
-                                   "script.py")
-
-        with open(script_path, "w") as f:
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
-
-        success, path, output_path, requirements_filepath = \
-            self.docker_environment_manager.create(language="python3")
-
-        assert success and \
-               os.path.isfile(path) and \
-               "datmo" in open(output_path, "r").read()
-        assert requirements_filepath and os.path.isfile(requirements_filepath) and \
-               "datmo" in open(requirements_filepath, "r").read()
-
-        # temporarily update requirements txt file after above assertion
-        # with just numpy as requirement
-        outfile_requirements = open(requirements_filepath, "w")
-        outfile_requirements.write('numpy')
-        outfile_requirements.close()
-
         result = self.docker_environment_manager.build(name, path)
         assert result == True
         # teardown
@@ -751,7 +691,6 @@ class TestDockerEnv():
 
     def test_create_default_dockerfile(self):
         # 1) Create default dockerfile for default script present
-        # 2) Create default dockerfile with no requirements present
 
         # 1) Test option 1
         script_path = os.path.join(self.docker_environment_manager.filepath,
@@ -759,27 +698,9 @@ class TestDockerEnv():
         with open(script_path, "w") as f:
             f.write(to_unicode("import numpy\n"))
             f.write(to_unicode("import sklearn\n"))
-        requirements_filepath = \
-            self.docker_environment_manager.create_requirements_file()
+
         result = self.docker_environment_manager.\
-            create_default_dockerfile(language="python3",
-                                      requirements_filepath=requirements_filepath)
-
-        assert result
-        assert os.path.isfile(result)
-        assert "python" in open(result, "r").read()
-        assert "requirements.txt" in open(result, "r").read()
-
-        # 2) Test option 2
-        os.remove(script_path)
-        with open(script_path, "w") as f:
-            f.write(to_unicode("import os\n"))
-            f.write(to_unicode("import sys\n"))
-        requirements_filepath = \
-            self.docker_environment_manager.create_requirements_file()
-        result = self.docker_environment_manager. \
-            create_default_dockerfile(language="python3",
-                                      requirements_filepath=requirements_filepath)
+            create_default_dockerfile(directory=self.docker_environment_manager.filepath)
 
         assert result
         assert os.path.isfile(result)
