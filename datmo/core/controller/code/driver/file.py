@@ -1,13 +1,9 @@
 import os
-import shutil
-import subprocess
-import semver
-from io import open
+import pathspec
 try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
-from giturlparse import parse
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (PathDoesNotExist)
@@ -28,6 +24,8 @@ class FileCodeDriver(CodeDriver):
                    filepath))
         self._datmo_filepath = os.path.join(self.filepath, ".datmo")
         self._code_filepath = os.path.join(self._datmo_filepath, "code")
+        self._datmo_ignore_filepath = os.path.join(self.filepath,
+                                                   ".datmoignore")
         self._is_initialized = self.is_initialized
         self.type = "file"
 
@@ -40,16 +38,49 @@ class FileCodeDriver(CodeDriver):
         self._is_initialized = False
         return self._is_initialized
 
+    def init(self):
+        # Create code path if does not exist
+        if not os.path.isdir(self._code_filepath):
+            os.makedirs(self._code_filepath)
+        return True
+
     def _tracked_files(self):
         """Return list of tracked files relative to the root directory
 
         This will look through all of the files and will exclude any datmo directories
         (.datmo, datmo_environment/, datmo_files/) and any paths included in .datmoignore
-        """
-        pass
 
-    def _calculate_hash(self, tracked_files):
-        """Return the hash of all the files that are to be changed"""
+        Returns
+        -------
+        list
+            list of filepaths relative to the the root of the repo
+        """
+        all_files = {
+            os.path.relpath(os.path.join(dirpath, file), self.filepath)
+            for (dirpath, dirnames, filenames) in os.walk(self.filepath)
+            for file in filenames
+        }
+
+        # Ignore the datmo_environment/ folder and all contents within it
+        spec = pathspec.PathSpec.from_lines('gitwildmatch',
+                                            ["datmo_environment"])
+        datmo_environment_files = set(spec.match_tree(self.filepath))
+
+        # Ignore the datmo_files/ folder and all contents within it
+        spec = pathspec.PathSpec.from_lines('gitwildmatch', ["datmo_files"])
+        datmo_files_files = set(spec.match_tree(self.filepath))
+
+        # Load ignored files from .datmoignore file if exists
+        datmoignore_files = {".datmoignore"}
+        if os.path.isfile(os.path.join(self.filepath, ".datmoignore")):
+            with open(self._datmo_ignore_filepath, "r") as f:
+                spec = pathspec.PathSpec.from_lines('gitignore', f)
+                datmoignore_files.update(set(spec.match_tree(self.filepath)))
+        return list(all_files - datmo_environment_files - datmo_files_files -
+                    datmoignore_files)
+
+    def _calculate_commit_hash(self, tracked_files):
+        """Return the commit hash of the repository"""
         # Move tracked files to temp directory within _code_filepath
         # Hash files and return hash
         pass
@@ -72,17 +103,17 @@ class FileCodeDriver(CodeDriver):
         Raises
         ------
         CommitDoesNotExist
-            commit id specified does not match a valid commit
+            commit id specified does not match a v  alid commit
         """
-        # Find all tracked files
-        # Create the hash of the files
+        # Find all tracked files (_tracked_files)
+        # Create the hash of the files (_calculate_commit_hash)
         # Check if the hash already exists with exists_ref
-        # Create a new file with the commit hash if it is new
+        # Create a new file with the commit hash if it is new, else ERROR (no changes)
         # Loop through the tracked files
         # 1) create folder for each file (use path name from tracked files list) -- if already exists skip
-        # 2) hash the file and check if already exists in the folder
-        # 3) if doesn't exist in the folder then add file with file hash as name to folder for the file
-        # 4) add a line into the new file for the commit hash with the following (filepath, filehash)
+        # 2) hash the file
+        # 3) add file with file hash as name to folder for the file (if already exists, will overwrite file -- new ts)
+        # 4) add a line into the new file for the commit hash with the following "filepath, filehash"
         # Return commit hash if success else ERROR
         pass
 
