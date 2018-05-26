@@ -74,8 +74,9 @@ class TestTaskController():
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
+        definition_filepaths = [env_def_path]
         environment_obj = self.environment.create({
-            "definition_filepath": env_def_path
+            "definition_filepaths": definition_filepaths
         })
 
         # Set log filepath

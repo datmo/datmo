@@ -202,7 +202,13 @@ MESSAGES = {
         "controller.environment.driver.docker.stop_remove_containers_by_term":
             "Error stopping and removing containers by term: %s",
         "controller.environment.create":
-            "Required argument definition_filepath not present in input",
+            "Required argument definition_filepaths not present in input",
+        "controller.environment.create.filepath.dne":
+            "Path specified in definition filepaths does not exist: %s",
+        "controller.environment.create.filename.exists":
+            "File name has already been specified and exists: %s",
+        "controller.environment.create.file.exists.datmoenvironment":
+            "File name has already been in the datmo_environments folder: %s",
         "controller.environment.requirements.create":
             "Error while creating requirements file for python: %s",
         "controller.environment.build":
