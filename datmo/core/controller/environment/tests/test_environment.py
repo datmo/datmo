@@ -51,7 +51,7 @@ class TestEnvironmentController():
 
         # Create environment definition in `datmo_environment` folder
         datmo_environment_folder = os.path.join(self.environment.home, "datmo_environment")
-        os.makedirs(datmo_environment_folder, 0755)
+        os.makedirs(datmo_environment_folder)
 
         definition_filepath = os.path.join(datmo_environment_folder, "Dockerfile")
         with open(definition_filepath, "w") as f:
@@ -152,7 +152,7 @@ class TestEnvironmentController():
         # 5) Test option 5
         # Create environment definition in `datmo_environment` folder
         datmo_environment_folder = os.path.join(self.environment.home, "datmo_environment")
-        os.makedirs(datmo_environment_folder, 0755)
+        os.makedirs(datmo_environment_folder)
 
         definition_filepath = os.path.join(datmo_environment_folder, "Dockerfile")
         with open(definition_filepath, "w") as f:
@@ -264,7 +264,7 @@ class TestEnvironmentController():
         # 5) Test option 5
         # Create environment definition in `datmo_environment` folder
         datmo_environment_folder = os.path.join(self.environment.home, "datmo_environment")
-        os.makedirs(datmo_environment_folder, 0755)
+        os.makedirs(datmo_environment_folder)
 
         definition_filepath = os.path.join(datmo_environment_folder, "Dockerfile")
         with open(definition_filepath, "w") as f:
@@ -285,7 +285,7 @@ class TestEnvironmentController():
         # 0) Test option 0
         # Create environment definition in `datmo_environment` folder
         datmo_environment_folder = os.path.join(self.environment.home, "datmo_environment")
-        os.makedirs(datmo_environment_folder, 0755)
+        os.makedirs(datmo_environment_folder)
 
         definition_filepath = os.path.join(datmo_environment_folder, "Dockerfile")
         with open(definition_filepath, "w") as f:

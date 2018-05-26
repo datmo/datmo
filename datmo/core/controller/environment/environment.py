@@ -39,7 +39,7 @@ class EnvironmentController(BaseController):
         self._env_dir = os.path.join(home, ".datmo", "environment")
         # creating the environment hidden dir
         if not os.path.isdir(self._env_dir):
-            os.makedirs(self._env_dir, 0755)
+            os.makedirs(self._env_dir)
         self._proj_env_dir = os.path.join(home, "datmo_environment")
 
     def create(self, dictionary):
