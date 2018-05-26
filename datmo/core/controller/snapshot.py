@@ -76,13 +76,9 @@ class SnapshotController(BaseController):
             environment :
                 environment_id : str, optional
                     id for environment used to create snapshot
-                environment_definition_filepath : str, optional
-                    absolute filepath for the environment definition file
+                environment_definition_filepaths : list, optional
+                    list of absolute filepath in string for the environment definition file
                     (e.g. Dockerfile path for Docker)
-                language: str, optional
-                    programing language for the scripts
-                    (e.g. if the python sdk is being used in `python3`,
-                    then language is `python3`)
 
                 Default
                 -------
@@ -421,18 +417,14 @@ class SnapshotController(BaseController):
         create_dict : dict
             dictionary for creating the Snapshot entity
         """
-        language = incoming_dictionary.get("language", None)
         if "environment_id" in incoming_dictionary:
             create_dict['environment_id'] = incoming_dictionary[
                 'environment_id']
-        elif "environment_definition_filepath" in incoming_dictionary:
+        elif "environment_definition_filepaths" in incoming_dictionary:
             create_dict['environment_id'] = self.environment.create({
-                "definition_filepath":
-                    incoming_dictionary['environment_definition_filepath']
+                "definition_filepaths":
+                    incoming_dictionary['environment_definition_filepaths']
             }).id
-        elif language:
-            create_dict['environment_id'] = self.environment.\
-                create({"language": language}).id
         else:
             # create some default environment
             create_dict['environment_id'] = self.environment.\
@@ -450,6 +442,7 @@ class SnapshotController(BaseController):
         """
 
         if "file_collection_id" in incoming_dictionary:
+
             create_dict['file_collection_id'] = incoming_dictionary[
                 'file_collection_id']
         elif "filepaths" in incoming_dictionary:
