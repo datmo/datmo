@@ -90,7 +90,16 @@ class EnvironmentController(BaseController):
         if "definition_filepaths" in dictionary and dictionary['definition_filepaths']:
             filepaths = dictionary['definition_filepaths']
             for filepath in filepaths:
-                filepath_list = filepath.split(":")
+                if platform.system() == "Windows":
+                    # This is performed to handle paths in windows(c:\\users\\datmo\\environment_file:env_filename) and
+                    # having mapping to filename
+                    filepath_split = filepath.split(":")
+                    if len(filepath_split) == 3:
+                        filepath_list = [':'.join(filepath_split[:2]), filepath_split[2]]
+                    else:
+                        filepath_list = [':'.join(filepath_split[:2])]
+                else:
+                    filepath_list = filepath.split(":")
 
                 # Creating src, dst files
                 if len(filepath_list) == 2:
