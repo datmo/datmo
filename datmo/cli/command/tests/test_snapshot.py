@@ -734,10 +734,6 @@ class TestSnapshot():
         self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
         snapshot_id = self.snapshot.execute()
 
-        # remove datmo_task folder to have no changes before checkout
-        datmo_tasks_dirpath = os.path.join(self.snapshot.home, "datmo_tasks")
-        if os.path.exists(datmo_tasks_dirpath):
-            shutil.rmtree(datmo_tasks_dirpath)
 
         # Test when optional parameters are not given
         self.snapshot.parse(["snapshot", "checkout", snapshot_id])

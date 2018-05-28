@@ -466,7 +466,7 @@ class TestSnapshotController():
 
         # Snapshot directory in user directory
         snapshot_obj_1_path = os.path.join(
-            self.snapshot.home, "datmo_snapshots", snapshot_obj_1.id)
+            self.snapshot.home, ".datmo", "snapshots", snapshot_obj_1.id)
 
         assert result == True and \
                self.snapshot.code_driver.latest_commit() == code_obj_1.commit_id and \

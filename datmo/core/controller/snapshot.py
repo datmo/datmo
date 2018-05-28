@@ -288,7 +288,7 @@ class SnapshotController(BaseController):
         self.code_driver.checkout_ref(code_obj.commit_id)
 
         # Pull file collection to the project home
-        dst_dirpath = os.path.join("datmo_snapshots", snapshot_id)
+        dst_dirpath = os.path.join(".datmo", "snapshots", snapshot_id)
         abs_dst_dirpath = self.file_driver.create(dst_dirpath, directory=True)
         self.file_driver.transfer_collection(file_collection_obj.filehash,
                                              abs_dst_dirpath)

@@ -156,7 +156,7 @@ class TaskController(BaseController):
         """Run a task with parameters. If dictionary specified, create a new task with new run parameters.
         Snapshot objects are created before and after the task to keep track of the state. During the run,
         you can access task outputs using environment variable DATMO_TASK_DIR or `/task` which points to
-        location of datmo_tasks/[task-id]. Create config.json, stats.json and any weights or any file such
+        location of .datmo/tasks/[task-id]. Create config.json, stats.json and any weights or any file such
         as graphs and visualizations within that directory for quick access
 
         Parameters
@@ -208,10 +208,9 @@ class TaskController(BaseController):
             raise TaskRunError(
                 __("error", "cli.task.run.already_running", task_obj.id))
         # Create Task directory for user during run
-        task_dirpath = os.path.join("datmo_tasks", task_obj.id)
+        task_dirpath = os.path.join(".datmo", "tasks", task_obj.id)
         try:
-            _ = self.file_driver.create(
-                os.path.join("datmo_tasks", task_obj.id), directory=True)
+            _ = self.file_driver.create(task_dirpath, directory=True)
         except Exception:
             raise TaskRunError(
                 __("error", "controller.task.run", task_dirpath))
