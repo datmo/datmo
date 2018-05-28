@@ -35,7 +35,10 @@ $ pip install datmo
 This can be done either through the GUI, or with the following R Console command.
 
         `> setwd("~/path/of/projectfolder")`
-   
+
+NOTE: You may find that some of the libraries requested in the script are not present, you can use 
+the RStudio GUI to install those packages if you run into any errors running the lines of code
+in the example.   
 
 ### Examples
 
