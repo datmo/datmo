@@ -8,15 +8,27 @@ $ pip install datmo
 ```
 
 ## Using the Examples
-### CLI flow
-See [CLI flow examples](/examples/cli) for instructions
+### CLI (Standalone)
+The datmo CLI can work entirely as a standalone tool. It can also be used in conjunction with our language-specific SDKs to enhance the experience of the user and enable more granular control over model management during runtime.
 
-### CLI + Python flow
+See [CLI flow examples](/examples/cli) for instructions.
+
+### Python
+We offer a fully supported Python SDK, that works in conjunction with the CLI.
+
 See [CLI + Python flow examples](/examples/python) for instructions
 
-### CLI + Jupyter Notebook flow
+### Jupyter Notebook (IPython)
+For Python kernels, the Python SDK is compatible with Jupyter notebooks. 
+For running a containerized notebook environment, the user can do this with the CLI.
+
 See [CLI + Jupyter Notebook flow examples](/examples/jupyter_notebook) for instructions
 
+### R (beta)
+Users can call the CLI natively using the `system2()` command in R, allowing for granular control over snapshot creation.
+In the future, these system calls will be replaced with a more intuitive SDK.
+
+See [R flow examples](/examples/R) for instructions
 
 ## Examples
 Listed below are actions you might want to take with Datmo. For each
@@ -31,6 +43,8 @@ each example.
     * snapshot_create_iris_sklearn
 * [CLI + Jupyter Notebook flow](/examples/jupyter_notebook)
     * snapshot_create_iris_sklearn
+* [CLI + R flow](/examples/R)
+    * snapshot_create_iris_caret
 
 #### Running a containerized task (with option to create Snapshot)
 * [CLI + Python flow](/examples/python)
