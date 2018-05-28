@@ -16,9 +16,9 @@ Setup
 First, we'll need to install a few packages for use today. They'll contain everything we'll need to model our data and create visualizations.
 
 ```{r installPackages}
-install.packages("datasets") # Package that contains the Iris dataset
+install.packages("datasets", dependencies = TRUE) # Package that contains the Iris dataset
 install.packages("caret", dependencies = TRUE) # Model selection/tuning package
-install.packages("rpart.plot") # Visualization package
+install.packages("rpart.plot", dependencies = TRUE) # Visualization package
 ```
 
 We're going to install a python package called Datmo, which will enable us to log and track our experiments through the power of *snapshots*.
@@ -39,6 +39,7 @@ opts_knit$set(root.dir = "~/Dev/datmo-R-example") # Replace with whatever your r
 ```
 
 Now we're going to initialize a Datmo repository. This will enable us to create snapshots for logging our experiments.
+This only needs to be done once for a given repository.
 
 ```{r initializeDatmo}
 system("datmo init", input=c("my new project","test description"), timeout=15)
@@ -65,7 +66,7 @@ modFit <- train(Species ~., method = "rpart", data=df) #Fit model
 print(modFit$finalModel)   #Summarize model
 ```
 
-Our model is built, but it's kind of hard to comprehend with just the metrics. Let's create a visualization to showcase the
+Our model is trained, but it's kind of hard to comprehend using only the metrics. Let's create a visualization to showcase the
 splits in our decision tree.
 
 ```{r visualizeModel}
@@ -75,7 +76,7 @@ rpart.plot(modFit$finalModel) #create decision tree visualization
 ```
 
 Awesome! Since we're happy with our model results, we'll want to save our model and log configuration and stats sections in a snapshot.
-We can do this with the following syntax, where we're creating a *char* string of format "--PROPERTY key:value" that will be passed to 
+We can do this with the following syntax, where we're creating a *char* string with the format "--PROPERTY key:value" that will be passed to 
 the snapshot create code block.
 
 ```{r defineSnapshot}
@@ -92,9 +93,21 @@ config
 stats
 ```
 
+
+Before we create a snapshot, we have the option of writing our global environment (data and variables) to files. R does this with one simple command.
+This is valuable for a large number of reasons, whether it's writing out model weight files, or saving the random train-test data split that occurred during training.
+
+```{r envVariables}
+save.image()
+```
+
+We can create a snapshot with the following command. A snapshot will enable us to log our experiment and reproduce the state of code, environment, metrics, and more in future examples.
+
 ```{r snapshotCreate}
 system2("datmo", args=paste("snapshot create", "-m 'Whoah, my first snapshot!'", config, stats))
 ```
+
+We can visualize the snapshot we just created (and any others associated with this project) with the following command
 
 ```{bash}
 datmo snapshot ls
