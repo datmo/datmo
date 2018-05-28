@@ -14,13 +14,17 @@ $ pip install datmo
         $ mkdir MY_DATMO_PROJECT
         $ cd MY_DATMO_PROJECT
         
-2. Initialize the datmo project
+2. Initialize the datmo project (skip this step if using an example with .Rmd)
 
         $ datmo init
 
 3. Copy/save example files within project folder (if directory, copy the contents of the directory)
 
         $ cp /path/to/SCRIPT_NAME.R .
+        
+   If it is an Rmd notebook, you can run the following
+   
+        $ cp /path/to/NOTEBOOK_NAME.Rmd .
         
    If the filename for the example is a directory then you can run the following
    
@@ -41,4 +45,5 @@ This can be done either through the GUI, or with the following R Console command
 
 | feature  | filename(s) | Instructions |
 | ------------- |:-------------:| -----|
-| Create Snapshot | `snapshot_create_iris_caret.R`| (1) Run `snapshot_create_iris_caret.R` <br> (2) See snapshot created with `$ datmo snapshot ls` |
+| Create Snapshot | `snapshot_create_iris_caret.R`| (1) Open and run `snapshot_create_iris_caret.R` in RStudio <br> (2) See snapshot created with `$ datmo snapshot ls` |
+| Create Snapshot Notebook | `snapshot_create_notebook.Rmd`| (1) Open and run `snapshot_create_notebook.Rmd` in RStudio <br> (2) See snapshot created with `$ datmo snapshot ls` |
