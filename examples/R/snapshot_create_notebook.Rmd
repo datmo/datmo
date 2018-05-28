@@ -92,8 +92,8 @@ config
 stats
 ```
 
-```{bash snapshotCreate}
-system2("datmo", args=paste("snapshot create", "-m 'Whoah, my first snapshot!'", config, stats), timeout=30)
+```{r snapshotCreate}
+system2("datmo", args=paste("snapshot create", "-m 'Whoah, my first snapshot!'", config, stats))
 ```
 
 ```{bash}
