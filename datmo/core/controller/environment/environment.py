@@ -8,6 +8,7 @@ from datmo.core.controller.base import BaseController
 from datmo.core.controller.file.file_collection import FileCollectionController
 from datmo.core.entity.environment import Environment
 from datmo.core.util.json_store import JSONStore
+from datmo.core.util.misc_functions import get_datmo_temp_path
 from datmo.core.util.exceptions import PathDoesNotExist, RequiredArgumentMissing, \
     TooManyArgumentsFound, FileAlreadyExistsError
 
@@ -36,10 +37,7 @@ class EnvironmentController(BaseController):
     def __init__(self, home):
         super(EnvironmentController, self).__init__(home)
         self.file_collection = FileCollectionController(home)
-        self._env_dir = os.path.join(home, ".datmo", "environment")
         # creating the environment hidden dir
-        if not os.path.isdir(self._env_dir):
-            os.makedirs(self._env_dir)
         self._proj_env_dir = os.path.join(home, "datmo_environment")
 
     def create(self, dictionary):
@@ -75,7 +73,8 @@ class EnvironmentController(BaseController):
         create_dict = {"model_id": self.model.id}
         create_dict["driver_type"] = self.environment_driver.type
 
-        self.temp_env_dir = tempfile.mkdtemp(dir=self._env_dir)
+        # Create temp environment folder
+        self.temp_env_dir = get_datmo_temp_path(self.home)
 
         # Step 1: Collate all files in datmo env temp
         # a. if there exists datmo_environments folder, then content from it
@@ -179,6 +178,9 @@ class EnvironmentController(BaseController):
         for optional_arg in ["description"]:
             if optional_arg in dictionary:
                 create_dict[optional_arg] = dictionary[optional_arg]
+
+        # Removing temp environment directory
+        shutil.rmtree(self.temp_env_dir)
 
         # Create environment and return
         return self.dal.environment.create(Environment(create_dict))

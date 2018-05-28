@@ -15,7 +15,7 @@ from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (PathDoesNotExist, FileIOError,
                                         FileStructureError)
 from datmo.core.controller.file.driver import FileDriver
-
+from datmo.core.util.misc_functions import get_datmo_temp_path
 
 class LocalFileDriver(FileDriver):
     """
@@ -214,19 +214,14 @@ class LocalFileDriver(FileDriver):
         # Ensure all filepaths are valid before proceeding
         for filepath in filepaths:
             if not os.path.isdir(filepath) and \
-                not os.path.isfile(filepath):
+                    not os.path.isfile(filepath):
                 raise PathDoesNotExist(
                     __("error",
                        "controller.file.driver.local.create_collection.filepath",
                        filepath))
 
-        # Create temp hash and folder to move all contents from filepaths
-        temp_hash = hashlib.sha1(str(uuid.uuid4()). \
-                                 encode("UTF=8")).hexdigest()[:20]
         self.ensure_collections_dir()
-        temp_collection_path = os.path.join(self.filepath, ".datmo",
-                                            "collections", temp_hash)
-        os.makedirs(temp_collection_path)
+        temp_collection_path = get_datmo_temp_path(self.filepath)
 
         # Populate collection
         for filepath in filepaths:

@@ -15,7 +15,7 @@ except NameError:
 
 from datmo.core.util.misc_functions import (
     get_filehash, create_unique_hash, mutually_exclusive, is_project_dir,
-    find_project_dir, grep, prettify_datetime, format_table, parse_cli_key_value)
+    find_project_dir, grep, prettify_datetime, format_table, parse_cli_key_value, get_datmo_temp_path)
 
 from datmo.core.util.exceptions import MutuallyExclusiveArguments, RequiredArgumentMissing
 
@@ -144,3 +144,10 @@ class TestMiscFunctions():
         result = format_table(test_data, padding=2)
         assert result == "row1  row1  \nrow2  row2  \n"
 
+    def test_get_datmo_temp_path(self):
+        datmo_temp_path = get_datmo_temp_path(self.temp_dir)
+        exists = False
+        if os.path.isdir(datmo_temp_path):
+            exists = True
+
+        assert exists

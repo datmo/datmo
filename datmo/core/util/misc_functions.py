@@ -3,6 +3,7 @@
 import os
 import re
 import ast
+import uuid
 import hashlib
 import textwrap
 import datetime
@@ -240,3 +241,12 @@ def format_table(data, padding=2):
         table_str = table_str + "".join(
             word.ljust(col_widths[idx]) for idx, word in enumerate(row)) + "\n"
     return table_str
+
+
+def get_datmo_temp_path(filepath):
+    # Create temp hash and folder to move all contents from filepaths
+    temp_hash = hashlib.sha1(str(uuid.uuid4()). \
+                             encode("UTF=8")).hexdigest()[:20]
+    datmo_temp_path = os.path.join(filepath, ".datmo", "tmp", temp_hash)
+    os.makedirs(datmo_temp_path)
+    return datmo_temp_path
