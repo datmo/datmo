@@ -18,16 +18,15 @@ import os
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.environment import EnvironmentCommand
 from datmo.cli.command.project import ProjectCommand
+from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 
+# provide mountable tmp directory for docker
+tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
+test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 
 class TestEnvironment():
     def setup_class(self):
-        # provide mountable tmp directory for docker
-        tempfile.tempdir = "/tmp" if not platform.system(
-        ) == "Windows" else None
-        test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
-                                        tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
 
@@ -104,6 +103,7 @@ class TestEnvironment():
 
         assert result
 
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_environment_delete(self):
         self.__set_variables()
         self.environment_command.parse(["environment", "create"])
