@@ -72,21 +72,6 @@ def get_nvidia_devices():
     return devices
 
 
-def get_filehash(filepath):
-    if not os.path.isfile(filepath):
-        raise PathDoesNotExist(
-            __("error", "util.misc_functions.get_filehash", filepath))
-    BUFF_SIZE = 65536
-    sha1 = hashlib.md5()
-    with open(filepath, "rb") as f:
-        while True:
-            data = f.read(BUFF_SIZE)
-            if not data:
-                break
-            sha1.update(data)
-    return sha1.hexdigest()
-
-
 def create_unique_hash(base_hash=None, salt=None):
     if not salt:
         salt = os.urandom(16)
@@ -252,9 +237,20 @@ def list_all_filepaths(absolute_dirpath):
     ]
 
 
-def filehash(absolute_filepath):
-    pass
+def get_filehash(absolute_filepath):
+    if not os.path.isfile(absolute_filepath):
+        raise PathDoesNotExist(
+            __("error", "util.misc_functions.get_filehash", absolute_filepath))
+    BUFF_SIZE = 65536
+    sha1 = hashlib.md5()
+    with open(absolute_filepath, "rb") as f:
+        while True:
+            data = f.read(BUFF_SIZE)
+            if not data:
+                break
+            sha1.update(data)
+    return sha1.hexdigest()
 
 
-def dirhash(absolute_dirpath):
+def get_dirhash(absolute_dirpath):
     return checksumdir.dirhash(absolute_dirpath)

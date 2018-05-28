@@ -10,7 +10,7 @@ try:
 except NameError:
     to_unicode = str
 
-from datmo.core.util.misc_functions import dirhash
+from datmo.core.util.misc_functions import get_dirhash
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (PathDoesNotExist, FileIOError,
                                         FileStructureError)
@@ -241,7 +241,7 @@ class LocalFileDriver(FileDriver):
                 self.copyfile(filepath, temp_collection_path)
 
         # Hash the files to find filehash
-        filehash = dirhash(temp_collection_path)
+        filehash = get_dirhash(temp_collection_path)
 
         # Move contents to folder with filehash as name and remove temp_collection_path
         collection_path = os.path.join(self.filepath, ".datmo", "collections",

@@ -7,9 +7,10 @@ try:
 except NameError:
     to_unicode = str
 
-from datmo.core.util.misc_functions import list_all_filepaths, dirhash
+from datmo.core.util.misc_functions import list_all_filepaths, get_filehash, get_dirhash
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import (PathDoesNotExist)
+from datmo.core.util.exceptions import (PathDoesNotExist, FileIOError,
+                                        UnstagedChanges)
 from datmo.core.controller.code.driver import CodeDriver
 
 
@@ -47,7 +48,7 @@ class FileCodeDriver(CodeDriver):
             os.makedirs(self._code_filepath)
         return True
 
-    def _tracked_files(self):
+    def _get_tracked_files(self):
         """Return list of tracked files relative to the root directory
 
         This will look through all of the files and will exclude any datmo directories
@@ -59,6 +60,10 @@ class FileCodeDriver(CodeDriver):
             list of filepaths relative to the the root of the repo
         """
         all_files = set(list_all_filepaths(self.filepath))
+
+        # Ignore the .datmo/ folder and all contents within it
+        spec = pathspec.PathSpec.from_lines('gitwildmatch', [".datmo"])
+        dot_datmo_files = set(spec.match_tree(self.filepath))
 
         # Ignore the datmo_environment/ folder and all contents within it
         spec = pathspec.PathSpec.from_lines('gitwildmatch',
@@ -75,8 +80,8 @@ class FileCodeDriver(CodeDriver):
             with open(self._datmo_ignore_filepath, "r") as f:
                 spec = pathspec.PathSpec.from_lines('gitignore', f)
                 datmoignore_files.update(set(spec.match_tree(self.filepath)))
-        return list(all_files - datmo_environment_files - datmo_files_files -
-                    datmoignore_files)
+        return list(all_files - dot_datmo_files - datmo_environment_files -
+                    datmo_files_files - datmoignore_files)
 
     def _calculate_commit_hash(self, tracked_files):
         """Return the commit hash of the repository"""
@@ -95,7 +100,15 @@ class FileCodeDriver(CodeDriver):
             old_filepath = os.path.join(self.filepath, rel_filepath)
             new_filepath = os.path.join(new_dirpath, filename)
             shutil.copy2(old_filepath, new_filepath)
-        return dirhash(temp_dir)
+        return get_dirhash(temp_dir)
+
+    def _has_unstaged_changes(self):
+        """Return whether there are unstaged changes"""
+        tracked_filepaths = self._get_tracked_files()
+        commit_hash = self._calculate_commit_hash(tracked_filepaths)
+        if self.exists_ref(commit_hash):
+            return False
+        return True
 
     def create_ref(self, commit_id=None):
         """Add all files except for those in .datmoignore, and make a commit
@@ -117,21 +130,35 @@ class FileCodeDriver(CodeDriver):
         CommitDoesNotExist
             commit id specified does not match a valid commit
         """
-        # Find all tracked files (_tracked_files)
+        # Find all tracked files (_get_tracked_files)
+        tracked_filepaths = self._get_tracked_files()
         # Create the hash of the files (_calculate_commit_hash)
+        commit_hash = self._calculate_commit_hash(tracked_filepaths)
         # Check if the hash already exists with exists_ref
-        # Create a new file with the commit hash if it is new, else ERROR (no changes)
-        # Loop through the tracked files
-        # 1) create folder for each file (use path name from tracked files list) -- if already exists skip
-        # 2) hash the file
-        # 3) add file with file hash as name to folder for the file (if already exists, will overwrite file -- new ts)
-        # 4) add a line into the new file for the commit hash with the following "filepath, filehash"
-        # Return commit hash if success else ERROR
-
-        tracked_files = self._tracked_files()
-        commit_hash = self._calculate_commit_hash(tracked_files)
         if self.exists_ref(commit_hash):
             return commit_hash
+        # Create a new file with the commit hash if it is new, else ERROR (no changes)
+        commit_filepath = os.path.join(self._code_filepath, commit_hash)
+        with open(commit_filepath, "a+") as f:
+            # Loop through the tracked files
+            for tracked_filepath in tracked_filepaths:
+                absolute_filepath = os.path.join(self.filepath,
+                                                 tracked_filepath)
+                absolute_dirpath = os.path.join(self._code_filepath,
+                                                tracked_filepath)
+                # 1) create dir for file (use path name from tracked files list) -- if already exists skip
+                if not os.path.isdir(absolute_dirpath):
+                    os.makedirs(absolute_dirpath)
+                # 2) hash the file
+                filehash = get_filehash(absolute_filepath)
+                # 3) add file with file hash as name to folder for the file (if already exists, will overwrite file -- new ts)
+                new_absolute_filepath = os.path.join(absolute_dirpath,
+                                                     filehash)
+                shutil.copy2(absolute_filepath, new_absolute_filepath)
+                # 4) append a line into the new file for the commit hash with the following "filepath, filehash"
+                f.write(tracked_filepath + "," + filehash + "\n")
+        # Return commit hash if success else ERROR
+        return commit_hash
 
     def exists_ref(self, commit_id):
         """Returns a boolean if the commit exists
@@ -146,13 +173,51 @@ class FileCodeDriver(CodeDriver):
         bool
             True if exists else False
         """
-        pass
+        # List all files in code directory
+        commit_hashes = self.list_refs()
+        # Check if commit_id exists in the list
+        if commit_id in commit_hashes:
+            return True
+        return False
 
     def delete_ref(self, commit_id):
-        pass
+        """Removes the commit hash file, but not the file references"""
+        if not self.exists_ref(commit_id):
+            raise FileIOError(
+                __("error", "controller.code.driver.file.delete_ref"))
+        commit_filepath = os.path.join(self._code_filepath, commit_id)
+        os.remove(commit_filepath)
+        return True
 
     def list_refs(self):
-        pass
+        # List all files in the code directory (ignore directories)
+        for _, _, commit_hashes in os.walk(self._code_filepath):
+            return commit_hashes
 
     def checkout_ref(self, commit_id):
-        pass
+        if not self.exists_ref(commit_id):
+            raise FileIOError(
+                __("error", "controller.code.driver.file.checkout_ref"))
+        # Check if unstaged changes exist
+        if self._has_unstaged_changes():
+            raise UnstagedChanges()
+        # Check if commit given is same as current
+        tracked_filepaths = self._get_tracked_files()
+        if self._calculate_commit_hash(tracked_filepaths) == commit_id:
+            return True
+        # Remove all tracked files from repository
+        for tracked_filepath in self._get_tracked_files():
+            absolute_filepath = os.path.join(self.filepath, tracked_filepath)
+            os.remove(absolute_filepath)
+        # Add in files from the commit
+        commit_filepath = os.path.join(self._code_filepath, commit_id)
+        with open(commit_filepath, "r") as f:
+            for line in f:
+                tracked_filepath, filehash = line.rstrip().split(",")
+                source_absolute_filepath = os.path.join(
+                    self._code_filepath, tracked_filepath, filehash)
+                destination_absolute_filepath = os.path.join(
+                    self.filepath, tracked_filepath)
+                shutil.copy2(source_absolute_filepath,
+                             destination_absolute_filepath)
+        return True

@@ -146,6 +146,10 @@ class DatmoFolderInWorkTree(Exception):
     pass
 
 
+class UnstagedChanges(Exception):
+    pass
+
+
 class InvalidArgumentType(Exception):
     pass
 

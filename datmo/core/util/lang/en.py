@@ -105,6 +105,10 @@ MESSAGES = {
             "Filepath does not point to a valid file: %s",
         "util.misc_functions.mutually_exclusive":
             "Mutually exclusive arguments passed: %s",
+        "controller.code.driver.file.delete_ref":
+            "Commit ref does not exist",
+        "controller.code.driver.file.checkout_ref":
+            "Commit ref does not exist",
         "controller.code.driver.git.__init__.dne":
             "File path does not exist: %s",
         "controller.code.driver.git.__init__.giterror":
