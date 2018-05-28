@@ -13,7 +13,7 @@ from docker import errors
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
-    PathDoesNotExist, EnvironmentDoesNotExist, EnvironmentInitFailed,
+    PathDoesNotExist, EnvironmentInitFailed,
     EnvironmentExecutionError, FileAlreadyExistsError,
     EnvironmentRequirementsCreateError, EnvironmentImageNotFound,
     EnvironmentContainerNotFound, GPUSupportNotEnabled)
@@ -752,7 +752,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
     def default_environment_definition(self):
         return os.path.join(self.filepath, "Dockerfile")
 
-    def create_default_dockerfile(self, directory, language="python3"):
+    @staticmethod
+    def create_default_dockerfile(directory, language="python3"):
         language_dockerfile = "%sDockerfile" % language
         base_dockerfile_filepath = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "templates",

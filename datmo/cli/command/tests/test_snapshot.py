@@ -12,6 +12,7 @@ from __future__ import unicode_literals
 #     # Python 3
 #     import builtins as __builtin__
 import os
+import time
 import shutil
 import tempfile
 import platform
@@ -645,6 +646,9 @@ class TestSnapshot():
         assert result.stats == {"acc": "91.34", "f1_score": "0.91"}
         assert result.message == test_message
         assert result.label == test_label
+
+        # Adding sleep due to issue with consistency in blitzdb database
+        time.sleep(2)
 
         # 5. Updating config, stats
         # Test when optional parameters are not given
