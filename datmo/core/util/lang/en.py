@@ -37,6 +37,14 @@ MESSAGES = {
             "{foo} - {bar}",
         "cli.general.tuple.test":
             "%s, %s",
+        "cli.environment.create":
+                    "Creating a new environment",
+        "cli.environment.create.success":
+                    "Created a new environment with id: %s",
+        "cli.environment.create.alreadyexist":
+                    "No changes in environment definition files from id: %s",
+        "cli.environment.delete.success":
+            "Deleted environment with id: %s",
         "cli.snapshot.create":
             "Creating a new snapshot",
         "cli.snapshot.create.success":

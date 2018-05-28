@@ -4,7 +4,6 @@ Tests for EnvironmentController
 import os
 import uuid
 import random
-import random
 import string
 import shutil
 import tempfile
@@ -20,7 +19,7 @@ from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import \
     EnvironmentController
 from datmo.core.util.exceptions import (
-    EntityNotFound, EnvironmentDoesNotExist, RequiredArgumentMissing,
+    EntityNotFound, RequiredArgumentMissing,
     TooManyArgumentsFound, FileAlreadyExistsError)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
@@ -155,8 +154,10 @@ class TestEnvironmentController():
         os.makedirs(datmo_environment_folder)
 
         definition_filepath = os.path.join(datmo_environment_folder, "Dockerfile")
+        random_text = str(uuid.uuid1())
         with open(definition_filepath, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_unicode(str("RUN echo " + random_text)))
 
         input_dict = {
             "definition_filepaths": [definition_filepath],
@@ -182,29 +183,14 @@ class TestEnvironmentController():
                                      definition_filepath+":Dockerfile"],
         }
 
-        # 6) Test option 6
         # Create environment in the project
-        environment_obj_4 = self.environment.create({})
+        failed = False
+        try:
+            _ = self.environment.create(input_dict)
+        except FileAlreadyExistsError:
+            failed = True
 
-        # Get file collection path
-        file_collection_obj = self.environment.dal.file_collection. \
-            get_by_id(environment_obj_4.file_collection_id)
-        file_collection_dir = self.environment.file_driver. \
-            get_collection_path(file_collection_obj.filehash)
-
-        assert environment_obj_4
-        assert environment_obj_4.id
-        assert environment_obj_4.driver_type == "docker"
-        assert environment_obj_4.file_collection_id
-        assert environment_obj_4.definition_filename
-        assert environment_obj_4.hardware_info
-        assert environment_obj_4.unique_hash == file_collection_obj.filehash
-        assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
-        assert os.path.isfile(
-            os.path.join(file_collection_dir, "datmoDockerfile"))
-        assert os.path.isfile(
-            os.path.join(file_collection_dir, "hardware_info"))
-
+        assert failed
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_build(self):
@@ -224,8 +210,10 @@ class TestEnvironmentController():
 
         # Create environment definition
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")
+        random_text = str(uuid.uuid1())
         with open(definition_filepath, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_unicode(str("RUN echo " + random_text)))
         input_dict = {
             "definition_filepaths": [definition_filepath],
         }
@@ -267,8 +255,10 @@ class TestEnvironmentController():
         os.makedirs(datmo_environment_folder)
 
         definition_filepath = os.path.join(datmo_environment_folder, "Dockerfile")
+        random_text = str(uuid.uuid1())
         with open(definition_filepath, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_unicode(str("RUN echo " + random_text)))
         environment_obj_4 = self.environment.create({})
         result = self.environment.build(environment_obj_4.id)
         assert result
@@ -288,8 +278,10 @@ class TestEnvironmentController():
         os.makedirs(datmo_environment_folder)
 
         definition_filepath = os.path.join(datmo_environment_folder, "Dockerfile")
+        random_text = str(uuid.uuid1())
         with open(definition_filepath, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_unicode(str("RUN echo " + random_text)))
 
         random_name = ''.join([
             random.choice(string.ascii_letters + string.digits)
@@ -329,8 +321,10 @@ class TestEnvironmentController():
         # 1) Test option 1
         # Create environment definition
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")
+        random_text = str(uuid.uuid1())
         with open(definition_filepath, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_unicode(str("RUN echo " + random_text)))
 
         random_name = ''.join([
             random.choice(string.ascii_letters + string.digits)
@@ -423,8 +417,10 @@ class TestEnvironmentController():
         self.project.init("test6", "test description")
 
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")
+        random_text = str(uuid.uuid1())
         with open(definition_filepath, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_unicode(str("RUN echo " + random_text)))
 
         input_dict = {
             "definition_filepath": [definition_filepath],
@@ -619,8 +615,10 @@ class TestEnvironmentController():
 
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
+        random_text = str(uuid.uuid1())
         with open(env_def_path, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_unicode(str("RUN echo " + random_text)))
 
         input_dict = {
             "definition_filepaths": [definition_filepath],

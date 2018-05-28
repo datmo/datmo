@@ -46,6 +46,37 @@ def get_datmo_parser():
     session_select.add_argument(
         "--name", dest="name", help="name of session to select")
 
+    # Environment
+    environment_parser = subparsers.add_parser("environment", help="environment module")
+    environment_subcommand_parsers = environment_parser.add_subparsers(
+        title="subcommands", dest="subcommand")
+
+    environment_create = environment_subcommand_parsers.add_parser(
+        "create", help="create environment")
+    environment_create.add_argument(
+        "--environment-def",
+        dest="definition_filepaths",
+        default=None,
+        action="append",
+        type=str,
+        help=
+        "absolute filepath to environment definition file (e.g. /path/to/Dockerfile)"
+    )
+    environment_create.add_argument(
+        "--message",
+        "-m",
+        dest="description",
+        default=None,
+        help="message to describe environment")
+
+    environment_delete = environment_subcommand_parsers.add_parser(
+        "delete", help="delete a environment by id")
+    environment_delete.add_argument(
+        "--id", dest="environment_id", help="id of environment to delete")
+
+    environment_ls = environment_subcommand_parsers.add_parser(
+        "ls", help="list environments")
+
     # Snapshot
     snapshot_parser = subparsers.add_parser(
         "snapshot", description=__("argparser", "cli.snapshot.description"))
