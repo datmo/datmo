@@ -80,17 +80,6 @@ def get_datmo_parser():
         help="specify task id to pull information from")
 
     snapshot_create.add_argument(
-        "--code-id",
-        dest="code_id",
-        default=None,
-        help="code id from code object")
-    snapshot_create.add_argument(
-        "--commit-id",
-        dest="commit_id",
-        default=None,
-        help="commit id from source control")
-
-    snapshot_create.add_argument(
         "--environment-id",
         dest="environment_id",
         default=None,
@@ -104,11 +93,6 @@ def get_datmo_parser():
         "absolute filepath to environment definition file (e.g. /path/to/Dockerfile)"
     )
 
-    snapshot_create.add_argument(
-        "--file-collection-id",
-        dest="file_collection_id",
-        default=None,
-        help="file collection id for file collection object")
     snapshot_create.add_argument(
         "--filepaths",
         dest="filepaths",

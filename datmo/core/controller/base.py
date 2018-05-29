@@ -146,10 +146,9 @@ class BaseController(object):
         return {
             "controller.code.driver": {
                 "class_constructor":
-                    "datmo.core.controller.code.driver.git.GitCodeDriver",
+                    "datmo.core.controller.code.driver.file.FileCodeDriver",
                 "options": {
-                    "filepath": self.home,
-                    "execpath": "git"
+                    "filepath": self.home
                 }
             },
             "controller.file.driver": {

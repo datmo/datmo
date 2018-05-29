@@ -9,7 +9,9 @@ import tempfile
 import platform
 
 from datmo.core.controller.base import BaseController
-from datmo.core.controller.code.driver.git import GitCodeDriver
+from datmo.core.controller.code.driver.file import FileCodeDriver
+from datmo.core.controller.file.driver.local import LocalFileDriver
+from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.core.entity.model import Model
 from datmo.core.entity.session import Session
 from datmo.core.util.exceptions import  \
@@ -85,17 +87,19 @@ class TestBaseController():
         assert session.model_id == "test"
         assert session.current == True
 
-    def test_code_manager(self):
+    def test_default_code_driver(self):
         assert self.base.code_driver != None
-        assert self.base.code_driver.type == "git"
+        assert self.base.code_driver.type == "file"
 
-    def test_file_tree(self):
+    def test_default_file_driver(self):
         assert self.base.file_driver != None
+        assert self.base.file_driver.type == "local"
         assert self.base.file_driver.filepath == self.base.home
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_environment(self):
+    def test_default_environment_driver(self):
         assert self.base.environment_driver != None
+        assert self.base.environment_driver.type == "docker"
         assert self.base.environment_driver.filepath == self.base.home
 
     def test_is_initialized(self):
@@ -107,10 +111,14 @@ class TestBaseController():
         assert self.base.dal != None
         assert self.base.dal.model != None
 
-    def test_config_loader(self):
+    def test_default_config_loader(self):
         # TODO: Test all Datmo default settings
         assert self.base.config_loader("controller.code.driver")["constructor"] == \
-               GitCodeDriver
+               FileCodeDriver
+        assert self.base.config_loader("controller.file.driver")["constructor"] == \
+               LocalFileDriver
+        assert self.base.config_loader("controller.environment.driver")["constructor"] == \
+               DockerEnvironmentDriver
 
     def test_sanity_check_for_dal(self):
         model = self.base.dal.model.create(Model({"name": "test"}))

@@ -155,7 +155,6 @@ def create(message,
            label=None,
            home=None,
            task_id=None,
-           commit_id=None,
            environment_id=None,
            filepaths=None,
            config=None,
@@ -184,8 +183,6 @@ def create(message,
         if task id is passed then subsequent parameters would be ignored.
         when using task id, it will overwrite the following inputs
 
-        *commit_id*:  taken form the source code after the task is run
-
         *environment_id*: used to run the task,
 
         *filepaths*: this is the set of all files saved during the task
@@ -196,9 +193,6 @@ def create(message,
         *stats*:  the task.results are added into the stats variable of the
         snapshot.
 
-    commit_id : str, optional
-        provide the exact commit hash associated with the snapshot
-        (default is None, which means it automatically creates a commit)
     environment_id : str, optional
         provide the environment object id to use with this snapshot
         (default is None, which means it creates a default environment)
@@ -235,7 +229,7 @@ def create(message,
     snapshot_controller = SnapshotController(home=home)
 
     if task_id is not None:
-        excluded_args = ["commit_id", "environment_id", "filepaths"]
+        excluded_args = ["environment_id", "filepaths"]
         for arg in excluded_args:
             if eval(arg) is not None:
                 raise SnapshotCreateFromTaskArgs(
@@ -255,8 +249,6 @@ def create(message,
         # add arguments if they are not None
         if label:
             snapshot_create_dict['label'] = label
-        if commit_id:
-            snapshot_create_dict['commit_id'] = commit_id
         if environment_id:
             snapshot_create_dict['environment_id'] = environment_id
         if filepaths:
@@ -346,7 +338,12 @@ def ls(session_id=None, filter=None, home=None):
     ]
 
 
-def update(snapshot_id=None, config=None, stats=None, message=None, label=None, home=None):
+def update(snapshot_id=None,
+           config=None,
+           stats=None,
+           message=None,
+           label=None,
+           home=None):
     """Update a snapshot within a project
 
     The project must be created before this is implemented. You can do that by using
@@ -393,7 +390,11 @@ def update(snapshot_id=None, config=None, stats=None, message=None, label=None, 
     snapshot_controller = SnapshotController(home=home)
 
     return snapshot_controller.update(
-        snapshot_id=snapshot_id, config=config, stats=stats, message=message, label=label)
+        snapshot_id=snapshot_id,
+        config=config,
+        stats=stats,
+        message=message,
+        label=label)
 
 
 def delete(snapshot_id=None, home=None):

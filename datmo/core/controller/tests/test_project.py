@@ -52,23 +52,24 @@ class TestProjectController():
         except ValidationFailed:
             failed = True
         assert failed
-        assert not self.project.code_driver.exists_code_refs_dir()
-        assert not self.project.file_driver.exists_datmo_file_structure()
+        assert not self.project.code_driver.is_initialized
+        assert not self.project.file_driver.is_initialized
 
-    def test_init_failure_code_driver(self):
+    def test_init_failure_git_code_driver(self):
         # Create a HEAD.lock file in .git to make GitCodeDriver.init() fail
-        git_dir = os.path.join(self.project.code_driver.filepath, ".git")
-        os.makedirs(git_dir)
-        with open(os.path.join(git_dir, "HEAD.lock"), "a+") as f:
-            f.write(to_unicode("test"))
-        failed = False
-        try:
-            self.project.init("test1", "test description")
-        except Exception:
-            failed = True
-        assert failed
-        assert not self.project.code_driver.exists_code_refs_dir()
-        assert not self.project.file_driver.exists_datmo_file_structure()
+        if self.project.code_driver.type == "git":
+            git_dir = os.path.join(self.project.code_driver.filepath, ".git")
+            os.makedirs(git_dir)
+            with open(os.path.join(git_dir, "HEAD.lock"), "a+") as f:
+                f.write(to_unicode("test"))
+            failed = False
+            try:
+                self.project.init("test1", "test description")
+            except Exception:
+                failed = True
+            assert failed
+            assert not self.project.code_driver.is_initialized
+            assert not self.project.file_driver.is_initialized
 
     def test_init_success(self):
         result = self.project.init("test1", "test description")
@@ -91,8 +92,8 @@ class TestProjectController():
         assert failed
         assert self.project.model.name == "test1"
         assert self.project.model.description == "test description"
-        assert self.project.code_driver.exists_code_refs_dir()
-        assert self.project.file_driver.exists_datmo_file_structure()
+        assert self.project.code_driver.is_initialized
+        assert self.project.file_driver.is_initialized
 
     def test_init_reinit_success(self):
         _ = self.project.init("test1", "test description")
@@ -107,8 +108,8 @@ class TestProjectController():
         self.project.init("test2", "test description")
         result = self.project.cleanup()
 
-        assert not self.project.code_driver.exists_code_refs_dir()
-        assert not self.project.file_driver.exists_datmo_file_structure()
+        assert not self.project.code_driver.is_initialized
+        assert not self.project.file_driver.is_initialized
         # Ensure that containers built with this image do not exist
         # assert not self.project.environment_driver.list_containers(filters={
         #     "ancestor": image_id
@@ -120,8 +121,8 @@ class TestProjectController():
         self.project.init("test2", "test description")
         result = self.project.cleanup()
 
-        assert not self.project.code_driver.exists_code_refs_dir()
-        assert not self.project.file_driver.exists_datmo_file_structure()
+        assert not self.project.code_driver.is_initialized
+        assert not self.project.file_driver.is_initialized
         assert not self.project.environment_driver.list_images("datmo-test2")
         # Ensure that containers built with this image do not exist
         # assert not self.project.environment_driver.list_containers(filters={

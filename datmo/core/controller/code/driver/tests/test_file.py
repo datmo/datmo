@@ -15,7 +15,7 @@ except NameError:
 
 from datmo.core.controller.code.driver.file import FileCodeDriver
 from datmo.core.util.misc_functions import list_all_filepaths, get_filehash
-from datmo.core.util.exceptions import PathDoesNotExist, FileIOError, UnstagedChanges
+from datmo.core.util.exceptions import PathDoesNotExist, FileIOError, CodeNotInitialized, UnstagedChanges, CommitDoesNotExist, CommitFailed
 
 
 class TestFileCodeDriver():
@@ -114,8 +114,30 @@ class TestFileCodeDriver():
         assert result == "69a329523ce1ec88bf63061863d9cb14"
 
     def test_create_ref(self):
-        self.__setup()
+        # Test failure, not initialized
+        failed = False
+        try:
+            self.file_code_manager.create_ref()
+        except CodeNotInitialized:
+            failed = True
+        assert failed
+        # Test failure, commit given does not exist
+        self.file_code_manager.init()
+        failed = False
+        try:
+            self.file_code_manager.create_ref(commit_id="random")
+        except CommitDoesNotExist:
+            failed = True
+        assert failed
+        # Test failure, no files to track
+        failed = False
+        try:
+            self.file_code_manager.create_ref()
+        except CommitFailed:
+            failed = True
+        assert failed
         # Test successful creation of ref
+        self.__setup()
         result = self.file_code_manager.create_ref()
         assert result == "69a329523ce1ec88bf63061863d9cb14"
         # Assert the commit file was added in the correct place
@@ -133,7 +155,64 @@ class TestFileCodeDriver():
                 absolute_dirpath)[0]
             assert file_line_str in open(commit_filepath).read()
 
+    def test_current_ref(self):
+        # Test failure, not initialized
+        failed = False
+        try:
+            self.file_code_manager.create_ref()
+        except CodeNotInitialized:
+            failed = True
+        assert failed
+        # Test success (single commit)
+        self.__setup()
+        commit_hash = self.file_code_manager.create_ref()
+        result = self.file_code_manager.current_ref()
+        assert result == commit_hash
+        # Test success (multiple commits)
+        with open(os.path.join(self.temp_dir, "test2.txt"), "w") as f:
+            f.write("hello")
+        commit_hash_2 = self.file_code_manager.create_ref()
+        result = self.file_code_manager.current_ref()
+        assert commit_hash != commit_hash_2
+        assert result == commit_hash_2
+        # Test success after checkout
+        self.file_code_manager.checkout_ref(commit_id=commit_hash)
+        result = self.file_code_manager.current_ref()
+        assert result == commit_hash
+
+    def test_latest_ref(self):
+        # Test failure, not initialized
+        failed = False
+        try:
+            self.file_code_manager.create_ref()
+        except CodeNotInitialized:
+            failed = True
+        assert failed
+        # Test success (single commit)
+        self.__setup()
+        commit_hash = self.file_code_manager.create_ref()
+        result = self.file_code_manager.latest_ref()
+        assert result == commit_hash
+        # Test success (multiple commits)
+        with open(os.path.join(self.temp_dir, "test2.txt"), "w") as f:
+            f.write("hello")
+        commit_hash_2 = self.file_code_manager.create_ref()
+        result = self.file_code_manager.latest_ref()
+        assert commit_hash != commit_hash_2
+        assert result == commit_hash_2
+        # Test success after checkout
+        self.file_code_manager.checkout_ref(commit_id=commit_hash)
+        result = self.file_code_manager.latest_ref()
+        assert result == commit_hash_2
+
     def test_exists_ref(self):
+        # Test failure, not initialized
+        failed = False
+        try:
+            self.file_code_manager.create_ref()
+        except CodeNotInitialized:
+            failed = True
+        assert failed
         self.__setup()
         commit_hash = "69a329523ce1ec88bf63061863d9cb14"
         # Test does not exist case
@@ -145,6 +224,13 @@ class TestFileCodeDriver():
         assert result == True
 
     def test_delete_ref(self):
+        # Test failure, not initialized
+        failed = False
+        try:
+            self.file_code_manager.create_ref()
+        except CodeNotInitialized:
+            failed = True
+        assert failed
         self.__setup()
         commit_hash = "69a329523ce1ec88bf63061863d9cb14"
         # Test trying to delete failure
@@ -163,6 +249,13 @@ class TestFileCodeDriver():
         assert not os.path.isfile(commit_filepath)
 
     def test_list_refs(self):
+        # Test failure, not initialized
+        failed = False
+        try:
+            self.file_code_manager.create_ref()
+        except CodeNotInitialized:
+            failed = True
+        assert failed
         self.__setup()
         # Test no commits
         result = self.file_code_manager.list_refs()
@@ -173,6 +266,13 @@ class TestFileCodeDriver():
         assert result == [commit_hash]
 
     def test_checkout_ref(self):
+        # Test failure, not initialized
+        failed = False
+        try:
+            self.file_code_manager.create_ref()
+        except CodeNotInitialized:
+            failed = True
+        assert failed
         self.__setup()
         commit_hash = "69a329523ce1ec88bf63061863d9cb14"
         # Test trying to checkout failure (commit does not exist)

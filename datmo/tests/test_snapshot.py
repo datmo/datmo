@@ -16,7 +16,7 @@ from datmo.task import run
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.controller.project import ProjectController
 from datmo.core.util.exceptions import (
-    GitCommitDoesNotExist, InvalidProjectPath, SessionDoesNotExist,
+    CommitFailed, InvalidProjectPath, SessionDoesNotExist,
     SnapshotCreateFromTaskArgs, EntityNotFound, DoesNotExist)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
@@ -74,7 +74,7 @@ class TestSnapshotModule():
         failed = False
         try:
             _ = create(message="test", home=self.temp_dir)
-        except GitCommitDoesNotExist:
+        except CommitFailed:
             failed = True
         assert failed
 
@@ -169,21 +169,7 @@ class TestSnapshotModule():
 
         task_obj = run("sh -c echo accuracy:0.45", home=self.temp_dir)
 
-        # Test if failure if user gives other parameters
-        failed = False
-        try:
-            _ = create(
-                message="my test snapshot",
-                task_id=task_obj.id,
-                home=self.temp_dir,
-                label="best",
-                config={"foo": "bar"},
-                stats={"foo": "bar"},
-                commit_id="test_id")
-        except SnapshotCreateFromTaskArgs:
-            failed = True
-        assert failed
-
+        # Test if failure if user gives environment_id with task_id
         failed = False
         try:
             _ = create(
@@ -197,7 +183,7 @@ class TestSnapshotModule():
         except SnapshotCreateFromTaskArgs:
             failed = True
         assert failed
-
+        # Test if failure if user gives filepaths with task_id
         failed = False
         try:
             _ = create(

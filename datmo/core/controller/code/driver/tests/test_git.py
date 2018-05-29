@@ -16,7 +16,7 @@ except NameError:
 
 from datmo.core.controller.code.driver.git import (GitCodeDriver,
                                                    GitHostDriver)
-from datmo.core.util.exceptions import (GitCommitDoesNotExist,
+from datmo.core.util.exceptions import (CommitFailed, CommitDoesNotExist,
                                         PathDoesNotExist, GitExecutionError,
                                         DatmoFolderInWorkTree)
 
@@ -98,7 +98,7 @@ class TestGitCodeDriver():
         failed = False
         try:
             self.git_code_manager.create_ref()
-        except GitCommitDoesNotExist:
+        except CommitFailed:
             failed = True
         assert failed
         # Test passing case with no code_id
@@ -106,20 +106,81 @@ class TestGitCodeDriver():
                                      "test.txt")
         with open(test_filepath, "w") as f:
             f.write(to_unicode(str("test")))
-        code_id = self.git_code_manager.create_ref()
+        commit_hash = self.git_code_manager.create_ref()
         code_ref_path = os.path.join(self.git_code_manager.filepath,
-                                     ".git/refs/datmo/", code_id)
-        assert code_id and \
-            os.path.isfile(code_ref_path)
+                                     ".git/refs/datmo/", commit_hash)
+        assert commit_hash
+        assert os.path.isfile(code_ref_path)
+        assert self.git_code_manager.latest_commit() == commit_hash
+        # Test passing case with no code_id, new file
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test2.txt")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode(str("test")))
+        commit_hash_2 = self.git_code_manager.create_ref()
+        code_ref_path_2 = os.path.join(self.git_code_manager.filepath,
+                                       ".git/refs/datmo/", commit_hash_2)
+        assert commit_hash_2
+        assert commit_hash_2 != commit_hash
+        assert os.path.isfile(code_ref_path_2)
+        assert self.git_code_manager.latest_commit() == commit_hash_2
         # Test error raised with commit_id
         random_commit_id = str("random")
         failed = False
         try:
             self.git_code_manager.\
                 create_ref(commit_id=random_commit_id)
-        except GitCommitDoesNotExist:
+        except CommitDoesNotExist:
             failed = True
         assert failed
+
+    def test_current_ref(self):
+        self.git_code_manager.init()
+        # Test success (single commit)
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test.txt")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode(str("test")))
+        commit_hash = self.git_code_manager.create_ref()
+        result = self.git_code_manager.current_ref()
+        assert result == commit_hash
+        # Test success (multiple commits)
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test2.txt")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode(str("test")))
+        commit_hash_2 = self.git_code_manager.create_ref()
+        result = self.git_code_manager.current_ref()
+        assert commit_hash != commit_hash_2
+        assert result == commit_hash_2
+        # Test success (checkout)
+        self.git_code_manager.checkout_ref(commit_id=commit_hash)
+        result = self.git_code_manager.current_ref()
+        assert result == commit_hash
+
+    def test_latest_ref(self):
+        self.git_code_manager.init()
+        # Test success (single commit)
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test.txt")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode(str("test")))
+        commit_hash = self.git_code_manager.create_ref()
+        result = self.git_code_manager.latest_ref()
+        assert result == commit_hash
+        # Test success (multiple commits)
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test2.txt")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode(str("test")))
+        commit_hash_2 = self.git_code_manager.create_ref()
+        result = self.git_code_manager.latest_ref()
+        assert commit_hash != commit_hash_2
+        assert result == commit_hash_2
+        # Test success (checkout)
+        self.git_code_manager.checkout_ref(commit_id=commit_hash)
+        result = self.git_code_manager.current_ref()
+        assert result == commit_hash
 
     def test_exists_ref(self):
         self.git_code_manager.init()
@@ -363,7 +424,7 @@ class TestGitCodeDriver():
     # def test_stash_apply(self):
     #     pass
     #
-    def test_latest_commit(self, capsys):
+    def test_latest_commit(self):
         self.git_code_manager.init()
         # Check if properly returns error without commit
         failed = False

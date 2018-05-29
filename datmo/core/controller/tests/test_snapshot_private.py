@@ -7,6 +7,7 @@ import platform
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
+from datmo.core.util.exceptions import CommitDoesNotExist
 
 
 class TestSnapshotController():
@@ -53,8 +54,19 @@ class TestSnapshotController():
         assert final_data['code_id'] == val
 
     def test_code_setup_with_commit_id(self):
-        val = "f38a8ace"
-        incoming_data = {"commit_id": val}
+        # Test failure
+        non_existant_commit_id = "f38a8ace"
+        incoming_data = {"commit_id": non_existant_commit_id}
+        final_data = {}
+        failed = False
+        try:
+            self.snapshot._code_setup(incoming_data, final_data)
+        except CommitDoesNotExist:
+            failed = True
+        assert failed
+        # Test success
+        commit_id = self.snapshot.code_driver.create_ref()
+        incoming_data = {"commit_id": commit_id}
         final_data = {}
         self.snapshot._code_setup(incoming_data, final_data)
         assert final_data['code_id']

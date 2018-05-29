@@ -12,7 +12,7 @@ from giturlparse import parse
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     PathDoesNotExist, GitUrlArgumentError, GitExecutionError, FileIOError,
-    GitCommitDoesNotExist, DatmoFolderInWorkTree)
+    CommitDoesNotExist, CommitFailed, DatmoFolderInWorkTree)
 from datmo.core.controller.code.driver import CodeDriver
 from datmo.config import Config
 
@@ -151,37 +151,31 @@ class GitCodeDriver(CodeDriver):
 
         Raises
         ------
-        GitCommitDoesNotExist
+        CommitDoesNotExist
             commit id specified does not match a valid commit within the tree
+        CommitFailed
+            commit could not be created
         """
         self.ensure_code_refs_dir()
         if not commit_id:
             try:
-                previous_commit_id = self.latest_commit()
-                # add files and commit changes on current branch
-                self.add("-A")
-                new_commit_bool = self.commit(
-                    options=["-m", "auto commit by datmo"])
+                _ = self.latest_commit()
+                message = "auto commit by datmo"
             except Exception:
-                self.add("-A")
-                new_commit_bool = self.commit(
-                    options=["-m", "auto initial commit by datmo"])
-                previous_commit_id = None
+                message = "auto initial commit by datmo"
+            # add files and commit changes on current branch
+            self.add("-A")
+            _ = self.commit(options=["-m", message])
             try:
                 commit_id = self.latest_commit()
             except GitExecutionError as e:
-                raise GitCommitDoesNotExist(
+                raise CommitFailed(
                     __("error",
                        "controller.code.driver.git.create_ref.cannot_commit",
                        str(e)))
-            # revert back to the original commit
-            if new_commit_bool and previous_commit_id:
-                self.reset(previous_commit_id)
-            else:
-                self.reset(commit_id)
         # writing git commit into ref if exists
         if not self.exists_commit(commit_id):
-            raise GitCommitDoesNotExist(
+            raise CommitDoesNotExist(
                 __("error", "controller.code.driver.git.create_ref.no_commit",
                    commit_id))
         # git refs for datmo for the latest commit id is created
@@ -190,6 +184,24 @@ class GitCodeDriver(CodeDriver):
         with open(code_ref_path, "w") as f:
             f.write(to_unicode(commit_id))
         return commit_id
+
+    def current_ref(self):
+        return self.latest_commit()
+
+    def latest_ref(self):
+        def getmtime(absolute_filepath):
+            return os.path.getmtime(absolute_filepath)
+
+        code_refs_path = os.path.join(self.filepath, ".git/refs/datmo/")
+        sorted_code_refs = sorted(
+            [
+                os.path.join(code_refs_path, filename)
+                for filename in os.listdir(code_refs_path)
+            ],
+            key=getmtime,
+            reverse=True)
+        _, filename = os.path.split(sorted_code_refs[0])
+        return filename
 
     def exists_ref(self, commit_id):
         code_ref_path = os.path.join(self.filepath, ".git/refs/datmo/",

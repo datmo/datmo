@@ -15,10 +15,9 @@ from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.controller.task import TaskController
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.util.exceptions import (
-    EntityNotFound, EnvironmentDoesNotExist, GitCommitDoesNotExist,
-    SessionDoesNotExist, RequiredArgumentMissing, TaskNotComplete,
-    InvalidArgumentType, ProjectNotInitialized, InvalidProjectPath,
-    DoesNotExist)
+    EntityNotFound, EnvironmentDoesNotExist, CommitFailed, SessionDoesNotExist,
+    RequiredArgumentMissing, TaskNotComplete, InvalidArgumentType,
+    ProjectNotInitialized, InvalidProjectPath, DoesNotExist)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -72,7 +71,7 @@ class TestSnapshotController():
         failed = False
         try:
             self.snapshot.create({"message": "my test snapshot"})
-        except GitCommitDoesNotExist:
+        except CommitFailed:
             failed = True
         assert failed
 
@@ -450,7 +449,7 @@ class TestSnapshotController():
             self.snapshot.home, "datmo_snapshots", snapshot_obj_1.id)
 
         assert result == True and \
-               self.snapshot.code_driver.latest_commit() == code_obj_1.commit_id and \
+               self.snapshot.code_driver.current_ref() == code_obj_1.commit_id and \
                os.path.isdir(snapshot_obj_1_path)
 
     def test_list(self):
@@ -559,8 +558,11 @@ class TestSnapshotController():
 
         # Update snapshot in the project
         self.snapshot.update(
-            snapshot_obj.id, config=test_config, stats=test_stats,
-            message=test_message, label=test_label)
+            snapshot_obj.id,
+            config=test_config,
+            stats=test_stats,
+            message=test_message,
+            label=test_label)
 
         # Get the updated snapshot obj
         updated_snapshot_obj = self.snapshot.dal.snapshot.get_by_id(

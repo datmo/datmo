@@ -15,9 +15,8 @@ from datmo.task import run, ls
 from datmo.task import Task
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.controller.project import ProjectController
-from datmo.core.util.exceptions import (GitCommitDoesNotExist, DoesNotExist,
-                                        InvalidProjectPath,
-                                        SessionDoesNotExist)
+from datmo.core.util.exceptions import (
+    CommitFailed, DoesNotExist, InvalidProjectPath, SessionDoesNotExist)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -58,7 +57,7 @@ class TestTaskModule():
         failed = False
         try:
             _ = run(command="test", home=self.temp_dir)
-        except GitCommitDoesNotExist:
+        except CommitFailed:
             failed = True
         assert failed
 

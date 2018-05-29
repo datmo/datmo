@@ -75,10 +75,12 @@ MESSAGES = {
             "git isn't setup. please install git",
         "controller.general.environment.failed":
             "Environment driver not initialized",
-        "controller.project.cleanup.refs":
-            "Project code refs do not exist",
+        "controller.project.cleanup.environment":
+            "Error cleaning up project environment",
+        "controller.project.cleanup.code":
+            "Error cleaning up project code",
         "controller.project.cleanup.files":
-            "Project files do not exist"
+            "Error cleaning up project files"
     },
     "error": {
         "exception.validationfailed":
@@ -105,6 +107,10 @@ MESSAGES = {
             "Filepath does not point to a valid file: %s",
         "util.misc_functions.mutually_exclusive":
             "Mutually exclusive arguments passed: %s",
+        "controller.code.driver.file.create_ref.no_commit":
+            "Commit ref given does not match an existing commit: %s",
+        "controller.code.driver.file.create_ref.cannot_commit":
+            "Commit failed, no files to commit",
         "controller.code.driver.file.delete_ref":
             "Commit ref does not exist",
         "controller.code.driver.file.checkout_ref":
@@ -172,7 +178,7 @@ MESSAGES = {
         "controller.code.driver.git.checkout_ref":
             "Error in git checkout code ref with id %s: %s",
         "controller.code.driver.git.create_ref.cannot_commit":
-            "Commit ref given does not match a git commit within the tree: %s",
+            "Git commit failed: %s",
         "controller.code.driver.git.create_ref.no_commit":
             "Commit ref given does not match a git commit within the tree: %s",
         "controller.code.create":

@@ -10,7 +10,8 @@ except NameError:
 from datmo.core.util.misc_functions import list_all_filepaths, get_filehash, get_dirhash
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (PathDoesNotExist, FileIOError,
-                                        UnstagedChanges)
+                                        UnstagedChanges, CodeNotInitialized,
+                                        CommitDoesNotExist, CommitFailed)
 from datmo.core.controller.code.driver import CodeDriver
 
 
@@ -74,6 +75,18 @@ class FileCodeDriver(CodeDriver):
         spec = pathspec.PathSpec.from_lines('gitwildmatch', ["datmo_files"])
         datmo_files_files = set(spec.match_tree(self.filepath))
 
+        # TODO: REMOVE THIS CODE
+        # Ignore the datmo_snapshots/ folder and all contents within it
+        spec = pathspec.PathSpec.from_lines('gitwildmatch',
+                                            ["datmo_snapshots"])
+        datmo_snapshots_files = set(spec.match_tree(self.filepath))
+
+        # Ignore the datmo_tasks/ folder and all contents within it
+        spec = pathspec.PathSpec.from_lines('gitwildmatch', ["datmo_tasks"])
+        datmo_tasks_files = set(spec.match_tree(self.filepath))
+
+        # TODO: REMOVE THE ABOVE
+
         # Load ignored files from .datmoignore file if exists
         datmoignore_files = {".datmoignore"}
         if os.path.isfile(os.path.join(self.filepath, ".datmoignore")):
@@ -81,7 +94,8 @@ class FileCodeDriver(CodeDriver):
                 spec = pathspec.PathSpec.from_lines('gitignore', f)
                 datmoignore_files.update(set(spec.match_tree(self.filepath)))
         return list(all_files - dot_datmo_files - datmo_environment_files -
-                    datmo_files_files - datmoignore_files)
+                    datmo_files_files - datmo_snapshots_files -
+                    datmo_tasks_files - datmoignore_files)
 
     def _calculate_commit_hash(self, tracked_files):
         """Return the commit hash of the repository"""
@@ -122,16 +136,35 @@ class FileCodeDriver(CodeDriver):
 
         Returns
         -------
-        commit_id : str
-            commit id for ref created
+        commit_id : str, optional
+            if commit_id is given, it will not add files and will not create a commit
 
         Raises
         ------
+        CodeNotInitialized
+            error if not initialized (must initialize first)
         CommitDoesNotExist
             commit id specified does not match a valid commit
+        CommitFailed
+            commit could not be created
         """
+        if not self.is_initialized:
+            raise CodeNotInitialized()
+        # If commit is given and it exists then just return it back
+        if commit_id:
+            if not self.exists_ref(commit_id):
+                raise CommitDoesNotExist(
+                    __("error",
+                       "controller.code.driver.file.create_ref.no_commit",
+                       commit_id))
+            return commit_id
         # Find all tracked files (_get_tracked_files)
         tracked_filepaths = self._get_tracked_files()
+        # If no tracked filepaths, then commit fails
+        if not tracked_filepaths:
+            raise CommitFailed(
+                __("error",
+                   "controller.code.driver.file.create_ref.cannot_commit"))
         # Create the hash of the files (_calculate_commit_hash)
         commit_hash = self._calculate_commit_hash(tracked_filepaths)
         # Check if the hash already exists with exists_ref
@@ -160,6 +193,50 @@ class FileCodeDriver(CodeDriver):
         # Return commit hash if success else ERROR
         return commit_hash
 
+    def current_ref(self):
+        """Returns the current ref of the code (may not be a commit id, if not saved)
+
+        Returns
+        -------
+        commit_id : str
+            the current commit_id (this may not be a commit id)
+
+        Raises
+        ------
+        CodeNotInitialized
+            error if not initialized (must initialize first)
+        """
+        if not self.is_initialized:
+            raise CodeNotInitialized()
+        tracked_filepaths = self._get_tracked_files()
+        return self._calculate_commit_hash(tracked_filepaths)
+
+    def latest_ref(self):
+        """Returns the latest ref of the code
+
+        Raises
+        ------
+        CodeNotInitialized
+            error if not initialized (must initialize first)
+        """
+        if not self.is_initialized:
+            raise CodeNotInitialized()
+
+        def getmtime(absolute_filepath):
+            return os.path.getmtime(absolute_filepath)
+
+        # List all files in the code directory (ignore directories)
+        for _, _, commit_hashes in os.walk(self._code_filepath):
+            sorted_commit_hashes = sorted(
+                [
+                    os.path.join(self._code_filepath, commit_hash)
+                    for commit_hash in commit_hashes
+                ],
+                key=getmtime,
+                reverse=True)
+            _, filename = os.path.split(sorted_commit_hashes[0])
+            return filename
+
     def exists_ref(self, commit_id):
         """Returns a boolean if the commit exists
 
@@ -172,7 +249,14 @@ class FileCodeDriver(CodeDriver):
         -------
         bool
             True if exists else False
+
+        Raises
+        ------
+        CodeNotInitialized
+            error if not initialized (must initialize first)
         """
+        if not self.is_initialized:
+            raise CodeNotInitialized()
         # List all files in code directory
         commit_hashes = self.list_refs()
         # Check if commit_id exists in the list
@@ -181,7 +265,15 @@ class FileCodeDriver(CodeDriver):
         return False
 
     def delete_ref(self, commit_id):
-        """Removes the commit hash file, but not the file references"""
+        """Removes the commit hash file, but not the file references
+
+        Raises
+        ------
+        CodeNotInitialized
+            error if not initialized (must initialize first)
+        """
+        if not self.is_initialized:
+            raise CodeNotInitialized()
         if not self.exists_ref(commit_id):
             raise FileIOError(
                 __("error", "controller.code.driver.file.delete_ref"))
@@ -190,11 +282,29 @@ class FileCodeDriver(CodeDriver):
         return True
 
     def list_refs(self):
+        """List all commits in repo
+
+        Raises
+        ------
+        CodeNotInitialized
+            error if not initialized (must initialize first)
+        """
+        if not self.is_initialized:
+            raise CodeNotInitialized()
         # List all files in the code directory (ignore directories)
         for _, _, commit_hashes in os.walk(self._code_filepath):
             return commit_hashes
 
     def checkout_ref(self, commit_id):
+        """Checkout to specific commit
+
+        Raises
+        ------
+        CodeNotInitialized
+            error if not initialized (must initialize first)
+        """
+        if not self.is_initialized:
+            raise CodeNotInitialized()
         if not self.exists_ref(commit_id):
             raise FileIOError(
                 __("error", "controller.code.driver.file.checkout_ref"))
