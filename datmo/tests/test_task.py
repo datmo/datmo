@@ -270,8 +270,7 @@ class TestTaskModule():
         task_entity = self.__setup()
         result = task_entity.results
 
-        assert isinstance(result, dict)
-        assert result == {}
+        assert result == None
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_files(self):
