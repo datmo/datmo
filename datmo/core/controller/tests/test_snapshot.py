@@ -304,7 +304,8 @@ class TestSnapshotController():
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_create_from_task(self):
         self.__setup()
-        # 1) Test if fails with TaskNotComplete error
+        # 0) Test if fails with TaskNotComplete error
+        # 1) Test if success with empty task files, results
         # 2) Test if success with task files, results, and message
         # 3) Test if success with message, label, config and stats
         # 4) Test if success with updated stats from after_snapshot_id and task_results
@@ -312,7 +313,7 @@ class TestSnapshotController():
         # Create task in the project
         task_obj = self.task.create()
 
-        # 1) Test option 1
+        # 0) Test option 0
         failed = False
         try:
             _ = self.snapshot.create_from_task(
@@ -321,7 +322,30 @@ class TestSnapshotController():
             failed = True
         assert failed
 
+        # 1) Test option 1
+
         # Create task_dict
+        task_command = ["sh", "-c", "echo test"]
+        task_dict = {"command_list": task_command}
+
+        # Create environment definition
+        env_def_path = os.path.join(self.project.home, "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)
+
+        snapshot_obj = self.snapshot.create_from_task(
+            message="my test snapshot", task_id=updated_task_obj.id)
+
+        assert isinstance(snapshot_obj, Snapshot)
+        assert snapshot_obj.id == updated_task_obj.after_snapshot_id
+        assert snapshot_obj.message == "my test snapshot"
+        assert snapshot_obj.stats == updated_task_obj.results
+        assert snapshot_obj.visible == True
+
+        # Create new task and corresponding dict
+        task_obj = self.task.create()
         task_command = ["sh", "-c", "echo accuracy:0.45"]
         task_dict = {"command_list": task_command}
 
@@ -559,8 +583,11 @@ class TestSnapshotController():
 
         # Update snapshot in the project
         self.snapshot.update(
-            snapshot_obj.id, config=test_config, stats=test_stats,
-            message=test_message, label=test_label)
+            snapshot_obj.id,
+            config=test_config,
+            stats=test_stats,
+            message=test_message,
+            label=test_label)
 
         # Get the updated snapshot obj
         updated_snapshot_obj = self.snapshot.dal.snapshot.get_by_id(

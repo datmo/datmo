@@ -168,6 +168,10 @@ class TestTaskController():
         assert result['validation'] == "0.32"
         assert result['model_type'] == "logistic regression"
 
+        test_logs = """test"""
+        result = self.task._parse_logs_for_results(test_logs)
+        assert result is None
+
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_run(self):
         self.__setup()

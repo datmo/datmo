@@ -142,7 +142,7 @@ class TaskController(BaseController):
 
         Returns
         -------
-        dict
+        dict or None
             dictionary to represent results from task
         """
         results = {}
@@ -150,6 +150,8 @@ class TaskController(BaseController):
             split_line = line.split(":")
             if len(split_line) == 2:
                 results[split_line[0].strip()] = split_line[1].strip()
+        if results == {}:
+            results = None
         return results
 
     def run(self, task_id, snapshot_dict=None, task_dict=None):

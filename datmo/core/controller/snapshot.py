@@ -272,8 +272,12 @@ class SnapshotController(BaseController):
         else:
             # Append to any existing stats already present
             snapshot_update_dict["stats"] = {}
-            snapshot_update_dict["stats"].update(after_snapshot_obj.stats)
-            snapshot_update_dict["stats"].update(task_obj.results)
+            if after_snapshot_obj.stats is not None:
+                snapshot_update_dict["stats"].update(after_snapshot_obj.stats)
+            if task_obj.results is not None:
+                snapshot_update_dict["stats"].update(task_obj.results)
+            if snapshot_update_dict["stats"] == {}:
+                snapshot_update_dict["stats"] = None
 
         return self.dal.snapshot.update(snapshot_update_dict)
 
@@ -316,7 +320,12 @@ class SnapshotController(BaseController):
 
         return self.dal.snapshot.query(query, sort_key, sort_order)
 
-    def update(self, snapshot_id, config=None, stats=None, message=None, label=None):
+    def update(self,
+               snapshot_id,
+               config=None,
+               stats=None,
+               message=None,
+               label=None):
         if not snapshot_id:
             raise RequiredArgumentMissing(
                 __("error", "controller.snapshot.delete.arg", "snapshot_id"))
