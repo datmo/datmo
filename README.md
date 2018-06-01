@@ -246,3 +246,10 @@ $ git pull origin +refs/datmo/*:refs/datmo/*  # pull datmo refs from remote
 $ datmo init  # This enables datmo in the new location. If you enter blanks, no project information will be updated
 ```
 If you are interested in sharing using the datmo protocol, you can visit [Datmo's website](https://datmo.com/product)
+
+### References
+
+* https://www.slideshare.net/fridiculous/managing-and-versioning-machine-learning-models-in-python
+* https://github.com/mitdbg/modeldb (system for managing machine learning models -- scikit-learn & spark.ml) 
+* https://github.com/drivendata/cookiecutter-data-science (replicable file structures for data projects) 
+* https://github.com/IDSIA/sacred (reproduce experiments with a GUI to track) 
