@@ -115,7 +115,8 @@ class TestSnapshotModule():
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu"))
-        snapshot_obj_3 = create(message="test", home=self.temp_dir, env=test_filepath)
+        snapshot_obj_3 = create(
+            message="test", home=self.temp_dir, env=test_filepath)
 
         assert snapshot_obj_3
         assert isinstance(snapshot_obj_3, Snapshot)
@@ -223,7 +224,7 @@ class TestSnapshotModule():
                 label="best",
                 config={"foo": "bar"},
                 stats={"foo": "bar"},
-                filepaths=["mypath"])
+                paths=["mypath"])
         except SnapshotCreateFromTaskArgs:
             failed = True
         assert failed
@@ -293,7 +294,7 @@ class TestSnapshotModule():
             f.write(to_unicode("import numpy\n"))
             f.write(to_unicode("import sklearn\n"))
         return create(
-            message="test", home=self.temp_dir, filepaths=[test_filepath])
+            message="test", home=self.temp_dir, paths=[test_filepath])
 
     def test_update(self):
         # check project is not initialized if wrong home

@@ -1,5 +1,5 @@
 """
-Tests for SessionCommand
+Tests for EnvironmentCommand
 """
 from __future__ import division
 from __future__ import print_function
@@ -20,10 +20,10 @@ from datmo.cli.command.environment import EnvironmentCommand
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
-
 # provide mountable tmp directory for docker
 tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
 test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
+
 
 class TestEnvironment():
     def setup_class(self):
@@ -38,20 +38,25 @@ class TestEnvironment():
         self.project.parse(
             ["init", "--name", "foobar", "--description", "test model"])
         self.project.execute()
-        self.environment_command = EnvironmentCommand(self.temp_dir, self.cli_helper)
+        self.environment_command = EnvironmentCommand(self.temp_dir,
+                                                      self.cli_helper)
 
     def test_environment_create(self):
         # 1) Environment definition file in `datmo_environment` folder
-        # 2) Environment definition file passed as on option
+        # 2) Environment definition file passed as an option
         # 3) Environment definition file in root project folder
-        # 4) No environment definition file present
+        # 4) Environment definition file in root project folder (should return the same environment)
+        # 5) No environment definition file present
+        # 6) No environment definition file present (should return the same environment)
         self.__set_variables()
         # Test option 1
         # Create environment definition in `datmo_environment` folder
-        datmo_environment_folder = os.path.join(self.temp_dir, "datmo_environment")
+        datmo_environment_folder = os.path.join(self.temp_dir,
+                                                "datmo_environment")
         os.makedirs(datmo_environment_folder)
 
-        definition_filepath = os.path.join(datmo_environment_folder, "Dockerfile")
+        definition_filepath = os.path.join(datmo_environment_folder,
+                                           "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
@@ -66,21 +71,25 @@ class TestEnvironment():
         shutil.rmtree(datmo_environment_folder)
 
         # Test option 2
-        random_datmo_environment_folder = os.path.join(self.temp_dir, "random_datmo_dir")
+        random_datmo_environment_folder = os.path.join(self.temp_dir,
+                                                       "random_datmo_dir")
         os.makedirs(random_datmo_environment_folder)
 
-        definition_filepath = os.path.join(random_datmo_environment_folder, "Dockerfile")
+        definition_filepath = os.path.join(random_datmo_environment_folder,
+                                           "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
 
-        self.environment_command.parse(["environment", "create", "--environment-def", definition_filepath])
+        self.environment_command.parse([
+            "environment", "create", "--environment-def", definition_filepath
+        ])
         result = self.environment_command.execute()
 
         assert result
 
-        # remove radon datmo environment directory
+        # remove datmo environment directory
         shutil.rmtree(random_datmo_environment_folder)
 
         # Test option 3
@@ -95,13 +104,24 @@ class TestEnvironment():
 
         assert result
 
+        # Test option 4
+        self.environment_command.parse(["environment", "create"])
+        result_2 = self.environment_command.execute()
+        assert result == result_2
+
         os.remove(definition_filepath)
 
-        # Test option 4
+        # Test option 5
         self.environment_command.parse(["environment", "create"])
         result = self.environment_command.execute()
 
         assert result
+
+        # Test option 6
+        self.environment_command.parse(["environment", "create"])
+        result_2 = self.environment_command.execute()
+
+        assert result == result_2
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_environment_delete(self):
@@ -109,7 +129,8 @@ class TestEnvironment():
         self.environment_command.parse(["environment", "create"])
         environment_id = self.environment_command.execute()
 
-        self.environment_command.parse(["environment", "delete", "--id", environment_id])
+        self.environment_command.parse(
+            ["environment", "delete", "--id", environment_id])
         result = self.environment_command.execute()
 
         assert result

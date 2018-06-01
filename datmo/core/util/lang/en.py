@@ -38,11 +38,11 @@ MESSAGES = {
         "cli.general.tuple.test":
             "%s, %s",
         "cli.environment.create":
-                    "Creating a new environment",
+            "Creating a new environment",
         "cli.environment.create.success":
-                    "Created a new environment with id: %s",
+            "Created a new environment with id: %s",
         "cli.environment.create.alreadyexist":
-                    "No changes in environment definition files from id: %s",
+            "No changes in environment definition files from id: %s",
         "cli.environment.delete.success":
             "Deleted environment with id: %s",
         "cli.snapshot.create":
@@ -210,13 +210,13 @@ MESSAGES = {
         "controller.environment.driver.docker.stop_remove_containers_by_term":
             "Error stopping and removing containers by term: %s",
         "controller.environment.create":
-            "Required argument definition_filepaths not present in input",
+            "Required argument definition_paths not present in input",
         "controller.environment.create.filepath.dne":
-            "Path specified in definition filepaths does not exist: %s",
-        "controller.environment.create.filename.exists":
+            "Path specified in definition paths does not exist: %s",
+        "controller.file.driver.create_collection.file_exists":
             "File name has already been specified and exists: %s",
-        "controller.environment.create.file.exists.datmoenvironment":
-            "File name has already been in the datmo_environments folder: %s",
+        "controller.file.driver.create_collection.dir_exists":
+            "Dir name has already been specified and exists: %s",
         "controller.environment.requirements.create":
             "Error while creating requirements file for python: %s",
         "controller.environment.build":

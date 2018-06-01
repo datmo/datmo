@@ -157,3 +157,50 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
             True if success
         """
         pass
+
+    @staticmethod
+    @abstractmethod
+    def create_default_definition(directory, language="python3"):
+        """Create default definition within the given directory and return full path
+
+        Parameters
+        ----------
+        directory : str
+            directory to create default definition file within
+        language : str, optional
+            language of the environment to support
+            (default is "python3")
+
+        Returns
+        -------
+        str
+            full path of the created default definition path
+        """
+
+    @abstractmethod
+    def get_default_definition_path(self):
+        """Get default definition path to read the file from
+
+        Returns
+        -------
+        str
+            full path of the default definition path
+        """
+
+    @abstractmethod
+    def create_datmo_definition(self, input_definition_path,
+                                output_definition_path):
+        """Create a datmo version of the definition
+
+        Parameters
+        ----------
+        input_definition_path : str
+            input original definition path to read from
+        output_definition_path : str
+            output datmo definition path to write to
+
+        Returns
+        -------
+        bool
+            True is success
+        """

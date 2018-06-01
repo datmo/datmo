@@ -156,7 +156,7 @@ class BaseController(object):
                 "class_constructor":
                     "datmo.core.controller.file.driver.local.LocalFileDriver",
                 "options": {
-                    "filepath": self.home
+                    "root": self.home
                 }
             },
             "controller.environment.driver": {

@@ -3,7 +3,6 @@
 import os
 import re
 import ast
-import uuid
 import hashlib
 import textwrap
 import datetime
@@ -11,6 +10,7 @@ import pytz
 import tzlocal
 import pytest
 import platform
+import tempfile
 from io import open
 try:
     to_unicode = unicode
@@ -22,7 +22,7 @@ from datmo.core.controller.environment.driver.dockerenv import DockerEnvironment
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     PathDoesNotExist, MutuallyExclusiveArguments, RequiredArgumentMissing,
-    EnvironmentInitFailed, EnvironmentExecutionError)
+    EnvironmentInitFailed, EnvironmentExecutionError, InvalidDestinationName)
 
 
 def grep(pattern, fileObj):
@@ -243,10 +243,100 @@ def format_table(data, padding=2):
     return table_str
 
 
+def list_all_filepaths(absolute_dirpath):
+    """Returns all filepaths within dir relative to dir root"""
+    return [
+        os.path.relpath(os.path.join(dirpath, file), absolute_dirpath)
+        for (dirpath, dirnames, filenames) in os.walk(absolute_dirpath)
+        for file in filenames
+    ]
+
+
 def get_datmo_temp_path(filepath):
-    # Create temp hash and folder to move all contents from filepaths
-    temp_hash = hashlib.sha1(str(uuid.uuid4()). \
-                             encode("UTF=8")).hexdigest()[:20]
-    datmo_temp_path = os.path.join(filepath, ".datmo", "tmp", temp_hash)
-    os.makedirs(datmo_temp_path)
-    return datmo_temp_path
+    # Create temp directory within .datmo/tmp
+    datmo_temp_path = os.path.join(filepath, ".datmo", "tmp")
+    if not os.path.exists(datmo_temp_path):
+        os.makedirs(datmo_temp_path)
+    return tempfile.mkdtemp(dir=datmo_temp_path)
+
+
+def parse_path(path):
+    """Parse user given path
+
+    Returns
+    -------
+    src_path : str
+        user given source path
+    dest_path : str
+        user given destination path
+    """
+    # Parse given path and split out the destination
+    path = path.strip()
+    # Split path first
+    prefix, tail = os.path.split(path)
+    tail_split_list = tail.split(":")
+    # Split colon first
+    split_list_2 = path.split(":")
+    dest_list = os.path.split(split_list_2[-1])
+    prefix_split_list = prefix.split(":")
+    extra_dest = prefix_split_list[-1]
+    # If extra_dest if not null and in dest_list then
+    if (extra_dest in dest_list or (extra_dest == "" and len(dest_list) > 1)
+        ) and len(split_list_2) > 1 and len(prefix_split_list) > 1:
+        raise InvalidDestinationName()
+    src_path = os.path.join(prefix, tail_split_list[0])
+    # Ensure dest_path is not an absolute path and set it accordingly
+    if len(tail_split_list) > 1:
+        if os.path.isabs(tail_split_list[-1]):
+            raise InvalidDestinationName(tail_split_list[-1])
+        dest_path = tail_split_list[-1]
+    else:
+        dest_path = tail_split_list[0]
+    return src_path, dest_path
+
+
+def parse_paths(default_src_prefix, paths, dest_prefix):
+    """Parse user given paths. Checks only source paths and destination are valid
+
+    Parameters
+    ----------
+    default_src_prefix : str
+        default directory prefix to append if source path is not an absolute path
+    paths : list
+        user given path strings. (e.g. "/path/to/file:hello", "/path/to/file2", "/path/to/dir:newdir")
+    dest_prefix : str
+        destination directory prefix to append to the destination filename
+
+    Returns
+    -------
+    files : list
+        list of tuples of the form (absolute_source_path, absolute_dest_filepath)
+    directories : list
+        list of tuples of the form (absolute_source_path, absolute_dest_filepath)
+
+    Raises
+    ------
+    InvalidDestinationName
+        destination specified in paths is not valid
+    PathDoesNotExist
+        if the path does not exist
+    """
+    files = []
+    directories = []
+    for path in paths:
+        src_path, dest_path = parse_path(path)
+        # For dest_path, append the dest_prefix
+        dest_abs_path = os.path.join(dest_prefix, dest_path)
+        # For src_path if not absolute, append the default src_prefix
+        if not os.path.isabs(path):
+            src_abs_path = os.path.join(default_src_prefix, src_path)
+        else:
+            src_abs_path = src_path
+        # Check if source is file or directory and save accordingly
+        if os.path.isfile(src_abs_path):
+            files.append((src_abs_path, dest_abs_path))
+        elif os.path.isdir(src_abs_path):
+            directories.append((src_abs_path, dest_abs_path))
+        else:
+            raise PathDoesNotExist(src_abs_path)
+    return files, directories

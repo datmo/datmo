@@ -128,7 +128,8 @@ class TestSnapshotController():
     def test_create_success_datmo_environment(self):
         self.__setup()
         # Create environment definition
-        datmo_environment_dir = os.path.join(self.snapshot.home, "datmo_environment")
+        datmo_environment_dir = os.path.join(self.snapshot.home,
+                                             "datmo_environment")
         os.makedirs(datmo_environment_dir)
         env_def_path = os.path.join(datmo_environment_dir, "Dockerfile")
         with open(env_def_path, "w") as f:
@@ -152,10 +153,12 @@ class TestSnapshotController():
         env_def_path = os.path.join(random_dir, "randomDockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
-        environment_definition_filepaths = [env_def_path + ":Dockerfile"]
+        environment_definition_paths = [env_def_path + ":Dockerfile"]
         # Test default values for snapshot, success
-        snapshot_obj = self.snapshot.create({"message": "my test snapshot",
-                                             "environment_definition_filepaths": environment_definition_filepaths})
+        snapshot_obj = self.snapshot.create({
+            "message": "my test snapshot",
+            "environment_definition_paths": environment_definition_paths
+        })
 
         assert isinstance(snapshot_obj, Snapshot)
         assert snapshot_obj.code_id
@@ -177,7 +180,7 @@ class TestSnapshotController():
         snapshot_obj_1 = self.snapshot.create({"message": "my test snapshot"})
 
         # Should return the same object back
-        assert snapshot_obj_1 == snapshot_obj
+        assert snapshot_obj_1.id == snapshot_obj.id
         assert snapshot_obj_1.code_id == snapshot_obj.code_id
         assert snapshot_obj_1.environment_id == \
                snapshot_obj.environment_id
@@ -215,12 +218,12 @@ class TestSnapshotController():
         input_dict = {
             "message":
                 "my test snapshot",
-            "filepaths": [
+            "paths": [
                 os.path.join(self.snapshot.home, "dirpath1"),
                 os.path.join(self.snapshot.home, "dirpath2"),
                 os.path.join(self.snapshot.home, "filepath1")
             ],
-            "environment_definition_filepaths": [env_def_path],
+            "environment_definition_paths": [env_def_path],
             "config_filepath":
                 config_filepath,
             "stats_filepath":
@@ -266,12 +269,12 @@ class TestSnapshotController():
         input_dict = {
             "message":
                 "my test snapshot",
-            "filepaths": [
+            "paths": [
                 os.path.join(self.snapshot.home, "dirpath1"),
                 os.path.join(self.snapshot.home, "dirpath2"),
                 os.path.join(self.snapshot.home, "filepath1")
             ],
-            "environment_definition_filepaths": [env_def_path],
+            "environment_definition_paths": [env_def_path],
             "config_filename":
                 "different_name",
             "stats_filename":
@@ -301,12 +304,12 @@ class TestSnapshotController():
         input_dict = {
             "message":
                 "my test snapshot",
-            "filepaths": [
+            "paths": [
                 os.path.join(self.snapshot.home, "dirpath1"),
                 os.path.join(self.snapshot.home, "dirpath2"),
                 os.path.join(self.snapshot.home, "filepath1")
             ],
-            "environment_definition_filepaths":[env_def_path],
+            "environment_definition_paths": [env_def_path],
             "config": {
                 "foo": "bar"
             },
@@ -433,12 +436,12 @@ class TestSnapshotController():
         input_dict = {
             "message":
                 "my test snapshot",
-            "filepaths": [
+            "paths": [
                 os.path.join(self.snapshot.home, "dirpath1"),
                 os.path.join(self.snapshot.home, "dirpath2"),
                 os.path.join(self.snapshot.home, "filepath1")
             ],
-            "environment_definition_filepaths": [env_def_path],
+            "environment_definition_paths": [env_def_path],
             "config_filename":
                 config_filepath,
             "stats_filename":
@@ -465,8 +468,8 @@ class TestSnapshotController():
         result = self.snapshot.checkout(snapshot_obj_1.id)
 
         # Snapshot directory in user directory
-        snapshot_obj_1_path = os.path.join(
-            self.snapshot.home, ".datmo", "snapshots", snapshot_obj_1.id)
+        snapshot_obj_1_path = os.path.join(self.snapshot.home, ".datmo",
+                                           "snapshots", snapshot_obj_1.id)
 
         assert result == True and \
                self.snapshot.code_driver.latest_commit() == code_obj_1.commit_id and \
@@ -578,8 +581,11 @@ class TestSnapshotController():
 
         # Update snapshot in the project
         self.snapshot.update(
-            snapshot_obj.id, config=test_config, stats=test_stats,
-            message=test_message, label=test_label)
+            snapshot_obj.id,
+            config=test_config,
+            stats=test_stats,
+            message=test_message,
+            label=test_label)
 
         # Get the updated snapshot obj
         updated_snapshot_obj = self.snapshot.dal.snapshot.get_by_id(

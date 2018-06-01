@@ -89,9 +89,9 @@ class TestBaseController():
         assert self.base.code_driver != None
         assert self.base.code_driver.type == "git"
 
-    def test_file_tree(self):
+    def test_file_driver(self):
         assert self.base.file_driver != None
-        assert self.base.file_driver.filepath == self.base.home
+        assert self.base.file_driver.root == self.base.home
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_environment(self):

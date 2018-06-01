@@ -102,7 +102,7 @@ class TestTaskCommand():
         # test for desired side effects
         assert self.task.args.cmd == test_command
         assert self.task.args.ports == [test_ports[0]]
-        assert self.task.args.environment_definition_filepaths == [test_dockerfile]
+        assert self.task.args.environment_definition_paths == [test_dockerfile]
 
         self.task.parse([
             "task", "run", "-p", test_ports[0], "-p", test_ports[1],
@@ -111,7 +111,7 @@ class TestTaskCommand():
         # test for desired side effects
         assert self.task.args.cmd == test_command
         assert self.task.args.ports == test_ports
-        assert self.task.args.environment_definition_filepaths == [test_dockerfile]
+        assert self.task.args.environment_definition_paths == [test_dockerfile]
 
         # test proper execution of task run command
         result = self.task.execute()
@@ -139,7 +139,7 @@ class TestTaskCommand():
         # test for desired side effects
         assert self.task.args.cmd == test_command
         assert self.task.args.ports == test_ports
-        assert self.task.args.environment_definition_filepaths == [test_dockerfile]
+        assert self.task.args.environment_definition_paths == [test_dockerfile]
 
         # test proper execution of task run command
         result = self.task.execute()

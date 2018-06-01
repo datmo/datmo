@@ -13,10 +13,10 @@ from docker import errors
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
-    PathDoesNotExist, EnvironmentInitFailed,
-    EnvironmentExecutionError, FileAlreadyExistsError,
-    EnvironmentRequirementsCreateError, EnvironmentImageNotFound,
-    EnvironmentContainerNotFound, GPUSupportNotEnabled)
+    PathDoesNotExist, EnvironmentInitFailed, EnvironmentExecutionError,
+    FileAlreadyExistsError, EnvironmentRequirementsCreateError,
+    EnvironmentImageNotFound, EnvironmentContainerNotFound,
+    GPUSupportNotEnabled, EnvironmentDoesNotExist)
 from datmo.core.controller.environment.driver import EnvironmentDriver
 
 
@@ -119,13 +119,16 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         if not output_path:
             directory, filename = os.path.split(path)
             output_path = os.path.join(directory, "datmo" + filename)
-
+        if not os.path.isfile(path):
+            raise EnvironmentDoesNotExist(
+                __("error", "controller.environment.driver.docker.create.dne",
+                   path))
         if os.path.isfile(output_path):
             raise FileAlreadyExistsError(
                 __("error",
                    "controller.environment.driver.docker.create.exists",
                    output_path))
-        success = self.form_datmo_definition_file(
+        success = self.create_datmo_definition(
             input_definition_path=path, output_definition_path=output_path)
 
         return success, path, output_path
@@ -730,9 +733,24 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 __("error", "controller.environment.requirements.create",
                    "no such package manager"))
 
-    def form_datmo_definition_file(self,
-                                   input_definition_path="Dockerfile",
-                                   output_definition_path="datmoDockerfile"):
+    @staticmethod
+    def create_default_definition(directory, language="python3"):
+        language_dockerfile = "%sDockerfile" % language
+        base_dockerfile_filepath = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), "templates",
+            language_dockerfile)
+
+        destination_dockerfile = os.path.join(directory, "Dockerfile")
+        destination = open(destination_dockerfile, "w")
+        shutil.copyfileobj(open(base_dockerfile_filepath, "r"), destination)
+        return destination_dockerfile
+
+    def get_default_definition_path(self):
+        return os.path.join(self.filepath, "Dockerfile")
+
+    def create_datmo_definition(self,
+                                input_definition_path="Dockerfile",
+                                output_definition_path="datmoDockerfile"):
         """
         In order to create intermediate dockerfile to run
         """
@@ -748,19 +766,3 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         destination.close()
 
         return True
-
-    def default_environment_definition(self):
-        return os.path.join(self.filepath, "Dockerfile")
-
-    @staticmethod
-    def create_default_dockerfile(directory, language="python3"):
-        language_dockerfile = "%sDockerfile" % language
-        base_dockerfile_filepath = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), "templates",
-            language_dockerfile)
-
-        destination_dockerfile = os.path.join(directory, "Dockerfile")
-        destination = open(destination_dockerfile, "w")
-        shutil.copyfileobj(open(base_dockerfile_filepath, "r"), destination)
-        return destination_dockerfile
-

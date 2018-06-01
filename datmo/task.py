@@ -241,9 +241,9 @@ def run(command, env=None, home=None, gpu=False):
     task_dict = {}
 
     if isinstance(env, list):
-        snapshot_dict["environment_definition_filepaths"] = env
+        snapshot_dict["environment_definition_paths"] = env
     elif env:
-        snapshot_dict["environment_definition_filepaths"] = [env]
+        snapshot_dict["environment_definition_paths"] = [env]
 
     if isinstance(command, list):
         task_dict["command_list"] = command

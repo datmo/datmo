@@ -47,7 +47,8 @@ def get_datmo_parser():
         "--name", dest="name", help="name of session to select")
 
     # Environment
-    environment_parser = subparsers.add_parser("environment", help="environment module")
+    environment_parser = subparsers.add_parser(
+        "environment", help="environment module")
     environment_subcommand_parsers = environment_parser.add_subparsers(
         title="subcommands", dest="subcommand")
 
@@ -55,7 +56,7 @@ def get_datmo_parser():
         "create", help="create environment")
     environment_create.add_argument(
         "--environment-def",
-        dest="definition_filepaths",
+        dest="definition_paths",
         default=None,
         action="append",
         type=str,
@@ -128,7 +129,7 @@ def get_datmo_parser():
         help="environment id from environment object")
     snapshot_create.add_argument(
         "--environment-def",
-        dest="environment_definition_filepaths",
+        dest="environment_definition_paths",
         default=None,
         action="append",
         type=str,
@@ -142,8 +143,8 @@ def get_datmo_parser():
         default=None,
         help="file collection id for file collection object")
     snapshot_create.add_argument(
-        "--filepaths",
-        dest="filepaths",
+        "--paths",
+        dest="paths",
         default=None,
         action="append",
         help=
@@ -283,7 +284,7 @@ def get_datmo_parser():
     # run.add_argument("--data", nargs="*", dest="data", type=str, help="Path for data to be used during the Task")
     task_run.add_argument(
         "--environment-def",
-        dest="environment_definition_filepaths",
+        dest="environment_definition_paths",
         default=None,
         action="append",
         type=str,

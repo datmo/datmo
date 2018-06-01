@@ -141,13 +141,14 @@ class FileDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
-    def create_collection(self, filepaths):
-        """Takes a list of absolute filepaths and aggregates into collection
+    def create_collection(self, paths):
+        """Takes a list of use given paths and aggregates into collection
 
         Parameters
         ----------
-        filepaths : list
-            list of strings to absolute paths
+        paths : list
+            list of absolute or relative filepaths and/or dirpaths to collect with destination names
+            (e.g. "/path/to/file:hello", "/path/to/file2", "/path/to/dir:newdir")
 
         Returns
         -------

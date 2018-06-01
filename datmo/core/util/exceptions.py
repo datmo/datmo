@@ -90,6 +90,10 @@ class FileAlreadyExistsError(Exception):
     pass
 
 
+class DirAlreadyExistsError(Exception):
+    pass
+
+
 class DoesNotExist(Exception):
     pass
 
@@ -167,6 +171,10 @@ class TaskInteractiveDetachError(ArgumentError):
 
 
 class SnapshotCreateFromTaskArgs(ArgumentError):
+    pass
+
+
+class InvalidDestinationName(ArgumentError):
     pass
 
 

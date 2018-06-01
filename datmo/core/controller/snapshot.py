@@ -76,7 +76,7 @@ class SnapshotController(BaseController):
             environment :
                 environment_id : str, optional
                     id for environment used to create snapshot
-                environment_definition_filepaths : list, optional
+                environment_definition_paths : list, optional
                     list of absolute filepath in string for the environment definition file
                     (e.g. Dockerfile path for Docker)
 
@@ -89,12 +89,13 @@ class SnapshotController(BaseController):
             file_collection :
                 file_collection_id : str, optional
                     file collection associated with the snapshot
-                filepaths : list, optional
-                    list of files or folder paths to include within the snapshot
+                paths : list, optional
+                    list of absolute or relative filepaths and/or dirpaths to collect with destination names
+                    (e.g. "/path/to/file:hello", "/path/to/file2", "/path/to/dir:newdir")
 
                 Default
                 -------
-                filepaths will be considered empty ([]), and the FileCollectionController
+                paths will be considered empty ([]), and the FileCollectionController
                 will create a blank FileCollection that is empty.
 
             config :
@@ -312,7 +313,12 @@ class SnapshotController(BaseController):
 
         return self.dal.snapshot.query(query, sort_key, sort_order)
 
-    def update(self, snapshot_id, config=None, stats=None, message=None, label=None):
+    def update(self,
+               snapshot_id,
+               config=None,
+               stats=None,
+               message=None,
+               label=None):
         if not snapshot_id:
             raise RequiredArgumentMissing(
                 __("error", "controller.snapshot.delete.arg", "snapshot_id"))
@@ -420,10 +426,10 @@ class SnapshotController(BaseController):
         if "environment_id" in incoming_dictionary:
             create_dict['environment_id'] = incoming_dictionary[
                 'environment_id']
-        elif "environment_definition_filepaths" in incoming_dictionary:
+        elif "environment_definition_paths" in incoming_dictionary:
             create_dict['environment_id'] = self.environment.create({
-                "definition_filepaths":
-                    incoming_dictionary['environment_definition_filepaths']
+                "definition_paths":
+                    incoming_dictionary['environment_definition_paths']
             }).id
         else:
             # create some default environment
@@ -445,10 +451,10 @@ class SnapshotController(BaseController):
 
             create_dict['file_collection_id'] = incoming_dictionary[
                 'file_collection_id']
-        elif "filepaths" in incoming_dictionary:
+        elif "paths" in incoming_dictionary:
             # transform file paths to file_collection_id
             create_dict['file_collection_id'] = self.file_collection.\
-                create(incoming_dictionary['filepaths']).id
+                create(incoming_dictionary['paths']).id
         else:
             # create some default file collection
             create_dict['file_collection_id'] = self.file_collection.\
