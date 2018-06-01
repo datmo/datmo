@@ -104,7 +104,7 @@ save.image()
 We can create a snapshot with the following command. A snapshot will enable us to log our experiment and reproduce the state of code, environment, metrics, and more in future examples.
 
 ```{r snapshotCreate}
-system2("datmo", args=paste("snapshot create", "-m 'Whoah, my first snapshot!'", config, stats))
+system2("datmo", args=paste("snapshot create", "-m 'Whoah, my first snapshot!'", config, stats), timeout=15)
 ```
 
 We can visualize the snapshot we just created (and any others associated with this project) with the following command

@@ -25,4 +25,4 @@ stats<- paste(sep="",
               " --stats Kappa:", modFit$results$Kappa[1])
 
 # Create snapshot with configuration and stats
-system2("datmo", args=paste("snapshot create", "-m 'Whoah, my first snapshot!'", config, stats))
+system2("datmo", args=paste("snapshot create", "-m 'Whoah, my first snapshot!'", config, stats), timeout=15)
