@@ -263,6 +263,11 @@ def get_datmo_temp_path(filepath):
 def parse_path(path):
     """Parse user given path
 
+    Parameters
+    ----------
+    path : str
+        user given path
+
     Returns
     -------
     src_path : str
@@ -272,26 +277,36 @@ def parse_path(path):
     """
     # Parse given path and split out the destination
     path = path.strip()
-    # Split path first
+    # Split path in multiple ways
+    path_list = path.split(":")
     prefix, tail = os.path.split(path)
-    tail_split_list = tail.split(":")
-    # Split colon first
-    split_list_2 = path.split(":")
-    dest_list = os.path.split(split_list_2[-1])
     prefix_split_list = prefix.split(":")
-    extra_dest = prefix_split_list[-1]
-    # If extra_dest if not null and in dest_list then
-    if (extra_dest in dest_list or (extra_dest == "" and len(dest_list) > 1)
-        ) and len(split_list_2) > 1 and len(prefix_split_list) > 1:
-        raise InvalidDestinationName()
-    src_path = os.path.join(prefix, tail_split_list[0])
-    # Ensure dest_path is not an absolute path and set it accordingly
-    if len(tail_split_list) > 1:
-        if os.path.isabs(tail_split_list[-1]):
-            raise InvalidDestinationName(tail_split_list[-1])
-        dest_path = tail_split_list[-1]
+    tail_split_list = tail.split(":")
+    if len(prefix_split_list) > 2:  # if windows based path
+        src_path = os.path.join(":".join(path_list[:2]))
+        dest_path = os.path.join(":".join(path_list[2:]))
+        return src_path, dest_path
+    elif len(prefix_split_list) == 2:  # windows normal or nix multiple
+        # if the first element can be split into a path, it is valid
+        if len(os.path.split(prefix_split_list[0])) > 1:
+            src_path = prefix_split_list[0]
+            new_tail = os.path.join(prefix_split_list[1], tail)
+        else:
+            src_path = os.path.join(prefix, tail_split_list[0])
+            new_tail = tail
     else:
+        src_path = os.path.join(prefix, tail_split_list[0])
+        new_tail = tail
+    # Resplit the tail
+    tail_split_list = new_tail.split(":")
+    # Check if the tail split can be determined
+    if len(tail_split_list) == 1:
         dest_path = tail_split_list[0]
+    else:
+        dest_path = ":".join(tail_split_list[1:])
+    # Test dest_path to ensure it is valid
+    if os.path.isabs(dest_path):
+        raise InvalidDestinationName()
     return src_path, dest_path
 
 

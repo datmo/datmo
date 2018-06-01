@@ -16,7 +16,7 @@ except NameError:
 from datmo.core.util.misc_functions import (
     get_filehash, create_unique_hash, mutually_exclusive, is_project_dir,
     find_project_dir, grep, prettify_datetime, format_table,
-    parse_cli_key_value, get_datmo_temp_path, parse_paths)
+    parse_cli_key_value, get_datmo_temp_path, parse_path, parse_paths)
 
 from datmo.core.util.exceptions import MutuallyExclusiveArguments, RequiredArgumentMissing, InvalidDestinationName, PathDoesNotExist
 
@@ -152,6 +152,37 @@ class TestMiscFunctions():
             exists = True
         assert exists
 
+    def test_parse_path(self):
+        test_simple = os.path.join(self.temp_dir, "test.txt")
+        test_path = os.path.join(self.temp_dir, "test.txt") + ":hello"
+        test_invalid_path = os.path.join(self.temp_dir,
+                                         "test.txt") + ":" + os.path.join(
+                                             self.temp_dir, "hello")
+        test_invalid_path_2 = "test.txt:" + os.path.join(
+            self.temp_dir, "hello")
+
+        src_path, dest_path = parse_path(test_simple)
+        assert "test.txt" in src_path
+        assert dest_path == "test.txt"
+
+        src_path, dest_path = parse_path(test_path)
+        assert "test.txt" in src_path
+        assert dest_path == "hello"
+
+        failed = False
+        try:
+            _ = parse_path(test_invalid_path)
+        except InvalidDestinationName:
+            failed = True
+        assert failed
+
+        failed = False
+        try:
+            _ = parse_path(test_invalid_path_2)
+        except InvalidDestinationName:
+            failed = True
+        assert failed
+
     def test_parse_paths(self):
         # Create a file and a directory to test on
         filepath = os.path.join(self.temp_dir, "test.txt")
@@ -184,14 +215,6 @@ class TestMiscFunctions():
                               os.path.join(dest_prefix, "new_name.txt"))]
         assert result[1] == [(os.path.join(default_source_prefix, "test_dir"),
                               os.path.join(dest_prefix, "new_dirname"))]
-        # Test failure for abs path for dest
-        paths = ["test.txt:/new_name.txt", "test_dir:/new_dirname"]
-        failed = False
-        try:
-            parse_paths(default_source_prefix, paths, dest_prefix)
-        except InvalidDestinationName:
-            failed = True
-        assert failed
         # Test failure if path does not exist
         paths = ["sldfkj.txt:new_name.txt", "sldkfj:new_dirname"]
         failed = False
