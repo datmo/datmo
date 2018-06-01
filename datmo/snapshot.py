@@ -209,8 +209,8 @@ def create(message,
         (default is None, environment_id is also not passed, which will defer to the environment to find a
         default environment or will fail if not found)
     paths : list, optional
-        provides a list of absolute filepaths to files or directories
-        that are relevant (default is None, which means we have an empty
+        list of absolute or relative filepaths and/or dirpaths to collect with destination names
+        (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
     config : dict, optional
         provide the dictionary of configurations
         (default is None, which means it is empty)

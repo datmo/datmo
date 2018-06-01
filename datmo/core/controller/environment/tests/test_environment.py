@@ -125,7 +125,7 @@ class TestEnvironmentController():
 
         # 4) Test option 4
         input_dict = {
-            "definition_paths": [definition_filepath + ":Dockerfile"],
+            "definition_paths": [definition_filepath + ">Dockerfile"],
         }
 
         # Create environment in the project
@@ -184,8 +184,8 @@ class TestEnvironmentController():
 
         input_dict = {
             "definition_paths": [
-                definition_filepath + ":Dockerfile",
-                definition_filepath + ":Dockerfile"
+                definition_filepath + ">Dockerfile",
+                definition_filepath + ">Dockerfile"
             ],
         }
 
@@ -535,7 +535,7 @@ class TestEnvironmentController():
             f.write(to_unicode(str("FROM datmo/scikit-opencv")))
 
         input_dict_2 = {
-            "definition_paths": [definition_path_2 + ":Dockerfile"],
+            "definition_paths": [definition_path_2 + ">Dockerfile"],
         }
 
         # Create second environment in the project

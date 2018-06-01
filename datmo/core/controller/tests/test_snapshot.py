@@ -153,7 +153,7 @@ class TestSnapshotController():
         env_def_path = os.path.join(random_dir, "randomDockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
-        environment_definition_paths = [env_def_path + ":Dockerfile"]
+        environment_definition_paths = [env_def_path + ">Dockerfile"]
         # Test default values for snapshot, success
         snapshot_obj = self.snapshot.create({
             "message": "my test snapshot",

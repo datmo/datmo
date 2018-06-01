@@ -45,8 +45,8 @@ class EnvironmentController(BaseController):
         dictionary : dict
             optional values to populate required environment entity args
                 definition_paths : list, optional
-                    list of absolute filepaths and/or dirpaths to collect for environment definition
-                    (e.g. "/path/to/file:hello", "/path/to/file2", "/path/to/dir:newdir")
+                    list of absolute or relative filepaths and/or dirpaths to collect with destination names
+                    (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
                     (default is to pull from datmo_environments/ folder and project root OR default driver definition if none found)
                 hardware_info : dict, optional
                     information about the environment hardware
@@ -96,7 +96,7 @@ class EnvironmentController(BaseController):
         _, environment_filename = os.path.split(src_environment_filepath)
         create_dict['definition_filename'] = environment_filename
         if not paths and os.path.exists(src_environment_filepath):
-            paths.append(src_environment_filepath + ":" + environment_filename)
+            paths.append(src_environment_filepath)
 
         # Step 2: Check existing paths and create files as needed to populate the
         # full environment within the temporary directory

@@ -61,7 +61,7 @@ def get_datmo_parser():
         action="append",
         type=str,
         help=
-        "absolute filepath to environment definition file (e.g. /path/to/Dockerfile)"
+        "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
     )
     environment_create.add_argument(
         "--message",
@@ -134,7 +134,7 @@ def get_datmo_parser():
         action="append",
         type=str,
         help=
-        "absolute filepath to environment definition file (e.g. /path/to/Dockerfile)"
+        "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
     )
 
     snapshot_create.add_argument(
@@ -148,7 +148,7 @@ def get_datmo_parser():
         default=None,
         action="append",
         help=
-        "absolute paths to files or folders to include within the files of the snapshot"
+        "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
     )
 
     snapshot_create.add_argument(
@@ -289,7 +289,7 @@ def get_datmo_parser():
         action="append",
         type=str,
         help=
-        "absolute filepath to environment definition file (e.g. /path/to/Dockerfile)"
+        "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
     )
     task_run.add_argument(
         "--interactive",

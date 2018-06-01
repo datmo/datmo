@@ -107,7 +107,7 @@ class TestTaskModule():
         # 5) Test out option 5
         task_obj_3 = run(
             command=["python", "script.py"],
-            env=[test_filepath+":Dockerfile"],
+            env=[test_filepath + ">Dockerfile"],
             home=self.temp_dir)
         assert isinstance(task_obj_3, Task)
         assert task_obj_3.id
@@ -116,14 +116,13 @@ class TestTaskModule():
 
         # 6) Test out option 6
         os.remove(test_filepath)
-        datmo_environment_dir = os.path.join(self.temp_dir, "datmo_environment")
+        datmo_environment_dir = os.path.join(self.temp_dir,
+                                             "datmo_environment")
         os.makedirs(datmo_environment_dir)
         test_filepath = os.path.join(datmo_environment_dir, "Dockerfile")
         with open(test_filepath, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu"))
-        task_obj_4 = run(
-            command=["python", "script.py"],
-            home=self.temp_dir)
+        task_obj_4 = run(command=["python", "script.py"], home=self.temp_dir)
         assert isinstance(task_obj_4, Task)
         assert task_obj_4.id
         assert 'hello' in task_obj_4.logs

@@ -37,7 +37,7 @@ class FileCollectionController(BaseController):
         ----------
         paths : list
             list of absolute or relative filepaths and/or dirpaths to collect with destination names
-            (e.g. "/path/to/file:hello", "/path/to/file2", "/path/to/dir:newdir")
+            (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
 
         Returns
         -------

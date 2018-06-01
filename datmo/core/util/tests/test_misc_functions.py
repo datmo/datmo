@@ -18,7 +18,7 @@ from datmo.core.util.misc_functions import (
     find_project_dir, grep, prettify_datetime, format_table,
     parse_cli_key_value, get_datmo_temp_path, parse_path, parse_paths)
 
-from datmo.core.util.exceptions import MutuallyExclusiveArguments, RequiredArgumentMissing, InvalidDestinationName, PathDoesNotExist
+from datmo.core.util.exceptions import MutuallyExclusiveArguments, RequiredArgumentMissing, InvalidDestinationName, PathDoesNotExist, TooManyArgumentsFound
 
 
 class TestMiscFunctions():
@@ -154,20 +154,31 @@ class TestMiscFunctions():
 
     def test_parse_path(self):
         test_simple = os.path.join(self.temp_dir, "test.txt")
-        test_path = os.path.join(self.temp_dir, "test.txt") + ":hello"
+        test_path = os.path.join(self.temp_dir, "test.txt") + ">hello"
+        test_windows_like = os.path.join("pre:pre", "test")
+        test_windows_like_with_dest = os.path.join("pre:pre", "test>new")
         test_invalid_path = os.path.join(self.temp_dir,
-                                         "test.txt") + ":" + os.path.join(
+                                         "test.txt") + ">" + os.path.join(
                                              self.temp_dir, "hello")
-        test_invalid_path_2 = "test.txt:" + os.path.join(
+        test_invalid_path_2 = "test.txt>" + os.path.join(
             self.temp_dir, "hello")
+        test_invalid_path_3 = "test.txt>new>third"
 
-        src_path, dest_path = parse_path(test_simple)
+        src_path, dest_name = parse_path(test_simple)
         assert "test.txt" in src_path
-        assert dest_path == "test.txt"
+        assert dest_name == "test.txt"
 
-        src_path, dest_path = parse_path(test_path)
+        src_path, dest_name = parse_path(test_path)
         assert "test.txt" in src_path
-        assert dest_path == "hello"
+        assert dest_name == "hello"
+
+        src_path, dest_name = parse_path(test_windows_like)
+        assert src_path == os.path.join("pre:pre", "test")
+        assert dest_name == "test"
+
+        src_path, dest_name = parse_path(test_windows_like_with_dest)
+        assert src_path == os.path.join("pre:pre", "test")
+        assert dest_name == "new"
 
         failed = False
         try:
@@ -180,6 +191,13 @@ class TestMiscFunctions():
         try:
             _ = parse_path(test_invalid_path_2)
         except InvalidDestinationName:
+            failed = True
+        assert failed
+
+        failed = False
+        try:
+            _ = parse_path(test_invalid_path_3)
+        except TooManyArgumentsFound:
             failed = True
         assert failed
 
@@ -209,14 +227,14 @@ class TestMiscFunctions():
         assert result[0] == [(filepath, os.path.join(dest_prefix, "test.txt"))]
         assert result[1] == [(dirpath, os.path.join(dest_prefix, "test_dir"))]
         # Test default source path and given dest path
-        paths = ["test.txt:new_name.txt", "test_dir:new_dirname"]
+        paths = ["test.txt>new_name.txt", "test_dir>new_dirname"]
         result = parse_paths(default_source_prefix, paths, dest_prefix)
         assert result[0] == [(os.path.join(default_source_prefix, "test.txt"),
                               os.path.join(dest_prefix, "new_name.txt"))]
         assert result[1] == [(os.path.join(default_source_prefix, "test_dir"),
                               os.path.join(dest_prefix, "new_dirname"))]
         # Test failure if path does not exist
-        paths = ["sldfkj.txt:new_name.txt", "sldkfj:new_dirname"]
+        paths = ["sldfkj.txt>new_name.txt", "sldkfj>new_dirname"]
         failed = False
         try:
             parse_paths(default_source_prefix, paths, dest_prefix)
@@ -224,7 +242,7 @@ class TestMiscFunctions():
             failed = True
         assert failed
         # Test success absolute path and destination
-        paths = [filepath + ":new_name.txt", dirpath + ":new_dirname"]
+        paths = [filepath + ">new_name.txt", dirpath + ">new_dirname"]
         result = parse_paths(default_source_prefix, paths, dest_prefix)
         assert result[0] == [(filepath,
                               os.path.join(dest_prefix, "new_name.txt"))]

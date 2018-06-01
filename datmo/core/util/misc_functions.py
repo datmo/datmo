@@ -22,7 +22,8 @@ from datmo.core.controller.environment.driver.dockerenv import DockerEnvironment
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     PathDoesNotExist, MutuallyExclusiveArguments, RequiredArgumentMissing,
-    EnvironmentInitFailed, EnvironmentExecutionError, InvalidDestinationName)
+    EnvironmentInitFailed, EnvironmentExecutionError, InvalidDestinationName,
+    TooManyArgumentsFound)
 
 
 def grep(pattern, fileObj):
@@ -272,42 +273,29 @@ def parse_path(path):
     -------
     src_path : str
         user given source path
-    dest_path : str
-        user given destination path
+    dest_name : str
+        user given destination name
+
+    Raises
+    ------
+    InvalidDestinationName
+        if destination name is a path then error
     """
     # Parse given path and split out the destination
     path = path.strip()
-    # Split path in multiple ways
-    path_list = path.split(":")
-    prefix, tail = os.path.split(path)
-    prefix_split_list = prefix.split(":")
-    tail_split_list = tail.split(":")
-    if len(prefix_split_list) > 2:  # if windows based path
-        src_path = os.path.join(":".join(path_list[:2]))
-        dest_path = os.path.join(":".join(path_list[2:]))
-        return src_path, dest_path
-    elif len(prefix_split_list) == 2:  # windows normal or nix multiple
-        # if the first element can be split into a path, it is valid
-        if len(os.path.split(prefix_split_list[0])) > 1:
-            src_path = prefix_split_list[0]
-            new_tail = os.path.join(prefix_split_list[1], tail)
-        else:
-            src_path = os.path.join(prefix, tail_split_list[0])
-            new_tail = tail
+    path_split_list = path.split(">")
+    if len(path_split_list) == 1:
+        src_path = path_split_list[0]
+        src_dir, src_name = os.path.split(src_path)
+        dest_name = src_name
+    elif len(path_split_list) == 2:
+        src_path, dest_name = path_split_list
     else:
-        src_path = os.path.join(prefix, tail_split_list[0])
-        new_tail = tail
-    # Resplit the tail
-    tail_split_list = new_tail.split(":")
-    # Check if the tail split can be determined
-    if len(tail_split_list) == 1:
-        dest_path = tail_split_list[0]
-    else:
-        dest_path = ":".join(tail_split_list[1:])
+        raise TooManyArgumentsFound()
     # Test dest_path to ensure it is valid
-    if os.path.isabs(dest_path):
+    if os.path.isabs(dest_name):
         raise InvalidDestinationName()
-    return src_path, dest_path
+    return src_path, dest_name
 
 
 def parse_paths(default_src_prefix, paths, dest_prefix):
@@ -318,7 +306,8 @@ def parse_paths(default_src_prefix, paths, dest_prefix):
     default_src_prefix : str
         default directory prefix to append if source path is not an absolute path
     paths : list
-        user given path strings. (e.g. "/path/to/file:hello", "/path/to/file2", "/path/to/dir:newdir")
+        list of absolute or relative filepaths and/or dirpaths to collect with destination names
+        (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
     dest_prefix : str
         destination directory prefix to append to the destination filename
 
@@ -339,9 +328,9 @@ def parse_paths(default_src_prefix, paths, dest_prefix):
     files = []
     directories = []
     for path in paths:
-        src_path, dest_path = parse_path(path)
-        # For dest_path, append the dest_prefix
-        dest_abs_path = os.path.join(dest_prefix, dest_path)
+        src_path, dest_name = parse_path(path)
+        # For dest_name, append the dest_prefix
+        dest_abs_path = os.path.join(dest_prefix, dest_name)
         # For src_path if not absolute, append the default src_prefix
         if not os.path.isabs(path):
             src_abs_path = os.path.join(default_src_prefix, src_path)

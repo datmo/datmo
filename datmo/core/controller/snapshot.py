@@ -77,8 +77,8 @@ class SnapshotController(BaseController):
                 environment_id : str, optional
                     id for environment used to create snapshot
                 environment_definition_paths : list, optional
-                    list of absolute filepath in string for the environment definition file
-                    (e.g. Dockerfile path for Docker)
+                    list of absolute or relative filepaths and/or dirpaths to collect with destination names
+                    (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
 
                 Default
                 -------
