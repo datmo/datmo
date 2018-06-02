@@ -283,20 +283,28 @@ class SnapshotController(BaseController):
         code_obj = self.dal.code.get_by_id(snapshot_obj.code_id)
         file_collection_obj = self.dal.file_collection.\
             get_by_id(snapshot_obj.file_collection_id)
+        environment_obj = self.dal.environment. \
+            get_by_id(snapshot_obj.environment_id)
 
-        # Create new code_driver ref to revert back (if needed)
-        # TODO: Save this to be reverted to
-        current_code_obj = self.code.create()
+        # check for unstaged changes in code
+        self.code_driver.check_unstaged_changes()
+        # check for unstaged changes in environment
+        self.environment.check_unstaged_changes()
+        # check for unstaged changes in file
+        self.file_collection.check_unstaged_changes()
 
         # Checkout code_driver to the relevant commit ref
-        self.code_driver.checkout_ref(code_obj.commit_id)
+        code_checkout_success = self.code_driver.checkout_ref(code_obj.commit_id)
 
-        # Pull file collection to the project home
-        dst_dirpath = os.path.join("datmo_snapshots", snapshot_id)
-        abs_dst_dirpath = self.file_driver.create(dst_dirpath, directory=True)
-        self.file_driver.transfer_collection(file_collection_obj.filehash,
-                                             abs_dst_dirpath)
-        return True
+        # Checkout environment_driver to relevant environment id
+        environment_checkout_success = self.environment.checkout(environment_obj.id)
+
+        # Checkout file_driver to relevant file collection id
+        file_checkout_success = self.file_collection.checkout(file_collection_obj.id)
+
+        return (code_checkout_success and
+                environment_checkout_success and
+                file_checkout_success)
 
     def list(self,
              session_id=None,

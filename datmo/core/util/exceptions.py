@@ -151,6 +151,10 @@ class FileStructureError(FileExecutionError):
     pass
 
 
+class FileNotInitialized(FileExecutionError):
+    pass
+
+
 class EnvironmentException(Exception):
     pass
 
@@ -211,5 +215,5 @@ class DatmoFolderInWorkTree(CodeException):
     pass
 
 
-class UnstagedChanges(CodeException):
+class UnstagedChanges(Exception):
     pass

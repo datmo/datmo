@@ -95,8 +95,7 @@ class TestSnapshotController():
         # Test default values for snapshot, fail due to no environment from file
         self.snapshot.file_driver.create("filepath1")
         snapshot_obj_0 = self.snapshot.create({
-            "message": "my test snapshot",
-            "language": "python3"
+            "message": "my test snapshot"
         })
         assert isinstance(snapshot_obj_0, Snapshot)
         assert snapshot_obj_0.code_id
@@ -126,9 +125,19 @@ class TestSnapshotController():
     def test_create_success_default_env_def(self):
         self.__setup()
         # Create environment definition
-        env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
+        datmo_environment_path = os.path.join(self.snapshot.home, "datmo_environment")
+        if not os.path.isdir(datmo_environment_path):
+            os.makedirs(datmo_environment_path)
+        env_def_path = os.path.join(datmo_environment_path, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        # Creating a file in project folder
+        test_filepath = os.path.join(self.snapshot.home, "script.py")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode("import numpy\n"))
+            f.write(to_unicode("import sklearn\n"))
+            f.write(to_unicode("print('hello')\n"))
 
         # Test default values for snapshot, success
         snapshot_obj = self.snapshot.create({"message": "my test snapshot"})
@@ -144,9 +153,19 @@ class TestSnapshotController():
         self.__setup()
         # Test 2 snapshots with same parameters
         # Create environment definition
-        env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
+        datmo_environment_path = os.path.join(self.snapshot.home, "datmo_environment")
+        if not os.path.isdir(datmo_environment_path):
+            os.makedirs(datmo_environment_path)
+        env_def_path = os.path.join(datmo_environment_path, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        # Creating a file in project folder
+        test_filepath = os.path.join(self.snapshot.home, "script.py")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode("import numpy\n"))
+            f.write(to_unicode("import sklearn\n"))
+            f.write(to_unicode("print('hello')\n"))
 
         snapshot_obj = self.snapshot.create({"message": "my test snapshot"})
 
@@ -167,16 +186,26 @@ class TestSnapshotController():
     def test_create_success_given_files_env_def_config_file_stats_file(self):
         self.__setup()
         # Create environment definition
-        env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
+        datmo_environment_path = os.path.join(self.snapshot.home, "datmo_environment")
+        if not os.path.isdir(datmo_environment_path):
+            os.makedirs(datmo_environment_path)
+        env_def_path = os.path.join(datmo_environment_path, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        # Creating a file in project folder
+        test_filepath = os.path.join(self.snapshot.home, "script.py")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode("import numpy\n"))
+            f.write(to_unicode("import sklearn\n"))
+            f.write(to_unicode("print('hello')\n"))
 
         snapshot_obj = self.snapshot.create({"message": "my test snapshot"})
 
         # Create files to add
-        self.snapshot.file_driver.create("dirpath1", directory=True)
-        self.snapshot.file_driver.create("dirpath2", directory=True)
-        self.snapshot.file_driver.create("filepath1")
+        self.snapshot.file_driver.create("datmo_files/dirpath1", directory=True)
+        self.snapshot.file_driver.create("datmo_files/dirpath2", directory=True)
+        self.snapshot.file_driver.create("datmo_files/filepath1")
 
         # Create config
         config_filepath = os.path.join(self.snapshot.home, "config.json")
@@ -192,12 +221,13 @@ class TestSnapshotController():
             "message":
                 "my test snapshot",
             "filepaths": [
-                os.path.join(self.snapshot.home, "dirpath1"),
-                os.path.join(self.snapshot.home, "dirpath2"),
-                os.path.join(self.snapshot.home, "filepath1")
+                os.path.join(self.snapshot.home, "datmo_files", "dirpath1"),
+                os.path.join(self.snapshot.home, "datmo_files", "dirpath2"),
+                os.path.join(self.snapshot.home, "datmo_files", "filepath1")
             ],
-            "environment_definition_filepath":
-                env_def_path,
+            # TODO: Check for it after merging changes in other PR
+            # "environment_definition_filepath":
+            #     env_def_path,
             "config_filepath":
                 config_filepath,
             "stats_filepath":
@@ -218,16 +248,26 @@ class TestSnapshotController():
     def test_create_success_given_files_env_def_different_config_stats(self):
         self.__setup()
         # Create environment definition
-        env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
+        datmo_environment_path = os.path.join(self.snapshot.home, "datmo_environment")
+        if not os.path.isdir(datmo_environment_path):
+            os.makedirs(datmo_environment_path)
+        env_def_path = os.path.join(datmo_environment_path, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        # Creating a file in project folder
+        test_filepath = os.path.join(self.snapshot.home, "script.py")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode("import numpy\n"))
+            f.write(to_unicode("import sklearn\n"))
+            f.write(to_unicode("print('hello')\n"))
 
         snapshot_obj = self.snapshot.create({"message": "my test snapshot"})
 
         # Create files to add
-        self.snapshot.file_driver.create("dirpath1", directory=True)
-        self.snapshot.file_driver.create("dirpath2", directory=True)
-        self.snapshot.file_driver.create("filepath1")
+        self.snapshot.file_driver.create("datmo_files/dirpath1", directory=True)
+        self.snapshot.file_driver.create("datmo_files/dirpath2", directory=True)
+        self.snapshot.file_driver.create("datmo_files/filepath1")
 
         # Create config
         config_filepath = os.path.join(self.snapshot.home, "config.json")
@@ -244,9 +284,9 @@ class TestSnapshotController():
             "message":
                 "my test snapshot",
             "filepaths": [
-                os.path.join(self.snapshot.home, "dirpath1"),
-                os.path.join(self.snapshot.home, "dirpath2"),
-                os.path.join(self.snapshot.home, "filepath1")
+                os.path.join(self.snapshot.home, "datmo_files", "dirpath1"),
+                os.path.join(self.snapshot.home, "datmo_files", "dirpath2"),
+                os.path.join(self.snapshot.home, "datmo_files", "filepath1")
             ],
             "environment_definition_filepath":
                 env_def_path,
@@ -266,23 +306,33 @@ class TestSnapshotController():
     def test_create_success_given_files_env_def_direct_config_stats(self):
         self.__setup()
         # Create environment definition
-        env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
+        datmo_environment_path = os.path.join(self.snapshot.home, "datmo_environment")
+        if not os.path.isdir(datmo_environment_path):
+            os.makedirs(datmo_environment_path)
+        env_def_path = os.path.join(datmo_environment_path, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
         # Create files to add
-        self.snapshot.file_driver.create("dirpath1", directory=True)
-        self.snapshot.file_driver.create("dirpath2", directory=True)
-        self.snapshot.file_driver.create("filepath1")
+        self.snapshot.file_driver.create("datmo_files/dirpath1", directory=True)
+        self.snapshot.file_driver.create("datmo_files/dirpath2", directory=True)
+        self.snapshot.file_driver.create("datmo_files/filepath1")
+
+        # Creating a file in project folder
+        test_filepath = os.path.join(self.snapshot.home, "script.py")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode("import numpy\n"))
+            f.write(to_unicode("import sklearn\n"))
+            f.write(to_unicode("print('hello')\n"))
 
         # Test different config and stats inputs
         input_dict = {
             "message":
                 "my test snapshot",
             "filepaths": [
-                os.path.join(self.snapshot.home, "dirpath1"),
-                os.path.join(self.snapshot.home, "dirpath2"),
-                os.path.join(self.snapshot.home, "filepath1")
+                os.path.join(self.snapshot.home, "datmo_files", "dirpath1"),
+                os.path.join(self.snapshot.home, "datmo_files", "dirpath2"),
+                os.path.join(self.snapshot.home, "datmo_files", "filepath1")
             ],
             "environment_definition_filepath":
                 env_def_path,
@@ -390,12 +440,18 @@ class TestSnapshotController():
 
     def __default_create(self):
         # Create files to add
-        self.snapshot.file_driver.create("dirpath1", directory=True)
-        self.snapshot.file_driver.create("dirpath2", directory=True)
-        self.snapshot.file_driver.create("filepath1")
+        self.snapshot.file_driver.create("datmo_files/dirpath1", directory=True)
+        self.snapshot.file_driver.create("datmo_files/dirpath2", directory=True)
+        self.snapshot.file_driver.create("datmo_files/filepath1")
 
+        self.snapshot.file_driver.create("filepath2")
+        with open(os.path.join(self.snapshot.home, "filepath2"), "w") as f:
+            f.write(to_unicode(str("import sys\n")))
         # Create environment_driver definition
-        env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
+        datmo_environment_path = os.path.join(self.snapshot.home, "datmo_environment")
+        if not os.path.isdir(datmo_environment_path):
+            os.makedirs(datmo_environment_path)
+        env_def_path = os.path.join(datmo_environment_path, "Dockerfile")
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
@@ -413,9 +469,9 @@ class TestSnapshotController():
             "message":
                 "my test snapshot",
             "filepaths": [
-                os.path.join(self.snapshot.home, "dirpath1"),
-                os.path.join(self.snapshot.home, "dirpath2"),
-                os.path.join(self.snapshot.home, "filepath1")
+                os.path.join(self.snapshot.home, "datmo_files", "dirpath1"),
+                os.path.join(self.snapshot.home, "datmo_files", "dirpath2"),
+                os.path.join(self.snapshot.home, "datmo_files", "filepath1")
             ],
             "environment_definition_filepath":
                 env_def_path,
@@ -446,8 +502,7 @@ class TestSnapshotController():
 
         # Snapshot directory in user directory
         snapshot_obj_1_path = os.path.join(
-            self.snapshot.home, "datmo_snapshots", snapshot_obj_1.id)
-
+            self.snapshot.home, "datmo_environment")
         assert result == True and \
                self.snapshot.code_driver.current_ref() == code_obj_1.commit_id and \
                os.path.isdir(snapshot_obj_1_path)

@@ -139,6 +139,8 @@ MESSAGES = {
             "Error in git commit with options %s: %s",
         "controller.code.driver.git.branch":
             "Error in git branch with name %s: %s",
+        "controller.code.driver.git.status":
+            "Error in git status",
         "controller.code.driver.git.checkout":
             "Error in git checkout with name %s: %s",
         "controller.code.driver.git.stash_save":
@@ -191,6 +193,8 @@ MESSAGES = {
             "Docker environment management initialization failed. Platform: %s",
         "controller.environment.driver.docker.init":
             "Error in docker initialization: %s",
+        "controller.environment.checkout_env":
+            "Environement id does not exist",
         "controller.environment.driver.docker.get_tags":
             "Error in getting tags: %s",
         "controller.environment.driver.docker.create.dne":
@@ -255,6 +259,8 @@ MESSAGES = {
             "Required argument not present in input",
         "controller.file_collection.delete":
             "FileCollection with id %s does NOT exist",
+        "controller.file_collection.checkout_file":
+            "FileCollection id does NOT exist",
         "controller.base.__init__":
             "Project path does not exist: %s",
         "controller.base.current_session":
