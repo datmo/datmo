@@ -17,6 +17,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 from glob import glob
 
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
@@ -173,9 +185,9 @@ def __helper(filepath):
         test.init()
         definition_path = os.path.join(filepath, "Dockerfile")
         if platform.system() == "Windows":
-            with open(definition_path, "w") as f:
-                f.write(to_unicode("FROM alpine:3.5" + "\n"))
-                f.write(to_unicode(str("RUN echo hello")))
+            with open(definition_path, "wb") as f:
+                f.write(to_bytes("FROM alpine:3.5" + "\n"))
+                f.write(to_bytes(str("RUN echo hello")))
             test.build("docker-test", definition_path)
         return False
     except (EnvironmentInitFailed, EnvironmentExecutionError):

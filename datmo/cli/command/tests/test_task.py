@@ -23,6 +23,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
@@ -54,8 +66,8 @@ class TestTaskCommand():
 
         # Create environment_driver definition
         env_def_path = os.path.join(self.temp_dir, "Dockerfile")
-        with open(env_def_path, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
     def test_task_project_not_init(self):
         failed = False

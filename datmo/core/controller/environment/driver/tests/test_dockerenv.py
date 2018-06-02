@@ -15,6 +15,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.core.util.exceptions import (
@@ -41,9 +53,9 @@ class TestDockerEnv():
             DockerEnvironmentDriver(self.temp_dir)
 
         random_text = str(uuid.uuid1())
-        with open(os.path.join(self.temp_dir, "Dockerfile"), "a+") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(os.path.join(self.temp_dir, "Dockerfile"), "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
 
     def teardown_method(self):
         self.docker_environment_driver.stop_remove_containers_by_term(
@@ -134,9 +146,9 @@ class TestDockerEnv():
         path = os.path.join(self.docker_environment_driver.filepath,
                             "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         result = self.docker_environment_driver.build(name, path)
         assert result == True
         # teardown
@@ -151,9 +163,9 @@ class TestDockerEnv():
         path = os.path.join(self.docker_environment_driver.filepath,
                             "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         log_filepath = os.path.join(self.docker_environment_driver.filepath,
                                     "test.log")
         self.docker_environment_driver.build(image_name, path)
@@ -179,6 +191,7 @@ class TestDockerEnv():
         assert return_code == 0
         assert run_id
         assert logs
+        assert isinstance(logs, str)
 
         # teardown
         self.docker_environment_driver.stop(run_id, force=True)
@@ -190,6 +203,7 @@ class TestDockerEnv():
         assert return_code == 0
         assert run_id
         assert logs
+        assert isinstance(logs, str)
         # teardown container
         self.docker_environment_driver.stop(run_id, force=True)
 
@@ -204,9 +218,9 @@ class TestDockerEnv():
         path = os.path.join(self.docker_environment_driver.filepath,
                             "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         log_filepath = os.path.join(self.docker_environment_driver.filepath,
                                     "test.log")
         self.docker_environment_driver.build(image_name, path)
@@ -287,9 +301,9 @@ class TestDockerEnv():
         path = os.path.join(self.docker_environment_driver.filepath,
                             "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         log_filepath = os.path.join(self.docker_environment_driver.filepath,
                                     "test.log")
         self.docker_environment_driver.build(name, path)
@@ -321,9 +335,9 @@ class TestDockerEnv():
         path = os.path.join(self.docker_environment_driver.filepath,
                             "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         # Without force
         self.docker_environment_driver.build(name, path)
         result = self.docker_environment_driver.remove(name)
@@ -347,9 +361,9 @@ class TestDockerEnv():
         dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
                                        "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(dockerfile_path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(dockerfile_path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         result = self.docker_environment_driver.build_image(
             image_name, dockerfile_path)
         assert result == True
@@ -368,9 +382,9 @@ class TestDockerEnv():
         dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
                                        "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(dockerfile_path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(dockerfile_path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         self.docker_environment_driver.build_image(image_name, dockerfile_path)
 
         result = self.docker_environment_driver.get_image(image_name)
@@ -385,9 +399,9 @@ class TestDockerEnv():
         dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
                                        "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(dockerfile_path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(dockerfile_path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         self.docker_environment_driver.build_image(image_name, dockerfile_path)
         # List images without all flag
         result = self.docker_environment_driver.list_images()
@@ -409,9 +423,9 @@ class TestDockerEnv():
         dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
                                        "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(dockerfile_path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(dockerfile_path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         self.docker_environment_driver.build_image(image_name, dockerfile_path)
         result = self.docker_environment_driver.search_images(image_name)
         assert len(result) > 0
@@ -423,9 +437,9 @@ class TestDockerEnv():
         dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
                                        "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(dockerfile_path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(dockerfile_path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         # Without force
         self.docker_environment_driver.build_image(image_name, dockerfile_path)
         result = self.docker_environment_driver.remove_image(image_name)
@@ -443,9 +457,9 @@ class TestDockerEnv():
         dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
                                        "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(dockerfile_path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(dockerfile_path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         # Without force
         self.docker_environment_driver.build_image(image_name, dockerfile_path)
         result = self.docker_environment_driver.remove_images(name=image_name)
@@ -463,9 +477,9 @@ class TestDockerEnv():
         dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
                                        "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(dockerfile_path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(dockerfile_path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         self.docker_environment_driver.build_image(image_name, dockerfile_path)
         # With default parameters
         return_code, container_id = \
@@ -499,9 +513,9 @@ class TestDockerEnv():
         dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
                                        "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(dockerfile_path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(dockerfile_path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         self.docker_environment_driver.build_image(image_name, dockerfile_path)
         _, container_id = self.docker_environment_driver.run_container(
             image_name)
@@ -518,9 +532,9 @@ class TestDockerEnv():
         dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
                                        "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(dockerfile_path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(dockerfile_path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         self.docker_environment_driver.build_image(image_name, dockerfile_path)
         _, container_id = self.docker_environment_driver.run_container(
             image_name, detach=True)
@@ -536,9 +550,9 @@ class TestDockerEnv():
         dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
                                        "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(dockerfile_path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(dockerfile_path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         self.docker_environment_driver.build_image(image_name, dockerfile_path)
         _, container_id = self.docker_environment_driver.run_container(
             image_name)
@@ -556,9 +570,9 @@ class TestDockerEnv():
         dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
                                        "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(dockerfile_path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(dockerfile_path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         # Without force
         self.docker_environment_driver.build_image(image_name, dockerfile_path)
         _, container_id = self.docker_environment_driver.run_container(
@@ -581,9 +595,9 @@ class TestDockerEnv():
         dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
                                        "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(dockerfile_path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(dockerfile_path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         log_filepath = os.path.join(self.docker_environment_driver.filepath,
                                     "test.log")
         self.docker_environment_driver.build_image(image_name, dockerfile_path)
@@ -611,9 +625,9 @@ class TestDockerEnv():
         dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
                                        "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(dockerfile_path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(dockerfile_path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         self.docker_environment_driver.build_image(image_name, dockerfile_path)
         # 1) Test option 1
 
@@ -656,9 +670,9 @@ class TestDockerEnv():
         # has already been installed in local
         script_path = os.path.join(self.docker_environment_driver.filepath,
                                    "script.py")
-        with open(script_path, "w") as f:
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
+        with open(script_path, "wb") as f:
+            f.write(to_bytes("import numpy\n"))
+            f.write(to_bytes("import sklearn\n"))
         # Test default
         result = self.docker_environment_driver.create_requirements_file()
         assert result
@@ -681,9 +695,9 @@ class TestDockerEnv():
         # 1) Test option 1
         script_path = os.path.join(self.docker_environment_driver.filepath,
                                    "script.py")
-        with open(script_path, "w") as f:
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
+        with open(script_path, "wb") as f:
+            f.write(to_bytes("import numpy\n"))
+            f.write(to_bytes("import sklearn\n"))
 
         result = self.docker_environment_driver.\
             create_default_definition(directory=self.docker_environment_driver.filepath)

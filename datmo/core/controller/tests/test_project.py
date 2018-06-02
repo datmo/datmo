@@ -13,6 +13,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
@@ -61,7 +73,7 @@ class TestProjectController():
             git_dir = os.path.join(self.project.code_driver.filepath, ".git")
             os.makedirs(git_dir)
             with open(os.path.join(git_dir, "HEAD.lock"), "a+") as f:
-                f.write(to_unicode("test"))
+                f.write(to_bytes("test"))
             failed = False
             try:
                 self.project.init("test1", "test description")
@@ -155,20 +167,20 @@ class TestProjectController():
 
         # Create environment_driver definition
         env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
-        with open(env_def_path, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         environment_definition_paths = [env_def_path]
 
         # Create config
         config_filepath = os.path.join(self.snapshot.home, "config.json")
-        with open(config_filepath, "w") as f:
-            f.write(to_unicode(str("{}")))
+        with open(config_filepath, "wb") as f:
+            f.write(to_bytes(str("{}")))
 
         # Create stats
         stats_filepath = os.path.join(self.snapshot.home, "stats.json")
-        with open(stats_filepath, "w") as f:
-            f.write(to_unicode(str("{}")))
+        with open(stats_filepath, "wb") as f:
+            f.write(to_bytes(str("{}")))
 
         input_dict = {
             "message":

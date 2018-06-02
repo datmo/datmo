@@ -13,6 +13,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.core.controller.code.driver.file import FileCodeDriver
 from datmo.core.util.misc_functions import list_all_filepaths, get_filehash
@@ -60,17 +72,17 @@ class TestFileCodeDriver():
 
     def __setup(self):
         self.file_code_manager.init()
-        with open(os.path.join(self.temp_dir, "test.txt"), "w") as f:
-            f.write("hello")
+        with open(os.path.join(self.temp_dir, "test.txt"), "wb") as f:
+            f.write(to_bytes("hello"))
         os.makedirs(os.path.join(self.temp_dir, "datmo_environment/"))
         with open(
                 os.path.join(self.temp_dir, "datmo_environment", "test"),
-                "w") as f:
-            f.write("cool")
+                "wb") as f:
+            f.write(to_bytes("cool"))
         os.makedirs(os.path.join(self.temp_dir, "datmo_files/"))
         with open(os.path.join(self.temp_dir, "datmo_files", "test"),
-                  "w") as f:
-            f.write("man")
+                  "wb") as f:
+            f.write(to_bytes("man"))
 
     def test_tracked_files(self):
         self.__setup()
@@ -79,23 +91,23 @@ class TestFileCodeDriver():
         assert result == ["test.txt"]
 
         # Test if catches multiple files (no .datmoignore)
-        with open(os.path.join(self.temp_dir, "test2.txt"), "w") as f:
-            f.write("hello")
+        with open(os.path.join(self.temp_dir, "test2.txt"), "wb") as f:
+            f.write(to_bytes("hello"))
         result = self.file_code_manager._get_tracked_files()
         for item in result:
             assert item in ["test.txt", "test2.txt"]
 
         # Test if it ignores any .datmo directory or files within
-        with open(os.path.join(self.temp_dir, ".datmo", "test"), "w") as f:
-            f.write("cool")
+        with open(os.path.join(self.temp_dir, ".datmo", "test"), "wb") as f:
+            f.write(to_bytes("cool"))
         result = self.file_code_manager._get_tracked_files()
         for item in result:
             assert ".datmo" not in item
             assert item in ["test.txt", "test2.txt"]
 
         # Test if ignores one file and only shows one
-        with open(os.path.join(self.temp_dir, ".datmoignore"), "w") as f:
-            f.write("test.txt")
+        with open(os.path.join(self.temp_dir, ".datmoignore"), "wb") as f:
+            f.write(to_bytes("test.txt"))
         result = self.file_code_manager._get_tracked_files()
         assert result == ["test2.txt"]
 
@@ -170,8 +182,8 @@ class TestFileCodeDriver():
         result = self.file_code_manager.current_ref()
         assert result == commit_hash
         # Test success (multiple commits)
-        with open(os.path.join(self.temp_dir, "test2.txt"), "w") as f:
-            f.write("hello")
+        with open(os.path.join(self.temp_dir, "test2.txt"), "wb") as f:
+            f.write(to_bytes("hello"))
         commit_hash_2 = self.file_code_manager.create_ref()
         result = self.file_code_manager.current_ref()
         assert commit_hash != commit_hash_2
@@ -195,8 +207,8 @@ class TestFileCodeDriver():
         result = self.file_code_manager.latest_ref()
         assert result == commit_hash
         # Test success (multiple commits)
-        with open(os.path.join(self.temp_dir, "test2.txt"), "w") as f:
-            f.write("hello")
+        with open(os.path.join(self.temp_dir, "test2.txt"), "wb") as f:
+            f.write(to_bytes("hello"))
         time.sleep(1)
         commit_hash_2 = self.file_code_manager.create_ref()
         result = self.file_code_manager.latest_ref()
@@ -313,8 +325,8 @@ class TestFileCodeDriver():
         result = self.file_code_manager.checkout_ref(commit_id=commit_hash)
         assert result
         # Test trying to checkout failure (unstaged changes)
-        with open(os.path.join(self.temp_dir, "test2.txt"), "w") as f:
-            f.write("hello")
+        with open(os.path.join(self.temp_dir, "test2.txt"), "wb") as f:
+            f.write(to_bytes("hello"))
         failed = False
         try:
             self.file_code_manager.checkout_ref(commit_id=commit_hash)

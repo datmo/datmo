@@ -12,6 +12,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.core.util.misc_functions import (
     get_filehash, create_unique_hash, mutually_exclusive, is_project_dir,
@@ -29,13 +41,6 @@ class TestMiscFunctions():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-
-    def test_get_filehash(self):
-        filepath = os.path.join(self.temp_dir, "test.txt")
-        with open(filepath, "w") as f:
-            f.write(to_unicode("hello\n"))
-        result = get_filehash(filepath)
-        assert len(result) == 32
 
     def test_create_unique_hash(self):
         result_hash_1 = create_unique_hash()
@@ -145,6 +150,29 @@ class TestMiscFunctions():
         result = format_table(test_data, padding=2)
         assert result == "row1  row1  \nrow2  row2  \n"
 
+    def test_list_all_filepaths(self):
+        pass
+
+    def test_get_filehash(self):
+        filepath = os.path.join(self.temp_dir, "test.txt")
+        with open(filepath, "wb") as f:
+            f.write(to_bytes("hello\n"))
+        result = get_filehash(filepath)
+        assert len(result) == 32
+
+    def test_get_dirhash(self):
+        temp_dir_1 = get_datmo_temp_path(self.temp_dir)
+        filepath = os.path.join(temp_dir_1, "test.txt")
+        with open(filepath, "wb") as f:
+            f.write(to_bytes("hello\n"))
+        result = get_filehash(filepath)
+        temp_dir_2 = get_datmo_temp_path(self.temp_dir)
+        filepath_2 = os.path.join(temp_dir_2, "test.txt")
+        with open(filepath_2, "wb") as f:
+            f.write(to_bytes("hello\n"))
+        result_2 = get_filehash(filepath)
+        assert result == result_2
+
     def test_get_datmo_temp_path(self):
         datmo_temp_path = get_datmo_temp_path(self.temp_dir)
         exists = False
@@ -212,11 +240,11 @@ class TestMiscFunctions():
         filepath = os.path.join(self.temp_dir, "test.txt")
         dirpath = os.path.join(self.temp_dir, "test_dir")
         dirfilepath = os.path.join(dirpath, "test.txt")
-        with open(filepath, "w") as f:
-            f.write(to_unicode("test" + "\n"))
+        with open(filepath, "wb") as f:
+            f.write(to_bytes("test" + "\n"))
         os.makedirs(dirpath)
-        with open(dirfilepath, "w") as f:
-            f.write(to_unicode("test" + "\n"))
+        with open(dirfilepath, "wb") as f:
+            f.write(to_bytes("test" + "\n"))
         # Define user paths
         default_source_prefix = self.temp_dir
         dest_prefix = os.path.join(self.temp_dir, "some_dest_dir")

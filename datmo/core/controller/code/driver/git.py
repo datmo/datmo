@@ -7,6 +7,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 from giturlparse import parse
 
 from datmo.core.util.i18n import get as __
@@ -181,8 +193,8 @@ class GitCodeDriver(CodeDriver):
         # git refs for datmo for the latest commit id is created
         code_ref_path = os.path.join(self.filepath, ".git/refs/datmo/",
                                      commit_id)
-        with open(code_ref_path, "w") as f:
-            f.write(to_unicode(commit_id))
+        with open(code_ref_path, "wb") as f:
+            f.write(to_bytes(commit_id))
         return commit_id
 
     def current_ref(self):
@@ -279,8 +291,8 @@ class GitCodeDriver(CodeDriver):
         exclude_file = os.path.join(self.filepath, ".git/info/exclude")
         try:
             if not self.exists_datmo_files_ignored():
-                with open(exclude_file, "a") as f:
-                    f.write(to_unicode("\n.datmo/*\n"))
+                with open(exclude_file, "ab") as f:
+                    f.write(to_bytes("\n.datmo/*\n"))
         except Exception as e:
             raise FileIOError(
                 __("error", "controller.code.driver.git.ensure_code_refs_dir",
@@ -484,10 +496,8 @@ class GitCodeDriver(CodeDriver):
                 raise UnstagedChanges()
         except subprocess.CalledProcessError as e:
             raise GitExecutionError(
-                __("error", "controller.code.driver.git.status",
-                   str(e)))
+                __("error", "controller.code.driver.git.status", str(e)))
         return False
-
 
     def checkout(self, name, option=None):
         try:
@@ -890,14 +900,14 @@ class GitHostDriver(object):
 
     def create_git_netrc(self, username, password):
         netrc_filepath = os.path.join(self.home, ".netrc")
-        netrc_file = open(netrc_filepath, "w")
+        netrc_file = open(netrc_filepath, "wb")
         netrc_file.truncate()
-        netrc_file.write(to_unicode("machine %s" % (self.host)))
-        netrc_file.write(to_unicode("\n"))
-        netrc_file.write(to_unicode("login " + str(username)))
-        netrc_file.write(to_unicode("\n"))
-        netrc_file.write(to_unicode("password " + str(password)))
-        netrc_file.write(to_unicode("\n"))
+        netrc_file.write(to_bytes("machine %s" % (self.host)))
+        netrc_file.write(to_bytes("\n"))
+        netrc_file.write(to_bytes("login " + str(username)))
+        netrc_file.write(to_bytes("\n"))
+        netrc_file.write(to_bytes("password " + str(password)))
+        netrc_file.write(to_bytes("\n"))
         netrc_file.close()
         return True
 

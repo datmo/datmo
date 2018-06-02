@@ -12,6 +12,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import ArgumentError
@@ -28,8 +40,8 @@ class Helper():
     def input(self, input_msg):
         def input_decorator(func):
             def wrapper(*args, **kwargs):
-                with open(os.path.join("input"), "w") as f:
-                    f.write(to_unicode(input_msg))
+                with open(os.path.join("input"), "wb") as f:
+                    f.write(to_bytes(input_msg))
 
                 with open(os.path.join("input"), "r") as f:
                     sys.stdin = f

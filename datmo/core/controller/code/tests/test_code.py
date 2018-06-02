@@ -9,6 +9,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.code.code import CodeController
@@ -51,8 +63,8 @@ class TestCodeController():
 
         # Create test file
         definition_filepath = os.path.join(self.code.home, "test.txt")
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode(str("test")))
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes(str("test")))
 
         # Test passing with something to commit
         code_obj = self.code.create()
@@ -78,16 +90,16 @@ class TestCodeController():
 
         # Create test file
         definition_filepath = os.path.join(self.code.home, "test.txt")
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode(str("test")))
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes(str("test")))
 
         # Test passing with something to commit
         code_obj_1 = self.code.create()
 
         # Create test file
         definition_filepath = os.path.join(self.code.home, "test2.txt")
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode(str("test")))
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes(str("test")))
 
         # Test passing with something to commit
         code_obj_2 = self.code.create()
@@ -104,8 +116,8 @@ class TestCodeController():
 
         # Create test file
         definition_filepath = os.path.join(self.code.home, "test.txt")
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode(str("test")))
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes(str("test")))
 
         # Test passing with something to commit
         code_obj = self.code.create()

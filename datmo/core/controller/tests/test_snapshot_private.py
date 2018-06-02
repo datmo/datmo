@@ -4,6 +4,18 @@ Tests for SnapshotController
 import os
 import tempfile
 import platform
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
@@ -25,23 +37,23 @@ class TestSnapshotController():
 
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
-        with open(self.env_def_path, "w") as f:
-            f.write(str("FROM datmo/xgboost:cpu"))
+        with open(self.env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         # Create config
         self.config_filepath = os.path.join(self.snapshot.home, "config.json")
-        with open(self.config_filepath, "w") as f:
-            f.write(str('{"foo":1}'))
+        with open(self.config_filepath, "wb") as f:
+            f.write(to_bytes(str('{"foo":1}')))
 
         # Create stats
         self.stats_filepath = os.path.join(self.snapshot.home, "stats.json")
-        with open(self.stats_filepath, "w") as f:
-            f.write(str('{"bar":1}'))
+        with open(self.stats_filepath, "wb") as f:
+            f.write(to_bytes(str('{"bar":1}')))
 
         # Create test file
         self.filepath = os.path.join(self.snapshot.home, "file.txt")
-        with open(self.filepath, "w") as f:
-            f.write(str("test"))
+        with open(self.filepath, "wb") as f:
+            f.write(to_bytes(str("test")))
 
     def teardown_method(self):
         pass

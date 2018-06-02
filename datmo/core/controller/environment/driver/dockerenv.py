@@ -8,6 +8,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 from docker import DockerClient
 from docker import errors
 
@@ -581,10 +593,10 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         """
         # TODO: Fix function to better accomodate all logs in the same way
         if api:  # calling the docker client via the API
-            with open(filepath, "w") as log_file:
+            with open(filepath, "wb") as log_file:
                 for line in self.client.containers.get(container_id).logs(
                         stream=True):
-                    log_file.write(to_unicode(line.strip() + "\n"))
+                    log_file.write(to_bytes(line.strip() + "\n"))
         else:
             command = list(self.prefix)
             if follow:
@@ -593,17 +605,19 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 command.extend(["logs", str(container_id)])
             process = subprocess.Popen(
                 command, stdout=subprocess.PIPE, universal_newlines=True)
-            with open(filepath, "w") as log_file:
+            with open(filepath, "wb") as log_file:
                 while True:
                     output = process.stdout.readline()
                     if output == "" and process.poll() is not None:
                         break
                     if output:
                         printable_output = output.strip().replace("\x08", " ")
-                        log_file.write(to_unicode(printable_output + "\n"))
+                        log_file.write(to_bytes(printable_output + "\n"))
             return_code = process.poll()
-            with open(filepath, "r") as log_file:
+            with open(filepath, "rb") as log_file:
                 logs = log_file.read()
+                if type(logs) != str:  # handle for python 3x
+                    logs = logs.decode("utf-8")
             return return_code, logs
 
     # running daemon needed
@@ -709,7 +723,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             try:
                 requirements_filepath = os.path.join(self.filepath,
                                                      "datmorequirements.txt")
-                outfile_requirements = open(requirements_filepath, "w")
+                outfile_requirements = open(requirements_filepath, "wb")
                 process = subprocess.Popen(
                     ["pip", "freeze"],
                     cwd=self.filepath,
@@ -741,8 +755,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             language_dockerfile)
 
         destination_dockerfile = os.path.join(directory, "Dockerfile")
-        destination = open(destination_dockerfile, "w")
-        shutil.copyfileobj(open(base_dockerfile_filepath, "r"), destination)
+        destination = open(destination_dockerfile, "wb")
+        shutil.copyfileobj(open(base_dockerfile_filepath, "rb"), destination)
         return destination_dockerfile
 
     def get_default_definition_filename(self):
@@ -754,8 +768,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
     def get_hardware_info(self):
         # Extract hardware info of the container (currently taking from system platform)
         # TODO: extract hardware information directly from the container
-        (system, node, release, version, machine,
-         processor) = platform.uname()
+        (system, node, release, version, machine, processor) = platform.uname()
         return {
             'system': system,
             'node': node,
@@ -777,9 +790,9 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
         # Combine dockerfiles
         destination = open(
-            os.path.join(self.filepath, output_definition_path), "w")
-        shutil.copyfileobj(open(input_definition_path, "r"), destination)
-        shutil.copyfileobj(open(base_dockerfile_filepath, "r"), destination)
+            os.path.join(self.filepath, output_definition_path), "wb")
+        shutil.copyfileobj(open(input_definition_path, "rb"), destination)
+        shutil.copyfileobj(open(base_dockerfile_filepath, "rb"), destination)
         destination.close()
 
         return True

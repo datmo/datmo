@@ -154,7 +154,7 @@ class LocalFileDriver(FileDriver):
             if directory:
                 os.makedirs(filepath)
             else:
-                with open(os.path.join(self.root, relative_path), "a"):
+                with open(os.path.join(self.root, relative_path), "ab"):
                     os.utime(filepath, None)
         return filepath
 

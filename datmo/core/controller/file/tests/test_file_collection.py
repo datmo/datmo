@@ -10,6 +10,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.file.file_collection import \
@@ -72,8 +84,8 @@ class TestFileCollectionController():
         paths_1 = [filepath1, dirpath1]
 
         filepath2 = os.path.join(self.file_collection.home, "filepath2")
-        with open(filepath2, "w") as f:
-            f.write(to_unicode("test" + "\n"))
+        with open(filepath2, "wb") as f:
+            f.write(to_bytes("test" + "\n"))
         paths_2 = [filepath2]
 
         file_collection_obj_1 = self.file_collection.create(paths_1)
@@ -199,8 +211,8 @@ class TestFileCollectionController():
         result = self.file_collection._has_unstaged_changes()
         assert not result
 
-        with open(filepath1, "w") as f:
-            f.write(to_unicode("hello"))
+        with open(filepath1, "wb") as f:
+            f.write(to_bytes("hello"))
 
         # Test when there are unstaged changes
         result = self.file_collection._has_unstaged_changes()
@@ -226,8 +238,8 @@ class TestFileCollectionController():
         assert not result
 
         # Change a file
-        with open(filepath1, "w") as f:
-            f.write(to_unicode("hello"))
+        with open(filepath1, "wb") as f:
+            f.write(to_bytes("hello"))
 
         # Test when there are unstaged changes
         failed = False
@@ -263,8 +275,8 @@ class TestFileCollectionController():
         # changing filepath in `datmo_files`
         datmo_file_path = os.path.join(self.file_collection.home,
                                        "datmo_files")
-        with open(os.path.join(datmo_file_path, "filepath1"), "w") as f:
-            f.write(to_unicode("hello"))
+        with open(os.path.join(datmo_file_path, "filepath1"), "wb") as f:
+            f.write(to_bytes("hello"))
 
         # Test when there are unstaged changes
         failed = False

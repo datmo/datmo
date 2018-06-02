@@ -20,6 +20,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
@@ -52,28 +64,28 @@ class TestSnapshot():
 
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
-        with open(self.env_def_path, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(self.env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         # Create config file
         self.config_filepath = os.path.join(self.snapshot.home, "config.json")
-        with open(self.config_filepath, "w") as f:
-            f.write(to_unicode(str("{}")))
+        with open(self.config_filepath, "wb") as f:
+            f.write(to_bytes(str("{}")))
 
         # Create stats file
         self.stats_filepath = os.path.join(self.snapshot.home, "stats.json")
-        with open(self.stats_filepath, "w") as f:
-            f.write(to_unicode(str("{}")))
+        with open(self.stats_filepath, "wb") as f:
+            f.write(to_bytes(str("{}")))
 
         # Create test file
         self.filepath = os.path.join(self.snapshot.home, "file.txt")
-        with open(self.filepath, "w") as f:
-            f.write(to_unicode(str("test")))
+        with open(self.filepath, "wb") as f:
+            f.write(to_bytes(str("test")))
 
         # Create another test file
         self.filepath_2 = os.path.join(self.snapshot.home, "file2.txt")
-        with open(self.filepath_2, "w") as f:
-            f.write(to_unicode(str("test")))
+        with open(self.filepath_2, "wb") as f:
+            f.write(to_bytes(str("test")))
 
         # Create config
         self.config = 'foo:bar'
@@ -670,8 +682,8 @@ class TestSnapshot():
 
         # Create another test file
         self.filepath_3 = os.path.join(self.snapshot.home, "file3.txt")
-        with open(self.filepath_3, "w") as f:
-            f.write(to_unicode(str("test")))
+        with open(self.filepath_3, "wb") as f:
+            f.write(to_bytes(str("test")))
 
         self.snapshot.parse(["snapshot", "create", "-m", "my second snapshot"])
         snapshot_id_2 = self.snapshot.execute()

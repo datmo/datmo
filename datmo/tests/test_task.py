@@ -10,6 +10,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.task import run, ls
 from datmo.task import Task
@@ -67,11 +79,11 @@ class TestTaskModule():
         # Create a basic task and run it with string command
         # (fails w/ no environment)
         test_filepath = os.path.join(self.temp_dir, "script.py")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("import os\n"))
-            f.write(to_unicode("import sys\n"))
-            f.write(to_unicode("print('hello')\n"))
-            f.write(to_unicode("print(' accuracy: 0.56 ')\n"))
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("import os\n"))
+            f.write(to_bytes("import sys\n"))
+            f.write(to_bytes("print('hello')\n"))
+            f.write(to_bytes("print(' accuracy: 0.56 ')\n"))
 
         # 2) Test out option 2
         task_obj_0 = run(command="python script.py", home=self.temp_dir)
@@ -82,8 +94,8 @@ class TestTaskModule():
 
         # Add environment definition
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu"))
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu"))
 
         # 3) Test out option 3
         task_obj_1 = run(
@@ -118,8 +130,8 @@ class TestTaskModule():
         datmo_environment_dir = os.path.join(self.temp_dir,
                                              "datmo_environment")
         test_filepath = os.path.join(datmo_environment_dir, "Dockerfile")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu"))
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu"))
         task_obj_4 = run(command=["python", "script.py"], home=self.temp_dir)
         assert isinstance(task_obj_4, Task)
         assert task_obj_4.id
@@ -179,14 +191,14 @@ class TestTaskModule():
     def __setup(self, command="python script.py"):
         # Create a basic task and run it with string command
         test_filepath = os.path.join(self.temp_dir, "script.py")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
-            f.write(to_unicode("print 'hello'\n"))
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("import numpy\n"))
+            f.write(to_bytes("import sklearn\n"))
+            f.write(to_bytes("print 'hello'\n"))
 
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu"))
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu"))
 
         return run(command=command, env=test_filepath, home=self.temp_dir)
 

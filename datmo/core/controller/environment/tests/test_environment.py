@@ -14,6 +14,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import \
@@ -39,16 +51,17 @@ class TestEnvironmentController():
 
     def __setup(self):
         self.project.init("test_setup", "test description")
-        with open(os.path.join(self.temp_dir, "test.txt"), "w") as f:
-            f.write(to_unicode("hello"))
+        with open(os.path.join(self.temp_dir, "test.txt"), "wb") as f:
+            f.write(to_bytes("hello"))
         self.datmo_environment_path = os.path.join(self.temp_dir,
                                                    "datmo_environment")
-        with open(os.path.join(self.datmo_environment_path, "test"), "w") as f:
-            f.write(to_unicode("cool"))
+        with open(os.path.join(self.datmo_environment_path, "test"),
+                  "wb") as f:
+            f.write(to_bytes("cool"))
         self.definition_filepath = os.path.join(self.datmo_environment_path,
                                                 "Dockerfile")
-        with open(self.definition_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu"))
+        with open(self.definition_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu"))
 
     def test_create(self):
         # 1) Test SUCCESS create when definition path exists in `datmo_environment` folder (no input, no root)
@@ -89,8 +102,8 @@ class TestEnvironmentController():
 
         # Create environment definition in root directory
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         # 2) Test option 2
         environment_obj_1 = self.environment.create({})
@@ -206,9 +219,9 @@ class TestEnvironmentController():
         # Create environment definition
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         input_dict = {
             "definition_paths": [definition_filepath],
         }
@@ -227,10 +240,10 @@ class TestEnvironmentController():
 
         # Create script to test
         test_filepath = os.path.join(self.environment.home, "script.py")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
-            f.write(to_unicode("print('hello')\n"))
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("import numpy\n"))
+            f.write(to_bytes("import sklearn\n"))
+            f.write(to_bytes("print('hello')\n"))
 
         # 4) Test option 4
         environment_obj_3 = self.environment.create({})
@@ -252,9 +265,9 @@ class TestEnvironmentController():
         definition_filepath = os.path.join(datmo_environment_folder,
                                            "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
         environment_obj_4 = self.environment.create({})
         result = self.environment.build(environment_obj_4.id)
         assert result
@@ -275,9 +288,9 @@ class TestEnvironmentController():
         definition_filepath = os.path.join(datmo_environment_folder,
                                            "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
 
         random_name = ''.join([
             random.choice(string.ascii_letters + string.digits)
@@ -318,9 +331,9 @@ class TestEnvironmentController():
         # Create environment definition
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
 
         random_name = ''.join([
             random.choice(string.ascii_letters + string.digits)
@@ -365,10 +378,10 @@ class TestEnvironmentController():
 
         # Create script to test
         test_filepath = os.path.join(self.environment.home, "script.py")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("import os\n"))
-            f.write(to_unicode("import sys\n"))
-            f.write(to_unicode("print('hello')\n"))
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("import os\n"))
+            f.write(to_bytes("import sys\n"))
+            f.write(to_bytes("print('hello')\n"))
 
         # Create environment in the project
         environment_obj = self.environment.create({})
@@ -414,9 +427,9 @@ class TestEnvironmentController():
 
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
 
         input_dict = {
             "definition_filepath": [definition_filepath],
@@ -506,8 +519,8 @@ class TestEnvironmentController():
 
         # Create environment definition for object 1
         definition_path_1 = os.path.join(self.environment.home, "Dockerfile")
-        with open(definition_path_1, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(definition_path_1, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         input_dict_1 = {
             "definition_paths": [definition_path_1],
@@ -518,8 +531,8 @@ class TestEnvironmentController():
 
         # Create environment definition for object 2
         definition_path_2 = os.path.join(self.environment.home, "Dockerfile2")
-        with open(definition_path_2, "w") as f:
-            f.write(to_unicode(str("FROM datmo/scikit-opencv")))
+        with open(definition_path_2, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/scikit-opencv")))
 
         input_dict_2 = {
             "definition_paths": [definition_path_2 + ">Dockerfile"],
@@ -541,8 +554,8 @@ class TestEnvironmentController():
 
         # Create environment definition
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         input_dict = {
             "definition_paths": [definition_filepath],
@@ -595,8 +608,8 @@ class TestEnvironmentController():
 
         # Create environment definition
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         run_options = {
             "command": ["sh", "-c", "echo yo"],
@@ -612,9 +625,9 @@ class TestEnvironmentController():
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(env_def_path, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
 
         input_dict = {
             "definition_paths": [definition_filepath],
@@ -721,8 +734,8 @@ class TestEnvironmentController():
 
         with open(
                 os.path.join(self.temp_dir, "datmo_environment", "Dockerfile"),
-                "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu\n"))
+                "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu\n"))
 
         result = self.environment._has_unstaged_changes()
         assert result
@@ -739,8 +752,8 @@ class TestEnvironmentController():
 
         # Add a new file
         with open(os.path.join(self.datmo_environment_path, "test2"),
-                  "w") as f:
-            f.write(to_unicode("cool"))
+                  "wb") as f:
+            f.write(to_bytes("cool"))
 
         # 2) Not commiting the changes, should error and raise UnstagedChanges
         failed = False
