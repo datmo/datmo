@@ -12,7 +12,7 @@ from giturlparse import parse
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     PathDoesNotExist, GitUrlArgumentError, GitExecutionError, FileIOError,
-    CommitDoesNotExist, CommitFailed, DatmoFolderInWorkTree)
+    CommitDoesNotExist, CommitFailed, DatmoFolderInWorkTree, UnstagedChanges)
 from datmo.core.controller.code.driver import CodeDriver
 from datmo.config import Config
 
@@ -190,7 +190,8 @@ class GitCodeDriver(CodeDriver):
 
     def latest_ref(self):
         def getmtime(absolute_filepath):
-            return os.path.getmtime(absolute_filepath)
+            # Keeping it granular as timestaps in git
+            return int(os.path.getmtime(absolute_filepath))
 
         code_refs_path = os.path.join(self.filepath, ".git/refs/datmo/")
         sorted_code_refs = sorted(
@@ -454,6 +455,39 @@ class GitCodeDriver(CodeDriver):
     #             __("error", "controller.code.driver.git.branch",
     #                (name, str(e))))
     #     return True
+
+    def check_unstaged_changes(self):
+        """Checks if there exists any unstaged changes for code
+
+        Raises
+        ------
+        UnstagedChanges
+            error if not there exists unstaged changes in environment
+
+        GitExecutionError
+            error if there exists any error while using git
+
+        """
+        try:
+            process = subprocess.Popen(
+                [self.execpath, "status"],
+                cwd=self.filepath,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode > 0:
+                raise GitExecutionError(
+                    __("error", "controller.code.driver.git.status",
+                       str(stderr)))
+            stdout = stdout.decode().strip()
+            if "working tree clean" not in stdout:
+                raise UnstagedChanges()
+        except subprocess.CalledProcessError as e:
+            raise GitExecutionError(
+                __("error", "controller.code.driver.git.status",
+                   str(e)))
+        return False
+
 
     def checkout(self, name, option=None):
         try:

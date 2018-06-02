@@ -223,7 +223,8 @@ class FileCodeDriver(CodeDriver):
             raise CodeNotInitialized()
 
         def getmtime(absolute_filepath):
-            return os.path.getmtime(absolute_filepath)
+            # Keeping it granular as timestaps in git
+            return int(os.path.getmtime(absolute_filepath))
 
         # List all files in the code directory (ignore directories)
         for _, _, commit_hashes in os.walk(self._code_filepath):
@@ -295,6 +296,27 @@ class FileCodeDriver(CodeDriver):
         for _, _, commit_hashes in os.walk(self._code_filepath):
             return commit_hashes
 
+    def check_unstaged_changes(self):
+        """Checks if there exists any unstaged changes for code. Returns False if it's already staged
+
+        Raises
+        ------
+        CodeNotInitialized
+            error if not initialized (must initialize first)
+
+        UnstagedChanges
+            error if not there exists unstaged changes in environment
+
+        """
+        if not self.is_initialized:
+            raise CodeNotInitialized()
+
+        # Check if unstaged changes exist
+        if self._has_unstaged_changes():
+            raise UnstagedChanges()
+
+        return False
+
     def checkout_ref(self, commit_id):
         """Checkout to specific commit
 
@@ -302,6 +324,9 @@ class FileCodeDriver(CodeDriver):
         ------
         CodeNotInitialized
             error if not initialized (must initialize first)
+
+        UnstagedChanges
+            error if not there exists unstaged changes in code
         """
         if not self.is_initialized:
             raise CodeNotInitialized()

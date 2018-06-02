@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import unicode_literals
 
 import os
+import time
 import shutil
 import tempfile
 import platform
@@ -18,7 +19,7 @@ from datmo.core.controller.code.driver.git import (GitCodeDriver,
                                                    GitHostDriver)
 from datmo.core.util.exceptions import (CommitFailed, CommitDoesNotExist,
                                         PathDoesNotExist, GitExecutionError,
-                                        DatmoFolderInWorkTree)
+                                        DatmoFolderInWorkTree, UnstagedChanges)
 
 
 class TestGitCodeDriver():
@@ -173,6 +174,7 @@ class TestGitCodeDriver():
                                      "test2.txt")
         with open(test_filepath, "w") as f:
             f.write(to_unicode(str("test")))
+        time.sleep(1)
         commit_hash_2 = self.git_code_manager.create_ref()
         result = self.git_code_manager.latest_ref()
         assert commit_hash != commit_hash_2
@@ -225,6 +227,28 @@ class TestGitCodeDriver():
     # def test_fetch_ref(self):
     #     pass
     #
+
+    def test_check_unstaged_changes(self):
+        self.git_code_manager.init()
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test.txt")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode(str("test1")))
+
+        # Test for unstaged changes
+        unstaged = False
+        try:
+            self.git_code_manager.check_unstaged_changes()
+        except UnstagedChanges:
+            unstaged = True
+        assert unstaged
+
+        # Test if the changes are commited
+        self.git_code_manager.create_ref()
+        unstaged = self.git_code_manager.check_unstaged_changes()
+
+        assert not unstaged
+
     def test_checkout_ref(self):
         # TODO: Test remote checkout
         self.git_code_manager.init()

@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import unicode_literals
 
 import os
+import time
 import tempfile
 import platform
 from io import open
@@ -196,6 +197,7 @@ class TestFileCodeDriver():
         # Test success (multiple commits)
         with open(os.path.join(self.temp_dir, "test2.txt"), "w") as f:
             f.write("hello")
+        time.sleep(1)
         commit_hash_2 = self.file_code_manager.create_ref()
         result = self.file_code_manager.latest_ref()
         assert commit_hash != commit_hash_2
@@ -264,6 +266,30 @@ class TestFileCodeDriver():
         commit_hash = self.file_code_manager.create_ref()
         result = self.file_code_manager.list_refs()
         assert result == [commit_hash]
+
+    def test_check_unstaged_changes(self):
+        # Test failure, not initialized
+        failed = False
+        try:
+            self.file_code_manager.create_ref()
+        except CodeNotInitialized:
+            failed = True
+        assert failed
+        self.__setup()
+
+        # Test for unstaged changes
+        unstaged = False
+        try:
+            self.file_code_manager.check_unstaged_changes()
+        except UnstagedChanges:
+            unstaged = True
+        assert unstaged
+
+        # Test if the changes are commited
+        self.file_code_manager.create_ref()
+        unstaged = self.file_code_manager.check_unstaged_changes()
+
+        assert not unstaged
 
     def test_checkout_ref(self):
         # Test failure, not initialized

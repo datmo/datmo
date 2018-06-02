@@ -158,6 +158,20 @@ class CodeDriver(with_metaclass(ABCMeta, object)):
     #     """
     #     pass
 
+    def check_unstaged_changes(self):
+        """Checks if there exists any unstaged changes for code
+
+        Raises
+        ------
+        CodeNotInitialized
+            error if not initialized (must initialize first)
+
+        UnstagedChanges
+            error if not there exists unstaged changes in environment
+
+        """
+        pass
+
     @abstractmethod
     def checkout_ref(self, commit_id):
         """Checkout commit reference given without affecting the .datmo directory
