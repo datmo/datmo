@@ -36,6 +36,25 @@ class TestEnvironmentController():
     def teardown_method(self):
         pass
 
+    def __setup(self):
+        self.project.init("test_setup", "test description")
+        with open(os.path.join(self.temp_dir, "test.txt"), "w") as f:
+            f.write("hello")
+        datmo_path_environment = os.path.join(self.temp_dir, "datmo_environment")
+        if not os.path.exists(datmo_path_environment):
+            os.makedirs(datmo_path_environment)
+        with open(
+                os.path.join(self.temp_dir, "datmo_environment", "test"),
+                "w") as f:
+            f.write("cool")
+        datmo_path_files = os.path.join(self.temp_dir, "datmo_files")
+        if not os.path.exists(datmo_path_files):
+            os.makedirs(datmo_path_files)
+        with open(os.path.join(self.temp_dir, "datmo_files", "test"),
+                  "w") as f:
+            f.write("man")
+
+
     def test_create(self):
         # 0) Test create when unsupported language given
         # 1) Test create when NO file exists and NO definition path exists
@@ -632,3 +651,102 @@ class TestEnvironmentController():
 
         # teardown
         self.environment.delete(environment_obj.id)
+
+    def test_exists_env(self):
+        # Test failure, not initialized
+        failed = False
+        try:
+            _ = self.environment.create({})
+        except:
+            failed = True
+        assert failed
+
+        # Setup
+        self.__setup()
+        environment_obj = self.environment.create({})
+
+        # Check by environment id
+        result = self.environment.exists(environment_id=environment_obj.id)
+        assert result
+
+        # Check by unique hash
+        result = self.environment.exists(environment_unique_hash=environment_obj.unique_hash)
+        assert result
+
+        # Test with wrong environment id
+        result = self.environment.exists(environment_id='test_wrong_env_id')
+        assert not result
+
+    def test_calculate_environment_hash(self):
+        # Setup
+        self.__setup()
+        self.environment.create({})
+        assert self.environment._calculate_environment_hash() == '03c44e04cdb4bb7f9da53f4b88c164ba'
+
+        environment_def_path = os.path.join(self.temp_dir, "datmo_environment", "Dockerfile")
+        with open(environment_def_path, "w") as f:
+            f.write("FROM datmo/xgboost:cpu\n")
+
+        environment_obj_0 = self.environment.create({})
+
+        environment_obj_1 = self.environment.create({"definition_filepath": environment_def_path})
+
+        # TODO: Fix this test
+        #assert environment_obj_0 == environment_obj_1
+        # assert environment_obj_0.id == environment_obj_1.id
+        # assert environment_obj_0.unique_hash == environment_obj_1.unique_hash
+
+    def test_has_unstaged_changes(self):
+
+        # Setup
+        # self.__setup()
+        # obj = self.environment.create({})
+
+        # TODO: Fix this test after merging PR from environment
+        # # Check for no unstaged changes
+        # result = self.environment._has_unstaged_changes()
+        # assert not result
+        #
+        # with open(
+        #         os.path.join(self.temp_dir, "datmo_environment", "Dockerfile"),
+        #         "w") as f:
+        #     f.write("FROM datmo/xgboost:cpu\n")
+        #
+        # result = self.environment._has_unstaged_changes()
+        # assert result
+        pass
+
+    def test_check_unstaged_changes(self):
+        # Setup
+        self.__setup()
+        obj = self.environment.create({})
+
+        # 1) After commiting the changes
+        # Check for no unstaged changes
+        result = self.environment.check_unstaged_changes()
+        assert not result
+
+        with open(
+                os.path.join(self.temp_dir, "datmo_environment", "Dockerfile"),
+                "w") as f:
+            f.write("FROM datmo/xgboost:cpu\n")
+
+        # TODO: Fix this test after merging PR from environment
+        # 2) Not commiting the changes
+        # result = self.environment._has_unstaged_changes()
+        # assert result
+
+    def test_checkout_env(self):
+        # Setup
+        self.__setup()
+        environment_obj = self.environment.create({})
+        # After committing the environment, make a checkout
+        result = self.environment.checkout(environment_obj.id)
+        assert result
+
+        # TODO: After making changes in `datmo_environment` make a checkout experiment
+
+
+
+
+

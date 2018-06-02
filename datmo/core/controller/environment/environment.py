@@ -1,4 +1,6 @@
 import os
+import shutil
+import tempfile
 import platform
 
 from datmo.core.util.i18n import get as __
@@ -6,7 +8,9 @@ from datmo.core.controller.base import BaseController
 from datmo.core.controller.file.file_collection import FileCollectionController
 from datmo.core.entity.environment import Environment
 from datmo.core.util.json_store import JSONStore
-from datmo.core.util.exceptions import PathDoesNotExist, RequiredArgumentMissing, TooManyArgumentsFound
+from datmo.core.util.misc_functions import get_dirhash
+from datmo.core.util.exceptions import PathDoesNotExist, RequiredArgumentMissing, TooManyArgumentsFound,\
+    EnvironmentNotInitialized, UnstagedChanges
 
 
 class EnvironmentController(BaseController):
@@ -33,6 +37,9 @@ class EnvironmentController(BaseController):
     def __init__(self, home):
         super(EnvironmentController, self).__init__(home)
         self.file_collection = FileCollectionController(home)
+        self.datmo_environment_path = os.path.join(self.home, "datmo_environment")
+        if not os.path.exists(self.datmo_environment_path):
+            os.makedirs(self.datmo_environment_path)
 
     def create(self, dictionary):
         """Create an environment
@@ -316,3 +323,129 @@ class EnvironmentController(BaseController):
             stop_success = self.environment_driver.stop_remove_containers_by_term(
                 term=all_match_string, force=True)
         return stop_success
+
+    def exists(self, environment_id=None, environment_unique_hash=None):
+        """Returns a boolean if the environment exists
+
+        Parameters
+        ----------
+        environment_id : str
+            environment id to check for
+        environment_unique_hash : str
+            unique hash for the environment to check for
+
+        Returns
+        -------
+        bool
+            True if exists else False
+
+        """
+        environment_objs = []
+        if environment_id:
+            environment_objs = self.dal.environment.query({
+                "id": environment_id
+            })
+        elif environment_unique_hash:
+            environment_objs = self.dal.environment.query({
+                "unique_hash": environment_unique_hash
+            })
+        env_exists = False
+        if environment_objs:
+            env_exists = True
+        return env_exists
+
+    def _calculate_environment_hash(self, env_path=None):
+        """Return the environment hash of the environment filepaths for `datmo_environments`"""
+        if env_path is None:
+            env_path = os.path.join(self.home, "datmo_environment")
+        return get_dirhash(env_path)
+
+    def _has_unstaged_changes(self):
+        """Return whether there are unstaged changes"""
+        # TODO: Fix after merging the PR for environments
+        # import pdb; pdb.set_trace()
+        # # Move tracked files to temp directory within _code_filepath
+        # # Hash files and return hash
+        # env_path = os.path.join(self.home, "datmo_environment")
+        # datmo_tmp_dirpath = os.path.join(self.home, ".datmo", "tmp")
+        # os.makedirs(datmo_tmp_dirpath)
+        # temp_dir = tempfile.mkdtemp(dir=datmo_tmp_dirpath)
+        # self.file_driver.copytree(env_path, temp_dir)
+        # self.environment_driver.create(path=os.path.join(temp_dir, "Dockerfile"))
+        # self._store_hardware_info({}, {}, temp_dir)
+        # env_hash = self._calculate_environment_hash(env_path=temp_dir)
+        # if self.exists_env(environment_unique_hash=env_hash):
+        #     return False
+        # return True
+
+        return False
+
+    def check_unstaged_changes(self):
+        """Checks if there exists any unstaged changes for the environment in `datmo_environment` folder. Returns False
+         if it's already staged
+
+        Raises
+        ------
+        EnvironmentNotInitialized
+            error if not initialized (must initialize first)
+
+        UnstagedChanges
+            error if not there exists unstaged changes in environment
+
+        """
+        if not self.is_initialized:
+            raise EnvironmentNotInitialized()
+
+        # Check if unstaged changes exist
+        if self._has_unstaged_changes():
+            raise UnstagedChanges()
+
+        return False
+
+    def checkout(self, environment_id):
+        """Checkout to specific environment id
+
+        Raises
+        ------
+        EnvironmentNotInitialized
+            error if not initialized (must initialize first)
+
+        UnstagedChanges
+            error if not there exists unstaged changes in environment
+
+        """
+        if not self.is_initialized:
+            raise EnvironmentNotInitialized()
+        if not self.exists(environment_id):
+            raise IOError(
+                __("error", "controller.environment.checkout_env"))
+        # Check if unstaged changes exist
+        if self._has_unstaged_changes():
+            raise UnstagedChanges()
+        # Check if environment has is same as current
+        results = self.dal.environment.query({
+            "id": environment_id
+        })
+        environment_obj = results[0]
+        environment_hash = environment_obj.unique_hash
+
+        if self._calculate_environment_hash() == environment_hash:
+            return True
+        # Remove all content from `datmo_environment` folder
+        # TODO Use datmo environment path as a class attribute
+        for file in os.listdir(self.datmo_environment_path):
+            file_path = os.path.join(self.datmo_environment_path, file)
+            try:
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print(e)
+        # Add in files for that environment id
+        file_collection_obj = self.dal.file_collection.\
+            get_by_id(environment_obj.file_collection_id)
+        environment_definition_path = os.path.join(
+            self.home, file_collection_obj.path)
+        self.file_driver.copytree(environment_definition_path, self.datmo_environment_path)
+        return True
