@@ -2,6 +2,7 @@
 Tests for FileCollectionController
 """
 import os
+import shutil
 import tempfile
 import platform
 from io import open
@@ -111,3 +112,140 @@ class TestFileCollectionController():
 
         assert result == True and \
             thrown == True
+
+    def test_exists_file(self):
+        self.project.init("test6", "test description")
+
+        # Test successful creation of collection
+        self.file_collection.file_driver.create("dirpath1", directory=True)
+        self.file_collection.file_driver.create("filepath1")
+
+        dirpath1 = os.path.join(self.file_collection.home, "dirpath1")
+        filepath1 = os.path.join(self.file_collection.home, "filepath1")
+        filepaths = [filepath1, dirpath1]
+
+        file_collection_obj = self.file_collection.create(filepaths)
+
+        # check for file_collection_id
+        result = self.file_collection.exists(file_collection_id=file_collection_obj.id)
+        assert result
+
+        # check for file_hash in file_collection
+        result = self.file_collection.exists(file_hash=file_collection_obj.filehash)
+        assert result
+
+        # check for not proper file_collection_id
+        result = self.file_collection.exists(file_collection_id="test_file_collection_id")
+        assert not result
+
+    def test_calculate_file_collection_hash(self):
+        self.project.init("test7", "test description")
+
+        # Test successful creation of collection
+        self.file_collection.file_driver.create("dirpath1", directory=True)
+        self.file_collection.file_driver.create("filepath1")
+
+        # Test successful creation of collection
+        dirpath1 = os.path.join(self.file_collection.home, "dirpath1")
+        filepath1 = os.path.join(self.file_collection.home, "filepath1")
+        filepaths = [filepath1, dirpath1]
+
+        file_collection_obj = self.file_collection.create(filepaths)
+        datmo_files_path = os.path.join(self.file_collection.home, "datmo_files")
+        file_collection_path = os.path.join(self.file_collection.home, file_collection_obj.path)
+        self.file_collection.file_driver.copytree(file_collection_path, datmo_files_path)
+
+        assert file_collection_obj.filehash == self.file_collection._calculate_datmo_files_hash()
+
+        shutil.rmtree(datmo_files_path)
+
+        self.file_collection.file_driver.create("datmo_files/dirpath1", directory=True)
+        self.file_collection.file_driver.create("datmo_files/filepath1")
+
+        dirpath1 = os.path.join(self.file_collection.home, "datmo_files", "dirpath1")
+        filepath1 = os.path.join(self.file_collection.home, "datmo_files",  "filepath1")
+        filepaths = [filepath1, dirpath1]
+
+        file_collection_obj_1 = self.file_collection.create(filepaths)
+
+        assert file_collection_obj.filehash == file_collection_obj_1.filehash
+
+    def test_has_unstaged_changes(self):
+        self.project.init("test8", "test description")
+
+        # Test successful creation of collection
+        self.file_collection.file_driver.create("datmo_files/dirpath1", directory=True)
+        self.file_collection.file_driver.create("datmo_files/filepath1")
+        dirpath1 = os.path.join(self.file_collection.home, "datmo_files", "dirpath1")
+        filepath1 = os.path.join(self.file_collection.home, "datmo_files", "filepath1")
+        filepaths = [filepath1, dirpath1]
+
+        self.file_collection.create(filepaths)
+
+        # Test when there are no unstaged changes
+        result = self.file_collection._has_unstaged_changes()
+        assert not result
+
+        with open(filepath1, "w") as f:
+            f.write("hello")
+
+        # Test when there are unstaged changes
+        result = self.file_collection._has_unstaged_changes()
+        assert result
+
+    def test_check_unstaged_changes(self):
+        self.project.init("test9", "test description")
+
+        # Test successful creation of collection
+        self.file_collection.file_driver.create("datmo_files/dirpath1", directory=True)
+        self.file_collection.file_driver.create("datmo_files/filepath1")
+
+        dirpath1 = os.path.join(self.file_collection.home, "datmo_files", "dirpath1")
+        filepath1 = os.path.join(self.file_collection.home, "datmo_files", "filepath1")
+        filepaths = [filepath1, dirpath1]
+        self.file_collection.create(filepaths)
+
+        # Test when there are no unstaged changes
+        result = self.file_collection.check_unstaged_changes()
+        assert result
+
+        with open(filepath1, "w") as f:
+            f.write("hello")
+
+        # Test when there are unstaged changes
+        failed = False
+        try:
+            _ = self.file_collection.check_unstaged_changes()
+        except:
+            failed = True
+        assert failed
+
+    def test_checkout_file(self):
+        self.project.init("test9", "test description")
+
+        # Test successful creation of collection
+        self.file_collection.file_driver.create("dirpath1", directory=True)
+        self.file_collection.file_driver.create("filepath1")
+
+        dirpath1 = os.path.join(self.file_collection.home, "dirpath1")
+        filepath1 = os.path.join(self.file_collection.home, "filepath1")
+        filepaths = [filepath1, dirpath1]
+
+        file_collection_obj = self.file_collection.create(filepaths)
+
+        # Test when there are no unstaged changes
+        result = self.file_collection.checkout(file_collection_obj.id)
+        assert result
+
+        # changing filepath in `datmo_files`
+        datmo_file_path = os.path.join(self.file_collection.home, "datmo_files")
+        with open(os.path.join(datmo_file_path, "filepath1"), "w") as f:
+            f.write("hello")
+
+        # Test when there are unstaged changes
+        failed = False
+        try:
+            _ = self.file_collection.checkout(file_collection_obj.id)
+        except:
+            failed = True
+        assert failed
