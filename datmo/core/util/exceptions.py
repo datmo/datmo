@@ -78,19 +78,6 @@ class MutuallyExclusiveArguments(ArgumentError):
     pass
 
 
-class ValidationFailed(ArgumentError):
-    def __init__(self, error_obj):
-        self.errors = error_obj
-        super(ValidationFailed, self).__init__(
-            __("error", "exception.validationfailed", self.get_error_str()))
-
-    def get_error_str(self):
-        err_str = ''
-        for name in self.errors:
-            err_str += "'%s': %s\n" % (name, self.errors[name])
-        return err_str
-
-
 class ValidationSchemaMissing(ArgumentError):
     pass
 
@@ -124,6 +111,10 @@ class FileExecutionError(Exception):
 
 
 class FileAlreadyExistsError(Exception):
+    pass
+
+
+class DirAlreadyExistsError(Exception):
     pass
 
 
@@ -209,6 +200,23 @@ class CommitDoesNotExist(CodeException):
 
 class CommitFailed(CodeException):
     pass
+
+
+class InvalidDestinationName(ArgumentError):
+    pass
+
+
+class ValidationFailed(ArgumentError):
+    def __init__(self, error_obj):
+        self.errors = error_obj
+        super(ValidationFailed, self).__init__(
+            __("error", "exception.validationfailed", self.get_error_str()))
+
+    def get_error_str(self):
+        err_str = ''
+        for name in self.errors:
+            err_str += "'%s': %s\n" % (name, self.errors[name])
+        return err_str
 
 
 class DatmoFolderInWorkTree(CodeException):

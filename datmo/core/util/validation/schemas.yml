@@ -24,12 +24,12 @@ create_snapshot:
 
   environment_id:
     type: string
-  environment_definition_filepath:
-    type: string
+  environment_definition_paths:
+    type: list
 
   file_collection_id:
     type: string
-  filepaths:
+  paths:
     type: list
 
   config:

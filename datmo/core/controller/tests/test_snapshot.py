@@ -15,7 +15,7 @@ from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.controller.task import TaskController
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.util.exceptions import (
-    EntityNotFound, EnvironmentDoesNotExist, CommitFailed, SessionDoesNotExist,
+    EntityNotFound, CommitFailed, SessionDoesNotExist,
     RequiredArgumentMissing, TaskNotComplete, InvalidArgumentType,
     ProjectNotInitialized, InvalidProjectPath, DoesNotExist)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
@@ -75,17 +75,43 @@ class TestSnapshotController():
             failed = True
         assert failed
 
-    def test_create_fail_no_environment_with_language(self):
+    def test_create_fail_no_code_environment(self):
         self.__setup()
-        # Test default values for snapshot, fail due to environment with other than default
-        self.snapshot.file_driver.create("filepath1")
+        # Create environment definition
+        datmo_environment_dir = os.path.join(self.snapshot.home,
+                                             "datmo_environment")
+        env_def_path = os.path.join(datmo_environment_dir, "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        # test must fail when there is file present in root project folder
         failed = False
         try:
-            self.snapshot.create({
-                "message": "my test snapshot",
-                "language": "java"
-            })
-        except EnvironmentDoesNotExist:
+            _ = self.snapshot.create({"message": "my test snapshot"})
+        except CommitFailed:
+            failed = True
+        assert failed
+
+    def test_create_fail_no_code_environment_files(self):
+        self.__setup()
+        # Create environment definition
+        datmo_environment_dir = os.path.join(self.snapshot.home,
+                                             "datmo_environment")
+        env_def_path = os.path.join(datmo_environment_dir, "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        datmo_files_dir = os.path.join(self.snapshot.home,
+                                       "datmo_files")
+        test_file = os.path.join(datmo_files_dir, "test.txt")
+        with open(test_file, "w") as f:
+            f.write(to_unicode(str("hello")))
+
+        # test must fail when there is file present in root project folder
+        failed = False
+        try:
+            _ = self.snapshot.create({"message": "my test snapshot"})
+        except CommitFailed:
             failed = True
         assert failed
 
@@ -109,8 +135,8 @@ class TestSnapshotController():
         # Test default values for snapshot when there is no environment
         test_filepath = os.path.join(self.snapshot.home, "script.py")
         with open(test_filepath, "w") as f:
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
+            f.write(to_unicode("import os\n"))
+            f.write(to_unicode("import sys\n"))
             f.write(to_unicode("print('hello')\n"))
 
         snapshot_obj_1 = self.snapshot.create({"message": "my test snapshot"})
@@ -149,6 +175,54 @@ class TestSnapshotController():
         assert snapshot_obj.config == {}
         assert snapshot_obj.stats == {}
 
+    def test_create_success_with_datmo_environment(self):
+        self.__setup()
+        # Create environment definition
+        datmo_environment_dir = os.path.join(self.snapshot.home,
+                                             "datmo_environment")
+        env_def_path = os.path.join(datmo_environment_dir, "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        # creating a file in project folder
+        test_filepath = os.path.join(self.snapshot.home, "script.py")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode("import numpy\n"))
+            f.write(to_unicode("import sklearn\n"))
+            f.write(to_unicode("print('hello')\n"))
+
+        # Test default values for snapshot, success
+        snapshot_obj = self.snapshot.create({"message": "my test snapshot"})
+
+        assert isinstance(snapshot_obj, Snapshot)
+        assert snapshot_obj.code_id
+        assert snapshot_obj.environment_id
+        assert snapshot_obj.file_collection_id
+        assert snapshot_obj.config == {}
+        assert snapshot_obj.stats == {}
+
+    def test_create_success_env_definition_paths(self):
+        self.__setup()
+        # Create environment definition
+        random_dir = os.path.join(self.snapshot.home, "random_dir")
+        os.makedirs(random_dir)
+        env_def_path = os.path.join(random_dir, "randomDockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        environment_definition_paths = [env_def_path + ">Dockerfile"]
+        # Test default values for snapshot, success
+        snapshot_obj = self.snapshot.create({
+            "message": "my test snapshot",
+            "environment_definition_paths": environment_definition_paths
+        })
+
+        assert isinstance(snapshot_obj, Snapshot)
+        assert snapshot_obj.code_id
+        assert snapshot_obj.environment_id
+        assert snapshot_obj.file_collection_id
+        assert snapshot_obj.config == {}
+        assert snapshot_obj.stats == {}
+
     def test_create_success_default_env_def_duplicate(self):
         self.__setup()
         # Test 2 snapshots with same parameters
@@ -172,7 +246,7 @@ class TestSnapshotController():
         snapshot_obj_1 = self.snapshot.create({"message": "my test snapshot"})
 
         # Should return the same object back
-        assert snapshot_obj_1 == snapshot_obj
+        assert snapshot_obj_1.id == snapshot_obj.id
         assert snapshot_obj_1.code_id == snapshot_obj.code_id
         assert snapshot_obj_1.environment_id == \
                snapshot_obj.environment_id
@@ -220,14 +294,11 @@ class TestSnapshotController():
         input_dict = {
             "message":
                 "my test snapshot",
-            "filepaths": [
+            "paths": [
                 os.path.join(self.snapshot.home, "datmo_files", "dirpath1"),
                 os.path.join(self.snapshot.home, "datmo_files", "dirpath2"),
                 os.path.join(self.snapshot.home, "datmo_files", "filepath1")
             ],
-            # TODO: Check for it after merging changes in other PR
-            # "environment_definition_filepath":
-            #     env_def_path,
             "config_filepath":
                 config_filepath,
             "stats_filepath":
@@ -283,13 +354,11 @@ class TestSnapshotController():
         input_dict = {
             "message":
                 "my test snapshot",
-            "filepaths": [
+            "paths": [
                 os.path.join(self.snapshot.home, "datmo_files", "dirpath1"),
                 os.path.join(self.snapshot.home, "datmo_files", "dirpath2"),
                 os.path.join(self.snapshot.home, "datmo_files", "filepath1")
             ],
-            "environment_definition_filepath":
-                env_def_path,
             "config_filename":
                 "different_name",
             "stats_filename":
@@ -329,13 +398,11 @@ class TestSnapshotController():
         input_dict = {
             "message":
                 "my test snapshot",
-            "filepaths": [
+            "paths": [
                 os.path.join(self.snapshot.home, "datmo_files", "dirpath1"),
                 os.path.join(self.snapshot.home, "datmo_files", "dirpath2"),
                 os.path.join(self.snapshot.home, "datmo_files", "filepath1")
             ],
-            "environment_definition_filepath":
-                env_def_path,
             "config": {
                 "foo": "bar"
             },
@@ -353,7 +420,8 @@ class TestSnapshotController():
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_create_from_task(self):
         self.__setup()
-        # 1) Test if fails with TaskNotComplete error
+        # 0) Test if fails with TaskNotComplete error
+        # 1) Test if success with empty task files, results
         # 2) Test if success with task files, results, and message
         # 3) Test if success with message, label, config and stats
         # 4) Test if success with updated stats from after_snapshot_id and task_results
@@ -361,7 +429,7 @@ class TestSnapshotController():
         # Create task in the project
         task_obj = self.task.create()
 
-        # 1) Test option 1
+        # 0) Test option 0
         failed = False
         try:
             _ = self.snapshot.create_from_task(
@@ -370,7 +438,30 @@ class TestSnapshotController():
             failed = True
         assert failed
 
+        # 1) Test option 1
+
         # Create task_dict
+        task_command = ["sh", "-c", "echo test"]
+        task_dict = {"command_list": task_command}
+
+        # Create environment definition
+        env_def_path = os.path.join(self.project.home, "Dockerfile")
+        with open(env_def_path, "w") as f:
+            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+
+        updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)
+
+        snapshot_obj = self.snapshot.create_from_task(
+            message="my test snapshot", task_id=updated_task_obj.id)
+
+        assert isinstance(snapshot_obj, Snapshot)
+        assert snapshot_obj.id == updated_task_obj.after_snapshot_id
+        assert snapshot_obj.message == "my test snapshot"
+        assert snapshot_obj.stats == updated_task_obj.results
+        assert snapshot_obj.visible == True
+
+        # Create new task and corresponding dict
+        task_obj = self.task.create()
         task_command = ["sh", "-c", "echo accuracy:0.45"]
         task_dict = {"command_list": task_command}
 
@@ -468,13 +559,11 @@ class TestSnapshotController():
         input_dict = {
             "message":
                 "my test snapshot",
-            "filepaths": [
+            "paths": [
                 os.path.join(self.snapshot.home, "datmo_files", "dirpath1"),
                 os.path.join(self.snapshot.home, "datmo_files", "dirpath2"),
                 os.path.join(self.snapshot.home, "datmo_files", "filepath1")
             ],
-            "environment_definition_filepath":
-                env_def_path,
             "config_filename":
                 config_filepath,
             "stats_filename":
@@ -489,8 +578,6 @@ class TestSnapshotController():
         # Create snapshot
         snapshot_obj_1 = self.__default_create()
 
-        code_obj_1 = self.snapshot.dal.code.get_by_id(snapshot_obj_1.code_id)
-
         # Create duplicate snapshot in project
         self.snapshot.file_driver.create("test")
         snapshot_obj_2 = self.__default_create()
@@ -499,13 +586,9 @@ class TestSnapshotController():
 
         # Checkout to snapshot 1 using snapshot id
         result = self.snapshot.checkout(snapshot_obj_1.id)
+        # TODO: Check for which snapshot we are on
 
-        # Snapshot directory in user directory
-        snapshot_obj_1_path = os.path.join(
-            self.snapshot.home, "datmo_environment")
-        assert result == True and \
-               self.snapshot.code_driver.current_ref() == code_obj_1.commit_id and \
-               os.path.isdir(snapshot_obj_1_path)
+        assert result == True
 
     def test_list(self):
         self.__setup()

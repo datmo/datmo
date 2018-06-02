@@ -1,0 +1,114 @@
+---
+title: "Log your experiments in R with Datmo"
+author: "Nick Walsh"
+output:
+  html_document:
+    df_print: paged
+    toc: yes
+  rmarkdown::html_vignette:
+    number_sections: yes
+    toc: yes
+---
+
+Setup
+=====
+
+First, we'll need to install a few packages for use today. They'll contain everything we'll need to model our data and create visualizations.
+
+```{r installPackages}
+install.packages("datasets", dependencies = TRUE) # Package that contains the Iris dataset
+install.packages("caret", dependencies = TRUE) # Model selection/tuning package
+install.packages("rpart.plot", dependencies = TRUE) # Visualization package
+```
+
+We're going to install a python package called Datmo, which will enable us to log and track our experiments through the power of *snapshots*.
+If you don't already have pip, you can [find it here](https://pip.pypa.io/en/stable/installing/).
+
+```{bash}
+pip install datmo
+```
+
+Next, we're going to want to make sure we've set the proper working directory. We can do this easily through the 
+RStudio file finder on the right, or with the following command.
+
+This will be necessary so that Datmo knows the proper directory to perform tracking in. 
+
+```{r "setup", include=FALSE}
+require("knitr")
+opts_knit$set(root.dir = "~/Dev/datmo-R-example") # Replace with whatever your root directory for the project is
+```
+
+Now we're going to initialize a Datmo repository. This will enable us to create snapshots for logging our experiments.
+This only needs to be done once for a given repository.
+
+```{r initializeDatmo}
+system("datmo init", input=c("my new project","test description"), timeout=15)
+```
+
+Example
+======
+
+Ok, time to start with loading in the Fisher Iris dataset.
+
+```{r loadData}
+library(datasets)
+
+df <- iris # Create dataframe from the Iris dataset
+head(df) # View first few rows of dataset
+```
+
+Now that our dataframe is loaded in, we can import the *caret* package to perform training.
+
+```{r fitModel}
+library(caret)
+
+modFit <- train(Species ~., method = "rpart", data=df) #Fit model
+print(modFit$finalModel)   #Summarize model
+```
+
+Our model is trained, but it's kind of hard to comprehend using only the metrics. Let's create a visualization to showcase the
+splits in our decision tree.
+
+```{r visualizeModel}
+library(rpart.plot)
+
+rpart.plot(modFit$finalModel) #create decision tree visualization
+```
+
+Awesome! Since we're happy with our model results, we'll want to save our model and log configuration and stats sections in a snapshot.
+We can do this with the following syntax, where we're creating a *char* string with the format "--PROPERTY key:value" that will be passed to 
+the snapshot create code block.
+
+```{r defineSnapshot}
+config<- paste(sep="",
+               " --config method:", modFit$method,
+               " --config modelType:", modFit$modelType)
+
+#define metrics to save from the model
+stats<- paste(sep="",
+              " --stats Accuracy:", modFit$results$Accuracy[1],
+              " --stats Kappa:", modFit$results$Kappa[1])
+
+config
+stats
+```
+
+
+Before we create a snapshot, we have the option of writing our global environment (data and variables) to files. R does this with one simple command.
+This is valuable for a large number of reasons, whether it's writing out model weight files, or saving the random train-test data split that occurred during training.
+
+```{r envVariables}
+save.image()
+```
+
+We can create a snapshot with the following command. A snapshot will enable us to log our experiment and reproduce the state of code, environment, metrics, and more in future examples.
+
+```{r snapshotCreate}
+system2("datmo", args=paste("snapshot create", "-m 'Whoah, my first snapshot!'", config, stats), timeout=15)
+```
+
+We can visualize the snapshot we just created (and any others associated with this project) with the following command
+
+```{bash}
+datmo snapshot ls
+```

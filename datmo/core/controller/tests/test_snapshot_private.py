@@ -89,8 +89,8 @@ class TestSnapshotController():
         self.snapshot._file_setup(incoming_data, final_data)
         assert final_data['file_collection_id']
 
-    def test_file_setup_with_filepaths(self):
-        incoming_data = {"filepaths": [self.filepath]}
+    def test_file_setup_with_paths(self):
+        incoming_data = {"paths": [self.filepath]}
         final_data = {}
         self.snapshot._file_setup(incoming_data, final_data)
         assert final_data['file_collection_id']

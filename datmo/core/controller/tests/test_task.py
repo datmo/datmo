@@ -74,8 +74,9 @@ class TestTaskController():
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
+        definition_paths = [env_def_path]
         environment_obj = self.environment.create({
-            "definition_filepath": env_def_path
+            "definition_paths": definition_paths
         })
 
         # Set log filepath
@@ -168,6 +169,10 @@ class TestTaskController():
         assert result['validation'] == "0.32"
         assert result['model_type'] == "logistic regression"
 
+        test_logs = """test"""
+        result = self.task._parse_logs_for_results(test_logs)
+        assert result is None
+
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_run(self):
         self.__setup()
@@ -255,7 +260,7 @@ class TestTaskController():
 
         # Snapshot dictionary
         snapshot_dict = {
-            "filepaths": [
+            "paths": [
                 os.path.join(self.project.home, "dirpath1"),
                 os.path.join(self.project.home, "dirpath2"),
                 os.path.join(self.project.home, "filepath1")
@@ -479,7 +484,7 @@ class TestTaskController():
 
         # Snapshot dictionary
         snapshot_dict = {
-            "filepaths": [
+            "paths": [
                 os.path.join(self.project.home, "dirpath1", "filepath1")
             ],
         }

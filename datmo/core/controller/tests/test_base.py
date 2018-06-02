@@ -94,7 +94,7 @@ class TestBaseController():
     def test_default_file_driver(self):
         assert self.base.file_driver != None
         assert self.base.file_driver.type == "local"
-        assert self.base.file_driver.filepath == self.base.home
+        assert self.base.file_driver.root == self.base.home
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_default_environment_driver(self):

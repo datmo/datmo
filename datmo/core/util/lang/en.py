@@ -37,6 +37,14 @@ MESSAGES = {
             "{foo} - {bar}",
         "cli.general.tuple.test":
             "%s, %s",
+        "cli.environment.create":
+            "Creating a new environment",
+        "cli.environment.create.success":
+            "Created a new environment with id: %s",
+        "cli.environment.create.alreadyexist":
+            "No changes in environment definition files from id: %s",
+        "cli.environment.delete.success":
+            "Deleted environment with id: %s",
         "cli.snapshot.create":
             "Creating a new snapshot",
         "cli.snapshot.create.success":
@@ -194,7 +202,7 @@ MESSAGES = {
         "controller.environment.driver.docker.init":
             "Error in docker initialization: %s",
         "controller.environment.checkout_env":
-            "Environement id does not exist",
+            "Environement id does not exist: %s",
         "controller.environment.driver.docker.get_tags":
             "Error in getting tags: %s",
         "controller.environment.driver.docker.create.dne":
@@ -216,7 +224,13 @@ MESSAGES = {
         "controller.environment.driver.docker.stop_remove_containers_by_term":
             "Error stopping and removing containers by term: %s",
         "controller.environment.create":
-            "Required argument definition_filepath not present in input",
+            "Required argument definition_paths not present in input",
+        "controller.environment.create.filepath.dne":
+            "Path specified in definition paths does not exist: %s",
+        "controller.file.driver.create_collection.file_exists":
+            "File name has already been specified and exists: %s",
+        "controller.file.driver.create_collection.dir_exists":
+            "Dir name has already been specified and exists: %s",
         "controller.environment.requirements.create":
             "Error while creating requirements file for python: %s",
         "controller.environment.build":

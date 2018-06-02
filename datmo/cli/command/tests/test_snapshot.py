@@ -12,7 +12,7 @@ from __future__ import unicode_literals
 #     # Python 3
 #     import builtins as __builtin__
 import os
-import shutil
+import time
 import tempfile
 import platform
 from io import open
@@ -125,7 +125,7 @@ class TestSnapshot():
         test_environment_definition_filepath = self.env_def_path
         test_config_filepath = self.config_filepath
         test_stats_filepath = self.config_filepath
-        test_filepaths = [self.filepath, self.filepath_2]
+        test_paths = [self.filepath, self.filepath_2]
 
         # try single filepath
         self.snapshot.parse([
@@ -153,36 +153,40 @@ class TestSnapshot():
             test_config_filepath,
             "--stats-filepath",
             test_stats_filepath,
-            "--filepaths",
-            test_filepaths[0],
+            "--paths",
+            test_paths[0],
         ])
 
         # test for desired side effects
         assert self.snapshot.args.message == test_message
         assert self.snapshot.args.label == test_label
         assert self.snapshot.args.session_id == test_session_id
-        assert self.snapshot.args.environment_definition_filepath == test_environment_definition_filepath
+        assert self.snapshot.args.environment_definition_paths == [
+            test_environment_definition_filepath
+        ]
         assert self.snapshot.args.config_filepath == test_config_filepath
         assert self.snapshot.args.stats_filepath == test_stats_filepath
-        assert self.snapshot.args.filepaths == [test_filepaths[0]]
+        assert self.snapshot.args.paths == [test_paths[0]]
 
-        # test multiple filepaths
+        # test multiple paths
         self.snapshot.parse([
             "snapshot", "create", "--message", test_message, "--label",
             test_label, "--session-id", test_session_id, "--environment-def",
             test_environment_definition_filepath, "--config-filepath",
             test_config_filepath, "--stats-filepath", test_stats_filepath,
-            "--filepaths", test_filepaths[0], "--filepaths", test_filepaths[1]
+            "--paths", test_paths[0], "--paths", test_paths[1]
         ])
 
         # test for desired side effects
         assert self.snapshot.args.message == test_message
         assert self.snapshot.args.label == test_label
         assert self.snapshot.args.session_id == test_session_id
-        assert self.snapshot.args.environment_definition_filepath == test_environment_definition_filepath
+        assert self.snapshot.args.environment_definition_paths == [
+            test_environment_definition_filepath
+        ]
         assert self.snapshot.args.config_filepath == test_config_filepath
         assert self.snapshot.args.stats_filepath == test_stats_filepath
-        assert self.snapshot.args.filepaths == test_filepaths
+        assert self.snapshot.args.paths == test_paths
 
         snapshot_id_1 = self.snapshot.execute()
         assert snapshot_id_1
@@ -307,7 +311,7 @@ class TestSnapshot():
             # test task id with filepaths
             self.snapshot.parse([
                 "snapshot", "create", "--message", test_message, "--task-id",
-                task_id, "--filepaths", "mypath"
+                task_id, "--paths", "mypath"
             ])
             _ = self.snapshot.execute()
         except SnapshotCreateFromTaskArgs:
@@ -369,7 +373,6 @@ class TestSnapshot():
         test_session_id = "test_session_id"
         test_environment_id = "test_environment_id"
         test_environment_definition_filepath = self.env_def_path
-        test_filepaths = [self.filepath]
         test_config_filename = "config.json"
         test_config_filepath = self.config_filepath
         test_stats_filename = "stats.json"
@@ -544,6 +547,9 @@ class TestSnapshot():
         assert result.message == test_message
         assert result.label == test_label
 
+        # Adding sleep due to issue with consistency in blitzdb database
+        time.sleep(2)
+
         # 5. Updating config, stats
         # Test when optional parameters are not given
         self.snapshot.parse([
@@ -650,11 +656,6 @@ class TestSnapshot():
         self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
         snapshot_id = self.snapshot.execute()
 
-        # remove datmo_task folder to have no changes before checkout
-        datmo_tasks_dirpath = os.path.join(self.snapshot.home, "datmo_tasks")
-        if os.path.exists(datmo_tasks_dirpath):
-            shutil.rmtree(datmo_tasks_dirpath)
-
         # Test when optional parameters are not given
         self.snapshot.parse(["snapshot", "checkout", snapshot_id])
 
@@ -686,7 +687,7 @@ class TestSnapshot():
         # Create snapshot to test
         self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
         snapshot_id = self.snapshot.execute()
-        # Test diff with the above two snapshots
+        # Test inspect for this snapshot
         self.snapshot.parse(["snapshot", "inspect", snapshot_id])
 
         result = self.snapshot.execute()

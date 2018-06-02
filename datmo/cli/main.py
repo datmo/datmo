@@ -27,7 +27,6 @@ def main():
     # parse_args defaults to [1:] for args, but you need to
     # exclude the rest of the args too, or validation will fail
     # args = parser.parse_args(sys.argv[1:2])
-
     if len(sys.argv) > 1 and \
         sys.argv[1] in cli_helper.get_command_choices():
         command_name = sys.argv[1]

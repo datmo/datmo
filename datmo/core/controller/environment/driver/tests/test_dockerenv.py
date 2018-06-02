@@ -37,7 +37,7 @@ class TestDockerEnv():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         # Test the default parameters
-        self.docker_environment_manager = \
+        self.docker_environment_driver = \
             DockerEnvironmentDriver(self.temp_dir)
 
         random_text = str(uuid.uuid1())
@@ -46,22 +46,22 @@ class TestDockerEnv():
             f.write(to_unicode(str("RUN echo " + random_text)))
 
     def teardown_method(self):
-        self.docker_environment_manager.stop_remove_containers_by_term(
+        self.docker_environment_driver.stop_remove_containers_by_term(
             term='cooltest', force=True)
 
     def test_instantiation(self):
-        assert self.docker_environment_manager != None
-        assert self.docker_environment_manager.docker_socket == None or "unix:///var/run/docker.sock"
-        assert self.docker_environment_manager.docker_execpath == "docker"
-        assert self.docker_environment_manager.client
-        assert self.docker_environment_manager.prefix
-        assert self.docker_environment_manager.type
+        assert self.docker_environment_driver != None
+        assert self.docker_environment_driver.docker_socket == None or "unix:///var/run/docker.sock"
+        assert self.docker_environment_driver.docker_execpath == "docker"
+        assert self.docker_environment_driver.client
+        assert self.docker_environment_driver.prefix
+        assert self.docker_environment_driver.type
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_init_success(self):
-        init_result = self.docker_environment_manager.init()
+        init_result = self.docker_environment_driver.init()
         assert init_result and \
-               self.docker_environment_manager.is_initialized == True
+               self.docker_environment_driver.is_initialized == True
 
     def test_init_failed(self):
         thrown = False
@@ -75,132 +75,72 @@ class TestDockerEnv():
 
     def test_create(self):
         input_dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
+            self.docker_environment_driver.filepath, "Dockerfile")
         output_dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "datmoDockerfile")
+            self.docker_environment_driver.filepath, "datmoDockerfile")
         # Test both default values
-        success, path, output_path, requirements_filepath = \
-            self.docker_environment_manager.create()
+        success, path, output_path = \
+            self.docker_environment_driver.create()
 
         assert success and \
                os.path.isfile(output_dockerfile_path) and \
                "datmo" in open(output_dockerfile_path, "r").read()
         assert path == input_dockerfile_path
         assert output_path == output_dockerfile_path
-        assert requirements_filepath == None
 
         open(output_dockerfile_path, "r").close()
         os.remove(output_dockerfile_path)
 
         # Test default values for output
-        success, path, output_path, requirements_filepath = \
-            self.docker_environment_manager.create(input_dockerfile_path)
+        success, path, output_path = \
+            self.docker_environment_driver.create(input_dockerfile_path)
 
         assert success and \
                os.path.isfile(output_dockerfile_path) and \
                "datmo" in open(output_dockerfile_path, "r").read()
         assert path == input_dockerfile_path
         assert output_path == output_dockerfile_path
-        assert requirements_filepath == None
 
         open(output_dockerfile_path, "r").close()
         os.remove(output_dockerfile_path)
 
         # Test both values given
-        success, path, output_path, requirements_filepath = \
-            self.docker_environment_manager.create(input_dockerfile_path,
+        success, path, output_path = \
+            self.docker_environment_driver.create(input_dockerfile_path,
                                                         output_dockerfile_path)
         assert success and \
                os.path.isfile(output_dockerfile_path) and \
                "datmo" in open(output_dockerfile_path, "r").read()
         assert path == input_dockerfile_path
         assert output_path == output_dockerfile_path
-        assert requirements_filepath == None
-
-        # Test for language being passed in
-        os.remove(input_dockerfile_path)
-        open(output_dockerfile_path, "r").close()
-        os.remove(output_dockerfile_path)
-
-        script_path = os.path.join(self.docker_environment_manager.filepath,
-                                   "script.py")
-        with open(script_path, "w") as f:
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
-        success, path, output_path, requirements_filepath = \
-            self.docker_environment_manager.create(language="python3")
-        assert success and \
-               os.path.isfile(output_dockerfile_path) and \
-               "datmo" in open(output_dockerfile_path, "r").read()
-        assert path == input_dockerfile_path
-        assert output_path == output_dockerfile_path
-        assert requirements_filepath and os.path.isfile(requirements_filepath) and \
-               "datmo" in open(requirements_filepath, "r").read()
-
-        # Test exception for path does not exist
-        os.remove(input_dockerfile_path)
-        open(output_dockerfile_path, "r").close()
-        os.remove(output_dockerfile_path)
-        success, path, output_path, requirements_filepath =\
-            self.docker_environment_manager.create()
-        assert success and \
-               os.path.isfile(output_dockerfile_path) and \
-               "datmo" in open(output_dockerfile_path, "r").read()
-        assert path == input_dockerfile_path
-        assert output_path == output_dockerfile_path
-        assert requirements_filepath
 
         # Test exception for output path already exists
         failed = False
         try:
-            self.docker_environment_manager.create(
+            self.docker_environment_driver.create(
                 output_path=output_dockerfile_path)
         except FileAlreadyExistsError:
             failed = True
         assert failed
 
+        # Test exception for path does not exist
+        os.remove(input_dockerfile_path)
+        open(output_dockerfile_path, "r").close()
+        os.remove(output_dockerfile_path)
+
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_build(self):
         name = str(uuid.uuid1())
-        path = os.path.join(self.docker_environment_manager.filepath,
+        path = os.path.join(self.docker_environment_driver.filepath,
                             "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        result = self.docker_environment_manager.build(name, path)
+        result = self.docker_environment_driver.build(name, path)
         assert result == True
         # teardown
-        self.docker_environment_manager.remove(name, force=True)
-
-        # test
-        os.remove(path)
-        script_path = os.path.join(self.docker_environment_manager.filepath,
-                                   "script.py")
-
-        with open(script_path, "w") as f:
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
-
-        success, path, output_path, requirements_filepath = \
-            self.docker_environment_manager.create(language="python3")
-
-        assert success and \
-               os.path.isfile(path) and \
-               "datmo" in open(output_path, "r").read()
-        assert requirements_filepath and os.path.isfile(requirements_filepath) and \
-               "datmo" in open(requirements_filepath, "r").read()
-
-        # temporarily update requirements txt file after above assertion
-        # with just numpy as requirement
-        outfile_requirements = open(requirements_filepath, "w")
-        outfile_requirements.write('numpy')
-        outfile_requirements.close()
-
-        result = self.docker_environment_manager.build(name, path)
-        assert result == True
-        # teardown
-        self.docker_environment_manager.remove(name, force=True)
+        self.docker_environment_driver.remove(name, force=True)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_run(self):
@@ -208,22 +148,22 @@ class TestDockerEnv():
         # Keeping stdin_open and tty as either (True, True) or (False, False).
         # other combination are not used
         image_name = str(uuid.uuid1())
-        path = os.path.join(self.docker_environment_manager.filepath,
+        path = os.path.join(self.docker_environment_driver.filepath,
                             "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        log_filepath = os.path.join(self.docker_environment_manager.filepath,
+        log_filepath = os.path.join(self.docker_environment_driver.filepath,
                                     "test.log")
-        self.docker_environment_manager.build(image_name, path)
+        self.docker_environment_driver.build(image_name, path)
         # keeping stdin_open and tty as False
         run_options = {
             "command": ["sh", "-c", "echo yo"],
             "ports": ["8888:9999", "5000:5001"],
             "name": str(uuid.uuid1()),
             "volumes": {
-                self.docker_environment_manager.filepath: {
+                self.docker_environment_driver.filepath: {
                     'bind': '/home/',
                     'mode': 'rw'
                 }
@@ -234,42 +174,42 @@ class TestDockerEnv():
             "api": False
         }
         return_code, run_id, logs = \
-            self.docker_environment_manager.run(image_name, run_options, log_filepath)
+            self.docker_environment_driver.run(image_name, run_options, log_filepath)
 
         assert return_code == 0
         assert run_id
         assert logs
 
         # teardown
-        self.docker_environment_manager.stop(run_id, force=True)
+        self.docker_environment_driver.stop(run_id, force=True)
 
         # Test default values for run options
         run_options = {"command": ["sh", "-c", "echo yo"]}
         return_code, run_id, logs = \
-            self.docker_environment_manager.run(image_name, run_options, log_filepath)
+            self.docker_environment_driver.run(image_name, run_options, log_filepath)
         assert return_code == 0
         assert run_id
         assert logs
         # teardown container
-        self.docker_environment_manager.stop(run_id, force=True)
+        self.docker_environment_driver.stop(run_id, force=True)
 
         # teardown image
-        self.docker_environment_manager.remove(image_name, force=True)
+        self.docker_environment_driver.remove(image_name, force=True)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_interactive_run(self):
         # keeping stdin_open, tty as True
         # build image
         image_name = str(uuid.uuid1())
-        path = os.path.join(self.docker_environment_manager.filepath,
+        path = os.path.join(self.docker_environment_driver.filepath,
                             "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        log_filepath = os.path.join(self.docker_environment_manager.filepath,
+        log_filepath = os.path.join(self.docker_environment_driver.filepath,
                                     "test.log")
-        self.docker_environment_manager.build(image_name, path)
+        self.docker_environment_driver.build(image_name, path)
 
         @timeout_decorator.timeout(10, use_signals=False)
         def timed_run(container_name, timed_run_result):
@@ -278,7 +218,7 @@ class TestDockerEnv():
                 "ports": ["8888:9999", "5000:5001"],
                 "name": container_name,
                 "volumes": {
-                    self.docker_environment_manager.filepath: {
+                    self.docker_environment_driver.filepath: {
                         'bind': '/home/',
                         'mode': 'rw'
                     }
@@ -289,8 +229,8 @@ class TestDockerEnv():
                 "api": False
             }
 
-            self.docker_environment_manager.run(image_name, run_options,
-                                                log_filepath)
+            self.docker_environment_driver.run(image_name, run_options,
+                                               log_filepath)
             return timed_run_result
 
         container_name = str(uuid.uuid1())
@@ -303,7 +243,7 @@ class TestDockerEnv():
         assert timed_run_result
 
         # teardown container
-        self.docker_environment_manager.stop(container_name, force=True)
+        self.docker_environment_driver.stop(container_name, force=True)
 
         @timeout_decorator.timeout(10, use_signals=False)
         def timed_run(container_name, timed_run_result):
@@ -312,7 +252,7 @@ class TestDockerEnv():
                 "ports": ["8888:8888"],
                 "name": container_name,
                 "volumes": {
-                    self.docker_environment_manager.filepath: {
+                    self.docker_environment_driver.filepath: {
                         'bind': '/home/',
                         'mode': 'rw'
                     }
@@ -323,8 +263,8 @@ class TestDockerEnv():
                 "api": False
             }
 
-            self.docker_environment_manager.run(image_name, run_options,
-                                                log_filepath)
+            self.docker_environment_driver.run(image_name, run_options,
+                                               log_filepath)
             return timed_run_result
 
         container_name = str(uuid.uuid1())
@@ -336,23 +276,23 @@ class TestDockerEnv():
         assert timed_run_result
 
         # teardown container
-        self.docker_environment_manager.stop(container_name, force=True)
+        self.docker_environment_driver.stop(container_name, force=True)
 
         # teardown image
-        self.docker_environment_manager.remove(image_name, force=True)
+        self.docker_environment_driver.remove(image_name, force=True)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_stop(self):
         name = str(uuid.uuid1())
-        path = os.path.join(self.docker_environment_manager.filepath,
+        path = os.path.join(self.docker_environment_driver.filepath,
                             "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        log_filepath = os.path.join(self.docker_environment_manager.filepath,
+        log_filepath = os.path.join(self.docker_environment_driver.filepath,
                                     "test.log")
-        self.docker_environment_manager.build(name, path)
+        self.docker_environment_driver.build(name, path)
 
         run_options = {
             "command": ["sh", "-c", "echo yo"],
@@ -365,139 +305,134 @@ class TestDockerEnv():
             "api": False
         }
         _, run_id, _ = \
-            self.docker_environment_manager.run(name, run_options, log_filepath)
-        result = self.docker_environment_manager.stop(run_id, force=True)
+            self.docker_environment_driver.run(name, run_options, log_filepath)
+        result = self.docker_environment_driver.stop(run_id, force=True)
         assert result
         # teardown
-        self.docker_environment_manager.remove(name, force=True)
+        self.docker_environment_driver.remove(name, force=True)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_remove(self):
         name = str(uuid.uuid1())
         # Test if no image present and no containers
-        result = self.docker_environment_manager.remove(name)
+        result = self.docker_environment_driver.remove(name)
         assert result == True
 
-        path = os.path.join(self.docker_environment_manager.filepath,
+        path = os.path.join(self.docker_environment_driver.filepath,
                             "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
         # Without force
-        self.docker_environment_manager.build(name, path)
-        result = self.docker_environment_manager.remove(name)
+        self.docker_environment_driver.build(name, path)
+        result = self.docker_environment_driver.remove(name)
         assert result == True
 
         # With force
-        self.docker_environment_manager.build(name, path)
+        self.docker_environment_driver.build(name, path)
         # teardown
-        result = self.docker_environment_manager.remove(name, force=True)
+        result = self.docker_environment_driver.remove(name, force=True)
         assert result == True
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_get_tags_for_docker_repository(self):
-        result = self.docker_environment_manager.get_tags_for_docker_repository(
+        result = self.docker_environment_driver.get_tags_for_docker_repository(
             "hello-world")
         assert 'latest' in result
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_build_image(self):
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
+        dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+                                       "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        result = self.docker_environment_manager.build_image(
+        result = self.docker_environment_driver.build_image(
             image_name, dockerfile_path)
         assert result == True
-        self.docker_environment_manager.remove_image(image_name, force=True)
+        self.docker_environment_driver.remove_image(image_name, force=True)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_get_image(self):
         failed = False
         try:
-            self.docker_environment_manager.get_image("random")
+            self.docker_environment_driver.get_image("random")
         except EnvironmentImageNotFound:
             failed = True
         assert failed
 
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
+        dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+                                       "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name,
-                                                    dockerfile_path)
+        self.docker_environment_driver.build_image(image_name, dockerfile_path)
 
-        result = self.docker_environment_manager.get_image(image_name)
+        result = self.docker_environment_driver.get_image(image_name)
         tags = result.__dict__['attrs']['RepoTags']
         assert image_name + ":latest" in tags
-        self.docker_environment_manager.remove_image(image_name, force=True)
+        self.docker_environment_driver.remove_image(image_name, force=True)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_list_images(self):
         # TODO: Test out all input permutations
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
+        dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+                                       "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name,
-                                                    dockerfile_path)
+        self.docker_environment_driver.build_image(image_name, dockerfile_path)
         # List images without all flag
-        result = self.docker_environment_manager.list_images()
+        result = self.docker_environment_driver.list_images()
         group = [item.__dict__['attrs']['RepoTags'] for item in result]
         list_of_lists = [sublist for sublist in group if sublist]
         group_flat = [item for sublist in list_of_lists for item in sublist]
         assert image_name + ":latest" in group_flat
         # List images with all flag
-        result = self.docker_environment_manager.list_images(all_images=True)
+        result = self.docker_environment_driver.list_images(all_images=True)
         group = [item.__dict__['attrs']['RepoTags'] for item in result]
         list_of_lists = [sublist for sublist in group if sublist]
         group_flat = [item for sublist in list_of_lists for item in sublist]
         assert image_name + ":latest" in group_flat
-        self.docker_environment_manager.remove_image(image_name, force=True)
+        self.docker_environment_driver.remove_image(image_name, force=True)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_search_images(self):
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
+        dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+                                       "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name,
-                                                    dockerfile_path)
-        result = self.docker_environment_manager.search_images(image_name)
+        self.docker_environment_driver.build_image(image_name, dockerfile_path)
+        result = self.docker_environment_driver.search_images(image_name)
         assert len(result) > 0
-        self.docker_environment_manager.remove_image(image_name, force=True)
+        self.docker_environment_driver.remove_image(image_name, force=True)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_remove_image(self):
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
+        dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+                                       "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
         # Without force
-        self.docker_environment_manager.build_image(image_name,
-                                                    dockerfile_path)
-        result = self.docker_environment_manager.remove_image(image_name)
+        self.docker_environment_driver.build_image(image_name, dockerfile_path)
+        result = self.docker_environment_driver.remove_image(image_name)
         assert result == True
         # With force
-        self.docker_environment_manager.build_image(image_name,
-                                                    dockerfile_path)
-        result = self.docker_environment_manager.remove_image(
+        self.docker_environment_driver.build_image(image_name, dockerfile_path)
+        result = self.docker_environment_driver.remove_image(
             image_name, force=True)
         assert result == True
 
@@ -505,21 +440,19 @@ class TestDockerEnv():
     def test_remove_images(self):
         # TODO: Test out all input permutations
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
+        dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+                                       "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
         # Without force
-        self.docker_environment_manager.build_image(image_name,
-                                                    dockerfile_path)
-        result = self.docker_environment_manager.remove_images(name=image_name)
+        self.docker_environment_driver.build_image(image_name, dockerfile_path)
+        result = self.docker_environment_driver.remove_images(name=image_name)
         assert result == True
         # With force
-        self.docker_environment_manager.build_image(image_name,
-                                                    dockerfile_path)
-        result = self.docker_environment_manager.remove_images(
+        self.docker_environment_driver.build_image(image_name, dockerfile_path)
+        result = self.docker_environment_driver.remove_images(
             name=image_name, force=True)
         assert result == True
 
@@ -527,143 +460,137 @@ class TestDockerEnv():
     def test_run_container(self):
         # TODO: test with all variables provided
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
+        dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+                                       "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name,
-                                                    dockerfile_path)
+        self.docker_environment_driver.build_image(image_name, dockerfile_path)
         # With default parameters
         return_code, container_id = \
-            self.docker_environment_manager.run_container(image_name)
+            self.docker_environment_driver.run_container(image_name)
         assert return_code == 0 and \
             container_id
         # teardown container
-        self.docker_environment_manager.stop(container_id, force=True)
+        self.docker_environment_driver.stop(container_id, force=True)
         # With api=True, detach=False
-        logs = self.docker_environment_manager.run_container(
+        logs = self.docker_environment_driver.run_container(
             image_name, api=True)
         assert logs == ""
         # With api=True, detach=True
-        container_obj = self.docker_environment_manager.run_container(
+        container_obj = self.docker_environment_driver.run_container(
             image_name, api=True, detach=True)
         assert container_obj
-        self.docker_environment_manager.stop_remove_containers_by_term(
+        self.docker_environment_driver.stop_remove_containers_by_term(
             image_name, force=True)
-        self.docker_environment_manager.remove_image(image_name, force=True)
+        self.docker_environment_driver.remove_image(image_name, force=True)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_get_container(self):
         failed = False
         try:
-            self.docker_environment_manager.get_container("random")
+            self.docker_environment_driver.get_container("random")
         except EnvironmentContainerNotFound:
             failed = True
         assert failed
 
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
+        dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+                                       "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name,
-                                                    dockerfile_path)
-        _, container_id = self.docker_environment_manager.run_container(
+        self.docker_environment_driver.build_image(image_name, dockerfile_path)
+        _, container_id = self.docker_environment_driver.run_container(
             image_name)
-        result = self.docker_environment_manager.get_container(container_id)
+        result = self.docker_environment_driver.get_container(container_id)
         assert result
-        self.docker_environment_manager.stop_remove_containers_by_term(
+        self.docker_environment_driver.stop_remove_containers_by_term(
             image_name, force=True)
-        self.docker_environment_manager.remove_image(image_name, force=True)
+        self.docker_environment_driver.remove_image(image_name, force=True)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_list_containers(self):
         # TODO: Test out all input permutations
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
+        dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+                                       "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name,
-                                                    dockerfile_path)
-        _, container_id = self.docker_environment_manager.run_container(
+        self.docker_environment_driver.build_image(image_name, dockerfile_path)
+        _, container_id = self.docker_environment_driver.run_container(
             image_name, detach=True)
-        result = self.docker_environment_manager.list_containers()
+        result = self.docker_environment_driver.list_containers()
         assert container_id and len(result) > 0
-        self.docker_environment_manager.stop_remove_containers_by_term(
+        self.docker_environment_driver.stop_remove_containers_by_term(
             image_name, force=True)
-        self.docker_environment_manager.remove_image(image_name, force=True)
+        self.docker_environment_driver.remove_image(image_name, force=True)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_stop_container(self):
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
+        dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+                                       "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name,
-                                                    dockerfile_path)
-        _, container_id = self.docker_environment_manager.run_container(
+        self.docker_environment_driver.build_image(image_name, dockerfile_path)
+        _, container_id = self.docker_environment_driver.run_container(
             image_name)
-        result = self.docker_environment_manager.stop_container(container_id)
+        result = self.docker_environment_driver.stop_container(container_id)
         assert result == True
-        result = self.docker_environment_manager.get_container(container_id)
+        result = self.docker_environment_driver.get_container(container_id)
         assert result.__dict__['attrs']['State']['Status'] == "exited"
-        self.docker_environment_manager.stop_remove_containers_by_term(
+        self.docker_environment_driver.stop_remove_containers_by_term(
             image_name, force=True)
-        self.docker_environment_manager.remove_image(image_name, force=True)
+        self.docker_environment_driver.remove_image(image_name, force=True)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_remove_container(self):
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
+        dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+                                       "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
         # Without force
-        self.docker_environment_manager.build_image(image_name,
-                                                    dockerfile_path)
-        _, container_id = self.docker_environment_manager.run_container(
+        self.docker_environment_driver.build_image(image_name, dockerfile_path)
+        _, container_id = self.docker_environment_driver.run_container(
             image_name)
-        result = self.docker_environment_manager.remove_container(container_id)
+        result = self.docker_environment_driver.remove_container(container_id)
         assert result == True
         # With force
-        _, container_id = self.docker_environment_manager.run_container(
+        _, container_id = self.docker_environment_driver.run_container(
             image_name)
-        result = self.docker_environment_manager.remove_container(
+        result = self.docker_environment_driver.remove_container(
             container_id, force=True)
         assert result == True
-        self.docker_environment_manager.remove_image(image_name, force=True)
+        self.docker_environment_driver.remove_image(image_name, force=True)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_log_container(self):
         # TODO: Do a more comprehensive test, test out optional variables
         # TODO: Test out more commands at the system level
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
+        dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+                                       "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        log_filepath = os.path.join(self.docker_environment_manager.filepath,
+        log_filepath = os.path.join(self.docker_environment_driver.filepath,
                                     "test.log")
-        self.docker_environment_manager.build_image(image_name,
-                                                    dockerfile_path)
+        self.docker_environment_driver.build_image(image_name, dockerfile_path)
         _, container_id = \
-            self.docker_environment_manager.run_container(image_name,
+            self.docker_environment_driver.run_container(image_name,
                                                           command=["sh", "-c", "echo yo"])
-        return_code, logs = self.docker_environment_manager.log_container(
+        return_code, logs = self.docker_environment_driver.log_container(
             container_id, log_filepath)
         assert return_code == 0
         assert logs and \
@@ -672,69 +599,68 @@ class TestDockerEnv():
         with open(log_filepath, "r") as f:
             assert f.readline() != ""
 
-        self.docker_environment_manager.stop_remove_containers_by_term(
+        self.docker_environment_driver.stop_remove_containers_by_term(
             image_name, force=True)
-        self.docker_environment_manager.remove_image(image_name, force=True)
+        self.docker_environment_driver.remove_image(image_name, force=True)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_stop_remove_containers_by_term(self):
         # 1) Test with image_name (random container name), match with image_name
         # 2) Test with image_name and name given, match with name
         image_name = str(uuid.uuid1())
-        dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
+        dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+                                       "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(dockerfile_path, "w") as f:
             f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_unicode(str("RUN echo " + random_text)))
-        self.docker_environment_manager.build_image(image_name,
-                                                    dockerfile_path)
+        self.docker_environment_driver.build_image(image_name, dockerfile_path)
         # 1) Test option 1
 
         # Test without force
-        self.docker_environment_manager.run_container(image_name)
-        result = self.docker_environment_manager.stop_remove_containers_by_term(
+        self.docker_environment_driver.run_container(image_name)
+        result = self.docker_environment_driver.stop_remove_containers_by_term(
             image_name)
         assert result == True
         # Test with force
-        self.docker_environment_manager.run_container(image_name)
-        result = self.docker_environment_manager.stop_remove_containers_by_term(
+        self.docker_environment_driver.run_container(image_name)
+        result = self.docker_environment_driver.stop_remove_containers_by_term(
             image_name, force=True)
         assert result == True
 
         # 2) Test option 2
-        self.docker_environment_manager.run_container(
+        self.docker_environment_driver.run_container(
             image_name, name="datmo_test")
-        result = self.docker_environment_manager.stop_remove_containers_by_term(
+        result = self.docker_environment_driver.stop_remove_containers_by_term(
             "datmo_test")
         assert result == True
         # Test with force
-        self.docker_environment_manager.run_container(
+        self.docker_environment_driver.run_container(
             image_name, name="datmo_test")
-        result = self.docker_environment_manager.stop_remove_containers_by_term(
+        result = self.docker_environment_driver.stop_remove_containers_by_term(
             "datmo_test", force=True)
         assert result == True
-        self.docker_environment_manager.remove_image(image_name, force=True)
+        self.docker_environment_driver.remove_image(image_name, force=True)
 
     def test_create_requirements_file(self):
         # 1) Test failure EnvironmentDoesNotExist
         # 2) Test success
         # 3) Test failure EnvironmentRequirementsCreateError
         # 1) Test option 1
-        result = self.docker_environment_manager.create_requirements_file()
+        result = self.docker_environment_driver.create_requirements_file()
         assert os.path.isfile(result) and \
                "datmo" in open(result, "r").read()
 
         # 2) Test option 2
         # Since it uses pip as package manager, it doesn't extract any other package than what
         # has already been installed in local
-        script_path = os.path.join(self.docker_environment_manager.filepath,
+        script_path = os.path.join(self.docker_environment_driver.filepath,
                                    "script.py")
         with open(script_path, "w") as f:
             f.write(to_unicode("import numpy\n"))
             f.write(to_unicode("import sklearn\n"))
         # Test default
-        result = self.docker_environment_manager.create_requirements_file()
+        result = self.docker_environment_driver.create_requirements_file()
         assert result
         assert os.path.isfile(result) and \
                "datmo" in open(result, "r").read()
@@ -742,7 +668,7 @@ class TestDockerEnv():
         # 3) Test option 3
         exception_thrown = False
         try:
-            _ = self.docker_environment_manager.\
+            _ = self.docker_environment_driver.\
                 create_requirements_file(package_manager="does_not_work")
         except EnvironmentRequirementsCreateError:
             exception_thrown = True
@@ -751,46 +677,27 @@ class TestDockerEnv():
 
     def test_create_default_dockerfile(self):
         # 1) Create default dockerfile for default script present
-        # 2) Create default dockerfile with no requirements present
 
         # 1) Test option 1
-        script_path = os.path.join(self.docker_environment_manager.filepath,
+        script_path = os.path.join(self.docker_environment_driver.filepath,
                                    "script.py")
         with open(script_path, "w") as f:
             f.write(to_unicode("import numpy\n"))
             f.write(to_unicode("import sklearn\n"))
-        requirements_filepath = \
-            self.docker_environment_manager.create_requirements_file()
-        result = self.docker_environment_manager.\
-            create_default_dockerfile(language="python3",
-                                      requirements_filepath=requirements_filepath)
 
-        assert result
-        assert os.path.isfile(result)
-        assert "python" in open(result, "r").read()
-        assert "requirements.txt" in open(result, "r").read()
-
-        # 2) Test option 2
-        os.remove(script_path)
-        with open(script_path, "w") as f:
-            f.write(to_unicode("import os\n"))
-            f.write(to_unicode("import sys\n"))
-        requirements_filepath = \
-            self.docker_environment_manager.create_requirements_file()
-        result = self.docker_environment_manager. \
-            create_default_dockerfile(language="python3",
-                                      requirements_filepath=requirements_filepath)
+        result = self.docker_environment_driver.\
+            create_default_definition(directory=self.docker_environment_driver.filepath)
 
         assert result
         assert os.path.isfile(result)
         assert "python" in open(result, "r").read()
 
-    def test_form_datmo_dockerfile(self):
+    def test_create_datmo_definition(self):
         input_dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "Dockerfile")
+            self.docker_environment_driver.filepath, "Dockerfile")
         output_dockerfile_path = os.path.join(
-            self.docker_environment_manager.filepath, "datmoDockerfile")
-        result = self.docker_environment_manager.form_datmo_definition_file(
+            self.docker_environment_driver.filepath, "datmoDockerfile")
+        result = self.docker_environment_driver.create_datmo_definition(
             input_dockerfile_path, output_dockerfile_path)
         assert result and \
             os.path.isfile(output_dockerfile_path) and \
@@ -798,12 +705,12 @@ class TestDockerEnv():
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_gpu_enabled(self):
-        if not self.docker_environment_manager.gpu_enabled():
+        if not self.docker_environment_driver.gpu_enabled():
             print("GPU not available")
         else:
             log_filepath = os.path.join(
-                self.docker_environment_manager.filepath, "test.log")
-            return_code, run_id, logs = self.docker_environment_manager.run(
+                self.docker_environment_driver.filepath, "test.log")
+            return_code, run_id, logs = self.docker_environment_driver.run(
                 "nvidia/cuda", {
                     "command": ["nvidia-smi"],
                     "name": str(uuid.uuid1()),

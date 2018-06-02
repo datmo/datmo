@@ -63,7 +63,6 @@ class TestLocalDAL():
             'hardware_info']
         assert environment.unique_hash == self.environment_input_dict[
             'unique_hash']
-        assert environment.language == self.environment_input_dict['language']
         assert environment.created_at
         assert environment.updated_at
 

@@ -30,8 +30,8 @@ class SnapshotCommand(ProjectCommand):
         # creating snapshot with task id if it exists
         if task_id is not None:
             excluded_args = [
-                "environment_id", "environment_definition_filepath",
-                "filepaths", "config_filepath", "config_filename",
+                "environment_id", "environment_definition_paths",
+                "paths", "config_filepath", "config_filename",
                 "stats_filepath", "stats_filename"
             ]
             for arg in excluded_args:
@@ -53,16 +53,16 @@ class SnapshotCommand(ProjectCommand):
 
             # Environment
             if kwargs.get("environment_id", None) or kwargs.get(
-                    "environment_definition_filepath", None):
+                    "environment_definition_paths", None):
                 mutually_exclusive_args = [
-                    "environment_id", "environment_definition_filepath"
+                    "environment_id", "environment_definition_paths"
                 ]
                 mutually_exclusive(mutually_exclusive_args, kwargs,
                                    snapshot_dict)
 
             # File
-            if kwargs.get("filepaths", None):
-                snapshot_dict['filepaths'] = kwargs['filepaths']
+            if kwargs.get("paths", None):
+                snapshot_dict['paths'] = kwargs['paths']
 
             # Config
             if kwargs.get("config_filepath", None) or kwargs.get(

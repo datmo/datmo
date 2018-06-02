@@ -19,7 +19,7 @@ class FileCollectionController(BaseController):
 
     Methods
     -------
-    create(filepaths)
+    create(paths)
         create a file collection within the project
     list()
         list all file collections within the project
@@ -33,17 +33,18 @@ class FileCollectionController(BaseController):
         except EnvironmentInitFailed:
             self.logger.warning(
                 __("warn", "controller.general.environment.failed"))
-        self.datmo_file_path = os.path.join(self.home, "datmo_files")
-        if not os.path.isdir(self.datmo_file_path):
-            os.makedirs(self.datmo_file_path)
+        self._proj_file_path = os.path.join(self.home, "datmo_files")
+        if not os.path.isdir(self._proj_file_path):
+            os.makedirs(self._proj_file_path)
 
-    def create(self, filepaths):
+    def create(self, paths):
         """Create a FileCollection
 
         Parameters
         ----------
-        filepaths : list
-            list of absolute filepaths to collect
+        paths : list
+            list of absolute or relative filepaths and/or dirpaths to collect with destination names
+            (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
 
         Returns
         -------
@@ -60,25 +61,20 @@ class FileCollectionController(BaseController):
         create_dict = {
             "model_id": self.model.id,
         }
+        # Parse paths to create collection and add in filehash
+        create_dict['filehash'] = self.file_driver.create_collection(paths)
+        # If file collection with filehash exists, return it
+        results = self.dal.file_collection.query({
+            "filehash": create_dict['filehash']
+        })
+        if results: return results[0]
 
-        ## Required args for FileCollection entity
-        required_args = ["filehash", "path", "driver_type"]
-        for required_arg in required_args:
-            if required_arg == "filehash":
-                create_dict[required_arg] = \
-                    self.file_driver.create_collection(filepaths)
-                # If file collection with filehash exists, return it
-                results = self.dal.file_collection.query({
-                    "filehash": create_dict[required_arg]
-                })
-                if results: return results[0]
-            elif required_arg == "path":
-                create_dict[required_arg] = \
-                    self.file_driver.get_relative_collection_path(create_dict['filehash'])
-            elif required_arg == "driver_type":
-                create_dict[required_arg] = self.file_driver.type
-            else:
-                raise NotImplementedError()
+        # Add in path of the collection created above
+        create_dict['path'] = self.file_driver.get_relative_collection_path(
+            create_dict['filehash'])
+
+        # Add in driver_type of the relative collection path
+        create_dict['driver_type'] = self.file_driver.type
 
         # Create file collection and return
         return self.dal.file_collection.create(FileCollection(create_dict))
@@ -215,8 +211,8 @@ class FileCollectionController(BaseController):
             return True
         # Remove all content from `datmo_file` folder
         # TODO Use datmo environment path as a class attribute
-        for file in os.listdir(self.datmo_file_path):
-            file_path = os.path.join(self.datmo_file_path, file)
+        for file in os.listdir(self._proj_file_path):
+            file_path = os.path.join(self._proj_file_path, file)
             try:
                 if os.path.isfile(file_path):
                     os.remove(file_path)
@@ -227,5 +223,5 @@ class FileCollectionController(BaseController):
         # Add in files for that file collection id
         file_collection_path = os.path.join(
             self.home, file_collection_obj.path)
-        self.file_driver.copytree(file_collection_path, self.datmo_file_path)
+        self.file_driver.copytree(file_collection_path, self._proj_file_path)
         return True

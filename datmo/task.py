@@ -208,8 +208,8 @@ def run(command, env=None, home=None, gpu=False):
     ----------
     command : str or list
         the command to be run in environment. this can be either a string or list
-    env : str, optional
-        the location for the environment definition path
+    env : str or list, optional
+        the absolute file path for the environment definition path. this can be either a string or list
         (default is None, which will defer to the environment to find a default environment,
         or will fail if not found)
     home : str, optional
@@ -240,8 +240,10 @@ def run(command, env=None, home=None, gpu=False):
     snapshot_dict = {}
     task_dict = {}
 
-    if env:
-        snapshot_dict["environment_definition_filepath"] = env
+    if isinstance(env, list):
+        snapshot_dict["environment_definition_paths"] = env
+    elif env:
+        snapshot_dict["environment_definition_paths"] = [env]
 
     if isinstance(command, list):
         task_dict["command_list"] = command

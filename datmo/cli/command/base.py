@@ -55,7 +55,6 @@ class BaseCommand(object):
         ClassMethodNotFound
             If the Class method is not found
         """
-
         # Sometimes eg(--help) the parser automagically handles the entire response
         # and calls exit.  If this happens, self.args is set to True
         # in base.parse.   Simply return True

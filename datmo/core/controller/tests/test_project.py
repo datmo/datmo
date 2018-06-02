@@ -158,6 +158,8 @@ class TestProjectController():
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
+        environment_definition_paths = [env_def_path]
+
         # Create config
         config_filepath = os.path.join(self.snapshot.home, "config.json")
         with open(config_filepath, "w") as f:
@@ -171,13 +173,13 @@ class TestProjectController():
         input_dict = {
             "message":
                 "my test snapshot",
-            "filepaths": [
+            "paths": [
                 os.path.join(self.snapshot.home, "dirpath1"),
                 os.path.join(self.snapshot.home, "dirpath2"),
                 os.path.join(self.snapshot.home, "filepath1")
             ],
-            "environment_definition_filepath":
-                env_def_path,
+            "environment_definition_paths":
+                environment_definition_paths,
             "config_filename":
                 config_filepath,
             "stats_filename":

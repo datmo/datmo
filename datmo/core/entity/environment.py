@@ -65,7 +65,6 @@ class Environment():
         self.model_id = dictionary['model_id']
         self.driver_type = dictionary['driver_type']
 
-        self.language = dictionary['language']
         self.definition_filename = dictionary['definition_filename']
         self.hardware_info = dictionary['hardware_info']
 

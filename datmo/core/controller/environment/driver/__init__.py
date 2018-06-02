@@ -38,7 +38,7 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         """
 
     @abstractmethod
-    def create(self, path=None, output_path=None, language=None):
+    def create(self, path=None, output_path=None):
         """Create datmo environment definition
 
         Parameters
@@ -52,12 +52,6 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
             (default is None, which creates a name of above file with `datmo` prefixed
             in the same directory as `path`. e.g. `datmoDockerfile` in
             the project root for the default above for docker driver)
-        language : str, optional
-            language of the code that is being used in the project
-            (default is None, which means if a definition file is not given,
-            and a default definition path is not found, and the language is supported
-            a definition will automatically be created. If this is not supported
-            in the EnvironmentDriver, then it will ignore this)
 
         Returns
         -------
@@ -163,3 +157,60 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
             True if success
         """
         pass
+
+    @staticmethod
+    @abstractmethod
+    def create_default_definition(directory, language="python3"):
+        """Create default definition within the given directory and return full path
+
+        Parameters
+        ----------
+        directory : str
+            directory to create default definition file within
+        language : str, optional
+            language of the environment to support
+            (default is "python3")
+
+        Returns
+        -------
+        str
+            full path of the created default definition path
+        """
+
+    @abstractmethod
+    def get_default_definition_filename(self):
+        """Get default definition path to read the file from
+
+        Returns
+        -------
+        str
+            file names of the default definition file
+        """
+
+    @abstractmethod
+    def get_datmo_definition_filenames(self):
+        """Get the filenames of datmo definition files
+
+        Returns
+        -------
+        list
+            list of file names of the datmo definition file
+        """
+
+    @abstractmethod
+    def create_datmo_definition(self, input_definition_path,
+                                output_definition_path):
+        """Create a datmo version of the definition
+
+        Parameters
+        ----------
+        input_definition_path : str
+            input original definition path to read from
+        output_definition_path : str
+            output datmo definition path to write to
+
+        Returns
+        -------
+        bool
+            True is success
+        """
