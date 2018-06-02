@@ -3,7 +3,7 @@ import shutil
 
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
-from datmo.core.util.misc_functions import get_dirhash
+from datmo.core.util.misc_functions import get_dirhash, list_all_filepaths
 from datmo.core.entity.file_collection import FileCollection
 from datmo.core.util.exceptions import PathDoesNotExist, EnvironmentInitFailed, FileNotInitialized, UnstagedChanges
 
@@ -154,22 +154,26 @@ class FileCollectionController(BaseController):
     def _has_unstaged_changes(self):
         """Return whether there are unstaged changes"""
         file_hash = self._calculate_datmo_files_hash()
-        # if file hash is not for empty directory and it already exists in file collection
-        if file_hash == 'd41d8cd98f00b204e9800998ecf8427e' or self.exists(file_hash=file_hash):
+        files = list_all_filepaths(self._proj_file_path)
+        # if already exists in the db or is an empty directory
+        if self.exists(file_hash=file_hash) or not files:
             return False
         return True
 
     def check_unstaged_changes(self):
         """Checks if there exists any unstaged changes for the file collection in `datmo_file` folder
 
+        Returns
+        -------
+        bool
+            False if already staged else error
+
         Raises
         ------
         FileNotInitialized
             error if not initialized (must initialize first)
-
         UnstagedChanges
             error if not there exists unstaged changes in files
-
         """
         if not self.is_initialized:
             raise FileNotInitialized()
@@ -178,32 +182,32 @@ class FileCollectionController(BaseController):
         if self._has_unstaged_changes():
             raise UnstagedChanges()
 
-        return True
+        return False
 
     def checkout(self, file_collection_id):
         """Checkout to specific file collection id
 
+        Returns
+        -------
+        bool
+            True if success
+
         Raises
         ------
         FileNotInitialized
             error if not initialized (must initialize first)
-
         UnstagedChanges
             error if not there exists unstaged changes in files
-
         """
         if not self.is_initialized:
             raise FileNotInitialized()
         if not self.exists(file_collection_id=file_collection_id):
-            raise IOError(
+            raise PathDoesNotExist(
                 __("error", "controller.file_collection.checkout_file"))
         # Check if unstaged changes exist
-        if self._has_unstaged_changes():
-            raise UnstagedChanges()
+        self.check_unstaged_changes()
         # Check if environment has is same as current
-        results = self.dal.file_collection.query({
-            "id": file_collection_id
-        })
+        results = self.dal.file_collection.query({"id": file_collection_id})
         file_collection_obj = results[0]
         file_hash = file_collection_obj.filehash
 
@@ -221,7 +225,7 @@ class FileCollectionController(BaseController):
             except Exception as e:
                 print(e)
         # Add in files for that file collection id
-        file_collection_path = os.path.join(
-            self.home, file_collection_obj.path)
+        file_collection_path = os.path.join(self.home,
+                                            file_collection_obj.path)
         self.file_driver.copytree(file_collection_path, self._proj_file_path)
         return True

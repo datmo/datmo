@@ -20,7 +20,7 @@ from datmo.core.controller.environment.environment import \
     EnvironmentController
 from datmo.core.util.exceptions import (
     EntityNotFound, RequiredArgumentMissing, TooManyArgumentsFound,
-    FileAlreadyExistsError)
+    FileAlreadyExistsError, UnstagedChanges)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -40,41 +40,27 @@ class TestEnvironmentController():
     def __setup(self):
         self.project.init("test_setup", "test description")
         with open(os.path.join(self.temp_dir, "test.txt"), "w") as f:
-            f.write("hello")
-        datmo_path_environment = os.path.join(self.temp_dir, "datmo_environment")
-        with open(
-                os.path.join(datmo_path_environment, "test"),
-                "w") as f:
-            f.write("cool")
-        with open(
-                os.path.join(datmo_path_environment, "Dockerfile"),
-                "w") as f:
-            f.write("FROM datmo/xgboost:cpu")
-        datmo_path_files = os.path.join(self.temp_dir, "datmo_files")
-        with open(os.path.join(datmo_path_files, "test"),
-                  "w") as f:
-            f.write("man")
-
+            f.write(to_unicode("hello"))
+        self.datmo_environment_path = os.path.join(self.temp_dir,
+                                                   "datmo_environment")
+        with open(os.path.join(self.datmo_environment_path, "test"), "w") as f:
+            f.write(to_unicode("cool"))
+        self.definition_filepath = os.path.join(self.datmo_environment_path,
+                                                "Dockerfile")
+        with open(self.definition_filepath, "w") as f:
+            f.write(to_unicode("FROM datmo/xgboost:cpu"))
 
     def test_create(self):
-        # 1) Test create when definition path exists in `datmo_environment` folder
-        # 2) Test create when definition path exists in root project folder
-        # 3) Test create when definition path is passed into input dict
-        # 4) Test create when definition path is passed into input dict along with expected filename to be saved
-        # 5) Test when definition path exists in `datmo_environment` and passed from input dict
-        # 6) Test when passing same filepath with same filename into input dict
-        # 7) Test when NOT passing filepath into input dict and definition path not exist in `datmo_environment`
+        # 1) Test SUCCESS create when definition path exists in `datmo_environment` folder (no input, no root)
+        # 5) Test SUCCESS when definition path exists in `datmo_environment` and passed from input dict (takes input)
+        # 2) Test SUCCESS create when definition path exists in root project folder (no input, no datmo_environment)
+        # 3) Test SUCCESS create when definition path is passed into input dict (takes input, no datmo_environment)
+        # 4) Test SUCCESS create when definition path is passed into input dict along with expected filename to be saved
+        # 6) Test FAIL when passing same filepath with same filename into input dict
 
         self.project.init("test3", "test description")
 
-        # Create environment definition in `datmo_environment` folder
-        datmo_environment_folder = os.path.join(self.environment.home,
-                                                "datmo_environment")
-
-        definition_filepath = os.path.join(datmo_environment_folder,
-                                           "Dockerfile")
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        self.__setup()
 
         # 1) Test option 1
         environment_obj_0 = self.environment.create({})
@@ -85,10 +71,23 @@ class TestEnvironmentController():
         assert environment_obj_0.definition_filename
         assert environment_obj_0.hardware_info
 
-        # remove the datmo_environment folder
-        shutil.rmtree(datmo_environment_folder)
+        # 5) Test option 5
+        input_dict = {
+            "definition_paths": [self.definition_filepath],
+        }
 
-        # Create environment definition
+        environment_obj = self.environment.create(input_dict)
+        assert environment_obj
+        assert environment_obj.id
+        assert environment_obj.driver_type == "docker"
+        assert environment_obj.file_collection_id
+        assert environment_obj.definition_filename
+        assert environment_obj.hardware_info
+
+        # remove the datmo_environment folder
+        shutil.rmtree(self.datmo_environment_path)
+
+        # Create environment definition in root directory
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")
         with open(definition_filepath, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
@@ -169,35 +168,7 @@ class TestEnvironmentController():
         assert os.path.isfile(
             os.path.join(file_collection_dir, "hardware_info"))
 
-        # 5) Test option 5
-        # Create environment definition in `datmo_environment` folder
-        datmo_environment_folder = os.path.join(self.environment.home,
-                                                "datmo_environment")
-        os.makedirs(datmo_environment_folder)
-        definition_filepath = os.path.join(datmo_environment_folder,
-                                           "Dockerfile")
-        random_text = str(uuid.uuid1())
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
-
-        input_dict = {
-            "definition_paths": [definition_filepath],
-        }
-
-        # Create environment in the project
-        failed = False
-        try:
-            # Create environment in the project
-            _ = self.environment.create(input_dict)
-        except FileAlreadyExistsError:
-            failed = True
-
-        assert failed
-
         # 6) Test option 6
-        # removing datmo_environment_dir
-        shutil.rmtree(datmo_environment_folder)
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")
 
         input_dict = {
@@ -713,7 +684,8 @@ class TestEnvironmentController():
         assert result
 
         # Check by unique hash
-        result = self.environment.exists(environment_unique_hash=environment_obj.unique_hash)
+        result = self.environment.exists(
+            environment_unique_hash=environment_obj.unique_hash)
         assert result
 
         # Test with wrong environment id
@@ -723,21 +695,20 @@ class TestEnvironmentController():
     def test_calculate_environment_hash(self):
         # Setup
         self.__setup()
-        self.environment.create({})
-        assert self.environment._calculate_environment_hash() == '78a3e31f7bc81119e7b865f4ac2ab5ca'
+        # Test hashing the default Dockerfile
+        assert self.environment._calculate_environment_hash(
+        ) == '86c247d417496333b284856fa410d5b4'
+        # Test if hash is the same as that of create
+        environment_obj = self.environment.create({})
+        assert self.environment._calculate_environment_hash(
+        ) == environment_obj.unique_hash
 
-        environment_def_path = os.path.join(self.temp_dir, "datmo_environment", "Dockerfile")
-        with open(environment_def_path, "w") as f:
-            f.write("FROM datmo/xgboost:cpu\n")
+        # Test if the hash is the same if the same file is passed in as an input
+        input_dict = {"definition_path": self.definition_filepath}
+        environment_obj_1 = self.environment.create(input_dict)
 
-        environment_obj_0 = self.environment.create({})
-
-        environment_obj_1 = self.environment.create({"definition_filepath": environment_def_path})
-
-        # TODO: Fix this test
-        #assert environment_obj_0 == environment_obj_1
-        # assert environment_obj_0.id == environment_obj_1.id
-        # assert environment_obj_0.unique_hash == environment_obj_1.unique_hash
+        assert self.environment._calculate_environment_hash(
+        ) == environment_obj_1.unique_hash
 
     def test_has_unstaged_changes(self):
 
@@ -751,7 +722,7 @@ class TestEnvironmentController():
         with open(
                 os.path.join(self.temp_dir, "datmo_environment", "Dockerfile"),
                 "w") as f:
-            f.write("FROM datmo/xgboost:cpu\n")
+            f.write(to_unicode("FROM datmo/xgboost:cpu\n"))
 
         result = self.environment._has_unstaged_changes()
         assert result
@@ -762,19 +733,43 @@ class TestEnvironmentController():
         obj = self.environment.create({})
 
         # 1) After commiting the changes
-        # Check for no unstaged changes
+        # Check for no unstaged changes because already committed
         result = self.environment.check_unstaged_changes()
         assert not result
 
-        with open(
-                os.path.join(self.temp_dir, "datmo_environment", "Dockerfile"),
-                "w") as f:
-            f.write("FROM datmo/xgboost:cpu\n")
+        # Add a new file
+        with open(os.path.join(self.datmo_environment_path, "test2"),
+                  "w") as f:
+            f.write(to_unicode("cool"))
 
-        # TODO: Fix this test after merging PR from environment
-        # 2) Not commiting the changes
-        # result = self.environment._has_unstaged_changes()
-        # assert result
+        # 2) Not commiting the changes, should error and raise UnstagedChanges
+        failed = False
+        try:
+            self.environment.check_unstaged_changes()
+        except UnstagedChanges:
+            failed = True
+        assert failed
+
+        # Remove new file
+        os.remove(os.path.join(self.datmo_environment_path, "test2"))
+
+        # 3) Files are the same as before but no new commit, should have no unstaged changes
+        result = self.environment.check_unstaged_changes()
+        assert not result
+
+        # 4) Remove another file, now it is different and should have unstaged changes
+        os.remove(os.path.join(self.datmo_environment_path, "test"))
+        failed = False
+        try:
+            self.environment.check_unstaged_changes()
+        except UnstagedChanges:
+            failed = True
+        assert failed
+
+        # 5) Remove the rest of the files, now it is empty and should return as already staged
+        os.remove(os.path.join(self.datmo_environment_path, "Dockerfile"))
+        result = self.environment.check_unstaged_changes()
+        assert not result
 
     def test_checkout(self):
         # Setup
@@ -783,13 +778,14 @@ class TestEnvironmentController():
         # After committing the environment, make a checkout
         result = self.environment.checkout(environment_obj.id)
         assert result
-        assert os.path.isfile(os.path.join(self.environment.home, "datmo_environment", "Dockerfile"))
-        assert not os.path.isfile(os.path.join(self.environment.home, "datmo_environment", "datmoDockerfile"))
-        assert not os.path.isfile(os.path.join(self.environment.home, "datmo_environment", "hardware_info"))
+        assert os.path.isfile(
+            os.path.join(self.environment.home, "datmo_environment",
+                         "Dockerfile"))
+        assert not os.path.isfile(
+            os.path.join(self.environment.home, "datmo_environment",
+                         "datmoDockerfile"))
+        assert not os.path.isfile(
+            os.path.join(self.environment.home, "datmo_environment",
+                         "hardware_info"))
 
         # TODO: After making changes in `datmo_environment` make a checkout experiment
-
-
-
-
-

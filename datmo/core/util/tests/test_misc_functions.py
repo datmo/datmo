@@ -151,6 +151,12 @@ class TestMiscFunctions():
         if os.path.isdir(datmo_temp_path):
             exists = True
         assert exists
+        # Test if subsequent temp dirs are different
+        datmo_temp_path_1 = get_datmo_temp_path(self.temp_dir)
+        assert datmo_temp_path != datmo_temp_path_1
+        datmo_temp_path_2 = get_datmo_temp_path(self.temp_dir)
+        assert datmo_temp_path != datmo_temp_path_2
+        assert datmo_temp_path_1 != datmo_temp_path_2
 
     def test_parse_path(self):
         test_simple = os.path.join(self.temp_dir, "test.txt")

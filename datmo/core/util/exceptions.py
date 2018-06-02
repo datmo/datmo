@@ -225,3 +225,7 @@ class DatmoFolderInWorkTree(CodeException):
 
 class UnstagedChanges(Exception):
     pass
+
+
+class NothingToStage(Exception):
+    pass

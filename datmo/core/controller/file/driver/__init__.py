@@ -142,7 +142,7 @@ class FileDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def create_collection(self, paths):
-        """Takes a list of use given paths and aggregates into collection
+        """Takes a list of user given paths and aggregates into collection
 
         Parameters
         ----------
@@ -156,6 +156,24 @@ class FileDriver(with_metaclass(ABCMeta, object)):
             hash representing the files in the collection
         """
         pass
+
+    @abstractmethod
+    def calculate_hash_paths(self, paths, directory):
+        """Takes a list of user given paths, copies to directory, and returns hash
+
+        Parameters
+        ----------
+        paths : list
+            list of absolute or relative filepaths and/or dirpaths to collect with destination names
+            (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
+        directory : str
+            directory to aggregate paths
+
+        Returns
+        -------
+        str
+            hash of all of the paths in a directory
+        """
 
     @abstractmethod
     def get_collection_path(self, filehash):
