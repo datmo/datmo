@@ -74,8 +74,9 @@ class TestTaskController():
         with open(env_def_path, "w") as f:
             f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
 
+        definition_paths = [env_def_path]
         environment_obj = self.environment.create({
-            "definition_filepath": env_def_path
+            "definition_paths": definition_paths
         })
 
         # Set log filepath
@@ -259,7 +260,7 @@ class TestTaskController():
 
         # Snapshot dictionary
         snapshot_dict = {
-            "filepaths": [
+            "paths": [
                 os.path.join(self.project.home, "dirpath1"),
                 os.path.join(self.project.home, "dirpath2"),
                 os.path.join(self.project.home, "filepath1")
@@ -483,7 +484,7 @@ class TestTaskController():
 
         # Snapshot dictionary
         snapshot_dict = {
-            "filepaths": [
+            "paths": [
                 os.path.join(self.project.home, "dirpath1", "filepath1")
             ],
         }

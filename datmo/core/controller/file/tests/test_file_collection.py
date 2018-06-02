@@ -47,17 +47,17 @@ class TestFileCollectionController():
 
         dirpath1 = os.path.join(self.file_collection.home, "dirpath1")
         filepath1 = os.path.join(self.file_collection.home, "filepath1")
-        filepaths = [filepath1, dirpath1]
+        paths = [filepath1, dirpath1]
 
-        file_collection_obj = self.file_collection.create(filepaths)
+        file_collection_obj = self.file_collection.create(paths)
 
         assert file_collection_obj
         assert file_collection_obj.id
         assert file_collection_obj.path
         assert file_collection_obj.driver_type
 
-        # Test file collection with same filepaths/filehash returns same object
-        file_collection_obj_2 = self.file_collection.create(filepaths)
+        # Test file collection with same paths/filehash returns same object
+        file_collection_obj_2 = self.file_collection.create(paths)
 
         assert file_collection_obj_2 == file_collection_obj
 
@@ -68,15 +68,15 @@ class TestFileCollectionController():
         self.file_collection.file_driver.create("filepath1")
         dirpath1 = os.path.join(self.file_collection.home, "dirpath1")
         filepath1 = os.path.join(self.file_collection.home, "filepath1")
-        filepaths_1 = [filepath1, dirpath1]
+        paths_1 = [filepath1, dirpath1]
 
         filepath2 = os.path.join(self.file_collection.home, "filepath2")
         with open(filepath2, "w") as f:
             f.write(to_unicode("test" + "\n"))
-        filepaths_2 = [filepath2]
+        paths_2 = [filepath2]
 
-        file_collection_obj_1 = self.file_collection.create(filepaths_1)
-        file_collection_obj_2 = self.file_collection.create(filepaths_2)
+        file_collection_obj_1 = self.file_collection.create(paths_1)
+        file_collection_obj_2 = self.file_collection.create(paths_2)
 
         # List all code and ensure they exist
         result = self.file_collection.list()
@@ -94,9 +94,9 @@ class TestFileCollectionController():
 
         dirpath1 = os.path.join(self.file_collection.home, "dirpath1")
         filepath1 = os.path.join(self.file_collection.home, "filepath1")
-        filepaths = [filepath1, dirpath1]
+        paths = [filepath1, dirpath1]
 
-        file_collection_obj = self.file_collection.create(filepaths)
+        file_collection_obj = self.file_collection.create(paths)
 
         # Delete code in the project
         result = self.file_collection.delete(file_collection_obj.id)

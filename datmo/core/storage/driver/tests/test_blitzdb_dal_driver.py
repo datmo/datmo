@@ -57,7 +57,6 @@ class TestBlitzDBDALDriver():
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         # TODO: Automatically create Document class from collection
         # For now, use one of pre-defined collections:
-        # model, datmo_session, datmo_task, datmo_snapshot, datmo_user
         self.collection = 'model'
         self.database = BlitzDBDALDriver("file", self.temp_dir)
 

@@ -31,9 +31,9 @@ class SnapshotCommand(ProjectCommand):
         if task_id is not None:
             excluded_args = [
                 "code_id", "commit_id", "environment_id",
-                "environment_definition_filepath", "file_collection_id",
-                "filepaths", "config_filepath", "config_filename",
-                "stats_filepath", "stats_filename"
+                "environment_definition_paths", "file_collection_id", "paths",
+                "config_filepath", "config_filename", "stats_filepath",
+                "stats_filename"
             ]
             for arg in excluded_args:
                 if arg in kwargs and kwargs[arg] is not None:
@@ -60,17 +60,17 @@ class SnapshotCommand(ProjectCommand):
 
             # Environment
             if kwargs.get("environment_id", None) or kwargs.get(
-                    "environment_definition_filepath", None):
+                    "environment_definition_paths", None):
                 mutually_exclusive_args = [
-                    "environment_id", "environment_definition_filepath"
+                    "environment_id", "environment_definition_paths"
                 ]
                 mutually_exclusive(mutually_exclusive_args, kwargs,
                                    snapshot_dict)
 
             # File
             if kwargs.get("file_collection_id", None) or kwargs.get(
-                    "filepaths", None):
-                mutually_exclusive_args = ["file_collection_id", "filepaths"]
+                    "paths", None):
+                mutually_exclusive_args = ["file_collection_id", "paths"]
                 mutually_exclusive(mutually_exclusive_args, kwargs,
                                    snapshot_dict)
 
@@ -94,7 +94,9 @@ class SnapshotCommand(ProjectCommand):
             # Stats
             if kwargs.get("stats_filepath", None) or kwargs.get(
                     "stats_filename", None) or kwargs.get("config", None):
-                mutually_exclusive_args = ["stats_filepath", "stats_filename", "stats"]
+                mutually_exclusive_args = [
+                    "stats_filepath", "stats_filename", "stats"
+                ]
                 mutually_exclusive(mutually_exclusive_args, kwargs,
                                    snapshot_dict)
             # parsing stats
@@ -159,7 +161,11 @@ class SnapshotCommand(ProjectCommand):
         label = kwargs.get("label", None)
 
         result = self.snapshot_controller.update(
-            snapshot_id, config=config, stats=stats, message=message, label=label)
+            snapshot_id,
+            config=config,
+            stats=stats,
+            message=message,
+            label=label)
         self.cli_helper.echo(
             __("info", "cli.snapshot.update.success", snapshot_id))
         return result
@@ -189,7 +195,8 @@ class SnapshotCommand(ProjectCommand):
                     str(snapshot_obj.stats))
                 snapshot_message = printable_string(snapshot_obj.message)
                 t.add_row([
-                    snapshot_obj.id, prettify_datetime(snapshot_obj.created_at),
+                    snapshot_obj.id,
+                    prettify_datetime(snapshot_obj.created_at),
                     snapshot_config_printable, snapshot_stats_printable,
                     snapshot_message, snapshot_obj.label, snapshot_obj.code_id,
                     snapshot_obj.environment_id,

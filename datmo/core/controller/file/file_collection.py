@@ -15,7 +15,7 @@ class FileCollectionController(BaseController):
 
     Methods
     -------
-    create(filepaths)
+    create(paths)
         create a file collection within the project
     list()
         list all file collections within the project
@@ -30,13 +30,14 @@ class FileCollectionController(BaseController):
             self.logger.warning(
                 __("warn", "controller.general.environment.failed"))
 
-    def create(self, filepaths):
+    def create(self, paths):
         """Create a FileCollection
 
         Parameters
         ----------
-        filepaths : list
-            list of absolute filepaths to collect
+        paths : list
+            list of absolute or relative filepaths and/or dirpaths to collect with destination names
+            (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
 
         Returns
         -------
@@ -53,25 +54,20 @@ class FileCollectionController(BaseController):
         create_dict = {
             "model_id": self.model.id,
         }
+        # Parse paths to create collection and add in filehash
+        create_dict['filehash'] = self.file_driver.create_collection(paths)
+        # If file collection with filehash exists, return it
+        results = self.dal.file_collection.query({
+            "filehash": create_dict['filehash']
+        })
+        if results: return results[0]
 
-        ## Required args for FileCollection entity
-        required_args = ["filehash", "path", "driver_type"]
-        for required_arg in required_args:
-            if required_arg == "filehash":
-                create_dict[required_arg] = \
-                    self.file_driver.create_collection(filepaths)
-                # If file collection with filehash exists, return it
-                results = self.dal.file_collection.query({
-                    "filehash": create_dict[required_arg]
-                })
-                if results: return results[0]
-            elif required_arg == "path":
-                create_dict[required_arg] = \
-                    self.file_driver.get_relative_collection_path(create_dict['filehash'])
-            elif required_arg == "driver_type":
-                create_dict[required_arg] = self.file_driver.type
-            else:
-                raise NotImplementedError()
+        # Add in path of the collection created above
+        create_dict['path'] = self.file_driver.get_relative_collection_path(
+            create_dict['filehash'])
+
+        # Add in driver_type of the relative collection path
+        create_dict['driver_type'] = self.file_driver.type
 
         # Create file collection and return
         return self.dal.file_collection.create(FileCollection(create_dict))

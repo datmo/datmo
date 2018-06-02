@@ -46,6 +46,38 @@ def get_datmo_parser():
     session_select.add_argument(
         "--name", dest="name", help="name of session to select")
 
+    # Environment
+    environment_parser = subparsers.add_parser(
+        "environment", help="environment module")
+    environment_subcommand_parsers = environment_parser.add_subparsers(
+        title="subcommands", dest="subcommand")
+
+    environment_create = environment_subcommand_parsers.add_parser(
+        "create", help="create environment")
+    environment_create.add_argument(
+        "--environment-def",
+        dest="definition_paths",
+        default=None,
+        action="append",
+        type=str,
+        help=
+        "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
+    )
+    environment_create.add_argument(
+        "--message",
+        "-m",
+        dest="description",
+        default=None,
+        help="message to describe environment")
+
+    environment_delete = environment_subcommand_parsers.add_parser(
+        "delete", help="delete a environment by id")
+    environment_delete.add_argument(
+        "--id", dest="environment_id", help="id of environment to delete")
+
+    environment_ls = environment_subcommand_parsers.add_parser(
+        "ls", help="list environments")
+
     # Snapshot
     snapshot_parser = subparsers.add_parser(
         "snapshot", description=__("argparser", "cli.snapshot.description"))
@@ -97,11 +129,12 @@ def get_datmo_parser():
         help="environment id from environment object")
     snapshot_create.add_argument(
         "--environment-def",
-        dest="environment_definition_filepath",
+        dest="environment_definition_paths",
         default=None,
+        action="append",
         type=str,
         help=
-        "absolute filepath to environment definition file (e.g. /path/to/Dockerfile)"
+        "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
     )
 
     snapshot_create.add_argument(
@@ -110,12 +143,12 @@ def get_datmo_parser():
         default=None,
         help="file collection id for file collection object")
     snapshot_create.add_argument(
-        "--filepaths",
-        dest="filepaths",
+        "--paths",
+        dest="paths",
         default=None,
         action="append",
         help=
-        "absolute paths to files or folders to include within the files of the snapshot"
+        "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
     )
 
     snapshot_create.add_argument(
@@ -251,11 +284,12 @@ def get_datmo_parser():
     # run.add_argument("--data", nargs="*", dest="data", type=str, help="Path for data to be used during the Task")
     task_run.add_argument(
         "--environment-def",
-        dest="environment_definition_filepath",
+        dest="environment_definition_paths",
         default=None,
+        action="append",
         type=str,
         help=
-        "absolute filepath to environment definition file (e.g. /path/to/Dockerfile)"
+        "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
     )
     task_run.add_argument(
         "--interactive",

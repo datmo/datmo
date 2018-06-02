@@ -10,6 +10,7 @@ import pytz
 import tzlocal
 import pytest
 import platform
+import tempfile
 from io import open
 try:
     to_unicode = unicode
@@ -21,7 +22,8 @@ from datmo.core.controller.environment.driver.dockerenv import DockerEnvironment
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     PathDoesNotExist, MutuallyExclusiveArguments, RequiredArgumentMissing,
-    EnvironmentInitFailed, EnvironmentExecutionError)
+    EnvironmentInitFailed, EnvironmentExecutionError, InvalidDestinationName,
+    TooManyArgumentsFound)
 
 
 def grep(pattern, fileObj):
@@ -240,3 +242,105 @@ def format_table(data, padding=2):
         table_str = table_str + "".join(
             word.ljust(col_widths[idx]) for idx, word in enumerate(row)) + "\n"
     return table_str
+
+
+def list_all_filepaths(absolute_dirpath):
+    """Returns all filepaths within dir relative to dir root"""
+    return [
+        os.path.relpath(os.path.join(dirpath, file), absolute_dirpath)
+        for (dirpath, dirnames, filenames) in os.walk(absolute_dirpath)
+        for file in filenames
+    ]
+
+
+def get_datmo_temp_path(filepath):
+    # Create temp directory within .datmo/tmp
+    datmo_temp_path = os.path.join(filepath, ".datmo", "tmp")
+    if not os.path.exists(datmo_temp_path):
+        os.makedirs(datmo_temp_path)
+    return tempfile.mkdtemp(dir=datmo_temp_path)
+
+
+def parse_path(path):
+    """Parse user given path
+
+    Parameters
+    ----------
+    path : str
+        user given path
+
+    Returns
+    -------
+    src_path : str
+        user given source path
+    dest_name : str
+        user given destination name
+
+    Raises
+    ------
+    InvalidDestinationName
+        if destination name is a path then error
+    """
+    # Parse given path and split out the destination
+    path = path.strip()
+    path_split_list = path.split(">")
+    if len(path_split_list) == 1:
+        src_path = path_split_list[0]
+        src_dir, src_name = os.path.split(src_path)
+        dest_name = src_name
+    elif len(path_split_list) == 2:
+        src_path, dest_name = path_split_list
+    else:
+        raise TooManyArgumentsFound()
+    # Test dest_path to ensure it is valid
+    if os.path.isabs(dest_name):
+        raise InvalidDestinationName()
+    return src_path, dest_name
+
+
+def parse_paths(default_src_prefix, paths, dest_prefix):
+    """Parse user given paths. Checks only source paths and destination are valid
+
+    Parameters
+    ----------
+    default_src_prefix : str
+        default directory prefix to append if source path is not an absolute path
+    paths : list
+        list of absolute or relative filepaths and/or dirpaths to collect with destination names
+        (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
+    dest_prefix : str
+        destination directory prefix to append to the destination filename
+
+    Returns
+    -------
+    files : list
+        list of tuples of the form (absolute_source_path, absolute_dest_filepath)
+    directories : list
+        list of tuples of the form (absolute_source_path, absolute_dest_filepath)
+
+    Raises
+    ------
+    InvalidDestinationName
+        destination specified in paths is not valid
+    PathDoesNotExist
+        if the path does not exist
+    """
+    files = []
+    directories = []
+    for path in paths:
+        src_path, dest_name = parse_path(path)
+        # For dest_name, append the dest_prefix
+        dest_abs_path = os.path.join(dest_prefix, dest_name)
+        # For src_path if not absolute, append the default src_prefix
+        if not os.path.isabs(path):
+            src_abs_path = os.path.join(default_src_prefix, src_path)
+        else:
+            src_abs_path = src_path
+        # Check if source is file or directory and save accordingly
+        if os.path.isfile(src_abs_path):
+            files.append((src_abs_path, dest_abs_path))
+        elif os.path.isdir(src_abs_path):
+            directories.append((src_abs_path, dest_abs_path))
+        else:
+            raise PathDoesNotExist(src_abs_path)
+    return files, directories

@@ -53,6 +53,9 @@ class TestTaskModule():
         # 2) Run task with simple python file, no environment definition, string command (auto generate env)
         # 3) Run task with simple python file and environment definition, string command
         # 4) Run task with simple python file and environment definition, list command
+        # 5) Run task with simple python file and environment definition passed as a list
+        # 6) Run task with simple python file and environment definition path present in `datmo_environment`
+        # folder in project
 
         # 1) Test out option 1)
         failed = False
@@ -100,6 +103,30 @@ class TestTaskModule():
         assert task_obj_2.id
         assert 'hello' in task_obj_2.logs
         assert task_obj_2.results == {"accuracy": "0.56"}
+
+        # 5) Test out option 5
+        task_obj_3 = run(
+            command=["python", "script.py"],
+            env=[test_filepath + ">Dockerfile"],
+            home=self.temp_dir)
+        assert isinstance(task_obj_3, Task)
+        assert task_obj_3.id
+        assert 'hello' in task_obj_3.logs
+        assert task_obj_3.results == {"accuracy": "0.56"}
+
+        # 6) Test out option 6
+        os.remove(test_filepath)
+        datmo_environment_dir = os.path.join(self.temp_dir,
+                                             "datmo_environment")
+        os.makedirs(datmo_environment_dir)
+        test_filepath = os.path.join(datmo_environment_dir, "Dockerfile")
+        with open(test_filepath, "w") as f:
+            f.write(to_unicode("FROM datmo/xgboost:cpu"))
+        task_obj_4 = run(command=["python", "script.py"], home=self.temp_dir)
+        assert isinstance(task_obj_4, Task)
+        assert task_obj_4.id
+        assert 'hello' in task_obj_4.logs
+        assert task_obj_4.results == {"accuracy": "0.56"}
 
     def test_ls(self):
         # check project is not initialized if wrong home

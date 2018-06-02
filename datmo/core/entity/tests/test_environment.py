@@ -14,8 +14,7 @@ class TestEnvironment():
                 "system": "test"
             },
             "file_collection_id": "my_collection",
-            "unique_hash": "sjfl39w",
-            "language": "python3"
+            "unique_hash": "sjfl39w"
         }
 
     def test_init_no_id(self):
@@ -27,7 +26,6 @@ class TestEnvironment():
         assert environment_entity.description == None
         assert environment_entity.created_at
         assert environment_entity.updated_at
-        assert environment_entity.language
 
     def test_init_with_id(self):
         self.input_dict['id'] = "test"
@@ -38,7 +36,6 @@ class TestEnvironment():
         assert environment_entity.description == None
         assert environment_entity.created_at
         assert environment_entity.updated_at
-        assert environment_entity.language
 
     def test_eq(self):
         environment_entity_1 = Environment(self.input_dict)

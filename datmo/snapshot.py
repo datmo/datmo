@@ -157,7 +157,8 @@ def create(message,
            task_id=None,
            commit_id=None,
            environment_id=None,
-           filepaths=None,
+           env=None,
+           paths=None,
            config=None,
            stats=None):
     """Create a snapshot within a project
@@ -188,7 +189,7 @@ def create(message,
 
         *environment_id*: used to run the task,
 
-        *filepaths*: this is the set of all files saved during the task
+        *paths*: this is the set of all files saved during the task
 
         *config*: nothing is passed into this variable. the user may add
         something to the config by passing in a dict for the config
@@ -202,9 +203,14 @@ def create(message,
     environment_id : str, optional
         provide the environment object id to use with this snapshot
         (default is None, which means it creates a default environment)
-    filepaths : list, optional
-        provides a list of absolute filepaths to files or directories
-        that are relevant (default is None, which means we have an empty
+    env : str or list, optional
+        the absolute file path for the environment definition path. env is not used if environment_id is also passed.
+        this can be either a string or list
+        (default is None, environment_id is also not passed, which will defer to the environment to find a
+        default environment or will fail if not found)
+    paths : list, optional
+        list of absolute or relative filepaths and/or dirpaths to collect with destination names
+        (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
     config : dict, optional
         provide the dictionary of configurations
         (default is None, which means it is empty)
@@ -224,7 +230,7 @@ def create(message,
     snapshot with the `datmo snapshot ls` cli command
 
     >>> import datmo
-    >>> datmo.snapshot.create(message="my first snapshot", filepaths=["/path/to/a/large/file"], config={"test": 0.4, "test2": "string"}, stats={"accuracy": 0.94})
+    >>> datmo.snapshot.create(message="my first snapshot", paths=["/path/to/a/large/file"], config={"test": 0.4, "test2": "string"}, stats={"accuracy": 0.94})
 
     You can also use the result of a task run in order to create a snapshot
 
@@ -235,7 +241,7 @@ def create(message,
     snapshot_controller = SnapshotController(home=home)
 
     if task_id is not None:
-        excluded_args = ["commit_id", "environment_id", "filepaths"]
+        excluded_args = ["commit_id", "environment_id", "paths"]
         for arg in excluded_args:
             if eval(arg) is not None:
                 raise SnapshotCreateFromTaskArgs(
@@ -259,8 +265,12 @@ def create(message,
             snapshot_create_dict['commit_id'] = commit_id
         if environment_id:
             snapshot_create_dict['environment_id'] = environment_id
-        if filepaths:
-            snapshot_create_dict['filepaths'] = filepaths
+        elif isinstance(env, list):
+            snapshot_create_dict['environment_definition_paths'] = env
+        elif env:
+            snapshot_create_dict['environment_definition_paths'] = [env]
+        if paths:
+            snapshot_create_dict['paths'] = paths
         if config:
             snapshot_create_dict['config'] = config
         if stats:
@@ -346,7 +356,12 @@ def ls(session_id=None, filter=None, home=None):
     ]
 
 
-def update(snapshot_id=None, config=None, stats=None, message=None, label=None, home=None):
+def update(snapshot_id=None,
+           config=None,
+           stats=None,
+           message=None,
+           label=None,
+           home=None):
     """Update a snapshot within a project
 
     The project must be created before this is implemented. You can do that by using
@@ -393,7 +408,11 @@ def update(snapshot_id=None, config=None, stats=None, message=None, label=None, 
     snapshot_controller = SnapshotController(home=home)
 
     return snapshot_controller.update(
-        snapshot_id=snapshot_id, config=config, stats=stats, message=message, label=label)
+        snapshot_id=snapshot_id,
+        config=config,
+        stats=stats,
+        message=message,
+        label=label)
 
 
 def delete(snapshot_id=None, home=None):
