@@ -82,6 +82,8 @@ class TestEnvironmentController():
         assert environment_obj_0.file_collection_id
         assert environment_obj_0.definition_filename
         assert environment_obj_0.hardware_info
+        assert environment_obj_0.unique_hash == "86c247d417496333b284856fa410d5b4"
+        # Files ["test", "Dockerfile", "datmoDockerfile", "hardware_info"]
 
         # 5) Test option 5
         input_dict = {
@@ -95,6 +97,8 @@ class TestEnvironmentController():
         assert environment_obj.file_collection_id
         assert environment_obj.definition_filename
         assert environment_obj.hardware_info
+        assert environment_obj.unique_hash == "887c37f214fce4ba568bf18d981b6cf7"
+        # Files ["Dockerfile", "datmoDockerfile", "hardware_info"]
 
         # remove the datmo_environment folder
         shutil.rmtree(self.environment.environment_directory)
@@ -125,6 +129,7 @@ class TestEnvironmentController():
             os.path.join(file_collection_dir, "datmoDockerfile"))
         assert os.path.isfile(
             os.path.join(file_collection_dir, "hardware_info"))
+        assert environment_obj_1.unique_hash == "887c37f214fce4ba568bf18d981b6cf7"
 
         # 3) Test option 3
         input_dict = {
@@ -152,6 +157,7 @@ class TestEnvironmentController():
             os.path.join(file_collection_dir, "datmoDockerfile"))
         assert os.path.isfile(
             os.path.join(file_collection_dir, "hardware_info"))
+        assert environment_obj_2.unique_hash == "887c37f214fce4ba568bf18d981b6cf7"
 
         # 4) Test option 4
         input_dict = {
@@ -179,6 +185,7 @@ class TestEnvironmentController():
             os.path.join(file_collection_dir, "datmoDockerfile"))
         assert os.path.isfile(
             os.path.join(file_collection_dir, "hardware_info"))
+        assert environment_obj_3.unique_hash == "887c37f214fce4ba568bf18d981b6cf7"
 
         # 6) Test option 6
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")

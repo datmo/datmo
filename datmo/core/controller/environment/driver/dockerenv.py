@@ -778,11 +778,10 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             'processor': processor
         }
 
-    def create_datmo_definition(self,
-                                input_definition_path="Dockerfile",
-                                output_definition_path="datmoDockerfile"):
+    def create_datmo_definition(self, input_definition_path,
+                                output_definition_path):
         """
-        In order to create intermediate dockerfile to run
+        Creates a datmo dockerfiles to run at the output path specified
         """
         base_dockerfile_filepath = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "templates",
@@ -791,8 +790,12 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         # Combine dockerfiles
         destination = open(
             os.path.join(self.filepath, output_definition_path), "wb")
-        shutil.copyfileobj(open(input_definition_path, "rb"), destination)
-        shutil.copyfileobj(open(base_dockerfile_filepath, "rb"), destination)
+        input_file = open(input_definition_path, "rb")
+        base_file = open(base_dockerfile_filepath, "rb")
+        shutil.copyfileobj(input_file, destination)
+        shutil.copyfileobj(base_file, destination)
+        base_file.close()
+        input_file.close()
         destination.close()
 
         return True

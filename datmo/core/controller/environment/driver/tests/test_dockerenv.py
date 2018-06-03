@@ -713,9 +713,9 @@ class TestDockerEnv():
             self.docker_environment_driver.filepath, "datmoDockerfile")
         result = self.docker_environment_driver.create_datmo_definition(
             input_dockerfile_path, output_dockerfile_path)
-        assert result and \
-            os.path.isfile(output_dockerfile_path) and \
-            "datmo" in open(output_dockerfile_path, "r").read()
+        assert result
+        assert os.path.isfile(output_dockerfile_path)
+        assert "datmo" in open(output_dockerfile_path, "r").read()
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_gpu_enabled(self):

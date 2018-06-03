@@ -48,7 +48,7 @@ class EnvironmentController(BaseController):
                 definition_paths : list, optional
                     list of absolute or relative filepaths and/or dirpaths to collect with destination names
                     (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
-                    (default is to pull from datmo_environments/ folder and project root OR default driver definition if none found)
+                    (default if none provided is to pull from project environment folder and project root. If none found create default definition)
                 hardware_info : dict, optional
                     information about the environment hardware
                     (default is to extract hardware from platform currently running)
@@ -483,8 +483,8 @@ class EnvironmentController(BaseController):
         ------
         EnvironmentNotInitialized
             error if not initialized (must initialize first)
-        IOError
-
+        PathDoesNotExist
+            if environment id does not exist
         UnstagedChanges
             error if not there exists unstaged changes in environment
 
@@ -505,8 +505,7 @@ class EnvironmentController(BaseController):
 
         if self._calculate_project_environment_hash() == environment_hash:
             return True
-        # Remove all content from `datmo_environment` folder
-        # TODO Use datmo environment path as a class attribute
+        # Remove all content from project environment directory
         for file in os.listdir(self.environment_directory):
             file_path = os.path.join(self.environment_directory, file)
             try:
