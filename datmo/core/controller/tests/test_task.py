@@ -341,8 +341,7 @@ class TestTaskController():
         test_filepath = os.path.join(self.temp_dir, "script.py")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("import os\n"))
-            f.write(to_bytes("import numpy\n"))
-            f.write(to_bytes("import sklearn\n"))
+            f.write(to_bytes("import shutil\n"))
             f.write(to_bytes("print('hello')\n"))
             f.write(to_bytes("print(' accuracy: 0.56 ')\n"))
             f.write(

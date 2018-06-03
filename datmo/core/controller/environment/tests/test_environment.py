@@ -484,7 +484,7 @@ class TestEnvironmentController():
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         input_dict = {

@@ -192,9 +192,9 @@ class TestTaskModule():
         # Create a basic task and run it with string command
         test_filepath = os.path.join(self.temp_dir, "script.py")
         with open(test_filepath, "wb") as f:
-            f.write(to_bytes("import numpy\n"))
-            f.write(to_bytes("import sklearn\n"))
-            f.write(to_bytes("print 'hello'\n"))
+            f.write(to_bytes("import os\n"))
+            f.write(to_bytes("import shutil\n"))
+            f.write(to_bytes("print('hello')\n"))
 
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "wb") as f:

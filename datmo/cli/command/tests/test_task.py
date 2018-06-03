@@ -65,8 +65,8 @@ class TestTaskCommand():
         self.task = TaskCommand(self.temp_dir, self.cli_helper)
 
         # Create environment_driver definition
-        env_def_path = os.path.join(self.temp_dir, "Dockerfile")
-        with open(env_def_path, "wb") as f:
+        self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
+        with open(self.env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
     def test_task_project_not_init(self):
@@ -208,6 +208,10 @@ class TestTaskCommand():
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_run_notebook(self):
         self.__set_variables()
+        # Update the default Dockerfile to test with
+        with open(self.env_def_path, "wb") as f:
+            f.write(to_bytes("FROM nbgallery/jupyter-alpine:latest"))
+
         # Test success case
         test_command = ["jupyter", "notebook", "list"]
         test_ports = ["8888:8888", "9999:9999"]
