@@ -84,7 +84,6 @@ class TestEnvironmentController():
         assert environment_obj_0.definition_filename
         assert environment_obj_0.hardware_info
         assert environment_obj_0.unique_hash
-
         # Get file collection path
         file_collection_obj = self.environment.dal.file_collection. \
             get_by_id(environment_obj_0.file_collection_id)
@@ -92,10 +91,19 @@ class TestEnvironmentController():
             get_collection_path(file_collection_obj.filehash)
         assert os.path.isfile(os.path.join(file_collection_dir, "test"))
         assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
+        output = open(os.path.join(file_collection_dir, "Dockerfile"),
+                      "r").read()
+        print(repr(output))
         assert os.path.isfile(
             os.path.join(file_collection_dir, "datmoDockerfile"))
+        output = open(
+            os.path.join(file_collection_dir, "datmoDockerfile"), "r").read()
+        print(repr(output))
         assert os.path.isfile(
             os.path.join(file_collection_dir, "hardware_info"))
+        output = open(os.path.join(file_collection_dir, "hardware_info"),
+                      "r").read()
+        print(repr(output))
 
         # 1) Test option 1
         environment_obj_0 = self.environment.create(
@@ -106,6 +114,21 @@ class TestEnvironmentController():
         assert environment_obj_0.file_collection_id
         assert environment_obj_0.definition_filename
         assert environment_obj_0.hardware_info
+        # Get file collection path
+        file_collection_obj = self.environment.dal.file_collection. \
+            get_by_id(environment_obj_0.file_collection_id)
+        file_collection_dir = self.environment.file_driver. \
+            get_collection_path(file_collection_obj.filehash)
+        assert os.path.isfile(os.path.join(file_collection_dir, "test"))
+        assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
+        output = open(os.path.join(file_collection_dir, "Dockerfile"),
+                      "r").read()
+        print(repr(output))
+        assert os.path.isfile(
+            os.path.join(file_collection_dir, "datmoDockerfile"))
+        output = open(
+            os.path.join(file_collection_dir, "datmoDockerfile"), "r").read()
+        print(repr(output))
         assert environment_obj_0.unique_hash == "d4e62871c1e6033bf3d045f91107fafe"
         # Files ["test", "Dockerfile", "datmoDockerfile"]
 
@@ -122,6 +145,20 @@ class TestEnvironmentController():
         assert environment_obj.file_collection_id
         assert environment_obj.definition_filename
         assert environment_obj.hardware_info
+        # Get file collection path
+        file_collection_obj = self.environment.dal.file_collection. \
+            get_by_id(environment_obj.file_collection_id)
+        file_collection_dir = self.environment.file_driver. \
+            get_collection_path(file_collection_obj.filehash)
+        assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
+        output = open(os.path.join(file_collection_dir, "Dockerfile"),
+                      "r").read()
+        print(repr(output))
+        assert os.path.isfile(
+            os.path.join(file_collection_dir, "datmoDockerfile"))
+        output = open(
+            os.path.join(file_collection_dir, "datmoDockerfile"), "r").read()
+        print(repr(output))
         assert environment_obj.unique_hash == "93920b84be871138bf219cb73a3a8a3f"
         # Files ["Dockerfile", "datmoDockerfile"]
 
@@ -137,12 +174,6 @@ class TestEnvironmentController():
         environment_obj_1 = self.environment.create(
             {}, save_hardware_file=False)
 
-        # Get file collection path
-        file_collection_obj = self.environment.dal.file_collection. \
-            get_by_id(environment_obj_1.file_collection_id)
-        file_collection_dir = self.environment.file_driver. \
-            get_collection_path(file_collection_obj.filehash)
-
         assert environment_obj_1
         assert environment_obj_1.id
         assert environment_obj_1.driver_type == "docker"
@@ -150,6 +181,11 @@ class TestEnvironmentController():
         assert environment_obj_1.definition_filename
         assert environment_obj_1.hardware_info
         assert environment_obj_1.unique_hash == file_collection_obj.filehash
+        # Get file collection path
+        file_collection_obj = self.environment.dal.file_collection. \
+            get_by_id(environment_obj_1.file_collection_id)
+        file_collection_dir = self.environment.file_driver. \
+            get_collection_path(file_collection_obj.filehash)
         assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
         assert os.path.isfile(
             os.path.join(file_collection_dir, "datmoDockerfile"))
@@ -164,12 +200,6 @@ class TestEnvironmentController():
         environment_obj_2 = self.environment.create(
             input_dict, save_hardware_file=False)
 
-        # Get file collection path
-        file_collection_obj = self.environment.dal.file_collection. \
-            get_by_id(environment_obj_2.file_collection_id)
-        file_collection_dir = self.environment.file_driver. \
-            get_collection_path(file_collection_obj.filehash)
-
         assert environment_obj_2
         assert environment_obj_2.id
         assert environment_obj_2.driver_type == "docker"
@@ -177,6 +207,11 @@ class TestEnvironmentController():
         assert environment_obj_2.definition_filename
         assert environment_obj_2.hardware_info
         assert environment_obj_2.unique_hash == file_collection_obj.filehash
+        # Get file collection path
+        file_collection_obj = self.environment.dal.file_collection. \
+            get_by_id(environment_obj_2.file_collection_id)
+        file_collection_dir = self.environment.file_driver. \
+            get_collection_path(file_collection_obj.filehash)
         assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
         assert os.path.isfile(
             os.path.join(file_collection_dir, "datmoDockerfile"))
@@ -191,12 +226,6 @@ class TestEnvironmentController():
         environment_obj_3 = self.environment.create(
             input_dict, save_hardware_file=False)
 
-        # Get file collection path
-        file_collection_obj = self.environment.dal.file_collection. \
-            get_by_id(environment_obj_3.file_collection_id)
-        file_collection_dir = self.environment.file_driver. \
-            get_collection_path(file_collection_obj.filehash)
-
         assert environment_obj_3
         assert environment_obj_3.id
         assert environment_obj_3.driver_type == "docker"
@@ -204,6 +233,11 @@ class TestEnvironmentController():
         assert environment_obj_3.definition_filename
         assert environment_obj_3.hardware_info
         assert environment_obj_3.unique_hash == file_collection_obj.filehash
+        # Get file collection path
+        file_collection_obj = self.environment.dal.file_collection. \
+            get_by_id(environment_obj_3.file_collection_id)
+        file_collection_dir = self.environment.file_driver. \
+            get_collection_path(file_collection_obj.filehash)
         assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
         assert os.path.isfile(
             os.path.join(file_collection_dir, "datmoDockerfile"))

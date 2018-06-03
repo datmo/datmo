@@ -704,7 +704,9 @@ class TestDockerEnv():
 
         assert result
         assert os.path.isfile(result)
-        assert "python" in open(result, "r").read()
+        output = open(result, "r").read()
+        print(repr(output))
+        assert "python" in output
 
     def test_create_datmo_definition(self):
         input_dockerfile_path = os.path.join(
@@ -715,7 +717,9 @@ class TestDockerEnv():
             input_dockerfile_path, output_dockerfile_path)
         assert result
         assert os.path.isfile(output_dockerfile_path)
-        assert "datmo" in open(output_dockerfile_path, "r").read()
+        output = open(output_dockerfile_path, "r").read()
+        print(repr(output))
+        assert "datmo essential" in output
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_gpu_enabled(self):

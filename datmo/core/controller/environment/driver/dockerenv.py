@@ -782,8 +782,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             'processor': processor
         }
 
-    def create_datmo_definition(self, input_definition_path,
-                                output_definition_path):
+    @staticmethod
+    def create_datmo_definition(input_definition_path, output_definition_path):
         """
         Creates a datmo dockerfiles to run at the output path specified
         """
