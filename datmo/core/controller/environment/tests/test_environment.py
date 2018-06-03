@@ -53,13 +53,12 @@ class TestEnvironmentController():
         self.project.init("test_setup", "test description")
         with open(os.path.join(self.temp_dir, "test.txt"), "wb") as f:
             f.write(to_bytes("hello"))
-        self.datmo_environment_path = os.path.join(self.temp_dir,
-                                                   "datmo_environment")
-        with open(os.path.join(self.datmo_environment_path, "test"),
-                  "wb") as f:
+        with open(
+                os.path.join(self.environment.environment_directory, "test"),
+                "wb") as f:
             f.write(to_bytes("cool"))
-        self.definition_filepath = os.path.join(self.datmo_environment_path,
-                                                "Dockerfile")
+        self.definition_filepath = os.path.join(
+            self.environment.environment_directory, "Dockerfile")
         with open(self.definition_filepath, "wb") as f:
             f.write(to_bytes("FROM datmo/xgboost:cpu"))
 
@@ -98,7 +97,7 @@ class TestEnvironmentController():
         assert environment_obj.hardware_info
 
         # remove the datmo_environment folder
-        shutil.rmtree(self.datmo_environment_path)
+        shutil.rmtree(self.environment.environment_directory)
 
         # Create environment definition in root directory
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")
@@ -705,26 +704,26 @@ class TestEnvironmentController():
         result = self.environment.exists(environment_id='test_wrong_env_id')
         assert not result
 
-    def test_calculate_environment_hash(self):
+    def test_calculate_project_environment_hash(self):
         # Setup
         self.__setup()
         # Test hashing the default Dockerfile
-        assert self.environment._calculate_environment_hash(
-        ) == '86c247d417496333b284856fa410d5b4'
+        result = self.environment._calculate_project_environment_hash()
+        assert result == "86c247d417496333b284856fa410d5b4"
         # Test if hash is the same as that of create
         environment_obj = self.environment.create({})
-        assert self.environment._calculate_environment_hash(
-        ) == environment_obj.unique_hash
+        result = self.environment._calculate_project_environment_hash()
+        assert result == "86c247d417496333b284856fa410d5b4"
+        assert result == environment_obj.unique_hash
 
         # Test if the hash is the same if the same file is passed in as an input
         input_dict = {"definition_path": self.definition_filepath}
         environment_obj_1 = self.environment.create(input_dict)
-
-        assert self.environment._calculate_environment_hash(
-        ) == environment_obj_1.unique_hash
+        result = self.environment._calculate_project_environment_hash()
+        assert result == "86c247d417496333b284856fa410d5b4"
+        assert result == environment_obj_1.unique_hash
 
     def test_has_unstaged_changes(self):
-
         # Setup
         self.__setup()
         obj = self.environment.create({})
@@ -751,8 +750,9 @@ class TestEnvironmentController():
         assert not result
 
         # Add a new file
-        with open(os.path.join(self.datmo_environment_path, "test2"),
-                  "wb") as f:
+        with open(
+                os.path.join(self.environment.environment_directory, "test2"),
+                "wb") as f:
             f.write(to_bytes("cool"))
 
         # 2) Not commiting the changes, should error and raise UnstagedChanges
@@ -764,14 +764,15 @@ class TestEnvironmentController():
         assert failed
 
         # Remove new file
-        os.remove(os.path.join(self.datmo_environment_path, "test2"))
+        os.remove(
+            os.path.join(self.environment.environment_directory, "test2"))
 
         # 3) Files are the same as before but no new commit, should have no unstaged changes
         result = self.environment.check_unstaged_changes()
         assert not result
 
         # 4) Remove another file, now it is different and should have unstaged changes
-        os.remove(os.path.join(self.datmo_environment_path, "test"))
+        os.remove(os.path.join(self.environment.environment_directory, "test"))
         failed = False
         try:
             self.environment.check_unstaged_changes()
@@ -780,25 +781,66 @@ class TestEnvironmentController():
         assert failed
 
         # 5) Remove the rest of the files, now it is empty and should return as already staged
-        os.remove(os.path.join(self.datmo_environment_path, "Dockerfile"))
+        os.remove(
+            os.path.join(self.environment.environment_directory, "Dockerfile"))
         result = self.environment.check_unstaged_changes()
         assert not result
 
     def test_checkout(self):
-        # Setup
+        # Setup and create all environment files
         self.__setup()
+
+        # Create environment to checkout to with defaults
         environment_obj = self.environment.create({})
-        # After committing the environment, make a checkout
+
+        # Checkout success with there are no unstaged changes
         result = self.environment.checkout(environment_obj.id)
         assert result
+        current_hash = self.environment._calculate_project_environment_hash()
+        assert current_hash == "86c247d417496333b284856fa410d5b4"
+        assert environment_obj.unique_hash == current_hash
+        # Check the filenames as well because the hash does not take this into account
         assert os.path.isfile(
-            os.path.join(self.environment.home, "datmo_environment",
-                         "Dockerfile"))
+            os.path.join(self.environment.environment_directory, "test"))
+        assert os.path.isfile(
+            os.path.join(self.environment.environment_directory, "Dockerfile"))
         assert not os.path.isfile(
-            os.path.join(self.environment.home, "datmo_environment",
+            os.path.join(self.environment.environment_directory,
                          "datmoDockerfile"))
         assert not os.path.isfile(
-            os.path.join(self.environment.home, "datmo_environment",
+            os.path.join(self.environment.environment_directory,
                          "hardware_info"))
 
-        # TODO: After making changes in `datmo_environment` make a checkout experiment
+        # Change file contents to make it unstaged
+        with open(self.definition_filepath, "wb") as f:
+            f.write(to_bytes("new content"))
+
+        # Checkout failure with unstaged changes
+        failed = False
+        try:
+            _ = self.environment.checkout(environment_obj.id)
+        except UnstagedChanges:
+            failed = True
+        assert failed
+
+        # Create new environment to checkout to with defaults
+        environment_obj_1 = self.environment.create({})
+
+        # Checkout success with there are no unstaged changes
+        result = self.environment.checkout(environment_obj.id)
+        assert result
+        current_hash = self.environment._calculate_project_environment_hash()
+        assert current_hash == "86c247d417496333b284856fa410d5b4"
+        assert environment_obj.unique_hash == current_hash
+        assert environment_obj_1.unique_hash != current_hash
+        # Check the filenames as well because the hash does not take this into account
+        assert os.path.isfile(
+            os.path.join(self.environment.environment_directory, "test"))
+        assert os.path.isfile(
+            os.path.join(self.environment.environment_directory, "Dockerfile"))
+        assert not os.path.isfile(
+            os.path.join(self.environment.environment_directory,
+                         "datmoDockerfile"))
+        assert not os.path.isfile(
+            os.path.join(self.environment.environment_directory,
+                         "hardware_info"))

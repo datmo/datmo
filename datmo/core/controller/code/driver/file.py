@@ -2,12 +2,14 @@ import os
 import shutil
 import pathspec
 import tempfile
+import hashlib
+import checksumdir
 try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
 
-from datmo.core.util.misc_functions import list_all_filepaths, get_filehash, get_dirhash
+from datmo.core.util.misc_functions import list_all_filepaths
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (PathDoesNotExist, FileIOError,
                                         UnstagedChanges, CodeNotInitialized,
@@ -114,7 +116,27 @@ class FileCodeDriver(CodeDriver):
             old_filepath = os.path.join(self.filepath, rel_filepath)
             new_filepath = os.path.join(new_dirpath, filename)
             shutil.copy2(old_filepath, new_filepath)
-        return get_dirhash(temp_dir)
+        return self._get_dirhash(temp_dir)
+
+    @staticmethod
+    def _get_filehash(absolute_filepath):
+        if not os.path.isfile(absolute_filepath):
+            raise PathDoesNotExist(
+                __("error", "util.misc_functions.get_filehash",
+                   absolute_filepath))
+        BUFF_SIZE = 65536
+        sha1 = hashlib.md5()
+        with open(absolute_filepath, "rb") as f:
+            while True:
+                data = f.read(BUFF_SIZE)
+                if not data:
+                    break
+                sha1.update(data)
+        return sha1.hexdigest()
+
+    @staticmethod
+    def _get_dirhash(absolute_dirpath):
+        return checksumdir.dirhash(absolute_dirpath)
 
     def _has_unstaged_changes(self):
         """Return whether there are unstaged changes"""
@@ -183,7 +205,7 @@ class FileCodeDriver(CodeDriver):
                 if not os.path.isdir(absolute_dirpath):
                     os.makedirs(absolute_dirpath)
                 # 2) hash the file
-                filehash = get_filehash(absolute_filepath)
+                filehash = self._get_filehash(absolute_filepath)
                 # 3) add file with file hash as name to folder for the file (if already exists, will overwrite file -- new ts)
                 new_absolute_filepath = os.path.join(absolute_dirpath,
                                                      filehash)

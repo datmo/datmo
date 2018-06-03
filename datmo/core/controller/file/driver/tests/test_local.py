@@ -6,10 +6,24 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
+import shutil
 import tempfile
 import platform
 from io import TextIOWrapper
+try:
 
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
+
+from datmo.core.util.misc_functions import get_datmo_temp_path
 from datmo.core.controller.file.driver.local import LocalFileDriver
 from datmo.core.util.exceptions import PathDoesNotExist
 
@@ -331,6 +345,114 @@ class TestLocalFileDriver():
         #             & 0o777) == '0777')
 
         self.local_file_driver.delete_collection(filehash)
+
+    def test_calculate_hash_paths_simple(self):
+        self.local_file_driver.init()
+
+        # Create test directories to move
+        self.local_file_driver.create("dirpath1", directory=True)
+        self.local_file_driver.create("dirpath2", directory=True)
+        self.local_file_driver.create("filepath1")
+        self.local_file_driver.create("filepath2")
+
+        dirpath1 = os.path.join(self.local_file_driver.root, "dirpath1")
+        dirpath2 = os.path.join(self.local_file_driver.root, "dirpath2")
+        filepath1 = os.path.join(self.local_file_driver.root, "filepath1")
+        filepath2 = os.path.join(self.local_file_driver.root, "filepath2")
+
+        # check with just 1 blank filepath
+        paths = [filepath1]
+        temp_dir = get_datmo_temp_path(self.local_file_driver.root)
+        result = self.local_file_driver.calculate_hash_paths(paths, temp_dir)
+        assert result == "74be16979710d4c4e7c6647856088456"
+        shutil.rmtree(temp_dir)
+
+        # check with 1 empty directory and 1 blank filepath (empty directories do NOT change hash)
+        paths = [filepath1, dirpath1]
+        temp_dir = get_datmo_temp_path(self.local_file_driver.root)
+        result = self.local_file_driver.calculate_hash_paths(paths, temp_dir)
+        assert result == "74be16979710d4c4e7c6647856088456"
+        shutil.rmtree(temp_dir)
+
+        # check with 2 empty directories and 1 blank filepath (empty directories do NOT change hash)
+        paths = [filepath1, dirpath1, dirpath2]
+        temp_dir = get_datmo_temp_path(self.local_file_driver.root)
+        result = self.local_file_driver.calculate_hash_paths(paths, temp_dir)
+        assert result == "74be16979710d4c4e7c6647856088456"
+        shutil.rmtree(temp_dir)
+
+        # check 2 blank filepaths (should be different)
+        paths = [filepath1, filepath2]
+        temp_dir = get_datmo_temp_path(self.local_file_driver.root)
+        result = self.local_file_driver.calculate_hash_paths(paths, temp_dir)
+        assert result == "020eb29b524d7ba672d9d48bc72db455"
+        shutil.rmtree(temp_dir)
+
+        # check 1 blank filepath with a different name (same because name not factored into hash)
+        paths = [filepath2]
+        temp_dir = get_datmo_temp_path(self.local_file_driver.root)
+        result = self.local_file_driver.calculate_hash_paths(paths, temp_dir)
+        assert result == "74be16979710d4c4e7c6647856088456"
+        shutil.rmtree(temp_dir)
+
+    def test_calculate_hash_paths_single_line(self):
+        self.local_file_driver.init()
+
+        # Create test directories to move
+        self.local_file_driver.create("filepath1")
+
+        filepath1 = os.path.join(self.local_file_driver.root, "filepath1")
+
+        paths = [filepath1]
+
+        # Add contents to the file in python and verify hash
+        temp_dir = get_datmo_temp_path(self.local_file_driver.root)
+        with open(filepath1, "wb") as f:
+            f.write(to_bytes("hello\n"))
+        result = self.local_file_driver.calculate_hash_paths(paths, temp_dir)
+        shutil.rmtree(temp_dir)
+        assert result == "57ae7aad8abe2f317e460c92d3ed1178"
+
+    def test_calculate_hash_paths_multiple_lines(self):
+        self.local_file_driver.init()
+
+        # Create test directories to move
+        self.local_file_driver.create("filepath1")
+
+        filepath1 = os.path.join(self.local_file_driver.root, "filepath1")
+
+        paths = [filepath1]
+
+        # Add contents to the file in python and verify hash
+        temp_dir = get_datmo_temp_path(self.local_file_driver.root)
+        with open(filepath1, "wb") as f:
+            f.write(to_bytes("FROM something:something\n"))
+            f.write(to_bytes("test multiple lines\n"))
+        result = self.local_file_driver.calculate_hash_paths(paths, temp_dir)
+        shutil.rmtree(temp_dir)
+        assert result == "a14de65c0fc13bc50cb246cc518195af"
+
+    def test_get_filehash(self):
+        filepath = os.path.join(self.temp_dir, "test.txt")
+        with open(filepath, "wb") as f:
+            f.write(to_bytes("hello\n"))
+        result = self.local_file_driver.get_filehash(filepath)
+        assert len(result) == 32
+        assert result == "b1946ac92492d2347c6235b4d2611184"
+
+    def test_get_dirhash(self):
+        temp_dir_1 = get_datmo_temp_path(self.temp_dir)
+        filepath = os.path.join(temp_dir_1, "test.txt")
+        with open(filepath, "wb") as f:
+            f.write(to_bytes("hello\n"))
+        result = self.local_file_driver.get_dirhash(temp_dir_1)
+        assert result == "57ae7aad8abe2f317e460c92d3ed1178"
+        temp_dir_2 = get_datmo_temp_path(self.temp_dir)
+        filepath_2 = os.path.join(temp_dir_2, "test.txt")
+        with open(filepath_2, "wb") as f:
+            f.write(to_bytes("hello\n"))
+        result_2 = self.local_file_driver.get_dirhash(temp_dir_2)
+        assert result == result_2
 
     def test_get_absolute_collection_path(self):
         self.local_file_driver.init()

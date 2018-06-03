@@ -10,7 +10,6 @@ import pytz
 import tzlocal
 import pytest
 import platform
-import checksumdir
 import tempfile
 from io import open
 try:
@@ -249,25 +248,6 @@ def list_all_filepaths(absolute_dirpath):
         for (dirpath, dirnames, filenames) in os.walk(absolute_dirpath)
         for file in filenames
     ]
-
-
-def get_filehash(absolute_filepath):
-    if not os.path.isfile(absolute_filepath):
-        raise PathDoesNotExist(
-            __("error", "util.misc_functions.get_filehash", absolute_filepath))
-    BUFF_SIZE = 65536
-    sha1 = hashlib.md5()
-    with open(absolute_filepath, "rb") as f:
-        while True:
-            data = f.read(BUFF_SIZE)
-            if not data:
-                break
-            sha1.update(data)
-    return sha1.hexdigest()
-
-
-def get_dirhash(absolute_dirpath):
-    return checksumdir.dirhash(absolute_dirpath)
 
 
 def get_datmo_temp_path(filepath):

@@ -3,14 +3,13 @@ import stat
 import shutil
 import glob
 import hashlib
-import uuid
+import checksumdir
 from io import open
 try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
 
-from datmo.core.util.misc_functions import get_dirhash
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     PathDoesNotExist, FileIOError, FileStructureError, FileAlreadyExistsError,
@@ -271,7 +270,27 @@ class LocalFileDriver(FileDriver):
             self.copytree(src_abs_dirpath, dest_abs_dirpath)
 
         # Hash the files to find filehash
-        return get_dirhash(directory)
+        return self.get_dirhash(directory)
+
+    @staticmethod
+    def get_filehash(absolute_filepath):
+        if not os.path.isfile(absolute_filepath):
+            raise PathDoesNotExist(
+                __("error", "util.misc_functions.get_filehash",
+                   absolute_filepath))
+        BUFF_SIZE = 65536
+        sha1 = hashlib.md5()
+        with open(absolute_filepath, "rb") as f:
+            while True:
+                data = f.read(BUFF_SIZE)
+                if not data:
+                    break
+                sha1.update(data)
+        return sha1.hexdigest()
+
+    @staticmethod
+    def get_dirhash(absolute_dirpath):
+        return checksumdir.dirhash(absolute_dirpath)
 
     def get_absolute_collection_path(self, filehash):
         return os.path.join(self.root, ".datmo", "collections", filehash)

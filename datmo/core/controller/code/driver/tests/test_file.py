@@ -27,7 +27,7 @@ except TypeError:
     to_bytes("test")
 
 from datmo.core.controller.code.driver.file import FileCodeDriver
-from datmo.core.util.misc_functions import list_all_filepaths, get_filehash
+from datmo.core.util.misc_functions import list_all_filepaths
 from datmo.core.util.exceptions import PathDoesNotExist, FileIOError, CodeNotInitialized, UnstagedChanges, CommitDoesNotExist, CommitFailed
 
 
@@ -346,6 +346,7 @@ class TestFileCodeDriver():
                 destination_absolute_filepath = os.path.join(
                     self.file_code_manager.filepath, tracked_filepath)
                 assert os.path.isfile(destination_absolute_filepath)
-                assert filehash == get_filehash(destination_absolute_filepath)
+                assert filehash == self.file_code_manager._get_filehash(
+                    destination_absolute_filepath)
         # Check that files in the latest commit are not present
         assert not os.path.isfile(os.path.join(self.temp_dir, "test2.txt"))

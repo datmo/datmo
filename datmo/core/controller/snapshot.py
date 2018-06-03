@@ -295,17 +295,19 @@ class SnapshotController(BaseController):
         self.file_collection.check_unstaged_changes()
 
         # Checkout code_driver to the relevant commit ref
-        code_checkout_success = self.code_driver.checkout_ref(code_obj.commit_id)
+        code_checkout_success = self.code_driver.checkout_ref(
+            code_obj.commit_id)
 
         # Checkout environment_driver to relevant environment id
-        environment_checkout_success = self.environment.checkout(environment_obj.id)
+        environment_checkout_success = self.environment.checkout(
+            environment_obj.id)
 
         # Checkout file_driver to relevant file collection id
-        file_checkout_success = self.file_collection.checkout(file_collection_obj.id)
+        file_checkout_success = self.file_collection.checkout(
+            file_collection_obj.id)
 
-        return (code_checkout_success and
-                environment_checkout_success and
-                file_checkout_success)
+        return (code_checkout_success and environment_checkout_success
+                and file_checkout_success)
 
     def list(self,
              session_id=None,
@@ -449,7 +451,8 @@ class SnapshotController(BaseController):
                 create({}).id
 
     def _file_setup(self, incoming_dictionary, create_dict):
-        """ TODO:
+        """ Checks for user inputs and uses the file collection controller to
+        obtain the file collection id and create the necessary collection
 
         Parameters
         ----------

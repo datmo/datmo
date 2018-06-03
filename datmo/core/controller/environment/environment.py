@@ -8,7 +8,7 @@ from datmo.core.entity.environment import Environment
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.misc_functions import get_datmo_temp_path, parse_path, list_all_filepaths
 from datmo.core.util.exceptions import PathDoesNotExist, RequiredArgumentMissing, TooManyArgumentsFound,\
-    EnvironmentNotInitialized, UnstagedChanges, ArgumentError
+    EnvironmentNotInitialized, UnstagedChanges, ArgumentError, EnvironmentDoesNotExist
 
 
 class EnvironmentController(BaseController):
@@ -35,9 +35,8 @@ class EnvironmentController(BaseController):
     def __init__(self, home):
         super(EnvironmentController, self).__init__(home)
         self.file_collection = FileCollectionController(home)
-        self._proj_env_dir = os.path.join(home, "datmo_environment")
-        if not os.path.exists(self._proj_env_dir):
-            os.makedirs(self._proj_env_dir)
+        if not os.path.exists(self.environment_directory):
+            os.makedirs(self.environment_directory)
 
     def create(self, dictionary):
         """Create an environment
@@ -66,6 +65,8 @@ class EnvironmentController(BaseController):
 
         Raises
         ------
+        EnvironmentDoesNotExist
+            if there is no environment found after given parameters and defaults are checked
         PathDoesNotExist
             if any source paths provided do not exist
         """
@@ -84,11 +85,11 @@ class EnvironmentController(BaseController):
         if "definition_paths" in dictionary and dictionary['definition_paths']:
             paths.extend(dictionary['definition_paths'])
 
-        # b. if there exists datmo_environments folder AND no paths exist, add in absolute paths
-        if not paths and os.path.isdir(self._proj_env_dir):
+        # b. if there exists projet environment directory AND no paths exist, add in absolute paths
+        if not paths and os.path.isdir(self.environment_directory):
             paths.extend([
-                os.path.join(self._proj_env_dir, filepath)
-                for filepath in list_all_filepaths(self._proj_env_dir)
+                os.path.join(self.environment_directory, filepath)
+                for filepath in list_all_filepaths(self.environment_directory)
             ])
 
         # c. add in default environment definition filepath as specified by the environment driver
@@ -110,6 +111,8 @@ class EnvironmentController(BaseController):
 
         # Step 3: Pass in all paths for the environment to the file collection create
         # If PathDoesNotExist is found for any source paths, then error
+        if not paths:
+            raise EnvironmentDoesNotExist()
         try:
             file_collection_obj = self.file_collection.create(paths)
         except PathDoesNotExist as e:
@@ -394,19 +397,24 @@ class EnvironmentController(BaseController):
             env_exists = True
         return env_exists
 
-    def _calculate_environment_hash(self):
-        """Return the environment hash from contents in project environment directory"""
+    def _calculate_project_environment_hash(self):
+        """Return the environment hash from contents in project environment directory
 
-        # Move tracked files to temp directory within project
-        _temp_dir = get_datmo_temp_path(self.home)
-
+        Returns
+        -------
+        str
+            unique hash of the project environment directory
+        """
         # Populate paths from the project environment directory
         paths = []
-        if os.path.isdir(self._proj_env_dir):
+        if os.path.isdir(self.environment_directory):
             paths.extend([
-                os.path.join(self._proj_env_dir, filepath)
-                for filepath in list_all_filepaths(self._proj_env_dir)
+                os.path.join(self.environment_directory, filepath)
+                for filepath in list_all_filepaths(self.environment_directory)
             ])
+
+        # Create a temp dir to save any additional files necessary
+        _temp_dir = get_datmo_temp_path(self.home)
 
         # Setup compatible environment and create add paths
         paths = self._setup_compatible_environment({}, {
@@ -428,8 +436,8 @@ class EnvironmentController(BaseController):
 
     def _has_unstaged_changes(self):
         """Return whether there are unstaged changes"""
-        env_hash = self._calculate_environment_hash()
-        environment_files = list_all_filepaths(self._proj_env_dir)
+        env_hash = self._calculate_project_environment_hash()
+        environment_files = list_all_filepaths(self.environment_directory)
         if self.exists(
                 environment_unique_hash=env_hash) or not environment_files:
             return False
@@ -495,12 +503,12 @@ class EnvironmentController(BaseController):
         environment_obj = results[0]
         environment_hash = environment_obj.unique_hash
 
-        if self._calculate_environment_hash() == environment_hash:
+        if self._calculate_project_environment_hash() == environment_hash:
             return True
         # Remove all content from `datmo_environment` folder
         # TODO Use datmo environment path as a class attribute
-        for file in os.listdir(self._proj_env_dir):
-            file_path = os.path.join(self._proj_env_dir, file)
+        for file in os.listdir(self.environment_directory):
+            file_path = os.path.join(self.environment_directory, file)
             try:
                 if os.path.isfile(file_path):
                     os.remove(file_path)
@@ -520,6 +528,6 @@ class EnvironmentController(BaseController):
         ):
             os.remove(os.path.join(_temp_env_dir, filename))
         # Copy from temp folder to project environment directory
-        self.file_driver.copytree(_temp_env_dir, self._proj_env_dir)
+        self.file_driver.copytree(_temp_env_dir, self.environment_directory)
         shutil.rmtree(_temp_env_dir)
         return True

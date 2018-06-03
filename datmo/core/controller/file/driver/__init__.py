@@ -140,6 +140,38 @@ class FileDriver(with_metaclass(ABCMeta, object)):
         """
         pass
 
+    @staticmethod
+    @abstractmethod
+    def get_filehash(filepath):
+        """Return the hash of the file path given
+
+        Parameters
+        ----------
+        filepath : str
+            path of the file
+
+        Returns
+        -------
+        str
+            unique hash of the file
+        """
+
+    @staticmethod
+    @abstractmethod
+    def get_dirhash(dirpath):
+        """Return the hash of the directory path given
+
+        Parameters
+        ----------
+        dirpath : str
+            path of the directory
+
+        Returns
+        -------
+        str
+            unique hash of the directory
+        """
+
     @abstractmethod
     def create_collection(self, paths):
         """Takes a list of user given paths and aggregates into collection

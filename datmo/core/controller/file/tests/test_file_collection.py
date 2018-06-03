@@ -43,45 +43,66 @@ class TestFileCollectionController():
     def teardown_method(self):
         pass
 
+    def __setup(self):
+        # Create the files in the project files directory
+        dirpath1 = os.path.join(self.file_collection.files_directory,
+                                "dirpath1")
+        os.makedirs(dirpath1)
+        filepath1 = os.path.join(self.file_collection.files_directory,
+                                 "filepath1")
+        with open(filepath1, "wb") as _:
+            pass
+        return filepath1, dirpath1
+
     def test_create(self):
         self.project.init("test3", "test description")
 
-        # Test failure creation of collection
+        # Test failure creation of collection if no path given
         failed = False
         try:
             self.file_collection.create()
-        except Exception:
+        except TypeError:
             failed = True
         assert failed
 
-        # Test successful creation of collection
-        self.file_collection.file_driver.create("dirpath1", directory=True)
-        self.file_collection.file_driver.create("filepath1")
-
-        dirpath1 = os.path.join(self.file_collection.home, "dirpath1")
-        filepath1 = os.path.join(self.file_collection.home, "filepath1")
-        paths = [filepath1, dirpath1]
-
+        # Test create success with paths
+        paths = self.__setup()
         file_collection_obj = self.file_collection.create(paths)
 
         assert file_collection_obj
         assert file_collection_obj.id
         assert file_collection_obj.path
         assert file_collection_obj.driver_type
+        assert file_collection_obj.filehash == "74be16979710d4c4e7c6647856088456"
 
-        # Test file collection with same paths/filehash returns same object
+        # Test create success without paths (should be the same as previous)
+        file_collection_obj_1 = self.file_collection.create([])
+        assert file_collection_obj_1 == file_collection_obj
+        assert file_collection_obj_1.id == file_collection_obj.id
+        assert file_collection_obj_1.path == file_collection_obj.path
+        assert file_collection_obj_1.driver_type == file_collection_obj.driver_type
+        assert file_collection_obj_1.filehash == file_collection_obj.filehash
+
+        # Test create success with paths again (should be same as previous)
         file_collection_obj_2 = self.file_collection.create(paths)
+        assert file_collection_obj_2 == file_collection_obj_1
+        assert file_collection_obj_2.id == file_collection_obj_1.id
+        assert file_collection_obj_2.path == file_collection_obj_1.path
+        assert file_collection_obj_2.driver_type == file_collection_obj_1.driver_type
+        assert file_collection_obj_2.filehash == file_collection_obj_1.filehash
 
-        assert file_collection_obj_2 == file_collection_obj
+        # Test file collection with empty paths (should be same as previous)
+        file_collection_obj_3 = self.file_collection.create([])
+        assert file_collection_obj_3 == file_collection_obj_2
+        assert file_collection_obj_3.id == file_collection_obj_2.id
+        assert file_collection_obj_3.path == file_collection_obj_2.path
+        assert file_collection_obj_3.driver_type == file_collection_obj_2.driver_type
+        assert file_collection_obj_3.filehash == file_collection_obj_2.filehash
 
     def test_list(self):
         self.project.init("test4", "test description")
 
-        self.file_collection.file_driver.create("dirpath1", directory=True)
-        self.file_collection.file_driver.create("filepath1")
-        dirpath1 = os.path.join(self.file_collection.home, "dirpath1")
-        filepath1 = os.path.join(self.file_collection.home, "filepath1")
-        paths_1 = [filepath1, dirpath1]
+        paths_1 = self.__setup()
 
         filepath2 = os.path.join(self.file_collection.home, "filepath2")
         with open(filepath2, "wb") as f:
@@ -101,13 +122,7 @@ class TestFileCollectionController():
     def test_delete(self):
         self.project.init("test5", "test description")
 
-        # Test successful creation of collection
-        self.file_collection.file_driver.create("dirpath1", directory=True)
-        self.file_collection.file_driver.create("filepath1")
-
-        dirpath1 = os.path.join(self.file_collection.home, "dirpath1")
-        filepath1 = os.path.join(self.file_collection.home, "filepath1")
-        paths = [filepath1, dirpath1]
+        paths = self.__setup()
 
         file_collection_obj = self.file_collection.create(paths)
 
@@ -128,15 +143,9 @@ class TestFileCollectionController():
     def test_exists_file(self):
         self.project.init("test6", "test description")
 
-        # Test successful creation of collection
-        self.file_collection.file_driver.create("dirpath1", directory=True)
-        self.file_collection.file_driver.create("filepath1")
+        paths = self.__setup()
 
-        dirpath1 = os.path.join(self.file_collection.home, "dirpath1")
-        filepath1 = os.path.join(self.file_collection.home, "filepath1")
-        filepaths = [filepath1, dirpath1]
-
-        file_collection_obj = self.file_collection.create(filepaths)
+        file_collection_obj = self.file_collection.create(paths)
 
         # check for file_collection_id
         result = self.file_collection.exists(
@@ -153,93 +162,45 @@ class TestFileCollectionController():
             file_collection_id="test_file_collection_id")
         assert not result
 
-    def test_calculate_file_collection_hash(self):
+    def test_calculate_project_files_hash(self):
         self.project.init("test7", "test description")
 
-        # Test successful creation of collection
-        self.file_collection.file_driver.create("dirpath1", directory=True)
-        self.file_collection.file_driver.create("filepath1")
+        filepath1, dirpath1 = self.__setup()
 
-        # Test successful creation of collection
-        dirpath1 = os.path.join(self.file_collection.home, "dirpath1")
-        filepath1 = os.path.join(self.file_collection.home, "filepath1")
-        filepaths = [filepath1, dirpath1]
-
-        file_collection_obj = self.file_collection.create(filepaths)
-        datmo_files_path = os.path.join(self.file_collection.home,
-                                        "datmo_files")
-        file_collection_path = os.path.join(self.file_collection.home,
-                                            file_collection_obj.path)
-        self.file_collection.file_driver.copytree(file_collection_path,
-                                                  datmo_files_path)
-
-        assert file_collection_obj.filehash == self.file_collection._calculate_datmo_files_hash(
-        )
-
-        shutil.rmtree(datmo_files_path)
-
-        self.file_collection.file_driver.create(
-            "datmo_files/dirpath1", directory=True)
-        self.file_collection.file_driver.create("datmo_files/filepath1")
-
-        dirpath1 = os.path.join(self.file_collection.home, "datmo_files",
-                                "dirpath1")
-        filepath1 = os.path.join(self.file_collection.home, "datmo_files",
-                                 "filepath1")
-        filepaths = [filepath1, dirpath1]
-
-        file_collection_obj_1 = self.file_collection.create(filepaths)
-
-        assert file_collection_obj.filehash == file_collection_obj_1.filehash
+        # Test if hash is for 1 blank filepath and empty directory
+        result = self.file_collection._calculate_project_files_hash()
+        assert result == "74be16979710d4c4e7c6647856088456"
 
     def test_has_unstaged_changes(self):
         self.project.init("test8", "test description")
 
-        # Test successful creation of collection
-        self.file_collection.file_driver.create(
-            "datmo_files/dirpath1", directory=True)
-        self.file_collection.file_driver.create("datmo_files/filepath1")
-        dirpath1 = os.path.join(self.file_collection.home, "datmo_files",
-                                "dirpath1")
-        filepath1 = os.path.join(self.file_collection.home, "datmo_files",
-                                 "filepath1")
-        filepaths = [filepath1, dirpath1]
+        # Create the files in the project files directory
+        paths = self.__setup()
 
-        self.file_collection.create(filepaths)
+        # Test when there are unstaged changes
+        result = self.file_collection._has_unstaged_changes()
+        assert result
+
+        # Save the file collection
+        self.file_collection.create(paths)
 
         # Test when there are no unstaged changes
         result = self.file_collection._has_unstaged_changes()
         assert not result
 
-        with open(filepath1, "wb") as f:
+        # Change the file contents
+        with open(paths[0], "wb") as f:
             f.write(to_bytes("hello"))
 
-        # Test when there are unstaged changes
+        # Test when there are unstaged changes again
         result = self.file_collection._has_unstaged_changes()
         assert result
 
     def test_check_unstaged_changes(self):
         self.project.init("test9", "test description")
 
-        # Test successful creation of collection
-        self.file_collection.file_driver.create(
-            "datmo_files/dirpath1", directory=True)
-        self.file_collection.file_driver.create("datmo_files/filepath1")
-
-        dirpath1 = os.path.join(self.file_collection.home, "datmo_files",
-                                "dirpath1")
-        filepath1 = os.path.join(self.file_collection.home, "datmo_files",
-                                 "filepath1")
-        filepaths = [filepath1, dirpath1]
-        self.file_collection.create(filepaths)
-
-        # Test when there are no unstaged changes
-        result = self.file_collection.check_unstaged_changes()
-        assert not result
-
-        # Change a file
-        with open(filepath1, "wb") as f:
-            f.write(to_bytes("hello"))
+        # Create the files in the project files directory
+        paths = self.__setup()
 
         # Test when there are unstaged changes
         failed = False
@@ -249,39 +210,70 @@ class TestFileCollectionController():
             failed = True
         assert failed
 
-        # Test when there are no files (should be staged)
-        os.remove(filepath1)
-        shutil.rmtree(dirpath1)
+        # Save the file collection
+        self.file_collection.create(paths)
+
+        # Test when there are no unstaged changes
         result = self.file_collection.check_unstaged_changes()
         assert not result
 
-    def test_checkout_file(self):
-        self.project.init("test9", "test description")
-
-        # Test successful creation of collection
-        self.file_collection.file_driver.create("dirpath1", directory=True)
-        self.file_collection.file_driver.create("filepath1")
-
-        dirpath1 = os.path.join(self.file_collection.home, "dirpath1")
-        filepath1 = os.path.join(self.file_collection.home, "filepath1")
-        filepaths = [filepath1, dirpath1]
-
-        file_collection_obj = self.file_collection.create(filepaths)
-
-        # Test when there are no unstaged changes
-        result = self.file_collection.checkout(file_collection_obj.id)
-        assert result
-
-        # changing filepath in `datmo_files`
-        datmo_file_path = os.path.join(self.file_collection.home,
-                                       "datmo_files")
-        with open(os.path.join(datmo_file_path, "filepath1"), "wb") as f:
+        # Change the file contents
+        with open(paths[0], "wb") as f:
             f.write(to_bytes("hello"))
 
-        # Test when there are unstaged changes
+        # Test when there are unstaged changes again
+        failed = False
+        try:
+            _ = self.file_collection.check_unstaged_changes()
+        except UnstagedChanges:
+            failed = True
+        assert failed
+
+        # Test when there are no files (should be staged)
+        os.remove(paths[0])
+        shutil.rmtree(paths[1])
+        result = self.file_collection.check_unstaged_changes()
+        assert not result
+
+    def test_checkout(self):
+        self.project.init("test9", "test description")
+
+        # Create the files in the project files directory
+        paths = self.__setup()
+
+        # Create a file collection to checkout to with paths
+        file_collection_obj = self.file_collection.create(paths)
+
+        # Checkout success when there are no unstaged changes
+        result = self.file_collection.checkout(file_collection_obj.id)
+        assert result
+        current_hash = self.file_collection._calculate_project_files_hash()
+        assert current_hash == "74be16979710d4c4e7c6647856088456"
+        assert file_collection_obj.filehash == current_hash
+        # Check the filenames as well because the hash does not take this into account
+        assert os.path.isfile(paths[0])
+
+        # Change file contents to make it unstaged
+        with open(paths[0], "wb") as f:
+            f.write(to_bytes("hello"))
+
+        # Checkout failure when there are unstaged changes
         failed = False
         try:
             _ = self.file_collection.checkout(file_collection_obj.id)
-        except:
+        except UnstagedChanges:
             failed = True
         assert failed
+
+        # Create a new file collection with paths
+        file_collection_obj_1 = self.file_collection.create(paths)
+
+        # Checkout success back when there are no unstaged changes
+        result = self.file_collection.checkout(file_collection_obj.id)
+        assert result
+        current_hash = self.file_collection._calculate_project_files_hash()
+        assert current_hash == "74be16979710d4c4e7c6647856088456"
+        assert file_collection_obj.filehash == current_hash
+        assert file_collection_obj_1.filehash != current_hash
+        # Check the filenames as well because the hash does not take this into account
+        assert os.path.isfile(paths[0])

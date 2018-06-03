@@ -26,9 +26,9 @@ except TypeError:
     to_bytes("test")
 
 from datmo.core.util.misc_functions import (
-    get_filehash, create_unique_hash, mutually_exclusive, is_project_dir,
-    find_project_dir, grep, prettify_datetime, format_table,
-    parse_cli_key_value, get_datmo_temp_path, parse_path, parse_paths)
+    create_unique_hash, mutually_exclusive, is_project_dir, find_project_dir,
+    grep, prettify_datetime, format_table, parse_cli_key_value,
+    get_datmo_temp_path, parse_path, parse_paths, list_all_filepaths)
 
 from datmo.core.util.exceptions import MutuallyExclusiveArguments, RequiredArgumentMissing, InvalidDestinationName, PathDoesNotExist, TooManyArgumentsFound
 
@@ -151,27 +151,20 @@ class TestMiscFunctions():
         assert result == "row1  row1  \nrow2  row2  \n"
 
     def test_list_all_filepaths(self):
-        pass
-
-    def test_get_filehash(self):
+        # Create a file and a directory to test on
         filepath = os.path.join(self.temp_dir, "test.txt")
+        dirpath = os.path.join(self.temp_dir, "test_dir")
+        dirfilepath = os.path.join(dirpath, "test.txt")
         with open(filepath, "wb") as f:
-            f.write(to_bytes("hello\n"))
-        result = get_filehash(filepath)
-        assert len(result) == 32
-
-    def test_get_dirhash(self):
-        temp_dir_1 = get_datmo_temp_path(self.temp_dir)
-        filepath = os.path.join(temp_dir_1, "test.txt")
-        with open(filepath, "wb") as f:
-            f.write(to_bytes("hello\n"))
-        result = get_filehash(filepath)
-        temp_dir_2 = get_datmo_temp_path(self.temp_dir)
-        filepath_2 = os.path.join(temp_dir_2, "test.txt")
-        with open(filepath_2, "wb") as f:
-            f.write(to_bytes("hello\n"))
-        result_2 = get_filehash(filepath)
-        assert result == result_2
+            f.write(to_bytes("test" + "\n"))
+        os.makedirs(dirpath)
+        with open(dirfilepath, "wb") as f:
+            f.write(to_bytes("test" + "\n"))
+        # List all paths
+        result = list_all_filepaths(self.temp_dir)
+        assert len(result) == 2
+        assert "test.txt" in result
+        assert os.path.join("test_dir", "test.txt") in result
 
     def test_get_datmo_temp_path(self):
         datmo_temp_path = get_datmo_temp_path(self.temp_dir)
