@@ -65,7 +65,7 @@ class TestSnapshot():
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(self.env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Create config file
         self.config_filepath = os.path.join(self.snapshot.home, "config.json")

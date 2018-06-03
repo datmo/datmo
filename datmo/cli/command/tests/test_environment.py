@@ -70,7 +70,7 @@ class TestEnvironment():
                                            "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         self.environment_command.parse(["environment", "create"])
@@ -90,7 +90,7 @@ class TestEnvironment():
                                            "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         self.environment_command.parse([
@@ -107,7 +107,7 @@ class TestEnvironment():
         definition_filepath = os.path.join(self.temp_dir, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         self.environment_command.parse(["environment", "create"])

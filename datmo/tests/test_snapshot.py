@@ -110,7 +110,7 @@ class TestSnapshotModule():
         # Create a snapshot with default params, files, and environment
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu"))
+            f.write(to_bytes("FROM python:3.5-alpine"))
         snapshot_obj_2 = create(message="test", home=self.temp_dir)
 
         assert snapshot_obj_2
@@ -126,7 +126,7 @@ class TestSnapshotModule():
         # Create a snapshot with default params, files, and environment being passed in
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu"))
+            f.write(to_bytes("FROM python:3.5-alpine"))
         snapshot_obj_3 = create(
             message="test", home=self.temp_dir, env=test_filepath)
 
@@ -151,7 +151,7 @@ class TestSnapshotModule():
         # Create environment definition
         env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         task_obj = run("sh -c echo accuracy:0.45", home=self.temp_dir)
 
@@ -194,7 +194,7 @@ class TestSnapshotModule():
         # Create environment definition
         env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         task_obj = run("sh -c echo accuracy:0.45", home=self.temp_dir)
 
@@ -262,7 +262,7 @@ class TestSnapshotModule():
         # Create a snapshot with default params, files, and environment
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu"))
+            f.write(to_bytes("FROM python:3.5-alpine"))
         create(message="test2", home=self.temp_dir)
 
         # list all snapshots with no filters (works when more than 1 snapshot)

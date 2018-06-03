@@ -95,7 +95,7 @@ class TestTaskModule():
         # Add environment definition
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu"))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # 3) Test out option 3
         task_obj_1 = run(
@@ -131,7 +131,7 @@ class TestTaskModule():
                                              "datmo_environment")
         test_filepath = os.path.join(datmo_environment_dir, "Dockerfile")
         with open(test_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu"))
+            f.write(to_bytes("FROM python:3.5-alpine"))
         task_obj_4 = run(command=["python", "script.py"], home=self.temp_dir)
         assert isinstance(task_obj_4, Task)
         assert task_obj_4.id
@@ -198,7 +198,7 @@ class TestTaskModule():
 
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu"))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         return run(command=command, env=test_filepath, home=self.temp_dir)
 

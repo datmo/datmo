@@ -93,7 +93,7 @@ class TestSnapshotController():
         env_def_path = os.path.join(self.project.environment_directory,
                                     "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # test must fail when there is file present in root project folder
         failed = False
@@ -109,7 +109,7 @@ class TestSnapshotController():
         env_def_path = os.path.join(self.project.environment_directory,
                                     "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         test_file = os.path.join(self.project.files_directory, "test.txt")
         with open(test_file, "wb") as f:
@@ -160,7 +160,7 @@ class TestSnapshotController():
         env_def_path = os.path.join(self.project.environment_directory,
                                     "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Creating a file in project folder
         test_filepath = os.path.join(self.snapshot.home, "script.py")
@@ -185,7 +185,7 @@ class TestSnapshotController():
         env_def_path = os.path.join(self.project.environment_directory,
                                     "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # creating a file in project folder
         test_filepath = os.path.join(self.snapshot.home, "script.py")
@@ -211,7 +211,7 @@ class TestSnapshotController():
         os.makedirs(random_dir)
         env_def_path = os.path.join(random_dir, "randomDockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
         environment_definition_paths = [env_def_path + ">Dockerfile"]
         # Test default values for snapshot, success
         snapshot_obj = self.snapshot.create({
@@ -233,7 +233,7 @@ class TestSnapshotController():
         env_def_path = os.path.join(self.project.environment_directory,
                                     "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Creating a file in project folder
         test_filepath = os.path.join(self.snapshot.home, "script.py")
@@ -264,7 +264,7 @@ class TestSnapshotController():
         env_def_path = os.path.join(self.project.environment_directory,
                                     "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Creating a file in project folder
         test_filepath = os.path.join(self.snapshot.home, "script.py")
@@ -317,7 +317,7 @@ class TestSnapshotController():
         env_def_path = os.path.join(self.project.environment_directory,
                                     "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Creating a file in project folder
         test_filepath = os.path.join(self.snapshot.home, "script.py")
@@ -367,7 +367,7 @@ class TestSnapshotController():
         env_def_path = os.path.join(self.project.environment_directory,
                                     "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Create files to add
         _, project_directory_name = os.path.split(self.project.files_directory)
@@ -432,7 +432,7 @@ class TestSnapshotController():
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)
 
@@ -453,7 +453,7 @@ class TestSnapshotController():
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Test the default values
         updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)
@@ -530,7 +530,7 @@ class TestSnapshotController():
         env_def_path = os.path.join(self.project.environment_directory,
                                     "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Create config
         config_filepath = os.path.join(self.snapshot.home, "config.json")

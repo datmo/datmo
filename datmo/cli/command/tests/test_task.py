@@ -67,7 +67,7 @@ class TestTaskCommand():
         # Create environment_driver definition
         env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
     def test_task_project_not_init(self):
         failed = False
