@@ -178,13 +178,23 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         """
 
     @abstractmethod
-    def get_default_definition_path(self):
+    def get_default_definition_filename(self):
         """Get default definition path to read the file from
 
         Returns
         -------
         str
-            full path of the default definition path
+            file names of the default definition file
+        """
+
+    @abstractmethod
+    def get_datmo_definition_filenames(self):
+        """Get the filenames of datmo definition files
+
+        Returns
+        -------
+        list
+            list of file names of the datmo definition file
         """
 
     @abstractmethod

@@ -112,17 +112,6 @@ def get_datmo_parser():
         help="specify task id to pull information from")
 
     snapshot_create.add_argument(
-        "--code-id",
-        dest="code_id",
-        default=None,
-        help="code id from code object")
-    snapshot_create.add_argument(
-        "--commit-id",
-        dest="commit_id",
-        default=None,
-        help="commit id from source control")
-
-    snapshot_create.add_argument(
         "--environment-id",
         dest="environment_id",
         default=None,
@@ -137,11 +126,6 @@ def get_datmo_parser():
         "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
     )
 
-    snapshot_create.add_argument(
-        "--file-collection-id",
-        dest="file_collection_id",
-        default=None,
-        help="file collection id for file collection object")
     snapshot_create.add_argument(
         "--paths",
         dest="paths",

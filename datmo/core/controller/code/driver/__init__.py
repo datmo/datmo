@@ -43,10 +43,29 @@ class CodeDriver(with_metaclass(ABCMeta, object)):
 
         Raises
         ------
-        GitCommitDoesNotExist
-            commit id specified does not match a valid commit within the tree
+        CodeNotInitialized
+            error if not initialized (must initialize first)
+        CommitDoesNotExist
+            commit id specified does not match a valid commit
+        CommitFailed
+            commit could not be created
         """
         pass
+
+    @abstractmethod
+    def latest_ref(self):
+        """Return the latest ref of the code
+
+        Returns
+        -------
+        commit_id : str
+            the latest commit_id in the ref list
+
+        Raises
+        ------
+        CodeNotInitialized
+            error if not initialized (must initialize first)
+        """
 
     @abstractmethod
     def exists_ref(self, commit_id):
@@ -61,6 +80,11 @@ class CodeDriver(with_metaclass(ABCMeta, object)):
         -------
         bool
             True if exists else False
+
+        Raises
+        ------
+        CodeNotInitialized
+            error if not initialized (must initialize first)
         """
         pass
 
@@ -77,6 +101,11 @@ class CodeDriver(with_metaclass(ABCMeta, object)):
         -------
         bool
             True if success
+
+        Raises
+        ------
+        CodeNotInitialized
+            error if not initialized (must initialize first)
         """
         pass
 
@@ -88,6 +117,11 @@ class CodeDriver(with_metaclass(ABCMeta, object)):
         -------
         list
             includes all commit ref ids present
+
+        Raises
+        ------
+        CodeNotInitialized
+            error if not initialized (must initialize first)
         """
         pass
 
@@ -124,20 +158,37 @@ class CodeDriver(with_metaclass(ABCMeta, object)):
     #     """
     #     pass
 
+    def check_unstaged_changes(self):
+        """Checks if there exists any unstaged changes for code
+
+        Raises
+        ------
+        CodeNotInitialized
+            error if not initialized (must initialize first)
+
+        UnstagedChanges
+            error if not there exists unstaged changes in environment
+
+        """
+        pass
+
     @abstractmethod
-    def checkout_ref(self, commit_id, remote=False):
+    def checkout_ref(self, commit_id):
         """Checkout commit reference given without affecting the .datmo directory
 
         Parameters
         ----------
         commit_id : str
             commit id for commit ref
-        remote : bool
-            signifies if commit id should be fetched before checkout
 
         Returns
         -------
         bool
             True if success
+
+        Raises
+        ------
+        CodeNotInitialized
+            error if not initialized (must initialize first)
         """
         pass

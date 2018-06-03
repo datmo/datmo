@@ -16,6 +16,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 from glob import glob
 
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
@@ -71,21 +83,6 @@ def get_nvidia_devices():
     for device in nvidia_devices:
         devices.append(device + ':' + device + ':rwm')
     return devices
-
-
-def get_filehash(filepath):
-    if not os.path.isfile(filepath):
-        raise PathDoesNotExist(
-            __("error", "util.misc_functions.get_filehash", filepath))
-    BUFF_SIZE = 65536
-    sha1 = hashlib.md5()
-    with open(filepath, "rb") as f:
-        while True:
-            data = f.read(BUFF_SIZE)
-            if not data:
-                break
-            sha1.update(data)
-    return sha1.hexdigest()
 
 
 def create_unique_hash(base_hash=None, salt=None):
@@ -187,9 +184,9 @@ def __helper(filepath):
         test.init()
         definition_path = os.path.join(filepath, "Dockerfile")
         if platform.system() == "Windows":
-            with open(definition_path, "w") as f:
-                f.write(to_unicode("FROM alpine:3.5" + "\n"))
-                f.write(to_unicode(str("RUN echo hello")))
+            with open(definition_path, "wb") as f:
+                f.write(to_bytes("FROM alpine:3.5" + "\n"))
+                f.write(to_bytes(str("RUN echo hello")))
             test.build("docker-test", definition_path)
         return False
     except (EnvironmentInitFailed, EnvironmentExecutionError):

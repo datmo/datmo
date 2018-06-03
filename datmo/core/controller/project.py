@@ -147,6 +147,7 @@ class ProjectController(BaseController):
         -------
         bool
         """
+        # Remove Datmo environment_driver references, give warning if error
         try:
             # Obtain image id before cleaning up if exists
             images = self.environment_driver.list_images(name="datmo-" + \
@@ -154,15 +155,17 @@ class ProjectController(BaseController):
             image_id = images[0].id if images else None
         except Exception:
             self.logger.warning(
-                __("warn", "controller.general.environment.failed"))
+                __("warn", "controller.project.cleanup.environment"))
 
-        # Remove Datmo code_driver references
+        # Remove Datmo code_driver references, give warning if error
         try:
-            self.code_driver.delete_code_refs_dir()
-        except PathDoesNotExist:
-            self.logger.warning(__("warn", "controller.project.cleanup.refs"))
+            if self.code_driver.is_initialized:
+                for ref in self.code_driver.list_refs():
+                    self.code_driver.delete_ref(ref)
+        except Exception:
+            self.logger.warning(__("warn", "controller.project.cleanup.code"))
 
-        # Remove Datmo file structure
+        # Remove Datmo file structure, give warning if error
         try:
             self.file_driver.delete_datmo_file_structure()
         except FileIOError:
@@ -181,7 +184,7 @@ class ProjectController(BaseController):
                     image_id, force=True)
         except Exception:
             self.logger.warning(
-                __("warn", "controller.general.environment.failed"))
+                __("warn", "controller.project.cleanup.environment"))
 
         return True
 

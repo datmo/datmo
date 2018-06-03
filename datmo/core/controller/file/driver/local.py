@@ -3,7 +3,6 @@ import stat
 import shutil
 import glob
 import hashlib
-import uuid
 import checksumdir
 from io import open
 try:
@@ -154,7 +153,7 @@ class LocalFileDriver(FileDriver):
             if directory:
                 os.makedirs(filepath)
             else:
-                with open(os.path.join(self.root, relative_path), "a"):
+                with open(os.path.join(self.root, relative_path), "ab"):
                     os.utime(filepath, None)
         return filepath
 
@@ -215,8 +214,33 @@ class LocalFileDriver(FileDriver):
         self.ensure_collections_dir()
         temp_collection_path = get_datmo_temp_path(self.root)
 
+        filehash = self.calculate_hash_paths(paths, temp_collection_path)
+
+        # Move contents to folder with filehash as name and remove temp_collection_path
+        collection_path = os.path.join(self.root, ".datmo", "collections",
+                                       filehash)
+        if os.path.isdir(collection_path):
+            return filehash
+            # raise FileStructureError("exception.file.create_collection", {
+            #     "exception": "File collection with id already exists."
+            # })
+        os.makedirs(collection_path)
+        self.copytree(temp_collection_path, collection_path)
+
+        # Change permissions to read only for collection_path. File collection is immutable
+        mode = stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH
+
+        for root, dirs, files in os.walk(collection_path, topdown=False):
+            for dir in [os.path.join(root, d) for d in dirs]:
+                os.chmod(dir, mode)
+            for file in [os.path.join(root, f) for f in files]:
+                os.chmod(file, mode)
+
+        return filehash
+
+    def calculate_hash_paths(self, paths, directory):
         try:
-            files, dirs = parse_paths(self.root, paths, temp_collection_path)
+            files, dirs = parse_paths(self.root, paths, directory)
         except PathDoesNotExist as e:
             raise PathDoesNotExist(
                 __("error",
@@ -246,29 +270,27 @@ class LocalFileDriver(FileDriver):
             self.copytree(src_abs_dirpath, dest_abs_dirpath)
 
         # Hash the files to find filehash
-        filehash = checksumdir.dirhash(temp_collection_path)
+        return self.get_dirhash(directory)
 
-        # Move contents to folder with filehash as name and remove temp_collection_path
-        collection_path = os.path.join(self.root, ".datmo", "collections",
-                                       filehash)
-        if os.path.isdir(collection_path):
-            return filehash
-            # raise FileStructureError("exception.file.create_collection", {
-            #     "exception": "File collection with id already exists."
-            # })
-        os.makedirs(collection_path)
-        self.copytree(temp_collection_path, collection_path)
+    @staticmethod
+    def get_filehash(absolute_filepath):
+        if not os.path.isfile(absolute_filepath):
+            raise PathDoesNotExist(
+                __("error", "util.misc_functions.get_filehash",
+                   absolute_filepath))
+        BUFF_SIZE = 65536
+        sha1 = hashlib.md5()
+        with open(absolute_filepath, "rb") as f:
+            while True:
+                data = f.read(BUFF_SIZE)
+                if not data:
+                    break
+                sha1.update(data)
+        return sha1.hexdigest()
 
-        # Change permissions to read only for collection_path. File collection is immutable
-        mode = stat.S_IRWXU | stat.S_IRGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH
-
-        for root, dirs, files in os.walk(collection_path, topdown=False):
-            for dir in [os.path.join(root, d) for d in dirs]:
-                os.chmod(dir, mode)
-            for file in [os.path.join(root, f) for f in files]:
-                os.chmod(file, mode)
-
-        return filehash
+    @staticmethod
+    def get_dirhash(absolute_dirpath):
+        return checksumdir.dirhash(absolute_dirpath)
 
     def get_absolute_collection_path(self, filehash):
         return os.path.join(self.root, ".datmo", "collections", filehash)

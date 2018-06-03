@@ -1,5 +1,5 @@
 import os
-import platform
+import shutil
 
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
@@ -7,8 +7,8 @@ from datmo.core.controller.file.file_collection import FileCollectionController
 from datmo.core.entity.environment import Environment
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.misc_functions import get_datmo_temp_path, parse_path, list_all_filepaths
-from datmo.core.util.exceptions import PathDoesNotExist, RequiredArgumentMissing, \
-    TooManyArgumentsFound
+from datmo.core.util.exceptions import PathDoesNotExist, RequiredArgumentMissing, TooManyArgumentsFound,\
+    EnvironmentNotInitialized, UnstagedChanges, ArgumentError, EnvironmentDoesNotExist
 
 
 class EnvironmentController(BaseController):
@@ -35,9 +35,10 @@ class EnvironmentController(BaseController):
     def __init__(self, home):
         super(EnvironmentController, self).__init__(home)
         self.file_collection = FileCollectionController(home)
-        self._proj_env_dir = os.path.join(home, "datmo_environment")
+        if not os.path.exists(self.environment_directory):
+            os.makedirs(self.environment_directory)
 
-    def create(self, dictionary):
+    def create(self, dictionary, save_hardware_file=True):
         """Create an environment
 
         Parameters
@@ -47,15 +48,14 @@ class EnvironmentController(BaseController):
                 definition_paths : list, optional
                     list of absolute or relative filepaths and/or dirpaths to collect with destination names
                     (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
-                    (default is to pull from datmo_environments/ folder and project root OR default driver definition if none found)
-                hardware_info : dict, optional
-                    information about the environment hardware
-                    (default is to extract hardware from platform currently running)
+                    (default if none provided is to pull from project environment folder and project root. If none found create default definition)
             optional values to populate optional  environment entity args
                 description : str, optional
                     description of the environment
                     (default is blank)
-
+        save_hardware_file : bool
+            boolean to save hardware file along with other files
+            (default is True to save the file and create distinct hashes based on software and hardware)
 
         Returns
         -------
@@ -64,6 +64,8 @@ class EnvironmentController(BaseController):
 
         Raises
         ------
+        EnvironmentDoesNotExist
+            if there is no environment found after given parameters and defaults are checked
         PathDoesNotExist
             if any source paths provided do not exist
         """
@@ -72,7 +74,7 @@ class EnvironmentController(BaseController):
         create_dict["driver_type"] = self.environment_driver.type
 
         # Create temp environment folder
-        self._temp_env_dir = get_datmo_temp_path(self.home)
+        _temp_env_dir = get_datmo_temp_path(self.home)
 
         # Step 1: Populate a path list from the user inputs in a format compatible
         # with the input of the File Collection create function
@@ -82,17 +84,19 @@ class EnvironmentController(BaseController):
         if "definition_paths" in dictionary and dictionary['definition_paths']:
             paths.extend(dictionary['definition_paths'])
 
-        # b. if there exists datmo_environments folder, add in absolute paths
-        if os.path.isdir(self._proj_env_dir):
+        # b. if there exists projet environment directory AND no paths exist, add in absolute paths
+        if not paths and os.path.isdir(self.environment_directory):
             paths.extend([
-                os.path.join(self._proj_env_dir, filepath)
-                for filepath in list_all_filepaths(self._proj_env_dir)
+                os.path.join(self.environment_directory, filepath)
+                for filepath in list_all_filepaths(self.environment_directory)
             ])
 
         # c. add in default environment definition filepath as specified by the environment driver
         # if path exists and NO OTHER PATHS exist
-        src_environment_filepath = self.environment_driver.get_default_definition_path(
+        src_environment_filename = self.environment_driver.get_default_definition_filename(
         )
+        src_environment_filepath = os.path.join(self.home,
+                                                src_environment_filename)
         _, environment_filename = os.path.split(src_environment_filepath)
         create_dict['definition_filename'] = environment_filename
         if not paths and os.path.exists(src_environment_filepath):
@@ -101,35 +105,16 @@ class EnvironmentController(BaseController):
         # Step 2: Check existing paths and create files as needed to populate the
         # full environment within the temporary directory
 
-        # a. look for the default definition, if not present add it to temp directory, and add it to paths
-        original_definition_filepath = ""
-        if all(environment_filename not in path for path in paths):
-            self.environment_driver.create_default_definition(
-                self._temp_env_dir)
-            original_definition_filepath = os.path.join(
-                self._temp_env_dir, environment_filename)
-            paths.append(original_definition_filepath)
-        else:
-            for idx, path in enumerate(paths):
-                if environment_filename in path:
-                    src_path, dest_path = parse_path(path)
-                    original_definition_filepath = src_path
-
-        # b. use the default definition and create a datmo definition in the temp directory, and add to paths
-        datmo_definition_filepath = \
-            os.path.join(self._temp_env_dir, "datmo" + environment_filename)
-        if not os.path.isfile(datmo_definition_filepath):
-            _, original_definition_filepath, datmo_definition_filepath = \
-                self.environment_driver.create(path=original_definition_filepath, output_path=datmo_definition_filepath)
-        paths.append(datmo_definition_filepath)
-
-        # c. get the hardware info and save it in the temp directory, and add to paths
-        hardware_info_filepath = self._store_hardware_info(
-            dictionary, create_dict, self._temp_env_dir)
-        paths.append(hardware_info_filepath)
+        paths = self._setup_compatible_environment(
+            create_dict,
+            paths,
+            _temp_env_dir,
+            save_hardware_file=save_hardware_file)
 
         # Step 3: Pass in all paths for the environment to the file collection create
         # If PathDoesNotExist is found for any source paths, then error
+        if not paths:
+            raise EnvironmentDoesNotExist()
         try:
             file_collection_obj = self.file_collection.create(paths)
         except PathDoesNotExist as e:
@@ -147,35 +132,76 @@ class EnvironmentController(BaseController):
         })
         if results: return results[0]
 
-        # Step 5: Add optional arguments to the Environment entity
+        # Step 5: Delete the temporary directory
+        shutil.rmtree(_temp_env_dir)
+
+        # Step 6: Add optional arguments to the Environment entity
         for optional_arg in ["description"]:
             if optional_arg in dictionary:
                 create_dict[optional_arg] = dictionary[optional_arg]
 
-        # Step 6: Create environment and return
+        # Step 7: Create environment and return
         return self.dal.environment.create(Environment(create_dict))
 
-    def _store_hardware_info(self, dictionary, create_dict, definition_path):
-        if "hardware_info" in dictionary:
-            create_dict['hardware_info'] = dictionary['hardware_info']
+    def _setup_compatible_environment(self,
+                                      create_dict,
+                                      paths,
+                                      directory,
+                                      save_hardware_file=True):
+        """Setup compatible environment from user paths. Creates the necessary datmo files if
+        they are not already present
+
+        Parameters
+        ----------
+        create_dict : dict
+            dictionary for entity creation, this is mutated in the function (not returned)
+        paths : list
+            list of absolute or relative filepaths and/or dirpaths to collect with destination names
+            (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
+        directory : str
+            path of directory to save additional files to
+        save_hardware_file : bool
+            boolean to save hardware file along with other files
+            (default is True to save the file and create distinct hashes based on software and hardware)
+
+        Returns
+        -------
+        paths : list
+            returns the input paths with the paths of the new files created appended
+        """
+        # a. look for the default definition, if not present add it to the directory, and add it to paths
+        original_definition_filepath = ""
+        if all(create_dict['definition_filename'] not in path
+               for path in paths):
+            self.environment_driver.create_default_definition(directory)
+            original_definition_filepath = os.path.join(
+                directory, create_dict['definition_filename'])
+            paths.append(original_definition_filepath)
         else:
-            # Extract hardware info of the container (currently taking from system platform)
-            # TODO: extract hardware information directly from the container
-            (system, node, release, version, machine,
-             processor) = platform.uname()
-            create_dict['hardware_info'] = {
-                'system': system,
-                'node': node,
-                'release': release,
-                'version': version,
-                'machine': machine,
-                'processor': processor
-            }
-        # Create hardware info file in definition path
-        hardware_info_filepath = os.path.join(definition_path, "hardware_info")
-        _ = JSONStore(
-            hardware_info_filepath, initial_dict=create_dict['hardware_info'])
-        return hardware_info_filepath
+            for idx, path in enumerate(paths):
+                if create_dict['definition_filename'] in path:
+                    src_path, dest_path = parse_path(path)
+                    original_definition_filepath = src_path
+
+        # b. use the default definition and create a datmo definition in the directory, and add to paths
+        datmo_definition_filepath = \
+            os.path.join(directory, "datmo" + create_dict['definition_filename'])
+        if not os.path.isfile(datmo_definition_filepath):
+            _, original_definition_filepath, datmo_definition_filepath = \
+                self.environment_driver.create(path=original_definition_filepath, output_path=datmo_definition_filepath)
+        paths.append(datmo_definition_filepath)
+
+        # c. get the hardware info and save it to the entity, if save_hardware_file is True
+        # then save it to file and add it to the paths
+        create_dict[
+            'hardware_info'] = self.environment_driver.get_hardware_info()
+        if save_hardware_file:
+            hardware_info_filepath = os.path.join(directory, "hardware_info")
+            _ = JSONStore(
+                hardware_info_filepath,
+                initial_dict=create_dict['hardware_info'])
+            paths.append(hardware_info_filepath)
+        return paths
 
     def build(self, environment_id):
         """Build environment from definition file
@@ -325,6 +351,7 @@ class EnvironmentController(BaseController):
             raise RequiredArgumentMissing()
         if sum(map(bool, [run_id, match_string, all])) > 1:
             raise TooManyArgumentsFound()
+        stop_success = False
         if run_id:
             # Stop the instance(e.g. container) running using environment driver(e.g. docker)
             stop_success = self.environment_driver.stop(run_id, force=True)
@@ -338,3 +365,179 @@ class EnvironmentController(BaseController):
             stop_success = self.environment_driver.stop_remove_containers_by_term(
                 term=all_match_string, force=True)
         return stop_success
+
+    def exists(self, environment_id=None, environment_unique_hash=None):
+        """Returns a boolean if the environment exists
+
+        Parameters
+        ----------
+        environment_id : str
+            environment id to check for
+        environment_unique_hash : str
+            unique hash for the environment to check for
+
+        Returns
+        -------
+        bool
+            True if exists else False
+        """
+        if environment_id:
+            environment_objs = self.dal.environment.query({
+                "id": environment_id
+            })
+        elif environment_unique_hash:
+            environment_objs = self.dal.environment.query({
+                "unique_hash": environment_unique_hash
+            })
+        else:
+            raise ArgumentError()
+        env_exists = False
+        if environment_objs:
+            env_exists = True
+        return env_exists
+
+    def _calculate_project_environment_hash(self, save_hardware_file=True):
+        """Return the environment hash from contents in project environment directory
+
+        Parameters
+        ----------
+        save_hardware_file : bool
+            include the hardware info file within the hash
+
+        Returns
+        -------
+        str
+            unique hash of the project environment directory
+        """
+        # Populate paths from the project environment directory
+        paths = []
+        if os.path.isdir(self.environment_directory):
+            paths.extend([
+                os.path.join(self.environment_directory, filepath)
+                for filepath in list_all_filepaths(self.environment_directory)
+            ])
+
+        # Create a temp dir to save any additional files necessary
+        _temp_dir = get_datmo_temp_path(self.home)
+
+        # Setup compatible environment and create add paths
+        paths = self._setup_compatible_environment(
+            {
+                "definition_filename":
+                    self.environment_driver.get_default_definition_filename()
+            },
+            paths,
+            _temp_dir,
+            save_hardware_file=save_hardware_file)
+
+        # Create new temp directory
+        _temp_dir_2 = get_datmo_temp_path(self.home)
+
+        # Hash the paths of the environment with a different temp dir
+        dirhash = self.file_driver.calculate_hash_paths(paths, _temp_dir_2)
+
+        # Remove both temporary directories
+        shutil.rmtree(_temp_dir)
+        shutil.rmtree(_temp_dir_2)
+
+        return dirhash
+
+    def _has_unstaged_changes(self):
+        """Return whether there are unstaged changes"""
+        env_hash = self._calculate_project_environment_hash()
+        env_hash_no_hardware = self._calculate_project_environment_hash(
+            save_hardware_file=False)
+        environment_files = list_all_filepaths(self.environment_directory)
+        if self.exists(environment_unique_hash=env_hash) or self.exists(
+                environment_unique_hash=env_hash_no_hardware
+        ) or not environment_files:
+            return False
+        return True
+
+    def check_unstaged_changes(self):
+        """Checks if there exists any unstaged changes for the environment in `datmo_environment` folder.
+
+        Returns
+        -------
+        bool
+            False if it's already staged else error
+
+        Raises
+        ------
+        EnvironmentNotInitialized
+            error if not initialized (must initialize first)
+        UnstagedChanges
+            error if not there exists unstaged changes in environment
+        """
+        if not self.is_initialized:
+            raise EnvironmentNotInitialized()
+
+        # Check if unstaged changes exist
+        if self._has_unstaged_changes():
+            raise UnstagedChanges()
+
+        return False
+
+    def checkout(self, environment_id):
+        """Checkout to specific environment id
+
+        Parameters
+        ----------
+        environment_id : str
+            environment id to checkout to
+
+        Returns
+        -------
+
+
+        Raises
+        ------
+        EnvironmentNotInitialized
+            error if not initialized (must initialize first)
+        PathDoesNotExist
+            if environment id does not exist
+        UnstagedChanges
+            error if not there exists unstaged changes in environment
+
+        """
+        if not self.is_initialized:
+            raise EnvironmentNotInitialized()
+        if not self.exists(environment_id):
+            raise PathDoesNotExist(
+                __("error", "controller.environment.checkout_env",
+                   environment_id))
+        # Check if unstaged changes exist
+        if self._has_unstaged_changes():
+            raise UnstagedChanges()
+        # Check if environment has is same as current
+        results = self.dal.environment.query({"id": environment_id})
+        environment_obj = results[0]
+        environment_hash = environment_obj.unique_hash
+
+        if self._calculate_project_environment_hash() == environment_hash:
+            return True
+        # Remove all content from project environment directory
+        for file in os.listdir(self.environment_directory):
+            file_path = os.path.join(self.environment_directory, file)
+            try:
+                if os.path.isfile(file_path):
+                    os.remove(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print(e)
+        # Add in files for that environment id
+        file_collection_obj = self.dal.file_collection.\
+            get_by_id(environment_obj.file_collection_id)
+        environment_definition_path = os.path.join(self.home,
+                                                   file_collection_obj.path)
+        # Copy to temp folder and remove files that are datmo specific
+        _temp_env_dir = get_datmo_temp_path(self.home)
+        self.file_driver.copytree(environment_definition_path, _temp_env_dir)
+        for filename in self.environment_driver.get_datmo_definition_filenames(
+        ):
+            os.remove(os.path.join(_temp_env_dir, filename))
+        # Copy from temp folder to project environment directory
+        self.file_driver.copytree(_temp_env_dir, self.environment_directory)
+        shutil.rmtree(_temp_env_dir)
+        return True

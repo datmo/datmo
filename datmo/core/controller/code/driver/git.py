@@ -7,12 +7,24 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 from giturlparse import parse
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     PathDoesNotExist, GitUrlArgumentError, GitExecutionError, FileIOError,
-    GitCommitDoesNotExist, DatmoFolderInWorkTree)
+    CommitDoesNotExist, CommitFailed, DatmoFolderInWorkTree, UnstagedChanges)
 from datmo.core.controller.code.driver import CodeDriver
 from datmo.config import Config
 
@@ -147,49 +159,62 @@ class GitCodeDriver(CodeDriver):
         Returns
         -------
         commit_id : str
-            code id for the ref created
+            commit id for the ref created
 
         Raises
         ------
-        GitCommitDoesNotExist
+        CommitDoesNotExist
             commit id specified does not match a valid commit within the tree
+        CommitFailed
+            commit could not be created
         """
         self.ensure_code_refs_dir()
         if not commit_id:
             try:
-                previous_commit_id = self.latest_commit()
-                # add files and commit changes on current branch
-                self.add("-A")
-                new_commit_bool = self.commit(
-                    options=["-m", "auto commit by datmo"])
+                _ = self.latest_commit()
+                message = "auto commit by datmo"
             except Exception:
-                self.add("-A")
-                new_commit_bool = self.commit(
-                    options=["-m", "auto initial commit by datmo"])
-                previous_commit_id = None
+                message = "auto initial commit by datmo"
+            # add files and commit changes on current branch
+            self.add("-A")
+            _ = self.commit(options=["-m", message])
             try:
                 commit_id = self.latest_commit()
             except GitExecutionError as e:
-                raise GitCommitDoesNotExist(
+                raise CommitFailed(
                     __("error",
                        "controller.code.driver.git.create_ref.cannot_commit",
                        str(e)))
-            # revert back to the original commit
-            if new_commit_bool and previous_commit_id:
-                self.reset(previous_commit_id)
-            else:
-                self.reset(commit_id)
         # writing git commit into ref if exists
         if not self.exists_commit(commit_id):
-            raise GitCommitDoesNotExist(
+            raise CommitDoesNotExist(
                 __("error", "controller.code.driver.git.create_ref.no_commit",
                    commit_id))
         # git refs for datmo for the latest commit id is created
         code_ref_path = os.path.join(self.filepath, ".git/refs/datmo/",
                                      commit_id)
-        with open(code_ref_path, "w") as f:
-            f.write(to_unicode(commit_id))
+        with open(code_ref_path, "wb") as f:
+            f.write(to_bytes(commit_id))
         return commit_id
+
+    def current_ref(self):
+        return self.latest_commit()
+
+    def latest_ref(self):
+        def getmtime(absolute_filepath):
+            # Keeping it granular as timestaps in git
+            return int(os.path.getmtime(absolute_filepath))
+
+        code_refs_path = os.path.join(self.filepath, ".git/refs/datmo/")
+        sorted_code_refs = sorted(
+            [
+                os.path.join(code_refs_path, filename)
+                for filename in os.listdir(code_refs_path)
+            ],
+            key=getmtime,
+            reverse=True)
+        _, filename = os.path.split(sorted_code_refs[0])
+        return filename
 
     def exists_ref(self, commit_id):
         code_ref_path = os.path.join(self.filepath, ".git/refs/datmo/",
@@ -239,11 +264,9 @@ class GitCodeDriver(CodeDriver):
     #                (commit_id, str(e))))
     #     return True
 
-    def checkout_ref(self, commit_id, remote=False):
+    def checkout_ref(self, commit_id):
         try:
             # Run checkout for the specific ref as usual
-            if remote:
-                self.fetch_ref(commit_id)
             datmo_ref = "refs/datmo/" + commit_id
             checkout_result = self.checkout(datmo_ref)
             return checkout_result
@@ -268,8 +291,8 @@ class GitCodeDriver(CodeDriver):
         exclude_file = os.path.join(self.filepath, ".git/info/exclude")
         try:
             if not self.exists_datmo_files_ignored():
-                with open(exclude_file, "a") as f:
-                    f.write(to_unicode("\n.datmo/*\n"))
+                with open(exclude_file, "ab") as f:
+                    f.write(to_bytes("\n.datmo/*\n"))
         except Exception as e:
             raise FileIOError(
                 __("error", "controller.code.driver.git.ensure_code_refs_dir",
@@ -444,6 +467,37 @@ class GitCodeDriver(CodeDriver):
     #             __("error", "controller.code.driver.git.branch",
     #                (name, str(e))))
     #     return True
+
+    def check_unstaged_changes(self):
+        """Checks if there exists any unstaged changes for code
+
+        Raises
+        ------
+        UnstagedChanges
+            error if not there exists unstaged changes in environment
+
+        GitExecutionError
+            error if there exists any error while using git
+
+        """
+        try:
+            process = subprocess.Popen(
+                [self.execpath, "status"],
+                cwd=self.filepath,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            if process.returncode > 0:
+                raise GitExecutionError(
+                    __("error", "controller.code.driver.git.status",
+                       str(stderr)))
+            stdout = stdout.decode().strip()
+            if "working tree clean" not in stdout:
+                raise UnstagedChanges()
+        except subprocess.CalledProcessError as e:
+            raise GitExecutionError(
+                __("error", "controller.code.driver.git.status", str(e)))
+        return False
 
     def checkout(self, name, option=None):
         try:
@@ -846,14 +900,14 @@ class GitHostDriver(object):
 
     def create_git_netrc(self, username, password):
         netrc_filepath = os.path.join(self.home, ".netrc")
-        netrc_file = open(netrc_filepath, "w")
+        netrc_file = open(netrc_filepath, "wb")
         netrc_file.truncate()
-        netrc_file.write(to_unicode("machine %s" % (self.host)))
-        netrc_file.write(to_unicode("\n"))
-        netrc_file.write(to_unicode("login " + str(username)))
-        netrc_file.write(to_unicode("\n"))
-        netrc_file.write(to_unicode("password " + str(password)))
-        netrc_file.write(to_unicode("\n"))
+        netrc_file.write(to_bytes("machine %s" % (self.host)))
+        netrc_file.write(to_bytes("\n"))
+        netrc_file.write(to_bytes("login " + str(username)))
+        netrc_file.write(to_bytes("\n"))
+        netrc_file.write(to_bytes("password " + str(password)))
+        netrc_file.write(to_bytes("\n"))
         netrc_file.close()
         return True
 

@@ -1,6 +1,5 @@
 import ast
 import os
-import shutil
 import subprocess
 import platform
 from io import open
@@ -8,6 +7,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 from docker import DockerClient
 from docker import errors
 
@@ -581,10 +592,10 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         """
         # TODO: Fix function to better accomodate all logs in the same way
         if api:  # calling the docker client via the API
-            with open(filepath, "w") as log_file:
+            with open(filepath, "wb") as log_file:
                 for line in self.client.containers.get(container_id).logs(
                         stream=True):
-                    log_file.write(to_unicode(line.strip() + "\n"))
+                    log_file.write(to_bytes(line.strip() + "\n"))
         else:
             command = list(self.prefix)
             if follow:
@@ -593,17 +604,19 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 command.extend(["logs", str(container_id)])
             process = subprocess.Popen(
                 command, stdout=subprocess.PIPE, universal_newlines=True)
-            with open(filepath, "w") as log_file:
+            with open(filepath, "wb") as log_file:
                 while True:
                     output = process.stdout.readline()
                     if output == "" and process.poll() is not None:
                         break
                     if output:
                         printable_output = output.strip().replace("\x08", " ")
-                        log_file.write(to_unicode(printable_output + "\n"))
+                        log_file.write(to_bytes(printable_output + "\n"))
             return_code = process.poll()
-            with open(filepath, "r") as log_file:
+            with open(filepath, "rb") as log_file:
                 logs = log_file.read()
+                if type(logs) != str:  # handle for python 3x
+                    logs = logs.decode("utf-8")
             return return_code, logs
 
     # running daemon needed
@@ -709,7 +722,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             try:
                 requirements_filepath = os.path.join(self.filepath,
                                                      "datmorequirements.txt")
-                outfile_requirements = open(requirements_filepath, "w")
+                outfile_requirements = open(requirements_filepath, "wb")
                 process = subprocess.Popen(
                     ["pip", "freeze"],
                     cwd=self.filepath,
@@ -736,33 +749,60 @@ class DockerEnvironmentDriver(EnvironmentDriver):
     @staticmethod
     def create_default_definition(directory, language="python3"):
         language_dockerfile = "%sDockerfile" % language
-        base_dockerfile_filepath = os.path.join(
+        default_dockerfile_filepath = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "templates",
             language_dockerfile)
 
         destination_dockerfile = os.path.join(directory, "Dockerfile")
-        destination = open(destination_dockerfile, "w")
-        shutil.copyfileobj(open(base_dockerfile_filepath, "r"), destination)
+        with open(default_dockerfile_filepath, "rb") as input_file:
+            with open(destination_dockerfile, "wb") as output_file:
+                for line in input_file:
+                    if to_bytes(os.linesep) in line:
+                        output_file.write(line.strip() + to_bytes("\n"))
+                    else:
+                        output_file.write(line.strip())
         return destination_dockerfile
 
-    def get_default_definition_path(self):
-        return os.path.join(self.filepath, "Dockerfile")
+    def get_default_definition_filename(self):
+        return "Dockerfile"
 
-    def create_datmo_definition(self,
-                                input_definition_path="Dockerfile",
-                                output_definition_path="datmoDockerfile"):
+    def get_datmo_definition_filenames(self):
+        return ["datmoDockerfile", "hardware_info"]
+
+    def get_hardware_info(self):
+        # Extract hardware info of the container (currently taking from system platform)
+        # TODO: extract hardware information directly from the container
+        (system, node, release, version, machine, processor) = platform.uname()
+        return {
+            'system': system,
+            'node': node,
+            'release': release,
+            'version': version,
+            'machine': machine,
+            'processor': processor
+        }
+
+    def create_datmo_definition(self, input_definition_path,
+                                output_definition_path):
         """
-        In order to create intermediate dockerfile to run
+        Creates a datmo dockerfiles to run at the output path specified
         """
-        base_dockerfile_filepath = os.path.join(
+        datmo_base_dockerfile_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "templates",
             "baseDockerfile")
 
         # Combine dockerfiles
-        destination = open(
-            os.path.join(self.filepath, output_definition_path), "w")
-        shutil.copyfileobj(open(input_definition_path, "r"), destination)
-        shutil.copyfileobj(open(base_dockerfile_filepath, "r"), destination)
-        destination.close()
-
+        with open(input_definition_path, "rb") as input_file:
+            with open(datmo_base_dockerfile_path, "rb") as datmo_base_file:
+                with open(output_definition_path, "wb") as output_file:
+                    for line in input_file:
+                        if to_bytes(os.linesep) in line:
+                            output_file.write(line.strip() + to_bytes("\n"))
+                        else:
+                            output_file.write(line.strip())
+                    for line in datmo_base_file:
+                        if to_bytes(os.linesep) in line:
+                            output_file.write(line.strip() + to_bytes("\n"))
+                        else:
+                            output_file.write(line.strip())
         return True

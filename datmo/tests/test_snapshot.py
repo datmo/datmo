@@ -9,6 +9,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.snapshot import create, ls, update, delete
 from datmo.snapshot import Snapshot
@@ -16,7 +28,7 @@ from datmo.task import run
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.controller.project import ProjectController
 from datmo.core.util.exceptions import (
-    GitCommitDoesNotExist, InvalidProjectPath, SessionDoesNotExist,
+    CommitFailed, InvalidProjectPath, SessionDoesNotExist,
     SnapshotCreateFromTaskArgs, EntityNotFound, DoesNotExist)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
@@ -74,15 +86,15 @@ class TestSnapshotModule():
         failed = False
         try:
             _ = create(message="test", home=self.temp_dir)
-        except GitCommitDoesNotExist:
+        except CommitFailed:
             failed = True
         assert failed
 
         # Create a snapshot with default params and files to commit
         test_filepath = os.path.join(self.temp_dir, "script.py")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("import numpy\n"))
+            f.write(to_bytes("import sklearn\n"))
 
         snapshot_obj_1 = create(message="test", home=self.temp_dir)
 
@@ -97,8 +109,8 @@ class TestSnapshotModule():
 
         # Create a snapshot with default params, files, and environment
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu"))
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu"))
         snapshot_obj_2 = create(message="test", home=self.temp_dir)
 
         assert snapshot_obj_2
@@ -113,8 +125,8 @@ class TestSnapshotModule():
 
         # Create a snapshot with default params, files, and environment being passed in
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu"))
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu"))
         snapshot_obj_3 = create(
             message="test", home=self.temp_dir, env=test_filepath)
 
@@ -138,8 +150,8 @@ class TestSnapshotModule():
 
         # Create environment definition
         env_def_path = os.path.join(self.temp_dir, "Dockerfile")
-        with open(env_def_path, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         task_obj = run("sh -c echo accuracy:0.45", home=self.temp_dir)
 
@@ -181,26 +193,12 @@ class TestSnapshotModule():
 
         # Create environment definition
         env_def_path = os.path.join(self.temp_dir, "Dockerfile")
-        with open(env_def_path, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         task_obj = run("sh -c echo accuracy:0.45", home=self.temp_dir)
 
-        # Test if failure if user gives other parameters
-        failed = False
-        try:
-            _ = create(
-                message="my test snapshot",
-                task_id=task_obj.id,
-                home=self.temp_dir,
-                label="best",
-                config={"foo": "bar"},
-                stats={"foo": "bar"},
-                commit_id="test_id")
-        except SnapshotCreateFromTaskArgs:
-            failed = True
-        assert failed
-
+        # Test if failure if user gives environment_id with task_id
         failed = False
         try:
             _ = create(
@@ -214,7 +212,7 @@ class TestSnapshotModule():
         except SnapshotCreateFromTaskArgs:
             failed = True
         assert failed
-
+        # Test if failure if user gives filepaths with task_id
         failed = False
         try:
             _ = create(
@@ -248,9 +246,9 @@ class TestSnapshotModule():
 
         # create with default params and files to commit
         test_filepath = os.path.join(self.temp_dir, "script.py")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("import numpy\n"))
+            f.write(to_bytes("import sklearn\n"))
 
         create(message="test1", home=self.temp_dir)
 
@@ -263,8 +261,8 @@ class TestSnapshotModule():
 
         # Create a snapshot with default params, files, and environment
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu"))
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu"))
         create(message="test2", home=self.temp_dir)
 
         # list all snapshots with no filters (works when more than 1 snapshot)
@@ -290,9 +288,9 @@ class TestSnapshotModule():
     def __setup(self):
         # Create a snapshot with default params and files to commit
         test_filepath = os.path.join(self.temp_dir, "script.py")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("import numpy\n"))
+            f.write(to_bytes("import sklearn\n"))
         return create(
             message="test", home=self.temp_dir, paths=[test_filepath])
 
@@ -392,9 +390,9 @@ class TestSnapshotModule():
 
         # delete a snapshot
         test_filepath = os.path.join(self.temp_dir, "script.py")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("import numpy\n"))
+            f.write(to_bytes("import sklearn\n"))
 
         snapshot_obj = create(message="delete_test", home=self.temp_dir)
 

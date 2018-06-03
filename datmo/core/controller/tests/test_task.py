@@ -11,6 +11,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController
@@ -71,8 +83,8 @@ class TestTaskController():
         # TODO: Try out more options (see below)
         # Create environment_driver id
         env_def_path = os.path.join(self.project.home, "Dockerfile")
-        with open(env_def_path, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         definition_paths = [env_def_path]
         environment_obj = self.environment.create({
@@ -190,8 +202,8 @@ class TestTaskController():
 
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
-        with open(env_def_path, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         # 0) Test option 0
         failed = False
@@ -281,8 +293,8 @@ class TestTaskController():
         self.task.dal.task.update({"id": task_obj_1.id, "status": "RUNNING"})
         # Create environment_driver definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
-        with open(env_def_path, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         failed = False
         try:
@@ -327,17 +339,17 @@ class TestTaskController():
         # Create a basic script
         # (fails w/ no environment)
         test_filepath = os.path.join(self.temp_dir, "script.py")
-        with open(test_filepath, "w") as f:
-            f.write(to_unicode("import os\n"))
-            f.write(to_unicode("import numpy\n"))
-            f.write(to_unicode("import sklearn\n"))
-            f.write(to_unicode("print('hello')\n"))
-            f.write(to_unicode("print(' accuracy: 0.56 ')\n"))
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("import os\n"))
+            f.write(to_bytes("import numpy\n"))
+            f.write(to_bytes("import sklearn\n"))
+            f.write(to_bytes("print('hello')\n"))
+            f.write(to_bytes("print(' accuracy: 0.56 ')\n"))
             f.write(
-                to_unicode(
+                to_bytes(
                     "with open(os.path.join('/task', 'new_file.txt'), 'a') as f:\n"
                 ))
-            f.write(to_unicode("    f.write('my test file')\n"))
+            f.write(to_bytes("    f.write('my test file')\n"))
 
         # Create task in the project
         task_obj_2 = self.task.create()
@@ -348,8 +360,8 @@ class TestTaskController():
 
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
-        with open(env_def_path, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         updated_task_obj_2 = self.task.run(task_obj_2.id, task_dict=task_dict)
 
@@ -475,8 +487,8 @@ class TestTaskController():
 
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
-        with open(env_def_path, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         # Create file to add
         self.project.file_driver.create("dirpath1", directory=True)
@@ -596,8 +608,8 @@ class TestTaskController():
 
         # Create environment driver definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
-        with open(env_def_path, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         # Create task_dict
         task_command = ["sh", "-c", "echo accuracy:0.45"]

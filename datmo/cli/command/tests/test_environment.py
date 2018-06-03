@@ -13,6 +13,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 import os
 from datmo.cli.driver.helper import Helper
@@ -53,14 +65,13 @@ class TestEnvironment():
         # Create environment definition in `datmo_environment` folder
         datmo_environment_folder = os.path.join(self.temp_dir,
                                                 "datmo_environment")
-        os.makedirs(datmo_environment_folder)
 
         definition_filepath = os.path.join(datmo_environment_folder,
                                            "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
 
         self.environment_command.parse(["environment", "create"])
         result = self.environment_command.execute()
@@ -78,9 +89,9 @@ class TestEnvironment():
         definition_filepath = os.path.join(random_datmo_environment_folder,
                                            "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
 
         self.environment_command.parse([
             "environment", "create", "--environment-def", definition_filepath
@@ -95,9 +106,9 @@ class TestEnvironment():
         # Test option 3
         definition_filepath = os.path.join(self.temp_dir, "Dockerfile")
         random_text = str(uuid.uuid1())
-        with open(definition_filepath, "w") as f:
-            f.write(to_unicode("FROM datmo/xgboost:cpu" + "\n"))
-            f.write(to_unicode(str("RUN echo " + random_text)))
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
 
         self.environment_command.parse(["environment", "create"])
         result = self.environment_command.execute()

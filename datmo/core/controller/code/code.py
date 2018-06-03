@@ -60,11 +60,8 @@ class CodeController(BaseController):
             if required_arg == "driver_type":
                 create_dict[required_arg] = self.code_driver.type
             elif required_arg == "commit_id":
-                if commit_id:
-                    create_dict[required_arg] = commit_id
-                else:
-                    create_dict[required_arg] = \
-                        self.code_driver.create_ref()
+                create_dict[required_arg] = \
+                    self.code_driver.create_ref(commit_id=commit_id)
                 # If code object with commit id exists, return it
                 results = self.dal.code.query({
                     "commit_id": create_dict[required_arg],

@@ -13,7 +13,6 @@ from __future__ import unicode_literals
 #     import builtins as __builtin__
 import os
 import time
-import shutil
 import tempfile
 import platform
 from io import open
@@ -21,6 +20,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
@@ -53,28 +64,28 @@ class TestSnapshot():
 
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
-        with open(self.env_def_path, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(self.env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         # Create config file
         self.config_filepath = os.path.join(self.snapshot.home, "config.json")
-        with open(self.config_filepath, "w") as f:
-            f.write(to_unicode(str("{}")))
+        with open(self.config_filepath, "wb") as f:
+            f.write(to_bytes(str("{}")))
 
         # Create stats file
         self.stats_filepath = os.path.join(self.snapshot.home, "stats.json")
-        with open(self.stats_filepath, "w") as f:
-            f.write(to_unicode(str("{}")))
+        with open(self.stats_filepath, "wb") as f:
+            f.write(to_bytes(str("{}")))
 
         # Create test file
         self.filepath = os.path.join(self.snapshot.home, "file.txt")
-        with open(self.filepath, "w") as f:
-            f.write(to_unicode(str("test")))
+        with open(self.filepath, "wb") as f:
+            f.write(to_bytes(str("test")))
 
         # Create another test file
         self.filepath_2 = os.path.join(self.snapshot.home, "file2.txt")
-        with open(self.filepath_2, "w") as f:
-            f.write(to_unicode(str("test")))
+        with open(self.filepath_2, "wb") as f:
+            f.write(to_bytes(str("test")))
 
         # Create config
         self.config = 'foo:bar'
@@ -123,7 +134,6 @@ class TestSnapshot():
         test_label = "test label"
         test_session_id = "test_session_id"
         test_task_id = "test_task_id"
-        test_code_id = "test_code_id"
         test_environment_definition_filepath = self.env_def_path
         test_config_filepath = self.config_filepath
         test_stats_filepath = self.config_filepath
@@ -149,8 +159,6 @@ class TestSnapshot():
             test_label,
             "--session-id",
             test_session_id,
-            "--code-id",
-            test_code_id,
             "--environment-def",
             test_environment_definition_filepath,
             "--config-filepath",
@@ -165,7 +173,6 @@ class TestSnapshot():
         assert self.snapshot.args.message == test_message
         assert self.snapshot.args.label == test_label
         assert self.snapshot.args.session_id == test_session_id
-        assert self.snapshot.args.code_id == test_code_id
         assert self.snapshot.args.environment_definition_paths == [
             test_environment_definition_filepath
         ]
@@ -176,8 +183,7 @@ class TestSnapshot():
         # test multiple paths
         self.snapshot.parse([
             "snapshot", "create", "--message", test_message, "--label",
-            test_label, "--session-id", test_session_id, "--code-id",
-            test_code_id, "--environment-def",
+            test_label, "--session-id", test_session_id, "--environment-def",
             test_environment_definition_filepath, "--config-filepath",
             test_config_filepath, "--stats-filepath", test_stats_filepath,
             "--paths", test_paths[0], "--paths", test_paths[1]
@@ -187,7 +193,6 @@ class TestSnapshot():
         assert self.snapshot.args.message == test_message
         assert self.snapshot.args.label == test_label
         assert self.snapshot.args.session_id == test_session_id
-        assert self.snapshot.args.code_id == test_code_id
         assert self.snapshot.args.environment_definition_paths == [
             test_environment_definition_filepath
         ]
@@ -291,31 +296,7 @@ class TestSnapshot():
 
         failed = False
         try:
-            # test task id with code id
-            self.snapshot.parse([
-                "snapshot", "create", "--message", test_message, "--task-id",
-                task_id, "--code-id", "test_code_id"
-            ])
-            _ = self.snapshot.execute()
-        except SnapshotCreateFromTaskArgs:
-            failed = True
-        assert failed
-
-        failed = False
-        try:
-            # test task id with code id
-            self.snapshot.parse([
-                "snapshot", "create", "--message", test_message, "--task-id",
-                task_id, "--commit-id", "test_commit_id"
-            ])
-            _ = self.snapshot.execute()
-        except SnapshotCreateFromTaskArgs:
-            failed = True
-        assert failed
-
-        failed = False
-        try:
-            # test task id with code id
+            # test task id with environment-id
             self.snapshot.parse([
                 "snapshot", "create", "--message", test_message, "--task-id",
                 task_id, "--environment-id", "test_environment_id"
@@ -327,7 +308,7 @@ class TestSnapshot():
 
         failed = False
         try:
-            # test task id with code id
+            # test task id with environment-def
             self.snapshot.parse([
                 "snapshot", "create", "--message", test_message, "--task-id",
                 task_id, "--environment-def", "test_environment_def"
@@ -339,19 +320,7 @@ class TestSnapshot():
 
         failed = False
         try:
-            # test task id with code id
-            self.snapshot.parse([
-                "snapshot", "create", "--message", test_message, "--task-id",
-                task_id, "--file-collection-id", "test_file_collection_id"
-            ])
-            _ = self.snapshot.execute()
-        except SnapshotCreateFromTaskArgs:
-            failed = True
-        assert failed
-
-        failed = False
-        try:
-            # test task id with code id
+            # test task id with filepaths
             self.snapshot.parse([
                 "snapshot", "create", "--message", test_message, "--task-id",
                 task_id, "--paths", "mypath"
@@ -363,7 +332,7 @@ class TestSnapshot():
 
         failed = False
         try:
-            # test task id with code id
+            # test task id with config-filepath
             self.snapshot.parse([
                 "snapshot", "create", "--message", test_message, "--task-id",
                 task_id, "--config-filepath", "mypath"
@@ -375,7 +344,7 @@ class TestSnapshot():
 
         failed = False
         try:
-            # test task id with code id
+            # test task id with config-filename
             self.snapshot.parse([
                 "snapshot", "create", "--message", test_message, "--task-id",
                 task_id, "--config-filename", "myname"
@@ -387,7 +356,7 @@ class TestSnapshot():
 
         failed = False
         try:
-            # test task id with code id
+            # test task id with stats-filepath
             self.snapshot.parse([
                 "snapshot", "create", "--message", test_message, "--task-id",
                 task_id, "--stats-filepath", "mypath"
@@ -399,7 +368,7 @@ class TestSnapshot():
 
         failed = False
         try:
-            # test task id with code id
+            # test task id with stats-filename
             self.snapshot.parse([
                 "snapshot", "create", "--message", test_message, "--task-id",
                 task_id, "--stats-filename", "myname"
@@ -414,29 +383,12 @@ class TestSnapshot():
         test_message = "this is a test message"
         test_label = "test label"
         test_session_id = "test_session_id"
-        test_code_id = "test_code_id"
-        test_commit_id = "test_commit_id"
         test_environment_id = "test_environment_id"
         test_environment_definition_filepath = self.env_def_path
-        test_file_collection_id = "test_file_collection_id"
-        test_paths = [self.filepath]
         test_config_filename = "config.json"
         test_config_filepath = self.config_filepath
         test_stats_filename = "stats.json"
         test_stats_filepath = self.config_filepath
-
-        # Code exception
-        exception_thrown = False
-        try:
-            self.snapshot.parse([
-                "snapshot", "create", "--message", test_message, "--label",
-                test_label, "--session-id", test_session_id, "--code-id",
-                test_code_id, "--commit-id", test_commit_id
-            ])
-            _ = self.snapshot.execute()
-        except MutuallyExclusiveArguments:
-            exception_thrown = True
-        assert exception_thrown
 
         # Environment exception
         exception_thrown = False
@@ -454,28 +406,6 @@ class TestSnapshot():
                 test_environment_id,
                 "--environment-def",
                 test_environment_definition_filepath,
-            ])
-            _ = self.snapshot.execute()
-        except MutuallyExclusiveArguments:
-            exception_thrown = True
-        assert exception_thrown
-
-        # File exception
-        exception_thrown = False
-        try:
-            self.snapshot.parse([
-                "snapshot",
-                "create",
-                "--message",
-                test_message,
-                "--label",
-                test_label,
-                "--session-id",
-                test_session_id,
-                "--file-collection-id",
-                test_file_collection_id,
-                "--paths",
-                test_paths[0],
             ])
             _ = self.snapshot.execute()
         except MutuallyExclusiveArguments:
@@ -752,8 +682,8 @@ class TestSnapshot():
 
         # Create another test file
         self.filepath_3 = os.path.join(self.snapshot.home, "file3.txt")
-        with open(self.filepath_3, "w") as f:
-            f.write(to_unicode(str("test")))
+        with open(self.filepath_3, "wb") as f:
+            f.write(to_bytes(str("test")))
 
         self.snapshot.parse(["snapshot", "create", "-m", "my second snapshot"])
         snapshot_id_2 = self.snapshot.execute()
@@ -769,7 +699,7 @@ class TestSnapshot():
         # Create snapshot to test
         self.snapshot.parse(["snapshot", "create", "-m", "my test snapshot"])
         snapshot_id = self.snapshot.execute()
-        # Test diff with the above two snapshots
+        # Test inspect for this snapshot
         self.snapshot.parse(["snapshot", "inspect", snapshot_id])
 
         result = self.snapshot.execute()

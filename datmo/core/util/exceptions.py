@@ -2,15 +2,51 @@
 from datmo.core.util.i18n import get as __
 
 
-class InvalidProjectPath(Exception):
+class ArgumentError(Exception):
     pass
 
 
-class ProjectNotInitialized(Exception):
+class TaskNotComplete(ArgumentError):
     pass
 
 
-class DatmoModelNotInitialized(Exception):
+class TaskNoCommandGiven(ArgumentError):
+    pass
+
+
+class TaskInteractiveDetachError(ArgumentError):
+    pass
+
+
+class SnapshotCreateFromTaskArgs(ArgumentError):
+    pass
+
+
+class RequiredArgumentMissing(ArgumentError):
+    pass
+
+
+class GitUrlArgumentError(ArgumentError):
+    pass
+
+
+class TooManyArgumentsFound(ArgumentError):
+    pass
+
+
+class ProjectException(Exception):
+    pass
+
+
+class InvalidProjectPath(ProjectException):
+    pass
+
+
+class ProjectNotInitialized(ProjectException):
+    pass
+
+
+class DatmoModelNotInitialized(ProjectException):
     pass
 
 
@@ -26,11 +62,23 @@ class ClassMethodNotFound(Exception):
     pass
 
 
-class CLIArgumentError(Exception):
+class CLIArgumentError(ArgumentError):
     pass
 
 
 class UnrecognizedCLIArgument(CLIArgumentError):
+    pass
+
+
+class InvalidArgumentType(ArgumentError):
+    pass
+
+
+class MutuallyExclusiveArguments(ArgumentError):
+    pass
+
+
+class ValidationSchemaMissing(ArgumentError):
     pass
 
 
@@ -55,30 +103,6 @@ class EntityCollectionNotFound(Exception):
 
 
 class SaveSettingError(Exception):
-    pass
-
-
-class ArgumentError(Exception):
-    pass
-
-
-class RequiredArgumentMissing(ArgumentError):
-    pass
-
-
-class GitUrlArgumentError(ArgumentError):
-    pass
-
-
-class TooManyArgumentsFound(ArgumentError):
-    pass
-
-
-class GitExecutionError(Exception):
-    pass
-
-
-class GitCommitDoesNotExist(Exception):
     pass
 
 
@@ -118,19 +142,27 @@ class FileStructureError(FileExecutionError):
     pass
 
 
-class EnvironmentImageNotFound(Exception):
+class FileNotInitialized(FileExecutionError):
     pass
 
 
-class EnvironmentContainerNotFound(Exception):
+class EnvironmentException(Exception):
     pass
 
 
-class EnvironmentExecutionError(Exception):
+class EnvironmentImageNotFound(EnvironmentException):
     pass
 
 
-class EnvironmentRequirementsCreateError(Exception):
+class EnvironmentContainerNotFound(EnvironmentException):
+    pass
+
+
+class EnvironmentExecutionError(EnvironmentException):
+    pass
+
+
+class EnvironmentRequirementsCreateError(EnvironmentException):
     pass
 
 
@@ -142,35 +174,31 @@ class EnvironmentNotInitialized(EnvironmentExecutionError):
     pass
 
 
-class TaskRunError(Exception):
+class TaskRunError(EnvironmentException):
     pass
 
 
-class DatmoFolderInWorkTree(Exception):
+class GPUSupportNotEnabled(EnvironmentExecutionError):
     pass
 
 
-class InvalidArgumentType(Exception):
+class CodeException(Exception):
     pass
 
 
-class MutuallyExclusiveArguments(Exception):
+class CodeNotInitialized(CodeException):
     pass
 
 
-class TaskNotComplete(ArgumentError):
+class GitExecutionError(CodeException):
     pass
 
 
-class TaskNoCommandGiven(ArgumentError):
+class CommitDoesNotExist(CodeException):
     pass
 
 
-class TaskInteractiveDetachError(ArgumentError):
-    pass
-
-
-class SnapshotCreateFromTaskArgs(ArgumentError):
+class CommitFailed(CodeException):
     pass
 
 
@@ -178,7 +206,7 @@ class InvalidDestinationName(ArgumentError):
     pass
 
 
-class ValidationFailed(Exception):
+class ValidationFailed(ArgumentError):
     def __init__(self, error_obj):
         self.errors = error_obj
         super(ValidationFailed, self).__init__(
@@ -191,9 +219,13 @@ class ValidationFailed(Exception):
         return err_str
 
 
-class ValidationSchemaMissing(Exception):
+class DatmoFolderInWorkTree(CodeException):
     pass
 
 
-class GPUSupportNotEnabled(EnvironmentExecutionError):
+class UnstagedChanges(Exception):
+    pass
+
+
+class NothingToStage(Exception):
     pass

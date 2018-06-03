@@ -13,6 +13,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
@@ -52,23 +64,24 @@ class TestProjectController():
         except ValidationFailed:
             failed = True
         assert failed
-        assert not self.project.code_driver.exists_code_refs_dir()
-        assert not self.project.file_driver.exists_datmo_file_structure()
+        assert not self.project.code_driver.is_initialized
+        assert not self.project.file_driver.is_initialized
 
-    def test_init_failure_code_driver(self):
+    def test_init_failure_git_code_driver(self):
         # Create a HEAD.lock file in .git to make GitCodeDriver.init() fail
-        git_dir = os.path.join(self.project.code_driver.filepath, ".git")
-        os.makedirs(git_dir)
-        with open(os.path.join(git_dir, "HEAD.lock"), "a+") as f:
-            f.write(to_unicode("test"))
-        failed = False
-        try:
-            self.project.init("test1", "test description")
-        except Exception:
-            failed = True
-        assert failed
-        assert not self.project.code_driver.exists_code_refs_dir()
-        assert not self.project.file_driver.exists_datmo_file_structure()
+        if self.project.code_driver.type == "git":
+            git_dir = os.path.join(self.project.code_driver.filepath, ".git")
+            os.makedirs(git_dir)
+            with open(os.path.join(git_dir, "HEAD.lock"), "a+") as f:
+                f.write(to_bytes("test"))
+            failed = False
+            try:
+                self.project.init("test1", "test description")
+            except Exception:
+                failed = True
+            assert failed
+            assert not self.project.code_driver.is_initialized
+            assert not self.project.file_driver.is_initialized
 
     def test_init_success(self):
         result = self.project.init("test1", "test description")
@@ -91,8 +104,8 @@ class TestProjectController():
         assert failed
         assert self.project.model.name == "test1"
         assert self.project.model.description == "test description"
-        assert self.project.code_driver.exists_code_refs_dir()
-        assert self.project.file_driver.exists_datmo_file_structure()
+        assert self.project.code_driver.is_initialized
+        assert self.project.file_driver.is_initialized
 
     def test_init_reinit_success(self):
         _ = self.project.init("test1", "test description")
@@ -107,8 +120,8 @@ class TestProjectController():
         self.project.init("test2", "test description")
         result = self.project.cleanup()
 
-        assert not self.project.code_driver.exists_code_refs_dir()
-        assert not self.project.file_driver.exists_datmo_file_structure()
+        assert not self.project.code_driver.is_initialized
+        assert not self.project.file_driver.is_initialized
         # Ensure that containers built with this image do not exist
         # assert not self.project.environment_driver.list_containers(filters={
         #     "ancestor": image_id
@@ -120,8 +133,8 @@ class TestProjectController():
         self.project.init("test2", "test description")
         result = self.project.cleanup()
 
-        assert not self.project.code_driver.exists_code_refs_dir()
-        assert not self.project.file_driver.exists_datmo_file_structure()
+        assert not self.project.code_driver.is_initialized
+        assert not self.project.file_driver.is_initialized
         assert not self.project.environment_driver.list_images("datmo-test2")
         # Ensure that containers built with this image do not exist
         # assert not self.project.environment_driver.list_containers(filters={
@@ -154,20 +167,20 @@ class TestProjectController():
 
         # Create environment_driver definition
         env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
-        with open(env_def_path, "w") as f:
-            f.write(to_unicode(str("FROM datmo/xgboost:cpu")))
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         environment_definition_paths = [env_def_path]
 
         # Create config
         config_filepath = os.path.join(self.snapshot.home, "config.json")
-        with open(config_filepath, "w") as f:
-            f.write(to_unicode(str("{}")))
+        with open(config_filepath, "wb") as f:
+            f.write(to_bytes(str("{}")))
 
         # Create stats
         stats_filepath = os.path.join(self.snapshot.home, "stats.json")
-        with open(stats_filepath, "w") as f:
-            f.write(to_unicode(str("{}")))
+        with open(stats_filepath, "wb") as f:
+            f.write(to_bytes(str("{}")))
 
         input_dict = {
             "message":
