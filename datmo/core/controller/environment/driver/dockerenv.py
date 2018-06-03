@@ -750,13 +750,15 @@ class DockerEnvironmentDriver(EnvironmentDriver):
     @staticmethod
     def create_default_definition(directory, language="python3"):
         language_dockerfile = "%sDockerfile" % language
-        base_dockerfile_filepath = os.path.join(
+        default_dockerfile_filepath = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "templates",
             language_dockerfile)
 
         destination_dockerfile = os.path.join(directory, "Dockerfile")
-        destination = open(destination_dockerfile, "wb")
-        shutil.copyfileobj(open(base_dockerfile_filepath, "rb"), destination)
+        with open(default_dockerfile_filepath, "rb") as input_file:
+            with open(destination_dockerfile, "wb") as output_file:
+                for line in input_file:
+                    output_file.write(line)
         return destination_dockerfile
 
     def get_default_definition_filename(self):
@@ -783,19 +785,16 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         """
         Creates a datmo dockerfiles to run at the output path specified
         """
-        base_dockerfile_filepath = os.path.join(
+        datmo_base_dockerfile_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "templates",
             "baseDockerfile")
 
         # Combine dockerfiles
-        destination = open(
-            os.path.join(self.filepath, output_definition_path), "wb")
-        input_file = open(input_definition_path, "rb")
-        base_file = open(base_dockerfile_filepath, "rb")
-        shutil.copyfileobj(input_file, destination)
-        shutil.copyfileobj(base_file, destination)
-        base_file.close()
-        input_file.close()
-        destination.close()
-
+        with open(input_definition_path, "rb") as input_file:
+            with open(datmo_base_dockerfile_path, "rb") as datmo_base_file:
+                with open(output_definition_path, "wb") as output_file:
+                    for line in input_file:
+                        output_file.write(line)
+                    for line in datmo_base_file:
+                        output_file.write(line)
         return True

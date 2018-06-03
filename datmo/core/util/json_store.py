@@ -6,6 +6,18 @@ try:
     to_unicode = unicode
 except NameError:
     to_unicode = str
+try:
+
+    def to_bytes(val):
+        return bytes(val)
+
+    to_bytes("test")
+except TypeError:
+
+    def to_bytes(val):
+        return bytes(val, "utf-8")
+
+    to_bytes("test")
 
 from datmo.core.util.exceptions import (SaveSettingError, FileIOError)
 
@@ -28,14 +40,14 @@ class JSONStore():
         self.in_memory_settings = False
 
     def to_file(self, dictionary):
-        with open(self.filepath, 'w', encoding='utf8') as outfile:
+        with open(self.filepath, "wb") as outfile:
             str_ = json.dumps(
                 dictionary,
                 indent=4,
                 sort_keys=True,
                 separators=(',', ': '),
                 ensure_ascii=False)
-            outfile.write(to_unicode(str_))
+            outfile.write(to_bytes(str_))
         return
 
     def save(self, key, value):
@@ -46,14 +58,14 @@ class JSONStore():
         else:
             settings_dict = json.load(open(self.filepath, 'r'))
         settings_dict[key] = value
-        with open(self.filepath, 'w', encoding='utf8') as outfile:
+        with open(self.filepath, "wb") as outfile:
             str_ = json.dumps(
                 settings_dict,
                 indent=4,
                 sort_keys=True,
                 separators=(',', ': '),
                 ensure_ascii=False)
-            outfile.write(to_unicode(str_))
+            outfile.write(to_bytes(str_))
         return
 
     def get(self, name):
@@ -81,14 +93,14 @@ class JSONStore():
         else:
             settings_dict = json.load(open(self.filepath, 'r'))
         settings_dict.pop(name, None)
-        with open(self.filepath, 'w', encoding='utf8') as outfile:
+        with open(self.filepath, "wb") as outfile:
             str_ = json.dumps(
                 settings_dict,
                 indent=4,
                 sort_keys=True,
                 separators=(',', ': '),
                 ensure_ascii=False)
-            outfile.write(to_unicode(str_))
+            outfile.write(to_bytes(str_))
         return
 
     def to_dict(self):
