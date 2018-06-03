@@ -83,6 +83,8 @@ class TestEnvironmentController():
         assert environment_obj_0.definition_filename
         assert environment_obj_0.hardware_info
         assert environment_obj_0.unique_hash == "86c247d417496333b284856fa410d5b4"
+        import pdb
+        pdb.set_trace()
         # Files ["test", "Dockerfile", "datmoDockerfile", "hardware_info"]
 
         # 5) Test option 5

@@ -70,7 +70,7 @@ class TestLocalFileDriver():
 
     def test_copytree(self):
         # Create source directory
-        relative_src_dirpath = "core"
+        relative_src_dirpath = "src"
         self.local_file_driver.create(relative_src_dirpath, directory=True)
         relative_src_filepath = os.path.join(relative_src_dirpath, "test.json")
         self.local_file_driver.create(relative_src_filepath)
@@ -80,9 +80,13 @@ class TestLocalFileDriver():
         # Copy source directory to destination
         src_dirpath = os.path.join(self.local_file_driver.root,
                                    relative_src_dirpath)
+        src_dishash = self.local_file_driver.get_dirhash(src_dirpath)
+        assert src_dishash == "74be16979710d4c4e7c6647856088456"
         dst_dirpath = os.path.join(self.local_file_driver.root,
                                    relative_dst_dirpath)
         self.local_file_driver.copytree(src_dirpath, dst_dirpath)
+        dst_dirhash = self.local_file_driver.get_dirhash(dst_dirpath)
+        assert dst_dirhash == "74be16979710d4c4e7c6647856088456"
         dst_filepath = os.path.join(dst_dirpath, "test.json")
         assert os.path.isdir(os.path.join(dst_dirpath)) and \
             os.path.isfile(dst_filepath) == True
@@ -99,8 +103,7 @@ class TestLocalFileDriver():
         dst_dirpath = os.path.join(self.local_file_driver.root,
                                    relative_dst_dirpath)
         self.local_file_driver.copyfile(filepath, dst_dirpath)
-        assert os.path.isfile(os.path.join(dst_dirpath,
-                                           relative_filepath)) == True
+        assert os.path.isfile(os.path.join(dst_dirpath, relative_filepath))
 
     # Instance Method Tests
 
