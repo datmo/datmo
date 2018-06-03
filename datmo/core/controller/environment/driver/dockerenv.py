@@ -1,6 +1,5 @@
 import ast
 import os
-import shutil
 import subprocess
 import platform
 from io import open
@@ -758,10 +757,10 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         with open(default_dockerfile_filepath, "rb") as input_file:
             with open(destination_dockerfile, "wb") as output_file:
                 for line in input_file:
-                    if os.linesep in str(line):
-                        output_file.write(to_bytes(str(line.strip()) + "\n"))
+                    if to_bytes(os.linesep) in line:
+                        output_file.write(line.strip() + to_bytes("\n"))
                     else:
-                        output_file.write(to_bytes(str(line.strip())))
+                        output_file.write(line.strip())
         return destination_dockerfile
 
     def get_default_definition_filename(self):
@@ -797,15 +796,13 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             with open(datmo_base_dockerfile_path, "rb") as datmo_base_file:
                 with open(output_definition_path, "wb") as output_file:
                     for line in input_file:
-                        if os.linesep in str(line):
-                            output_file.write(
-                                to_bytes(str(line.strip()) + "\n"))
+                        if to_bytes(os.linesep) in line:
+                            output_file.write(line.strip() + to_bytes("\n"))
                         else:
-                            output_file.write(to_bytes(str(line.strip())))
+                            output_file.write(line.strip())
                     for line in datmo_base_file:
-                        if os.linesep in str(line):
-                            output_file.write(
-                                to_bytes(str(line.strip()) + "\n"))
+                        if to_bytes(os.linesep) in line:
+                            output_file.write(line.strip() + to_bytes("\n"))
                         else:
-                            output_file.write(to_bytes(str(line.strip())))
+                            output_file.write(line.strip())
         return True

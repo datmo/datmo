@@ -38,7 +38,7 @@ class EnvironmentController(BaseController):
         if not os.path.exists(self.environment_directory):
             os.makedirs(self.environment_directory)
 
-    def create(self, dictionary):
+    def create(self, dictionary, save_hardware_file=True):
         """Create an environment
 
         Parameters
@@ -49,14 +49,13 @@ class EnvironmentController(BaseController):
                     list of absolute or relative filepaths and/or dirpaths to collect with destination names
                     (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
                     (default if none provided is to pull from project environment folder and project root. If none found create default definition)
-                hardware_info : dict, optional
-                    information about the environment hardware
-                    (default is to extract hardware from platform currently running)
             optional values to populate optional  environment entity args
                 description : str, optional
                     description of the environment
                     (default is blank)
-
+        save_hardware_file : bool
+            boolean to save hardware file along with other files
+            (default is True to save the file and create distinct hashes based on software and hardware)
 
         Returns
         -------
@@ -106,8 +105,11 @@ class EnvironmentController(BaseController):
         # Step 2: Check existing paths and create files as needed to populate the
         # full environment within the temporary directory
 
-        paths = self._setup_compatible_environment(dictionary, create_dict,
-                                                   paths, _temp_env_dir)
+        paths = self._setup_compatible_environment(
+            create_dict,
+            paths,
+            _temp_env_dir,
+            save_hardware_file=save_hardware_file)
 
         # Step 3: Pass in all paths for the environment to the file collection create
         # If PathDoesNotExist is found for any source paths, then error
@@ -141,15 +143,16 @@ class EnvironmentController(BaseController):
         # Step 7: Create environment and return
         return self.dal.environment.create(Environment(create_dict))
 
-    def _setup_compatible_environment(self, dictionary, create_dict, paths,
-                                      directory):
+    def _setup_compatible_environment(self,
+                                      create_dict,
+                                      paths,
+                                      directory,
+                                      save_hardware_file=True):
         """Setup compatible environment from user paths. Creates the necessary datmo files if
         they are not already present
 
         Parameters
         ----------
-        dictionary : dict
-            incoming dictionary, this is mutated in the function (not returned)
         create_dict : dict
             dictionary for entity creation, this is mutated in the function (not returned)
         paths : list
@@ -157,6 +160,9 @@ class EnvironmentController(BaseController):
             (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
         directory : str
             path of directory to save additional files to
+        save_hardware_file : bool
+            boolean to save hardware file along with other files
+            (default is True to save the file and create distinct hashes based on software and hardware)
 
         Returns
         -------
@@ -185,24 +191,17 @@ class EnvironmentController(BaseController):
                 self.environment_driver.create(path=original_definition_filepath, output_path=datmo_definition_filepath)
         paths.append(datmo_definition_filepath)
 
-        # c. get the hardware info and save it in the directory, and add to paths
-        hardware_info_filepath = self._store_hardware_info(
-            dictionary, create_dict, directory)
-        paths.append(hardware_info_filepath)
+        # c. get the hardware info and save it to the entity, if save_hardware_file is True
+        # then save it to file and add it to the paths
+        create_dict[
+            'hardware_info'] = self.environment_driver.get_hardware_info()
+        if save_hardware_file:
+            hardware_info_filepath = os.path.join(directory, "hardware_info")
+            _ = JSONStore(
+                hardware_info_filepath,
+                initial_dict=create_dict['hardware_info'])
+            paths.append(hardware_info_filepath)
         return paths
-
-    def _store_hardware_info(self, dictionary, create_dict, definition_path):
-        if "hardware_info" in dictionary:
-            create_dict['hardware_info'] = dictionary['hardware_info']
-        else:
-            # Extract hardware info from the environment driver
-            create_dict[
-                'hardware_info'] = self.environment_driver.get_hardware_info()
-        # Create hardware info file in definition path
-        hardware_info_filepath = os.path.join(definition_path, "hardware_info")
-        _ = JSONStore(
-            hardware_info_filepath, initial_dict=create_dict['hardware_info'])
-        return hardware_info_filepath
 
     def build(self, environment_id):
         """Build environment from definition file
@@ -397,8 +396,13 @@ class EnvironmentController(BaseController):
             env_exists = True
         return env_exists
 
-    def _calculate_project_environment_hash(self):
+    def _calculate_project_environment_hash(self, save_hardware_file=True):
         """Return the environment hash from contents in project environment directory
+
+        Parameters
+        ----------
+        save_hardware_file : bool
+            include the hardware info file within the hash
 
         Returns
         -------
@@ -417,10 +421,14 @@ class EnvironmentController(BaseController):
         _temp_dir = get_datmo_temp_path(self.home)
 
         # Setup compatible environment and create add paths
-        paths = self._setup_compatible_environment({}, {
-            "definition_filename":
-                self.environment_driver.get_default_definition_filename()
-        }, paths, _temp_dir)
+        paths = self._setup_compatible_environment(
+            {
+                "definition_filename":
+                    self.environment_driver.get_default_definition_filename()
+            },
+            paths,
+            _temp_dir,
+            save_hardware_file=save_hardware_file)
 
         # Create new temp directory
         _temp_dir_2 = get_datmo_temp_path(self.home)
@@ -437,9 +445,12 @@ class EnvironmentController(BaseController):
     def _has_unstaged_changes(self):
         """Return whether there are unstaged changes"""
         env_hash = self._calculate_project_environment_hash()
+        env_hash_no_hardware = self._calculate_project_environment_hash(
+            save_hardware_file=False)
         environment_files = list_all_filepaths(self.environment_directory)
-        if self.exists(
-                environment_unique_hash=env_hash) or not environment_files:
+        if self.exists(environment_unique_hash=env_hash) or self.exists(
+                environment_unique_hash=env_hash_no_hardware
+        ) or not environment_files:
             return False
         return True
 
