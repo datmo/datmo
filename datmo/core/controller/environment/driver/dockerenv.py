@@ -794,6 +794,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             with open(datmo_base_dockerfile_path, "rb") as datmo_base_file:
                 with open(output_definition_path, "wb") as output_file:
                     for line in input_file:
+                        import pdb
+                        pdb.set_trace()
                         output_file.write(to_bytes(str(line)))
                     for line in datmo_base_file:
                         output_file.write(to_bytes(str(line)))
