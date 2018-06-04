@@ -85,6 +85,28 @@ class TestDockerEnv():
             thrown = True
         assert thrown
 
+    def test_get_current_libraries(self):
+        result = self.docker_environment_driver.get_current_libraries()
+        assert result
+
+    def test_setup(self):
+        options = {"libraries": "xgboost:cpu"}
+        definition_path = os.path.join(self.docker_environment_driver.filepath,
+                                           "datmo_environment")
+        # Test by passing only options
+        datmo_environment_dir = os.path.join(self.docker_environment_driver.filepath, "datmo_environment")
+        if not os.path.isdir(datmo_environment_dir):
+            os.makedirs(datmo_environment_dir)
+        result = self.docker_environment_driver.setup(options=options)
+        assert result
+
+        # Test by passing definition filepath and options
+        result = self.docker_environment_driver.setup(options=options,
+                                                      definition_path=definition_path)
+        definition_filepath = os.path.join(definition_path, "Dockerfile")
+        assert result and os.path.isfile(definition_filepath) and \
+               "datmo" in open(definition_filepath, "r").read()
+
     def test_create(self):
         input_dockerfile_path = os.path.join(
             self.docker_environment_driver.filepath, "Dockerfile")

@@ -124,6 +124,30 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                    platform.system()))
         return True
 
+    @staticmethod
+    def get_current_libraries():
+        # To get the current frameworks
+        return ["xgboost:cpu", "keras-tensorflow:cpu", "keras-tensorflow:gpu",
+                "tensorflow:cpu", "tensorflow:gpu", "scikit-opencv:py-2.7",
+                "theano:cpu", "theano:gpu", "keras-theano:cpu", "keras-theano:gpu",
+                "kaggle:python", "spacy:py-2.7", "pytorch:cpu", "catboost:cpu"]
+
+    def setup(self, options, definition_path=None):
+        # To setup the environment definition file
+        if not definition_path:
+            definition_filepath = os.path.join(self.filepath, "datmo_environment", "Dockerfile")
+        else:
+            definition_filepath = os.path.join(definition_path, "Dockerfile")
+
+        libraries = options.get("libraries", None)
+        if not libraries: return False
+
+        if libraries:
+            with open(definition_filepath, "wb") as f:
+                f.write(to_bytes("FROM datmo/%s\n\n" % libraries))
+
+        return True
+
     def create(self, path=None, output_path=None):
         if not path:
             path = os.path.join(self.filepath, "Dockerfile")

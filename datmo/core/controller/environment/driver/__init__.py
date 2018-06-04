@@ -7,6 +7,8 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
 
     Methods
     -------
+    setup(output_path)
+        create environment definition
     create(path, output_path)
         create datmo environment definition
     build(name, path)
@@ -35,6 +37,40 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         Raises
         ------
         EnvironmentInitFailed
+        """
+
+    @staticmethod
+    @abstractmethod
+    def get_current_libraries():
+        """Get all the supported libraries
+
+        Returns
+        -------
+        list
+            List of all available libraries
+        """
+
+    @abstractmethod
+    def setup(self, options, definition_path=None):
+        """Create the environment definition file
+
+        Parameters
+        ----------
+        options : dict
+            can include the following values:
+
+            libraries : str
+                the library to be used for the environment definition file
+        definition_path : str, optional
+            absolute output path for environment definition file
+            (default is None, which sets up the file in `datmo_environment`,
+            e.g. `Dockerfile` in `datmo_environment` folder)
+
+
+        Returns
+        -------
+        bool
+            True is success
         """
 
     @abstractmethod
