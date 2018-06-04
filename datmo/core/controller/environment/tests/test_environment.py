@@ -62,6 +62,21 @@ class TestEnvironmentController():
         with open(self.definition_filepath, "wb") as f:
             f.write(to_bytes("FROM datmo/xgboost:cpu"))
 
+    def test_get_current_libraries(self):
+        result = self.environment.get_current_libraries()
+        assert result
+
+    def test_setup(self):
+        options = {"libraries": "xgboost:cpu"}
+        result = self.environment.setup(options=options)
+        # Create environment definition in `datmo_environment` folder
+        datmo_environment_folder = os.path.join(self.environment.home,
+                                                "datmo_environment")
+        definition_filepath = os.path.join(datmo_environment_folder,
+                                           "Dockerfile")
+        assert result and os.path.isfile(definition_filepath) and \
+               "datmo" in open(definition_filepath, "r").read()
+
     def test_create(self):
         # 0) Test SUCCESS create when definition path exists in project environment directory (no input, no root) -- with hardware file
         # 1) Test SUCCESS create when definition path exists in project environment directory (no input, no root)
