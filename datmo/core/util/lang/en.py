@@ -37,6 +37,8 @@ MESSAGES = {
             "{foo} - {bar}",
         "cli.general.tuple.test":
             "%s, %s",
+        "cli.environment.setup.argument":
+            "No library exists with this name: %s",
         "cli.environment.create":
             "Creating a new environment",
         "cli.environment.create.success":
@@ -328,6 +330,8 @@ MESSAGES = {
     "trace": {},
     "fatal": {},
     "prompt": {
+        "cli.environment.setup.libraries":
+            "Please choose one of the above images",
         "cli.project.init.name":
             "Enter name for the project",
         "cli.project.init.description":

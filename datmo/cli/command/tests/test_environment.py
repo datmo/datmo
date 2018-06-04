@@ -53,6 +53,21 @@ class TestEnvironment():
         self.environment_command = EnvironmentCommand(self.temp_dir,
                                                       self.cli_helper)
 
+    def test_environment_setup(self):
+        # Setup the environement by passing libraries
+        self.__set_variables()
+        datmo_environment_folder = os.path.join(self.temp_dir,
+                                                "datmo_environment")
+
+        definition_filepath = os.path.join(datmo_environment_folder,
+                                           "Dockerfile")
+        test_libraries = 'xgboost:cpu'
+        self.environment_command.parse(["environment", "setup", "--libraries", test_libraries])
+        result = self.environment_command.execute()
+
+        assert result and os.path.isfile(definition_filepath) and \
+               "datmo" in open(definition_filepath, "r").read()
+
     def test_environment_create(self):
         # 1) Environment definition file in `datmo_environment` folder
         # 2) Environment definition file passed as an option

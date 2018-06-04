@@ -19,6 +19,20 @@ class EnvironmentCommand(ProjectCommand):
         self.parse(["--help"])
         return True
 
+    def setup(self, **kwargs):
+        libraries = kwargs.get("libraries", None)
+        available_libraries = self.environment_controller.get_current_libraries()
+        if not libraries:
+            for index, library in enumerate(available_libraries):
+                self.cli_helper.echo("(%s) %s" % (index+1, library))
+            libraries = self.cli_helper.prompt(
+                __("prompt", "cli.environment.setup.libraries"))
+        if libraries in available_libraries:
+            options = {"libraries": libraries}
+            return self.environment_controller.setup(options=options)
+        else:
+            self.cli_helper.echo(__("error", "cli.environment.setup.argument", libraries))
+
     def create(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.environment.create"))
         environment_obj = self.environment_controller.create(kwargs)
