@@ -28,6 +28,9 @@ class Environment():
             file collection id to store environment files
         unique_hash : str
             unique hash created from hardware and software info
+        name : str, optional
+            name of the environment given by the user
+            (default is "", blank name)
         description : str, optional
             description of the environment given by user
             (default is "", blank description)
@@ -54,6 +57,8 @@ class Environment():
         file collection id to store environment files
     unique_hash : str
         unique hash created from hardware and software info
+    name : str or None
+            name of the environment given by the user
     description : str or None
         description of the environment given by user
     created_at : datetime.datetime
@@ -71,6 +76,7 @@ class Environment():
         self.file_collection_id = dictionary['file_collection_id']
         self.unique_hash = dictionary['unique_hash']
 
+        self.name = dictionary.get('name', None)
         self.description = dictionary.get('description', None)
         self.created_at = dictionary.get('created_at', datetime.utcnow())
         self.updated_at = dictionary.get('updated_at', self.created_at)
