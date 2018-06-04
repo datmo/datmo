@@ -52,7 +52,7 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def setup(self, options, definition_path):
-        """Create the environment definition file
+        """Create the supported environment definition file in given path
 
         Parameters
         ----------

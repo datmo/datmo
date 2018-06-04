@@ -135,18 +135,17 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         ]
 
     def setup(self, options, definition_path):
+        name = options.get("name", None)
+        # Validate that the name exists
+        if not name or name not in self.get_supported_environments():
+            raise EnvironmentDoesNotExist()
+        # Validate the given definition path exists
         if not os.path.isdir(definition_path):
             raise PathDoesNotExist()
         # To setup the environment definition file
         definition_filepath = os.path.join(definition_path, "Dockerfile")
-
-        name = options.get("name", None)
-        if not name: return False
-
-        if name:
-            with open(definition_filepath, "wb") as f:
-                f.write(to_bytes("FROM datmo/%s\n\n" % name))
-
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/%s\n\n" % name))
         return True
 
     def create(self, path=None, output_path=None):

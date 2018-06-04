@@ -225,6 +225,8 @@ MESSAGES = {
             "Error removing docker container: %s",
         "controller.environment.driver.docker.stop_remove_containers_by_term":
             "Error stopping and removing containers by term: %s",
+        "controller.environment.setup.unstaged":
+            "Unstaged changes found in project environment directory: %s",
         "controller.environment.create":
             "Required argument definition_paths not present in input",
         "controller.environment.create.filepath.dne":

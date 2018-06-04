@@ -48,8 +48,10 @@ class EnvironmentController(BaseController):
         """
         return self.environment_driver.get_supported_environments()
 
-    def setup(self, options):
-        """Create the environment definition file
+    def setup(self, options, save_hardware_file=True):
+        """Create a pre-defined supported environment and add it to the project environment directory
+
+        The user can build on top of the pre-defined environment and create new ones of their own
 
         Parameters
         ----------
@@ -57,15 +59,38 @@ class EnvironmentController(BaseController):
             can include the following values:
 
             name : str
-                the name to be used for the environment definition file
+                the name to be used to specify a supported environment
+        save_hardware_file : bool, optional
+            boolean to save hardware file along with other files
+            (default is True to save the file and create distinct hashes based on software and hardware)
 
         Returns
         -------
-        bool
-            True is success
+        Environment
+            returns an object representing the environment created
+
+        Raises
+        ------
+        UnstagedChanges
+            if unstaged changes exist in the environment it should fail
         """
-        return self.environment_driver.setup(
-            options, definition_path=self.environment_directory)
+        # Check unstaged changes before trying to setup
+        try:
+            self.check_unstaged_changes()
+        except UnstagedChanges:
+            raise UnstagedChanges(
+                __("error", "controller.environment.setup.unstaged",
+                   self.environment_directory))
+        try:
+            _ = self.environment_driver.setup(
+                options, definition_path=self.environment_directory)
+        except Exception as e:
+            raise EnvironmentError(e)
+        create_dict = {
+            "name": options['name'],
+            "description": "supported base environment created by datmo"
+        }
+        return self.create(create_dict, save_hardware_file=save_hardware_file)
 
     def create(self, dictionary, save_hardware_file=True):
         """Create an environment
@@ -78,10 +103,12 @@ class EnvironmentController(BaseController):
                     list of absolute or relative filepaths and/or dirpaths to collect with destination names
                     (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
                     (default if none provided is to pull from project environment folder and project root. If none found create default definition)
-            optional values to populate optional  environment entity args
+                name : str, optional
+                    name of the environment
+                    (default is None)
                 description : str, optional
                     description of the environment
-                    (default is blank)
+                    (default is None)
         save_hardware_file : bool
             boolean to save hardware file along with other files
             (default is True to save the file and create distinct hashes based on software and hardware)
@@ -165,7 +192,7 @@ class EnvironmentController(BaseController):
         shutil.rmtree(_temp_env_dir)
 
         # Step 6: Add optional arguments to the Environment entity
-        for optional_arg in ["description"]:
+        for optional_arg in ["name", "description"]:
             if optional_arg in dictionary:
                 create_dict[optional_arg] = dictionary[optional_arg]
 
