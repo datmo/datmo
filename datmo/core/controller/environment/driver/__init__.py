@@ -42,16 +42,16 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
     @staticmethod
     @abstractmethod
     def get_current_libraries():
-        """Get all the supported libraries
+        """Get all the supported environments
 
         Returns
         -------
         list
-            List of all available libraries
+            List of all available environments
         """
 
     @abstractmethod
-    def setup(self, options, definition_path=None):
+    def setup(self, options, definition_path):
         """Create the environment definition file
 
         Parameters
@@ -59,8 +59,8 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         options : dict
             can include the following values:
 
-            libraries : str
-                the library to be used for the environment definition file
+            name : str
+                the name of environment to be used for the environment definition file
         definition_path : str, optional
             absolute output path for environment definition file
             (default is None, which sets up the file in `datmo_environment`,

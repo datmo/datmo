@@ -54,15 +54,15 @@ class TestEnvironment():
                                                       self.cli_helper)
 
     def test_environment_setup(self):
-        # Setup the environement by passing libraries
+        # Setup the environement by passing name
         self.__set_variables()
         datmo_environment_folder = os.path.join(self.temp_dir,
                                                 "datmo_environment")
 
         definition_filepath = os.path.join(datmo_environment_folder,
                                            "Dockerfile")
-        test_libraries = 'xgboost:cpu'
-        self.environment_command.parse(["environment", "setup", "--libraries", test_libraries])
+        test_name = 'xgboost:cpu'
+        self.environment_command.parse(["environment", "setup", "--name", test_name])
         result = self.environment_command.execute()
 
         assert result and os.path.isfile(definition_filepath) and \

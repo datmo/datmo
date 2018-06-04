@@ -38,15 +38,15 @@ class EnvironmentController(BaseController):
         if not os.path.exists(self.environment_directory):
             os.makedirs(self.environment_directory)
 
-    def get_current_libraries(self):
-        """Get all the supported libraries
+    def get_current_environments(self):
+        """Get all the supported environments
 
         Returns
         -------
         list
-            List of all available libraries
+            List of all available environments
         """
-        return self.environment_driver.get_current_libraries()
+        return self.environment_driver.get_current_environments()
 
     def setup(self, options):
         """Create the environment definition file
@@ -56,8 +56,8 @@ class EnvironmentController(BaseController):
         options : dict
             can include the following values:
 
-            libraries : str
-                the library to be used for the environment definition file
+            name : str
+                the name to be used for the environment definition file
 
         Returns
         -------

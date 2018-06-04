@@ -20,18 +20,18 @@ class EnvironmentCommand(ProjectCommand):
         return True
 
     def setup(self, **kwargs):
-        libraries = kwargs.get("libraries", None)
-        available_libraries = self.environment_controller.get_current_libraries()
-        if not libraries:
-            for index, library in enumerate(available_libraries):
-                self.cli_helper.echo("(%s) %s" % (index+1, library))
-            libraries = self.cli_helper.prompt(
-                __("prompt", "cli.environment.setup.libraries"))
-        if libraries in available_libraries:
-            options = {"libraries": libraries}
+        name = kwargs.get("name", None)
+        available_environments = self.environment_controller.get_current_environments()
+        if not name:
+            for index, name in enumerate(available_environments):
+                self.cli_helper.echo("(%s) %s" % (index+1, name))
+            name = self.cli_helper.prompt(
+                __("prompt", "cli.environment.setup.name"))
+        if name in available_environments:
+            options = {"name": name}
             return self.environment_controller.setup(options=options)
         else:
-            self.cli_helper.echo(__("error", "cli.environment.setup.argument", libraries))
+            self.cli_helper.echo(__("error", "cli.environment.setup.argument", name))
 
     def create(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.environment.create"))
