@@ -125,14 +125,18 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         return True
 
     @staticmethod
-    def get_current_environments():
+    def get_supported_environments():
         # To get the current frameworks
-        return ["xgboost:cpu", "keras-tensorflow:cpu", "keras-tensorflow:gpu",
-                "tensorflow:cpu", "tensorflow:gpu", "scikit-opencv:py-2.7",
-                "theano:cpu", "theano:gpu", "keras-theano:cpu", "keras-theano:gpu",
-                "kaggle:python", "spacy:py-2.7", "pytorch:cpu", "catboost:cpu"]
+        return [
+            "xgboost:cpu", "keras-tensorflow:cpu", "keras-tensorflow:gpu",
+            "tensorflow:cpu", "tensorflow:gpu", "scikit-opencv:py-2.7",
+            "theano:cpu", "theano:gpu", "keras-theano:cpu", "keras-theano:gpu",
+            "kaggle:python", "spacy:py-2.7", "pytorch:cpu", "catboost:cpu"
+        ]
 
     def setup(self, options, definition_path):
+        if not os.path.isdir(definition_path):
+            raise PathDoesNotExist()
         # To setup the environment definition file
         definition_filepath = os.path.join(definition_path, "Dockerfile")
 

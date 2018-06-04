@@ -39,8 +39,8 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestTaskModule():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        _ = ProjectController(self.temp_dir).\
-            init("test", "test description")
+        self.project = ProjectController(self.temp_dir)
+        _ = self.project.init("test", "test description")
         self.input_dict = {
             "id": "test",
             "model_id": "my_model",
@@ -65,7 +65,7 @@ class TestTaskModule():
         # 3) Run task with simple python file and environment definition, string command
         # 4) Run task with simple python file and environment definition, list command
         # 5) Run task with simple python file and environment definition passed as a list
-        # 6) Run task with simple python file and environment definition path present in `datmo_environment`
+        # 6) Run task with simple python file and environment definition path present in project environment directory
         # folder in project
 
         # 1) Test out option 1)
@@ -127,9 +127,8 @@ class TestTaskModule():
 
         # 6) Test out option 6
         os.remove(test_filepath)
-        datmo_environment_dir = os.path.join(self.temp_dir,
-                                             "datmo_environment")
-        test_filepath = os.path.join(datmo_environment_dir, "Dockerfile")
+        test_filepath = os.path.join(self.project.environment_directory,
+                                     "Dockerfile")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("FROM datmo/xgboost:cpu"))
         task_obj_4 = run(command=["python", "script.py"], home=self.temp_dir)

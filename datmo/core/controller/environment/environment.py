@@ -38,7 +38,7 @@ class EnvironmentController(BaseController):
         if not os.path.exists(self.environment_directory):
             os.makedirs(self.environment_directory)
 
-    def get_current_environments(self):
+    def get_supported_environments(self):
         """Get all the supported environments
 
         Returns
@@ -46,7 +46,7 @@ class EnvironmentController(BaseController):
         list
             List of all available environments
         """
-        return self.environment_driver.get_current_environments()
+        return self.environment_driver.get_supported_environments()
 
     def setup(self, options):
         """Create the environment definition file
@@ -64,8 +64,8 @@ class EnvironmentController(BaseController):
         bool
             True is success
         """
-        return self.environment_driver.setup(options,
-                                             definition_path=self.environment_directory)
+        return self.environment_driver.setup(
+            options, definition_path=self.environment_directory)
 
     def create(self, dictionary, save_hardware_file=True):
         """Create an environment
@@ -484,7 +484,7 @@ class EnvironmentController(BaseController):
         return True
 
     def check_unstaged_changes(self):
-        """Checks if there exists any unstaged changes for the environment in `datmo_environment` folder.
+        """Checks if there exists any unstaged changes for the environment in project environment directory.
 
         Returns
         -------

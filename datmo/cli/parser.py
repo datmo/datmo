@@ -53,18 +53,24 @@ def get_datmo_parser():
         title="subcommands", dest="subcommand")
 
     environment_setup = environment_subcommand_parsers.add_parser(
-        "setup", help="setup environment")
+        "setup",
+        help=
+        "setup environment adds a predefined supported environment into your project environment directory"
+    )
     environment_setup.add_argument(
-        "--libraries",
-        dest="libraries",
+        "--name",
+        dest="name",
         default=None,
         type=str,
         help=
-        "libraries/framework to be used for environment (e.g. xgboost:cpu)"
+        "name of environment to be used for environment (e.g. xgboost:cpu). if none is given, a prompt will present the supported names"
     )
 
     environment_create = environment_subcommand_parsers.add_parser(
-        "create", help="create environment")
+        "create",
+        help=
+        "create environment using the definition paths given, if not looks in your project environment directory, or creates a default"
+    )
     environment_create.add_argument(
         "--environment-def",
         dest="definition_paths",

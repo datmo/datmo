@@ -41,7 +41,7 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
 
     @staticmethod
     @abstractmethod
-    def get_current_libraries():
+    def get_supported_environments():
         """Get all the supported environments
 
         Returns
@@ -63,7 +63,7 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
                 the name of environment to be used for the environment definition file
         definition_path : str, optional
             absolute output path for environment definition file
-            (default is None, which sets up the file in `datmo_environment`,
+            (default is None, which sets up the file in the project environment directory,
             e.g. `Dockerfile` in `datmo_environment` folder)
 
 
@@ -71,6 +71,11 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         -------
         bool
             True is success
+
+        Raises
+        ------
+        PathDoesNotExist
+            if the definition_path given does not exist
         """
 
     @abstractmethod

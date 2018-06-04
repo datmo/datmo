@@ -56,13 +56,12 @@ class TestEnvironment():
     def test_environment_setup(self):
         # Setup the environement by passing name
         self.__set_variables()
-        datmo_environment_folder = os.path.join(self.temp_dir,
-                                                "datmo_environment")
-
-        definition_filepath = os.path.join(datmo_environment_folder,
-                                           "Dockerfile")
+        definition_filepath = os.path.join(
+            self.environment_command.environment_controller.
+            environment_directory, "Dockerfile")
         test_name = 'xgboost:cpu'
-        self.environment_command.parse(["environment", "setup", "--name", test_name])
+        self.environment_command.parse(
+            ["environment", "setup", "--name", test_name])
         result = self.environment_command.execute()
 
         assert result and os.path.isfile(definition_filepath) and \
@@ -77,12 +76,10 @@ class TestEnvironment():
         # 6) No environment definition file present (should return the same environment)
         self.__set_variables()
         # Test option 1
-        # Create environment definition in `datmo_environment` folder
-        datmo_environment_folder = os.path.join(self.temp_dir,
-                                                "datmo_environment")
-
-        definition_filepath = os.path.join(datmo_environment_folder,
-                                           "Dockerfile")
+        # Create environment definition in project environment directory
+        definition_filepath = os.path.join(
+            self.environment_command.environment_controller.
+            environment_directory, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
             f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
@@ -94,15 +91,14 @@ class TestEnvironment():
         assert result
 
         # remove datmo_environment directory
-        shutil.rmtree(datmo_environment_folder)
+        shutil.rmtree(self.environment_command.environment_controller.
+                      environment_directory)
 
         # Test option 2
-        random_datmo_environment_folder = os.path.join(self.temp_dir,
-                                                       "random_datmo_dir")
-        os.makedirs(random_datmo_environment_folder)
+        random_dir = os.path.join(self.temp_dir, "random_datmo_dir")
+        os.makedirs(random_dir)
 
-        definition_filepath = os.path.join(random_datmo_environment_folder,
-                                           "Dockerfile")
+        definition_filepath = os.path.join(random_dir, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
             f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
@@ -116,7 +112,7 @@ class TestEnvironment():
         assert result
 
         # remove datmo environment directory
-        shutil.rmtree(random_datmo_environment_folder)
+        shutil.rmtree(random_dir)
 
         # Test option 3
         definition_filepath = os.path.join(self.temp_dir, "Dockerfile")

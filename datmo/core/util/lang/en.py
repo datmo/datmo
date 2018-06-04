@@ -330,8 +330,8 @@ MESSAGES = {
     "trace": {},
     "fatal": {},
     "prompt": {
-        "cli.environment.setup.libraries":
-            "Please choose one of the above images",
+        "cli.environment.setup.name":
+            "Please choose one of the above environments",
         "cli.project.init.name":
             "Enter name for the project",
         "cli.project.init.description":

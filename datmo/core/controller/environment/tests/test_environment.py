@@ -62,18 +62,16 @@ class TestEnvironmentController():
         with open(self.definition_filepath, "wb") as f:
             f.write(to_bytes("FROM datmo/xgboost:cpu"))
 
-    def test_get_current_libraries(self):
-        result = self.environment.get_current_libraries()
+    def test_get_supported_environments(self):
+        result = self.environment.get_supported_environments()
         assert result
 
     def test_setup(self):
-        options = {"libraries": "xgboost:cpu"}
+        options = {"name": "xgboost:cpu"}
         result = self.environment.setup(options=options)
-        # Create environment definition in `datmo_environment` folder
-        datmo_environment_folder = os.path.join(self.environment.home,
-                                                "datmo_environment")
-        definition_filepath = os.path.join(datmo_environment_folder,
-                                           "Dockerfile")
+        # Create environment definition in project environment directory folder
+        definition_filepath = os.path.join(
+            self.environment.environment_directory, "Dockerfile")
         assert result and os.path.isfile(definition_filepath) and \
                "datmo" in open(definition_filepath, "r").read()
 
@@ -81,8 +79,8 @@ class TestEnvironmentController():
         # 0) Test SUCCESS create when definition path exists in project environment directory (no input, no root) -- with hardware file
         # 1) Test SUCCESS create when definition path exists in project environment directory (no input, no root)
         # 5) Test SUCCESS when definition path exists in project environment directory and passed from input dict (takes input)
-        # 2) Test SUCCESS create when definition path exists in root project folder (no input, no datmo_environment)
-        # 3) Test SUCCESS create when definition path is passed into input dict (takes input, no datmo_environment)
+        # 2) Test SUCCESS create when definition path exists in root project folder (no input, no project environment dir)
+        # 3) Test SUCCESS create when definition path is passed into input dict (takes input, no project environment dir)
         # 4) Test SUCCESS create when definition path is passed into input dict along with expected filename to be saved
         # 6) Test FAIL when passing same filepath with same filename into input dict
 
@@ -140,7 +138,7 @@ class TestEnvironmentController():
         assert environment_obj.unique_hash == "93920b84be871138bf219cb73a3a8a3f"
         # Files ["Dockerfile", "datmoDockerfile"]
 
-        # remove the datmo_environment folder
+        # remove the project environment directory
         shutil.rmtree(self.environment.environment_directory)
 
         # Create environment definition in root directory
@@ -301,12 +299,9 @@ class TestEnvironmentController():
         os.remove(definition_filepath)
 
         # 5) Test option 5
-        # Create environment definition in `datmo_environment` folder
-        datmo_environment_folder = os.path.join(self.environment.home,
-                                                "datmo_environment")
-
-        definition_filepath = os.path.join(datmo_environment_folder,
-                                           "Dockerfile")
+        # Create environment definition in project environment directory
+        definition_filepath = os.path.join(
+            self.environment.environment_directory, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
             f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
@@ -324,12 +319,9 @@ class TestEnvironmentController():
         self.project.init("test5", "test description")
 
         # 0) Test option 0
-        # Create environment definition in `datmo_environment` folder
-        datmo_environment_folder = os.path.join(self.environment.home,
-                                                "datmo_environment")
-
-        definition_filepath = os.path.join(datmo_environment_folder,
-                                           "Dockerfile")
+        # Create environment definition in project environment directory
+        definition_filepath = os.path.join(
+            self.environment.environment_directory, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
             f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
@@ -368,7 +360,7 @@ class TestEnvironmentController():
 
         # teardown
         self.environment.delete(environment_obj.id)
-        shutil.rmtree(datmo_environment_folder)
+        shutil.rmtree(self.environment.environment_directory)
 
         # 1) Test option 1
         # Create environment definition
@@ -783,8 +775,8 @@ class TestEnvironmentController():
         assert not result
 
         with open(
-                os.path.join(self.temp_dir, "datmo_environment", "Dockerfile"),
-                "wb") as f:
+                os.path.join(self.environment.environment_directory,
+                             "Dockerfile"), "wb") as f:
             f.write(to_bytes("FROM datmo/xgboost:cpu\n"))
 
         result = self.environment._has_unstaged_changes()

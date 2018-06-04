@@ -179,7 +179,7 @@ class TestSnapshotController():
         assert snapshot_obj.config == {}
         assert snapshot_obj.stats == {}
 
-    def test_create_success_with_datmo_environment(self):
+    def test_create_success_with_environment(self):
         self.__setup()
         # Create environment definition
         env_def_path = os.path.join(self.project.environment_directory,
