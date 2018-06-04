@@ -46,8 +46,9 @@ class BaseController(object):
         self.home = home
         if not os.path.isdir(self.home):
             raise InvalidProjectPath(
-                __("error", "controller.base.__init__", home))
-        self.environment_directory = os.path.join(home, "datmo_environment")
+                __("error", "controller.base.__init__", self.home))
+        self.environment_directory = os.path.join(self.home,
+                                                  "datmo_environment")
         self.files_directory = os.path.join(self.home, "datmo_files")
         self.config = JSONStore(os.path.join(self.home, ".datmo", ".config"))
         self.logger = DatmoLogger.get_logger(__name__)
@@ -131,11 +132,10 @@ class BaseController(object):
         return dal_dict["constructor"](**dal_dict["options"])
 
     def get_or_set_default(self, key, default_value):
-        value = self.config.get(key)
-        if value is None:
-            self.config.save(key, default_value)
-            value = default_value
-        return value
+        # Discard current value (always overwrite the value to default)
+        # value = self.config.get(key)s
+        self.config.save(key, default_value)
+        return default_value
 
     def config_loader(self, key):
         defaults = self.get_config_defaults()
