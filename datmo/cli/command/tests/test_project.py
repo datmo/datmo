@@ -31,7 +31,7 @@ class TestProject():
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
-        self.project = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.project_command = ProjectCommand(self.temp_dir, self.cli_helper)
 
     def teardown_method(self):
         pass
@@ -39,20 +39,20 @@ class TestProject():
     def test_init_create_success(self):
         test_name = "foobar"
         test_description = "test model"
-        self.project.parse(
+        self.project_command.parse(
             ["init", "--name", test_name, "--description", test_description])
-        result = self.project.execute()
+        result = self.project_command.execute()
         # test for desired side effects
         assert os.path.exists(os.path.join(self.temp_dir, '.datmo'))
         assert result.name == test_name
         assert result.description == test_description
 
     def test_init_create_failure(self):
-        self.project.parse(["init", "--name", "", "--description", ""])
+        self.project_command.parse(["init", "--name", "", "--description", ""])
         # test if prompt opens
-        @self.project.cli_helper.input("\n\n")
+        @self.project_command.cli_helper.input("\n\n")
         def dummy(self):
-            return self.project.execute()
+            return self.project_command.execute()
 
         result = dummy(self)
         assert not result
@@ -60,16 +60,16 @@ class TestProject():
     def test_init_update_success(self):
         test_name = "foobar"
         test_description = "test model"
-        self.project.parse(
+        self.project_command.parse(
             ["init", "--name", test_name, "--description", test_description])
-        result_1 = self.project.execute()
+        result_1 = self.project_command.execute()
         updated_name = "foobar2"
         updated_description = "test model 2"
-        self.project.parse([
+        self.project_command.parse([
             "init", "--name", updated_name, "--description",
             updated_description
         ])
-        result_2 = self.project.execute()
+        result_2 = self.project_command.execute()
         # test for desired side effects
         assert os.path.exists(os.path.join(self.temp_dir, '.datmo'))
         assert result_2.id == result_1.id
@@ -79,16 +79,16 @@ class TestProject():
     def test_init_update_success_only_name(self):
         test_name = "foobar"
         test_description = "test model"
-        self.project.parse(
+        self.project_command.parse(
             ["init", "--name", test_name, "--description", test_description])
-        result_1 = self.project.execute()
+        result_1 = self.project_command.execute()
         updated_name = "foobar2"
-        self.project.parse(
+        self.project_command.parse(
             ["init", "--name", updated_name, "--description", ""])
 
-        @self.project.cli_helper.input("\n")
+        @self.project_command.cli_helper.input("\n")
         def dummy(self):
-            return self.project.execute()
+            return self.project_command.execute()
 
         result_2 = dummy(self)
         # test for desired side effects
@@ -100,16 +100,16 @@ class TestProject():
     def test_init_update_success_only_description(self):
         test_name = "foobar"
         test_description = "test model"
-        self.project.parse(
+        self.project_command.parse(
             ["init", "--name", test_name, "--description", test_description])
-        result_1 = self.project.execute()
+        result_1 = self.project_command.execute()
         updated_description = "test model 2"
-        self.project.parse(
+        self.project_command.parse(
             ["init", "--name", "", "--description", updated_description])
 
-        @self.project.cli_helper.input("\n")
+        @self.project_command.cli_helper.input("\n")
         def dummy(self):
-            return self.project.execute()
+            return self.project_command.execute()
 
         result_2 = dummy(self)
         # test for desired side effects
@@ -121,21 +121,21 @@ class TestProject():
     def test_init_invalid_arg(self):
         exception_thrown = False
         try:
-            self.project.parse(["init", "--foobar", "foobar"])
+            self.project_command.parse(["init", "--foobar", "foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown
 
     def test_version(self):
-        self.project.parse(["version"])
-        result = self.project.execute()
+        self.project_command.parse(["version"])
+        result = self.project_command.execute()
         # test for desired side effects
         assert __version__ in result
 
     def test_version_invalid_arg(self):
         exception_thrown = False
         try:
-            self.project.parse(["version", "--foobar"])
+            self.project_command.parse(["version", "--foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown
@@ -143,12 +143,12 @@ class TestProject():
     def test_status(self):
         test_name = "foobar"
         test_description = "test model"
-        self.project.parse(
+        self.project_command.parse(
             ["init", "--name", test_name, "--description", test_description])
-        _ = self.project.execute()
+        _ = self.project_command.execute()
 
-        self.project.parse(["status"])
-        result = self.project.execute()
+        self.project_command.parse(["status"])
+        result = self.project_command.execute()
         assert isinstance(result[0], dict)
         assert not result[1]
         assert not result[2]
@@ -156,7 +156,7 @@ class TestProject():
     def test_status_invalid_arg(self):
         exception_thrown = False
         try:
-            self.project.parse(["status", "--foobar"])
+            self.project_command.parse(["status", "--foobar"])
         except UnrecognizedCLIArgument:
             exception_thrown = True
         assert exception_thrown
@@ -164,15 +164,15 @@ class TestProject():
     def test_cleanup(self):
         test_name = "foobar"
         test_description = "test model"
-        self.project.parse(
+        self.project_command.parse(
             ["init", "--name", test_name, "--description", test_description])
-        _ = self.project.execute()
+        _ = self.project_command.execute()
 
-        self.project.parse(["cleanup"])
+        self.project_command.parse(["cleanup"])
 
-        @self.project.cli_helper.input("y\n")
+        @self.project_command.cli_helper.input("y\n")
         def dummy(self):
-            return self.project.execute()
+            return self.project_command.execute()
 
         result = dummy(self)
         assert not os.path.exists(os.path.join(self.temp_dir, '.datmo'))
@@ -182,7 +182,7 @@ class TestProject():
     def test_cleanup_invalid_arg(self):
         exception_thrown = False
         try:
-            self.project.parse(["cleanup", "--foobar"])
+            self.project_command.parse(["cleanup", "--foobar"])
         except UnrecognizedCLIArgument:
             exception_thrown = True
         assert exception_thrown

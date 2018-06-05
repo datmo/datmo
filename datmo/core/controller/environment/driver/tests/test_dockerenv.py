@@ -32,7 +32,7 @@ from datmo.core.controller.environment.driver.dockerenv import DockerEnvironment
 from datmo.core.util.exceptions import (
     EnvironmentInitFailed, FileAlreadyExistsError,
     EnvironmentRequirementsCreateError, EnvironmentImageNotFound,
-    EnvironmentContainerNotFound)
+    EnvironmentContainerNotFound, PathDoesNotExist, EnvironmentDoesNotExist)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -84,6 +84,54 @@ class TestDockerEnv():
         except EnvironmentInitFailed:
             thrown = True
         assert thrown
+
+    def test_get_current_name(self):
+        result = self.docker_environment_driver.get_supported_environments()
+        assert result
+
+    def test_setup(self):
+        save_definition_path = os.path.join(
+            self.docker_environment_driver.filepath, "test")
+
+        # Test setup failure if name it not present
+        failed = False
+        try:
+            _ = self.docker_environment_driver.setup(
+                options={}, definition_path=save_definition_path)
+        except EnvironmentDoesNotExist:
+            failed = True
+        assert failed
+
+        # Test setup failure if name is not a valid name
+        failed = False
+        try:
+            _ = self.docker_environment_driver.setup(
+                options={"name": "random"},
+                definition_path=save_definition_path)
+        except EnvironmentDoesNotExist:
+            failed = True
+        assert failed
+
+        options = {"name": "xgboost:cpu"}
+
+        # Test if failure if the path does not exist
+        failed = False
+        try:
+            _ = self.docker_environment_driver.setup(
+                options=options, definition_path=save_definition_path)
+        except PathDoesNotExist:
+            failed = True
+        assert failed
+
+        # Create definition path
+        os.makedirs(save_definition_path)
+
+        # Test by passing definition filepath and options
+        result = self.docker_environment_driver.setup(
+            options=options, definition_path=save_definition_path)
+        definition_filepath = os.path.join(save_definition_path, "Dockerfile")
+        assert result and os.path.isfile(definition_filepath) and \
+               "datmo" in open(definition_filepath, "r").read()
 
     def test_create(self):
         input_dockerfile_path = os.path.join(

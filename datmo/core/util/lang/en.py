@@ -37,6 +37,8 @@ MESSAGES = {
             "{foo} - {bar}",
         "cli.general.tuple.test":
             "%s, %s",
+        "cli.environment.setup.success":
+            "Setup a new base environment with name: %s and id: %s",
         "cli.environment.create":
             "Creating a new environment",
         "cli.environment.create.success":
@@ -101,6 +103,8 @@ MESSAGES = {
             "Method %s.%s not found",
         "cli.project":
             "No project found in the current directory: %s",
+        "cli.environment.setup.argument":
+            "This name or index does not match any supported environments: %s",
         "cli.task.run":
             "Error while running the task: %s",
         "cli.task.run.already_running":
@@ -223,8 +227,10 @@ MESSAGES = {
             "Error removing docker container: %s",
         "controller.environment.driver.docker.stop_remove_containers_by_term":
             "Error stopping and removing containers by term: %s",
+        "controller.environment.setup.unstaged":
+            "Unstaged changes found in project environment directory: %s",
         "controller.environment.create":
-            "Required argument definition_paths not present in input",
+            "Required argument paths not present in input",
         "controller.environment.create.filepath.dne":
             "Path specified in definition paths does not exist: %s",
         "controller.file.driver.create_collection.file_exists":
@@ -328,6 +334,8 @@ MESSAGES = {
     "trace": {},
     "fatal": {},
     "prompt": {
+        "cli.environment.setup.name":
+            "Please select one of the above environments (e.g. 1 or xgboost:cpu)",
         "cli.project.init.name":
             "Enter name for the project",
         "cli.project.init.description":

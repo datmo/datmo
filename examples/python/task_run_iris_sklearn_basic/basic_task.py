@@ -18,7 +18,7 @@ INSTRUCTIONS
 
 task = datmo.task.run(command="python train_model_1.py")
 
-print("files: ", task.files())
+print("files: ", task.files)
 print("results: ", task.results)
 
 # create a snapshot from the task id directly

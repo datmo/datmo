@@ -30,9 +30,12 @@ class TaskCommand(ProjectCommand):
 
         # Create input dictionaries
         snapshot_dict = {}
-        if kwargs['environment_definition_paths']:
-            snapshot_dict["environment_definition_paths"] =\
-                kwargs['environment_definition_paths']
+
+        # Environment
+        if kwargs.get("environment_id", None) or kwargs.get(
+                "environment_paths", None):
+            mutually_exclusive_args = ["environment_id", "environment_paths"]
+            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
         task_dict = {
             "ports": kwargs['ports'],
             "interactive": kwargs['interactive']

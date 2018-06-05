@@ -57,12 +57,12 @@ class TestTaskCommand():
         pass
 
     def __set_variables(self):
-        self.project = ProjectCommand(self.temp_dir, self.cli_helper)
-        self.project.parse(
+        self.project_command = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.project_command.parse(
             ["init", "--name", "foobar", "--description", "test model"])
-        self.project.execute()
+        self.project_command.execute()
 
-        self.task = TaskCommand(self.temp_dir, self.cli_helper)
+        self.task_command = TaskCommand(self.temp_dir, self.cli_helper)
 
         # Create environment_driver definition
         env_def_path = os.path.join(self.temp_dir, "Dockerfile")
@@ -72,21 +72,21 @@ class TestTaskCommand():
     def test_task_project_not_init(self):
         failed = False
         try:
-            self.task = TaskCommand(self.temp_dir, self.cli_helper)
+            self.task_command = TaskCommand(self.temp_dir, self.cli_helper)
         except ProjectNotInitialized:
             failed = True
         assert failed
 
     def test_task_command(self):
         self.__set_variables()
-        self.task.parse(["task"])
-        assert self.task.execute()
+        self.task_command.parse(["task"])
+        assert self.task_command.execute()
 
     def test_task_run_should_fail1(self):
         self.__set_variables()
         # Test failure case
-        self.task.parse(["task", "run"])
-        result = self.task.execute()
+        self.task_command.parse(["task", "run"])
+        result = self.task_command.execute()
         assert not result
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
@@ -96,8 +96,8 @@ class TestTaskCommand():
 
         # Test failure command execute
         test_command = ["yo", "yo"]
-        self.task.parse(["task", "run", test_command])
-        result = self.task.execute()
+        self.task_command.parse(["task", "run", test_command])
+        result = self.task_command.execute()
         assert result
 
         # Test success case
@@ -106,27 +106,27 @@ class TestTaskCommand():
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
 
         # test for single set of ports
-        self.task.parse([
-            "task", "run", "--ports", test_ports[0], "--environment-def",
+        self.task_command.parse([
+            "task", "run", "--ports", test_ports[0], "--environment-paths",
             test_dockerfile, test_command
         ])
 
         # test for desired side effects
-        assert self.task.args.cmd == test_command
-        assert self.task.args.ports == [test_ports[0]]
-        assert self.task.args.environment_definition_paths == [test_dockerfile]
+        assert self.task_command.args.cmd == test_command
+        assert self.task_command.args.ports == [test_ports[0]]
+        assert self.task_command.args.environment_paths == [test_dockerfile]
 
-        self.task.parse([
+        self.task_command.parse([
             "task", "run", "-p", test_ports[0], "-p", test_ports[1],
-            "--environment-def", test_dockerfile, test_command
+            "--environment-paths", test_dockerfile, test_command
         ])
         # test for desired side effects
-        assert self.task.args.cmd == test_command
-        assert self.task.args.ports == test_ports
-        assert self.task.args.environment_definition_paths == [test_dockerfile]
+        assert self.task_command.args.cmd == test_command
+        assert self.task_command.args.ports == test_ports
+        assert self.task_command.args.environment_paths == [test_dockerfile]
 
         # test proper execution of task run command
-        result = self.task.execute()
+        result = self.task_command.execute()
         time.sleep(1)
         assert result
         assert isinstance(result, CoreTask)
@@ -144,17 +144,17 @@ class TestTaskCommand():
         test_command = "sh -c 'echo accuracy:0.45'"
         test_ports = ["8888:8888", "9999:9999"]
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-        self.task.parse([
+        self.task_command.parse([
             "task", "run", "--ports", test_ports[0], "--ports", test_ports[1],
-            "--environment-def", test_dockerfile, test_command
+            "--environment-paths", test_dockerfile, test_command
         ])
         # test for desired side effects
-        assert self.task.args.cmd == test_command
-        assert self.task.args.ports == test_ports
-        assert self.task.args.environment_definition_paths == [test_dockerfile]
+        assert self.task_command.args.cmd == test_command
+        assert self.task_command.args.ports == test_ports
+        assert self.task_command.args.environment_paths == [test_dockerfile]
 
         # test proper execution of task run command
-        result = self.task.execute()
+        result = self.task_command.execute()
         assert result
         assert isinstance(result, CoreTask)
         assert result.logs
@@ -174,7 +174,7 @@ class TestTaskCommand():
     #         task = TaskCommand(self.temp_dir, self.cli_helper)
     #         print("Parsing command")
     #         task.parse(
-    #             ["task", "run", "--environment-def", test_dockerfile, test_command])
+    #             ["task", "run", "--environment-paths", test_dockerfile, test_command])
     #         print("Executing command")
     #         result = task.execute()
     #         return_dict[procnum] = result
@@ -213,25 +213,25 @@ class TestTaskCommand():
         test_ports = ["8888:8888", "9999:9999"]
 
         # test single ports option before command
-        self.task.parse(
+        self.task_command.parse(
             ["task", "run", "--ports", test_ports[0], test_command])
 
         # test for desired side effects
-        assert self.task.args.cmd == test_command
-        assert self.task.args.ports == [test_ports[0]]
+        assert self.task_command.args.cmd == test_command
+        assert self.task_command.args.ports == [test_ports[0]]
 
         # test multiple ports option before command
-        self.task.parse([
+        self.task_command.parse([
             "task", "run", "--ports", test_ports[0], "--ports", test_ports[1],
             test_command
         ])
 
         # test for desired side effects
-        assert self.task.args.cmd == test_command
-        assert self.task.args.ports == test_ports
+        assert self.task_command.args.cmd == test_command
+        assert self.task_command.args.ports == test_ports
 
         # test proper execution of task run command
-        result = self.task.execute()
+        result = self.task_command.execute()
         assert result
         assert isinstance(result, CoreTask)
         assert result.logs
@@ -242,7 +242,7 @@ class TestTaskCommand():
         self.__set_variables()
         exception_thrown = False
         try:
-            self.task.parse(["task", "run" "--foobar", "foobar"])
+            self.task_command.parse(["task", "run" "--foobar", "foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown
@@ -250,20 +250,21 @@ class TestTaskCommand():
     def test_task_ls(self):
         self.__set_variables()
 
-        self.task.parse(["task", "ls"])
-        task_ls_command = self.task.execute()
+        self.task_command.parse(["task", "ls"])
+        task_ls_command = self.task_command.execute()
 
         assert task_ls_command == True
 
         test_session_id = 'test_session_id'
-        self.task.parse(["task", "ls", "--session-id", test_session_id])
+        self.task_command.parse(
+            ["task", "ls", "--session-id", test_session_id])
 
         # test for desired side effects
-        assert self.task.args.session_id == test_session_id
+        assert self.task_command.args.session_id == test_session_id
 
         failed = False
         try:
-            task_ls_command = self.task.execute()
+            task_ls_command = self.task_command.execute()
         except SessionDoesNotExist:
             failed = True
         assert failed
@@ -272,7 +273,7 @@ class TestTaskCommand():
         self.__set_variables()
         exception_thrown = False
         try:
-            self.task.parse(["task", "ls" "--foobar", "foobar"])
+            self.task_command.parse(["task", "ls" "--foobar", "foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown
@@ -287,37 +288,37 @@ class TestTaskCommand():
         test_ports = "8888:8888"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
 
-        self.task.parse([
-            "task", "run", "--ports", test_ports, "--environment-def",
+        self.task_command.parse([
+            "task", "run", "--ports", test_ports, "--environment-paths",
             test_dockerfile, test_command
         ])
 
-        test_task_obj = self.task.execute()
+        test_task_obj = self.task_command.execute()
 
         # 1) Test option 1
-        self.task.parse(["task", "stop", "--id", test_task_obj.id])
+        self.task_command.parse(["task", "stop", "--id", test_task_obj.id])
 
         # test for desired side effects
-        assert self.task.args.id == test_task_obj.id
+        assert self.task_command.args.id == test_task_obj.id
 
         # test when task id is passed to stop it
-        task_stop_command = self.task.execute()
+        task_stop_command = self.task_command.execute()
         assert task_stop_command == True
 
         # 2) Test option 2
-        self.task.parse(["task", "stop", "--all"])
+        self.task_command.parse(["task", "stop", "--all"])
 
         # test when all is passed to stop all
-        task_stop_command = self.task.execute()
+        task_stop_command = self.task_command.execute()
         assert task_stop_command == True
 
     def test_task_stop_failure_required_args(self):
         self.__set_variables()
         # Passing wrong task id
-        self.task.parse(["task", "stop"])
+        self.task_command.parse(["task", "stop"])
         failed = False
         try:
-            _ = self.task.execute()
+            _ = self.task_command.execute()
         except RequiredArgumentMissing:
             failed = True
         assert failed
@@ -325,10 +326,11 @@ class TestTaskCommand():
     def test_task_stop_failure_mutually_exclusive_vars(self):
         self.__set_variables()
         # Passing wrong task id
-        self.task.parse(["task", "stop", "--id", "invalid-task-id", "--all"])
+        self.task_command.parse(
+            ["task", "stop", "--id", "invalid-task-id", "--all"])
         failed = False
         try:
-            _ = self.task.execute()
+            _ = self.task_command.execute()
         except MutuallyExclusiveArguments:
             failed = True
         assert failed
@@ -337,7 +339,7 @@ class TestTaskCommand():
         self.__set_variables()
         exception_thrown = False
         try:
-            self.task.parse(["task", "stop" "--foobar", "foobar"])
+            self.task_command.parse(["task", "stop" "--foobar", "foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown
@@ -345,8 +347,8 @@ class TestTaskCommand():
     def test_task_stop_invalid_task_id(self):
         self.__set_variables()
         # Passing wrong task id
-        self.task.parse(["task", "stop", "--id", "invalid-task-id"])
+        self.task_command.parse(["task", "stop", "--id", "invalid-task-id"])
 
         # test when wrong task id is passed to stop it
-        result = self.task.execute()
+        result = self.task_command.execute()
         assert not result
