@@ -33,7 +33,7 @@ from datmo.core.controller.environment.environment import \
 from datmo.core.entity.environment import Environment
 from datmo.core.util.exceptions import (
     EntityNotFound, RequiredArgumentMissing, TooManyArgumentsFound,
-    FileAlreadyExistsError, UnstagedChanges)
+    FileAlreadyExistsError, UnstagedChanges, EnvironmentDoesNotExist)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -100,7 +100,7 @@ class TestEnvironmentController():
         failed = False
         try:
             self.environment.setup(options={})
-        except EnvironmentError:
+        except EnvironmentDoesNotExist:
             failed = True
         assert failed
 

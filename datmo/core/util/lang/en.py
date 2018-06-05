@@ -37,8 +37,8 @@ MESSAGES = {
             "{foo} - {bar}",
         "cli.general.tuple.test":
             "%s, %s",
-        "cli.environment.setup.argument":
-            "No library exists with this name: %s",
+        "cli.environment.setup.success":
+            "Setup a new base environment with name: %s and id: %s",
         "cli.environment.create":
             "Creating a new environment",
         "cli.environment.create.success":
@@ -103,6 +103,8 @@ MESSAGES = {
             "Method %s.%s not found",
         "cli.project":
             "No project found in the current directory: %s",
+        "cli.environment.setup.argument":
+            "This name or index does not match any supported environments: %s",
         "cli.task.run":
             "Error while running the task: %s",
         "cli.task.run.already_running":
@@ -333,7 +335,7 @@ MESSAGES = {
     "fatal": {},
     "prompt": {
         "cli.environment.setup.name":
-            "Please choose one of the above environments",
+            "Please select one of the above environments (e.g. 1 or xgboost:cpu)",
         "cli.project.init.name":
             "Enter name for the project",
         "cli.project.init.description":

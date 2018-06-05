@@ -84,8 +84,8 @@ class EnvironmentController(BaseController):
         try:
             _ = self.environment_driver.setup(
                 options, definition_path=self.environment_directory)
-        except Exception as e:
-            raise EnvironmentError(e)
+        except Exception:
+            raise
         create_dict = {
             "name": options['name'],
             "description": "supported base environment created by datmo"

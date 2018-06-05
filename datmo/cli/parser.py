@@ -81,11 +81,17 @@ def get_datmo_parser():
         "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
     )
     environment_create.add_argument(
-        "--message",
-        "-m",
+        "--name",
+        "-n",
+        dest="name",
+        default=None,
+        help="name given to the environment")
+    environment_create.add_argument(
+        "--description",
+        "-d",
         dest="description",
         default=None,
-        help="message to describe environment")
+        help="description of environment")
 
     environment_delete = environment_subcommand_parsers.add_parser(
         "delete", help="delete a environment by id")
