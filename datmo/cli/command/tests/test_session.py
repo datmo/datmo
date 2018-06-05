@@ -33,10 +33,10 @@ class TestSession():
         pass
 
     def __set_variables(self):
-        self.project = ProjectCommand(self.temp_dir, self.cli_helper)
-        self.project.parse(
+        self.project_command = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.project_command.parse(
             ["init", "--name", "foobar", "--description", "test model"])
-        self.project.execute()
+        self.project_command.execute()
         self.session_command = SessionCommand(self.temp_dir, self.cli_helper)
 
     def test_session_project_not_init(self):
