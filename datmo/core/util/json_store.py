@@ -105,10 +105,12 @@ class JSONStore():
 
     def to_dict(self):
         output_dict = dict()
-        # reading json file to stats
+        # reading json file
         if os.path.exists(self.filepath):
             with open(self.filepath) as data_file:
                 meta_data_string = data_file.read()
+            if not meta_data_string:
+                return {}
             try:
                 output_dict = json.loads(meta_data_string)
                 output_dict = yaml.safe_load(json.dumps(output_dict))
