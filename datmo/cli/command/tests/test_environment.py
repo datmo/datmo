@@ -178,9 +178,8 @@ class TestEnvironment():
             f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
-        self.environment_command.parse([
-            "environment", "create", "--environment-def", definition_filepath
-        ])
+        self.environment_command.parse(
+            ["environment", "create", "--paths", definition_filepath])
         result = self.environment_command.execute()
         assert result
 

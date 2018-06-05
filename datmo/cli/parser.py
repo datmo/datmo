@@ -72,8 +72,8 @@ def get_datmo_parser():
         "create environment using the definition paths given, if not looks in your project environment directory, or creates a default"
     )
     environment_create.add_argument(
-        "--environment-def",
-        dest="definition_paths",
+        "--paths",
+        dest="paths",
         default=None,
         action="append",
         type=str,

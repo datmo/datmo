@@ -175,7 +175,7 @@ class TestEnvironmentController():
         input_dict_1 = {
             "name": "test",
             "description": "test description",
-            "definition_paths": [self.definition_filepath],
+            "paths": [self.definition_filepath],
         }
 
         environment_obj = self.environment.create(
@@ -230,7 +230,7 @@ class TestEnvironmentController():
         input_dict_2 = {
             "name": "test",
             "description": "test description",
-            "definition_paths": [home_definition_filepath],
+            "paths": [home_definition_filepath],
         }
 
         # Create environment in the project
@@ -260,7 +260,7 @@ class TestEnvironmentController():
 
         # 4) Test option 4
         input_dict_3 = {
-            "definition_paths": [home_definition_filepath + ">Dockerfile"],
+            "paths": [home_definition_filepath + ">Dockerfile"],
         }
 
         # Create environment in the project
@@ -292,7 +292,7 @@ class TestEnvironmentController():
         definition_filepath = os.path.join(self.environment.home, "Dockerfile")
 
         input_dict = {
-            "definition_paths": [
+            "paths": [
                 definition_filepath + ">Dockerfile",
                 definition_filepath + ">Dockerfile"
             ],
@@ -330,7 +330,7 @@ class TestEnvironmentController():
             f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
             f.write(to_bytes(str("RUN echo " + random_text)))
         input_dict = {
-            "definition_paths": [definition_filepath],
+            "paths": [definition_filepath],
         }
 
         # 2) Test option 2
@@ -452,7 +452,7 @@ class TestEnvironmentController():
         }
 
         input_dict = {
-            "definition_paths": [definition_filepath],
+            "paths": [definition_filepath],
         }
 
         # Create environment in the project
@@ -624,7 +624,7 @@ class TestEnvironmentController():
             f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         input_dict_1 = {
-            "definition_paths": [definition_path_1],
+            "paths": [definition_path_1],
         }
 
         # Create environment in the project
@@ -636,7 +636,7 @@ class TestEnvironmentController():
             f.write(to_bytes(str("FROM datmo/scikit-opencv")))
 
         input_dict_2 = {
-            "definition_paths": [definition_path_2 + ">Dockerfile"],
+            "paths": [definition_path_2 + ">Dockerfile"],
         }
 
         # Create second environment in the project
@@ -659,7 +659,7 @@ class TestEnvironmentController():
             f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
 
         input_dict = {
-            "definition_paths": [definition_filepath],
+            "paths": [definition_filepath],
         }
 
         # Create environment in the project
@@ -731,7 +731,7 @@ class TestEnvironmentController():
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         input_dict = {
-            "definition_paths": [definition_filepath],
+            "paths": [definition_filepath],
         }
 
         # Create environment in the project

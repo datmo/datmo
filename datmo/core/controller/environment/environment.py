@@ -99,7 +99,7 @@ class EnvironmentController(BaseController):
         ----------
         dictionary : dict
             optional values to populate required environment entity args
-                definition_paths : list, optional
+                paths : list, optional
                     list of absolute or relative filepaths and/or dirpaths to collect with destination names
                     (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
                     (default if none provided is to pull from project environment folder and project root. If none found create default definition)
@@ -137,8 +137,8 @@ class EnvironmentController(BaseController):
         paths = []
 
         # a. add in user given paths as is if they exist
-        if "definition_paths" in dictionary and dictionary['definition_paths']:
-            paths.extend(dictionary['definition_paths'])
+        if "paths" in dictionary and dictionary['paths']:
+            paths.extend(dictionary['paths'])
 
         # b. if there exists projet environment directory AND no paths exist, add in absolute paths
         if not paths and os.path.isdir(self.environment_directory):
