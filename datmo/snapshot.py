@@ -258,9 +258,9 @@ def create(message,
         if environment_id:
             snapshot_create_dict['environment_id'] = environment_id
         elif isinstance(env, list):
-            snapshot_create_dict['environment_definition_paths'] = env
+            snapshot_create_dict['environment_paths'] = env
         elif env:
-            snapshot_create_dict['environment_definition_paths'] = [env]
+            snapshot_create_dict['environment_paths'] = [env]
         if paths:
             snapshot_create_dict['paths'] = paths
         if config:

@@ -162,7 +162,7 @@ class TestSnapshot():
             test_label,
             "--session-id",
             test_session_id,
-            "--environment-def",
+            "--environment-paths",
             test_environment_definition_filepath,
             "--config-filepath",
             test_config_filepath,
@@ -176,7 +176,7 @@ class TestSnapshot():
         assert self.snapshot_command.args.message == test_message
         assert self.snapshot_command.args.label == test_label
         assert self.snapshot_command.args.session_id == test_session_id
-        assert self.snapshot_command.args.environment_definition_paths == [
+        assert self.snapshot_command.args.environment_paths == [
             test_environment_definition_filepath
         ]
         assert self.snapshot_command.args.config_filepath == test_config_filepath
@@ -186,7 +186,7 @@ class TestSnapshot():
         # test multiple paths
         self.snapshot_command.parse([
             "snapshot", "create", "--message", test_message, "--label",
-            test_label, "--session-id", test_session_id, "--environment-def",
+            test_label, "--session-id", test_session_id, "--environment-paths",
             test_environment_definition_filepath, "--config-filepath",
             test_config_filepath, "--stats-filepath", test_stats_filepath,
             "--paths", test_paths[0], "--paths", test_paths[1]
@@ -196,7 +196,7 @@ class TestSnapshot():
         assert self.snapshot_command.args.message == test_message
         assert self.snapshot_command.args.label == test_label
         assert self.snapshot_command.args.session_id == test_session_id
-        assert self.snapshot_command.args.environment_definition_paths == [
+        assert self.snapshot_command.args.environment_paths == [
             test_environment_definition_filepath
         ]
         assert self.snapshot_command.args.config_filepath == test_config_filepath
@@ -259,7 +259,7 @@ class TestSnapshot():
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         self.task = TaskCommand(self.temp_dir, self.cli_helper)
         self.task.parse([
-            "task", "run", "--environment-def", test_dockerfile, test_command
+            "task", "run", "--environment-paths", test_dockerfile, test_command
         ])
 
         # test proper execution of task run command
@@ -289,7 +289,7 @@ class TestSnapshot():
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         self.task = TaskCommand(self.temp_dir, self.cli_helper)
         self.task.parse([
-            "task", "run", "--environment-def", test_dockerfile, test_command
+            "task", "run", "--environment-paths", test_dockerfile, test_command
         ])
 
         # test proper execution of task run command
@@ -314,7 +314,7 @@ class TestSnapshot():
             # test task id with environment-def
             self.snapshot_command.parse([
                 "snapshot", "create", "--message", test_message, "--task-id",
-                task_id, "--environment-def", "test_environment_def"
+                task_id, "--environment-paths", "test_environment_path"
             ])
             _ = self.snapshot_command.execute()
         except SnapshotCreateFromTaskArgs:
@@ -407,7 +407,7 @@ class TestSnapshot():
                 test_session_id,
                 "--environment-id",
                 test_environment_id,
-                "--environment-def",
+                "--environment-paths",
                 test_environment_definition_filepath,
             ])
             _ = self.snapshot_command.execute()

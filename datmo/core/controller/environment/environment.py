@@ -1,10 +1,11 @@
 import os
 import shutil
 
-from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
 from datmo.core.controller.file.file_collection import FileCollectionController
 from datmo.core.entity.environment import Environment
+from datmo.core.util.i18n import get as __
+from datmo.core.util.validation import validate
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.misc_functions import get_datmo_temp_path, parse_path, list_all_filepaths
 from datmo.core.util.exceptions import PathDoesNotExist, RequiredArgumentMissing, TooManyArgumentsFound,\
@@ -128,6 +129,8 @@ class EnvironmentController(BaseController):
         # Validate Inputs
         create_dict = {"model_id": self.model.id}
         create_dict["driver_type"] = self.environment_driver.type
+
+        validate("create_environment", dictionary)
 
         # Create temp environment folder
         _temp_env_dir = get_datmo_temp_path(self.home)

@@ -204,7 +204,7 @@ class TestSnapshotController():
         assert snapshot_obj.config == {}
         assert snapshot_obj.stats == {}
 
-    def test_create_success_env_definition_paths(self):
+    def test_create_success_env_paths(self):
         self.__setup()
         # Create environment definition
         random_dir = os.path.join(self.snapshot.home, "random_dir")
@@ -212,11 +212,11 @@ class TestSnapshotController():
         env_def_path = os.path.join(random_dir, "randomDockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
-        environment_definition_paths = [env_def_path + ">Dockerfile"]
+        environment_paths = [env_def_path + ">Dockerfile"]
         # Test default values for snapshot, success
         snapshot_obj = self.snapshot.create({
             "message": "my test snapshot",
-            "environment_definition_paths": environment_definition_paths
+            "environment_paths": environment_paths
         })
 
         assert isinstance(snapshot_obj, Snapshot)

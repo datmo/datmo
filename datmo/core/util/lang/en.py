@@ -230,7 +230,7 @@ MESSAGES = {
         "controller.environment.setup.unstaged":
             "Unstaged changes found in project environment directory: %s",
         "controller.environment.create":
-            "Required argument definition_paths not present in input",
+            "Required argument paths not present in input",
         "controller.environment.create.filepath.dne":
             "Path specified in definition paths does not exist: %s",
         "controller.file.driver.create_collection.file_exists":

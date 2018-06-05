@@ -104,7 +104,8 @@ def create_unique_hash(base_hash=None, salt=None):
 def mutually_exclusive(mutually_exclusive_args, input_dictionary,
                        output_dictionary):
     """
-    Goes through args to check for and adds them to a dictionary. The dictionary
+    Goes through args to check for to see if they exist in the input_dictionary
+    and adds them to output_dictionary. The output_dictionary
     is mutated in the function. This function will raise errors if at least
     one of the arguments is not present or more than 1
 

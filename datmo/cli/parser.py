@@ -140,14 +140,24 @@ def get_datmo_parser():
         default=None,
         help="environment id from environment object")
     snapshot_create.add_argument(
-        "--environment-def",
-        dest="environment_definition_paths",
+        "--environment-paths",
+        dest="environment_paths",
         default=None,
         action="append",
         type=str,
         help=
         "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
     )
+    # snapshot_create.add_argument(
+    #     "--environment-name",
+    #     dest="environment_name",
+    #     default=None,
+    #     help="name given to the environment")
+    # snapshot_create.add_argument(
+    #     "--environment-description",
+    #     dest="environment_description",
+    #     default=None,
+    #     help="description of environment")
 
     snapshot_create.add_argument(
         "--paths",
@@ -288,16 +298,30 @@ def get_datmo_parser():
         network port mapping during task (e.g. 8888:8888). Left is the host machine port and right
         is the environment port available during a run.
     """)
-    # run.add_argument("--data", nargs="*", dest="data", type=str, help="Path for data to be used during the Task")
     task_run.add_argument(
-        "--environment-def",
-        dest="environment_definition_paths",
+        "--environment-id",
+        dest="environment_id",
+        default=None,
+        help="environment id from environment object")
+    task_run.add_argument(
+        "--environment-paths",
+        dest="environment_paths",
         default=None,
         action="append",
         type=str,
         help=
         "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
     )
+    # task_run.add_argument(
+    #     "--environment-name",
+    #     dest="environment_name",
+    #     default=None,
+    #     help="name given to the environment")
+    # task_run.add_argument(
+    #     "--environment-description",
+    #     dest="environment_description",
+    #     default=None,
+    #     help="description of environment")
     task_run.add_argument(
         "--interactive",
         dest="interactive",

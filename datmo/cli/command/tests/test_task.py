@@ -107,27 +107,23 @@ class TestTaskCommand():
 
         # test for single set of ports
         self.task_command.parse([
-            "task", "run", "--ports", test_ports[0], "--environment-def",
+            "task", "run", "--ports", test_ports[0], "--environment-paths",
             test_dockerfile, test_command
         ])
 
         # test for desired side effects
         assert self.task_command.args.cmd == test_command
         assert self.task_command.args.ports == [test_ports[0]]
-        assert self.task_command.args.environment_definition_paths == [
-            test_dockerfile
-        ]
+        assert self.task_command.args.environment_paths == [test_dockerfile]
 
         self.task_command.parse([
             "task", "run", "-p", test_ports[0], "-p", test_ports[1],
-            "--environment-def", test_dockerfile, test_command
+            "--environment-paths", test_dockerfile, test_command
         ])
         # test for desired side effects
         assert self.task_command.args.cmd == test_command
         assert self.task_command.args.ports == test_ports
-        assert self.task_command.args.environment_definition_paths == [
-            test_dockerfile
-        ]
+        assert self.task_command.args.environment_paths == [test_dockerfile]
 
         # test proper execution of task run command
         result = self.task_command.execute()
@@ -150,14 +146,12 @@ class TestTaskCommand():
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         self.task_command.parse([
             "task", "run", "--ports", test_ports[0], "--ports", test_ports[1],
-            "--environment-def", test_dockerfile, test_command
+            "--environment-paths", test_dockerfile, test_command
         ])
         # test for desired side effects
         assert self.task_command.args.cmd == test_command
         assert self.task_command.args.ports == test_ports
-        assert self.task_command.args.environment_definition_paths == [
-            test_dockerfile
-        ]
+        assert self.task_command.args.environment_paths == [test_dockerfile]
 
         # test proper execution of task run command
         result = self.task_command.execute()
@@ -180,7 +174,7 @@ class TestTaskCommand():
     #         task = TaskCommand(self.temp_dir, self.cli_helper)
     #         print("Parsing command")
     #         task.parse(
-    #             ["task", "run", "--environment-def", test_dockerfile, test_command])
+    #             ["task", "run", "--environment-paths", test_dockerfile, test_command])
     #         print("Executing command")
     #         result = task.execute()
     #         return_dict[procnum] = result
@@ -295,7 +289,7 @@ class TestTaskCommand():
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
 
         self.task_command.parse([
-            "task", "run", "--ports", test_ports, "--environment-def",
+            "task", "run", "--ports", test_ports, "--environment-paths",
             test_dockerfile, test_command
         ])
 

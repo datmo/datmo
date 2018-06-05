@@ -54,9 +54,9 @@ class TestEnvironmentController():
         self.project.init("test_setup", "test description")
         with open(os.path.join(self.temp_dir, "test.txt"), "wb") as f:
             f.write(to_bytes("hello"))
-        with open(
-                os.path.join(self.environment.environment_directory, "test"),
-                "wb") as f:
+        self.random_filepath = os.path.join(
+            self.environment.environment_directory, "test")
+        with open(self.random_filepath, "wb") as f:
             f.write(to_bytes("cool"))
         self.definition_filepath = os.path.join(
             self.environment.environment_directory, "Dockerfile")
@@ -533,7 +533,7 @@ class TestEnvironmentController():
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         input_dict = {
-            "definition_filepath": [definition_filepath],
+            "paths": [definition_filepath],
         }
 
         # Create environment in the project
@@ -824,7 +824,9 @@ class TestEnvironmentController():
         assert result == environment_obj.unique_hash
 
         # Test if the hash is the same if the same file is passed in as an input
-        input_dict = {"definition_path": self.definition_filepath}
+        input_dict = {
+            "paths": [self.definition_filepath, self.random_filepath]
+        }
         environment_obj_1 = self.environment.create(
             input_dict, save_hardware_file=False)
         result = self.environment._calculate_project_environment_hash(
