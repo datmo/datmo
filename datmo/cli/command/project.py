@@ -1,8 +1,9 @@
 from datmo import __version__
 from datmo.core.util.i18n import get as __
 from datmo.cli.command.base import BaseCommand
+from datmo.core.util.misc_functions import mutually_exclusive
 from datmo.core.controller.project import ProjectController
-
+from datmo.core.controller.task import TaskController
 
 class ProjectCommand(BaseCommand):
     # NOTE: dal_driver is not passed into the project because it is created
@@ -170,3 +171,37 @@ class ProjectCommand(BaseCommand):
                             "path": self.project_controller.home
                         }))
         return False
+
+    def notebook(self, **kwargs):
+        self.cli_helper.echo(__("info", "cli.project.notebook"))
+        self.task_controller = TaskController(home=self.project_controller.home)
+
+        # Creating input dictionaries
+        snapshot_dict = {}
+
+        # Environment
+        if kwargs.get("environment_id", None) or kwargs.get(
+                "environment_paths", None):
+            mutually_exclusive_args = ["environment_id", "environment_paths"]
+            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+
+        task_dict = {
+            "ports": ["8888:8888"],
+            "command_list": ["jupyter", "notebook"]
+        }
+
+        # Create the task object
+        task_obj = self.task_controller.create()
+
+        # Pass in the task
+        try:
+            updated_task_obj = self.task_controller.run(
+                task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
+        except Exception as e:
+            self.logger.error("%s %s" % (e, task_dict))
+            self.cli_helper.echo(__("error", "cli.project.notebook", task_obj.id))
+            return False
+
+        self.cli_helper.echo("Ran notebook with task id: %s" % updated_task_obj.id)
+
+        return updated_task_obj

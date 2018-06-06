@@ -112,5 +112,5 @@ class Helper():
     def get_command_choices(self):
         return [
             "init", "version", "--version", "-v", "status", "cleanup",
-            "snapshot", "task", "environment"
+            "snapshot", "task", "notebook", "environment"
         ]
