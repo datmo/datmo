@@ -126,18 +126,30 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
     @staticmethod
     def get_supported_environments():
-        # To get the current frameworks
+        # To get the current environments
         return [
-            "xgboost:cpu", "keras-tensorflow:cpu", "keras-tensorflow:gpu",
-            "tensorflow:cpu", "tensorflow:gpu", "scikit-opencv:py-2.7",
-            "theano:cpu", "theano:gpu", "keras-theano:cpu", "keras-theano:gpu",
-            "kaggle:python", "spacy:py-2.7", "pytorch:cpu", "catboost:cpu"
-        ]
+                ("xgboost:cpu", "sklearn, numpy, scipy, matplotlib and xgboost for numerical data science problems"),
+                ("keras-tensorflow:cpu", "keras with tensorflow backend (CPU) + sklearn, numpy, scipy, matplotlib"),
+                ("keras-tensorflow:gpu", "keras with tensorflow backend (GPU) + sklearn, numpy, scipy, matplotlib"),
+                ("tensorflow:cpu", "tensorflow (CPU) + sklearn, numpy, scipy, matplotlib"),
+                ("tensorflow:gpu", "tensorflow (GPU) + sklearn, numpy, scipy, matplotlib"),
+                ("scikit-opencv:py-2.7", "sklearn, scipy, opencv, Pillow, numpy"),
+                ("theano:cpu", "theano (CPU) + scipy, numpy"),
+                ("theano:gpu", "theano (GPU) + scipy, numpy"),
+                ("keras-theano:cpu", "keras with theano (CPU) + scipy, numpy"),
+                ("keras-theano:gpu", "keras with theano (GPU) + scipy, numpy"),
+                ("kaggle:python", "environment as provided in kaggle kernels for numerical data science problems"),
+                ("spacy:py-2.7", "Spacy for NLP + scipy, numpy"),
+                ("pytorch:cpu", "Pytorch (CPU)"),
+                ("catboost:cpu", "catboost + sklearn, numpy, scipy")
+                ]
 
     def setup(self, options, definition_path):
         name = options.get("name", None)
+        available_environments = self.get_supported_environments()
+        available_environment_names, available_environment_description = zip(*available_environments)
         # Validate that the name exists
-        if not name or name not in self.get_supported_environments():
+        if not name or name not in available_environment_names:
             raise EnvironmentDoesNotExist()
         # Validate the given definition path exists
         if not os.path.isdir(definition_path):

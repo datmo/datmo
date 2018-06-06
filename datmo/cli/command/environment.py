@@ -24,17 +24,20 @@ class EnvironmentCommand(ProjectCommand):
         name = kwargs.get("name", None)
         available_environments = self.environment_controller.get_supported_environments(
         )
+        available_environment_names, available_environment_description = zip(*available_environments)
         if not name:
-            for idx, n in enumerate(available_environments):
-                self.cli_helper.echo("(%s) %s" % (idx + 1, n))
+            for idx, environment_name_description in enumerate(available_environments):
+                environment_name = environment_name_description[0]
+                environment_description = environment_name_description[1]
+                self.cli_helper.echo("(%s) %s: %s" % (idx + 1, environment_name, environment_description))
             input_name = self.cli_helper.prompt(
                 __("prompt", "cli.environment.setup.name"))
             try:
                 name_index = int(input_name)
             except ValueError:
                 name_index = 0
-            if name_index > 0 and name_index < len(available_environments):
-                name = available_environments[name_index - 1]
+            if 0 < name_index < len(available_environments):
+                name = available_environment_names[name_index - 1]
             elif name_index == 0:
                 name = input_name
             else:
