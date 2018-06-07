@@ -187,7 +187,8 @@ class ProjectCommand(BaseCommand):
 
         task_dict = {
             "ports": ["8888:8888"],
-            "command_list": ["jupyter", "notebook"]
+            "command_list": ["jupyter", "notebook"],
+            "mem_limit": kwargs["mem_limit"]
         }
 
         # Create the task object

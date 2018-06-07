@@ -207,15 +207,18 @@ class TestProject():
 
         # Create environment_driver definition
         env_def_path = os.path.join(self.temp_dir, "Dockerfile")
+        test_mem_limit = "4g"
         with open(env_def_path, "wb") as f:
             f.write(to_bytes(str("FROM datmo/xgboost:cpu\n")))
 
         # test single ports option before command
-        self.project_command.parse(["notebook", "--gpu", "--environment-paths", env_def_path])
+        self.project_command.parse(["notebook", "--gpu", "--environment-paths", env_def_path,
+                                    "--mem-limit", test_mem_limit,])
 
         # test for desired side effects
         assert self.project_command.args.gpu == True
         assert self.project_command.args.environment_paths == [env_def_path]
+        assert self.project_command.args.mem_limit == test_mem_limit
 
         # test multiple ports option before command
         self.project_command.parse(["notebook"])

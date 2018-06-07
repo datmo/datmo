@@ -39,6 +39,13 @@ def get_datmo_parser():
                                 help=
                                 "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
                             )
+    notebook_parser.add_argument(
+        "--mem-limit",
+        "-m",
+        dest="mem_limit",
+        default=None,
+        type=str,
+        help="maximum amount of memory the notebook environment can use (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes)")
 
     # Session
     session_parser = subparsers.add_parser("session", help="session module")
@@ -334,6 +341,13 @@ def get_datmo_parser():
         help=
         "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
     )
+    task_run.add_argument(
+        "--mem-limit",
+        "-m",
+        dest="mem_limit",
+        default=None,
+        type=str,
+        help="maximum amount of memory the task environment can use (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes)")
     # task_run.add_argument(
     #     "--environment-name",
     #     dest="environment_name",

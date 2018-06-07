@@ -90,6 +90,7 @@ class TaskController(BaseController):
                 which maps the running host port (right) to that of the environment (left)
             name : str
             volumes : dict
+            mem_limit : str
             detach : bool
             stdin_open : bool
             tty : bool
@@ -111,6 +112,7 @@ class TaskController(BaseController):
             "ports": options.get('ports', None),
             "name": options.get('name', None),
             "volumes": options.get('volumes', None),
+            "mem_limit": options.get('mem_limit', None),
             "gpu": options.get('gpu', False),
             "detach": options.get('detach', False),
             "stdin_open": options.get('stdin_open', False),
@@ -245,6 +247,8 @@ class TaskController(BaseController):
                 task_dict.get('command_list', task_obj.command_list),
             "gpu":
                 task_dict.get('gpu', False),
+            "mem_limit":
+                task_dict.get('mem_limit', None),
             "interactive":
                 task_dict.get('interactive', task_obj.interactive),
             "detach":
@@ -291,6 +295,7 @@ class TaskController(BaseController):
                         'mode': 'rw'
                     }
                 },
+                "mem_limit": task_obj.mem_limit,
                 "gpu": task_obj.gpu,
                 "detach": task_obj.detach,
                 "stdin_open": task_obj.interactive,

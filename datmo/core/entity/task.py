@@ -41,6 +41,10 @@ class Task():
             list of string mappings from host system (left) to environment (right)
             (e.g. ["9999:9999", "8888:8888"])
             (default is None, which means it isn't set yet)
+        mem_limit : string, optional
+            maximum amount of memory the environment can use
+            (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes,
+            megabytes, or gigabytes. memory limit is contrained by total memory of the VM in which docker runs)
         task_dirpath : str, optional
             task directory path relative to the project root
             (default is None, which means it isn't set yet)
@@ -135,6 +139,7 @@ class Task():
         self.interactive = dictionary.get('interactive', False)
         self.detach = dictionary.get('detach', False)
         self.gpu = dictionary.get('gpu', False)
+        self.mem_limit = dictionary.get('mem_limit', None)
         self.ports = dictionary.get('ports', None)
         self.task_dirpath = dictionary.get('task_dirpath', None)
         self.log_filepath = dictionary.get('log_filepath', None)
