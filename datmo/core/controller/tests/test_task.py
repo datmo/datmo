@@ -86,10 +86,8 @@ class TestTaskController():
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
-        definition_paths = [env_def_path]
-        environment_obj = self.environment.create({
-            "definition_paths": definition_paths
-        })
+        paths = [env_def_path]
+        environment_obj = self.environment.create({"paths": paths})
 
         # Set log filepath
         log_filepath = os.path.join(self.task.home, "test.log")

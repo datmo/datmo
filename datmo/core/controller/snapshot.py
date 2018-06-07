@@ -49,7 +49,7 @@ class SnapshotController(BaseController):
             raise ProjectNotInitialized(
                 __("error", "controller.snapshot.__init__"))
 
-    def create(self, incoming_dictionary):
+    def create(self, dictionary):
         """Create snapshot object
 
         Parameters
@@ -76,7 +76,7 @@ class SnapshotController(BaseController):
             environment :
                 environment_id : str, optional
                     id for environment used to create snapshot
-                environment_definition_paths : list, optional
+                environment_paths : list, optional
                     list of absolute or relative filepaths and/or dirpaths to collect with destination names
                     (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
 
@@ -155,29 +155,29 @@ class SnapshotController(BaseController):
             "session_id": self.current_session.id,
         }
 
-        validate("create_snapshot", incoming_dictionary)
+        validate("create_snapshot", dictionary)
 
         # Message must be present
-        if "message" in incoming_dictionary:
-            create_dict['message'] = incoming_dictionary['message']
+        if "message" in dictionary:
+            create_dict['message'] = dictionary['message']
         else:
             raise RequiredArgumentMissing(
                 __("error", "controller.snapshot.create.arg", "message"))
 
         # Code setup
-        self._code_setup(incoming_dictionary, create_dict)
+        self._code_setup(dictionary, create_dict)
 
         # Environment setup
-        self._env_setup(incoming_dictionary, create_dict)
+        self._env_setup(dictionary, create_dict)
 
         # File setup
-        self._file_setup(incoming_dictionary, create_dict)
+        self._file_setup(dictionary, create_dict)
 
         # Config setup
-        self._config_setup(incoming_dictionary, create_dict)
+        self._config_setup(dictionary, create_dict)
 
         # Stats setup
-        self._stats_setup(incoming_dictionary, create_dict)
+        self._stats_setup(dictionary, create_dict)
 
         # If snapshot object with required args already exists, return it
         # DO NOT create a new snapshot with the same required arguments
@@ -194,8 +194,8 @@ class SnapshotController(BaseController):
         # Optional args for Snapshot entity
         optional_args = ["task_id", "label", "visible"]
         for optional_arg in optional_args:
-            if optional_arg in incoming_dictionary:
-                create_dict[optional_arg] = incoming_dictionary[optional_arg]
+            if optional_arg in dictionary:
+                create_dict[optional_arg] = dictionary[optional_arg]
 
         # Create snapshot and return
         return self.dal.snapshot.create(Snapshot(create_dict))
@@ -440,10 +440,9 @@ class SnapshotController(BaseController):
         if "environment_id" in incoming_dictionary:
             create_dict['environment_id'] = incoming_dictionary[
                 'environment_id']
-        elif "environment_definition_paths" in incoming_dictionary:
+        elif "environment_paths" in incoming_dictionary:
             create_dict['environment_id'] = self.environment.create({
-                "definition_paths":
-                    incoming_dictionary['environment_definition_paths']
+                "paths": incoming_dictionary['environment_paths']
             }).id
         else:
             # create some default environment

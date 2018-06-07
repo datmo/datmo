@@ -53,8 +53,91 @@ class TestEnvironment():
         self.environment_command = EnvironmentCommand(self.temp_dir,
                                                       self.cli_helper)
 
+    def test_environment_setup_parameter(self):
+        # Setup the environement by passing name
+        self.__set_variables()
+        definition_filepath = os.path.join(
+            self.environment_command.environment_controller.
+            environment_directory, "Dockerfile")
+
+        # Test pass with correct input
+        test_name = "xgboost:cpu"
+        self.environment_command.parse(
+            ["environment", "setup", "--name", test_name])
+        result = self.environment_command.execute()
+
+        assert result
+        assert os.path.isfile(definition_filepath)
+        assert "FROM datmo/xgboost:cpu" in open(definition_filepath,
+                                                "r").read()
+
+        # Test fail with wrong input
+        test_name = "random"
+        self.environment_command.parse(
+            ["environment", "setup", "--name", test_name])
+        result = self.environment_command.execute()
+        assert not result
+
+    def test_environment_setup_prompt(self):
+        # Setup the environement by passing name
+        self.__set_variables()
+        definition_filepath = os.path.join(
+            self.environment_command.environment_controller.
+            environment_directory, "Dockerfile")
+
+        # Test success with correct prompt input using numbers
+        self.environment_command.parse(["environment", "setup"])
+
+        @self.environment_command.cli_helper.input("1\n")
+        def dummy(self):
+            return self.environment_command.execute()
+
+        result = dummy(self)
+
+        assert result
+        assert os.path.isfile(definition_filepath)
+        assert "FROM datmo/xgboost:cpu" in open(definition_filepath,
+                                                "r").read()
+
+        # Test success with correct prompt input using string
+        test_name = "xgboost:cpu"
+        self.environment_command.parse(["environment", "setup"])
+
+        @self.environment_command.cli_helper.input(test_name + "\n")
+        def dummy(self):
+            return self.environment_command.execute()
+
+        result = dummy(self)
+
+        assert result
+        assert os.path.isfile(definition_filepath)
+        assert "FROM datmo/xgboost:cpu" in open(definition_filepath,
+                                                "r").read()
+
+        # Test failure with prompt input number out of range
+        self.environment_command.parse(["environment", "setup"])
+
+        @self.environment_command.cli_helper.input("-1\n")
+        def dummy(self):
+            return self.environment_command.execute()
+
+        result = dummy(self)
+
+        assert not result
+
+        # Test failure with prompt input string incorrect
+        self.environment_command.parse(["environment", "setup"])
+
+        @self.environment_command.cli_helper.input("random\n")
+        def dummy(self):
+            return self.environment_command.execute()
+
+        result = dummy(self)
+
+        assert not result
+
     def test_environment_create(self):
-        # 1) Environment definition file in `datmo_environment` folder
+        # 1) Environment definition file in project environment directory (with name / description)
         # 2) Environment definition file passed as an option
         # 3) Environment definition file in root project folder
         # 4) Environment definition file in root project folder (should return the same environment)
@@ -62,46 +145,46 @@ class TestEnvironment():
         # 6) No environment definition file present (should return the same environment)
         self.__set_variables()
         # Test option 1
-        # Create environment definition in `datmo_environment` folder
-        datmo_environment_folder = os.path.join(self.temp_dir,
-                                                "datmo_environment")
-
-        definition_filepath = os.path.join(datmo_environment_folder,
-                                           "Dockerfile")
-        random_text = str(uuid.uuid1())
-        with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
-            f.write(to_bytes(str("RUN echo " + random_text)))
-
-        self.environment_command.parse(["environment", "create"])
-        result = self.environment_command.execute()
-
-        assert result
-
-        # remove datmo_environment directory
-        shutil.rmtree(datmo_environment_folder)
-
-        # Test option 2
-        random_datmo_environment_folder = os.path.join(self.temp_dir,
-                                                       "random_datmo_dir")
-        os.makedirs(random_datmo_environment_folder)
-
-        definition_filepath = os.path.join(random_datmo_environment_folder,
-                                           "Dockerfile")
+        # Create environment definition in project environment directory
+        definition_filepath = os.path.join(
+            self.environment_command.environment_controller.
+            environment_directory, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         self.environment_command.parse([
-            "environment", "create", "--environment-def", definition_filepath
+            "environment", "create", "--name", "test", "--description",
+            "test description"
         ])
         result = self.environment_command.execute()
 
         assert result
+        assert result.name == "test"
+        assert result.description == "test description"
 
-        # remove datmo environment directory
-        shutil.rmtree(random_datmo_environment_folder)
+        # remove datmo_environment directory
+        shutil.rmtree(self.environment_command.environment_controller.
+                      environment_directory)
+
+        # Test option 2
+        random_dir = os.path.join(self.temp_dir, "random_datmo_dir")
+        os.makedirs(random_dir)
+
+        definition_filepath = os.path.join(random_dir, "Dockerfile")
+        random_text = str(uuid.uuid1())
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
+            f.write(to_bytes(str("RUN echo " + random_text)))
+
+        self.environment_command.parse(
+            ["environment", "create", "--paths", definition_filepath])
+        result = self.environment_command.execute()
+        assert result
+
+        # remove directory with Dockerfile
+        shutil.rmtree(random_dir)
 
         # Test option 3
         definition_filepath = os.path.join(self.temp_dir, "Dockerfile")
@@ -112,7 +195,6 @@ class TestEnvironment():
 
         self.environment_command.parse(["environment", "create"])
         result = self.environment_command.execute()
-
         assert result
 
         # Test option 4
@@ -125,23 +207,21 @@ class TestEnvironment():
         # Test option 5
         self.environment_command.parse(["environment", "create"])
         result = self.environment_command.execute()
-
         assert result
 
         # Test option 6
         self.environment_command.parse(["environment", "create"])
         result_2 = self.environment_command.execute()
-
         assert result == result_2
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_environment_delete(self):
         self.__set_variables()
         self.environment_command.parse(["environment", "create"])
-        environment_id = self.environment_command.execute()
+        environment_obj = self.environment_command.execute()
 
         self.environment_command.parse(
-            ["environment", "delete", "--id", environment_id])
+            ["environment", "delete", "--id", environment_obj.id])
         result = self.environment_command.execute()
 
         assert result
@@ -149,9 +229,9 @@ class TestEnvironment():
     def test_environment_ls(self):
         self.__set_variables()
         self.environment_command.parse(["environment", "create"])
-        environment_id = self.environment_command.execute()
+        created_environment_obj = self.environment_command.execute()
 
         self.environment_command.parse(["environment", "ls"])
-        environment_ids = self.environment_command.execute()
+        environment_objs = self.environment_command.execute()
 
-        assert environment_id in environment_ids
+        assert created_environment_obj in environment_objs

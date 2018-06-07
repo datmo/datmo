@@ -16,6 +16,17 @@ create_session:
   current:
     type: boolean
 
+create_environment:
+  paths:
+    nullable: true
+    type: list
+  name:
+    nullable: true
+    type: string
+  description:
+    nullable: true
+    type: string
+
 create_snapshot:
   code_id:
     type: string
@@ -24,7 +35,7 @@ create_snapshot:
 
   environment_id:
     type: string
-  environment_definition_paths:
+  environment_paths:
     type: list
 
   file_collection_id:
