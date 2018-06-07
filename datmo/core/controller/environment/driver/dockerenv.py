@@ -402,6 +402,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                       ports=None,
                       name=None,
                       volumes=None,
+                      mem_limit=None,
                       runtime=None,
                       detach=False,
                       stdin_open=False,
@@ -426,6 +427,10 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         volumes : dict, optional
             Includes storage volumes for docker
             (e.g. { outsidepath1 : {"bind", containerpath2, "mode", MODE} })
+        mem_limit : str, optional
+            maximum amount of memory the container can use
+            (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes,
+            megabytes, or gigabytes. memory limit is contrained by total memory of the VM in which docker runs)
         detach : bool, optional
             True if container is to be detached else False
         stdin_open : bool, optional
@@ -461,6 +466,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                     container = \
                         self.client.containers.run(image_name, command, ports=ports,
                                                    name=name, volumes=volumes,
+                                                   mem_limit=mem_limit,
                                                    detach=detach, stdin_open=stdin_open)
                     return container
                 else:
@@ -471,6 +477,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                         ports=ports,
                         name=name,
                         volumes=volumes,
+                        mem_limit=mem_limit,
                         detach=detach,
                         stdin_open=stdin_open)
                     return logs.decode()
@@ -485,6 +492,12 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 if runtime:
                     docker_shell_cmd_list.append("--runtime")
                     docker_shell_cmd_list.append(runtime)
+
+                if mem_limit:
+                    docker_shell_cmd_list.append("-m")
+                    docker_shell_cmd_list.append(mem_limit)
+                    docker_shell_cmd_list.append("--memory-swap")
+                    docker_shell_cmd_list.append("-1")
 
                 if stdin_open:
                     docker_shell_cmd_list.append("-i")
