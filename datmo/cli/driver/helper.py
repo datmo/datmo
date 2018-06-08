@@ -90,6 +90,7 @@ class Helper():
                 output += "\n"
         else:
             output = ""
+
         # Save final output to file if path given
         if output_path:
             self.echo("Downloading output to path %s" % output_path)

@@ -57,6 +57,8 @@ def printable_dict(input_dictionary):
 
 
 def printable_string(string, max_width=40):
+    if not string:
+        return ""
     return '\n'.join(textwrap.wrap(string, max_width))
 
 

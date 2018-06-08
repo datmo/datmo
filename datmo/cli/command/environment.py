@@ -79,10 +79,10 @@ class EnvironmentCommand(ProjectCommand):
         format = kwargs.get('format', "table")
         download = kwargs.get('download', None)
         download_path = kwargs.get('download_path', None)
-        environments = self.environment_controller.list()
+        environment_objs = self.environment_controller.list()
         header_list = ["id", "created at", "name", "description"]
         item_dict_list = []
-        for environment_obj in environments:
+        for environment_obj in environment_objs:
             environment_obj_created_at = printable_string(
                 environment_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"))
             environment_obj_name = printable_string(environment_obj.name) \
@@ -110,4 +110,6 @@ class EnvironmentCommand(ProjectCommand):
                 item_dict_list,
                 format=format,
                 output_path=download_path)
-        return environments
+            return environment_objs
+        self.cli_helper.print_items(header_list, item_dict_list, format=format)
+        return environment_objs

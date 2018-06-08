@@ -40,6 +40,22 @@ def get_datmo_parser():
 
     session_ls = session_subcommand_parsers.add_parser(
         "ls", help="list sessions")
+    session_ls.add_argument(
+        "--format", dest="format", default="table", help="output format")
+    session_ls.add_argument(
+        "--download",
+        dest="download",
+        action="store_true",
+        help=
+        "boolean is true if user would like to download. use --download-path to specify a path"
+    )
+    session_ls.add_argument(
+        "--download-path",
+        dest="download_path",
+        default=None,
+        help=
+        "checked only if download is specified. saves output to location specified"
+    )
 
     session_select = session_subcommand_parsers.add_parser(
         "select", help="select a session")
@@ -101,7 +117,7 @@ def get_datmo_parser():
     environment_ls = environment_subcommand_parsers.add_parser(
         "ls", help="list environments")
     environment_ls.add_argument(
-        "--format", dest="format", default=None, help="output format")
+        "--format", dest="format", default="table", help="output format")
     environment_ls.add_argument(
         "--download",
         dest="download",
@@ -111,7 +127,7 @@ def get_datmo_parser():
     )
     environment_ls.add_argument(
         "--download-path",
-        dest="download",
+        dest="download_path",
         default=None,
         help=
         "checked only if download is specified. saves output to location specified"
@@ -277,6 +293,22 @@ def get_datmo_parser():
         dest="details",
         action="store_true",
         help="show detailed snapshot information")
+    snapshot_ls.add_argument(
+        "--format", dest="format", default="table", help="output format")
+    snapshot_ls.add_argument(
+        "--download",
+        dest="download",
+        action="store_true",
+        help=
+        "boolean is true if user would like to download. use --download-path to specify a path"
+    )
+    snapshot_ls.add_argument(
+        "--download-path",
+        dest="download_path",
+        default=None,
+        help=
+        "checked only if download is specified. saves output to location specified"
+    )
 
     snapshot_checkout = snapshot_subcommand_parsers.add_parser(
         "checkout", help="checkout a snapshot by id")
@@ -358,6 +390,22 @@ def get_datmo_parser():
         nargs="?",
         type=str,
         help="pass in the session id to list the tasks in that session")
+    task_ls.add_argument(
+        "--format", dest="format", default="table", help="output format")
+    task_ls.add_argument(
+        "--download",
+        dest="download",
+        action="store_true",
+        help=
+        "boolean is true if user would like to download. use --download-path to specify a path"
+    )
+    task_ls.add_argument(
+        "--download-path",
+        dest="download_path",
+        default=None,
+        help=
+        "checked only if download is specified. saves output to location specified"
+    )
 
     # Task stop arguments
     task_stop = task_subcommand_parsers.add_parser("stop", help="stop tasks")

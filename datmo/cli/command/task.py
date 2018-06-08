@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import os
+from datetime import datetime
 import shlex
 import platform
 import prettytable
@@ -65,21 +67,40 @@ class TaskCommand(ProjectCommand):
     def ls(self, **kwargs):
         session_id = kwargs.get('session_id',
                                 self.task_controller.current_session.id)
-        # Get all snapshot meta information
-        header_list = ["id", "command", "status", "results", "created at"]
-        t = prettytable.PrettyTable(header_list)
+        format = kwargs.get('format', "table")
+        download = kwargs.get('download', None)
+        download_path = kwargs.get('download_path', None)
+        # Get all task meta information
         task_objs = self.task_controller.list(
             session_id, sort_key='created_at', sort_order='descending')
+        header_list = ["id", "command", "status", "results", "created at"]
+        item_dict_list = []
         for task_obj in task_objs:
             task_results_printable = printable_string(str(task_obj.results))
-            t.add_row([
-                task_obj.id, task_obj.command, task_obj.status,
-                task_results_printable,
-                prettify_datetime(task_obj.created_at)
-            ])
-        self.cli_helper.echo(t)
-
-        return True
+            item_dict_list.append({
+                "id": task_obj.id,
+                "command": task_obj.command,
+                "status": task_obj.status,
+                "results": task_results_printable,
+                "created at": prettify_datetime(task_obj.created_at)
+            })
+        if download:
+            if not download_path:
+                # download to current working directory with timestamp
+                current_time = datetime.utcnow()
+                epoch_time = datetime.utcfromtimestamp(0)
+                current_time_unix_time_ms = (
+                    current_time - epoch_time).total_seconds() * 1000.0
+                download_path = os.path.join(
+                    os.getcwd(), "task_ls_" + str(current_time_unix_time_ms))
+            self.cli_helper.print_items(
+                header_list,
+                item_dict_list,
+                format=format,
+                output_path=download_path)
+            return task_objs
+        self.cli_helper.print_items(header_list, item_dict_list, format=format)
+        return task_objs
 
     def stop(self, **kwargs):
         input_dict = {}

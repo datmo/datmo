@@ -5,10 +5,13 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
+import glob
 import uuid
 import tempfile
 import shutil
 import platform
+from argparse import ArgumentError
 try:
     to_unicode = unicode
 except NameError:
@@ -26,7 +29,6 @@ except TypeError:
 
     to_bytes("test")
 
-import os
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.environment import EnvironmentCommand
 from datmo.cli.command.project import ProjectCommand
@@ -231,7 +233,69 @@ class TestEnvironment():
         self.environment_command.parse(["environment", "create"])
         created_environment_obj = self.environment_command.execute()
 
+        # Test success (defaults)
         self.environment_command.parse(["environment", "ls"])
         environment_objs = self.environment_command.execute()
-
         assert created_environment_obj in environment_objs
+
+        # Test failure (format)
+        failed = False
+        try:
+            self.environment_command.parse(["environment", "ls", "--format"])
+        except ArgumentError:
+            failed = True
+        assert failed
+
+        # Test success format csv
+        self.environment_command.parse(
+            ["environment", "ls", "--format", "csv"])
+        environment_objs = self.environment_command.execute()
+        assert created_environment_obj in environment_objs
+
+        # Test success format csv, download default
+        self.environment_command.parse(
+            ["environment", "ls", "--format", "csv", "--download"])
+        environment_objs = self.environment_command.execute()
+        assert created_environment_obj in environment_objs
+        test_wildcard = os.path.join(os.getcwd(), "environment_ls_*")
+        paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
+        assert paths
+        assert open(paths[0], "r").read()
+        os.remove(paths[0])
+
+        # Test success format csv, download exact path
+        test_path = os.path.join(self.temp_dir, "my_output")
+        self.environment_command.parse([
+            "environment", "ls", "--format", "csv", "--download",
+            "--download-path", test_path
+        ])
+        environment_objs = self.environment_command.execute()
+        assert created_environment_obj in environment_objs
+        assert os.path.isfile(test_path)
+        assert open(test_path, "r").read()
+        os.remove(test_path)
+
+        # Test success format table
+        self.environment_command.parse(["environment", "ls"])
+        environment_objs = self.environment_command.execute()
+        assert created_environment_obj in environment_objs
+
+        # Test success format table, download default
+        self.environment_command.parse(["environment", "ls", "--download"])
+        environment_objs = self.environment_command.execute()
+        assert created_environment_obj in environment_objs
+        test_wildcard = os.path.join(os.getcwd(), "environment_ls_*")
+        paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
+        assert paths
+        assert open(paths[0], "r").read()
+        os.remove(paths[0])
+
+        # Test success format table, download exact path
+        test_path = os.path.join(self.temp_dir, "my_output")
+        self.environment_command.parse(
+            ["environment", "ls", "--download", "--download-path", test_path])
+        environment_objs = self.environment_command.execute()
+        assert created_environment_obj in environment_objs
+        assert os.path.isfile(test_path)
+        assert open(test_path, "r").read()
+        os.remove(test_path)
