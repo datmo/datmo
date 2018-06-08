@@ -170,8 +170,8 @@ class SnapshotCommand(ProjectCommand):
         snapshot_objs = self.snapshot_controller.list(
             session_id=session_id,
             visible=True,
-            sort_key='created_at',
-            sort_order='descending')
+            sort_key="created_at",
+            sort_order="descending")
         if detailed_info:
             header_list = [
                 "id", "created at", "config", "stats", "message", "label",

@@ -100,6 +100,22 @@ def get_datmo_parser():
 
     environment_ls = environment_subcommand_parsers.add_parser(
         "ls", help="list environments")
+    environment_ls.add_argument(
+        "--format", dest="format", default=None, help="output format")
+    environment_ls.add_argument(
+        "--download",
+        dest="download",
+        action="store_true",
+        help=
+        "boolean is true if user would like to download. use --download-path to specify a path"
+    )
+    environment_ls.add_argument(
+        "--download-path",
+        dest="download",
+        default=None,
+        help=
+        "checked only if download is specified. saves output to location specified"
+    )
 
     # Snapshot
     snapshot_parser = subparsers.add_parser(

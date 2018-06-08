@@ -1,12 +1,13 @@
 from __future__ import print_function
 
-import prettytable
+import os
+from datetime import datetime
 
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.environment.environment import EnvironmentController
-from datmo.core.util.misc_functions import printable_string
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.util.exceptions import EnvironmentDoesNotExist
+from datmo.core.util.misc_functions import printable_string
 
 
 class EnvironmentCommand(ProjectCommand):
@@ -74,22 +75,39 @@ class EnvironmentCommand(ProjectCommand):
                 __("info", "cli.environment.delete.success", environment_id))
             return True
 
-    def ls(self):
+    def ls(self, **kwargs):
+        format = kwargs.get('format', "table")
+        download = kwargs.get('download', None)
+        download_path = kwargs.get('download_path', None)
         environments = self.environment_controller.list()
         header_list = ["id", "created at", "name", "description"]
-        t = prettytable.PrettyTable(header_list)
-        environment_ids = []
+        item_dict_list = []
         for environment_obj in environments:
-            environment_ids.append(environment_obj.id)
-            environment_created_at = printable_string(
+            environment_obj_created_at = printable_string(
                 environment_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"))
-            environment_name = printable_string(environment_obj.name) \
+            environment_obj_name = printable_string(environment_obj.name) \
                 if environment_obj.name is not None else ""
-            environment_description = printable_string(environment_obj.description) \
+            environment_obj_description = printable_string(environment_obj.description) \
                 if environment_obj.description is not None else ""
-            t.add_row([
-                environment_obj.id, environment_created_at, environment_name,
-                environment_description
-            ])
-        self.cli_helper.echo(t)
+            item_dict_list.append({
+                "id": environment_obj.id,
+                "created at": environment_obj_created_at,
+                "name": environment_obj_name,
+                "description": environment_obj_description
+            })
+        if download:
+            if not download_path:
+                # download to current working directory with timestamp
+                current_time = datetime.utcnow()
+                epoch_time = datetime.utcfromtimestamp(0)
+                current_time_unix_time_ms = (
+                    current_time - epoch_time).total_seconds() * 1000.0
+                download_path = os.path.join(
+                    os.getcwd(),
+                    "environment_ls_" + str(current_time_unix_time_ms))
+            self.cli_helper.print_items(
+                header_list,
+                item_dict_list,
+                format=format,
+                output_path=download_path)
         return environments
