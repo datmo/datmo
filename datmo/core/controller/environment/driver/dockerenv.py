@@ -140,7 +140,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         available_environment_names, available_environment_description = zip(*available_environments)
         # Validate that the name exists
         if not name or name not in available_environment_names:
-            raise EnvironmentDoesNotExist()
+            raise EnvironmentDoesNotExist(__("error", "controller.environment.driver.docker.setup.dne", name))
+
         # Validate the given definition path exists
         if not os.path.isdir(definition_path):
             raise PathDoesNotExist()

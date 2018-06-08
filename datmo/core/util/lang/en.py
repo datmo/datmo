@@ -108,7 +108,8 @@ MESSAGES = {
         "cli.project.notebook":
             "Error while running the notebook with task: %s",
         "cli.environment.setup.argument":
-            "This name or index does not match any supported environments: %s",
+            "This name or index does not match any supported environments: %s, "
+            "Update Dockerfile with image name in environment folder",
         "cli.task.run":
             "Error while running the task: %s",
         "cli.task.run.already_running":
@@ -215,6 +216,8 @@ MESSAGES = {
             "Error in getting tags: %s",
         "controller.environment.driver.docker.create.dne":
             "path does not exist: %s",
+        "controller.environment.driver.docker.setup.dne":
+            "input environment does not exist: %s, Update Dockerfile with image name in environment folder",
         "controller.environment.driver.docker.create.exists":
             "output path already exists: %s",
         "controller.environment.driver.docker.build_image":
@@ -350,6 +353,8 @@ MESSAGES = {
             "Is it okay?",
         "cli.project.cleanup.confirm":
             "Are you sure you want to delete all datmo project information? [yN]",
+        "cli.project.environment.setup":
+            "Would you like to setup the environment? [yN]"
     },
     "argparser": {
         "cli.datmo.usage":
