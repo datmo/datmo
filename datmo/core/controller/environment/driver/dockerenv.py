@@ -1,5 +1,6 @@
 import ast
 import os
+import json
 import subprocess
 import platform
 from io import open
@@ -29,6 +30,9 @@ from datmo.core.util.exceptions import (
     EnvironmentImageNotFound, EnvironmentContainerNotFound,
     GPUSupportNotEnabled, EnvironmentDoesNotExist)
 from datmo.core.controller.environment.driver import EnvironmentDriver
+
+
+docker_config_filepath = os.path.join(os.path.split(__file__)[0], "config", "docker.json")
 
 
 class DockerEnvironmentDriver(EnvironmentDriver):
@@ -94,6 +98,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         self.is_connected = False
         self._is_initialized = self.is_initialized
         self.type = "docker"
+        with open(docker_config_filepath) as f:
+            self.docker_config = json.load(f)
 
     @property
     def is_initialized(self):
@@ -124,25 +130,9 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                    platform.system()))
         return True
 
-    @staticmethod
-    def get_supported_environments():
+    def get_supported_environments(self):
         # To get the current environments
-        return [
-                ("xgboost:cpu", "sklearn, numpy, scipy, matplotlib and xgboost for numerical data science problems"),
-                ("keras-tensorflow:cpu", "keras with tensorflow backend (CPU) + sklearn, numpy, scipy, matplotlib"),
-                ("keras-tensorflow:gpu", "keras with tensorflow backend (GPU) + sklearn, numpy, scipy, matplotlib"),
-                ("tensorflow:cpu", "tensorflow (CPU) + sklearn, numpy, scipy, matplotlib"),
-                ("tensorflow:gpu", "tensorflow (GPU) + sklearn, numpy, scipy, matplotlib"),
-                ("scikit-opencv:py-2.7", "sklearn, scipy, opencv, Pillow, numpy"),
-                ("theano:cpu", "theano (CPU) + scipy, numpy"),
-                ("theano:gpu", "theano (GPU) + scipy, numpy"),
-                ("keras-theano:cpu", "keras with theano (CPU) + scipy, numpy"),
-                ("keras-theano:gpu", "keras with theano (GPU) + scipy, numpy"),
-                ("kaggle:python", "environment as provided in kaggle kernels for numerical data science problems"),
-                ("spacy:py-2.7", "Spacy for NLP + scipy, numpy"),
-                ("pytorch:cpu", "Pytorch (CPU)"),
-                ("catboost:cpu", "catboost + sklearn, numpy, scipy")
-                ]
+        return self.docker_config["supported_environments"]
 
     def setup(self, options, definition_path):
         name = options.get("name", None)
