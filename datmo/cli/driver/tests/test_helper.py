@@ -77,7 +77,7 @@ class TestHelper():
         # assert cli.prompt(test_message)
 
     def test_print_items(self):
-        # Test without download in format="table"
+        # Test without download in print_format="table"
         header_list = ["foo", "bar"]
         item_dict_list = [{
             "foo": "yo",
@@ -95,18 +95,18 @@ class TestHelper():
         assert "cool" in result
         assert "there" not in result
         assert "N/A" in result
-        # Test without download in format="csv"
+        # Test without download in print_format="csv"
         result = self.cli.print_items(
             header_list=header_list,
             item_dict_list=item_dict_list,
-            format="csv")
+            print_format="csv")
         assert result == "foo,bar\nyo,hello\ncool,N/A\n"
         assert "there" not in result
-        # Test without download in random format
+        # Test without download in random print_format
         result = self.cli.print_items(
             header_list=header_list,
             item_dict_list=item_dict_list,
-            format="not_valid")
+            print_format="not_valid")
         assert not result
         # Test with output_path given (not absolute)
         test_path = "testprint"

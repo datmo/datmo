@@ -76,7 +76,7 @@ class EnvironmentCommand(ProjectCommand):
             return True
 
     def ls(self, **kwargs):
-        format = kwargs.get('format', "table")
+        print_format = kwargs.get('format', "table")
         download = kwargs.get('download', None)
         download_path = kwargs.get('download_path', None)
         environment_objs = self.environment_controller.list()
@@ -108,8 +108,9 @@ class EnvironmentCommand(ProjectCommand):
             self.cli_helper.print_items(
                 header_list,
                 item_dict_list,
-                format=format,
+                print_format=print_format,
                 output_path=download_path)
             return environment_objs
-        self.cli_helper.print_items(header_list, item_dict_list, format=format)
+        self.cli_helper.print_items(
+            header_list, item_dict_list, print_format=print_format)
         return environment_objs

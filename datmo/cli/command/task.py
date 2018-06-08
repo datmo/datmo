@@ -4,7 +4,6 @@ import os
 from datetime import datetime
 import shlex
 import platform
-import prettytable
 # https://stackoverflow.com/questions/11301138/how-to-check-if-variable-is-string-with-python-2-and-3-compatibility/11301392?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
 try:
     basestring
@@ -67,7 +66,7 @@ class TaskCommand(ProjectCommand):
     def ls(self, **kwargs):
         session_id = kwargs.get('session_id',
                                 self.task_controller.current_session.id)
-        format = kwargs.get('format', "table")
+        print_format = kwargs.get('format', "table")
         download = kwargs.get('download', None)
         download_path = kwargs.get('download_path', None)
         # Get all task meta information
@@ -96,10 +95,11 @@ class TaskCommand(ProjectCommand):
             self.cli_helper.print_items(
                 header_list,
                 item_dict_list,
-                format=format,
+                print_format=print_format,
                 output_path=download_path)
             return task_objs
-        self.cli_helper.print_items(header_list, item_dict_list, format=format)
+        self.cli_helper.print_items(
+            header_list, item_dict_list, print_format=print_format)
         return task_objs
 
     def stop(self, **kwargs):

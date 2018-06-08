@@ -66,16 +66,16 @@ class Helper():
     def print_items(self,
                     header_list,
                     item_dict_list,
-                    format="table",
+                    print_format="table",
                     output_path=None):
-        if format == "table":
+        if print_format == "table":
             output = prettytable.PrettyTable(header_list)
             for item_dict in item_dict_list:
                 row_vals = []
                 for col_name in header_list:
                     row_vals.append(item_dict.get(col_name, "N/A"))
                 output.add_row(row_vals)
-        elif format == "csv":
+        elif print_format == "csv":
             output = ""
             for idx, header in enumerate(header_list):
                 output += header if idx == len(

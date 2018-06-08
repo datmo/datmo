@@ -164,7 +164,7 @@ class SnapshotCommand(ProjectCommand):
         session_id = kwargs.get('session_id',
                                 self.snapshot_controller.current_session.id)
         detailed_info = kwargs.get('details', None)
-        format = kwargs.get('format', "table")
+        print_format = kwargs.get('format', "table")
         download = kwargs.get('download', None)
         download_path = kwargs.get('download_path', None)
         snapshot_objs = self.snapshot_controller.list(
@@ -228,10 +228,11 @@ class SnapshotCommand(ProjectCommand):
             self.cli_helper.print_items(
                 header_list,
                 item_dict_list,
-                format=format,
+                print_format=print_format,
                 output_path=download_path)
             return snapshot_objs
-        self.cli_helper.print_items(header_list, item_dict_list, format=format)
+        self.cli_helper.print_items(
+            header_list, item_dict_list, print_format=print_format)
         return snapshot_objs
 
     def checkout(self, **kwargs):
