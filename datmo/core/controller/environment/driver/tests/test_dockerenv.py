@@ -228,6 +228,7 @@ class TestDockerEnv():
                     'mode': 'rw'
                 }
             },
+            "mem_limit": "4g",
             "detach": True,
             "stdin_open": False,
             "tty": False,
@@ -235,7 +236,6 @@ class TestDockerEnv():
         }
         return_code, run_id, logs = \
             self.docker_environment_driver.run(image_name, run_options, log_filepath)
-
         assert return_code == 0
         assert run_id
         assert logs

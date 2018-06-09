@@ -38,7 +38,12 @@ class TestSession():
         self.project_command = ProjectCommand(self.temp_dir, self.cli_helper)
         self.project_command.parse(
             ["init", "--name", "foobar", "--description", "test model"])
-        self.project_command.execute()
+
+        @self.project_command.cli_helper.input("\n")
+        def dummy(self):
+            return self.project_command.execute()
+
+        dummy(self)
         self.session_command = SessionCommand(self.temp_dir, self.cli_helper)
 
     def test_session_project_not_init(self):

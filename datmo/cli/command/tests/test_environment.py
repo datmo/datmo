@@ -51,7 +51,12 @@ class TestEnvironment():
         self.project = ProjectCommand(self.temp_dir, self.cli_helper)
         self.project.parse(
             ["init", "--name", "foobar", "--description", "test model"])
-        self.project.execute()
+
+        @self.project.cli_helper.input("\n")
+        def dummy(self):
+            return self.project.execute()
+
+        dummy(self)
         self.environment_command = EnvironmentCommand(self.temp_dir,
                                                       self.cli_helper)
 

@@ -28,7 +28,6 @@ class TaskCommand(ProjectCommand):
 
     def run(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.task.run"))
-
         # Create input dictionaries
         snapshot_dict = {}
 
@@ -39,7 +38,8 @@ class TaskCommand(ProjectCommand):
             mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
         task_dict = {
             "ports": kwargs['ports'],
-            "interactive": kwargs['interactive']
+            "interactive": kwargs['interactive'],
+            "mem_limit": kwargs['mem_limit']
         }
         if not isinstance(kwargs['cmd'], list):
             if platform.system() == "Windows":

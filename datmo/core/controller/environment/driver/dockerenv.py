@@ -1,5 +1,6 @@
 import ast
 import os
+import json
 import subprocess
 import platform
 from io import open
@@ -29,6 +30,9 @@ from datmo.core.util.exceptions import (
     EnvironmentImageNotFound, EnvironmentContainerNotFound,
     GPUSupportNotEnabled, EnvironmentDoesNotExist)
 from datmo.core.controller.environment.driver import EnvironmentDriver
+
+docker_config_filepath = os.path.join(
+    os.path.split(__file__)[0], "config", "docker.json")
 
 
 class DockerEnvironmentDriver(EnvironmentDriver):
@@ -94,6 +98,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         self.is_connected = False
         self._is_initialized = self.is_initialized
         self.type = "docker"
+        with open(docker_config_filepath) as f:
+            self.docker_config = json.load(f)
 
     @property
     def is_initialized(self):
@@ -124,21 +130,19 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                    platform.system()))
         return True
 
-    @staticmethod
-    def get_supported_environments():
-        # To get the current frameworks
-        return [
-            "xgboost:cpu", "keras-tensorflow:cpu", "keras-tensorflow:gpu",
-            "tensorflow:cpu", "tensorflow:gpu", "scikit-opencv:py-2.7",
-            "theano:cpu", "theano:gpu", "keras-theano:cpu", "keras-theano:gpu",
-            "kaggle:python", "spacy:py-2.7", "pytorch:cpu", "catboost:cpu"
-        ]
+    def get_supported_environments(self):
+        # To get the current environments
+        return self.docker_config["supported_environments"]
 
     def setup(self, options, definition_path):
         name = options.get("name", None)
+        available_environments = self.get_supported_environments()
         # Validate that the name exists
-        if not name or name not in self.get_supported_environments():
-            raise EnvironmentDoesNotExist()
+        if not name or name not in [n for n, _ in available_environments]:
+            raise EnvironmentDoesNotExist(
+                __("error", "controller.environment.driver.docker.setup.dne",
+                   name))
+
         # Validate the given definition path exists
         if not os.path.isdir(definition_path):
             raise PathDoesNotExist()
@@ -390,6 +394,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                       ports=None,
                       name=None,
                       volumes=None,
+                      mem_limit=None,
                       runtime=None,
                       detach=False,
                       stdin_open=False,
@@ -414,6 +419,10 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         volumes : dict, optional
             Includes storage volumes for docker
             (e.g. { outsidepath1 : {"bind", containerpath2, "mode", MODE} })
+        mem_limit : str, optional
+            maximum amount of memory the container can use
+            (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes,
+            megabytes, or gigabytes. memory limit is contrained by total memory of the VM in which docker runs)
         detach : bool, optional
             True if container is to be detached else False
         stdin_open : bool, optional
@@ -449,6 +458,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                     container = \
                         self.client.containers.run(image_name, command, ports=ports,
                                                    name=name, volumes=volumes,
+                                                   mem_limit=mem_limit,
                                                    detach=detach, stdin_open=stdin_open)
                     return container
                 else:
@@ -459,6 +469,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                         ports=ports,
                         name=name,
                         volumes=volumes,
+                        mem_limit=mem_limit,
                         detach=detach,
                         stdin_open=stdin_open)
                     return logs.decode()
@@ -473,6 +484,12 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 if runtime:
                     docker_shell_cmd_list.append("--runtime")
                     docker_shell_cmd_list.append(runtime)
+
+                if mem_limit:
+                    docker_shell_cmd_list.append("-m")
+                    docker_shell_cmd_list.append(mem_limit)
+                    docker_shell_cmd_list.append("--memory-swap")
+                    docker_shell_cmd_list.append("-1")
 
                 if stdin_open:
                     docker_shell_cmd_list.append("-i")

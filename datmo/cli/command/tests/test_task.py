@@ -62,7 +62,12 @@ class TestTaskCommand():
         self.project_command = ProjectCommand(self.temp_dir, self.cli_helper)
         self.project_command.parse(
             ["init", "--name", "foobar", "--description", "test model"])
-        self.project_command.execute()
+
+        @self.project_command.cli_helper.input("\n")
+        def dummy(self):
+            return self.project_command.execute()
+
+        dummy(self)
 
         self.task_command = TaskCommand(self.temp_dir, self.cli_helper)
 
@@ -95,37 +100,38 @@ class TestTaskCommand():
     def test_task_run(self):
         # TODO: Adding test with `--interactive` argument and terminate inside container
         self.__set_variables()
-
         # Test failure command execute
         test_command = ["yo", "yo"]
         self.task_command.parse(["task", "run", test_command])
         result = self.task_command.execute()
         assert result
-
         # Test success case
         test_command = ["sh", "-c", "echo accuracy:0.45"]
         test_ports = ["8888:8888", "9999:9999"]
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
+        test_mem_limit = "4g"
 
         # test for single set of ports
         self.task_command.parse([
             "task", "run", "--ports", test_ports[0], "--environment-paths",
-            test_dockerfile, test_command
+            test_dockerfile, "--mem-limit", test_mem_limit, test_command
         ])
-
         # test for desired side effects
         assert self.task_command.args.cmd == test_command
         assert self.task_command.args.ports == [test_ports[0]]
         assert self.task_command.args.environment_paths == [test_dockerfile]
+        assert self.task_command.args.mem_limit == test_mem_limit
 
         self.task_command.parse([
             "task", "run", "-p", test_ports[0], "-p", test_ports[1],
-            "--environment-paths", test_dockerfile, test_command
+            "--environment-paths", test_dockerfile, "--mem-limit",
+            test_mem_limit, test_command
         ])
         # test for desired side effects
         assert self.task_command.args.cmd == test_command
         assert self.task_command.args.ports == test_ports
         assert self.task_command.args.environment_paths == [test_dockerfile]
+        assert self.task_command.args.mem_limit == test_mem_limit
 
         # test proper execution of task run command
         result = self.task_command.execute()
@@ -151,14 +157,17 @@ class TestTaskCommand():
         test_command = "sh -c 'echo accuracy:0.45'"
         test_ports = ["8888:8888", "9999:9999"]
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
+        test_mem_limit = "4g"
         self.task_command.parse([
             "task", "run", "--ports", test_ports[0], "--ports", test_ports[1],
-            "--environment-paths", test_dockerfile, test_command
+            "--environment-paths", test_dockerfile, "--mem-limit",
+            test_mem_limit, test_command
         ])
         # test for desired side effects
         assert self.task_command.args.cmd == test_command
         assert self.task_command.args.ports == test_ports
         assert self.task_command.args.environment_paths == [test_dockerfile]
+        assert self.task_command.args.mem_limit == test_mem_limit
 
         # test proper execution of task run command
         result = self.task_command.execute()
@@ -227,24 +236,29 @@ class TestTaskCommand():
         # Test success case
         test_command = ["jupyter", "notebook", "list"]
         test_ports = ["8888:8888", "9999:9999"]
+        test_mem_limit = "4g"
 
         # test single ports option before command
-        self.task_command.parse(
-            ["task", "run", "--ports", test_ports[0], test_command])
+        self.task_command.parse([
+            "task", "run", "--ports", test_ports[0], "--mem-limit",
+            test_mem_limit, test_command
+        ])
 
         # test for desired side effects
         assert self.task_command.args.cmd == test_command
         assert self.task_command.args.ports == [test_ports[0]]
+        assert self.task_command.args.mem_limit == test_mem_limit
 
         # test multiple ports option before command
         self.task_command.parse([
             "task", "run", "--ports", test_ports[0], "--ports", test_ports[1],
-            test_command
+            "--mem-limit", test_mem_limit, test_command
         ])
 
         # test for desired side effects
         assert self.task_command.args.cmd == test_command
         assert self.task_command.args.ports == test_ports
+        assert self.task_command.args.mem_limit == test_mem_limit
 
         # test proper execution of task run command
         result = self.task_command.execute()
@@ -369,11 +383,12 @@ class TestTaskCommand():
 
         test_command = ["sh", "-c", "echo yo"]
         test_ports = "8888:8888"
+        test_mem_limit = "4g"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
 
         self.task_command.parse([
             "task", "run", "--ports", test_ports, "--environment-paths",
-            test_dockerfile, test_command
+            test_dockerfile, "--mem-limit", test_mem_limit, test_command
         ])
 
         test_task_obj = self.task_command.execute()

@@ -26,21 +26,8 @@ class EnvironmentCommand(ProjectCommand):
         available_environments = self.environment_controller.get_supported_environments(
         )
         if not name:
-            for idx, n in enumerate(available_environments):
-                self.cli_helper.echo("(%s) %s" % (idx + 1, n))
-            input_name = self.cli_helper.prompt(
-                __("prompt", "cli.environment.setup.name"))
-            try:
-                name_index = int(input_name)
-            except ValueError:
-                name_index = 0
-            if name_index > 0 and name_index < len(available_environments):
-                name = available_environments[name_index - 1]
-            elif name_index == 0:
-                name = input_name
-            else:
-                self.cli_helper.echo(
-                    __("error", "cli.environment.setup.argument", input_name))
+            name = self.cli_helper.prompt_available_environments(
+                available_environments)
         try:
             options = {"name": name}
             environment_obj = self.environment_controller.setup(

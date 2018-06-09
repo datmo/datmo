@@ -39,9 +39,8 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         EnvironmentInitFailed
         """
 
-    @staticmethod
     @abstractmethod
-    def get_supported_environments():
+    def get_supported_environments(self):
         """Get all the supported environments
 
         Returns

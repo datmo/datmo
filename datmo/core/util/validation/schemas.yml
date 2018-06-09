@@ -102,6 +102,9 @@ create_task:
   ports:
     nullable: true
     type: list
+  mem_limit:
+    nullable: true
+    type: string
   task_dirpath:
     nullable: true
     type: string
