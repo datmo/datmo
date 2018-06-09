@@ -65,6 +65,7 @@ class TaskCommand(ProjectCommand):
     def ls(self, **kwargs):
         session_id = kwargs.get('session_id',
                                 self.task_controller.current_session.id)
+        listed_task_ids = []
         # Get all snapshot meta information
         header_list = ["id", "command", "status", "results", "created at"]
         t = prettytable.PrettyTable(header_list)
@@ -77,9 +78,10 @@ class TaskCommand(ProjectCommand):
                 task_results_printable,
                 prettify_datetime(task_obj.created_at)
             ])
+            listed_task_ids.append(task_obj.id)
         self.cli_helper.echo(t)
 
-        return True
+        return listed_task_ids
 
     def stop(self, **kwargs):
         input_dict = {}

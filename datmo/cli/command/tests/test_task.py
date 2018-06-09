@@ -253,7 +253,7 @@ class TestTaskCommand():
         self.task_command.parse(["task", "ls"])
         task_ls_command = self.task_command.execute()
 
-        assert task_ls_command == True
+        assert task_ls_command
 
         test_session_id = 'test_session_id'
         self.task_command.parse(
@@ -264,7 +264,7 @@ class TestTaskCommand():
 
         failed = False
         try:
-            task_ls_command = self.task_command.execute()
+            _ = self.task_command.execute()
         except SessionDoesNotExist:
             failed = True
         assert failed
