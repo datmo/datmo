@@ -31,8 +31,8 @@ from datmo.core.util.exceptions import (
     GPUSupportNotEnabled, EnvironmentDoesNotExist)
 from datmo.core.controller.environment.driver import EnvironmentDriver
 
-
-docker_config_filepath = os.path.join(os.path.split(__file__)[0], "config", "docker.json")
+docker_config_filepath = os.path.join(
+    os.path.split(__file__)[0], "config", "docker.json")
 
 
 class DockerEnvironmentDriver(EnvironmentDriver):
@@ -137,10 +137,13 @@ class DockerEnvironmentDriver(EnvironmentDriver):
     def setup(self, options, definition_path):
         name = options.get("name", None)
         available_environments = self.get_supported_environments()
-        available_environment_names, available_environment_description = zip(*available_environments)
         # Validate that the name exists
-        if not name or name not in available_environment_names:
-            raise EnvironmentDoesNotExist(__("error", "controller.environment.driver.docker.setup.dne", name))
+        if not name or name not in [
+                name for name, desc in available_environments
+        ]:
+            raise EnvironmentDoesNotExist(
+                __("error", "controller.environment.driver.docker.setup.dne",
+                   name))
 
         # Validate the given definition path exists
         if not os.path.isdir(definition_path):

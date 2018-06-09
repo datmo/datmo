@@ -19,33 +19,36 @@ def get_datmo_parser():
     cleanup_parser = subparsers.add_parser("cleanup", help="remove project")
 
     # Notebook
-    notebook_parser = subparsers.add_parser("notebook", help="To run jupyter notebook")
+    notebook_parser = subparsers.add_parser(
+        "notebook", help="To run jupyter notebook")
     notebook_parser.add_argument(
-                                "--gpu",
-                                dest="gpu",
-                                action="store_true",
-                                help="boolean if you want to run using GPUs")
+        "--gpu",
+        dest="gpu",
+        action="store_true",
+        help="boolean if you want to run using GPUs")
     notebook_parser.add_argument(
-                                "--environment-id",
-                                dest="environment_id",
-                                default=None,
-                                help="environment id from environment object")
+        "--environment-id",
+        dest="environment_id",
+        default=None,
+        help="environment id from environment object")
     notebook_parser.add_argument(
-                                "--environment-paths",
-                                dest="environment_paths",
-                                default=None,
-                                action="append",
-                                type=str,
-                                help=
-                                "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
-                            )
+        "--environment-paths",
+        dest="environment_paths",
+        default=None,
+        action="append",
+        type=str,
+        help=
+        "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
+    )
     notebook_parser.add_argument(
         "--mem-limit",
         "-m",
         dest="mem_limit",
         default=None,
         type=str,
-        help="maximum amount of memory the notebook environment can use (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes)")
+        help=
+        "maximum amount of memory the notebook environment can use (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes)"
+    )
 
     # Session
     session_parser = subparsers.add_parser("session", help="session module")
@@ -347,7 +350,9 @@ def get_datmo_parser():
         dest="mem_limit",
         default=None,
         type=str,
-        help="maximum amount of memory the task environment can use (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes)")
+        help=
+        "maximum amount of memory the task environment can use (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes. e.g. 4g)"
+    )
     # task_run.add_argument(
     #     "--environment-name",
     #     dest="environment_name",

@@ -6,6 +6,7 @@ from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController, EnvironmentDoesNotExist
 from datmo.core.controller.task import TaskController
 
+
 class ProjectCommand(BaseCommand):
     # NOTE: dal_driver is not passed into the project because it is created
     # first by ProjectController and then passed down to all other Controllers
@@ -105,24 +106,10 @@ class ProjectCommand(BaseCommand):
         if environment_setup:
             # Setting up the environment definition file
             self.environment_controller = EnvironmentController(home=self.home)
-            available_environments = self.environment_controller.get_supported_environments()
-            available_environment_names, available_environment_description = zip(*available_environments)
-            for idx, environment_name_description in enumerate(available_environments):
-                environment_name = environment_name_description[0]
-                environment_description = environment_name_description[1]
-                self.cli_helper.echo("(%s) %s: %s" % (idx + 1, environment_name, environment_description))
-            input_environment_name = self.cli_helper.prompt(
-                __("prompt", "cli.environment.setup.name"))
-            try:
-                name_environment_index = int(input_environment_name)
-            except ValueError:
-                name_environment_index = 0
-            if 0 < name_environment_index < len(available_environments):
-                input_environment_name = available_environment_names[name_environment_index - 1]
-            else:
-                self.cli_helper.echo(
-                    __("error", "cli.environment.setup.argument", input_environment_name))
-
+            available_environments = self.environment_controller.get_supported_environments(
+            )
+            input_environment_name = self.cli_helper.prompt_available_environments(
+                available_environments)
             try:
                 options = {"name": input_environment_name}
                 environment_obj = self.environment_controller.setup(
@@ -132,7 +119,8 @@ class ProjectCommand(BaseCommand):
                        (environment_obj.name, environment_obj.id)))
             except EnvironmentDoesNotExist:
                 self.cli_helper.echo(
-                    __("error", "cli.environment.setup.argument", input_environment_name))
+                    __("error", "cli.environment.setup.argument",
+                       input_environment_name))
         return self.project_controller.model
 
     def version(self):
@@ -208,7 +196,8 @@ class ProjectCommand(BaseCommand):
 
     def notebook(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.project.notebook"))
-        self.task_controller = TaskController(home=self.project_controller.home)
+        self.task_controller = TaskController(
+            home=self.project_controller.home)
 
         # Creating input dictionaries
         snapshot_dict = {}
@@ -234,9 +223,11 @@ class ProjectCommand(BaseCommand):
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
         except Exception as e:
             self.logger.error("%s %s" % (e, task_dict))
-            self.cli_helper.echo(__("error", "cli.project.notebook", task_obj.id))
+            self.cli_helper.echo(
+                __("error", "cli.project.notebook", task_obj.id))
             return False
 
-        self.cli_helper.echo("Ran notebook with task id: %s" % updated_task_obj.id)
+        self.cli_helper.echo(
+            "Ran notebook with task id: %s" % updated_task_obj.id)
 
         return updated_task_obj

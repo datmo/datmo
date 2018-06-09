@@ -114,3 +114,26 @@ class Helper():
             "init", "version", "--version", "-v", "status", "cleanup",
             "snapshot", "task", "notebook", "environment"
         ]
+
+    def prompt_available_environments(self, available_environments):
+        """Prompt user to choose an available environment. Returns the environment name"""
+        for idx, environment_name_description in enumerate(
+                available_environments):
+            environment_name = environment_name_description[0]
+            environment_description = environment_name_description[1]
+            self.echo("(%s) %s: %s" % (idx + 1, environment_name,
+                                       environment_description))
+        input_environment_name = self.prompt(
+            __("prompt", "cli.environment.setup.name"))
+        try:
+            name_environment_index = int(input_environment_name)
+        except ValueError:
+            name_environment_index = 0
+        if 0 < name_environment_index < len(available_environments):
+            input_environment_name = available_environments[
+                name_environment_index - 1][0]
+        else:
+            self.echo(
+                __("error", "cli.environment.setup.argument",
+                   input_environment_name))
+        return input_environment_name
