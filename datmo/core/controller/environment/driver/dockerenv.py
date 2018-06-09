@@ -138,9 +138,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         name = options.get("name", None)
         available_environments = self.get_supported_environments()
         # Validate that the name exists
-        if not name or name not in [
-                name for name, desc in available_environments
-        ]:
+        if not name or name not in [n for n, _ in available_environments]:
             raise EnvironmentDoesNotExist(
                 __("error", "controller.environment.driver.docker.setup.dne",
                    name))

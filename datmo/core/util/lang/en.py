@@ -108,8 +108,7 @@ MESSAGES = {
         "cli.project.notebook":
             "Error while running the notebook with task: %s",
         "cli.environment.setup.argument":
-            "This name or index does not match any supported environments: %s, "
-            "Update Dockerfile with image name in environment folder",
+            "This name or index does not match any supported environments: %s, ",
         "cli.task.run":
             "Error while running the task: %s",
         "cli.task.run.already_running":

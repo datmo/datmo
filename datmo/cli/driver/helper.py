@@ -128,12 +128,18 @@ class Helper():
         try:
             name_environment_index = int(input_environment_name)
         except ValueError:
-            name_environment_index = 0
+            available_names = [
+                name for name, description in available_environments
+            ]
+            try:
+                name_environment_index = available_names.index(
+                    input_environment_name) + 1
+            except ValueError:
+                self.echo(
+                    __("error", "cli.environment.setup.argument",
+                       input_environment_name))
+                return input_environment_name
         if 0 < name_environment_index < len(available_environments):
             input_environment_name = available_environments[
                 name_environment_index - 1][0]
-        else:
-            self.echo(
-                __("error", "cli.environment.setup.argument",
-                   input_environment_name))
         return input_environment_name
