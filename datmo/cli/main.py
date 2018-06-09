@@ -20,7 +20,7 @@ def main():
     # This is required for logging to place the logs in a
     # place for the user.
     config = Config()
-    config.home = os.getcwd()
+    config.set_home(os.getcwd())
 
     log = DatmoLogger.get_logger(__name__)
     log.info("handling command %s", config.home)
@@ -53,7 +53,7 @@ def main():
 
     # instantiate the command class
     try:
-        command_instance = command_class(os.getcwd(), cli_helper)
+        command_instance = command_class(cli_helper)
     except TypeError as ex:
         cli_helper.echo(__("error", "cli.general", str(ex)))
         return 1
