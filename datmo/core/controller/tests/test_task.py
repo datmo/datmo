@@ -111,6 +111,7 @@ class TestTaskController():
                     'mode': 'rw'
                 }
             },
+            "mem_limit": "4g",
             "detach": False,
             "stdin_open": False,
             "tty": False,
@@ -144,6 +145,7 @@ class TestTaskController():
                     'mode': 'rw'
                 }
             },
+            "mem_limit": "4g",
             "detach": True,
             "stdin_open": False,
             "tty": False,

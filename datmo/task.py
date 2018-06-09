@@ -195,7 +195,7 @@ class Task():
         return self.__str__()
 
 
-def run(command, env=None, home=None, gpu=False):
+def run(command, env=None, home=None, gpu=False, mem_limit=None):
     """Run the code or script inside
 
     The project must be created before this is implemented. You can do that by using
@@ -217,6 +217,10 @@ def run(command, env=None, home=None, gpu=False):
         (default is None, which will use the CWD as the project path)
     gpu: boolean
         try to run task on GPU (if available)
+    mem_limit : string, optional
+        maximum amount of memory the environment can use
+        (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes,
+        megabytes, or gigabytes. memory limit is contrained by total memory of the VM in which docker runs)
 
     Returns
     -------
@@ -254,6 +258,8 @@ def run(command, env=None, home=None, gpu=False):
             task_dict["command_list"] = shlex.split(command)
 
     task_dict["gpu"] = gpu
+
+    task_dict["mem_limit"] = mem_limit
 
     # Create the task object
     core_task_obj = task_controller.create()

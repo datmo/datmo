@@ -59,7 +59,12 @@ class TestSnapshot():
         self.project_command = ProjectCommand(self.temp_dir, self.cli_helper)
         self.project_command.parse(
             ["init", "--name", "foobar", "--description", "test model"])
-        self.project_command.execute()
+
+        @self.project_command.cli_helper.input("\n")
+        def dummy(self):
+            return self.project_command.execute()
+
+        dummy(self)
         self.snapshot_command = SnapshotCommand(self.temp_dir, self.cli_helper)
 
         # Create environment_driver definition

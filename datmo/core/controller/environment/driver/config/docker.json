@@ -1,0 +1,18 @@
+{
+  "supported_environments": [
+    ["xgboost:cpu", "sklearn, numpy, scipy, matplotlib and xgboost for numerical data science problems (language: py27)"],
+    ["keras-tensorflow:cpu", "keras with tensorflow backend (CPU) + sklearn, numpy, scipy, matplotlib (language: py27)"],
+    ["keras-tensorflow:gpu", "keras with tensorflow backend (GPU) + sklearn, numpy, scipy, matplotlib (language: py27)"],
+    ["tensorflow:cpu", "tensorflow (CPU) + sklearn, numpy, scipy, matplotlib (language: py27)"],
+    ["tensorflow:gpu", "tensorflow (GPU) + sklearn, numpy, scipy, matplotlib (language: py27)"],
+    ["scikit-opencv:py-2.7", "sklearn, scipy, opencv, Pillow, numpy (language: py27)"],
+    ["theano:cpu", "theano (CPU) + scipy, numpy (language: py27)"],
+    ["theano:gpu", "theano (GPU) + scipy, numpy (language: py27)"],
+    ["keras-theano:cpu", "keras with theano (CPU) + scipy, numpy (language: py27)"],
+    ["keras-theano:gpu", "keras with theano (GPU) + scipy, numpy (language: py27)"],
+    ["kaggle:python", "environment as provided in kaggle kernels for numerical data science problems (language: py27)"],
+    ["spacy:py-2.7", "Spacy for NLP + scipy, numpy (language: py27)"],
+    ["pytorch:cpu", "Pytorch (CPU, language in py27)"],
+    ["catboost:cpu", "catboost + sklearn, numpy, scipy (language: py27)"]
+  ]
+}

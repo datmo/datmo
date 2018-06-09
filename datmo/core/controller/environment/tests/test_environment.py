@@ -404,6 +404,7 @@ class TestEnvironmentController():
             "volumes": None,
             "detach": True,
             "stdin_open": False,
+            "mem_limit": "4g",
             "tty": False,
             "api": False
         }
@@ -445,6 +446,7 @@ class TestEnvironmentController():
             "ports": ["8888:8888"],
             "name": random_name,
             "volumes": None,
+            "mem_limit": "4g",
             "detach": True,
             "stdin_open": False,
             "tty": False,
@@ -502,6 +504,7 @@ class TestEnvironmentController():
                     'mode': 'rw'
                 }
             },
+            "mem_limit": "4g",
             "detach": False,
             "stdin_open": False,
             "tty": False,
@@ -546,6 +549,7 @@ class TestEnvironmentController():
                 "ports": ["8888:8888"],
                 "name": container_name,
                 "volumes": None,
+                "mem_limit": "4g",
                 "detach": True,
                 "stdin_open": True,
                 "tty": True,
@@ -584,6 +588,7 @@ class TestEnvironmentController():
                 "ports": ["8888:8888"],
                 "name": container_name,
                 "volumes": None,
+                "mem_limit": "4g",
                 "detach": True,
                 "stdin_open": False,
                 "tty": False,
@@ -717,6 +722,7 @@ class TestEnvironmentController():
             "ports": ["8888:8888"],
             "name": "datmo-task-" + self.environment.model.id + "-" + "test",
             "volumes": None,
+            "mem_limit": "4g",
             "detach": False,
             "stdin_open": False,
             "tty": False,
@@ -766,6 +772,7 @@ class TestEnvironmentController():
             "ports": ["8888:8888"],
             "name": "datmo-task-" + self.environment.model.id + "-" + "test2",
             "volumes": None,
+            "mem_limit": "4g",
             "detach": False,
             "stdin_open": False,
             "tty": False,
