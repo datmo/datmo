@@ -49,4 +49,4 @@ install:
   - "%PYTHON%/python.exe setup.py install"
 test_script:
   - "%PYTHON%/Scripts/pip.exe --version"
-  - "%PYTHON%/Scripts/pytest "
+  - "%PYTHON%/Scripts/pytest -s -v"

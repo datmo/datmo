@@ -36,8 +36,8 @@ from datmo.core.util.misc_functions import pytest_docker_environment_failed_inst
 
 # provide mountable tmp directory for docker
 tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
-test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
-                                tempfile.gettempdir())
+test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
+
 
 class TestProject():
     def setup_method(self):
@@ -61,7 +61,8 @@ class TestProject():
 
         result = dummy_no_environment(self)
 
-        definition_filepath = os.path.join(self.temp_dir, "datmo_environment", "Dockerfile")
+        definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
+                                           "Dockerfile")
 
         assert result
         assert not os.path.isfile(definition_filepath)
@@ -82,7 +83,8 @@ class TestProject():
 
         result = dummy_environment(self)
 
-        definition_filepath = os.path.join(self.temp_dir, "datmo_environment", "Dockerfile")
+        definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
+                                           "Dockerfile")
 
         assert result
         assert os.path.isfile(definition_filepath)
@@ -93,7 +95,6 @@ class TestProject():
         assert os.path.exists(os.path.join(self.temp_dir, '.datmo'))
         assert result.name == test_name
         assert result.description == test_description
-
 
     def test_init_create_failure(self):
         self.project_command.parse(["init", "--name", "", "--description", ""])
@@ -279,8 +280,14 @@ class TestProject():
             f.write(to_bytes(str("FROM datmo/xgboost:cpu\n")))
 
         # test single ports option before command
-        self.project_command.parse(["notebook", "--gpu", "--environment-paths", env_def_path,
-                                    "--mem-limit", test_mem_limit,])
+        self.project_command.parse([
+            "notebook",
+            "--gpu",
+            "--environment-paths",
+            env_def_path,
+            "--mem-limit",
+            test_mem_limit,
+        ])
 
         # test for desired side effects
         assert self.project_command.args.gpu == True

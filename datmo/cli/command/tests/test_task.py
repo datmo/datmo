@@ -13,9 +13,11 @@ from __future__ import unicode_literals
 #     import builtins as __builtin__
 
 import os
+import glob
 import time
 import tempfile
 import platform
+from argparse import ArgumentError
 
 from multiprocessing import Process, Manager
 from io import open
@@ -49,17 +51,18 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 
 
 class TestTaskCommand():
-    def setup_class(self):
+    def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
 
-    def teardown_class(self):
+    def teardown_method(self):
         pass
 
     def __set_variables(self):
         self.project_command = ProjectCommand(self.temp_dir, self.cli_helper)
         self.project_command.parse(
             ["init", "--name", "foobar", "--description", "test model"])
+
         @self.project_command.cli_helper.input("\n")
         def dummy(self):
             return self.project_command.execute()
@@ -69,9 +72,9 @@ class TestTaskCommand():
         self.task_command = TaskCommand(self.temp_dir, self.cli_helper)
 
         # Create environment_driver definition
-        env_def_path = os.path.join(self.temp_dir, "Dockerfile")
-        with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+        self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
+        with open(self.env_def_path, "wb") as f:
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
     def test_task_project_not_init(self):
         failed = False
@@ -112,7 +115,7 @@ class TestTaskCommand():
         self.task_command.parse([
             "task", "run", "--ports", test_ports[0], "--environment-paths",
             test_dockerfile, "--mem-limit", test_mem_limit, test_command
-        ])        
+        ])
         # test for desired side effects
         assert self.task_command.args.cmd == test_command
         assert self.task_command.args.ports == [test_ports[0]]
@@ -121,7 +124,8 @@ class TestTaskCommand():
 
         self.task_command.parse([
             "task", "run", "-p", test_ports[0], "-p", test_ports[1],
-            "--environment-paths", test_dockerfile, "--mem-limit", test_mem_limit, test_command
+            "--environment-paths", test_dockerfile, "--mem-limit",
+            test_mem_limit, test_command
         ])
         # test for desired side effects
         assert self.task_command.args.cmd == test_command
@@ -140,6 +144,11 @@ class TestTaskCommand():
         assert result.results == {"accuracy": "0.45"}
         assert result.status == "SUCCESS"
 
+        # teardown
+        self.task_command.parse(["task", "stop", "--all"])
+        # test when all is passed to stop all
+        task_stop_command = self.task_command.execute()
+
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_run_string_command(self):
         # TODO: Adding test with `--interactive` argument and terminate inside container
@@ -151,7 +160,8 @@ class TestTaskCommand():
         test_mem_limit = "4g"
         self.task_command.parse([
             "task", "run", "--ports", test_ports[0], "--ports", test_ports[1],
-            "--environment-paths", test_dockerfile, "--mem-limit", test_mem_limit, test_command
+            "--environment-paths", test_dockerfile, "--mem-limit",
+            test_mem_limit, test_command
         ])
         # test for desired side effects
         assert self.task_command.args.cmd == test_command
@@ -168,6 +178,11 @@ class TestTaskCommand():
         assert result.results
         assert result.results == {"accuracy": "0.45"}
         assert result.status == "SUCCESS"
+
+        # teardown
+        self.task_command.parse(["task", "stop", "--all"])
+        # test when all is passed to stop all
+        task_stop_command = self.task_command.execute()
 
     # def test_multiple_concurrent_task_run_command(self):
     #     test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
@@ -214,14 +229,20 @@ class TestTaskCommand():
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_run_notebook(self):
         self.__set_variables()
+        # Update the default Dockerfile to test with
+        with open(self.env_def_path, "wb") as f:
+            f.write(to_bytes("FROM nbgallery/jupyter-alpine:latest"))
+
         # Test success case
         test_command = ["jupyter", "notebook", "list"]
         test_ports = ["8888:8888", "9999:9999"]
         test_mem_limit = "4g"
 
         # test single ports option before command
-        self.task_command.parse(
-            ["task", "run", "--ports", test_ports[0], "--mem-limit", test_mem_limit, test_command])
+        self.task_command.parse([
+            "task", "run", "--ports", test_ports[0], "--mem-limit",
+            test_mem_limit, test_command
+        ])
 
         # test for desired side effects
         assert self.task_command.args.cmd == test_command
@@ -230,8 +251,9 @@ class TestTaskCommand():
 
         # test multiple ports option before command
         self.task_command.parse([
-            "task", "run", "--ports", test_ports[0], "--ports", test_ports[1], "--mem-limit", test_mem_limit,
-            test_command])
+            "task", "run", "--ports", test_ports[0], "--ports", test_ports[1],
+            "--mem-limit", test_mem_limit, test_command
+        ])
 
         # test for desired side effects
         assert self.task_command.args.cmd == test_command
@@ -246,6 +268,11 @@ class TestTaskCommand():
         assert "Currently running servers" in result.logs
         assert result.status == "SUCCESS"
 
+        # teardown
+        self.task_command.parse(["task", "stop", "--all"])
+        # test when all is passed to stop all
+        task_stop_command = self.task_command.execute()
+
     def test_task_run_invalid_arg(self):
         self.__set_variables()
         exception_thrown = False
@@ -258,10 +285,10 @@ class TestTaskCommand():
     def test_task_ls(self):
         self.__set_variables()
 
+        # Test defaults
         self.task_command.parse(["task", "ls"])
-        task_ls_command = self.task_command.execute()
-
-        assert task_ls_command == True
+        task_objs = self.task_command.execute()
+        assert task_objs == []
 
         test_session_id = 'test_session_id'
         self.task_command.parse(
@@ -270,12 +297,74 @@ class TestTaskCommand():
         # test for desired side effects
         assert self.task_command.args.session_id == test_session_id
 
+        # Test failure no session
         failed = False
         try:
-            task_ls_command = self.task_command.execute()
+            self.task_command.execute()
         except SessionDoesNotExist:
             failed = True
         assert failed
+
+        # Test failure (format)
+        failed = False
+        try:
+            self.task_command.parse(["task", "ls", "--format"])
+        except ArgumentError:
+            failed = True
+        assert failed
+
+        # Test success format csv
+        self.task_command.parse(["task", "ls", "--format", "csv"])
+        task_objs = self.task_command.execute()
+        assert task_objs == []
+
+        # Test success format csv, download default
+        self.task_command.parse(
+            ["task", "ls", "--format", "csv", "--download"])
+        task_objs = self.task_command.execute()
+        assert task_objs == []
+        test_wildcard = os.path.join(os.getcwd(), "task_ls_*")
+        paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
+        assert paths
+        assert open(paths[0], "r").read()
+        os.remove(paths[0])
+
+        # Test success format csv, download exact path
+        test_path = os.path.join(self.temp_dir, "my_output")
+        self.task_command.parse([
+            "task", "ls", "--format", "csv", "--download", "--download-path",
+            test_path
+        ])
+        task_objs = self.task_command.execute()
+        assert task_objs == []
+        assert os.path.isfile(test_path)
+        assert open(test_path, "r").read()
+        os.remove(test_path)
+
+        # Test success format table
+        self.task_command.parse(["task", "ls"])
+        task_objs = self.task_command.execute()
+        assert task_objs == []
+
+        # Test success format table, download default
+        self.task_command.parse(["task", "ls", "--download"])
+        task_objs = self.task_command.execute()
+        assert task_objs == []
+        test_wildcard = os.path.join(os.getcwd(), "task_ls_*")
+        paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
+        assert paths
+        assert open(paths[0], "r").read()
+        os.remove(paths[0])
+
+        # Test success format table, download exact path
+        test_path = os.path.join(self.temp_dir, "my_output")
+        self.task_command.parse(
+            ["task", "ls", "--download", "--download-path", test_path])
+        task_objs = self.task_command.execute()
+        assert task_objs == []
+        assert os.path.isfile(test_path)
+        assert open(test_path, "r").read()
+        os.remove(test_path)
 
     def test_task_ls_invalid_arg(self):
         self.__set_variables()

@@ -12,10 +12,12 @@ from __future__ import unicode_literals
 #     # Python 3
 #     import builtins as __builtin__
 import os
+import glob
 import time
 import tempfile
 import platform
 from io import open
+from argparse import ArgumentError
 try:
     to_unicode = unicode
 except NameError:
@@ -48,11 +50,11 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 
 
 class TestSnapshot():
-    def setup_class(self):
+    def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
 
-    def teardown_class(self):
+    def teardown_method(self):
         pass
 
     def __set_variables(self):
@@ -70,7 +72,7 @@ class TestSnapshot():
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(self.env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Create config file
         self.config_filepath = os.path.join(self.snapshot_command.home,
@@ -208,8 +210,8 @@ class TestSnapshot():
         assert self.snapshot_command.args.stats_filepath == test_stats_filepath
         assert self.snapshot_command.args.paths == test_paths
 
-        snapshot_id_1 = self.snapshot_command.execute()
-        assert snapshot_id_1
+        snapshot_obj_1 = self.snapshot_command.execute()
+        assert snapshot_obj_1
 
     def test_snapshot_create_config_stats(self):
         self.__set_variables()
@@ -225,8 +227,8 @@ class TestSnapshot():
         ])
 
         # test for desired side effects
-        snapshot_id = self.snapshot_command.execute()
-        assert snapshot_id
+        snapshot_obj = self.snapshot_command.execute()
+        assert snapshot_obj
 
         test_config = self.config1
         test_stats = self.stats1
@@ -238,21 +240,21 @@ class TestSnapshot():
         ])
 
         # test for desired side effects
-        snapshot_id = self.snapshot_command.execute()
-        assert snapshot_id
+        snapshot_obj = self.snapshot_command.execute()
+        assert snapshot_obj
 
         test_config = self.config2
         test_stats = self.stats2
 
         # try config
-        result = self.snapshot_command.parse([
+        self.snapshot_command.parse([
             "snapshot", "create", "--message", test_message, "--label",
             test_label, "--config", test_config, "--stats", test_stats
         ])
 
         # test for desired side effects
-        snapshot_id = self.snapshot_command.execute()
-        assert snapshot_id
+        snapshot_obj = self.snapshot_command.execute()
+        assert snapshot_obj
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_snapshot_create_from_task(self):
@@ -281,8 +283,8 @@ class TestSnapshot():
         # test for desired side effects
         assert self.snapshot_command.args.message == test_message
 
-        snapshot_id = self.snapshot_command.execute()
-        assert snapshot_id
+        snapshot_obj = self.snapshot_command.execute()
+        assert snapshot_obj
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_snapshot_create_from_task_fail_user_inputs(self):
@@ -386,7 +388,7 @@ class TestSnapshot():
             failed = True
         assert failed
 
-    def test_datmo_snapshot_create_fail_mutually_exclusive_args(self):
+    def test_snapshot_create_fail_mutually_exclusive_args(self):
         self.__set_variables()
         test_message = "this is a test message"
         test_label = "test label"
@@ -464,15 +466,15 @@ class TestSnapshot():
             exception_thrown = True
         assert exception_thrown
 
-    def test_datmo_snapshot_create_default(self):
+    def test_snapshot_create_default(self):
         self.__set_variables()
         self.snapshot_command.parse(
             ["snapshot", "create", "-m", "my test snapshot"])
 
-        snapshot_id_2 = self.snapshot_command.execute()
-        assert snapshot_id_2
+        snapshot_obj_2 = self.snapshot_command.execute()
+        assert snapshot_obj_2
 
-    def test_datmo_snapshot_create_invalid_arg(self):
+    def test_snapshot_create_invalid_arg(self):
         self.__set_variables()
         exception_thrown = False
         try:
@@ -483,7 +485,7 @@ class TestSnapshot():
             exception_thrown = True
         assert exception_thrown
 
-    def test_datmo_snapshot_update(self):
+    def test_snapshot_update(self):
         self.__set_variables()
 
         test_config = ["depth: 10", "learning_rate:0.91"]
@@ -498,61 +500,63 @@ class TestSnapshot():
         # 1. Updating both message and label
         self.snapshot_command.parse(
             ["snapshot", "create", "-m", "my test snapshot"])
-        snapshot_id = self.snapshot_command.execute()
+        snapshot_obj = self.snapshot_command.execute()
 
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_id, "--message",
+            "snapshot", "update", "--id", snapshot_obj.id, "--message",
             test_message, "--label", test_label
         ])
 
         result = self.snapshot_command.execute()
-        assert result.id == snapshot_id
+        assert result.id == snapshot_obj.id
         assert result.message == test_message
         assert result.label == test_label
 
         # 2. Updating only message
         self.snapshot_command.parse(
             ["snapshot", "create", "-m", "my test snapshot"])
-        snapshot_id = self.snapshot_command.execute()
+        snapshot_obj = self.snapshot_command.execute()
 
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_id, "--message",
+            "snapshot", "update", "--id", snapshot_obj.id, "--message",
             test_message
         ])
 
         result = self.snapshot_command.execute()
-        assert result.id == snapshot_id
+        assert result.id == snapshot_obj.id
         assert result.message == test_message
 
         # Updating label
         self.snapshot_command.parse(
             ["snapshot", "create", "-m", "my test snapshot"])
-        snapshot_id = self.snapshot_command.execute()
+        snapshot_obj = self.snapshot_command.execute()
 
         # Test when optional parameters are not given
-        self.snapshot_command.parse(
-            ["snapshot", "update", "--id", snapshot_id, "--label", test_label])
+        self.snapshot_command.parse([
+            "snapshot", "update", "--id", snapshot_obj.id, "--label",
+            test_label
+        ])
 
         result = self.snapshot_command.execute()
-        assert result.id == snapshot_id
+        assert result.id == snapshot_obj.id
         assert result.label == test_label
 
         # 3. Updating config, message and label
         self.snapshot_command.parse(
             ["snapshot", "create", "-m", "my test snapshot"])
-        snapshot_id = self.snapshot_command.execute()
+        snapshot_obj = self.snapshot_command.execute()
 
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_id, "--config",
+            "snapshot", "update", "--id", snapshot_obj.id, "--config",
             test_config[0], "--config", test_config[1], "--message",
             test_message, "--label", test_label
         ])
 
         result = self.snapshot_command.execute()
-        assert result.id == snapshot_id
+        assert result.id == snapshot_obj.id
         assert result.config == {"depth": "10", "learning_rate": "0.91"}
         assert result.message == test_message
         assert result.label == test_label
@@ -560,17 +564,17 @@ class TestSnapshot():
         # 4. Updating stats, message and label
         self.snapshot_command.parse(
             ["snapshot", "create", "-m", "my test snapshot"])
-        snapshot_id = self.snapshot_command.execute()
+        snapshot_obj = self.snapshot_command.execute()
 
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_id, "--stats",
+            "snapshot", "update", "--id", snapshot_obj.id, "--stats",
             test_stats[0], "--stats", test_stats[1], "--message", test_message,
             "--label", test_label
         ])
 
         result = self.snapshot_command.execute()
-        assert result.id == snapshot_id
+        assert result.id == snapshot_obj.id
         assert result.stats == {"acc": "91.34", "f1_score": "0.91"}
         assert result.message == test_message
         assert result.label == test_label
@@ -581,12 +585,12 @@ class TestSnapshot():
         # 5. Updating config, stats
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_id, "--config",
+            "snapshot", "update", "--id", snapshot_obj.id, "--config",
             test_config1, "--stats", test_stats1
         ])
 
         result = self.snapshot_command.execute()
-        assert result.id == snapshot_id
+        assert result.id == snapshot_obj.id
         assert result.config == {
             "depth": "10",
             "learning_rate": "0.91",
@@ -602,12 +606,12 @@ class TestSnapshot():
 
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_id, "--config",
+            "snapshot", "update", "--id", snapshot_obj.id, "--config",
             test_config2, "--stats", test_stats2
         ])
 
         result = self.snapshot_command.execute()
-        assert result.id == snapshot_id
+        assert result.id == snapshot_obj.id
         assert result.config == {
             "depth": "10",
             "learning_rate": "0.91",
@@ -623,23 +627,23 @@ class TestSnapshot():
         assert result.message == test_message
         assert result.label == test_label
 
-    def test_datmo_snapshot_delete(self):
+    def test_snapshot_delete(self):
         self.__set_variables()
 
         # Test when optional parameters are not given
         self.snapshot_command.parse(
             ["snapshot", "create", "-m", "my test snapshot"])
 
-        snapshot_id = self.snapshot_command.execute()
+        snapshot_obj = self.snapshot_command.execute()
 
         # Test when optional parameters are not given
         self.snapshot_command.parse(
-            ["snapshot", "delete", "--id", snapshot_id])
+            ["snapshot", "delete", "--id", snapshot_obj.id])
 
         result = self.snapshot_command.execute()
         assert result
 
-    def test_datmo_snapshot_delete_invalid_arg(self):
+    def test_snapshot_delete_invalid_arg(self):
         self.__set_variables()
         exception_thrown = False
         try:
@@ -650,13 +654,13 @@ class TestSnapshot():
             exception_thrown = True
         assert exception_thrown
 
-    def test_datmo_snapshot_ls(self):
+    def test_snapshot_ls(self):
         self.__set_variables()
         # Test when optional parameters are not given
         self.snapshot_command.parse(
             ["snapshot", "create", "-m", "my test snapshot"])
 
-        snapshot_id = self.snapshot_command.execute()
+        created_snapshot_obj = self.snapshot_command.execute()
 
         # Test when optional parameters are not given
         self.snapshot_command.parse(["snapshot", "ls"])
@@ -664,7 +668,7 @@ class TestSnapshot():
         result = self.snapshot_command.execute()
 
         assert result
-        assert snapshot_id in result
+        assert created_snapshot_obj in result
 
         # Test when optional parameters are not given
         self.snapshot_command.parse(["snapshot", "ls", "-a"])
@@ -672,9 +676,70 @@ class TestSnapshot():
         result = self.snapshot_command.execute()
 
         assert result
-        assert snapshot_id in result
+        assert created_snapshot_obj in result
 
-    def test_datmo_snapshot_checkout_invalid_arg(self):
+        # Test failure (format)
+        failed = False
+        try:
+            self.snapshot_command.parse(["snapshot", "ls", "--format"])
+        except ArgumentError:
+            failed = True
+        assert failed
+
+        # Test success format csv
+        self.snapshot_command.parse(["snapshot", "ls", "--format", "csv"])
+        snapshot_objs = self.snapshot_command.execute()
+        assert created_snapshot_obj in snapshot_objs
+
+        # Test success format csv, download default
+        self.snapshot_command.parse(
+            ["snapshot", "ls", "--format", "csv", "--download"])
+        snapshot_objs = self.snapshot_command.execute()
+        assert created_snapshot_obj in snapshot_objs
+        test_wildcard = os.path.join(os.getcwd(), "snapshot_ls_*")
+        paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
+        assert paths
+        assert open(paths[0], "r").read()
+        os.remove(paths[0])
+
+        # Test success format csv, download exact path
+        test_path = os.path.join(self.temp_dir, "my_output")
+        self.snapshot_command.parse([
+            "snapshot", "ls", "--format", "csv", "--download",
+            "--download-path", test_path
+        ])
+        snapshot_objs = self.snapshot_command.execute()
+        assert created_snapshot_obj in snapshot_objs
+        assert os.path.isfile(test_path)
+        assert open(test_path, "r").read()
+        os.remove(test_path)
+
+        # Test success format table
+        self.snapshot_command.parse(["snapshot", "ls"])
+        environment_objs = self.snapshot_command.execute()
+        assert created_snapshot_obj in snapshot_objs
+
+        # Test success format table, download default
+        self.snapshot_command.parse(["snapshot", "ls", "--download"])
+        snapshot_objs = self.snapshot_command.execute()
+        assert created_snapshot_obj in snapshot_objs
+        test_wildcard = os.path.join(os.getcwd(), "snapshot_ls_*")
+        paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
+        assert paths
+        assert open(paths[0], "r").read()
+        os.remove(paths[0])
+
+        # Test success format table, download exact path
+        test_path = os.path.join(self.temp_dir, "my_output")
+        self.snapshot_command.parse(
+            ["snapshot", "ls", "--download", "--download-path", test_path])
+        snapshot_objs = self.snapshot_command.execute()
+        assert created_snapshot_obj in snapshot_objs
+        assert os.path.isfile(test_path)
+        assert open(test_path, "r").read()
+        os.remove(test_path)
+
+    def test_snapshot_checkout_invalid_arg(self):
         self.__set_variables()
         exception_thrown = False
         try:
@@ -685,25 +750,25 @@ class TestSnapshot():
             exception_thrown = True
         assert exception_thrown
 
-    def test_datmo_snapshot_checkout(self):
+    def test_snapshot_checkout(self):
         self.__set_variables()
         # Test when optional parameters are not given
         self.snapshot_command.parse(
             ["snapshot", "create", "-m", "my test snapshot"])
-        snapshot_id = self.snapshot_command.execute()
+        snapshot_obj = self.snapshot_command.execute()
 
         # Test when optional parameters are not given
-        self.snapshot_command.parse(["snapshot", "checkout", snapshot_id])
+        self.snapshot_command.parse(["snapshot", "checkout", snapshot_obj.id])
 
         result = self.snapshot_command.execute()
         assert result
 
-    def test_datmo_snapshot_diff(self):
+    def test_snapshot_diff(self):
         self.__set_variables()
         # Create snapshots to test
         self.snapshot_command.parse(
             ["snapshot", "create", "-m", "my test snapshot"])
-        snapshot_id_1 = self.snapshot_command.execute()
+        snapshot_obj_1 = self.snapshot_command.execute()
 
         # Create another test file
         self.filepath_3 = os.path.join(self.snapshot_command.home, "file3.txt")
@@ -712,23 +777,23 @@ class TestSnapshot():
 
         self.snapshot_command.parse(
             ["snapshot", "create", "-m", "my second snapshot"])
-        snapshot_id_2 = self.snapshot_command.execute()
+        snapshot_obj_2 = self.snapshot_command.execute()
 
         # Test diff with the above two snapshots
         self.snapshot_command.parse(
-            ["snapshot", "diff", snapshot_id_1, snapshot_id_2])
+            ["snapshot", "diff", snapshot_obj_1.id, snapshot_obj_2.id])
 
         result = self.snapshot_command.execute()
         assert result
 
-    def test_datmo_snapshot_inspect(self):
+    def test_snapshot_inspect(self):
         self.__set_variables()
         # Create snapshot to test
         self.snapshot_command.parse(
             ["snapshot", "create", "-m", "my test snapshot"])
-        snapshot_id = self.snapshot_command.execute()
+        snapshot_obj = self.snapshot_command.execute()
         # Test inspect for this snapshot
-        self.snapshot_command.parse(["snapshot", "inspect", snapshot_id])
+        self.snapshot_command.parse(["snapshot", "inspect", snapshot_obj.id])
 
         result = self.snapshot_command.execute()
         assert result
