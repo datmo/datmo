@@ -189,7 +189,14 @@ class SnapshotController(BaseController):
             "config": create_dict['config'],
             "stats": create_dict['stats']
         })
-        if results: return results[0]
+        if results:
+            snapshot_obj = results[0]
+            snapshot_update_dict = {"id": snapshot_obj.id}
+            optional_args = ["label", "visible"]
+            for optional_arg in optional_args:
+                if optional_arg in dictionary:
+                    snapshot_update_dict[optional_arg] = dictionary[optional_arg]
+            return self.dal.snapshot.update(snapshot_update_dict)
 
         # Optional args for Snapshot entity
         optional_args = ["task_id", "label", "visible"]
