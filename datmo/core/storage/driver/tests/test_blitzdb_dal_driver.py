@@ -71,6 +71,25 @@ class TestBlitzDBDALDriver():
         result = self.database.set(self.collection, test_obj)
         assert result.get('id') != None
 
+    def test_db_set_multiple_objs(self):
+        test_obj = {"foo": "bar"}
+        result = self.database.set(self.collection, test_obj)
+        assert result.get('id') != None
+
+        # updating with new key in obj
+        test_obj = {"foo": "bar", "foo1": "bar1"}
+        result = self.database.set(self.collection, test_obj)
+        assert result.get('id') != None
+
+        # removing the previously added key
+        test_obj = {"foo2": "bar2"}
+        result = self.database.set(self.collection, test_obj)
+        assert result.get('id') != None
+
+        # get all entries till now
+        items = self.database.query(self.collection, {})
+        assert len(items) == 4
+
     def test_db_get(self):
         test_obj = {"foo": "bar_0"}
         result = self.database.set(self.collection, test_obj)
@@ -96,7 +115,7 @@ class TestBlitzDBDALDriver():
     def test_db_query(self):
         test_obj = {"foo": "bar"}
         results = self.database.query(self.collection, test_obj)
-        assert len(results) == 1
+        assert len(results) == 3
 
     def test_db_query_bool(self):
         test_obj = {"bool": True}
@@ -112,7 +131,7 @@ class TestBlitzDBDALDriver():
 
     def test_db_query_all(self):
         results = self.database.query(self.collection, {})
-        assert len(results) == 6
+        assert len(results) == 9
         # ensure each entity returns an 'id'
         for entity in results:
             assert entity['id'] != None
