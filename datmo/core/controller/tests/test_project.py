@@ -99,7 +99,7 @@ class TestProjectController():
     def test_init_with_interuption(self):
         # Reinitializing after timed interuption during init
 
-        @timeout_decorator.timeout(0.05, use_signals=False)
+        @timeout_decorator.timeout(0.01, use_signals=False)
         def timed_init_with_interuption():
             result = self.project.init("test1", "test description")
             return result

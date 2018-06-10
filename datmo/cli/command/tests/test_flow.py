@@ -133,7 +133,7 @@ class TestFlow():
         self.__set_variables()
 
         # Step 1: interrupted environment setup
-        @timeout_decorator.timeout(0.05, use_signals=False)
+        @timeout_decorator.timeout(0.01, use_signals=False)
         def timed_command_with_interuption():
             result = self.__environment_setup()
             return result
@@ -180,7 +180,7 @@ class TestFlow():
         assert environment_setup_result
 
         # Step 2: interrupted task run
-        @timeout_decorator.timeout(0.1, use_signals=False)
+        @timeout_decorator.timeout(0.01, use_signals=False)
         def timed_command_with_interuption():
             result = self.__task_run()
             return result
@@ -232,7 +232,7 @@ class TestFlow():
         assert task_ls_result
 
         # Step 4: interrupted snapshot create
-        @timeout_decorator.timeout(0.1, use_signals=False)
+        @timeout_decorator.timeout(0.01, use_signals=False)
         def timed_command_with_interuption():
             result = self.__snapshot_create()
             return result
