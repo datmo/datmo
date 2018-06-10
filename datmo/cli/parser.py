@@ -18,6 +18,38 @@ def get_datmo_parser():
 
     cleanup_parser = subparsers.add_parser("cleanup", help="remove project")
 
+    # Notebook
+    notebook_parser = subparsers.add_parser(
+        "notebook", help="To run jupyter notebook")
+    notebook_parser.add_argument(
+        "--gpu",
+        dest="gpu",
+        action="store_true",
+        help="boolean if you want to run using GPUs")
+    notebook_parser.add_argument(
+        "--environment-id",
+        dest="environment_id",
+        default=None,
+        help="environment id from environment object")
+    notebook_parser.add_argument(
+        "--environment-paths",
+        dest="environment_paths",
+        default=None,
+        action="append",
+        type=str,
+        help=
+        "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
+    )
+    notebook_parser.add_argument(
+        "--mem-limit",
+        "-m",
+        dest="mem_limit",
+        default=None,
+        type=str,
+        help=
+        "maximum amount of memory the notebook environment can use (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes)"
+    )
+
     # Session
     session_parser = subparsers.add_parser("session", help="session module")
     session_subcommand_parsers = session_parser.add_subparsers(
@@ -40,6 +72,22 @@ def get_datmo_parser():
 
     session_ls = session_subcommand_parsers.add_parser(
         "ls", help="list sessions")
+    session_ls.add_argument(
+        "--format", dest="format", default="table", help="output format")
+    session_ls.add_argument(
+        "--download",
+        dest="download",
+        action="store_true",
+        help=
+        "boolean is true if user would like to download. use --download-path to specify a path"
+    )
+    session_ls.add_argument(
+        "--download-path",
+        dest="download_path",
+        default=None,
+        help=
+        "checked only if download is specified. saves output to location specified"
+    )
 
     session_select = session_subcommand_parsers.add_parser(
         "select", help="select a session")
@@ -100,6 +148,22 @@ def get_datmo_parser():
 
     environment_ls = environment_subcommand_parsers.add_parser(
         "ls", help="list environments")
+    environment_ls.add_argument(
+        "--format", dest="format", default="table", help="output format")
+    environment_ls.add_argument(
+        "--download",
+        dest="download",
+        action="store_true",
+        help=
+        "boolean is true if user would like to download. use --download-path to specify a path"
+    )
+    environment_ls.add_argument(
+        "--download-path",
+        dest="download_path",
+        default=None,
+        help=
+        "checked only if download is specified. saves output to location specified"
+    )
 
     # Snapshot
     snapshot_parser = subparsers.add_parser(
@@ -261,6 +325,22 @@ def get_datmo_parser():
         dest="details",
         action="store_true",
         help="show detailed snapshot information")
+    snapshot_ls.add_argument(
+        "--format", dest="format", default="table", help="output format")
+    snapshot_ls.add_argument(
+        "--download",
+        dest="download",
+        action="store_true",
+        help=
+        "boolean is true if user would like to download. use --download-path to specify a path"
+    )
+    snapshot_ls.add_argument(
+        "--download-path",
+        dest="download_path",
+        default=None,
+        help=
+        "checked only if download is specified. saves output to location specified"
+    )
 
     snapshot_checkout = snapshot_subcommand_parsers.add_parser(
         "checkout", help="checkout a snapshot by id")
@@ -312,6 +392,15 @@ def get_datmo_parser():
         help=
         "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
     )
+    task_run.add_argument(
+        "--mem-limit",
+        "-m",
+        dest="mem_limit",
+        default=None,
+        type=str,
+        help=
+        "maximum amount of memory the task environment can use (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes. e.g. 4g)"
+    )
     # task_run.add_argument(
     #     "--environment-name",
     #     dest="environment_name",
@@ -342,6 +431,22 @@ def get_datmo_parser():
         nargs="?",
         type=str,
         help="pass in the session id to list the tasks in that session")
+    task_ls.add_argument(
+        "--format", dest="format", default="table", help="output format")
+    task_ls.add_argument(
+        "--download",
+        dest="download",
+        action="store_true",
+        help=
+        "boolean is true if user would like to download. use --download-path to specify a path"
+    )
+    task_ls.add_argument(
+        "--download-path",
+        dest="download_path",
+        default=None,
+        help=
+        "checked only if download is specified. saves output to location specified"
+    )
 
     # Task stop arguments
     task_stop = task_subcommand_parsers.add_parser("stop", help="stop tasks")

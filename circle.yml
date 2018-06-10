@@ -5,7 +5,7 @@ machine:
 
   environment:
     LOGGING_LEVEL: DEBUG
-    TEST_PACKAGE: python -m pytest
+    TEST_PACKAGE: python -m pytest -s -v
 
   pre:
     - echo "Creating python environments"

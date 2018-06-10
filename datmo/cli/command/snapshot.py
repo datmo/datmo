@@ -1,7 +1,7 @@
 from __future__ import print_function
 
-import prettytable
-import datetime
+import os
+from datetime import datetime
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.misc_functions import mutually_exclusive, printable_string, prettify_datetime, parse_cli_key_value, format_table
@@ -46,7 +46,7 @@ class SnapshotCommand(ProjectCommand):
                 message, task_id, label=label)
             self.cli_helper.echo(
                 "Created snapshot id: %s" % snapshot_task_obj.id)
-            return snapshot_task_obj.id
+            return snapshot_task_obj
         else:
             # creating snapshot without task id
             snapshot_dict = {"visible": True}
@@ -107,7 +107,7 @@ class SnapshotCommand(ProjectCommand):
             snapshot_obj = self.snapshot_controller.create(snapshot_dict)
             self.cli_helper.echo(
                 __("info", "cli.snapshot.create.success", snapshot_obj.id))
-            return snapshot_obj.id
+            return snapshot_obj
 
     def delete(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.snapshot.delete"))
@@ -163,58 +163,77 @@ class SnapshotCommand(ProjectCommand):
     def ls(self, **kwargs):
         session_id = kwargs.get('session_id',
                                 self.snapshot_controller.current_session.id)
-        # Get all snapshot meta information
         detailed_info = kwargs.get('details', None)
-        # List of ids shown
-        listed_snapshot_ids = []
+        print_format = kwargs.get('format', "table")
+        download = kwargs.get('download', None)
+        download_path = kwargs.get('download_path', None)
         snapshot_objs = self.snapshot_controller.list(
             session_id=session_id,
             visible=True,
-            sort_key='created_at',
-            sort_order='descending')
+            sort_key="created_at",
+            sort_order="descending")
+        item_dict_list = []
         if detailed_info:
             header_list = [
                 "id", "created at", "config", "stats", "message", "label",
                 "code id", "environment id", "file collection id"
             ]
-            t = prettytable.PrettyTable(header_list)
             for snapshot_obj in snapshot_objs:
                 snapshot_config_printable = printable_string(
                     str(snapshot_obj.config))
                 snapshot_stats_printable = printable_string(
                     str(snapshot_obj.stats))
                 snapshot_message = printable_string(snapshot_obj.message)
-                t.add_row([
-                    snapshot_obj.id,
-                    prettify_datetime(snapshot_obj.created_at),
-                    snapshot_config_printable, snapshot_stats_printable,
-                    snapshot_message, snapshot_obj.label, snapshot_obj.code_id,
-                    snapshot_obj.environment_id,
-                    snapshot_obj.file_collection_id
-                ])
-                listed_snapshot_ids.append(snapshot_obj.id)
+                snapshot_label = printable_string(snapshot_obj.label)
+                item_dict_list.append({
+                    "id": snapshot_obj.id,
+                    "created at ": prettify_datetime(snapshot_obj.created_at),
+                    "config": snapshot_config_printable,
+                    "stats": snapshot_stats_printable,
+                    "message": snapshot_message,
+                    "label": snapshot_label,
+                    "code id": snapshot_obj.code_id,
+                    "environment id": snapshot_obj.environment_id,
+                    "file collection id": snapshot_obj.file_collection_id
+                })
         else:
             header_list = [
                 "id", "created at", "config", "stats", "message", "label"
             ]
-            t = prettytable.PrettyTable(header_list)
             for snapshot_obj in snapshot_objs:
                 snapshot_config_printable = printable_string(
                     str(snapshot_obj.config))
                 snapshot_stats_printable = printable_string(
                     str(snapshot_obj.stats))
                 snapshot_message = printable_string(snapshot_obj.message)
-                snapshot_created_at = printable_string(
-                    snapshot_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"))
-                t.add_row([
-                    snapshot_obj.id, snapshot_created_at,
-                    snapshot_config_printable, snapshot_stats_printable,
-                    snapshot_message, snapshot_obj.label
-                ])
-                listed_snapshot_ids.append(snapshot_obj.id)
-
-        self.cli_helper.echo(t)
-        return listed_snapshot_ids
+                snapshot_label = printable_string(snapshot_obj.label)
+                item_dict_list.append({
+                    "id": snapshot_obj.id,
+                    "created at ": prettify_datetime(snapshot_obj.created_at),
+                    "config": snapshot_config_printable,
+                    "stats": snapshot_stats_printable,
+                    "message": snapshot_message,
+                    "label": snapshot_label,
+                })
+        if download:
+            if not download_path:
+                # download to current working directory with timestamp
+                current_time = datetime.utcnow()
+                epoch_time = datetime.utcfromtimestamp(0)
+                current_time_unix_time_ms = (
+                    current_time - epoch_time).total_seconds() * 1000.0
+                download_path = os.path.join(
+                    os.getcwd(),
+                    "snapshot_ls_" + str(current_time_unix_time_ms))
+            self.cli_helper.print_items(
+                header_list,
+                item_dict_list,
+                print_format=print_format,
+                output_path=download_path)
+            return snapshot_objs
+        self.cli_helper.print_items(
+            header_list, item_dict_list, print_format=print_format)
+        return snapshot_objs
 
     def checkout(self, **kwargs):
         snapshot_id = kwargs.get("id", None)
@@ -240,16 +259,18 @@ class SnapshotCommand(ProjectCommand):
                 snapshot_obj_1, attribute) else "N/A"
             value_2 = getattr(snapshot_obj_2, attribute) if getattr(
                 snapshot_obj_2, attribute) else "N/A"
-            if isinstance(value_1, datetime.datetime):
+            if isinstance(value_1, datetime):
                 value_1 = prettify_datetime(value_1)
-            if isinstance(value_2, datetime.datetime):
+            if isinstance(value_2, datetime):
                 value_2 = prettify_datetime(value_2)
             table_data.append([attribute, value_1, "->", value_2])
-        self.cli_helper.echo(format_table(table_data))
-        return True
+        output = format_table(table_data)
+        self.cli_helper.echo(output)
+        return output
 
     def inspect(self, **kwargs):
         snapshot_id = kwargs.get("id", None)
         snapshot_obj = self.snapshot_controller.get(snapshot_id)
-        self.cli_helper.echo(str(snapshot_obj))
-        return True
+        output = str(snapshot_obj)
+        self.cli_helper.echo(output)
+        return output
