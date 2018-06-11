@@ -28,13 +28,15 @@ except TypeError:
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import ArgumentError
+from datmo.core.util.misc_functions import check_docker_active
 
 
 class Helper():
     def __init__(self):
         pass
 
-    def echo(self, value):
+    @staticmethod
+    def echo(value):
         print(to_unicode(value))
         return to_unicode(value)
 
@@ -180,3 +182,19 @@ class Helper():
             input_environment_name = available_environments[
                 name_environment_index - 1][0]
         return input_environment_name
+
+    @staticmethod
+    def notify_environment_active(controller_name):
+        def real_decorator(function):
+            def wrapper(self, *args, **kwargs):
+                controller_obj = getattr(self, controller_name)
+                if controller_obj.environment_driver.type == "docker":
+                    if not check_docker_active(controller_obj.home):
+                        Helper.echo(
+                            __("error", "general.environment.docker.na"))
+                        return
+                function(*args, **kwargs)
+
+            return wrapper
+
+        return real_decorator

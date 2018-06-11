@@ -1,5 +1,6 @@
 from datmo import __version__
 from datmo.core.util.i18n import get as __
+from datmo.cli.driver.helper import Helper
 from datmo.cli.command.base import BaseCommand
 from datmo.core.util.misc_functions import mutually_exclusive
 from datmo.core.controller.project import ProjectController
@@ -195,6 +196,7 @@ class ProjectCommand(BaseCommand):
                         }))
         return False
 
+    @Helper.notify_environment_active("project_controller")
     def notebook(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.project.notebook"))
         self.task_controller = TaskController()

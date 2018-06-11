@@ -97,6 +97,8 @@ MESSAGES = {
     "error": {
         "exception.validationfailed":
             "Validation failed: %s",
+        "general.environment.docker.na":
+            "Docker environment is not initialized. This command cannot be run",
         "sdk.snapshot.create.task.args":
             "Error due to passing excluded args while creating snapshot from task: %s",
         "cli.general":
