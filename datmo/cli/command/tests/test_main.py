@@ -91,7 +91,7 @@ class TestMain():
         try:
             success = True
             p = self.command_run([self.execpath, 'init', '--name', '"test"', '--description', '"test"'])
-            out, err = p.communicate("\n")
+            out, err = p.communicate(to_bytes("\n"))
             out, err = out.decode(), err.decode()
             if err:
                 success = False
@@ -157,5 +157,3 @@ class TestMain():
         except Exception:
             success = False
         assert success
-
-
