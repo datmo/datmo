@@ -12,6 +12,7 @@ except NameError:
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.misc_functions import mutually_exclusive, printable_string, prettify_datetime
+from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
 from datmo.core.util.exceptions import RequiredArgumentMissing
@@ -26,6 +27,7 @@ class TaskCommand(ProjectCommand):
         self.parse(["--help"])
         return True
 
+    @Helper.notify_environment_active("task_controller")
     def run(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.task.run"))
         # Create input dictionaries
@@ -102,6 +104,7 @@ class TaskCommand(ProjectCommand):
             header_list, item_dict_list, print_format=print_format)
         return task_objs
 
+    @Helper.notify_environment_active("task_controller")
     def stop(self, **kwargs):
         input_dict = {}
         mutually_exclusive(["id", "all"], kwargs, input_dict)
