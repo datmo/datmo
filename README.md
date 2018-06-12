@@ -12,8 +12,17 @@
 
 **Datmo** is an open source model tracking and reproducibility tool for developers. Use `datmo init` to turn any repository into a trackable task record with reusable environments and metrics logging.
 
+## Features
+
+- **One command environment setup** (languages, frameworks, packages, etc)
+- **Tracking and logging** for model config and results
+- **Project versioning** (model state tracking)
+- **Experiment reproducibility** (re-run tasks)
+- **Visualize + export** experiment history
+
+---
+
 ### Table of Contents
-* [Introduction](#introduction)
 * [Requirements](#requirements)
 * [Installation](#installation)
 * [Examples](#examples)
@@ -21,11 +30,6 @@
 * [Transform a Current Project](#transform)
 * [Sharing](#sharing)
 * [Contributing to Datmo](/CONTRIBUTING.md)
-
-## Introduction
-Tracking experiments in a unified manner for data science, machine learning, and artificial intelligence projects is difficult for many reasons, with one of the largest being the lack of interoperability between frameworks, languages, environments, and best practices.
-
-Datmo's open source tool helps to alleviate some of the largest pain points of dealing with model-based projects by leveraging strong foundational technologies and enforcing a set of conventions in a framework, language, and platform-agnostic CLI, with additional SDKs for more granular control and workflow integration.
 
 ## Requirements
 
@@ -42,6 +46,8 @@ pip install datmo
 In the `/examples` folder we have a few scripts you can run to get a feel for datmo. You can 
 navigate to [Examples](/examples/README.md) to learn more about how you can run the examples 
 and get started with your own projects.
+
+For more advanced tutorials, check out our dedicated tutorial repository [here](https://github.com/datmo/datmo-tutorials).
 
 Here's a comparison of a typical logistic regression model with one leveraging Datmo.
 
