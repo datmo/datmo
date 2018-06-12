@@ -14,12 +14,14 @@ from datmo.core.util.misc_functions import mutually_exclusive, printable_string,
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
 from datmo.core.util.exceptions import RequiredArgumentMissing
+from datmo.core.util.spinner import Spinner
 
 
 class TaskCommand(ProjectCommand):
     def __init__(self, home, cli_helper):
         super(TaskCommand, self).__init__(home, cli_helper)
         self.task_controller = TaskController(home=home)
+        self.spinner = Spinner()
 
     def task(self):
         self.parse(["--help"])
@@ -48,18 +50,22 @@ class TaskCommand(ProjectCommand):
         else:
             task_dict['command_list'] = kwargs['cmd']
 
-        # Create the task object)
+        # Create the task object
         task_obj = self.task_controller.create()
 
         # Pass in the task
         try:
+            self.spinner.start()
             updated_task_obj = self.task_controller.run(
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
         except Exception as e:
             self.logger.error("%s %s" % (e, task_dict))
             self.cli_helper.echo(__("error", "cli.task.run", task_obj.id))
             return False
-        self.cli_helper.echo("Ran task id: %s" % updated_task_obj.id)
+        finally:
+            self.spinner.stop()
+
+        self.cli_helper.echo(" Ran task id: %s" % updated_task_obj.id)
         return updated_task_obj
 
     def ls(self, **kwargs):
