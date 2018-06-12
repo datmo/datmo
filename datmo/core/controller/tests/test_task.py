@@ -84,7 +84,7 @@ class TestTaskController():
         # Create environment_driver id
         env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         paths = [env_def_path]
         environment_obj = self.environment.create({"paths": paths})
@@ -111,6 +111,7 @@ class TestTaskController():
                     'mode': 'rw'
                 }
             },
+            "mem_limit": "4g",
             "detach": False,
             "stdin_open": False,
             "tty": False,
@@ -144,6 +145,7 @@ class TestTaskController():
                     'mode': 'rw'
                 }
             },
+            "mem_limit": "4g",
             "detach": True,
             "stdin_open": False,
             "tty": False,
@@ -201,7 +203,7 @@ class TestTaskController():
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # 0) Test option 0
         failed = False
@@ -292,7 +294,7 @@ class TestTaskController():
         # Create environment_driver definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         failed = False
         try:
@@ -339,8 +341,7 @@ class TestTaskController():
         test_filepath = os.path.join(self.temp_dir, "script.py")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("import os\n"))
-            f.write(to_bytes("import numpy\n"))
-            f.write(to_bytes("import sklearn\n"))
+            f.write(to_bytes("import shutil\n"))
             f.write(to_bytes("print('hello')\n"))
             f.write(to_bytes("print(' accuracy: 0.56 ')\n"))
             f.write(
@@ -359,7 +360,7 @@ class TestTaskController():
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         updated_task_obj_2 = self.task.run(task_obj_2.id, task_dict=task_dict)
 
@@ -486,7 +487,7 @@ class TestTaskController():
         # Create environment definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Create file to add
         self.project.file_driver.create("dirpath1", directory=True)
@@ -607,7 +608,7 @@ class TestTaskController():
         # Create environment driver definition
         env_def_path = os.path.join(self.project.home, "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Create task_dict
         task_command = ["sh", "-c", "echo accuracy:0.45"]

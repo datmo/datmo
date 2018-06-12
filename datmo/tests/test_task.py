@@ -78,6 +78,7 @@ class TestTaskModule():
 
         # Create a basic task and run it with string command
         # (fails w/ no environment)
+        test_mem_limit = "4g"
         test_filepath = os.path.join(self.temp_dir, "script.py")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("import os\n"))
@@ -86,7 +87,10 @@ class TestTaskModule():
             f.write(to_bytes("print(' accuracy: 0.56 ')\n"))
 
         # 2) Test out option 2
-        task_obj_0 = run(command="python script.py", home=self.temp_dir)
+        task_obj_0 = run(
+            command="python script.py",
+            home=self.temp_dir,
+            mem_limit=test_mem_limit)
         assert isinstance(task_obj_0, Task)
         assert task_obj_0.id
         assert 'hello' in task_obj_0.logs
@@ -95,11 +99,14 @@ class TestTaskModule():
         # Add environment definition
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu"))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         # 3) Test out option 3
         task_obj_1 = run(
-            command="python script.py", env=test_filepath, home=self.temp_dir)
+            command="python script.py",
+            env=test_filepath,
+            home=self.temp_dir,
+            mem_limit=test_mem_limit)
         assert isinstance(task_obj_1, Task)
         assert task_obj_1.id
         assert 'hello' in task_obj_1.logs
@@ -109,7 +116,8 @@ class TestTaskModule():
         task_obj_2 = run(
             command=["python", "script.py"],
             env=test_filepath,
-            home=self.temp_dir)
+            home=self.temp_dir,
+            mem_limit=test_mem_limit)
         assert isinstance(task_obj_2, Task)
         assert task_obj_2.id
         assert 'hello' in task_obj_2.logs
@@ -119,7 +127,8 @@ class TestTaskModule():
         task_obj_3 = run(
             command=["python", "script.py"],
             env=[test_filepath + ">Dockerfile"],
-            home=self.temp_dir)
+            home=self.temp_dir,
+            mem_limit=test_mem_limit)
         assert isinstance(task_obj_3, Task)
         assert task_obj_3.id
         assert 'hello' in task_obj_3.logs
@@ -130,7 +139,7 @@ class TestTaskModule():
         test_filepath = os.path.join(self.project.environment_directory,
                                      "Dockerfile")
         with open(test_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu"))
+            f.write(to_bytes("FROM python:3.5-alpine"))
         task_obj_4 = run(command=["python", "script.py"], home=self.temp_dir)
         assert isinstance(task_obj_4, Task)
         assert task_obj_4.id
@@ -191,13 +200,13 @@ class TestTaskModule():
         # Create a basic task and run it with string command
         test_filepath = os.path.join(self.temp_dir, "script.py")
         with open(test_filepath, "wb") as f:
-            f.write(to_bytes("import numpy\n"))
-            f.write(to_bytes("import sklearn\n"))
-            f.write(to_bytes("print 'hello'\n"))
+            f.write(to_bytes("import os\n"))
+            f.write(to_bytes("import shutil\n"))
+            f.write(to_bytes("print('hello')\n"))
 
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu"))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         return run(command=command, env=test_filepath, home=self.temp_dir)
 

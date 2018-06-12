@@ -198,7 +198,7 @@ class TestProjectController():
         # Create environment_driver definition
         env_def_path = os.path.join(self.snapshot.home, "Dockerfile")
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu")))
+            f.write(to_bytes("FROM python:3.5-alpine"))
 
         environment_paths = [env_def_path]
 

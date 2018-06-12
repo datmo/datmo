@@ -57,6 +57,8 @@ def printable_dict(input_dictionary):
 
 
 def printable_string(string, max_width=40):
+    if not string:
+        return ""
     return '\n'.join(textwrap.wrap(string, max_width))
 
 
@@ -186,7 +188,7 @@ def __helper(filepath):
         definition_path = os.path.join(filepath, "Dockerfile")
         if platform.system() == "Windows":
             with open(definition_path, "wb") as f:
-                f.write(to_bytes("FROM alpine:3.5" + "\n"))
+                f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
                 f.write(to_bytes(str("RUN echo hello")))
             test.build("docker-test", definition_path)
         return False

@@ -1,8 +1,9 @@
 from __future__ import print_function
 
+import os
+from datetime import datetime
 import shlex
 import platform
-import prettytable
 # https://stackoverflow.com/questions/11301138/how-to-check-if-variable-is-string-with-python-2-and-3-compatibility/11301392?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
 try:
     basestring
@@ -29,7 +30,6 @@ class TaskCommand(ProjectCommand):
 
     def run(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.task.run"))
-
         # Create input dictionaries
         snapshot_dict = {}
 
@@ -40,7 +40,8 @@ class TaskCommand(ProjectCommand):
             mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
         task_dict = {
             "ports": kwargs['ports'],
-            "interactive": kwargs['interactive']
+            "interactive": kwargs['interactive'],
+            "mem_limit": kwargs['mem_limit']
         }
         if not isinstance(kwargs['cmd'], list):
             if platform.system() == "Windows":
@@ -50,12 +51,11 @@ class TaskCommand(ProjectCommand):
         else:
             task_dict['command_list'] = kwargs['cmd']
 
-        # Create the task object
-        task_obj = self.task_controller.create()
-
         # Pass in the task
         try:
             self.spinner.start()
+            # Create the task object
+            task_obj = self.task_controller.create()
             updated_task_obj = self.task_controller.run(
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
         except Exception as e:
@@ -71,23 +71,41 @@ class TaskCommand(ProjectCommand):
     def ls(self, **kwargs):
         session_id = kwargs.get('session_id',
                                 self.task_controller.current_session.id)
-        listed_task_ids = []
-        # Get all snapshot meta information
-        header_list = ["id", "command", "status", "results", "created at"]
-        t = prettytable.PrettyTable(header_list)
+        print_format = kwargs.get('format', "table")
+        download = kwargs.get('download', None)
+        download_path = kwargs.get('download_path', None)
+        # Get all task meta information
         task_objs = self.task_controller.list(
             session_id, sort_key='created_at', sort_order='descending')
+        header_list = ["id", "command", "status", "results", "created at"]
+        item_dict_list = []
         for task_obj in task_objs:
             task_results_printable = printable_string(str(task_obj.results))
-            t.add_row([
-                task_obj.id, task_obj.command, task_obj.status,
-                task_results_printable,
-                prettify_datetime(task_obj.created_at)
-            ])
-            listed_task_ids.append(task_obj.id)
-        self.cli_helper.echo(t)
-
-        return listed_task_ids
+            item_dict_list.append({
+                "id": task_obj.id,
+                "command": task_obj.command,
+                "status": task_obj.status,
+                "results": task_results_printable,
+                "created at": prettify_datetime(task_obj.created_at)
+            })
+        if download:
+            if not download_path:
+                # download to current working directory with timestamp
+                current_time = datetime.utcnow()
+                epoch_time = datetime.utcfromtimestamp(0)
+                current_time_unix_time_ms = (
+                    current_time - epoch_time).total_seconds() * 1000.0
+                download_path = os.path.join(
+                    os.getcwd(), "task_ls_" + str(current_time_unix_time_ms))
+            self.cli_helper.print_items(
+                header_list,
+                item_dict_list,
+                print_format=print_format,
+                output_path=download_path)
+            return task_objs
+        self.cli_helper.print_items(
+            header_list, item_dict_list, print_format=print_format)
+        return task_objs
 
     def stop(self, **kwargs):
         input_dict = {}

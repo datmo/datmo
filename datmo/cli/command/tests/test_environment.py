@@ -5,10 +5,13 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
+import glob
 import uuid
 import tempfile
 import shutil
 import platform
+from argparse import ArgumentError
 try:
     to_unicode = unicode
 except NameError:
@@ -26,7 +29,6 @@ except TypeError:
 
     to_bytes("test")
 
-import os
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.environment import EnvironmentCommand
 from datmo.cli.command.project import ProjectCommand
@@ -49,7 +51,12 @@ class TestEnvironment():
         self.project = ProjectCommand(self.temp_dir, self.cli_helper)
         self.project.parse(
             ["init", "--name", "foobar", "--description", "test model"])
-        self.project.execute()
+
+        @self.project.cli_helper.input("\n")
+        def dummy(self):
+            return self.project.execute()
+
+        dummy(self)
         self.environment_command = EnvironmentCommand(self.temp_dir,
                                                       self.cli_helper)
 
@@ -151,7 +158,7 @@ class TestEnvironment():
             environment_directory, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         self.environment_command.parse([
@@ -175,7 +182,7 @@ class TestEnvironment():
         definition_filepath = os.path.join(random_dir, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         self.environment_command.parse(
@@ -190,7 +197,7 @@ class TestEnvironment():
         definition_filepath = os.path.join(self.temp_dir, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         self.environment_command.parse(["environment", "create"])
@@ -231,7 +238,69 @@ class TestEnvironment():
         self.environment_command.parse(["environment", "create"])
         created_environment_obj = self.environment_command.execute()
 
+        # Test success (defaults)
         self.environment_command.parse(["environment", "ls"])
         environment_objs = self.environment_command.execute()
-
         assert created_environment_obj in environment_objs
+
+        # Test failure (format)
+        failed = False
+        try:
+            self.environment_command.parse(["environment", "ls", "--format"])
+        except ArgumentError:
+            failed = True
+        assert failed
+
+        # Test success format csv
+        self.environment_command.parse(
+            ["environment", "ls", "--format", "csv"])
+        environment_objs = self.environment_command.execute()
+        assert created_environment_obj in environment_objs
+
+        # Test success format csv, download default
+        self.environment_command.parse(
+            ["environment", "ls", "--format", "csv", "--download"])
+        environment_objs = self.environment_command.execute()
+        assert created_environment_obj in environment_objs
+        test_wildcard = os.path.join(os.getcwd(), "environment_ls_*")
+        paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
+        assert paths
+        assert open(paths[0], "r").read()
+        os.remove(paths[0])
+
+        # Test success format csv, download exact path
+        test_path = os.path.join(self.temp_dir, "my_output")
+        self.environment_command.parse([
+            "environment", "ls", "--format", "csv", "--download",
+            "--download-path", test_path
+        ])
+        environment_objs = self.environment_command.execute()
+        assert created_environment_obj in environment_objs
+        assert os.path.isfile(test_path)
+        assert open(test_path, "r").read()
+        os.remove(test_path)
+
+        # Test success format table
+        self.environment_command.parse(["environment", "ls"])
+        environment_objs = self.environment_command.execute()
+        assert created_environment_obj in environment_objs
+
+        # Test success format table, download default
+        self.environment_command.parse(["environment", "ls", "--download"])
+        environment_objs = self.environment_command.execute()
+        assert created_environment_obj in environment_objs
+        test_wildcard = os.path.join(os.getcwd(), "environment_ls_*")
+        paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
+        assert paths
+        assert open(paths[0], "r").read()
+        os.remove(paths[0])
+
+        # Test success format table, download exact path
+        test_path = os.path.join(self.temp_dir, "my_output")
+        self.environment_command.parse(
+            ["environment", "ls", "--download", "--download-path", test_path])
+        environment_objs = self.environment_command.execute()
+        assert created_environment_obj in environment_objs
+        assert os.path.isfile(test_path)
+        assert open(test_path, "r").read()
+        os.remove(test_path)

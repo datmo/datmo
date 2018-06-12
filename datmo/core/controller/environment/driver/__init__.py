@@ -39,9 +39,8 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         EnvironmentInitFailed
         """
 
-    @staticmethod
     @abstractmethod
-    def get_supported_environments():
+    def get_supported_environments(self):
         """Get all the supported environments
 
         Returns
@@ -238,9 +237,9 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
             list of file names of the datmo definition file
         """
 
+    @staticmethod
     @abstractmethod
-    def create_datmo_definition(self, input_definition_path,
-                                output_definition_path):
+    def create_datmo_definition(input_definition_path, output_definition_path):
         """Create a datmo version of the definition
 
         Parameters

@@ -7,6 +7,7 @@ import os
 import sys
 import importlib
 import inspect
+import prettytable
 from io import open
 try:
     to_unicode = unicode
@@ -35,7 +36,7 @@ class Helper():
 
     def echo(self, value):
         print(to_unicode(value))
-        return value
+        return to_unicode(value)
 
     def input(self, input_msg):
         def input_decorator(func):
@@ -61,6 +62,42 @@ class Helper():
             return input(msg)
         except EOFError:
             pass
+
+    def print_items(self,
+                    header_list,
+                    item_dict_list,
+                    print_format="table",
+                    output_path=None):
+        if print_format == "table":
+            output = prettytable.PrettyTable(header_list)
+            for item_dict in item_dict_list:
+                row_vals = []
+                for col_name in header_list:
+                    row_vals.append(item_dict.get(col_name, "N/A"))
+                output.add_row(row_vals)
+        elif print_format == "csv":
+            output = ""
+            for idx, header in enumerate(header_list):
+                output += header if idx == len(
+                    header_list) - 1 else header + ","
+            output += "\n"
+            for item_dict in item_dict_list:
+                for idx, header in enumerate(header_list):
+                    output += item_dict.get(
+                        header, "N/A"
+                    ) if idx == len(header_list) - 1 else item_dict.get(
+                        header, "N/A") + ","
+                output += "\n"
+        else:
+            output = ""
+
+        # Save final output to file if path given
+        if output_path:
+            self.echo("Downloading output to path %s" % output_path)
+            with open(output_path, "wb") as f:
+                f.write(to_bytes(to_unicode(output)))
+        # Print final output
+        return self.echo(to_unicode(output))
 
     def prompt_bool(self, msg):
         msg = msg + ": "
@@ -90,12 +127,12 @@ class Helper():
 
         try:
             command_class = importlib.import_module(command_path)
-        except ImportError as ex:
+        except ImportError:
             try:
                 command_path = "datmo.cli.command." + command_name + "_command"
                 command_class = importlib.import_module(command_path)
             except ImportError as ex:
-                self.echo(__("error", "cli.general", ex.message))
+                self.echo(__("error", "cli.general", str(ex)))
                 sys.exit()
 
         all_members = inspect.getmembers(command_class)
@@ -112,5 +149,34 @@ class Helper():
     def get_command_choices(self):
         return [
             "init", "version", "--version", "-v", "status", "cleanup",
-            "snapshot", "task", "environment"
+            "snapshot", "task", "notebook", "environment"
         ]
+
+    def prompt_available_environments(self, available_environments):
+        """Prompt user to choose an available environment. Returns the environment name"""
+        for idx, environment_name_description in enumerate(
+                available_environments):
+            environment_name = environment_name_description[0]
+            environment_description = environment_name_description[1]
+            self.echo("(%s) %s: %s" % (idx + 1, environment_name,
+                                       environment_description))
+        input_environment_name = self.prompt(
+            __("prompt", "cli.environment.setup.name"))
+        try:
+            name_environment_index = int(input_environment_name)
+        except ValueError:
+            available_names = [
+                name for name, description in available_environments
+            ]
+            try:
+                name_environment_index = available_names.index(
+                    input_environment_name) + 1
+            except ValueError:
+                self.echo(
+                    __("error", "cli.environment.setup.argument",
+                       input_environment_name))
+                return input_environment_name
+        if 0 < name_environment_index < len(available_environments):
+            input_environment_name = available_environments[
+                name_environment_index - 1][0]
+        return input_environment_name
