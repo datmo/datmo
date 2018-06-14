@@ -99,7 +99,7 @@ class TestProjectController():
     def test_init_with_interuption(self):
         # Reinitializing after timed interuption during init
 
-        @timeout_decorator.timeout(0.01, use_signals=False)
+        @timeout_decorator.timeout(0.001, use_signals=False)
         def timed_init_with_interuption():
             result = self.project.init("test1", "test description")
             return result
@@ -122,7 +122,6 @@ class TestProjectController():
 
         # Changeable by user, not tested in is_initialized
         assert self.project.current_session.name == "default"
-
 
     def test_init_reinit_failure_empty_str(self):
         _ = self.project.init("test1", "test description")
