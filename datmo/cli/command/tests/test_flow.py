@@ -27,18 +27,17 @@ from datmo.cli.command.task import TaskCommand
 
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
-
 # provide mountable tmp directory for docker
 tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
 test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 
 
 class TestFlow():
-    def setup_class(self):
+    def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
 
-    def teardown_class(self):
+    def teardown_method(self):
         pass
 
     def __set_variables(self):
@@ -51,7 +50,8 @@ class TestFlow():
             return self.project_command.execute()
 
         dummy(self)
-        self.environment_command = EnvironmentCommand(self.temp_dir, self.cli_helper)
+        self.environment_command = EnvironmentCommand(self.temp_dir,
+                                                      self.cli_helper)
         self.task_command = TaskCommand(self.temp_dir, self.cli_helper)
         self.snapshot_command = SnapshotCommand(self.temp_dir, self.cli_helper)
 
@@ -73,9 +73,8 @@ class TestFlow():
     def __task_run(self):
         test_command = ["sh", "-c", "echo accuracy:0.45"]
         test_ports = ["8888:8888"]
-        self.task_command.parse([
-            "task", "run", "-p", test_ports[0], test_command
-        ])
+        self.task_command.parse(
+            ["task", "run", "-p", test_ports[0], test_command])
         task_run_result = self.task_command.execute()
         return task_run_result
 
@@ -138,7 +137,7 @@ class TestFlow():
         self.__set_variables()
 
         # Step 1: interrupted environment setup
-        @timeout_decorator.timeout(0.01, use_signals=False)
+        @timeout_decorator.timeout(0.0001, use_signals=False)
         def timed_command_with_interuption():
             result = self.__environment_setup()
             return result
@@ -185,7 +184,7 @@ class TestFlow():
         assert environment_setup_result
 
         # Step 2: interrupted task run
-        @timeout_decorator.timeout(0.01, use_signals=False)
+        @timeout_decorator.timeout(0.0001, use_signals=False)
         def timed_command_with_interuption():
             result = self.__task_run()
             return result
@@ -237,7 +236,7 @@ class TestFlow():
         assert task_ls_result
 
         # Step 4: interrupted snapshot create
-        @timeout_decorator.timeout(0.01, use_signals=False)
+        @timeout_decorator.timeout(0.0001, use_signals=False)
         def timed_command_with_interuption():
             result = self.__snapshot_create()
             return result

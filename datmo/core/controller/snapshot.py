@@ -189,14 +189,7 @@ class SnapshotController(BaseController):
             "config": create_dict['config'],
             "stats": create_dict['stats']
         })
-        if results:
-            snapshot_obj = results[0]
-            snapshot_update_dict = {"id": snapshot_obj.id}
-            optional_args = ["label", "visible"]
-            for optional_arg in optional_args:
-                if optional_arg in dictionary:
-                    snapshot_update_dict[optional_arg] = dictionary[optional_arg]
-            return self.dal.snapshot.update(snapshot_update_dict)
+        if results: return results[0]
 
         # Optional args for Snapshot entity
         optional_args = ["task_id", "label", "visible"]
@@ -339,19 +332,31 @@ class SnapshotController(BaseController):
                config=None,
                stats=None,
                message=None,
-               label=None):
+               label=None,
+               visible=None):
         if not snapshot_id:
             raise RequiredArgumentMissing(
                 __("error", "controller.snapshot.delete.arg", "snapshot_id"))
         update_snapshot_input_dict = {'id': snapshot_id}
-        if config:
+        validate(
+            "update_snapshot", {
+                "config": config,
+                "stats": stats,
+                "message": message,
+                "label": label,
+                "visible": visible
+            })
+        if config is not None:
             update_snapshot_input_dict['config'] = config
-        if stats:
+        if stats is not None:
             update_snapshot_input_dict['stats'] = stats
-        if message:
+        if message is not None:
             update_snapshot_input_dict['message'] = message
-        if label:
+        if label is not None:
             update_snapshot_input_dict['label'] = label
+        if visible is not None:
+            update_snapshot_input_dict['visible'] = visible
+
         return self.dal.snapshot.update(update_snapshot_input_dict)
 
     def get(self, snapshot_id):
