@@ -77,7 +77,9 @@ class TaskCommand(ProjectCommand):
         # Get all task meta information
         task_objs = self.task_controller.list(
             session_id, sort_key='created_at', sort_order='descending')
-        header_list = ["id", "command", "status", "results", "created at"]
+        header_list = [
+            "id", "start time", "duration (s)", "command", "status", "results"
+        ]
         item_dict_list = []
         for task_obj in task_objs:
             task_results_printable = printable_string(str(task_obj.results))
@@ -86,7 +88,8 @@ class TaskCommand(ProjectCommand):
                 "command": task_obj.command,
                 "status": task_obj.status,
                 "results": task_results_printable,
-                "created at": prettify_datetime(task_obj.created_at)
+                "start time": prettify_datetime(task_obj.start_time),
+                "duration (s)": task_obj.duration
             })
         if download:
             if not download_path:

@@ -193,7 +193,7 @@ class SnapshotCommand(ProjectCommand):
                 snapshot_label = printable_string(snapshot_obj.label)
                 item_dict_list.append({
                     "id": snapshot_obj.id,
-                    "created at ": prettify_datetime(snapshot_obj.created_at),
+                    "created at": prettify_datetime(snapshot_obj.created_at),
                     "config": snapshot_config_printable,
                     "stats": snapshot_stats_printable,
                     "message": snapshot_message,
@@ -215,7 +215,7 @@ class SnapshotCommand(ProjectCommand):
                 snapshot_label = printable_string(snapshot_obj.label)
                 item_dict_list.append({
                     "id": snapshot_obj.id,
-                    "created at ": prettify_datetime(snapshot_obj.created_at),
+                    "created at": prettify_datetime(snapshot_obj.created_at),
                     "config": snapshot_config_printable,
                     "stats": snapshot_stats_printable,
                     "message": snapshot_message,
