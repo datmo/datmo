@@ -293,8 +293,6 @@ MESSAGES = {
             "Model object does not exist within project",
         "controller.project.init.arg":
             "Required argument %s not present in input",
-        "controller.project.init":
-            "Sessions does not exist. ",
         "controller.project.status":
             "Project has not been initialized",
         "controller.snapshot.__init__":

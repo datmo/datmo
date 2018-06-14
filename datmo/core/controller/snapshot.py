@@ -332,19 +332,31 @@ class SnapshotController(BaseController):
                config=None,
                stats=None,
                message=None,
-               label=None):
+               label=None,
+               visible=None):
         if not snapshot_id:
             raise RequiredArgumentMissing(
                 __("error", "controller.snapshot.delete.arg", "snapshot_id"))
         update_snapshot_input_dict = {'id': snapshot_id}
-        if config:
+        validate(
+            "update_snapshot", {
+                "config": config,
+                "stats": stats,
+                "message": message,
+                "label": label,
+                "visible": visible
+            })
+        if config is not None:
             update_snapshot_input_dict['config'] = config
-        if stats:
+        if stats is not None:
             update_snapshot_input_dict['stats'] = stats
-        if message:
+        if message is not None:
             update_snapshot_input_dict['message'] = message
-        if label:
+        if label is not None:
             update_snapshot_input_dict['label'] = label
+        if visible is not None:
+            update_snapshot_input_dict['visible'] = visible
+
         return self.dal.snapshot.update(update_snapshot_input_dict)
 
     def get(self, snapshot_id):

@@ -71,6 +71,23 @@ create_snapshot:
   visible:
     type: boolean
 
+update_snapshot:
+  config:
+    nullable: true
+    type: dict
+  stats:
+    nullable: true
+    type: dict
+  message:
+    nullable: true
+    type: string
+  label:
+    nullable: true
+    type: string
+  visible:
+    nullable: true
+    type: boolean
+
 create_snapshot_from_task:
   message:
     type: string
