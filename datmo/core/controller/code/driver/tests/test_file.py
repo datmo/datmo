@@ -102,7 +102,35 @@ class TestFileCodeDriver():
             f.write(to_bytes("cool"))
         result = self.file_code_manager._get_tracked_files()
         for item in result:
-            assert ".datmo" not in item
+            assert os.path.join(".datmo", "test") not in item
+            assert item in ["test.txt", "test2.txt"]
+
+        # Test if it ignores any .git directory or files within
+        os.makedirs(os.path.join(self.temp_dir, ".git"))
+        with open(os.path.join(self.temp_dir, ".git", "test"), "wb") as f:
+            f.write(to_bytes("cool"))
+        result = self.file_code_manager._get_tracked_files()
+        for item in result:
+            assert os.path.join(".git", "test") not in item
+            assert item in ["test.txt", "test2.txt"]
+
+        # Test if it ignores any datmo_environment directory or files within
+        with open(
+                os.path.join(self.temp_dir, "datmo_environment", "test"),
+                "wb") as f:
+            f.write(to_bytes("cool"))
+        result = self.file_code_manager._get_tracked_files()
+        for item in result:
+            assert os.path.join("datmo_environment", "test") not in item
+            assert item in ["test.txt", "test2.txt"]
+
+        # Test if it ignores any datmo_files directory or files within
+        with open(os.path.join(self.temp_dir, "datmo_files", "test"),
+                  "wb") as f:
+            f.write(to_bytes("cool"))
+        result = self.file_code_manager._get_tracked_files()
+        for item in result:
+            assert os.path.join("datmo_files", "test") not in item
             assert item in ["test.txt", "test2.txt"]
 
         # Test if ignores one file and only shows one
