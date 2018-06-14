@@ -11,7 +11,7 @@ except NameError:
     basestring = str
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.misc_functions import mutually_exclusive, printable_string, prettify_datetime
+from datmo.core.util.misc_functions import mutually_exclusive, printable_object, prettify_datetime
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
@@ -87,14 +87,14 @@ class TaskCommand(ProjectCommand):
         ]
         item_dict_list = []
         for task_obj in task_objs:
-            task_results_printable = printable_string(str(task_obj.results))
+            task_results_printable = printable_object(task_obj.results)
             item_dict_list.append({
                 "id": task_obj.id,
-                "command": task_obj.command,
-                "status": task_obj.status,
+                "command": printable_object(task_obj.command),
+                "status": printable_object(task_obj.status),
                 "results": task_results_printable,
                 "start time": prettify_datetime(task_obj.start_time),
-                "duration (s)": task_obj.duration
+                "duration (s)": printable_object(task_obj.duration)
             })
         if download:
             if not download_path:

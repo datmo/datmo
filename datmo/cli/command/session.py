@@ -5,6 +5,7 @@ from datetime import datetime
 
 from datmo.core.util.i18n import get as __
 from datmo.cli.driver.helper import Helper
+from datmo.core.util.misc_functions import printable_object
 from datmo.core.controller.session import SessionController
 from datmo.cli.command.project import ProjectCommand
 
@@ -62,10 +63,10 @@ class SessionCommand(ProjectCommand):
                     "model_id": self.session_controller.model.id
                 }))
             item_dict_list.append({
-                "name": session_obj.name,
-                "selected": str(session_obj.current),
-                "tasks": str(task_count),
-                "snapshots": str(snapshot_count)
+                "name": printable_object(session_obj.name),
+                "selected": printable_object(session_obj.current),
+                "tasks": printable_object(task_count),
+                "snapshots": printable_object(snapshot_count)
             })
         if download:
             if not download_path:

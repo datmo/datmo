@@ -8,7 +8,7 @@ from datmo.cli.driver.helper import Helper
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.util.exceptions import EnvironmentDoesNotExist
-from datmo.core.util.misc_functions import printable_string
+from datmo.core.util.misc_functions import printable_object, prettify_datetime
 
 
 class EnvironmentCommand(ProjectCommand):
@@ -87,15 +87,12 @@ class EnvironmentCommand(ProjectCommand):
         header_list = ["id", "created at", "name", "description"]
         item_dict_list = []
         for environment_obj in environment_objs:
-            environment_obj_created_at = printable_string(
-                environment_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"))
-            environment_obj_name = printable_string(environment_obj.name) \
-                if environment_obj.name is not None else ""
-            environment_obj_description = printable_string(environment_obj.description) \
-                if environment_obj.description is not None else ""
+            environment_obj_name = printable_object(environment_obj.name)
+            environment_obj_description = printable_object(
+                environment_obj.description)
             item_dict_list.append({
                 "id": environment_obj.id,
-                "created at": environment_obj_created_at,
+                "created at": prettify_datetime(environment_obj.created_at),
                 "name": environment_obj_name,
                 "description": environment_obj_description
             })

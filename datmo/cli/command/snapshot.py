@@ -5,7 +5,7 @@ from datetime import datetime
 
 from datmo.core.util.i18n import get as __
 from datmo.cli.driver.helper import Helper
-from datmo.core.util.misc_functions import mutually_exclusive, printable_string, prettify_datetime, parse_cli_key_value, format_table
+from datmo.core.util.misc_functions import mutually_exclusive, printable_object, prettify_datetime, parse_cli_key_value, format_table
 from datmo.core.util.exceptions import (SnapshotCreateFromTaskArgs)
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.snapshot import SnapshotController
@@ -189,12 +189,11 @@ class SnapshotCommand(ProjectCommand):
                 "code id", "environment id", "file collection id"
             ]
             for snapshot_obj in snapshot_objs:
-                snapshot_config_printable = printable_string(
-                    str(snapshot_obj.config))
-                snapshot_stats_printable = printable_string(
-                    str(snapshot_obj.stats))
-                snapshot_message = printable_string(snapshot_obj.message)
-                snapshot_label = printable_string(snapshot_obj.label)
+                snapshot_config_printable = printable_object(
+                    snapshot_obj.config)
+                snapshot_stats_printable = printable_object(snapshot_obj.stats)
+                snapshot_message = printable_object(snapshot_obj.message)
+                snapshot_label = printable_object(snapshot_obj.label)
                 item_dict_list.append({
                     "id": snapshot_obj.id,
                     "created at": prettify_datetime(snapshot_obj.created_at),
@@ -211,12 +210,11 @@ class SnapshotCommand(ProjectCommand):
                 "id", "created at", "config", "stats", "message", "label"
             ]
             for snapshot_obj in snapshot_objs:
-                snapshot_config_printable = printable_string(
-                    str(snapshot_obj.config))
-                snapshot_stats_printable = printable_string(
-                    str(snapshot_obj.stats))
-                snapshot_message = printable_string(snapshot_obj.message)
-                snapshot_label = printable_string(snapshot_obj.label)
+                snapshot_config_printable = printable_object(
+                    snapshot_obj.config)
+                snapshot_stats_printable = printable_object(snapshot_obj.stats)
+                snapshot_message = printable_object(snapshot_obj.message)
+                snapshot_label = printable_object(snapshot_obj.label)
                 item_dict_list.append({
                     "id": snapshot_obj.id,
                     "created at": prettify_datetime(snapshot_obj.created_at),

@@ -56,10 +56,16 @@ def printable_dict(input_dictionary):
     return printable_output
 
 
-def printable_string(string, max_width=40):
-    if not string:
+def printable_object(object, max_width=40):
+    if not object:
         return ""
-    return '\n'.join(textwrap.wrap(string, max_width))
+    if isinstance(object, str):
+        printable_str = object
+    elif isinstance(object, dict):
+        printable_str = printable_dict(object)
+    else:
+        printable_str = str(object)
+    return '\n'.join(textwrap.wrap(printable_str, max_width))
 
 
 def which(program):
