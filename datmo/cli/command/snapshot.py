@@ -105,6 +105,10 @@ class SnapshotCommand(ProjectCommand):
                     snapshot_dict[arg] = kwargs[arg]
 
             snapshot_obj = self.snapshot_controller.create(snapshot_dict)
+            # Because snapshots may be invisible to the user, this function ensures that by the end
+            # the user can monitor the snapshot on the CLI, but making it visible
+            snapshot_obj = self.snapshot_controller.update(
+                snapshot_obj.id, visible=True)
             self.cli_helper.echo(
                 __("info", "cli.snapshot.create.success", snapshot_obj.id))
             return snapshot_obj

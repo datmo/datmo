@@ -19,7 +19,6 @@ import tempfile
 import platform
 from argparse import ArgumentError
 
-from multiprocessing import Process, Manager
 from io import open
 try:
     to_unicode = unicode
@@ -300,7 +299,7 @@ class TestTaskCommand():
         # Test failure no session
         failed = False
         try:
-            self.task_command.execute()
+            _ = self.task_command.execute()
         except SessionDoesNotExist:
             failed = True
         assert failed
