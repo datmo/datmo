@@ -790,7 +790,8 @@ class TestEnvironmentController():
     def test_stop_failure(self):
         # 1) Test failure with RequiredArgumentMissing
         # 2) Test failure with TooManyArgumentsFound
-
+        self.project_controller.init("test5", "test description")
+        self.environment_controller = EnvironmentController()
         # 1) Test option 1
         failed = False
         try:

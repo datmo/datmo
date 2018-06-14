@@ -28,7 +28,7 @@ except TypeError:
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import ArgumentError, ProjectNotInitialized
-from datmo.core.util.misc_functions import check_docker_active
+from datmo.core.util.misc_functions import check_docker_inactive
 
 
 class Helper():
@@ -201,7 +201,7 @@ class Helper():
             def wrapper(self, *args, **kwargs):
                 controller_obj = controller_class()
                 if controller_obj.environment_driver.type == "docker":
-                    if not check_docker_active(controller_obj.home):
+                    if check_docker_inactive(controller_obj.home):
                         Helper.echo(
                             __("error", "general.environment.docker.na"))
                         return

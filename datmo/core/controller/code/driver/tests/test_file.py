@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import os
 import time
+import shutil
 import tempfile
 import platform
 from io import open
@@ -58,6 +59,16 @@ class TestFileCodeDriver():
         except PathDoesNotExist:
             failed = True
         assert failed
+
+    def test_is_initalized(self):
+        # test if code manager is initialized
+        self.file_code_manager.init()
+        assert self.file_code_manager.is_initialized == True
+        # test if code folder is removed from .datmo folder
+        self._datmo_filepath = os.path.join(self.temp_dir, ".datmo")
+        self._code_filepath = os.path.join(self._datmo_filepath, "code")
+        shutil.rmtree(self._code_filepath)
+        assert self.file_code_manager.is_initialized == False
 
     def test_init(self):
         result = self.file_code_manager.init()

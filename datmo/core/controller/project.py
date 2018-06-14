@@ -108,18 +108,25 @@ class ProjectController(BaseController):
                     }))
             else:
                 if not self.current_session:
-                    default_session_obj = self.dal.session.query({
+                    default_session_objs = self.dal.session.query({
                         "name": "default",
                         "model_id": self.model.id
                     })
-                    if not default_session_obj:
-                        raise SessionDoesNotExist(
-                            __("error", "controller.project.init"))
-                    # Update default session to be current
-                    self.dal.session.update({
-                        "id": default_session_obj.id,
-                        "current": True
-                    })
+                    if not default_session_objs:
+                        # Creating a default session since none exists
+                        _ = self.dal.session.create(
+                            Session({
+                                "name": "default",
+                                "model_id": self.model.id,
+                                "current": True
+                            }))
+                    else:
+                        # Update default session to be current
+                        default_session_obj = default_session_objs[0]
+                        self.dal.session.update({
+                            "id": default_session_obj.id,
+                            "current": True
+                        })
             return True
         except Exception:
             # if any error occurred with new model, ensure no initialize occurs and raise previous error

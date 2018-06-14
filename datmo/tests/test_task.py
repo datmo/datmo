@@ -132,8 +132,8 @@ class TestTaskModule():
 
         # 6) Test out option 6
         os.remove(test_filepath)
-        test_filepath = os.path.join(self.project.environment_directory,
-                                     "Dockerfile")
+        test_filepath = os.path.join(
+            self.project_controller.environment_directory, "Dockerfile")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
         task_obj_4 = run(command=["python", "script.py"])

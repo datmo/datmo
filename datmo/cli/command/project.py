@@ -4,6 +4,7 @@ from datmo import __version__
 from datmo.core.util.i18n import get as __
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.base import BaseCommand
+from datmo.core.util.spinner import Spinner
 from datmo.core.util.misc_functions import mutually_exclusive
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController, EnvironmentDoesNotExist
@@ -11,11 +12,10 @@ from datmo.core.controller.task import TaskController
 
 
 class ProjectCommand(BaseCommand):
-    # NOTE: dal_driver is not passed into the project because it is created
-    # first by ProjectController and then passed down to all other Controllers
     def __init__(self, cli_helper):
         super(ProjectCommand, self).__init__(cli_helper)
         self.project_controller = ProjectController()
+        self.spinner = Spinner()
 
     def init(self, name, description):
         """Initialize command
@@ -218,11 +218,11 @@ class ProjectCommand(BaseCommand):
             "mem_limit": kwargs["mem_limit"]
         }
 
-        # Create the task object
-        task_obj = self.task_controller.create()
-
         # Pass in the task
         try:
+            self.spinner.start()
+            # Create the task object
+            task_obj = self.task_controller.create()
             updated_task_obj = self.task_controller.run(
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
         except Exception as e:
@@ -230,6 +230,8 @@ class ProjectCommand(BaseCommand):
             self.cli_helper.echo(
                 __("error", "cli.project.notebook", task_obj.id))
             return False
+        finally:
+            self.spinner.stop()
 
         self.cli_helper.echo(
             "Ran notebook with task id: %s" % updated_task_obj.id)

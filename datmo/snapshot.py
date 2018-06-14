@@ -261,6 +261,8 @@ def create(message,
 
         # Create a new core snapshot object
         core_snapshot_obj = snapshot_controller.create(snapshot_create_dict)
+        core_snapshot_obj = snapshot_controller.update(
+            core_snapshot_obj.id, visible=True)
 
         # Create a new snapshot object
         client_snapshot_obj = Snapshot(core_snapshot_obj)

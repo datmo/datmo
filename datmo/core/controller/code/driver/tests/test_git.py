@@ -75,6 +75,18 @@ class TestGitCodeDriver():
     def test_instantiation_fail_git_version_out_of_date(self):
         pass
 
+    def test_is_initialized(self):
+        # Test if there are .git folder already exist
+        self.git_code_manager.init()
+        assert self.git_code_manager.is_initialized == True
+        # Test when we remove datmo refs
+        shutil.rmtree(os.path.join(self.temp_dir, ".git", "refs", "datmo"))
+        assert self.git_code_manager.is_initialized == False
+        # Test when we remove .git folder
+        self.git_code_manager.init()
+        shutil.rmtree(os.path.join(self.temp_dir, ".git"))
+        assert self.git_code_manager.is_initialized == False
+
     def test_init(self):
         result = self.git_code_manager.init()
         assert result and \

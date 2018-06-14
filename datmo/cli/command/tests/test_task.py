@@ -19,7 +19,6 @@ import tempfile
 import platform
 from argparse import ArgumentError
 
-from multiprocessing import Process, Manager
 from io import open
 try:
     to_unicode = unicode
@@ -43,7 +42,7 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.util.exceptions import ProjectNotInitialized, MutuallyExclusiveArguments, RequiredArgumentMissing, SessionDoesNotExist
+from datmo.core.util.exceptions import MutuallyExclusiveArguments, RequiredArgumentMissing, SessionDoesNotExist
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -265,7 +264,7 @@ class TestTaskCommand():
         # teardown
         self.task_command.parse(["task", "stop", "--all"])
         # test when all is passed to stop all
-        task_stop_command = self.task_command.execute()
+        _ = self.task_command.execute()
 
     def test_task_run_invalid_arg(self):
         self.__set_variables()
@@ -294,7 +293,7 @@ class TestTaskCommand():
         # Test failure no session
         failed = False
         try:
-            self.task_command.execute()
+            _ = self.task_command.execute()
         except SessionDoesNotExist:
             failed = True
         assert failed
@@ -404,6 +403,7 @@ class TestTaskCommand():
         task_stop_command = self.task_command.execute()
         assert task_stop_command == True
 
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_stop_failure_required_args(self):
         self.__set_variables()
         # Passing wrong task id
@@ -415,6 +415,7 @@ class TestTaskCommand():
             failed = True
         assert failed
 
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_stop_failure_mutually_exclusive_vars(self):
         self.__set_variables()
         # Passing wrong task id

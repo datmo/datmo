@@ -108,6 +108,11 @@ class TestLocalFileDriver():
         self.local_file_driver.copyfile(filepath, dst_dirpath)
         assert os.path.isfile(os.path.join(dst_dirpath, relative_filepath))
 
+    # Property Method Test
+    def test_is_initialized(self):
+        self.local_file_driver.init()
+        assert self.local_file_driver.is_initialized == True
+
     # Instance Method Tests
 
     def test_init(self):
