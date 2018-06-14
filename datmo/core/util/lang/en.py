@@ -3,7 +3,7 @@ MESSAGES = {
         "cli.general.line":
             "==============================================================",
         "cli.project.init.create":
-            "Initializing project {name} @ ({path}) ",
+            "Initializing project @ ({path}) ",
         "cli.project.init.create.success":
             "Created project {name} @ ({path}) ",
         "cli.project.init.create.failure":

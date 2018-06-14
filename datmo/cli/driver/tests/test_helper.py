@@ -63,7 +63,7 @@ class TestHelper():
         assert test_input in result
 
     def test_prompt(self):
-        test_input = 'foobar'
+        test_input = "foobar"
 
         @self.cli.input(test_input)
         def dummy():
@@ -71,6 +71,27 @@ class TestHelper():
 
         i = dummy()
         assert i == test_input
+
+        # Test with default input true
+        test_input = ""
+        default_input = "hello"
+
+        @self.cli.input(test_input)
+        def dummy():
+            return self.cli.prompt("what is this test?", default=default_input)
+
+        i = dummy()
+        assert i == default_input
+
+        # Test with false input and no default given
+        test_input = ""
+
+        @self.cli.input(test_input)
+        def dummy():
+            return self.cli.prompt("what is this test?")
+
+        i = dummy()
+        assert i == None
 
         # TODO: figure out how to replace "print" with a testable function
         # https://stackoverflow.com/questions/4219717/how-to-assert-output-with-nosetest-unittest-in-python

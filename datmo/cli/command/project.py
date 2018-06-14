@@ -1,3 +1,5 @@
+import os
+
 from datmo import __version__
 from datmo.core.util.i18n import get as __
 from datmo.cli.driver.helper import Helper
@@ -36,13 +38,13 @@ class ProjectCommand(BaseCommand):
 
         if is_new_model:  # Initialize a new project
             self.cli_helper.echo(
-                __("info", "cli.project.init.create", {
-                    "name": name,
-                    "path": self.project_controller.home
-                }))
+                __("info", "cli.project.init.create",
+                   {"path": self.project_controller.home}))
             if not name:
+                _, default_name = os.path.split(self.project_controller.home)
                 name = self.cli_helper.prompt(
-                    __("prompt", "cli.project.init.name"))
+                    __("prompt", "cli.project.init.name"),
+                    default=default_name)
             if not description:
                 description = self.cli_helper.prompt(
                     __("prompt", "cli.project.init.description"))
@@ -68,17 +70,15 @@ class ProjectCommand(BaseCommand):
                         "name": self.project_controller.model.name,
                         "path": self.project_controller.home
                     }))
+            # Prompt for the name and description and add default if not given
             if not name:
                 name = self.cli_helper.prompt(
-                    __("prompt", "cli.project.init.name"))
+                    __("prompt", "cli.project.init.name"),
+                    default=self.project_controller.model.name)
             if not description:
                 description = self.cli_helper.prompt(
-                    __("prompt", "cli.project.init.description"))
-            # Update project parameter if given parameter is not falsy and different
-            if not name or name == self.project_controller.model.name:
-                name = self.project_controller.model.name
-            if not description or description == self.project_controller.model.description:
-                description = self.project_controller.model.description
+                    __("prompt", "cli.project.init.description"),
+                    default=self.project_controller.model.description)
             # Update the project with the values given
             try:
                 success = self.project_controller.init(name, description)

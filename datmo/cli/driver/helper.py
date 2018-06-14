@@ -61,9 +61,10 @@ class Helper():
             if default:
                 msg = msg + "[" + str(default) + "]"
             msg = msg + ": "
-            return input(msg)
+            result = input(msg)
+            return result if result else default
         except EOFError:
-            pass
+            return default
 
     def print_items(self,
                     header_list,
@@ -193,7 +194,7 @@ class Helper():
                         Helper.echo(
                             __("error", "general.environment.docker.na"))
                         return
-                function(*args, **kwargs)
+                function(self, *args, **kwargs)
 
             return wrapper
 
