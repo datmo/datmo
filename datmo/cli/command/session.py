@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 
 from datmo.core.util.i18n import get as __
+from datmo.cli.driver.helper import Helper
 from datmo.core.controller.session import SessionController
 from datmo.cli.command.project import ProjectCommand
 
@@ -11,32 +12,37 @@ from datmo.cli.command.project import ProjectCommand
 class SessionCommand(ProjectCommand):
     def __init__(self, cli_helper):
         super(SessionCommand, self).__init__(cli_helper)
-        # dest="subcommand" argument will populate a "subcommand" property with the subparsers name
-        # example  "subcommand"="create"  or "subcommand"="ls"
-        self.session_controller = SessionController()
 
     def session(self):
-        self.parse(["--help"])
+        self.parse(["session", "--help"])
         return True
 
+    @Helper.notify_no_project_found
     def create(self, **kwargs):
+        self.session_controller = SessionController()
         name = kwargs.get('name')
         session_obj = self.session_controller.create(kwargs)
         self.cli_helper.echo(__("info", "cli.session.create", name))
         return session_obj
 
+    @Helper.notify_no_project_found
     def delete(self, **kwargs):
+        self.session_controller = SessionController()
         name = kwargs.get('name')
         if self.session_controller.delete_by_name(name):
             self.cli_helper.echo(__("info", "cli.session.delete", name))
             return True
 
+    @Helper.notify_no_project_found
     def select(self, **kwargs):
+        self.session_controller = SessionController()
         name = kwargs.get("name")
         self.cli_helper.echo(__("info", "cli.session.select", name))
         return self.session_controller.select(name)
 
+    @Helper.notify_no_project_found
     def ls(self, **kwargs):
+        self.session_controller = SessionController()
         print_format = kwargs.get('format', "table")
         download = kwargs.get('download', None)
         download_path = kwargs.get('download_path', None)

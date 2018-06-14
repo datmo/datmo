@@ -108,14 +108,6 @@ class TestSnapshotCommand():
         self.stats1 = "{'foo1':'bar1'}"
         self.stats2 = "this is test stats blob"
 
-    def test_snapshot_project_not_init(self):
-        failed = False
-        try:
-            self.snapshot_command = SnapshotCommand(self.cli_helper)
-        except ProjectNotInitialized:
-            failed = True
-        assert failed
-
     def test_snapshot_help(self):
         self.__set_variables()
         print(
@@ -563,10 +555,6 @@ class TestSnapshotCommand():
         assert result.label == test_label
 
         # 4. Updating stats, message and label
-        self.snapshot_command.parse(
-            ["snapshot", "create", "-m", "my test snapshot"])
-        snapshot_obj = self.snapshot_command.execute()
-
         # Test when optional parameters are not given
         self.snapshot_command.parse([
             "snapshot", "update", "--id", snapshot_obj.id, "--stats",

@@ -21,14 +21,15 @@ from datmo.core.util.exceptions import RequiredArgumentMissing
 class TaskCommand(ProjectCommand):
     def __init__(self, cli_helper):
         super(TaskCommand, self).__init__(cli_helper)
-        self.task_controller = TaskController()
 
     def task(self):
-        self.parse(["--help"])
+        self.parse(["task", "--help"])
         return True
 
-    @Helper.notify_environment_active("task_controller")
+    @Helper.notify_environment_active(TaskController)
+    @Helper.notify_no_project_found
     def run(self, **kwargs):
+        self.task_controller = TaskController()
         self.cli_helper.echo(__("info", "cli.task.run"))
         # Create input dictionaries
         snapshot_dict = {}
@@ -65,7 +66,9 @@ class TaskCommand(ProjectCommand):
         self.cli_helper.echo("Ran task id: %s" % updated_task_obj.id)
         return updated_task_obj
 
+    @Helper.notify_no_project_found
     def ls(self, **kwargs):
+        self.task_controller = TaskController()
         session_id = kwargs.get('session_id',
                                 self.task_controller.current_session.id)
         print_format = kwargs.get('format', "table")
@@ -104,8 +107,10 @@ class TaskCommand(ProjectCommand):
             header_list, item_dict_list, print_format=print_format)
         return task_objs
 
-    @Helper.notify_environment_active("task_controller")
+    @Helper.notify_environment_active(TaskController)
+    @Helper.notify_no_project_found
     def stop(self, **kwargs):
+        self.task_controller = TaskController()
         input_dict = {}
         mutually_exclusive(["id", "all"], kwargs, input_dict)
         if "id" in input_dict:

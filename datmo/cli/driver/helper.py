@@ -27,7 +27,7 @@ except TypeError:
     to_bytes("test")
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import ArgumentError
+from datmo.core.util.exceptions import ArgumentError, ProjectNotInitialized
 from datmo.core.util.misc_functions import check_docker_active
 
 
@@ -152,7 +152,7 @@ class Helper():
     def get_command_choices(self):
         return [
             "init", "version", "--version", "-v", "status", "cleanup",
-            "snapshot", "task", "notebook", "environment"
+            "snapshot", "task", "session", "notebook", "environment"
         ]
 
     def prompt_available_environments(self, available_environments):
@@ -185,16 +185,27 @@ class Helper():
         return input_environment_name
 
     @staticmethod
-    def notify_environment_active(controller_name):
+    def notify_no_project_found(function):
+        def decorator(*args, **kwargs):
+            try:
+                return function(*args, **kwargs)
+            except ProjectNotInitialized:
+                Helper.echo(__("error", "general.project.dne"))
+                return
+
+        return decorator
+
+    @staticmethod
+    def notify_environment_active(controller_class):
         def real_decorator(function):
             def wrapper(self, *args, **kwargs):
-                controller_obj = getattr(self, controller_name)
+                controller_obj = controller_class()
                 if controller_obj.environment_driver.type == "docker":
                     if not check_docker_active(controller_obj.home):
                         Helper.echo(
                             __("error", "general.environment.docker.na"))
                         return
-                function(self, *args, **kwargs)
+                return function(self, *args, **kwargs)
 
             return wrapper
 

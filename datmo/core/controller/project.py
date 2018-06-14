@@ -147,6 +147,9 @@ class ProjectController(BaseController):
         -------
         bool
         """
+        if not self.is_initialized:
+            self.logger.warning(
+                __("warn", "controller.project.cleanup.not_init"))
         # Remove Datmo environment_driver references, give warning if error
         try:
             # Obtain image id before cleaning up if exists

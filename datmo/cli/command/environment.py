@@ -14,15 +14,14 @@ from datmo.core.util.misc_functions import printable_string
 class EnvironmentCommand(ProjectCommand):
     def __init__(self, cli_helper):
         super(EnvironmentCommand, self).__init__(cli_helper)
-        # dest="subcommand" argument will populate a "subcommand" property with the subparsers name
-        # example  "subcommand"="create"  or "subcommand"="ls"
-        self.environment_controller = EnvironmentController()
 
     def environment(self):
-        self.parse(["--help"])
+        self.parse(["environment", "--help"])
         return True
 
+    @Helper.notify_no_project_found
     def setup(self, **kwargs):
+        self.environment_controller = EnvironmentController()
         name = kwargs.get("name", None)
         available_environments = self.environment_controller.get_supported_environments(
         )
@@ -41,7 +40,9 @@ class EnvironmentCommand(ProjectCommand):
             self.cli_helper.echo(
                 __("error", "cli.environment.setup.argument", name))
 
+    @Helper.notify_no_project_found
     def create(self, **kwargs):
+        self.environment_controller = EnvironmentController()
         self.cli_helper.echo(__("info", "cli.environment.create"))
         created_environment_obj = self.environment_controller.create(kwargs)
         environments = self.environment_controller.list()
@@ -56,7 +57,9 @@ class EnvironmentCommand(ProjectCommand):
                created_environment_obj.id))
         return created_environment_obj
 
+    @Helper.notify_no_project_found
     def update(self, **kwargs):
+        self.environment_controller = EnvironmentController()
         environment_id = kwargs.get("id", None)
         name = kwargs.get("name", None)
         description = kwargs.get("description", None)
@@ -64,15 +67,19 @@ class EnvironmentCommand(ProjectCommand):
             environment_id, name=name, description=description)
         return result
 
-    @Helper.notify_environment_active("environment_controller")
+    @Helper.notify_environment_active(EnvironmentController)
+    @Helper.notify_no_project_found
     def delete(self, **kwargs):
+        self.environment_controller = EnvironmentController()
         environment_id = kwargs.get('environment_id')
         if self.environment_controller.delete(environment_id):
             self.cli_helper.echo(
                 __("info", "cli.environment.delete.success", environment_id))
             return True
 
+    @Helper.notify_no_project_found
     def ls(self, **kwargs):
+        self.environment_controller = EnvironmentController()
         print_format = kwargs.get('format', "table")
         download = kwargs.get('download', None)
         download_path = kwargs.get('download_path', None)

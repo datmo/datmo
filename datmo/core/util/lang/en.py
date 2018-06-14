@@ -15,7 +15,7 @@ MESSAGES = {
         "cli.project.init.update.failure":
             "Failed to update project {name} @ ({path}) ",
         "cli.project.notebook":
-            "Running a notebook",
+            "Starting a notebook...",
         "cli.project.pull":
             "Pulling information from the Datmo project url and adding it to local...",
         "cli.project.update":
@@ -87,6 +87,8 @@ MESSAGES = {
             "git isn't setup. please install git",
         "controller.general.environment.failed":
             "Environment driver not initialized",
+        "controller.project.cleanup.not_init":
+            "No valid datmo project was detected",
         "controller.project.cleanup.environment":
             "Error cleaning up project environment",
         "controller.project.cleanup.code":
@@ -97,6 +99,8 @@ MESSAGES = {
     "error": {
         "exception.validationfailed":
             "Validation failed: %s",
+        "general.project.dne":
+            "No project found in current directory. Run `datmo init` to create one",
         "general.environment.docker.na":
             "Docker environment is not initialized. This command cannot be run",
         "sdk.snapshot.create.task.args":
@@ -205,6 +209,8 @@ MESSAGES = {
             "Required argument not present in input",
         "controller.code.delete":
             "Code with id %s does NOT exist",
+        "controller.environment.__init__":
+            "Project has not been initialized",
         "controller.environment.driver.docker.__init__.dne":
             "File path does not exist: %s",
         "controller.environment.driver.docker.__init__":
@@ -353,7 +359,7 @@ MESSAGES = {
         "cli.general.confirm":
             "Is it okay?",
         "cli.project.cleanup.confirm":
-            "Are you sure you want to delete all datmo project information? [yN]",
+            "Are you sure you want to delete all datmo project information? If none found, no changes will be made [yN]",
         "cli.project.environment.setup":
             "Would you like to setup the environment? [yN]"
     },

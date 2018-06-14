@@ -78,14 +78,6 @@ class TestTaskCommand():
         with open(self.env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
-    def test_task_project_not_init(self):
-        failed = False
-        try:
-            self.task_command = TaskCommand(self.cli_helper)
-        except ProjectNotInitialized:
-            failed = True
-        assert failed
-
     def test_task_command(self):
         self.__set_variables()
         self.task_command.parse(["task"])

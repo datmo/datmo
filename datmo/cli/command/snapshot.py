@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 
 from datmo.core.util.i18n import get as __
+from datmo.cli.driver.helper import Helper
 from datmo.core.util.misc_functions import mutually_exclusive, printable_string, prettify_datetime, parse_cli_key_value, format_table
 from datmo.core.util.exceptions import (SnapshotCreateFromTaskArgs)
 from datmo.cli.command.project import ProjectCommand
@@ -13,9 +14,6 @@ from datmo.core.controller.snapshot import SnapshotController
 class SnapshotCommand(ProjectCommand):
     def __init__(self, cli_helper):
         super(SnapshotCommand, self).__init__(cli_helper)
-        # dest="subcommand" argument will populate a "subcommand" property with the subparsers name
-        # example  "subcommand"="create"  or "subcommand"="ls"
-        self.snapshot_controller = SnapshotController()
 
     def usage(self):
         self.cli_helper.echo(__("argparser", "cli.snapshot.usage"))
@@ -24,7 +22,9 @@ class SnapshotCommand(ProjectCommand):
         self.parse(["snapshot", "--help"])
         return True
 
+    @Helper.notify_no_project_found
     def create(self, **kwargs):
+        self.snapshot_controller = SnapshotController()
         self.cli_helper.echo(__("info", "cli.snapshot.create"))
         task_id = kwargs.get("task_id", None)
         # creating snapshot with task id if it exists
@@ -109,7 +109,9 @@ class SnapshotCommand(ProjectCommand):
                 __("info", "cli.snapshot.create.success", snapshot_obj.id))
             return snapshot_obj
 
+    @Helper.notify_no_project_found
     def delete(self, **kwargs):
+        self.snapshot_controller = SnapshotController()
         self.cli_helper.echo(__("info", "cli.snapshot.delete"))
         snapshot_id = kwargs.get("id", None)
         result = self.snapshot_controller.delete(snapshot_id)
@@ -117,7 +119,9 @@ class SnapshotCommand(ProjectCommand):
             __("info", "cli.snapshot.delete.success", snapshot_id))
         return result
 
+    @Helper.notify_no_project_found
     def update(self, **kwargs):
+        self.snapshot_controller = SnapshotController()
         self.cli_helper.echo(__("info", "cli.snapshot.update"))
         snapshot_id = kwargs.get("id", None)
         # getting previous saved config and stats
@@ -160,7 +164,9 @@ class SnapshotCommand(ProjectCommand):
             __("info", "cli.snapshot.update.success", snapshot_id))
         return result
 
+    @Helper.notify_no_project_found
     def ls(self, **kwargs):
+        self.snapshot_controller = SnapshotController()
         session_id = kwargs.get('session_id',
                                 self.snapshot_controller.current_session.id)
         detailed_info = kwargs.get('details', None)
@@ -235,7 +241,9 @@ class SnapshotCommand(ProjectCommand):
             header_list, item_dict_list, print_format=print_format)
         return snapshot_objs
 
+    @Helper.notify_no_project_found
     def checkout(self, **kwargs):
+        self.snapshot_controller = SnapshotController()
         snapshot_id = kwargs.get("id", None)
         checkout_success = self.snapshot_controller.checkout(snapshot_id)
         if checkout_success:
@@ -243,7 +251,9 @@ class SnapshotCommand(ProjectCommand):
                 __("info", "cli.snapshot.checkout.success", snapshot_id))
         return self.snapshot_controller.checkout(snapshot_id)
 
+    @Helper.notify_no_project_found
     def diff(self, **kwargs):
+        self.snapshot_controller = SnapshotController()
         snapshot_id_1 = kwargs.get("id_1", None)
         snapshot_id_2 = kwargs.get("id_2", None)
         snapshot_obj_1 = self.snapshot_controller.get(snapshot_id_1)
@@ -268,7 +278,9 @@ class SnapshotCommand(ProjectCommand):
         self.cli_helper.echo(output)
         return output
 
+    @Helper.notify_no_project_found
     def inspect(self, **kwargs):
+        self.snapshot_controller = SnapshotController()
         snapshot_id = kwargs.get("id", None)
         snapshot_obj = self.snapshot_controller.get(snapshot_id)
         output = str(snapshot_obj)

@@ -48,14 +48,6 @@ class TestSessionCommand():
         dummy(self)
         self.session_command = SessionCommand(self.cli_helper)
 
-    def test_session_project_not_init(self):
-        failed = False
-        try:
-            self.snapshot = SessionCommand(self.cli_helper)
-        except ProjectNotInitialized:
-            failed = True
-        assert failed
-
     def test_session_no_subcommand(self):
         self.__set_variables()
         self.session_command.parse(["session"])

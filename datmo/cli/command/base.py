@@ -24,7 +24,7 @@ class BaseCommand(object):
             pass
 
     def display_usage_message(self, args):
-        """ Checks to see if --help or -h is passed in, and if so it calls our help()
+        """ Checks to see if --help or -h is passed in, and if so it calls our usage()
         if it exists.
 
         Since argparser thinks it is clever and automatically
@@ -61,21 +61,28 @@ class BaseCommand(object):
         # in base.parse.   Simply return True
         if self.args is True: return True
 
-        if getattr(self.args, 'command') is None:
-            self.args.command = 'datmo'
+        if getattr(self.args, "command") is None:
+            self.args.command = "datmo"
 
         command_args = vars(self.args).copy()
         # use command name if it exists,
         # otherwise use the module name
+        function_name = None
         method = None
 
-        if "subcommand" in command_args and command_args['subcommand'] is not None:
-            method = getattr(self,
-                             getattr(self.args, "subcommand",
-                                     self.args.command))
-        else:
-            method = getattr(self,
-                             getattr(self.args, "command", self.args.command))
+        try:
+            if "subcommand" in command_args and command_args['subcommand'] is not None:
+                function_name = getattr(self.args, "subcommand",
+                                        self.args.command)
+                method = getattr(self, function_name)
+            else:
+                function_name = getattr(self.args, "command",
+                                        self.args.command)
+                method = getattr(self, function_name)
+        except AttributeError:
+            raise ClassMethodNotFound(
+                __("error", "cli.general.method.not_found",
+                   (self.args.command, function_name)))
 
         # remove extraneous options that the method should need to care about
         if "command" in command_args:

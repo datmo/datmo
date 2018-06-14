@@ -128,6 +128,7 @@ class ProjectCommand(BaseCommand):
     def version(self):
         return self.cli_helper.echo("datmo version: %s" % __version__)
 
+    @Helper.notify_no_project_found
     def status(self):
         status_dict, latest_snapshot, ascending_unstaged_tasks = self.project_controller.status(
         )
@@ -196,7 +197,8 @@ class ProjectCommand(BaseCommand):
                         }))
         return False
 
-    @Helper.notify_environment_active("project_controller")
+    @Helper.notify_environment_active(ProjectController)
+    @Helper.notify_no_project_found
     def notebook(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.project.notebook"))
         self.task_controller = TaskController()

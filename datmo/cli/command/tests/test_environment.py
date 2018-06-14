@@ -65,9 +65,8 @@ class TestEnvironmentCommand():
     def test_environment_setup_parameter(self):
         # Setup the environement by passing name
         self.__set_variables()
-        definition_filepath = os.path.join(
-            self.environment_command.environment_controller.
-            environment_directory, "Dockerfile")
+        definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
+                                           "Dockerfile")
 
         # Test pass with correct input
         test_name = "xgboost:cpu"
@@ -90,9 +89,8 @@ class TestEnvironmentCommand():
     def test_environment_setup_prompt(self):
         # Setup the environement by passing name
         self.__set_variables()
-        definition_filepath = os.path.join(
-            self.environment_command.environment_controller.
-            environment_directory, "Dockerfile")
+        definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
+                                           "Dockerfile")
 
         # Test success with correct prompt input using numbers
         self.environment_command.parse(["environment", "setup"])
@@ -155,9 +153,8 @@ class TestEnvironmentCommand():
         self.__set_variables()
         # Test option 1
         # Create environment definition in project environment directory
-        definition_filepath = os.path.join(
-            self.environment_command.environment_controller.
-            environment_directory, "Dockerfile")
+        definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
+                                           "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
@@ -174,8 +171,7 @@ class TestEnvironmentCommand():
         assert result.description == "test description"
 
         # remove datmo_environment directory
-        shutil.rmtree(self.environment_command.environment_controller.
-                      environment_directory)
+        shutil.rmtree(os.path.join(self.temp_dir, "datmo_environment"))
 
         # Test option 2
         random_dir = os.path.join(self.temp_dir, "random_datmo_dir")

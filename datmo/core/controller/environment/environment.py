@@ -9,7 +9,7 @@ from datmo.core.util.validation import validate
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.misc_functions import get_datmo_temp_path, parse_path, list_all_filepaths
 from datmo.core.util.exceptions import PathDoesNotExist, RequiredArgumentMissing, TooManyArgumentsFound,\
-    EnvironmentNotInitialized, UnstagedChanges, ArgumentError, EnvironmentDoesNotExist
+    EnvironmentNotInitialized, UnstagedChanges, ArgumentError, EnvironmentDoesNotExist, ProjectNotInitialized
 
 
 class EnvironmentController(BaseController):
@@ -38,6 +38,9 @@ class EnvironmentController(BaseController):
         self.file_collection = FileCollectionController()
         if not os.path.exists(self.environment_directory):
             os.makedirs(self.environment_directory)
+        if not self.is_initialized:
+            raise ProjectNotInitialized(
+                __("error", "controller.environment.__init__"))
 
     def get_supported_environments(self):
         """Get all the supported environments

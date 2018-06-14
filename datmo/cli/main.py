@@ -48,6 +48,9 @@ def main():
             command_name = "project"
             sys.argv[1] = "notebook"
         command_class = cli_helper.get_command_class(command_name)
+    elif len(sys.argv) == 1:
+        command_name = "datmo_command"
+        command_class = cli_helper.get_command_class(command_name)
     else:
         command_class = BaseCommand
 
