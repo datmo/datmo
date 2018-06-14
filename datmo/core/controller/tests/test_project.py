@@ -96,24 +96,23 @@ class TestProjectController():
         # Changeable by user, not tested in is_initialized
         assert self.project.current_session.name == "default"
 
-    def test_init_with_interuption(self):
-        # Reinitializing after timed interuption during init
-
+    def test_init_with_interruption(self):
+        # Reinitializing after timed interruption during init
         @timeout_decorator.timeout(0.001, use_signals=False)
-        def timed_init_with_interuption():
+        def timed_init_with_interruption():
             result = self.project.init("test1", "test description")
             return result
 
         failed = False
         try:
-            timed_init_with_interuption()
+            timed_init_with_interruption()
         except timeout_decorator.timeout_decorator.TimeoutError:
             failed = True
         # Tested with is_initialized
         assert failed
 
-        # Reperforming init after a wait of 1 second
-        time.sleep(1)
+        # Reperforming init after a wait of 2 seconds
+        time.sleep(2)
         result = self.project.init("test2", "test description")
         # Tested with is_initialized
         assert self.project.model.name == "test2"
