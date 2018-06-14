@@ -126,6 +126,10 @@ class EnvironmentDoesNotExist(DoesNotExist):
     pass
 
 
+class SnapshotDoesNotExist(DoesNotExist):
+    pass
+
+
 class PathDoesNotExist(FileExecutionError):
     pass
 

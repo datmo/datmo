@@ -34,6 +34,7 @@ from datmo.cli.command.environment import EnvironmentCommand
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 from datmo.config import Config
+from datmo.core.util.exceptions import EnvironmentDoesNotExist
 
 # provide mountable tmp directory for docker
 tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
@@ -221,6 +222,41 @@ class TestEnvironmentCommand():
         self.environment_command.parse(["environment", "create"])
         result_2 = self.environment_command.execute()
         assert result == result_2
+
+    def test_environment_update(self):
+        self.__set_variables()
+        self.environment_command.parse(["environment", "create"])
+        environment_obj = self.environment_command.execute()
+
+        # Test successful update (none given)
+        self.environment_command.parse(
+            ["environment", "update", "--id", environment_obj.id])
+        result = self.environment_command.execute()
+        assert result
+        assert not result.name
+        assert not result.description
+
+        # Test successful update (name and description given)
+        new_name = "test name"
+        new_description = "test description"
+        self.environment_command.parse([
+            "environment", "update", "--id", environment_obj.id, "--name",
+            new_name, "--description", new_description
+        ])
+        result = self.environment_command.execute()
+        assert result
+        assert result.name == new_name
+        assert result.description == new_description
+
+        # Test failed update (passing up error from controller)
+        failed = False
+        try:
+            self.environment_command.parse(
+                ["environment", "update", "--id", "random_id"])
+            self.environment_command.execute()
+        except EnvironmentDoesNotExist:
+            failed = True
+        assert failed
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_environment_delete(self):

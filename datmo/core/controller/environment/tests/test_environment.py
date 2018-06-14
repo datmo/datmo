@@ -356,7 +356,7 @@ class TestEnvironmentController():
         failed = False
         try:
             _ = self.environment.build("does_not_exist")
-        except EntityNotFound:
+        except EnvironmentDoesNotExist:
             failed = True
         assert failed
 
@@ -690,6 +690,40 @@ class TestEnvironmentController():
         assert len(result) == 2 and \
             environment_obj_1 in result and \
             environment_obj_2 in result
+
+    def test_update(self):
+        self.project.init("test5", "test description")
+
+        # Create environment definition
+        definition_filepath = os.path.join(self.environment.home, "Dockerfile")
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes("FROM python:3.5-alpine"))
+
+        input_dict = {
+            "paths": [definition_filepath],
+        }
+
+        # Create environment in the project
+        environment_obj = self.environment.create(input_dict)
+
+        # Test success update
+        new_name = "test name"
+        new_description = "test description"
+        result = self.environment.update(
+            environment_obj.id, name=new_name, description=new_description)
+        assert result
+        assert isinstance(result, Environment)
+        assert result.name == new_name
+        assert result.description == new_description
+
+        # Test failed update
+        failed = False
+        try:
+            self.environment.update(
+                "random_id", name=new_name, description=new_description)
+        except EnvironmentDoesNotExist:
+            failed = True
+        assert failed
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_delete(self):

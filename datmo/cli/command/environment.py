@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 
 from datmo.core.util.i18n import get as __
+from datmo.cli.driver.helper import Helper
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.util.exceptions import EnvironmentDoesNotExist
@@ -55,6 +56,15 @@ class EnvironmentCommand(ProjectCommand):
                created_environment_obj.id))
         return created_environment_obj
 
+    def update(self, **kwargs):
+        environment_id = kwargs.get("id", None)
+        name = kwargs.get("name", None)
+        description = kwargs.get("description", None)
+        result = self.environment_controller.update(
+            environment_id, name=name, description=description)
+        return result
+
+    @Helper.notify_environment_active("environment_controller")
     def delete(self, **kwargs):
         environment_id = kwargs.get('environment_id')
         if self.environment_controller.delete(environment_id):

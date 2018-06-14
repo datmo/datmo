@@ -141,6 +141,17 @@ def get_datmo_parser():
         default=None,
         help="description of environment")
 
+    environment_update = environment_subcommand_parsers.add_parser(
+        "update", help="update an environment by id")
+    environment_update.add_argument(
+        "--id", dest="id", help="environment id to update")
+    environment_update.add_argument(
+        "--name", dest="name", help="new name for the environment")
+    environment_update.add_argument(
+        "--description",
+        dest="description",
+        help="new description for the environment")
+
     environment_delete = environment_subcommand_parsers.add_parser(
         "delete", help="delete a environment by id")
     environment_delete.add_argument(

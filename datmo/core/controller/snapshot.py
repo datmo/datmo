@@ -333,10 +333,11 @@ class SnapshotController(BaseController):
                stats=None,
                message=None,
                label=None):
+        """Update the snapshot metadata"""
         if not snapshot_id:
             raise RequiredArgumentMissing(
                 __("error", "controller.snapshot.delete.arg", "snapshot_id"))
-        update_snapshot_input_dict = {'id': snapshot_id}
+        update_snapshot_input_dict = {"id": snapshot_id}
         if config:
             update_snapshot_input_dict['config'] = config
         if stats:
@@ -401,6 +402,23 @@ class SnapshotController(BaseController):
             file_collection_obj.filehash, mode=mode)
 
     def delete(self, snapshot_id):
+        """Delete all traces of a snapshot
+
+        Parameters
+        ----------
+        snapshot_id : str
+            id for the snapshot to remove
+
+        Returns
+        -------
+        bool
+            True if success
+
+        Raises
+        ------
+        RequiredArgumentMissing
+            if the provided snapshot_id is None
+        """
         if not snapshot_id:
             raise RequiredArgumentMissing(
                 __("error", "controller.snapshot.delete.arg", "snapshot_id"))
