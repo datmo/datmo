@@ -117,7 +117,7 @@ class SnapshotCommand(ProjectCommand):
     def delete(self, **kwargs):
         self.snapshot_controller = SnapshotController()
         self.cli_helper.echo(__("info", "cli.snapshot.delete"))
-        snapshot_id = kwargs.get("id", None)
+        snapshot_id = kwargs.get('id')
         result = self.snapshot_controller.delete(snapshot_id)
         self.cli_helper.echo(
             __("info", "cli.snapshot.delete.success", snapshot_id))
@@ -127,14 +127,14 @@ class SnapshotCommand(ProjectCommand):
     def update(self, **kwargs):
         self.snapshot_controller = SnapshotController()
         self.cli_helper.echo(__("info", "cli.snapshot.update"))
-        snapshot_id = kwargs.get("id", None)
+        snapshot_id = kwargs.get('id')
         # getting previous saved config and stats
         snapshot_obj = self.snapshot_controller.get(snapshot_id)
         config = snapshot_obj.config
         stats = snapshot_obj.stats
 
         # extracting config
-        update_config_list = kwargs.get("config", None)
+        update_config_list = kwargs.get('config', None)
         if update_config_list:
             update_config = {}
             for item in update_config_list:
@@ -144,7 +144,7 @@ class SnapshotCommand(ProjectCommand):
             config.update(update_config)
 
         # extracting stats
-        update_stats_list = kwargs.get("stats", None)
+        update_stats_list = kwargs.get('stats', None)
         if update_stats_list:
             update_stats = {}
             for item in update_stats_list:
@@ -154,9 +154,9 @@ class SnapshotCommand(ProjectCommand):
             stats.update(update_stats)
 
         # extracting message
-        message = kwargs.get("message", None)
+        message = kwargs.get('message', None)
         # extracting label
-        label = kwargs.get("label", None)
+        label = kwargs.get('label', None)
 
         result = self.snapshot_controller.update(
             snapshot_id,
@@ -246,7 +246,7 @@ class SnapshotCommand(ProjectCommand):
     @Helper.notify_no_project_found
     def checkout(self, **kwargs):
         self.snapshot_controller = SnapshotController()
-        snapshot_id = kwargs.get("id", None)
+        snapshot_id = kwargs.get('id')
         checkout_success = self.snapshot_controller.checkout(snapshot_id)
         if checkout_success:
             self.cli_helper.echo(

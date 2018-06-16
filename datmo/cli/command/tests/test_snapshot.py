@@ -497,8 +497,8 @@ class TestSnapshotCommand():
 
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_obj.id, "--message",
-            test_message, "--label", test_label
+            "snapshot", "update", snapshot_obj.id, "--message", test_message,
+            "--label", test_label
         ])
 
         result = self.snapshot_command.execute()
@@ -512,10 +512,8 @@ class TestSnapshotCommand():
         snapshot_obj = self.snapshot_command.execute()
 
         # Test when optional parameters are not given
-        self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_obj.id, "--message",
-            test_message
-        ])
+        self.snapshot_command.parse(
+            ["snapshot", "update", snapshot_obj.id, "--message", test_message])
 
         result = self.snapshot_command.execute()
         assert result.id == snapshot_obj.id
@@ -527,10 +525,8 @@ class TestSnapshotCommand():
         snapshot_obj = self.snapshot_command.execute()
 
         # Test when optional parameters are not given
-        self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_obj.id, "--label",
-            test_label
-        ])
+        self.snapshot_command.parse(
+            ["snapshot", "update", snapshot_obj.id, "--label", test_label])
 
         result = self.snapshot_command.execute()
         assert result.id == snapshot_obj.id
@@ -543,9 +539,9 @@ class TestSnapshotCommand():
 
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_obj.id, "--config",
-            test_config[0], "--config", test_config[1], "--message",
-            test_message, "--label", test_label
+            "snapshot", "update", snapshot_obj.id, "--config", test_config[0],
+            "--config", test_config[1], "--message", test_message, "--label",
+            test_label
         ])
 
         result = self.snapshot_command.execute()
@@ -557,9 +553,9 @@ class TestSnapshotCommand():
         # 4. Updating stats, message and label
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_obj.id, "--stats",
-            test_stats[0], "--stats", test_stats[1], "--message", test_message,
-            "--label", test_label
+            "snapshot", "update", snapshot_obj.id, "--stats", test_stats[0],
+            "--stats", test_stats[1], "--message", test_message, "--label",
+            test_label
         ])
 
         result = self.snapshot_command.execute()
@@ -574,8 +570,8 @@ class TestSnapshotCommand():
         # 5. Updating config, stats
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_obj.id, "--config",
-            test_config1, "--stats", test_stats1
+            "snapshot", "update", snapshot_obj.id, "--config", test_config1,
+            "--stats", test_stats1
         ])
 
         result = self.snapshot_command.execute()
@@ -595,8 +591,8 @@ class TestSnapshotCommand():
 
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_obj.id, "--config",
-            test_config2, "--stats", test_stats2
+            "snapshot", "update", snapshot_obj.id, "--config", test_config2,
+            "--stats", test_stats2
         ])
 
         result = self.snapshot_command.execute()
@@ -626,8 +622,7 @@ class TestSnapshotCommand():
         snapshot_obj = self.snapshot_command.execute()
 
         # Test when optional parameters are not given
-        self.snapshot_command.parse(
-            ["snapshot", "delete", "--id", snapshot_obj.id])
+        self.snapshot_command.parse(["snapshot", "delete", snapshot_obj.id])
 
         result = self.snapshot_command.execute()
         assert result

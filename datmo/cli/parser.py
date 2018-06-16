@@ -152,8 +152,7 @@ def get_datmo_parser():
 
     environment_update = environment_subcommand_parsers.add_parser(
         "update", help="update an environment by id")
-    environment_update.add_argument(
-        "--id", dest="id", help="environment id to update")
+    environment_update.add_argument("id", help="environment id to update")
     environment_update.add_argument(
         "--name", dest="name", help="new name for the environment")
     environment_update.add_argument(
@@ -163,8 +162,7 @@ def get_datmo_parser():
 
     environment_delete = environment_subcommand_parsers.add_parser(
         "delete", help="delete a environment by id")
-    environment_delete.add_argument(
-        "--id", dest="environment_id", help="id of environment to delete")
+    environment_delete.add_argument("id", help="id of environment to delete")
 
     environment_ls = environment_subcommand_parsers.add_parser(
         "ls", help="list environments")
@@ -298,8 +296,7 @@ def get_datmo_parser():
 
     snapshot_update = snapshot_subcommand_parsers.add_parser(
         "update", help="update a snapshot by id")
-    snapshot_update.add_argument(
-        "--id", dest="id", help="snapshot id to update")
+    snapshot_update.add_argument("id", help="snapshot id to update")
     snapshot_update.add_argument(
         "--config",
         "-c",
@@ -329,8 +326,7 @@ def get_datmo_parser():
 
     snapshot_delete = snapshot_subcommand_parsers.add_parser(
         "delete", help="delete a snapshot by id")
-    snapshot_delete.add_argument(
-        "--id", dest="id", help="snapshot id to delete")
+    snapshot_delete.add_argument("id", help="snapshot id to delete")
 
     snapshot_ls = snapshot_subcommand_parsers.add_parser(
         "ls", help="list snapshots")
@@ -364,7 +360,7 @@ def get_datmo_parser():
 
     snapshot_checkout = snapshot_subcommand_parsers.add_parser(
         "checkout", help="checkout a snapshot by id")
-    snapshot_checkout.add_argument("id", default=None, help="snapshot id")
+    snapshot_checkout.add_argument("id", help="snapshot id to checkout")
 
     snapshot_diff = snapshot_subcommand_parsers.add_parser(
         "diff", help="view diff between 2 snapshots")

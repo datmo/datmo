@@ -226,7 +226,7 @@ class TestEnvironmentCommand():
 
         # Test successful update (none given)
         self.environment_command.parse(
-            ["environment", "update", "--id", environment_obj.id])
+            ["environment", "update", environment_obj.id])
         result = self.environment_command.execute()
         assert result
         assert not result.name
@@ -236,8 +236,8 @@ class TestEnvironmentCommand():
         new_name = "test name"
         new_description = "test description"
         self.environment_command.parse([
-            "environment", "update", "--id", environment_obj.id, "--name",
-            new_name, "--description", new_description
+            "environment", "update", environment_obj.id, "--name", new_name,
+            "--description", new_description
         ])
         result = self.environment_command.execute()
         assert result
@@ -248,7 +248,7 @@ class TestEnvironmentCommand():
         failed = False
         try:
             self.environment_command.parse(
-                ["environment", "update", "--id", "random_id"])
+                ["environment", "update", "random_id"])
             self.environment_command.execute()
         except EnvironmentDoesNotExist:
             failed = True
@@ -261,7 +261,7 @@ class TestEnvironmentCommand():
         environment_obj = self.environment_command.execute()
 
         self.environment_command.parse(
-            ["environment", "delete", "--id", environment_obj.id])
+            ["environment", "delete", environment_obj.id])
         result = self.environment_command.execute()
 
         assert result

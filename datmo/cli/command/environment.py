@@ -60,8 +60,8 @@ class EnvironmentCommand(ProjectCommand):
     @Helper.notify_no_project_found
     def update(self, **kwargs):
         self.environment_controller = EnvironmentController()
-        environment_id = kwargs.get("id", None)
-        name = kwargs.get("name", None)
+        environment_id = kwargs.get('id')
+        name = kwargs.get('name', None)
         description = kwargs.get("description", None)
         result = self.environment_controller.update(
             environment_id, name=name, description=description)
@@ -71,7 +71,7 @@ class EnvironmentCommand(ProjectCommand):
     @Helper.notify_no_project_found
     def delete(self, **kwargs):
         self.environment_controller = EnvironmentController()
-        environment_id = kwargs.get('environment_id')
+        environment_id = kwargs.get('id')
         if self.environment_controller.delete(environment_id):
             self.cli_helper.echo(
                 __("info", "cli.environment.delete.success", environment_id))
