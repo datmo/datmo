@@ -295,7 +295,9 @@ class TestEnvironmentCommand():
             ["environment", "ls", "--format", "csv", "--download"])
         environment_objs = self.environment_command.execute()
         assert created_environment_obj in environment_objs
-        test_wildcard = os.path.join(os.getcwd(), "environment_ls_*")
+        test_wildcard = os.path.join(
+            self.environment_command.environment_controller.home,
+            "environment_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()
@@ -322,7 +324,9 @@ class TestEnvironmentCommand():
         self.environment_command.parse(["environment", "ls", "--download"])
         environment_objs = self.environment_command.execute()
         assert created_environment_obj in environment_objs
-        test_wildcard = os.path.join(os.getcwd(), "environment_ls_*")
+        test_wildcard = os.path.join(
+            self.environment_command.environment_controller.home,
+            "environment_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()

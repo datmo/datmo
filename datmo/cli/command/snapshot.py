@@ -231,7 +231,7 @@ class SnapshotCommand(ProjectCommand):
                 current_time_unix_time_ms = (
                     current_time - epoch_time).total_seconds() * 1000.0
                 download_path = os.path.join(
-                    os.getcwd(),
+                    self.snapshot_controller.home,
                     "snapshot_ls_" + str(current_time_unix_time_ms))
             self.cli_helper.print_items(
                 header_list,

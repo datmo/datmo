@@ -316,7 +316,8 @@ class TestTaskCommand():
             ["task", "ls", "--format", "csv", "--download"])
         task_objs = self.task_command.execute()
         assert task_objs == []
-        test_wildcard = os.path.join(os.getcwd(), "task_ls_*")
+        test_wildcard = os.path.join(self.task_command.task_controller.home,
+                                     "task_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()
@@ -343,7 +344,8 @@ class TestTaskCommand():
         self.task_command.parse(["task", "ls", "--download"])
         task_objs = self.task_command.execute()
         assert task_objs == []
-        test_wildcard = os.path.join(os.getcwd(), "task_ls_*")
+        test_wildcard = os.path.join(self.task_command.task_controller.home,
+                                     "task_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()

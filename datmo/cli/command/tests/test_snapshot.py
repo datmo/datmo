@@ -680,7 +680,8 @@ class TestSnapshotCommand():
             ["snapshot", "ls", "--format", "csv", "--download"])
         snapshot_objs = self.snapshot_command.execute()
         assert created_snapshot_obj in snapshot_objs
-        test_wildcard = os.path.join(os.getcwd(), "snapshot_ls_*")
+        test_wildcard = os.path.join(
+            self.snapshot_command.snapshot_controller.home, "snapshot_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()
@@ -707,7 +708,8 @@ class TestSnapshotCommand():
         self.snapshot_command.parse(["snapshot", "ls", "--download"])
         snapshot_objs = self.snapshot_command.execute()
         assert created_snapshot_obj in snapshot_objs
-        test_wildcard = os.path.join(os.getcwd(), "snapshot_ls_*")
+        test_wildcard = os.path.join(
+            self.snapshot_command.snapshot_controller.home, "snapshot_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()

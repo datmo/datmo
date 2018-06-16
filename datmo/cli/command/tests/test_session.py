@@ -108,7 +108,8 @@ class TestSessionCommand():
             ["session", "ls", "--format", "csv", "--download"])
         session_objs = self.session_command.execute()
         assert created_session_obj in session_objs
-        test_wildcard = os.path.join(os.getcwd(), "session_ls_*")
+        test_wildcard = os.path.join(
+            self.session_command.session_controller.home, "session_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()
@@ -135,7 +136,8 @@ class TestSessionCommand():
         self.session_command.parse(["session", "ls", "--download"])
         session_objs = self.session_command.execute()
         assert created_session_obj in session_objs
-        test_wildcard = os.path.join(os.getcwd(), "session_ls_*")
+        test_wildcard = os.path.join(
+            self.session_command.session_controller.home, "session_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()
