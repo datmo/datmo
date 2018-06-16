@@ -149,7 +149,7 @@ class Helper():
     def get_command_choices(self):
         return [
             "init", "version", "--version", "-v", "status", "cleanup",
-            "snapshot", "task", "notebook", "environment"
+            "snapshot", "task", "notebook", "environment", "run"
         ]
 
     def prompt_available_environments(self, available_environments):

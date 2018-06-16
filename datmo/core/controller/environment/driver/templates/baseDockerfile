@@ -1,7 +1,7 @@
 
 ##### datmo essential ###
 # Mount essential folders
-VOLUME ["/task", "/data"]
+VOLUME ["/task", "/data", "/home"]
 
 # Setup environment_driver variables
 ENV DATMO_TASK_DIR=/task

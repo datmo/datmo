@@ -225,6 +225,7 @@ class ProjectCommand(BaseCommand):
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
         except Exception as e:
             self.logger.error("%s %s" % (e, task_dict))
+            self.cli_helper.echo("%s" % e)
             self.cli_helper.echo(
                 __("error", "cli.project.notebook", task_obj.id))
             return False
