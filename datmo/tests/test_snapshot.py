@@ -23,6 +23,7 @@ except TypeError:
     to_bytes("test")
 
 from datmo.snapshot import create, ls, update, delete
+from datmo.config import Config
 from datmo.snapshot import Snapshot
 from datmo.task import run
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
@@ -40,8 +41,8 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestSnapshotModule():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        _ = ProjectController(self.temp_dir).\
-            init("test", "test description")
+        Config().set_home(self.temp_dir)
+        _ = ProjectController().init("test", "test description")
         self.input_dict = {
             "id": "test",
             "model_id": "my_model",
@@ -63,7 +64,7 @@ class TestSnapshotModule():
 
     def test_snapshot_entity_instantiate(self):
         core_snapshot_entity = CoreSnapshot(self.input_dict)
-        snapshot_entity = Snapshot(core_snapshot_entity, home=self.temp_dir)
+        snapshot_entity = Snapshot(core_snapshot_entity)
 
         for k, v in self.input_dict.items():
             if k != "file_collection_id":
@@ -74,18 +75,20 @@ class TestSnapshotModule():
 
     def test_create(self):
         # check project is not initialized if wrong home
+        Config().set_home(os.path.join("does", "not", "exist"))
         failed = False
         try:
-            create(message="test", home=os.path.join("does", "not", "exist"))
+            create(message="test")
         except InvalidProjectPath:
             failed = True
         assert failed
 
         # Create a snapshot with default params
         # (fails w/ no commit)
+        Config().set_home(self.temp_dir)
         failed = False
         try:
-            _ = create(message="test", home=self.temp_dir)
+            _ = create(message="test")
         except CommitFailed:
             failed = True
         assert failed
@@ -96,7 +99,7 @@ class TestSnapshotModule():
             f.write(to_bytes("import numpy\n"))
             f.write(to_bytes("import sklearn\n"))
 
-        snapshot_obj_1 = create(message="test", home=self.temp_dir)
+        snapshot_obj_1 = create(message="test")
 
         assert snapshot_obj_1
         assert isinstance(snapshot_obj_1, Snapshot)
@@ -111,7 +114,7 @@ class TestSnapshotModule():
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
-        snapshot_obj_2 = create(message="test", home=self.temp_dir)
+        snapshot_obj_2 = create(message="test")
 
         assert snapshot_obj_2
         assert isinstance(snapshot_obj_2, Snapshot)
@@ -127,8 +130,7 @@ class TestSnapshotModule():
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
-        snapshot_obj_3 = create(
-            message="test", home=self.temp_dir, env=test_filepath)
+        snapshot_obj_3 = create(message="test", env=test_filepath)
 
         assert snapshot_obj_3
         assert isinstance(snapshot_obj_3, Snapshot)
@@ -153,13 +155,12 @@ class TestSnapshotModule():
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
-        task_obj = run("sh -c echo accuracy:0.45", home=self.temp_dir)
+        task_obj = run("sh -c echo accuracy:0.45")
 
         # 1) Test option 1
         snapshot_obj = create(
             message="my test snapshot",
             task_id=task_obj.id,
-            home=self.temp_dir,
             label="best",
             config={"foo": "bar"})
 
@@ -175,7 +176,6 @@ class TestSnapshotModule():
         snapshot_obj_2 = create(
             message="my test snapshot",
             task_id=task_obj.id,
-            home=self.temp_dir,
             label="best",
             config={"foo": "bar"},
             stats={"foo": "bar"})
@@ -196,7 +196,7 @@ class TestSnapshotModule():
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
-        task_obj = run("sh -c echo accuracy:0.45", home=self.temp_dir)
+        task_obj = run("sh -c echo accuracy:0.45")
 
         # Test if failure if user gives environment_id with task_id
         failed = False
@@ -204,7 +204,6 @@ class TestSnapshotModule():
             _ = create(
                 message="my test snapshot",
                 task_id=task_obj.id,
-                home=self.temp_dir,
                 label="best",
                 config={"foo": "bar"},
                 stats={"foo": "bar"},
@@ -218,7 +217,6 @@ class TestSnapshotModule():
             _ = create(
                 message="my test snapshot",
                 task_id=task_obj.id,
-                home=self.temp_dir,
                 label="best",
                 config={"foo": "bar"},
                 stats={"foo": "bar"},
@@ -229,17 +227,19 @@ class TestSnapshotModule():
 
     def test_ls(self):
         # check project is not initialized if wrong home
+        Config().set_home(os.path.join("does", "not", "exist"))
         failed = False
         try:
-            ls(home=os.path.join("does", "not", "exist"))
+            ls()
         except InvalidProjectPath:
             failed = True
         assert failed
 
         # check session does not exist if wrong session
+        Config().set_home(self.temp_dir)
         failed = False
         try:
-            ls(session_id="does_not_exist", home=self.temp_dir)
+            ls(session_id="does_not_exist")
         except SessionDoesNotExist:
             failed = True
         assert failed
@@ -250,10 +250,10 @@ class TestSnapshotModule():
             f.write(to_bytes("import numpy\n"))
             f.write(to_bytes("import sklearn\n"))
 
-        create(message="test1", home=self.temp_dir)
+        create(message="test1")
 
         # list all snapshots with no filters
-        snapshot_list_1 = ls(home=self.temp_dir)
+        snapshot_list_1 = ls()
 
         assert snapshot_list_1
         assert len(list(snapshot_list_1)) == 1
@@ -263,10 +263,10 @@ class TestSnapshotModule():
         test_filepath = os.path.join(self.temp_dir, "Dockerfile")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
-        create(message="test2", home=self.temp_dir)
+        create(message="test2")
 
         # list all snapshots with no filters (works when more than 1 snapshot)
-        snapshot_list_2 = ls(home=self.temp_dir)
+        snapshot_list_2 = ls()
 
         assert snapshot_list_2
         assert len(list(snapshot_list_2)) == 2
@@ -274,14 +274,14 @@ class TestSnapshotModule():
         assert isinstance(snapshot_list_2[1], Snapshot)
 
         # list snapshots with specific filter
-        snapshot_list_3 = ls(filter="test2", home=self.temp_dir)
+        snapshot_list_3 = ls(filter="test2")
 
         assert snapshot_list_3
         assert len(list(snapshot_list_3)) == 1
         assert isinstance(snapshot_list_3[0], Snapshot)
 
         # list snapshots with filter of none
-        snapshot_list_4 = ls(filter="test3", home=self.temp_dir)
+        snapshot_list_4 = ls(filter="test3")
 
         assert len(list(snapshot_list_4)) == 0
 
@@ -291,22 +291,23 @@ class TestSnapshotModule():
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("import numpy\n"))
             f.write(to_bytes("import sklearn\n"))
-        return create(
-            message="test", home=self.temp_dir, paths=[test_filepath])
+        return create(message="test", paths=[test_filepath])
 
     def test_update(self):
         # check project is not initialized if wrong home
+        Config().set_home(os.path.join("does", "not", "exist"))
         failed = False
         try:
-            delete(home=os.path.join("does", "not", "exist"))
+            delete()
         except InvalidProjectPath:
             failed = True
         assert failed
 
         # check for snapshot id that does not exist
+        Config().set_home(self.temp_dir)
         failed = False
         try:
-            update(snapshot_id="does_not_exist", home=self.temp_dir)
+            update(snapshot_id="does_not_exist")
         except EntityNotFound:
             failed = True
         assert failed
@@ -320,70 +321,63 @@ class TestSnapshotModule():
         updated_snapshot_obj = update(
             snapshot_id=snapshot_entity.id,
             message=test_message,
-            label=test_label,
-            home=self.temp_dir)
+            label=test_label)
 
         assert updated_snapshot_obj.id == snapshot_entity.id
         assert updated_snapshot_obj.message == test_message
         assert updated_snapshot_obj.label == test_label
 
         # update message
-        snapshot_obj_1 = create(message="test", home=self.temp_dir)
+        snapshot_obj_1 = create(message="test")
 
         updated_snapshot_obj_1 = update(
-            snapshot_id=snapshot_obj_1.id,
-            message=test_message,
-            home=self.temp_dir)
+            snapshot_id=snapshot_obj_1.id, message=test_message)
 
         assert updated_snapshot_obj_1.id == snapshot_obj_1.id
         assert updated_snapshot_obj_1.message == test_message
 
         # update label
-        snapshot_obj_2 = create(message="test", home=self.temp_dir)
+        snapshot_obj_2 = create(message="test")
 
         updated_snapshot_obj_2 = update(
-            snapshot_id=snapshot_obj_2.id,
-            label=test_label,
-            home=self.temp_dir)
+            snapshot_id=snapshot_obj_2.id, label=test_label)
 
         assert updated_snapshot_obj_2.id == snapshot_obj_2.id
         assert updated_snapshot_obj_2.message == test_message
 
         # test config
-        snapshot_obj_3 = create(message="test", home=self.temp_dir)
+        snapshot_obj_3 = create(message="test")
 
         updated_snapshot_obj_3 = update(
-            snapshot_id=snapshot_obj_3.id,
-            config=test_config,
-            home=self.temp_dir)
+            snapshot_id=snapshot_obj_3.id, config=test_config)
 
         assert updated_snapshot_obj_3.id == snapshot_obj_3.id
         assert updated_snapshot_obj_3.config == test_config
 
         # test stats
-        snapshot_obj_4 = create(message="test", home=self.temp_dir)
+        snapshot_obj_4 = create(message="test")
 
         updated_snapshot_obj_4 = update(
-            snapshot_id=snapshot_obj_4.id,
-            stats=test_stats,
-            home=self.temp_dir)
+            snapshot_id=snapshot_obj_4.id, stats=test_stats)
 
         assert updated_snapshot_obj_4.id == snapshot_obj_4.id
         assert updated_snapshot_obj_4.stats == test_stats
 
     def test_delete(self):
         # check project is not initialized if wrong home
+        Config().set_home(os.path.join("does", "not", "exist"))
         failed = False
         try:
-            delete(home=os.path.join("does", "not", "exist"))
+            delete()
         except InvalidProjectPath:
             failed = True
         assert failed
 
         # check for snapshot id that does not exist
+        Config().set_home(self.temp_dir)
         failed = False
         try:
-            delete(snapshot_id="does_not_exist", home=self.temp_dir)
+            delete(snapshot_id="does_not_exist")
         except EntityNotFound:
             failed = True
         assert failed
@@ -394,22 +388,20 @@ class TestSnapshotModule():
             f.write(to_bytes("import numpy\n"))
             f.write(to_bytes("import sklearn\n"))
 
-        snapshot_obj = create(message="delete_test", home=self.temp_dir)
+        snapshot_obj = create(message="delete_test")
 
-        snapshot_list_before_delete = ls(
-            filter='delete_test', home=self.temp_dir)
+        snapshot_list_before_delete = ls(filter='delete_test')
 
-        delete(snapshot_id=snapshot_obj.id, home=self.temp_dir)
+        delete(snapshot_id=snapshot_obj.id)
 
-        snapshot_list_after_delete = ls(
-            filter='delete_test', home=self.temp_dir)
+        snapshot_list_after_delete = ls(filter='delete_test')
 
         assert len(snapshot_list_before_delete) == 1
         assert len(snapshot_list_after_delete) == 0
 
     def test_snapshot_entity_files(self):
         core_snapshot_entity = CoreSnapshot(self.input_dict)
-        snapshot_entity = Snapshot(core_snapshot_entity, home=self.temp_dir)
+        snapshot_entity = Snapshot(core_snapshot_entity)
         # Test failure because entity has not been created by controller
         failed = False
         try:
@@ -428,7 +420,7 @@ class TestSnapshotModule():
 
     def test_task_entity_get_files(self):
         core_snapshot_entity = CoreSnapshot(self.input_dict)
-        snapshot_entity = Snapshot(core_snapshot_entity, home=self.temp_dir)
+        snapshot_entity = Snapshot(core_snapshot_entity)
         # Test failure because entity has not been created by controller
         failed = False
         try:

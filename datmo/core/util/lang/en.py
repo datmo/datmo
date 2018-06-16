@@ -3,7 +3,7 @@ MESSAGES = {
         "cli.general.line":
             "==============================================================",
         "cli.project.init.create":
-            "Initializing project {name} @ ({path}) ",
+            "Initializing project @ ({path}) ",
         "cli.project.init.create.success":
             "Created project {name} @ ({path}) ",
         "cli.project.init.create.failure":
@@ -15,7 +15,7 @@ MESSAGES = {
         "cli.project.init.update.failure":
             "Failed to update project {name} @ ({path}) ",
         "cli.project.notebook":
-            "Running a notebook",
+            "Starting a notebook...",
         "cli.project.pull":
             "Pulling information from the Datmo project url and adding it to local...",
         "cli.project.update":
@@ -77,6 +77,8 @@ MESSAGES = {
             "Created session '%s'",
         "cli.session.select":
             "Selecting new session '%s'",
+        "cli.session.update":
+            "Updated session '%s'",
         "cli.session.delete":
             "Removed session '%s'"
     },
@@ -87,6 +89,8 @@ MESSAGES = {
             "git isn't setup. please install git",
         "controller.general.environment.failed":
             "Environment driver not initialized",
+        "controller.project.cleanup.not_init":
+            "No valid datmo project was detected",
         "controller.project.cleanup.environment":
             "Error cleaning up project environment",
         "controller.project.cleanup.code":
@@ -97,6 +101,10 @@ MESSAGES = {
     "error": {
         "exception.validationfailed":
             "Validation failed: %s",
+        "general.project.dne":
+            "No project found in current directory. Run `datmo init` to create one",
+        "general.environment.docker.na":
+            "Docker environment is not initialized. This command cannot be run",
         "sdk.snapshot.create.task.args":
             "Error due to passing excluded args while creating snapshot from task: %s",
         "cli.general":
@@ -107,6 +115,14 @@ MESSAGES = {
             "No project found in the current directory: %s",
         "cli.project.notebook":
             "Error while running the notebook with task: %s",
+        "cli.session.update.dne":
+            "No session found with given id: %s",
+        "cli.session.delete.dne":
+            "No session found with given name or id: %s",
+        "cli.session.delete.default":
+            "Cannot delete default session",
+        "cli.session.select.dne":
+            "No session found with given name or id: %s",
         "cli.environment.setup.argument":
             "This name or index does not match any supported environments: %s, ",
         "cli.task.run":
@@ -203,6 +219,8 @@ MESSAGES = {
             "Required argument not present in input",
         "controller.code.delete":
             "Code with id %s does NOT exist",
+        "controller.environment.__init__":
+            "Project has not been initialized",
         "controller.environment.driver.docker.__init__.dne":
             "File path does not exist: %s",
         "controller.environment.driver.docker.__init__":
@@ -329,8 +347,10 @@ MESSAGES = {
             "Delete argument %s not present in input",
         "controller.session.__init__":
             "Project has not been initialized",
+        "controller.session.update.default":
+            "Cannot update default session",
         "controller.session.delete.default":
-            "Can not delete default session",
+            "Cannot delete default session",
         "storage.local.dal.update":
             "Entity id not provided in the input for update",
     },
@@ -349,7 +369,7 @@ MESSAGES = {
         "cli.general.confirm":
             "Is it okay?",
         "cli.project.cleanup.confirm":
-            "Are you sure you want to delete all datmo project information? [yN]",
+            "Are you sure you want to delete all datmo project information? If none found, no changes will be made [yN]",
         "cli.project.environment.setup":
             "Would you like to setup the environment? [yN]"
     },

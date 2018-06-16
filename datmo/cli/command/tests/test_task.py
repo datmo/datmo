@@ -37,11 +37,12 @@ except TypeError:
 
     to_bytes("test")
 
+from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.task import TaskCommand
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.util.exceptions import ProjectNotInitialized, MutuallyExclusiveArguments, RequiredArgumentMissing, SessionDoesNotExist
+from datmo.core.util.exceptions import MutuallyExclusiveArguments, RequiredArgumentMissing, SessionDoesNotExist
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -52,13 +53,14 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestTaskCommand():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        Config().set_home(self.temp_dir)
         self.cli_helper = Helper()
 
     def teardown_method(self):
         pass
 
     def __set_variables(self):
-        self.project_command = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.project_command = ProjectCommand(self.cli_helper)
         self.project_command.parse(
             ["init", "--name", "foobar", "--description", "test model"])
 
@@ -68,20 +70,12 @@ class TestTaskCommand():
 
         dummy(self)
 
-        self.task_command = TaskCommand(self.temp_dir, self.cli_helper)
+        self.task_command = TaskCommand(self.cli_helper)
 
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(self.env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
-
-    def test_task_project_not_init(self):
-        failed = False
-        try:
-            self.task_command = TaskCommand(self.temp_dir, self.cli_helper)
-        except ProjectNotInitialized:
-            failed = True
-        assert failed
 
     def test_task_command(self):
         self.__set_variables()
@@ -191,7 +185,7 @@ class TestTaskCommand():
     #
     #     def task_exec_func(procnum, return_dict):
     #         print("Creating Task object")
-    #         task = TaskCommand(self.temp_dir, self.cli_helper)
+    #         task = TaskCommand(self.cli_helper)
     #         print("Parsing command")
     #         task.parse(
     #             ["task", "run", "--environment-paths", test_dockerfile, test_command])
@@ -270,7 +264,7 @@ class TestTaskCommand():
         # teardown
         self.task_command.parse(["task", "stop", "--all"])
         # test when all is passed to stop all
-        task_stop_command = self.task_command.execute()
+        _ = self.task_command.execute()
 
     def test_task_run_invalid_arg(self):
         self.__set_variables()
@@ -322,7 +316,8 @@ class TestTaskCommand():
             ["task", "ls", "--format", "csv", "--download"])
         task_objs = self.task_command.execute()
         assert task_objs == []
-        test_wildcard = os.path.join(os.getcwd(), "task_ls_*")
+        test_wildcard = os.path.join(self.task_command.task_controller.home,
+                                     "task_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()
@@ -349,7 +344,8 @@ class TestTaskCommand():
         self.task_command.parse(["task", "ls", "--download"])
         task_objs = self.task_command.execute()
         assert task_objs == []
-        test_wildcard = os.path.join(os.getcwd(), "task_ls_*")
+        test_wildcard = os.path.join(self.task_command.task_controller.home,
+                                     "task_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()
@@ -409,6 +405,7 @@ class TestTaskCommand():
         task_stop_command = self.task_command.execute()
         assert task_stop_command == True
 
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_stop_failure_required_args(self):
         self.__set_variables()
         # Passing wrong task id
@@ -420,6 +417,7 @@ class TestTaskCommand():
             failed = True
         assert failed
 
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_stop_failure_mutually_exclusive_vars(self):
         self.__set_variables()
         # Passing wrong task id

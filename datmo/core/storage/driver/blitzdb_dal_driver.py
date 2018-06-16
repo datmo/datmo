@@ -11,13 +11,15 @@ class BlitzDBDALDriver(DALDriver):
     def __init__(self, driver_type, connection_string):
         super(BlitzDBDALDriver, self).__init__()
         self.database_name = 'datmo_db'
-        if driver_type == "file":
+        self.driver_type = driver_type
+        self.connection_string = connection_string
+        if self.driver_type == "file":
             from blitzdb import FileBackend
-            self.backend = FileBackend(connection_string)
-        elif driver_type == "mongo":
+            self.backend = FileBackend(self.connection_string)
+        elif self.driver_type == "mongo":
             from pymongo import MongoClient
             from blitzdb.backends.mongo import Backend as MongoBackend
-            c = MongoClient(connection_string)
+            c = MongoClient(self.connection_string)
             #create a new BlitzDB backend using a MongoDB database
             self.backend = MongoBackend(c[self.database_name])
 
@@ -60,6 +62,7 @@ class BlitzDBDALDriver(DALDriver):
                     # Only load from store if storage exists
                     if nested_index[index]._store:
                         nested_index[index].load_from_store()
+            self.__init__(self.driver_type, self.connection_string)
 
     def get(self, collection, entity_id):
         self.__reload()

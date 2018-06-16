@@ -3,9 +3,8 @@ from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
 from datmo.core.entity.model import Model
 from datmo.core.entity.session import Session
-from datmo.core.util.exceptions import (
-    SessionDoesNotExist, ProjectNotInitialized, EnvironmentInitFailed,
-    PathDoesNotExist, FileIOError)
+from datmo.core.util.exceptions import (ProjectNotInitialized,
+                                        EnvironmentInitFailed, FileIOError)
 
 
 class ProjectController(BaseController):
@@ -27,8 +26,8 @@ class ProjectController(BaseController):
         Give the user a picture of the status of the project, snapshots, and tasks
     """
 
-    def __init__(self, home):
-        super(ProjectController, self).__init__(home)
+    def __init__(self):
+        super(ProjectController, self).__init__()
 
     def init(self, name, description):
         """ Initialize the project
@@ -154,6 +153,9 @@ class ProjectController(BaseController):
         -------
         bool
         """
+        if not self.is_initialized:
+            self.logger.warning(
+                __("warn", "controller.project.cleanup.not_init"))
         # Remove Datmo environment_driver references, give warning if error
         try:
             # Obtain image id before cleaning up if exists
@@ -216,11 +218,13 @@ class ProjectController(BaseController):
         status_dict = self.model.to_dictionary().copy()
 
         # Show all project settings
-        status_dict["config"] = self.config.to_dict()
+        status_dict["config"] = self.config_store.to_dict()
 
-        # Show the latest snapshot
+        # Show the latest visible snapshot
         descending_snapshots = self.dal.snapshot.query(
-            {}, sort_key="created_at", sort_order="descending")
+            {
+                "visible": True
+            }, sort_key="created_at", sort_order="descending")
         latest_snapshot = descending_snapshots[
             0] if descending_snapshots else None
 

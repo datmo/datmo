@@ -28,6 +28,7 @@ import os
 import tempfile
 import platform
 
+from datmo.config import Config
 from datmo import __version__
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
@@ -39,14 +40,41 @@ tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
 test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 
 
-class TestProject():
+class TestProjectCommand():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        Config().set_home(self.temp_dir)
         self.cli_helper = Helper()
-        self.project_command = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.project_command = ProjectCommand(self.cli_helper)
 
     def teardown_method(self):
         pass
+
+    def test_init_create_success_default_name_no_description_no_environment(
+            self):
+        self.project_command.parse(["init"])
+
+        # Test when environment is created
+        @self.project_command.cli_helper.input("\n\ny\n1\n")
+        def dummy(self):
+            return self.project_command.execute()
+
+        result = dummy(self)
+
+        # Ensure that the name and description are current
+        _, default_name = os.path.split(
+            self.project_command.project_controller.home)
+        assert result
+        assert result.name == default_name
+        assert result.description == None
+        # Ensure environment is correct
+        definition_filepath = os.path.join(
+            self.temp_dir,
+            self.project_command.project_controller.environment_directory,
+            "Dockerfile")
+        assert os.path.isfile(definition_filepath)
+        assert "FROM datmo/xgboost:cpu" in open(definition_filepath,
+                                                "r").read()
 
     def test_init_create_success_no_environment(self):
         test_name = "foobar"
@@ -56,13 +84,15 @@ class TestProject():
 
         # Test when environment is not created
         @self.project_command.cli_helper.input("\n")
-        def dummy_no_environment(self):
+        def dummy(self):
             return self.project_command.execute()
 
-        result = dummy_no_environment(self)
+        result = dummy(self)
 
-        definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
-                                           "Dockerfile")
+        definition_filepath = os.path.join(
+            self.temp_dir,
+            self.project_command.project_controller.environment_directory,
+            "Dockerfile")
 
         assert result
         assert not os.path.isfile(definition_filepath)
@@ -78,13 +108,15 @@ class TestProject():
 
         # Test when environment is created
         @self.project_command.cli_helper.input("y\n1\n")
-        def dummy_environment(self):
+        def dummy(self):
             return self.project_command.execute()
 
-        result = dummy_environment(self)
+        result = dummy(self)
 
-        definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
-                                           "Dockerfile")
+        definition_filepath = os.path.join(
+            self.temp_dir,
+            self.project_command.project_controller.environment_directory,
+            "Dockerfile")
 
         assert result
         assert os.path.isfile(definition_filepath)
@@ -96,7 +128,7 @@ class TestProject():
         assert result.name == test_name
         assert result.description == test_description
 
-    def test_init_create_failure(self):
+    def test_init_create_success_blank(self):
         self.project_command.parse(["init", "--name", "", "--description", ""])
         # test if prompt opens
         @self.project_command.cli_helper.input("\n\n\n")
@@ -104,7 +136,9 @@ class TestProject():
             return self.project_command.execute()
 
         result = dummy(self)
-        assert not result
+        assert result
+        assert result.name
+        assert not result.description
 
     def test_init_update_success(self):
         test_name = "foobar"

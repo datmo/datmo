@@ -13,8 +13,8 @@ class ModelController(BaseController):
     # TODO: Enable multiple models per project
     """
 
-    def __init__(self, home):
-        super(ModelController, self).__init__(home)
+    def __init__(self):
+        super(ModelController, self).__init__()
 
     def create(self):
         pass

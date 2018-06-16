@@ -4,24 +4,24 @@ import os
 from datetime import datetime
 
 from datmo.core.util.i18n import get as __
+from datmo.cli.driver.helper import Helper
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.util.exceptions import EnvironmentDoesNotExist
-from datmo.core.util.misc_functions import printable_string
+from datmo.core.util.misc_functions import printable_object, prettify_datetime
 
 
 class EnvironmentCommand(ProjectCommand):
-    def __init__(self, home, cli_helper):
-        super(EnvironmentCommand, self).__init__(home, cli_helper)
-        # dest="subcommand" argument will populate a "subcommand" property with the subparsers name
-        # example  "subcommand"="create"  or "subcommand"="ls"
-        self.environment_controller = EnvironmentController(home=home)
+    def __init__(self, cli_helper):
+        super(EnvironmentCommand, self).__init__(cli_helper)
 
     def environment(self):
-        self.parse(["--help"])
+        self.parse(["environment", "--help"])
         return True
 
+    @Helper.notify_no_project_found
     def setup(self, **kwargs):
+        self.environment_controller = EnvironmentController()
         name = kwargs.get("name", None)
         available_environments = self.environment_controller.get_supported_environments(
         )
@@ -40,7 +40,9 @@ class EnvironmentCommand(ProjectCommand):
             self.cli_helper.echo(
                 __("error", "cli.environment.setup.argument", name))
 
+    @Helper.notify_no_project_found
     def create(self, **kwargs):
+        self.environment_controller = EnvironmentController()
         self.cli_helper.echo(__("info", "cli.environment.create"))
         created_environment_obj = self.environment_controller.create(kwargs)
         environments = self.environment_controller.list()
@@ -55,14 +57,29 @@ class EnvironmentCommand(ProjectCommand):
                created_environment_obj.id))
         return created_environment_obj
 
+    @Helper.notify_no_project_found
+    def update(self, **kwargs):
+        self.environment_controller = EnvironmentController()
+        environment_id = kwargs.get('id')
+        name = kwargs.get('name', None)
+        description = kwargs.get("description", None)
+        result = self.environment_controller.update(
+            environment_id, name=name, description=description)
+        return result
+
+    @Helper.notify_environment_active(EnvironmentController)
+    @Helper.notify_no_project_found
     def delete(self, **kwargs):
-        environment_id = kwargs.get('environment_id')
+        self.environment_controller = EnvironmentController()
+        environment_id = kwargs.get('id')
         if self.environment_controller.delete(environment_id):
             self.cli_helper.echo(
                 __("info", "cli.environment.delete.success", environment_id))
             return True
 
+    @Helper.notify_no_project_found
     def ls(self, **kwargs):
+        self.environment_controller = EnvironmentController()
         print_format = kwargs.get('format', "table")
         download = kwargs.get('download', None)
         download_path = kwargs.get('download_path', None)
@@ -70,15 +87,12 @@ class EnvironmentCommand(ProjectCommand):
         header_list = ["id", "created at", "name", "description"]
         item_dict_list = []
         for environment_obj in environment_objs:
-            environment_obj_created_at = printable_string(
-                environment_obj.created_at.strftime("%Y-%m-%d %H:%M:%S"))
-            environment_obj_name = printable_string(environment_obj.name) \
-                if environment_obj.name is not None else ""
-            environment_obj_description = printable_string(environment_obj.description) \
-                if environment_obj.description is not None else ""
+            environment_obj_name = printable_object(environment_obj.name)
+            environment_obj_description = printable_object(
+                environment_obj.description)
             item_dict_list.append({
                 "id": environment_obj.id,
-                "created at": environment_obj_created_at,
+                "created at": prettify_datetime(environment_obj.created_at),
                 "name": environment_obj_name,
                 "description": environment_obj_description
             })
@@ -90,7 +104,7 @@ class EnvironmentCommand(ProjectCommand):
                 current_time_unix_time_ms = (
                     current_time - epoch_time).total_seconds() * 1000.0
                 download_path = os.path.join(
-                    os.getcwd(),
+                    self.environment_controller.home,
                     "environment_ls_" + str(current_time_unix_time_ms))
             self.cli_helper.print_items(
                 header_list,

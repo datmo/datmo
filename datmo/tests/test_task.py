@@ -24,6 +24,7 @@ except TypeError:
     to_bytes("test")
 
 from datmo.task import run, ls
+from datmo.config import Config
 from datmo.task import Task
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.controller.project import ProjectController
@@ -39,8 +40,9 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestTaskModule():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.project = ProjectController(self.temp_dir)
-        _ = self.project.init("test", "test description")
+        Config().set_home(self.temp_dir)
+        self.project_controller = ProjectController()
+        _ = self.project_controller.init("test", "test description")
         self.input_dict = {
             "id": "test",
             "model_id": "my_model",
@@ -53,7 +55,7 @@ class TestTaskModule():
 
     def test_task_entity_instantiate(self):
         core_task_entity = CoreTask(self.input_dict)
-        task_entity = Task(core_task_entity, home=self.temp_dir)
+        task_entity = Task(core_task_entity)
 
         for k, v in self.input_dict.items():
             assert getattr(task_entity, k) == v
@@ -71,7 +73,7 @@ class TestTaskModule():
         # 1) Test out option 1)
         failed = False
         try:
-            _ = run(command="test", home=self.temp_dir)
+            _ = run(command="test")
         except CommitFailed:
             failed = True
         assert failed
@@ -87,10 +89,7 @@ class TestTaskModule():
             f.write(to_bytes("print(' accuracy: 0.56 ')\n"))
 
         # 2) Test out option 2
-        task_obj_0 = run(
-            command="python script.py",
-            home=self.temp_dir,
-            mem_limit=test_mem_limit)
+        task_obj_0 = run(command="python script.py", mem_limit=test_mem_limit)
         assert isinstance(task_obj_0, Task)
         assert task_obj_0.id
         assert 'hello' in task_obj_0.logs
@@ -105,7 +104,6 @@ class TestTaskModule():
         task_obj_1 = run(
             command="python script.py",
             env=test_filepath,
-            home=self.temp_dir,
             mem_limit=test_mem_limit)
         assert isinstance(task_obj_1, Task)
         assert task_obj_1.id
@@ -116,7 +114,6 @@ class TestTaskModule():
         task_obj_2 = run(
             command=["python", "script.py"],
             env=test_filepath,
-            home=self.temp_dir,
             mem_limit=test_mem_limit)
         assert isinstance(task_obj_2, Task)
         assert task_obj_2.id
@@ -127,7 +124,6 @@ class TestTaskModule():
         task_obj_3 = run(
             command=["python", "script.py"],
             env=[test_filepath + ">Dockerfile"],
-            home=self.temp_dir,
             mem_limit=test_mem_limit)
         assert isinstance(task_obj_3, Task)
         assert task_obj_3.id
@@ -136,11 +132,11 @@ class TestTaskModule():
 
         # 6) Test out option 6
         os.remove(test_filepath)
-        test_filepath = os.path.join(self.project.environment_directory,
-                                     "Dockerfile")
+        test_filepath = os.path.join(
+            self.project_controller.environment_directory, "Dockerfile")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
-        task_obj_4 = run(command=["python", "script.py"], home=self.temp_dir)
+        task_obj_4 = run(command=["python", "script.py"])
         assert isinstance(task_obj_4, Task)
         assert task_obj_4.id
         assert 'hello' in task_obj_4.logs
@@ -148,17 +144,19 @@ class TestTaskModule():
 
     def test_ls(self):
         # check project is not initialized if wrong home
+        Config().set_home(os.path.join("does", "not", "exist"))
         failed = False
         try:
-            ls(home=os.path.join("does", "not", "exist"))
+            ls()
         except InvalidProjectPath:
             failed = True
         assert failed
 
         # check session does not exist if wrong session
+        Config().set_home(self.temp_dir)
         failed = False
         try:
-            ls(session_id="does_not_exist", home=self.temp_dir)
+            ls(session_id="does_not_exist")
         except SessionDoesNotExist:
             failed = True
         assert failed
@@ -167,7 +165,7 @@ class TestTaskModule():
         self.__setup()
 
         # list all tasks with no filters
-        task_list_1 = ls(home=self.temp_dir)
+        task_list_1 = ls()
 
         assert task_list_1
         assert len(list(task_list_1)) == 1
@@ -177,7 +175,7 @@ class TestTaskModule():
         self.__setup(command="test")
 
         # list all tasks with no filters (works when more than 1 task)
-        task_list_2 = ls(home=self.temp_dir)
+        task_list_2 = ls()
 
         assert task_list_2
         assert len(list(task_list_2)) == 2
@@ -185,14 +183,14 @@ class TestTaskModule():
         assert isinstance(task_list_2[1], Task)
 
         # list tasks with specific filter
-        task_list_3 = ls(filter="script.py", home=self.temp_dir)
+        task_list_3 = ls(filter="script.py")
 
         assert task_list_3
         assert len(list(task_list_3)) == 1
         assert isinstance(task_list_3[0], Task)
 
         # list snapshots with filter of none
-        task_list_4 = ls(filter="random", home=self.temp_dir)
+        task_list_4 = ls(filter="random")
 
         assert len(list(task_list_4)) == 0
 
@@ -208,12 +206,12 @@ class TestTaskModule():
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
-        return run(command=command, env=test_filepath, home=self.temp_dir)
+        return run(command=command, env=test_filepath)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_status(self):
         core_task_entity = CoreTask(self.input_dict)
-        task_entity = Task(core_task_entity, home=self.temp_dir)
+        task_entity = Task(core_task_entity)
         # Test failure because entity has not been created by controller
         failed = False
         try:
@@ -231,7 +229,7 @@ class TestTaskModule():
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_start_time(self):
         core_task_entity = CoreTask(self.input_dict)
-        task_entity = Task(core_task_entity, home=self.temp_dir)
+        task_entity = Task(core_task_entity)
         # Test failure because entity has not been created by controller
         failed = False
         try:
@@ -249,7 +247,7 @@ class TestTaskModule():
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_end_time(self):
         core_task_entity = CoreTask(self.input_dict)
-        task_entity = Task(core_task_entity, home=self.temp_dir)
+        task_entity = Task(core_task_entity)
         # Test failure because entity has not been created by controller
         failed = False
         try:
@@ -267,7 +265,7 @@ class TestTaskModule():
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_duration(self):
         core_task_entity = CoreTask(self.input_dict)
-        task_entity = Task(core_task_entity, home=self.temp_dir)
+        task_entity = Task(core_task_entity)
         # Test failure because entity has not been created by controller
         failed = False
         try:
@@ -285,7 +283,7 @@ class TestTaskModule():
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_logs(self):
         core_task_entity = CoreTask(self.input_dict)
-        task_entity = Task(core_task_entity, home=self.temp_dir)
+        task_entity = Task(core_task_entity)
         # Test failure because entity has not been created by controller
         failed = False
         try:
@@ -303,7 +301,7 @@ class TestTaskModule():
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_results(self):
         core_task_entity = CoreTask(self.input_dict)
-        task_entity = Task(core_task_entity, home=self.temp_dir)
+        task_entity = Task(core_task_entity)
         # Test failure because entity has not been created by controller
         failed = False
         try:
@@ -320,7 +318,7 @@ class TestTaskModule():
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_files(self):
         core_task_entity = CoreTask(self.input_dict)
-        task_entity = Task(core_task_entity, home=self.temp_dir)
+        task_entity = Task(core_task_entity)
         # Test failure because entity has not been created by controller
         failed = False
         try:
@@ -340,7 +338,7 @@ class TestTaskModule():
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_entity_get_files(self):
         core_task_entity = CoreTask(self.input_dict)
-        task_entity = Task(core_task_entity, home=self.temp_dir)
+        task_entity = Task(core_task_entity)
         # Test failure because entity has not been created by controller
         failed = False
         try:

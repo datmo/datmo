@@ -2,11 +2,11 @@
 
 create_project:
   name:
-    empty: False
-    required: True
+    empty: false
+    required: true
     type: string
   description:
-    required: True
+    nullable: true
     type: string
 
 create_session:

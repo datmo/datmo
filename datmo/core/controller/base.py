@@ -6,6 +6,7 @@ from datmo.core.util import get_class_contructor
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import (InvalidProjectPath,
                                         DatmoModelNotInitialized)
+from datmo.config import Config
 
 
 class BaseController(object):
@@ -42,15 +43,16 @@ class BaseController(object):
         Return the configuration defaults
     """
 
-    def __init__(self, home):
-        self.home = home
+    def __init__(self):
+        self.home = Config().home
         if not os.path.isdir(self.home):
             raise InvalidProjectPath(
                 __("error", "controller.base.__init__", self.home))
         self.environment_directory = os.path.join(self.home,
                                                   "datmo_environment")
         self.files_directory = os.path.join(self.home, "datmo_files")
-        self.config = JSONStore(os.path.join(self.home, ".datmo", ".config"))
+        self.config_store = JSONStore(
+            os.path.join(self.home, ".datmo", ".config"))
         self.logger = DatmoLogger.get_logger(__name__)
         # property caches and initial values
         self._dal = None
@@ -133,8 +135,8 @@ class BaseController(object):
 
     def get_or_set_default(self, key, default_value):
         # Discard current value (always overwrite the value to default)
-        # value = self.config.get(key)s
-        self.config.save(key, default_value)
+        # value = self.config_store.get(key)s
+        self.config_store.save(key, default_value)
         return default_value
 
     def config_loader(self, key):

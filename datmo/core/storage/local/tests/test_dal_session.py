@@ -34,6 +34,7 @@ class TestLocalDAL():
         self.session_input_dict = {
             "name": "session_1",
             "model_id": model.id,
+            "current": True
         }
 
     def teardown_method(self):
@@ -119,6 +120,58 @@ class TestLocalDAL():
             self.dal.session.query({
                 "name": self.session_input_dict['name']
             })) == 2
+
+    def test_query_sessions_current(self):
+        session_1 = self.dal.session.create(Session(self.session_input_dict))
+        session_2 = self.dal.session.create(
+            Session({
+                "name": "test",
+                "model_id": "test",
+                "current": False
+            }))
+        current_sessions = self.dal.session.query({"current": True})
+        noncurrent_sessions = self.dal.session.query({"current": False})
+        assert len(current_sessions) == 1
+        assert current_sessions[0] == session_1
+        assert len(noncurrent_sessions) == 1
+        assert noncurrent_sessions[0] == session_2
+
+    def test_create_update_key_to_same_value(self):
+        session_1 = self.dal.session.create(Session(self.session_input_dict))
+        session_2 = self.dal.session.create(
+            Session({
+                "name": "test",
+                "model_id": "test",
+                "current": False
+            }))
+
+        next_session = self.dal.session.query({"model_id": session_2.model_id})
+        next_session = next_session[0]
+
+        # get current session and update to false if present
+        current_session = self.dal.session.query({
+            "model_id": session_1.model_id
+        })
+        if len(current_session) == 1:
+            current_session = current_session[0]
+            current_session.model_id = session_2.model_id
+            self.dal.session.update(current_session)
+
+        # update the next session to the current one
+        next_session.model_id = session_1.model_id
+        self.dal.session.update(next_session)
+
+        # ensure we still get the right result
+        current_sessions = self.dal.session.query({
+            "model_id": session_1.model_id
+        })
+        noncurrent_sessions = self.dal.session.query({
+            "model_id": session_2.model_id
+        })
+        assert len(current_sessions) == 1
+        assert current_sessions[0] == session_2
+        assert len(noncurrent_sessions) == 1
+        assert noncurrent_sessions[0] == session_1
 
     def test_sort_sessions(self):
         session_1 = self.dal.session.create(Session(self.session_input_dict))

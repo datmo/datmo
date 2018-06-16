@@ -11,7 +11,8 @@ except NameError:
     basestring = str
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.misc_functions import mutually_exclusive, printable_string, prettify_datetime
+from datmo.core.util.misc_functions import mutually_exclusive, printable_object, prettify_datetime
+from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
 from datmo.core.util.exceptions import RequiredArgumentMissing
@@ -19,16 +20,18 @@ from datmo.core.util.spinner import Spinner
 
 
 class TaskCommand(ProjectCommand):
-    def __init__(self, home, cli_helper):
-        super(TaskCommand, self).__init__(home, cli_helper)
-        self.task_controller = TaskController(home=home)
+    def __init__(self, cli_helper):
+        super(TaskCommand, self).__init__(cli_helper)
         self.spinner = Spinner()
 
     def task(self):
-        self.parse(["--help"])
+        self.parse(["task", "--help"])
         return True
 
+    @Helper.notify_environment_active(TaskController)
+    @Helper.notify_no_project_found
     def run(self, **kwargs):
+        self.task_controller = TaskController()
         self.cli_helper.echo(__("info", "cli.task.run"))
         # Create input dictionaries
         snapshot_dict = {}
@@ -68,7 +71,9 @@ class TaskCommand(ProjectCommand):
         self.cli_helper.echo(" Ran task id: %s" % updated_task_obj.id)
         return updated_task_obj
 
+    @Helper.notify_no_project_found
     def ls(self, **kwargs):
+        self.task_controller = TaskController()
         session_id = kwargs.get('session_id',
                                 self.task_controller.current_session.id)
         print_format = kwargs.get('format', "table")
@@ -77,16 +82,19 @@ class TaskCommand(ProjectCommand):
         # Get all task meta information
         task_objs = self.task_controller.list(
             session_id, sort_key='created_at', sort_order='descending')
-        header_list = ["id", "command", "status", "results", "created at"]
+        header_list = [
+            "id", "start time", "duration (s)", "command", "status", "results"
+        ]
         item_dict_list = []
         for task_obj in task_objs:
-            task_results_printable = printable_string(str(task_obj.results))
+            task_results_printable = printable_object(task_obj.results)
             item_dict_list.append({
                 "id": task_obj.id,
-                "command": task_obj.command,
-                "status": task_obj.status,
+                "command": printable_object(task_obj.command),
+                "status": printable_object(task_obj.status),
                 "results": task_results_printable,
-                "created at": prettify_datetime(task_obj.created_at)
+                "start time": prettify_datetime(task_obj.start_time),
+                "duration (s)": printable_object(task_obj.duration)
             })
         if download:
             if not download_path:
@@ -96,7 +104,8 @@ class TaskCommand(ProjectCommand):
                 current_time_unix_time_ms = (
                     current_time - epoch_time).total_seconds() * 1000.0
                 download_path = os.path.join(
-                    os.getcwd(), "task_ls_" + str(current_time_unix_time_ms))
+                    self.task_controller.home,
+                    "task_ls_" + str(current_time_unix_time_ms))
             self.cli_helper.print_items(
                 header_list,
                 item_dict_list,
@@ -107,7 +116,10 @@ class TaskCommand(ProjectCommand):
             header_list, item_dict_list, print_format=print_format)
         return task_objs
 
+    @Helper.notify_environment_active(TaskController)
+    @Helper.notify_no_project_found
     def stop(self, **kwargs):
+        self.task_controller = TaskController()
         input_dict = {}
         mutually_exclusive(["id", "all"], kwargs, input_dict)
         if "id" in input_dict:

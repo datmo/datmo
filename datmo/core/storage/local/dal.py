@@ -183,9 +183,8 @@ class EntityMethodsCRUD(object):
                 else:
                     dict_obj[key] = getattr(original_datmo_entity, key)
 
-            # set updated_at if not present
-            dict_obj['updated_at'] = datmo_entity.get('updated_at',
-                                                      datetime.now()).utcnow()
+        # set updated_at always
+        dict_obj['updated_at'] = datetime.utcnow()
         response = self.driver.set(self.collection, dict_obj)
         entity_instance = self.entity_class(response)
         return entity_instance

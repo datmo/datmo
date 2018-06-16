@@ -22,8 +22,6 @@ class TestConfigModule():
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
 
-        #_ = ProjectController(self.temp_dir).init("test", "test description")
-
     def teardown_method(self):
         pass
 
@@ -35,4 +33,4 @@ class TestConfigModule():
         assert c2.test == 'foo'
 
     def test_config_home_default(self):
-        Config().home == os.getcwd()
+        Config().set_home(os.getcwd())

@@ -33,39 +33,40 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.command.environment import EnvironmentCommand
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
+from datmo.config import Config
+from datmo.core.util.exceptions import EnvironmentDoesNotExist
 
 # provide mountable tmp directory for docker
 tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
 test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 
 
-class TestEnvironment():
+class TestEnvironmentCommand():
     def setup_class(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
+        Config().set_home(self.temp_dir)
 
     def teardown_class(self):
         pass
 
     def __set_variables(self):
-        self.project = ProjectCommand(self.temp_dir, self.cli_helper)
-        self.project.parse(
+        self.project_command = ProjectCommand(self.cli_helper)
+        self.project_command.parse(
             ["init", "--name", "foobar", "--description", "test model"])
 
-        @self.project.cli_helper.input("\n")
+        @self.project_command.cli_helper.input("\n")
         def dummy(self):
-            return self.project.execute()
+            return self.project_command.execute()
 
         dummy(self)
-        self.environment_command = EnvironmentCommand(self.temp_dir,
-                                                      self.cli_helper)
+        self.environment_command = EnvironmentCommand(self.cli_helper)
 
     def test_environment_setup_parameter(self):
         # Setup the environement by passing name
         self.__set_variables()
-        definition_filepath = os.path.join(
-            self.environment_command.environment_controller.
-            environment_directory, "Dockerfile")
+        definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
+                                           "Dockerfile")
 
         # Test pass with correct input
         test_name = "xgboost:cpu"
@@ -88,9 +89,8 @@ class TestEnvironment():
     def test_environment_setup_prompt(self):
         # Setup the environement by passing name
         self.__set_variables()
-        definition_filepath = os.path.join(
-            self.environment_command.environment_controller.
-            environment_directory, "Dockerfile")
+        definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
+                                           "Dockerfile")
 
         # Test success with correct prompt input using numbers
         self.environment_command.parse(["environment", "setup"])
@@ -153,9 +153,8 @@ class TestEnvironment():
         self.__set_variables()
         # Test option 1
         # Create environment definition in project environment directory
-        definition_filepath = os.path.join(
-            self.environment_command.environment_controller.
-            environment_directory, "Dockerfile")
+        definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
+                                           "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
@@ -172,8 +171,7 @@ class TestEnvironment():
         assert result.description == "test description"
 
         # remove datmo_environment directory
-        shutil.rmtree(self.environment_command.environment_controller.
-                      environment_directory)
+        shutil.rmtree(os.path.join(self.temp_dir, "datmo_environment"))
 
         # Test option 2
         random_dir = os.path.join(self.temp_dir, "random_datmo_dir")
@@ -221,6 +219,41 @@ class TestEnvironment():
         result_2 = self.environment_command.execute()
         assert result == result_2
 
+    def test_environment_update(self):
+        self.__set_variables()
+        self.environment_command.parse(["environment", "create"])
+        environment_obj = self.environment_command.execute()
+
+        # Test successful update (none given)
+        self.environment_command.parse(
+            ["environment", "update", environment_obj.id])
+        result = self.environment_command.execute()
+        assert result
+        assert not result.name
+        assert not result.description
+
+        # Test successful update (name and description given)
+        new_name = "test name"
+        new_description = "test description"
+        self.environment_command.parse([
+            "environment", "update", environment_obj.id, "--name", new_name,
+            "--description", new_description
+        ])
+        result = self.environment_command.execute()
+        assert result
+        assert result.name == new_name
+        assert result.description == new_description
+
+        # Test failed update (passing up error from controller)
+        failed = False
+        try:
+            self.environment_command.parse(
+                ["environment", "update", "random_id"])
+            self.environment_command.execute()
+        except EnvironmentDoesNotExist:
+            failed = True
+        assert failed
+
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_environment_delete(self):
         self.__set_variables()
@@ -228,7 +261,7 @@ class TestEnvironment():
         environment_obj = self.environment_command.execute()
 
         self.environment_command.parse(
-            ["environment", "delete", "--id", environment_obj.id])
+            ["environment", "delete", environment_obj.id])
         result = self.environment_command.execute()
 
         assert result
@@ -262,7 +295,9 @@ class TestEnvironment():
             ["environment", "ls", "--format", "csv", "--download"])
         environment_objs = self.environment_command.execute()
         assert created_environment_obj in environment_objs
-        test_wildcard = os.path.join(os.getcwd(), "environment_ls_*")
+        test_wildcard = os.path.join(
+            self.environment_command.environment_controller.home,
+            "environment_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()
@@ -289,7 +324,9 @@ class TestEnvironment():
         self.environment_command.parse(["environment", "ls", "--download"])
         environment_objs = self.environment_command.execute()
         assert created_environment_obj in environment_objs
-        test_wildcard = os.path.join(os.getcwd(), "environment_ls_*")
+        test_wildcard = os.path.join(
+            self.environment_command.environment_controller.home,
+            "environment_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()

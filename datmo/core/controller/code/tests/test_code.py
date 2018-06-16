@@ -22,6 +22,7 @@ except TypeError:
 
     to_bytes("test")
 
+from datmo.config import Config
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.code.code import CodeController
 from datmo.core.util.exceptions import (EntityNotFound, CommitFailed,
@@ -36,8 +37,9 @@ class TestCodeController():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.project = ProjectController(self.temp_dir)
-        self.code = CodeController(self.temp_dir)
+        Config().set_home(self.temp_dir)
+        self.project = ProjectController()
+        self.code = CodeController()
 
     def teardown_method(self):
         pass
