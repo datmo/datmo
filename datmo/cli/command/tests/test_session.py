@@ -19,11 +19,10 @@ from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.session import SessionCommand
 from datmo.cli.command.project import ProjectCommand
-from datmo.core.util.exceptions import ProjectNotInitialized
 
 
 class TestSessionCommand():
-    def setup_class(self):
+    def setup_method(self):
         # provide mountable tmp directory for docker
         tempfile.tempdir = "/tmp" if not platform.system(
         ) == "Windows" else None
@@ -33,7 +32,7 @@ class TestSessionCommand():
         Config().set_home(self.temp_dir)
         self.cli_helper = Helper()
 
-    def teardown_class(self):
+    def teardown_method(self):
         pass
 
     def __set_variables(self):
@@ -61,9 +60,20 @@ class TestSessionCommand():
         return result
 
     def test_session_select(self):
-        self.test_session_create()
-
-        self.session_command.parse(["session", "select", "--name", "pizza"])
+        session_obj = self.test_session_create()
+        # Test successful select name
+        self.session_command.parse(["session", "select", "pizza"])
+        assert self.session_command.execute()
+        current = 0
+        for s in self.session_command.session_controller.list():
+            print("%s - %s" % (s.name, s.current))
+            if s.current == True:
+                current = current + 1
+        assert current == 1
+        # Reset to default
+        self.session_command.parse(["session", "select", "default"])
+        # Test successful select id
+        self.session_command.parse(["session", "select", session_obj.id])
         assert self.session_command.execute()
         current = 0
         for s in self.session_command.session_controller.list():
@@ -141,15 +151,43 @@ class TestSessionCommand():
         assert open(test_path, "r").read()
         os.remove(test_path)
 
+    def test_session_update(self):
+        created_session_obj = self.test_session_create()
+        # Test successful update
+        updated_name = "new"
+        self.session_command.parse([
+            "session", "update", created_session_obj.id, "--name", updated_name
+        ])
+        assert self.session_command.execute()
+        # Test failure update
+        self.session_command.parse(
+            ["session", "update", "random_id", "--name", updated_name])
+        assert not self.session_command.execute()
+        # Test success nothing given
+        self.session_command.parse(
+            ["session", "update", created_session_obj.id])
+        assert self.session_command.execute()
+
     def test_session_delete(self):
         self.test_session_create()
-
-        self.session_command.parse(["session", "delete", "--name", "pizza"])
+        # Test successful delete name
+        self.session_command.parse(["session", "delete", "pizza"])
         assert self.session_command.execute()
-        session_removed = True
-        for s in self.session_command.session_controller.list():
-            if s.name == 'pizza':
-                session_removed = False
-        assert session_removed
+        # Test failure delete default name
+        self.session_command.parse(["session", "delete", "default"])
+        assert not self.session_command.execute()
+        # Test failure delete random name
+        self.session_command.parse(["session", "delete", "random_name"])
+        assert not self.session_command.execute()
+        session_obj = self.test_session_create()
+        # Test successful delete id
+        self.session_command.parse(["session", "delete", session_obj.id])
+        assert self.session_command.execute()
+        # Test failure delete default id
         self.session_command.parse(["session", "ls"])
-        assert self.session_command.execute()
+        session_objs = self.session_command.execute()
+        self.session_command.parse(["session", "delete", session_objs[0].id])
+        assert not self.session_command.execute()
+        # Test failure delete random id
+        self.session_command.parse(["session", "delete", "random_id"])
+        assert not self.session_command.execute()

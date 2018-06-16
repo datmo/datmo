@@ -3,9 +3,8 @@ from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
 from datmo.core.entity.model import Model
 from datmo.core.entity.session import Session
-from datmo.core.util.exceptions import (
-    SessionDoesNotExist, ProjectNotInitialized, EnvironmentInitFailed,
-    PathDoesNotExist, FileIOError)
+from datmo.core.util.exceptions import (ProjectNotInitialized,
+                                        EnvironmentInitFailed, FileIOError)
 
 
 class ProjectController(BaseController):
@@ -221,9 +220,11 @@ class ProjectController(BaseController):
         # Show all project settings
         status_dict["config"] = self.config_store.to_dict()
 
-        # Show the latest snapshot
+        # Show the latest visible snapshot
         descending_snapshots = self.dal.snapshot.query(
-            {}, sort_key="created_at", sort_order="descending")
+            {
+                "visible": True
+            }, sort_key="created_at", sort_order="descending")
         latest_snapshot = descending_snapshots[
             0] if descending_snapshots else None
 

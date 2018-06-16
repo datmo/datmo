@@ -9,7 +9,7 @@ import platform
 from datmo.config import Config
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.session import SessionController
-from datmo.core.util.exceptions import InvalidArgumentType, ProjectNotInitialized, InvalidProjectPath
+from datmo.core.util.exceptions import InvalidArgumentType, ProjectNotInitialized, InvalidProjectPath, SessionDoesNotExist, InvalidOperation, EntityNotFound
 
 
 class TestSessionController():
@@ -65,20 +65,42 @@ class TestSessionController():
         assert test_sess.id
         assert test_sess.model_id == self.project_controller.model.id
 
-    def test_select_session(self):
+    def test_select(self):
         self.__setup()
-        self.session_controller.create({"name": "test2"})
+        session_obj = self.session_controller.create({"name": "test2"})
+        # Test success with name
         new_current = self.session_controller.select("test2")
         assert new_current.current == True
         found_old_current = False
         current_was_updated = False
-        for s in self.session_controller.list():
-            if s.current == True and s.id != new_current.id:
+        for sess in self.session_controller.list():
+            if sess.current == True and sess.id != new_current.id:
                 found_old_current = True
-            if s.current == True and s.id == new_current.id:
+            if sess.current == True and sess.id == new_current.id:
                 current_was_updated = True
         assert not found_old_current == True
         assert current_was_updated == True
+        # reset to default
+        _ = self.session_controller.select("default")
+        # Test success with id
+        new_current = self.session_controller.select(session_obj.id)
+        assert new_current.current == True
+        found_old_current = False
+        current_was_updated = False
+        for sess in self.session_controller.list():
+            if sess.current == True and sess.id != new_current.id:
+                found_old_current = True
+            if sess.current == True and sess.id == new_current.id:
+                current_was_updated = True
+        assert not found_old_current == True
+        assert current_was_updated == True
+        # Test failure no session
+        failed = False
+        try:
+            _ = self.session_controller.select("random_name_or_id")
+        except SessionDoesNotExist:
+            failed = True
+        assert failed
 
     def test_get_current(self):
         self.__setup()
@@ -125,17 +147,91 @@ class TestSessionController():
         ids = [item.id for item in sessions]
         assert set(expected_ids) == set(ids)
 
-    def test_delete_session(self):
+    def test_update(self):
         self.__setup()
-        self.session_controller.create({"name": "test3"})
+        # Test successful update
+        session_obj = self.session_controller.create({"name": "test3"})
+        new_name = "new"
+        updated_session_obj = self.session_controller.update(
+            session_obj.id, name=new_name)
+        same_session_obj = self.session_controller.dal.session.findOne({
+            "name": new_name
+        })
+        assert updated_session_obj == same_session_obj
+        assert updated_session_obj.name == new_name
+        # Test failure session does not exist
+        failed = False
+        try:
+            self.session_controller.update("random_id")
+        except SessionDoesNotExist:
+            failed = True
+        assert failed
+        # Test failure try to update default
+        default_session_obj = self.session_controller.dal.session.findOne({
+            "name": "default"
+        })
+        failed = False
+        try:
+            self.session_controller.update(default_session_obj.id)
+        except InvalidOperation:
+            failed = True
+        assert failed
+
+    def test_delete(self):
+        self.__setup()
+        # Test successful delete
+        session_obj = self.session_controller.create({"name": "test3"})
+        _ = self.session_controller.select("test3")
+        self.session_controller.delete(session_obj.id)
+        entity_does_not_exist = False
+        try:
+            _ = self.session_controller.dal.session.get_by_id(session_obj.id)
+        except EntityNotFound:
+            entity_does_not_exist = True
+        assert entity_does_not_exist
+        # current session should be "default"
+        assert self.session_controller.get_current().name == "default"
+        # Test failure delete default
+        failed = False
+        try:
+            self.session_controller.delete(
+                self.session_controller.get_current().id)
+        except InvalidOperation:
+            failed = True
+        assert failed
+        # Test failure does not exist
+        failed = False
+        try:
+            self.session_controller.delete("random_id")
+        except SessionDoesNotExist:
+            failed = True
+        assert failed
+
+    def test_delete_by_name(self):
+        self.__setup()
+        session_obj = self.session_controller.create({"name": "test3"})
         _ = self.session_controller.select("test3")
         self.session_controller.delete_by_name("test3")
-        entity_exists = False
+        entity_does_not_exist = False
         try:
-            _ = self.session_controller.findOne({"name": "test3"})
-            entity_exists = True
-        except Exception:
-            pass
-        assert not entity_exists
+            _ = self.session_controller.dal.session.get_by_id(session_obj.id)
+        except EntityNotFound:
+            entity_does_not_exist = True
+        assert entity_does_not_exist
         # current session should be "default"
-        assert self.session_controller.get_current().name == 'default'
+        assert self.session_controller.get_current().name == "default"
+        # Test failure delete default
+        failed = False
+        try:
+            self.session_controller.delete_by_name(
+                self.session_controller.get_current().name)
+        except InvalidOperation:
+            failed = True
+        assert failed
+        # Test failure does not exist
+        failed = False
+        try:
+            self.session_controller.delete_by_name("random_name")
+        except SessionDoesNotExist:
+            failed = True
+        assert failed

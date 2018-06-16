@@ -77,6 +77,8 @@ MESSAGES = {
             "Created session '%s'",
         "cli.session.select":
             "Selecting new session '%s'",
+        "cli.session.update":
+            "Updated session '%s'",
         "cli.session.delete":
             "Removed session '%s'"
     },
@@ -113,6 +115,14 @@ MESSAGES = {
             "No project found in the current directory: %s",
         "cli.project.notebook":
             "Error while running the notebook with task: %s",
+        "cli.session.update.dne":
+            "No session found with given id: %s",
+        "cli.session.delete.dne":
+            "No session found with given name or id: %s",
+        "cli.session.delete.default":
+            "Cannot delete default session",
+        "cli.session.select.dne":
+            "No session found with given name or id: %s",
         "cli.environment.setup.argument":
             "This name or index does not match any supported environments: %s, ",
         "cli.task.run":
@@ -337,8 +347,10 @@ MESSAGES = {
             "Delete argument %s not present in input",
         "controller.session.__init__":
             "Project has not been initialized",
+        "controller.session.update.default":
+            "Cannot update default session",
         "controller.session.delete.default":
-            "Can not delete default session",
+            "Cannot delete default session",
         "storage.local.dal.update":
             "Entity id not provided in the input for update",
     },

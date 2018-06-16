@@ -65,10 +65,19 @@ def get_datmo_parser():
         action="store_false",
         help="boolean if you want to switch to this session")
 
+    session_update = session_subcommand_parsers.add_parser(
+        "update", help="update a session")
+    session_update.add_argument("id", help="id of session to update")
+    session_update.add_argument(
+        "--name",
+        dest="name",
+        default=None,
+        help="updated name of the session")
+
     session_delete = session_subcommand_parsers.add_parser(
-        "delete", help="delete a session by id")
+        "delete", help="delete a session by name or id")
     session_delete.add_argument(
-        "--name", dest="name", help="name of session to delete")
+        "name_or_id", help="name or id of session to delete")
 
     session_ls = session_subcommand_parsers.add_parser(
         "ls", help="list sessions")
@@ -92,7 +101,7 @@ def get_datmo_parser():
     session_select = session_subcommand_parsers.add_parser(
         "select", help="select a session")
     session_select.add_argument(
-        "--name", dest="name", help="name of session to select")
+        "name_or_id", help="name or id of session to select")
 
     # Environment
     environment_parser = subparsers.add_parser(
