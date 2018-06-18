@@ -14,8 +14,9 @@ class Model():
         id : str, optional
             the id of the entity
             (default is None; storage driver has not assigned an id yet)
-        name : str
+        name : str, optional
             name given by the user at creation
+            (default is None, which means no name set)
         description : str, optional
             description given by the user at creation
             (default is None, which means no description set)
@@ -28,7 +29,7 @@ class Model():
     ----------
     id : str or None
         the id of the entity
-    name : str
+    name : str or None
         name given by the user at creation
     description : str or None
         description given by the user at creation
@@ -38,7 +39,7 @@ class Model():
 
     def __init__(self, dictionary):
         self.id = dictionary.get('id', None)
-        self.name = dictionary['name']
+        self.name = dictionary.get('name', None)
         # TODO: figure out User object and handling of owner in Project
         # self.owner_id = dictionary['owner_id']
 

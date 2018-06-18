@@ -56,10 +56,16 @@ def printable_dict(input_dictionary):
     return printable_output
 
 
-def printable_string(string, max_width=40):
-    if not string:
+def printable_object(object, max_width=40):
+    if not object:
         return ""
-    return '\n'.join(textwrap.wrap(string, max_width))
+    if isinstance(object, str):
+        printable_str = object
+    elif isinstance(object, dict):
+        printable_str = printable_dict(object)
+    else:
+        printable_str = str(object)
+    return '\n'.join(textwrap.wrap(printable_str, max_width))
 
 
 def which(program):
@@ -181,7 +187,7 @@ def is_project_dir(path):
         os.path.join(path, ".datmo"))
 
 
-def __helper(filepath):
+def check_docker_inactive(filepath):
     try:
         test = DockerEnvironmentDriver(filepath=filepath)
         test.init()
@@ -198,7 +204,7 @@ def __helper(filepath):
 
 def pytest_docker_environment_failed_instantiation(filepath):
     return pytest.mark.skipif(
-        __helper(filepath),
+        check_docker_inactive(filepath),
         reason="a running environment could not be instantiated")
 
 

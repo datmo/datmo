@@ -30,7 +30,7 @@ class Config(object):
         def __init__(self):
             self._home = None
             self.logging_level = logging.DEBUG
-            DatmoLogger.get_logger(__name__).info("initalizing")
+            DatmoLogger.get_logger(__name__).info("initializing")
             self.data_cache = JSONStore(
                 os.path.join(os.path.expanduser("~"), ".datmo", "cache.json"))
 
@@ -38,8 +38,7 @@ class Config(object):
         def home(self):
             return self._home
 
-        @home.setter
-        def home(self, home_path):
+        def set_home(self, home_path):
             self._home = home_path
 
         def get_cache_item(self, key):

@@ -28,6 +28,7 @@ import os
 import tempfile
 import platform
 
+from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.workspace import WorkspaceCommand
@@ -41,42 +42,48 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestWorkspace():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        Config().set_home(self.temp_dir)
         self.cli_helper = Helper()
-        self.project_command = ProjectCommand(self.temp_dir, self.cli_helper)
+
+    def __set_variables(self):
+        self.project_command = ProjectCommand(self.cli_helper)
         self.project_command.parse(
             ["init", "--name", "foobar", "--description", "test model"])
 
         @self.project_command.cli_helper.input("\n")
         def dummy(self):
-            self.project_command.execute()
+            return self.project_command.execute()
 
         dummy(self)
-        self.workspace_command = WorkspaceCommand(self.temp_dir, self.cli_helper)
+
+        self.workspace_command = WorkspaceCommand(self.cli_helper)
+
+        # Create environment_driver definition
+        self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
+        with open(self.env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/xgboost:cpu\n")))
 
     def teardown_method(self):
         pass
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_notebook(self):
-        # Create environment_driver definition
-        env_def_path = os.path.join(self.temp_dir, "Dockerfile")
-        test_mem_limit = "4g"
-        with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu\n")))
+        self.__set_variables()
 
+        test_mem_limit = "4g"
         # test single ports option before command
         self.workspace_command.parse([
             "notebook",
             "--gpu",
             "--environment-paths",
-            env_def_path,
+            self.env_def_path,
             "--mem-limit",
             test_mem_limit,
         ])
 
         # test for desired side effects
         assert self.workspace_command.args.gpu == True
-        assert self.workspace_command.args.environment_paths == [env_def_path]
+        assert self.workspace_command.args.environment_paths == [self.env_def_path]
         assert self.workspace_command.args.mem_limit == test_mem_limit
 
         # test multiple ports option before command

@@ -50,10 +50,6 @@ class DatmoModelNotInitialized(ProjectException):
     pass
 
 
-class SessionDoesNotExist(Exception):
-    pass
-
-
 class InvalidOperation(Exception):
     pass
 
@@ -122,7 +118,15 @@ class DoesNotExist(Exception):
     pass
 
 
+class SessionDoesNotExist(DoesNotExist):
+    pass
+
+
 class EnvironmentDoesNotExist(DoesNotExist):
+    pass
+
+
+class SnapshotDoesNotExist(DoesNotExist):
     pass
 
 

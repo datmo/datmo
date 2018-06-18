@@ -40,11 +40,11 @@ class SnapshotController(BaseController):
 
     """
 
-    def __init__(self, home):
-        super(SnapshotController, self).__init__(home)
-        self.code = CodeController(home)
-        self.file_collection = FileCollectionController(home)
-        self.environment = EnvironmentController(home)
+    def __init__(self):
+        super(SnapshotController, self).__init__()
+        self.code = CodeController()
+        self.file_collection = FileCollectionController()
+        self.environment = EnvironmentController()
         if not self.is_initialized:
             raise ProjectNotInitialized(
                 __("error", "controller.snapshot.__init__"))
@@ -334,6 +334,7 @@ class SnapshotController(BaseController):
                message=None,
                label=None,
                visible=None):
+        """Update the snapshot metadata"""
         if not snapshot_id:
             raise RequiredArgumentMissing(
                 __("error", "controller.snapshot.delete.arg", "snapshot_id"))
@@ -413,6 +414,23 @@ class SnapshotController(BaseController):
             file_collection_obj.filehash, mode=mode)
 
     def delete(self, snapshot_id):
+        """Delete all traces of a snapshot
+
+        Parameters
+        ----------
+        snapshot_id : str
+            id for the snapshot to remove
+
+        Returns
+        -------
+        bool
+            True if success
+
+        Raises
+        ------
+        RequiredArgumentMissing
+            if the provided snapshot_id is None
+        """
         if not snapshot_id:
             raise RequiredArgumentMissing(
                 __("error", "controller.snapshot.delete.arg", "snapshot_id"))

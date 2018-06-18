@@ -493,30 +493,30 @@ class TestBlitzDBDALDriver():
 
     def test_query_sort_bool(self):
         collection = 'snapshot'
-        self.database.set(collection, {"range_query6": 1, "bool_query": True})
-        self.database.set(collection, {"range_query6": 2, "bool_query": False})
-        self.database.set(collection, {"range_query6": 3, "bool_query": True})
-        self.database.set(collection, {"range_query6": 4, "bool_query": True})
+        self.database.set(collection, {"range_query6": 1, "current": True})
+        self.database.set(collection, {"range_query6": 2, "current": False})
+        self.database.set(collection, {"range_query6": 3, "current": True})
+        self.database.set(collection, {"range_query6": 4, "current": True})
 
         # ascending
         items = self.database.query(
             collection, {"range_query6": {
                 "$gte": 2
             }},
-            sort_key="bool_query",
+            sort_key="current",
             sort_order='ascending')
         assert items[0]['range_query6'] == 2
-        assert items[0]['bool_query'] == False
+        assert items[0]['current'] == False
 
         # descending
         items = self.database.query(
             collection, {"range_query6": {
                 "$gte": 2
             }},
-            sort_key="bool_query",
+            sort_key="current",
             sort_order='descending')
         assert items[0]['range_query6'] == 3
-        assert items[0]['bool_query'] == True
+        assert items[0]['current'] == True
 
         # sort_key passed in but sort_order missing
         failed = False
@@ -524,8 +524,7 @@ class TestBlitzDBDALDriver():
             _ = self.database.query(
                 collection, {"range_query6": {
                     "$gte": 2
-                }},
-                sort_key="bool_query")
+                }}, sort_key="current")
         except RequiredArgumentMissing:
             failed = True
         assert failed
@@ -582,3 +581,39 @@ class TestBlitzDBDALDriver():
         expected_ids = [item['id'] for item in expected_items]
         ids = [item['id'] for item in items]
         assert set(expected_ids) == set(ids)
+
+    def test_query_filter_bool(self):
+        collection = 'snapshot'
+
+        # Filter False
+        items = self.database.query(collection, {"current": False})
+        assert len(items) == 1
+
+        # Filter True
+        items = self.database.query(collection, {"current": True})
+        assert len(items) == 3
+
+    def test_set_update_key_to_same_value(self):
+        self.database.set("snapshot", {"id": 1, "key": "hello"})
+        self.database.set("snapshot", {"id": 2, "key": "there"})
+        items = [
+            item for item in self.database.query("snapshot", {"key": "there"})
+        ]
+        next_item = items[0]
+
+        items = [
+            item for item in self.database.query("snapshot", {"key": "hello"})
+        ]
+        current_item = items[0]
+        current_item['key'] = next_item['key']
+        self.database.set("snapshot", current_item)
+
+        next_item['key'] = "hello"
+        self.database.set("snapshot", next_item)
+
+        items = self.database.query("snapshot", {"key": "hello"})
+        assert len(items) == 1
+        assert items[0] == next_item
+        items = self.database.query("snapshot", {"key": "there"})
+        assert len(items) == 1
+        assert items[0] == current_item

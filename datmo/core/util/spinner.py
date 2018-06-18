@@ -5,7 +5,6 @@ import threading
 
 
 class Spinner:
-
     def __init__(self, delay=0.1):
         self.spinner_generator = itertools.cycle(['-', '/', '|', '\\'])
         if delay and float(delay): self.delay = delay

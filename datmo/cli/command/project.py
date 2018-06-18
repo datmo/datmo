@@ -1,19 +1,18 @@
+import os
+
 from datmo import __version__
 from datmo.core.util.i18n import get as __
+from datmo.cli.driver.helper import Helper
 from datmo.cli.command.base import BaseCommand
 from datmo.core.util.spinner import Spinner
-from datmo.core.util.misc_functions import mutually_exclusive
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController, EnvironmentDoesNotExist
-from datmo.core.controller.task import TaskController
 
 
 class ProjectCommand(BaseCommand):
-    # NOTE: dal_driver is not passed into the project because it is created
-    # first by ProjectController and then passed down to all other Controllers
-    def __init__(self, home, cli_helper):
-        super(ProjectCommand, self).__init__(home, cli_helper)
-        self.project_controller = ProjectController(home=home)
+    def __init__(self, cli_helper):
+        super(ProjectCommand, self).__init__(cli_helper)
+        self.project_controller = ProjectController()
         self.spinner = Spinner()
 
     def init(self, name, description):
@@ -37,13 +36,13 @@ class ProjectCommand(BaseCommand):
 
         if is_new_model:  # Initialize a new project
             self.cli_helper.echo(
-                __("info", "cli.project.init.create", {
-                    "name": name,
-                    "path": self.home
-                }))
+                __("info", "cli.project.init.create",
+                   {"path": self.project_controller.home}))
             if not name:
+                _, default_name = os.path.split(self.project_controller.home)
                 name = self.cli_helper.prompt(
-                    __("prompt", "cli.project.init.name"))
+                    __("prompt", "cli.project.init.name"),
+                    default=default_name)
             if not description:
                 description = self.cli_helper.prompt(
                     __("prompt", "cli.project.init.description"))
@@ -53,32 +52,31 @@ class ProjectCommand(BaseCommand):
                     self.cli_helper.echo(
                         __("info", "cli.project.init.create.success", {
                             "name": name,
-                            "path": self.home
+                            "path": self.project_controller.home
                         }))
             except Exception:
                 self.cli_helper.echo(
                     __("info", "cli.project.init.create.failure", {
                         "name": name,
-                        "path": self.home
+                        "path": self.project_controller.home
                     }))
                 return None
         else:  # Update the current project
             self.cli_helper.echo(
-                __("info", "cli.project.init.update", {
-                    "name": self.project_controller.model.name,
-                    "path": self.home
-                }))
+                __(
+                    "info", "cli.project.init.update", {
+                        "name": self.project_controller.model.name,
+                        "path": self.project_controller.home
+                    }))
+            # Prompt for the name and description and add default if not given
             if not name:
                 name = self.cli_helper.prompt(
-                    __("prompt", "cli.project.init.name"))
+                    __("prompt", "cli.project.init.name"),
+                    default=self.project_controller.model.name)
             if not description:
                 description = self.cli_helper.prompt(
-                    __("prompt", "cli.project.init.description"))
-            # Update project parameter if given parameter is not falsy and different
-            if not name or name == self.project_controller.model.name:
-                name = self.project_controller.model.name
-            if not description or description == self.project_controller.model.description:
-                description = self.project_controller.model.description
+                    __("prompt", "cli.project.init.description"),
+                    default=self.project_controller.model.description)
             # Update the project with the values given
             try:
                 success = self.project_controller.init(name, description)
@@ -86,13 +84,13 @@ class ProjectCommand(BaseCommand):
                     self.cli_helper.echo(
                         __("info", "cli.project.init.update.success", {
                             "name": name,
-                            "path": self.home
+                            "path": self.project_controller.home
                         }))
             except Exception:
                 self.cli_helper.echo(
                     __("info", "cli.project.init.update.failure", {
                         "name": name,
-                        "path": self.home
+                        "path": self.project_controller.home
                     }))
                 return None
 
@@ -107,7 +105,7 @@ class ProjectCommand(BaseCommand):
             __("prompt", "cli.project.environment.setup"))
         if environment_setup:
             # Setting up the environment definition file
-            self.environment_controller = EnvironmentController(home=self.home)
+            self.environment_controller = EnvironmentController()
             available_environments = self.environment_controller.get_supported_environments(
             )
             input_environment_name = self.cli_helper.prompt_available_environments(
@@ -128,6 +126,7 @@ class ProjectCommand(BaseCommand):
     def version(self):
         return self.cli_helper.echo("datmo version: %s" % __version__)
 
+    @Helper.notify_no_project_found
     def status(self):
         status_dict, latest_snapshot, ascending_unstaged_tasks = self.project_controller.status(
         )

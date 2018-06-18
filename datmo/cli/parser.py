@@ -145,10 +145,19 @@ def get_datmo_parser():
         action="store_false",
         help="boolean if you want to switch to this session")
 
+    session_update = session_subcommand_parsers.add_parser(
+        "update", help="update a session")
+    session_update.add_argument("id", help="id of session to update")
+    session_update.add_argument(
+        "--name",
+        dest="name",
+        default=None,
+        help="updated name of the session")
+
     session_delete = session_subcommand_parsers.add_parser(
-        "delete", help="delete a session by id")
+        "delete", help="delete a session by name or id")
     session_delete.add_argument(
-        "--name", dest="name", help="name of session to delete")
+        "name_or_id", help="name or id of session to delete")
 
     session_ls = session_subcommand_parsers.add_parser(
         "ls", help="list sessions")
@@ -172,7 +181,7 @@ def get_datmo_parser():
     session_select = session_subcommand_parsers.add_parser(
         "select", help="select a session")
     session_select.add_argument(
-        "--name", dest="name", help="name of session to select")
+        "name_or_id", help="name or id of session to select")
 
     # Environment
     environment_parser = subparsers.add_parser(
@@ -221,10 +230,19 @@ def get_datmo_parser():
         default=None,
         help="description of environment")
 
+    environment_update = environment_subcommand_parsers.add_parser(
+        "update", help="update an environment by id")
+    environment_update.add_argument("id", help="environment id to update")
+    environment_update.add_argument(
+        "--name", dest="name", help="new name for the environment")
+    environment_update.add_argument(
+        "--description",
+        dest="description",
+        help="new description for the environment")
+
     environment_delete = environment_subcommand_parsers.add_parser(
         "delete", help="delete a environment by id")
-    environment_delete.add_argument(
-        "--id", dest="environment_id", help="id of environment to delete")
+    environment_delete.add_argument("id", help="id of environment to delete")
 
     environment_ls = environment_subcommand_parsers.add_parser(
         "ls", help="list environments")
@@ -358,8 +376,7 @@ def get_datmo_parser():
 
     snapshot_update = snapshot_subcommand_parsers.add_parser(
         "update", help="update a snapshot by id")
-    snapshot_update.add_argument(
-        "--id", dest="id", help="snapshot id to update")
+    snapshot_update.add_argument("id", help="snapshot id to update")
     snapshot_update.add_argument(
         "--config",
         "-c",
@@ -389,8 +406,7 @@ def get_datmo_parser():
 
     snapshot_delete = snapshot_subcommand_parsers.add_parser(
         "delete", help="delete a snapshot by id")
-    snapshot_delete.add_argument(
-        "--id", dest="id", help="snapshot id to delete")
+    snapshot_delete.add_argument("id", help="snapshot id to delete")
 
     snapshot_ls = snapshot_subcommand_parsers.add_parser(
         "ls", help="list snapshots")
@@ -424,7 +440,7 @@ def get_datmo_parser():
 
     snapshot_checkout = snapshot_subcommand_parsers.add_parser(
         "checkout", help="checkout a snapshot by id")
-    snapshot_checkout.add_argument("id", default=None, help="snapshot id")
+    snapshot_checkout.add_argument("id", help="snapshot id to checkout")
 
     snapshot_diff = snapshot_subcommand_parsers.add_parser(
         "diff", help="view diff between 2 snapshots")

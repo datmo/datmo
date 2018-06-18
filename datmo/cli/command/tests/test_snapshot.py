@@ -35,6 +35,7 @@ except TypeError:
 
     to_bytes("test")
 
+from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
@@ -49,16 +50,17 @@ tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
 test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 
 
-class TestSnapshot():
+class TestSnapshotCommand():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        Config().set_home(self.temp_dir)
         self.cli_helper = Helper()
 
     def teardown_method(self):
         pass
 
     def __set_variables(self):
-        self.project_command = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.project_command = ProjectCommand(self.cli_helper)
         self.project_command.parse(
             ["init", "--name", "foobar", "--description", "test model"])
 
@@ -67,7 +69,7 @@ class TestSnapshot():
             return self.project_command.execute()
 
         dummy(self)
-        self.snapshot_command = SnapshotCommand(self.temp_dir, self.cli_helper)
+        self.snapshot_command = SnapshotCommand(self.cli_helper)
 
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
@@ -105,15 +107,6 @@ class TestSnapshot():
         self.stats = 'foo:bar'
         self.stats1 = "{'foo1':'bar1'}"
         self.stats2 = "this is test stats blob"
-
-    def test_snapshot_project_not_init(self):
-        failed = False
-        try:
-            self.snapshot_command = SnapshotCommand(self.temp_dir,
-                                                    self.cli_helper)
-        except ProjectNotInitialized:
-            failed = True
-        assert failed
 
     def test_snapshot_help(self):
         self.__set_variables()
@@ -264,7 +257,7 @@ class TestSnapshot():
         # create task
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-        self.task = TaskCommand(self.temp_dir, self.cli_helper)
+        self.task = TaskCommand(self.cli_helper)
         self.task.parse([
             "task", "run", "--environment-paths", test_dockerfile, test_command
         ])
@@ -294,7 +287,7 @@ class TestSnapshot():
         # create task
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-        self.task = TaskCommand(self.temp_dir, self.cli_helper)
+        self.task = TaskCommand(self.cli_helper)
         self.task.parse([
             "task", "run", "--environment-paths", test_dockerfile, test_command
         ])
@@ -504,8 +497,8 @@ class TestSnapshot():
 
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_obj.id, "--message",
-            test_message, "--label", test_label
+            "snapshot", "update", snapshot_obj.id, "--message", test_message,
+            "--label", test_label
         ])
 
         result = self.snapshot_command.execute()
@@ -519,10 +512,8 @@ class TestSnapshot():
         snapshot_obj = self.snapshot_command.execute()
 
         # Test when optional parameters are not given
-        self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_obj.id, "--message",
-            test_message
-        ])
+        self.snapshot_command.parse(
+            ["snapshot", "update", snapshot_obj.id, "--message", test_message])
 
         result = self.snapshot_command.execute()
         assert result.id == snapshot_obj.id
@@ -534,10 +525,8 @@ class TestSnapshot():
         snapshot_obj = self.snapshot_command.execute()
 
         # Test when optional parameters are not given
-        self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_obj.id, "--label",
-            test_label
-        ])
+        self.snapshot_command.parse(
+            ["snapshot", "update", snapshot_obj.id, "--label", test_label])
 
         result = self.snapshot_command.execute()
         assert result.id == snapshot_obj.id
@@ -550,9 +539,9 @@ class TestSnapshot():
 
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_obj.id, "--config",
-            test_config[0], "--config", test_config[1], "--message",
-            test_message, "--label", test_label
+            "snapshot", "update", snapshot_obj.id, "--config", test_config[0],
+            "--config", test_config[1], "--message", test_message, "--label",
+            test_label
         ])
 
         result = self.snapshot_command.execute()
@@ -562,15 +551,11 @@ class TestSnapshot():
         assert result.label == test_label
 
         # 4. Updating stats, message and label
-        self.snapshot_command.parse(
-            ["snapshot", "create", "-m", "my test snapshot"])
-        snapshot_obj = self.snapshot_command.execute()
-
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_obj.id, "--stats",
-            test_stats[0], "--stats", test_stats[1], "--message", test_message,
-            "--label", test_label
+            "snapshot", "update", snapshot_obj.id, "--stats", test_stats[0],
+            "--stats", test_stats[1], "--message", test_message, "--label",
+            test_label
         ])
 
         result = self.snapshot_command.execute()
@@ -585,8 +570,8 @@ class TestSnapshot():
         # 5. Updating config, stats
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_obj.id, "--config",
-            test_config1, "--stats", test_stats1
+            "snapshot", "update", snapshot_obj.id, "--config", test_config1,
+            "--stats", test_stats1
         ])
 
         result = self.snapshot_command.execute()
@@ -606,8 +591,8 @@ class TestSnapshot():
 
         # Test when optional parameters are not given
         self.snapshot_command.parse([
-            "snapshot", "update", "--id", snapshot_obj.id, "--config",
-            test_config2, "--stats", test_stats2
+            "snapshot", "update", snapshot_obj.id, "--config", test_config2,
+            "--stats", test_stats2
         ])
 
         result = self.snapshot_command.execute()
@@ -637,8 +622,7 @@ class TestSnapshot():
         snapshot_obj = self.snapshot_command.execute()
 
         # Test when optional parameters are not given
-        self.snapshot_command.parse(
-            ["snapshot", "delete", "--id", snapshot_obj.id])
+        self.snapshot_command.parse(["snapshot", "delete", snapshot_obj.id])
 
         result = self.snapshot_command.execute()
         assert result
@@ -696,7 +680,8 @@ class TestSnapshot():
             ["snapshot", "ls", "--format", "csv", "--download"])
         snapshot_objs = self.snapshot_command.execute()
         assert created_snapshot_obj in snapshot_objs
-        test_wildcard = os.path.join(os.getcwd(), "snapshot_ls_*")
+        test_wildcard = os.path.join(
+            self.snapshot_command.snapshot_controller.home, "snapshot_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()
@@ -723,7 +708,8 @@ class TestSnapshot():
         self.snapshot_command.parse(["snapshot", "ls", "--download"])
         snapshot_objs = self.snapshot_command.execute()
         assert created_snapshot_obj in snapshot_objs
-        test_wildcard = os.path.join(os.getcwd(), "snapshot_ls_*")
+        test_wildcard = os.path.join(
+            self.snapshot_command.snapshot_controller.home, "snapshot_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()

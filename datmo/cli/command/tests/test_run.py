@@ -37,6 +37,7 @@ except TypeError:
 
     to_bytes("test")
 
+from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.run import RunCommand
@@ -53,13 +54,14 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestRunCommand():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        Config().set_home(self.temp_dir)
         self.cli_helper = Helper()
 
     def teardown_method(self):
         pass
 
     def __set_variables(self):
-        self.project_command = ProjectCommand(self.temp_dir, self.cli_helper)
+        self.project_command = ProjectCommand(self.cli_helper)
         self.project_command.parse(
             ["init", "--name", "foobar", "--description", "test model"])
 
@@ -69,21 +71,13 @@ class TestRunCommand():
 
         dummy(self)
 
-        self.run_command = RunCommand(self.temp_dir, self.cli_helper)
-        self.task_command = TaskCommand(self.temp_dir, self.cli_helper)
+        self.run_command = RunCommand(self.cli_helper)
+        self.task_command = TaskCommand(self.cli_helper)
 
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(self.env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
-
-    def test_run_project_not_init(self):
-        failed = False
-        try:
-            self.run_command = RunCommand(self.temp_dir, self.cli_helper)
-        except ProjectNotInitialized:
-            failed = True
-        assert failed
 
     def test_run_should_fail1(self):
         self.__set_variables()
@@ -248,7 +242,8 @@ class TestRunCommand():
         # test multiple ports option before command
         self.run_command.parse([
             "run", "--ports", test_ports[0], "--ports", test_ports[1],
-            "--mem-limit", test_mem_limit, test_command
+            "--mem-limit", test_mem_limit,"--environment-paths",
+            self.env_def_path, test_command
         ])
 
         # test for desired side effects
@@ -365,7 +360,7 @@ class TestRunCommand():
         self.__set_variables()
         exception_thrown = False
         try:
-            self.task_command.parse(["run", "ls" "--foobar", "foobar"])
+            self.task_command.parse(["ls" "--foobar", "foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown

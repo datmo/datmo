@@ -22,6 +22,7 @@ except TypeError:
 
     to_bytes("test")
 
+from datmo.config import Config
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.task import TaskController
 from datmo.core.controller.snapshot import SnapshotController
@@ -40,29 +41,33 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestSnapshotController():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        Config().set_home(self.temp_dir)
 
     def teardown_method(self):
         pass
 
     def __setup(self):
-        self.project = ProjectController(self.temp_dir)
-        self.project.init("test", "test description")
-        self.task = TaskController(self.temp_dir)
-        self.snapshot = SnapshotController(self.temp_dir)
+        Config().set_home(self.temp_dir)
+        self.project_controller = ProjectController()
+        self.project_controller.init("test", "test description")
+        self.task_controller = TaskController()
+        self.snapshot_controller = SnapshotController()
 
     def test_init_fail_project_not_init(self):
+        Config().set_home(self.temp_dir)
         failed = False
         try:
-            SnapshotController(self.temp_dir)
+            SnapshotController()
         except ProjectNotInitialized:
             failed = True
         assert failed
 
     def test_init_fail_invalid_path(self):
         test_home = "some_random_dir"
+        Config().set_home(test_home)
         failed = False
         try:
-            SnapshotController(test_home)
+            SnapshotController()
         except InvalidProjectPath:
             failed = True
         assert failed
@@ -72,7 +77,7 @@ class TestSnapshotController():
         # Test no message
         failed = False
         try:
-            self.snapshot.create({})
+            self.snapshot_controller.create({})
         except RequiredArgumentMissing:
             failed = True
         assert failed
@@ -82,7 +87,7 @@ class TestSnapshotController():
         # Test default values for snapshot, fail due to code
         failed = False
         try:
-            self.snapshot.create({"message": "my test snapshot"})
+            self.snapshot_controller.create({"message": "my test snapshot"})
         except CommitFailed:
             failed = True
         assert failed
@@ -90,15 +95,17 @@ class TestSnapshotController():
     def test_create_fail_no_code_environment(self):
         self.__setup()
         # Create environment definition
-        env_def_path = os.path.join(self.project.environment_directory,
-                                    "Dockerfile")
+        env_def_path = os.path.join(
+            self.project_controller.environment_directory, "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
         # test must fail when there is file present in root project folder
         failed = False
         try:
-            _ = self.snapshot.create({"message": "my test snapshot"})
+            _ = self.snapshot_controller.create({
+                "message": "my test snapshot"
+            })
         except CommitFailed:
             failed = True
         assert failed
@@ -106,19 +113,22 @@ class TestSnapshotController():
     def test_create_fail_no_code_environment_files(self):
         self.__setup()
         # Create environment definition
-        env_def_path = os.path.join(self.project.environment_directory,
-                                    "Dockerfile")
+        env_def_path = os.path.join(
+            self.project_controller.environment_directory, "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
-        test_file = os.path.join(self.project.files_directory, "test.txt")
+        test_file = os.path.join(self.project_controller.files_directory,
+                                 "test.txt")
         with open(test_file, "wb") as f:
             f.write(to_bytes(str("hello")))
 
         # test must fail when there is file present in root project folder
         failed = False
         try:
-            _ = self.snapshot.create({"message": "my test snapshot"})
+            _ = self.snapshot_controller.create({
+                "message": "my test snapshot"
+            })
         except CommitFailed:
             failed = True
         assert failed
@@ -127,8 +137,10 @@ class TestSnapshotController():
         self.__setup()
 
         # Test default values for snapshot, fail due to no environment from file
-        self.snapshot.file_driver.create("filepath1")
-        snapshot_obj_0 = self.snapshot.create({"message": "my test snapshot"})
+        self.snapshot_controller.file_driver.create("filepath1")
+        snapshot_obj_0 = self.snapshot_controller.create({
+            "message": "my test snapshot"
+        })
         assert isinstance(snapshot_obj_0, Snapshot)
         assert snapshot_obj_0.code_id
         assert snapshot_obj_0.environment_id
@@ -139,13 +151,16 @@ class TestSnapshotController():
     def test_create_success_default_detected_in_file(self):
         self.__setup()
         # Test default values for snapshot when there is no environment
-        test_filepath = os.path.join(self.snapshot.home, "script.py")
+        test_filepath = os.path.join(self.snapshot_controller.home,
+                                     "script.py")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("import os\n"))
             f.write(to_bytes("import sys\n"))
             f.write(to_bytes("print('hello')\n"))
 
-        snapshot_obj_1 = self.snapshot.create({"message": "my test snapshot"})
+        snapshot_obj_1 = self.snapshot_controller.create({
+            "message": "my test snapshot"
+        })
 
         assert isinstance(snapshot_obj_1, Snapshot)
         assert snapshot_obj_1.code_id
@@ -157,20 +172,23 @@ class TestSnapshotController():
     def test_create_success_default_env_def(self):
         self.__setup()
         # Create environment definition
-        env_def_path = os.path.join(self.project.environment_directory,
-                                    "Dockerfile")
+        env_def_path = os.path.join(
+            self.project_controller.environment_directory, "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Creating a file in project folder
-        test_filepath = os.path.join(self.snapshot.home, "script.py")
+        test_filepath = os.path.join(self.snapshot_controller.home,
+                                     "script.py")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("import numpy\n"))
             f.write(to_bytes("import sklearn\n"))
             f.write(to_bytes("print('hello')\n"))
 
         # Test default values for snapshot, success
-        snapshot_obj = self.snapshot.create({"message": "my test snapshot"})
+        snapshot_obj = self.snapshot_controller.create({
+            "message": "my test snapshot"
+        })
 
         assert isinstance(snapshot_obj, Snapshot)
         assert snapshot_obj.code_id
@@ -182,20 +200,23 @@ class TestSnapshotController():
     def test_create_success_with_environment(self):
         self.__setup()
         # Create environment definition
-        env_def_path = os.path.join(self.project.environment_directory,
-                                    "Dockerfile")
+        env_def_path = os.path.join(
+            self.project_controller.environment_directory, "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
         # creating a file in project folder
-        test_filepath = os.path.join(self.snapshot.home, "script.py")
+        test_filepath = os.path.join(self.snapshot_controller.home,
+                                     "script.py")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("import numpy\n"))
             f.write(to_bytes("import sklearn\n"))
             f.write(to_bytes("print('hello')\n"))
 
         # Test default values for snapshot, success
-        snapshot_obj = self.snapshot.create({"message": "my test snapshot"})
+        snapshot_obj = self.snapshot_controller.create({
+            "message": "my test snapshot"
+        })
 
         assert isinstance(snapshot_obj, Snapshot)
         assert snapshot_obj.code_id
@@ -207,7 +228,7 @@ class TestSnapshotController():
     def test_create_success_env_paths(self):
         self.__setup()
         # Create environment definition
-        random_dir = os.path.join(self.snapshot.home, "random_dir")
+        random_dir = os.path.join(self.snapshot_controller.home, "random_dir")
         os.makedirs(random_dir)
         env_def_path = os.path.join(random_dir, "randomDockerfile")
         with open(env_def_path, "wb") as f:
@@ -215,7 +236,7 @@ class TestSnapshotController():
         environment_paths = [env_def_path + ">Dockerfile"]
 
         # Test default values for snapshot, success
-        snapshot_obj = self.snapshot.create({
+        snapshot_obj = self.snapshot_controller.create({
             "message": "my test snapshot",
             "environment_paths": environment_paths
         })
@@ -231,21 +252,26 @@ class TestSnapshotController():
         self.__setup()
         # Test 2 snapshots with same parameters
         # Create environment definition
-        env_def_path = os.path.join(self.project.environment_directory,
-                                    "Dockerfile")
+        env_def_path = os.path.join(
+            self.project_controller.environment_directory, "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Creating a file in project folder
-        test_filepath = os.path.join(self.snapshot.home, "script.py")
+        test_filepath = os.path.join(self.snapshot_controller.home,
+                                     "script.py")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("import numpy\n"))
             f.write(to_bytes("import sklearn\n"))
             f.write(to_bytes("print('hello')\n"))
 
-        snapshot_obj = self.snapshot.create({"message": "my test snapshot"})
+        snapshot_obj = self.snapshot_controller.create({
+            "message": "my test snapshot"
+        })
 
-        snapshot_obj_1 = self.snapshot.create({"message": "my test snapshot"})
+        snapshot_obj_1 = self.snapshot_controller.create({
+            "message": "my test snapshot"
+        })
 
         # Should return the same object back
         assert snapshot_obj_1.id == snapshot_obj.id
@@ -262,36 +288,42 @@ class TestSnapshotController():
     def test_create_success_given_files_env_def_config_file_stats_file(self):
         self.__setup()
         # Create environment definition
-        env_def_path = os.path.join(self.project.environment_directory,
-                                    "Dockerfile")
+        env_def_path = os.path.join(
+            self.project_controller.environment_directory, "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Creating a file in project folder
-        test_filepath = os.path.join(self.snapshot.home, "script.py")
+        test_filepath = os.path.join(self.snapshot_controller.home,
+                                     "script.py")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("import numpy\n"))
             f.write(to_bytes("import sklearn\n"))
             f.write(to_bytes("print('hello')\n"))
 
-        snapshot_obj = self.snapshot.create({"message": "my test snapshot"})
+        snapshot_obj = self.snapshot_controller.create({
+            "message": "my test snapshot"
+        })
 
         # Create files to add
-        _, project_directory_name = os.path.split(self.project.files_directory)
-        self.snapshot.file_driver.create(
+        _, project_directory_name = os.path.split(
+            self.project_controller.files_directory)
+        self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "dirpath1"), directory=True)
-        self.snapshot.file_driver.create(
+        self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "dirpath2"), directory=True)
-        self.snapshot.file_driver.create(
+        self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "filepath1"))
 
         # Create config
-        config_filepath = os.path.join(self.snapshot.home, "config.json")
+        config_filepath = os.path.join(self.snapshot_controller.home,
+                                       "config.json")
         with open(config_filepath, "wb") as f:
             f.write(to_bytes(str('{"foo":"bar"}')))
 
         # Create stats
-        stats_filepath = os.path.join(self.snapshot.home, "stats.json")
+        stats_filepath = os.path.join(self.snapshot_controller.home,
+                                      "stats.json")
         with open(stats_filepath, "wb") as f:
             f.write(to_bytes(str('{"foo":"bar"}')))
 
@@ -301,7 +333,7 @@ class TestSnapshotController():
             "stats_filepath": stats_filepath,
         }
         # Create snapshot in the project
-        snapshot_obj_4 = self.snapshot.create(input_dict)
+        snapshot_obj_4 = self.snapshot_controller.create(input_dict)
 
         assert snapshot_obj_4 != snapshot_obj
         assert snapshot_obj_4.code_id != snapshot_obj.code_id
@@ -315,36 +347,42 @@ class TestSnapshotController():
     def test_create_success_given_files_env_def_different_config_stats(self):
         self.__setup()
         # Create environment definition
-        env_def_path = os.path.join(self.project.environment_directory,
-                                    "Dockerfile")
+        env_def_path = os.path.join(
+            self.project_controller.environment_directory, "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Creating a file in project folder
-        test_filepath = os.path.join(self.snapshot.home, "script.py")
+        test_filepath = os.path.join(self.snapshot_controller.home,
+                                     "script.py")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("import numpy\n"))
             f.write(to_bytes("import sklearn\n"))
             f.write(to_bytes("print('hello')\n"))
 
-        snapshot_obj = self.snapshot.create({"message": "my test snapshot"})
+        snapshot_obj = self.snapshot_controller.create({
+            "message": "my test snapshot"
+        })
 
         # Create files to add
-        _, project_directory_name = os.path.split(self.project.files_directory)
-        self.snapshot.file_driver.create(
+        _, project_directory_name = os.path.split(
+            self.project_controller.files_directory)
+        self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "dirpath1"), directory=True)
-        self.snapshot.file_driver.create(
+        self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "dirpath2"), directory=True)
-        self.snapshot.file_driver.create(
+        self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "filepath1"))
 
         # Create config
-        config_filepath = os.path.join(self.snapshot.home, "config.json")
+        config_filepath = os.path.join(self.snapshot_controller.home,
+                                       "config.json")
         with open(config_filepath, "wb") as f:
             f.write(to_bytes(str('{"foo":"bar"}')))
 
         # Create stats
-        stats_filepath = os.path.join(self.snapshot.home, "stats.json")
+        stats_filepath = os.path.join(self.snapshot_controller.home,
+                                      "stats.json")
         with open(stats_filepath, "wb") as f:
             f.write(to_bytes(str('{"foo":"bar"}')))
 
@@ -356,7 +394,7 @@ class TestSnapshotController():
         }
 
         # Create snapshot in the project
-        snapshot_obj_1 = self.snapshot.create(input_dict)
+        snapshot_obj_1 = self.snapshot_controller.create(input_dict)
 
         assert snapshot_obj_1 != snapshot_obj
         assert snapshot_obj_1.config == {}
@@ -365,22 +403,24 @@ class TestSnapshotController():
     def test_create_success_given_files_env_def_direct_config_stats(self):
         self.__setup()
         # Create environment definition
-        env_def_path = os.path.join(self.project.environment_directory,
-                                    "Dockerfile")
+        env_def_path = os.path.join(
+            self.project_controller.environment_directory, "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Create files to add
-        _, project_directory_name = os.path.split(self.project.files_directory)
-        self.snapshot.file_driver.create(
+        _, project_directory_name = os.path.split(
+            self.project_controller.files_directory)
+        self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "dirpath1"), directory=True)
-        self.snapshot.file_driver.create(
+        self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "dirpath2"), directory=True)
-        self.snapshot.file_driver.create(
+        self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "filepath1"))
 
         # Creating a file in project folder
-        test_filepath = os.path.join(self.snapshot.home, "script.py")
+        test_filepath = os.path.join(self.snapshot_controller.home,
+                                     "script.py")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("import numpy\n"))
             f.write(to_bytes("import sklearn\n"))
@@ -398,7 +438,7 @@ class TestSnapshotController():
         }
 
         # Create snapshot in the project
-        snapshot_obj_6 = self.snapshot.create(input_dict)
+        snapshot_obj_6 = self.snapshot_controller.create(input_dict)
 
         assert snapshot_obj_6.config == {"foo": "bar"}
         assert snapshot_obj_6.stats == {"foo": "bar"}
@@ -413,12 +453,12 @@ class TestSnapshotController():
         # 4) Test if success with updated stats from after_snapshot_id and task_results
 
         # Create task in the project
-        task_obj = self.task.create()
+        task_obj = self.task_controller.create()
 
         # 0) Test option 0
         failed = False
         try:
-            _ = self.snapshot.create_from_task(
+            _ = self.snapshot_controller.create_from_task(
                 message="my test snapshot", task_id=task_obj.id)
         except TaskNotComplete:
             failed = True
@@ -431,13 +471,14 @@ class TestSnapshotController():
         task_dict = {"command_list": task_command}
 
         # Create environment definition
-        env_def_path = os.path.join(self.project.home, "Dockerfile")
+        env_def_path = os.path.join(self.project_controller.home, "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
-        updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)
+        updated_task_obj = self.task_controller.run(
+            task_obj.id, task_dict=task_dict)
 
-        snapshot_obj = self.snapshot.create_from_task(
+        snapshot_obj = self.snapshot_controller.create_from_task(
             message="my test snapshot", task_id=updated_task_obj.id)
 
         assert isinstance(snapshot_obj, Snapshot)
@@ -447,20 +488,21 @@ class TestSnapshotController():
         assert snapshot_obj.visible == True
 
         # Create new task and corresponding dict
-        task_obj = self.task.create()
+        task_obj = self.task_controller.create()
         task_command = ["sh", "-c", "echo accuracy:0.45"]
         task_dict = {"command_list": task_command}
 
         # Create environment definition
-        env_def_path = os.path.join(self.project.home, "Dockerfile")
+        env_def_path = os.path.join(self.project_controller.home, "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Test the default values
-        updated_task_obj = self.task.run(task_obj.id, task_dict=task_dict)
+        updated_task_obj = self.task_controller.run(
+            task_obj.id, task_dict=task_dict)
 
         # 2) Test option 2
-        snapshot_obj = self.snapshot.create_from_task(
+        snapshot_obj = self.snapshot_controller.create_from_task(
             message="my test snapshot", task_id=updated_task_obj.id)
 
         assert isinstance(snapshot_obj, Snapshot)
@@ -472,7 +514,7 @@ class TestSnapshotController():
         # 3) Test option 3
         test_config = {"algo": "regression"}
         test_stats = {"accuracy": 0.9}
-        snapshot_obj = self.snapshot.create_from_task(
+        snapshot_obj = self.snapshot_controller.create_from_task(
             message="my test snapshot",
             task_id=updated_task_obj.id,
             label="best",
@@ -490,8 +532,8 @@ class TestSnapshotController():
         # 4) Test option 4
         test_config = {"algo": "regression"}
         test_stats = {"new_key": 0.9}
-        task_obj_2 = self.task.create()
-        updated_task_obj_2 = self.task.run(
+        task_obj_2 = self.task_controller.create()
+        updated_task_obj_2 = self.task_controller.run(
             task_obj_2.id,
             task_dict=task_dict,
             snapshot_dict={
@@ -499,7 +541,7 @@ class TestSnapshotController():
                 "stats": test_stats
             })
 
-        snapshot_obj = self.snapshot.create_from_task(
+        snapshot_obj = self.snapshot_controller.create_from_task(
             message="my test snapshot",
             task_id=updated_task_obj_2.id,
             label="best")
@@ -517,29 +559,34 @@ class TestSnapshotController():
 
     def __default_create(self):
         # Create files to add
-        _, project_directory_name = os.path.split(self.project.files_directory)
-        self.snapshot.file_driver.create(
+        _, project_directory_name = os.path.split(
+            self.project_controller.files_directory)
+        self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "dirpath1"), directory=True)
-        self.snapshot.file_driver.create(
+        self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "dirpath2"), directory=True)
-        self.snapshot.file_driver.create(
+        self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "filepath1"))
-        self.snapshot.file_driver.create("filepath2")
-        with open(os.path.join(self.snapshot.home, "filepath2"), "wb") as f:
+        self.snapshot_controller.file_driver.create("filepath2")
+        with open(
+                os.path.join(self.snapshot_controller.home, "filepath2"),
+                "wb") as f:
             f.write(to_bytes(str("import sys\n")))
         # Create environment_driver definition
-        env_def_path = os.path.join(self.project.environment_directory,
-                                    "Dockerfile")
+        env_def_path = os.path.join(
+            self.project_controller.environment_directory, "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Create config
-        config_filepath = os.path.join(self.snapshot.home, "config.json")
+        config_filepath = os.path.join(self.snapshot_controller.home,
+                                       "config.json")
         with open(config_filepath, "wb") as f:
             f.write(to_bytes(str("{}")))
 
         # Create stats
-        stats_filepath = os.path.join(self.snapshot.home, "stats.json")
+        stats_filepath = os.path.join(self.snapshot_controller.home,
+                                      "stats.json")
         with open(stats_filepath, "wb") as f:
             f.write(to_bytes(str("{}")))
 
@@ -550,7 +597,7 @@ class TestSnapshotController():
         }
 
         # Create snapshot in the project
-        return self.snapshot.create(input_dict)
+        return self.snapshot_controller.create(input_dict)
 
     def test_checkout(self):
         self.__setup()
@@ -558,13 +605,13 @@ class TestSnapshotController():
         snapshot_obj_1 = self.__default_create()
 
         # Create duplicate snapshot in project
-        self.snapshot.file_driver.create("test")
+        self.snapshot_controller.file_driver.create("test")
         snapshot_obj_2 = self.__default_create()
 
         assert snapshot_obj_2 != snapshot_obj_1
 
         # Checkout to snapshot 1 using snapshot id
-        result = self.snapshot.checkout(snapshot_obj_1.id)
+        result = self.snapshot_controller.checkout(snapshot_obj_1.id)
         # TODO: Check for which snapshot we are on
 
         assert result == True
@@ -574,13 +621,14 @@ class TestSnapshotController():
         # Check for error if incorrect session given
         failed = False
         try:
-            self.snapshot.list(session_id="does_not_exist")
+            self.snapshot_controller.list(session_id="does_not_exist")
         except SessionDoesNotExist:
             failed = True
         assert failed
 
         # Create file to add to snapshot
-        test_filepath_1 = os.path.join(self.snapshot.home, "test.txt")
+        test_filepath_1 = os.path.join(self.snapshot_controller.home,
+                                       "test.txt")
         with open(test_filepath_1, "wb") as f:
             f.write(to_bytes(str("test")))
 
@@ -588,7 +636,8 @@ class TestSnapshotController():
         snapshot_obj_1 = self.__default_create()
 
         # Create file to add to second snapshot
-        test_filepath_2 = os.path.join(self.snapshot.home, "test2.txt")
+        test_filepath_2 = os.path.join(self.snapshot_controller.home,
+                                       "test2.txt")
         with open(test_filepath_2, "wb") as f:
             f.write(to_bytes(str("test2")))
 
@@ -596,14 +645,14 @@ class TestSnapshotController():
         snapshot_obj_2 = self.__default_create()
 
         # List all snapshots and ensure they exist
-        result = self.snapshot.list()
+        result = self.snapshot_controller.list()
 
         assert len(result) == 2 and \
             snapshot_obj_1 in result and \
             snapshot_obj_2 in result
 
         # List all tasks regardless of filters in ascending
-        result = self.snapshot.list(
+        result = self.snapshot_controller.list(
             sort_key='created_at', sort_order='ascending')
 
         assert len(result) == 2 and \
@@ -612,7 +661,7 @@ class TestSnapshotController():
         assert result[0].created_at <= result[-1].created_at
 
         # List all tasks regardless of filters in descending
-        result = self.snapshot.list(
+        result = self.snapshot_controller.list(
             sort_key='created_at', sort_order='descending')
         assert len(result) == 2 and \
                snapshot_obj_1 in result and \
@@ -622,7 +671,7 @@ class TestSnapshotController():
         # Wrong order being passed in
         failed = False
         try:
-            _ = self.snapshot.list(
+            _ = self.snapshot_controller.list(
                 sort_key='created_at', sort_order='wrong_order')
         except InvalidArgumentType:
             failed = True
@@ -631,33 +680,34 @@ class TestSnapshotController():
         # Wrong key and order being passed in
         failed = False
         try:
-            _ = self.snapshot.list(
+            _ = self.snapshot_controller.list(
                 sort_key='wrong_key', sort_order='wrong_order')
         except InvalidArgumentType:
             failed = True
         assert failed
 
         # wrong key and right order being passed in
-        expected_result = self.snapshot.list(
+        expected_result = self.snapshot_controller.list(
             sort_key='created_at', sort_order='ascending')
-        result = self.snapshot.list(
+        result = self.snapshot_controller.list(
             sort_key='wrong_key', sort_order='ascending')
         expected_ids = [item.id for item in expected_result]
         ids = [item.id for item in result]
         assert set(expected_ids) == set(ids)
 
         # List all snapshots with session filter
-        result = self.snapshot.list(session_id=self.project.current_session.id)
+        result = self.snapshot_controller.list(
+            session_id=self.project_controller.current_session.id)
 
         assert len(result) == 2 and \
                snapshot_obj_1 in result and \
                snapshot_obj_2 in result
 
         # List snapshots with visible filter
-        result = self.snapshot.list(visible=False)
+        result = self.snapshot_controller.list(visible=False)
         assert len(result) == 0
 
-        result = self.snapshot.list(visible=True)
+        result = self.snapshot_controller.list(visible=True)
         assert len(result) == 2 and \
                snapshot_obj_1 in result and \
                snapshot_obj_2 in result
@@ -674,7 +724,7 @@ class TestSnapshotController():
         snapshot_obj = self.__default_create()
 
         # Update snapshot in the project
-        self.snapshot.update(
+        self.snapshot_controller.update(
             snapshot_obj.id,
             config=test_config,
             stats=test_stats,
@@ -682,7 +732,7 @@ class TestSnapshotController():
             label=test_label)
 
         # Get the updated snapshot obj
-        updated_snapshot_obj = self.snapshot.dal.snapshot.get_by_id(
+        updated_snapshot_obj = self.snapshot_controller.dal.snapshot.get_by_id(
             snapshot_obj.id)
         assert updated_snapshot_obj.config == test_config
         assert updated_snapshot_obj.stats == test_stats
@@ -694,11 +744,11 @@ class TestSnapshotController():
         snapshot_obj = self.__default_create()
 
         # Update snapshot in the project
-        self.snapshot.update(
+        self.snapshot_controller.update(
             snapshot_obj.id, config=test_config, stats=test_stats)
 
         # Get the updated snapshot obj
-        updated_snapshot_obj = self.snapshot.dal.snapshot.get_by_id(
+        updated_snapshot_obj = self.snapshot_controller.dal.snapshot.get_by_id(
             snapshot_obj.id)
         assert updated_snapshot_obj.config == test_config
         assert updated_snapshot_obj.stats == test_stats
@@ -708,11 +758,11 @@ class TestSnapshotController():
         snapshot_obj = self.__default_create()
 
         # Update snapshot in the project
-        self.snapshot.update(
+        self.snapshot_controller.update(
             snapshot_obj.id, message=test_message, label=test_label)
 
         # Get the updated snapshot obj
-        updated_snapshot_obj = self.snapshot.dal.snapshot.get_by_id(
+        updated_snapshot_obj = self.snapshot_controller.dal.snapshot.get_by_id(
             snapshot_obj.id)
 
         assert updated_snapshot_obj.message == test_message
@@ -723,10 +773,11 @@ class TestSnapshotController():
         snapshot_obj_1 = self.__default_create()
 
         # Update snapshot in the project
-        self.snapshot.update(snapshot_obj_1.id, message=test_message)
+        self.snapshot_controller.update(
+            snapshot_obj_1.id, message=test_message)
 
         # Get the updated snapshot obj
-        updated_snapshot_obj_1 = self.snapshot.dal.snapshot.get_by_id(
+        updated_snapshot_obj_1 = self.snapshot_controller.dal.snapshot.get_by_id(
             snapshot_obj_1.id)
 
         assert updated_snapshot_obj_1.message == test_message
@@ -736,10 +787,10 @@ class TestSnapshotController():
         snapshot_obj_2 = self.__default_create()
 
         # Update snapshot in the project
-        self.snapshot.update(snapshot_obj_2.id, label=test_label)
+        self.snapshot_controller.update(snapshot_obj_2.id, label=test_label)
 
         # Get the updated snapshot obj
-        updated_snapshot_obj_2 = self.snapshot.dal.snapshot.get_by_id(
+        updated_snapshot_obj_2 = self.snapshot_controller.dal.snapshot.get_by_id(
             snapshot_obj_2.id)
 
         assert updated_snapshot_obj_2.label == test_label
@@ -749,14 +800,14 @@ class TestSnapshotController():
         # Test failure for no snapshot
         failed = False
         try:
-            self.snapshot.get("random")
+            self.snapshot_controller.get("random")
         except DoesNotExist:
             failed = True
         assert failed
 
         # Test success for snapshot
         snapshot_obj = self.__default_create()
-        snapshot_obj_returned = self.snapshot.get(snapshot_obj.id)
+        snapshot_obj_returned = self.snapshot_controller.get(snapshot_obj.id)
         assert snapshot_obj == snapshot_obj_returned
 
     def test_get_files(self):
@@ -764,15 +815,15 @@ class TestSnapshotController():
         # Test failure case
         failed = False
         try:
-            self.snapshot.get_files("random")
+            self.snapshot_controller.get_files("random")
         except DoesNotExist:
             failed = True
         assert failed
 
         # Test success case
         snapshot_obj = self.__default_create()
-        result = self.snapshot.get_files(snapshot_obj.id)
-        file_collection_obj = self.task.dal.file_collection.get_by_id(
+        result = self.snapshot_controller.get_files(snapshot_obj.id)
+        file_collection_obj = self.task_controller.dal.file_collection.get_by_id(
             snapshot_obj.file_collection_id)
 
         file_names = [item.name for item in result]
@@ -781,17 +832,17 @@ class TestSnapshotController():
         for item in result:
             assert isinstance(item, TextIOWrapper)
             assert item.mode == "r"
-        assert os.path.join(self.task.home, ".datmo", "collections",
+        assert os.path.join(self.task_controller.home, ".datmo", "collections",
                             file_collection_obj.filehash,
                             "filepath1") in file_names
 
-        result = self.snapshot.get_files(snapshot_obj.id, mode="a")
+        result = self.snapshot_controller.get_files(snapshot_obj.id, mode="a")
 
         assert len(result) == 1
         for item in result:
             assert isinstance(item, TextIOWrapper)
             assert item.mode == "a"
-        assert os.path.join(self.task.home, ".datmo", "collections",
+        assert os.path.join(self.task_controller.home, ".datmo", "collections",
                             file_collection_obj.filehash,
                             "filepath1") in file_names
 
@@ -801,12 +852,12 @@ class TestSnapshotController():
         snapshot_obj = self.__default_create()
 
         # Delete snapshot in the project
-        result = self.snapshot.delete(snapshot_obj.id)
+        result = self.snapshot_controller.delete(snapshot_obj.id)
 
         # Check if snapshot retrieval throws error
         thrown = False
         try:
-            self.snapshot.dal.snapshot.get_by_id(snapshot_obj.id)
+            self.snapshot_controller.dal.snapshot.get_by_id(snapshot_obj.id)
         except EntityNotFound:
             thrown = True
 

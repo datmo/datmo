@@ -2,19 +2,19 @@ from datmo.core.util.i18n import get as __
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.util.spinner import Spinner
 from datmo.core.util.misc_functions import mutually_exclusive
-from datmo.core.controller.project import ProjectController
+from datmo.cli.driver.helper import Helper
 from datmo.core.controller.task import TaskController
 
 
 class WorkspaceCommand(ProjectCommand):
-    # NOTE: dal_driver is not passed into the project because it is created
-    # first by ProjectController and then passed down to all other Controllers
-    def __init__(self, home, cli_helper):
-        super(WorkspaceCommand, self).__init__(home, cli_helper)
-        self.task_controller = TaskController(home=self.project_controller.home)
+    def __init__(self, cli_helper):
+        super(WorkspaceCommand, self).__init__(cli_helper)
         self.spinner = Spinner()
 
+    @Helper.notify_environment_active(TaskController)
+    @Helper.notify_no_project_found
     def notebook(self, **kwargs):
+        self.task_controller = TaskController()
         self.cli_helper.echo(__("info", "cli.workspace.notebook"))
         # Creating input dictionaries
         snapshot_dict = {}
@@ -40,7 +40,6 @@ class WorkspaceCommand(ProjectCommand):
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
         except Exception as e:
             self.logger.error("%s %s" % (e, task_dict))
-            self.cli_helper.echo("%s" % e)
             self.cli_helper.echo(
                 __("error", "cli.workspace.notebook", task_obj.id))
             return False

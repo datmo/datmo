@@ -11,11 +11,12 @@ except NameError:
     basestring = str
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.misc_functions import mutually_exclusive, printable_string, prettify_datetime
+from datmo.core.util.misc_functions import mutually_exclusive, printable_object
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.util.spinner import Spinner
+from datmo.cli.driver.helper import Helper
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.util.exceptions import InvalidArgumentType
@@ -30,9 +31,6 @@ class RunObject():
         core task entity to reference
     snapshot_entity : datmo.core.entity.snapshot.Snapshot
         core snapshot entity to reference
-    home : str, optional
-        root directory of the project
-        (default is CWD, if not provided)
 
     Attributes
     ----------
@@ -73,9 +71,7 @@ class RunObject():
     InvalidArgumentType
     """
 
-    def __init__(self, task_entity, snapshot_entity, home=None):
-        if not home:
-            home = os.getcwd()
+    def __init__(self, task_entity, snapshot_entity):
 
         if not isinstance(task_entity, CoreTask):
             raise InvalidArgumentType()
@@ -84,7 +80,6 @@ class RunObject():
 
         self._core_task = task_entity
         self._core_snapshot = snapshot_entity
-        self._home = home
 
         self.id = self._core_task.id
         self.model_id = self._core_task.model_id
@@ -164,7 +159,7 @@ class RunObject():
         datmo.core.entity.task.Task
             core task object fo the task
         """
-        task_controller = TaskController(home=self._home)
+        task_controller = TaskController()
         return task_controller.get(self.id)
 
     def __get_core_snapshot(self):
@@ -175,7 +170,7 @@ class RunObject():
         datmo.core.entity.snapshot.Snapshot
             core snapshot object for the Snapshot
         """
-        snapshot_controller = SnapshotController(home=self._home)
+        snapshot_controller = SnapshotController()
         snapshot_obj = snapshot_controller.get(self.snapshot_id)
         return snapshot_obj
 
@@ -193,7 +188,7 @@ class RunObject():
         list
             list of file objects associated with the task
         """
-        task_controller = TaskController(home=self._home)
+        task_controller = TaskController()
         return task_controller.get_files(self.id, mode=mode)
 
     def __eq__(self, other):
@@ -239,18 +234,17 @@ class RunObject():
 
 
 class RunCommand(ProjectCommand):
-    def __init__(self, home, cli_helper):
-        super(RunCommand, self).__init__(home, cli_helper)
-        self.home = home
-        self.task_controller = TaskController(home=self.home)
-        self.snapshot_controller = SnapshotController(home=self.home)
+    def __init__(self, cli_helper):
+        super(RunCommand, self).__init__(cli_helper)
         self.spinner = Spinner()
 
+    @Helper.notify_environment_active(TaskController)
+    @Helper.notify_no_project_found
     def run(self, **kwargs):
         self.cli_helper.echo(__("info", "cli.task.run"))
-        # Creating a task controller object
-        self.task_controller = TaskController(
-            home=self.project_controller.home)
+        # Create controllers
+        self.task_controller = TaskController()
+        self.snapshot_controller = SnapshotController()
         # Create input dictionaries
         snapshot_dict = {}
 
@@ -291,7 +285,11 @@ class RunCommand(ProjectCommand):
         self.cli_helper.echo(" Ran task id: %s" % updated_task_obj.id)
         return updated_task_obj
 
+    @Helper.notify_no_project_found
     def ls(self, **kwargs):
+        # Create controllers
+        self.task_controller = TaskController()
+        self.snapshot_controller = SnapshotController()
         session_id = kwargs.get('session_id',
                                 self.task_controller.current_session.id)
         print_format = kwargs.get('format', "table")
@@ -305,16 +303,18 @@ class RunCommand(ProjectCommand):
         run_obj_list = []
         for task_obj in task_objs:
             snapshot_id = task_obj.after_snapshot_id if task_obj.after_snapshot_id else task_obj.before_snapshot_id
+            if snapshot_id is None:
+                import pdb; pdb.set_trace()
             snapshot_obj = self.snapshot_controller.get(snapshot_id)
             # Create a new task object for the
-            run_obj = RunObject(task_obj, snapshot_obj, home=self.home)
+            run_obj = RunObject(task_obj, snapshot_obj)
             snapshot_config = snapshot_obj.config
             if task_obj.results is None:
                 task_results = {}
             else:
                 task_results = task_obj.results
-            task_results_printable = printable_string(str(task_results))
-            snapshot_config_printable = printable_string(str(snapshot_config))
+            task_results_printable = printable_object(str(task_results))
+            snapshot_config_printable = printable_object(str(snapshot_config))
             item_dict_list.append({
                 "id": task_obj.id,
                 "command": task_obj.command,

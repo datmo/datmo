@@ -69,6 +69,10 @@ class FileCodeDriver(CodeDriver):
         spec = pathspec.PathSpec.from_lines('gitwildmatch', [".datmo"])
         dot_datmo_files = set(spec.match_tree(self.filepath))
 
+        # Ignore the .git/ folder and all contents within it
+        spec = pathspec.PathSpec.from_lines('gitwildmatch', [".git"])
+        dot_git_files = set(spec.match_tree(self.filepath))
+
         # Ignore the datmo_environment/ folder and all contents within it
         spec = pathspec.PathSpec.from_lines('gitwildmatch',
                                             ["datmo_environment"])
@@ -96,9 +100,10 @@ class FileCodeDriver(CodeDriver):
             with open(self._datmo_ignore_filepath, "r") as f:
                 spec = pathspec.PathSpec.from_lines('gitignore', f)
                 datmoignore_files.update(set(spec.match_tree(self.filepath)))
-        return list(all_files - dot_datmo_files - datmo_environment_files -
-                    datmo_files_files - datmo_snapshots_files -
-                    datmo_tasks_files - datmoignore_files)
+        return list(
+            all_files - dot_datmo_files - dot_git_files -
+            datmo_environment_files - datmo_files_files -
+            datmo_snapshots_files - datmo_tasks_files - datmoignore_files)
 
     def _calculate_commit_hash(self, tracked_files):
         """Return the commit hash of the repository"""

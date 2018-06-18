@@ -23,9 +23,9 @@ class CodeController(BaseController):
         delete the specified code object from the project
     """
 
-    def __init__(self, home):
+    def __init__(self):
         try:
-            super(CodeController, self).__init__(home)
+            super(CodeController, self).__init__()
         except EnvironmentInitFailed:
             self.logger.warning(
                 __("warn", "controller.general.environment.failed"))
