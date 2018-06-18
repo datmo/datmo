@@ -202,7 +202,7 @@ class TestEnvironmentController():
         output = open(
             os.path.join(file_collection_dir, "datmoDockerfile"), "r").read()
         print(repr(output))
-        assert environment_obj_0.unique_hash == "92bf199434958cfa7f226d1d0c3cb498"
+        assert environment_obj_0.unique_hash == "c309ae4f58163693a91816988d9dc88b"
         assert environment_obj_0.name == "test"
         assert environment_obj_0.description == "test description"
         # Files ["test", "Dockerfile", "datmoDockerfile"]
@@ -237,7 +237,7 @@ class TestEnvironmentController():
         output = open(
             os.path.join(file_collection_dir, "datmoDockerfile"), "r").read()
         print(repr(output))
-        assert environment_obj.unique_hash == "01c18ce1635911b11faa64b555463631"
+        assert environment_obj.unique_hash == "6e06d7c4d77cb6ae69e7e0efa883ef4b"
         assert environment_obj.name == "test"
         assert environment_obj.description == "test description"
         # Files ["Dockerfile", "datmoDockerfile"]
@@ -273,7 +273,7 @@ class TestEnvironmentController():
         assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
         assert os.path.isfile(
             os.path.join(file_collection_dir, "datmoDockerfile"))
-        assert environment_obj_1.unique_hash == "01c18ce1635911b11faa64b555463631"
+        assert environment_obj_1.unique_hash == "6e06d7c4d77cb6ae69e7e0efa883ef4b"
 
         # 3) Test option 3
         input_dict_2 = {
@@ -304,7 +304,7 @@ class TestEnvironmentController():
         assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
         assert os.path.isfile(
             os.path.join(file_collection_dir, "datmoDockerfile"))
-        assert environment_obj_2.unique_hash == "01c18ce1635911b11faa64b555463631"
+        assert environment_obj_2.unique_hash == "6e06d7c4d77cb6ae69e7e0efa883ef4b"
 
         # 4) Test option 4
         input_dict_3 = {
@@ -333,7 +333,7 @@ class TestEnvironmentController():
         assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
         assert os.path.isfile(
             os.path.join(file_collection_dir, "datmoDockerfile"))
-        assert environment_obj_3.unique_hash == "01c18ce1635911b11faa64b555463631"
+        assert environment_obj_3.unique_hash == "6e06d7c4d77cb6ae69e7e0efa883ef4b"
 
         # 6) Test option 6
         definition_filepath = os.path.join(self.environment_controller.home,
@@ -948,13 +948,13 @@ class TestEnvironmentController():
         # Test hashing the default Dockerfile
         result = self.environment_controller._calculate_project_environment_hash(
             save_hardware_file=False)
-        assert result == "92bf199434958cfa7f226d1d0c3cb498"
+        assert result == "c309ae4f58163693a91816988d9dc88b"
         # Test if hash is the same as that of create
         environment_obj = self.environment_controller.create(
             {}, save_hardware_file=False)
         result = self.environment_controller._calculate_project_environment_hash(
             save_hardware_file=False)
-        assert result == "92bf199434958cfa7f226d1d0c3cb498"
+        assert result == "c309ae4f58163693a91816988d9dc88b"
         assert result == environment_obj.unique_hash
 
         # Test if the hash is the same if the same file is passed in as an input
@@ -965,7 +965,7 @@ class TestEnvironmentController():
             input_dict, save_hardware_file=False)
         result = self.environment_controller._calculate_project_environment_hash(
             save_hardware_file=False)
-        assert result == "92bf199434958cfa7f226d1d0c3cb498"
+        assert result == "c309ae4f58163693a91816988d9dc88b"
         assert result == environment_obj_1.unique_hash
 
     def test_has_unstaged_changes(self):

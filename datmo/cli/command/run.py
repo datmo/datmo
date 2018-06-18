@@ -303,8 +303,6 @@ class RunCommand(ProjectCommand):
         run_obj_list = []
         for task_obj in task_objs:
             snapshot_id = task_obj.after_snapshot_id if task_obj.after_snapshot_id else task_obj.before_snapshot_id
-            if snapshot_id is None:
-                import pdb; pdb.set_trace()
             snapshot_obj = self.snapshot_controller.get(snapshot_id)
             # Create a new task object for the
             run_obj = RunObject(task_obj, snapshot_obj)
