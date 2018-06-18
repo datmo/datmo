@@ -14,7 +14,7 @@ MESSAGES = {
             "Updated project {name} @ ({path}) ",
         "cli.project.init.update.failure":
             "Failed to update project {name} @ ({path}) ",
-        "cli.project.notebook":
+        "cli.workspace.notebook":
             "Running a notebook",
         "cli.project.pull":
             "Pulling information from the Datmo project url and adding it to local...",
@@ -105,7 +105,7 @@ MESSAGES = {
             "Method %s.%s not found",
         "cli.project":
             "No project found in the current directory: %s",
-        "cli.project.notebook":
+        "cli.workspace.notebook":
             "Error while running the notebook with task: %s",
         "cli.environment.setup.argument":
             "This name or index does not match any supported environments: %s, ",
