@@ -273,6 +273,7 @@ class TestRunCommand():
             exception_thrown = True
         assert exception_thrown
 
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_run_ls(self):
         self.__set_variables()
 

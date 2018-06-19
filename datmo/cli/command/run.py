@@ -15,10 +15,8 @@ from datmo.core.util.misc_functions import mutually_exclusive, printable_object
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
 from datmo.core.controller.snapshot import SnapshotController
-from datmo.core.util.spinner import Spinner
 from datmo.cli.driver.helper import Helper
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.util.exceptions import InvalidArgumentType
 from datmo.core.util.misc_functions import prettify_datetime, format_table
 
@@ -40,8 +38,10 @@ class RunObject():
         the parent model id for the entity
     session_id : str
         id of session associated with run
-    snapshot_id : str
-        id of snapshot associated with run
+    before_snapshot_id : str
+        id of snapshot associated before the run
+    after_snapshot_id : str
+        id of snapshot associated after the run
     command : str
         command that is used by the run
     status : str or None
@@ -71,25 +71,23 @@ class RunObject():
     InvalidArgumentType
     """
 
-    def __init__(self, task_entity, snapshot_entity):
+    def __init__(self, task_entity):
 
         if not isinstance(task_entity, CoreTask):
             raise InvalidArgumentType()
-        if snapshot_entity and not isinstance(snapshot_entity, CoreSnapshot):
-            raise InvalidArgumentType()
 
         self._core_task = task_entity
-        self._core_snapshot = snapshot_entity
 
         self.id = self._core_task.id
         self.model_id = self._core_task.model_id
         self.session_id = self._core_task.session_id
-        self.snapshot_id = task_entity.after_snapshot_id if task_entity.after_snapshot_id \
-            else task_entity.before_snapshot_id
+        self.created_at = self._core_task.created_at
+        self.before_snapshot_id = task_entity.before_snapshot_id
+        self.after_snapshot_id = task_entity.after_snapshot_id
 
         # Execution definition
         self.command = self._core_task.command
-        self._config = self._core_snapshot.config if snapshot_entity else {}
+        self._config = {}
 
         # Run parameters
         self._status = self._core_task.status
@@ -100,9 +98,7 @@ class RunObject():
         # Outputs
         self._logs = self._core_task.logs
         self._results = {}
-        if self._core_task.results is not None:
-            self._results = self._core_task.results
-        self._files = self.get_files
+        self._files = None
 
     @property
     def status(self):
@@ -171,7 +167,8 @@ class RunObject():
             core snapshot object for the Snapshot
         """
         snapshot_controller = SnapshotController()
-        snapshot_obj = snapshot_controller.get(self.snapshot_id)
+        snapshot_id = self.after_snapshot_id if self.after_snapshot_id else self.before_snapshot_id
+        snapshot_obj = snapshot_controller.get(snapshot_id)
         return snapshot_obj
 
     def get_files(self, mode="r"):
@@ -188,8 +185,9 @@ class RunObject():
         list
             list of file objects associated with the task
         """
-        task_controller = TaskController()
-        return task_controller.get_files(self.id, mode=mode)
+        snapshot_controller = SnapshotController()
+        self._core_snapshot = self.__get_core_snapshot()
+        return snapshot_controller.get_files(self._core_snapshot.id, mode=mode)
 
     def __eq__(self, other):
         return self.id == other.id if other else False
@@ -236,7 +234,6 @@ class RunObject():
 class RunCommand(ProjectCommand):
     def __init__(self, cli_helper):
         super(RunCommand, self).__init__(cli_helper)
-        self.spinner = Spinner()
 
     @Helper.notify_environment_active(TaskController)
     @Helper.notify_no_project_found
@@ -266,11 +263,11 @@ class RunCommand(ProjectCommand):
         else:
             task_dict['command_list'] = kwargs['cmd']
 
-        # Pass in the task
+        # Create the task object
+        task_obj = self.task_controller.create()
+
         try:
-            self.spinner.start()
-            # Create the task object
-            task_obj = self.task_controller.create()
+            # Pass in the task
             updated_task_obj = self.task_controller.run(
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
         except Exception as e:
@@ -278,9 +275,6 @@ class RunCommand(ProjectCommand):
             self.cli_helper.echo("%s" % e)
             self.cli_helper.echo(__("error", "cli.task.run", task_obj.id))
             return False
-        finally:
-            self.spinner.stop()
-            pass
 
         self.cli_helper.echo(" Ran task id: %s" % updated_task_obj.id)
         return updated_task_obj
@@ -302,24 +296,17 @@ class RunCommand(ProjectCommand):
         item_dict_list = []
         run_obj_list = []
         for task_obj in task_objs:
-            snapshot_id = task_obj.after_snapshot_id if task_obj.after_snapshot_id else task_obj.before_snapshot_id
-            snapshot_obj = self.snapshot_controller.get(snapshot_id)
             # Create a new task object for the
-            run_obj = RunObject(task_obj, snapshot_obj)
-            snapshot_config = snapshot_obj.config
-            if task_obj.results is None:
-                task_results = {}
-            else:
-                task_results = task_obj.results
-            task_results_printable = printable_object(str(task_results))
-            snapshot_config_printable = printable_object(str(snapshot_config))
+            run_obj = RunObject(task_obj)
+            task_results_printable = printable_object(str(run_obj.results))
+            snapshot_config_printable = printable_object(str(run_obj.config))
             item_dict_list.append({
-                "id": task_obj.id,
-                "command": task_obj.command,
-                "status": task_obj.status,
+                "id": run_obj.id,
+                "command": run_obj.command,
+                "status": run_obj.status,
                 "config": snapshot_config_printable,
                 "results": task_results_printable,
-                "created at": prettify_datetime(task_obj.created_at)
+                "created at": prettify_datetime(run_obj.created_at)
             })
             run_obj_list.append(run_obj)
         if download:
