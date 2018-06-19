@@ -27,11 +27,13 @@ except TypeError:
 import os
 import tempfile
 import platform
+import timeout_decorator
 
 from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.workspace import WorkspaceCommand
+from datmo.cli.command.task import TaskCommand
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -57,6 +59,7 @@ class TestWorkspace():
         dummy(self)
 
         self.workspace_command = WorkspaceCommand(self.cli_helper)
+        self.task_command = TaskCommand(self.cli_helper)
 
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
@@ -83,10 +86,74 @@ class TestWorkspace():
 
         # test for desired side effects
         assert self.workspace_command.args.gpu == True
-        assert self.workspace_command.args.environment_paths == [self.env_def_path]
+        assert self.workspace_command.args.environment_paths == [
+            self.env_def_path
+        ]
         assert self.workspace_command.args.mem_limit == test_mem_limit
 
         # test multiple ports option before command
         self.workspace_command.parse(["notebook"])
 
         assert self.workspace_command.args.gpu == False
+
+        @timeout_decorator.timeout(10, use_signals=False)
+        def timed_run(timed_run_result):
+            if self.workspace_command.execute():
+                return timed_run_result
+
+        timed_run_result = False
+        try:
+            timed_run_result = timed_run(timed_run_result)
+        except timeout_decorator.timeout_decorator.TimeoutError:
+            timed_run_result = True
+
+        assert timed_run_result
+
+        # Stop all running datmo task
+        self.task_command.parse(["task", "stop", "--all"])
+        self.task_command.execute()
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_rstudio(self):
+        self.__set_variables()
+
+        # Update environment_driver definition
+        self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
+        with open(self.env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/rstudio:latest\n")))
+
+        test_mem_limit = "4g"
+        # test single ports option before command
+        self.workspace_command.parse([
+            "rstudio",
+            "--environment-paths",
+            self.env_def_path,
+            "--mem-limit",
+            test_mem_limit,
+        ])
+
+        # test for desired side effects
+        assert self.workspace_command.args.environment_paths == [
+            self.env_def_path
+        ]
+        assert self.workspace_command.args.mem_limit == test_mem_limit
+
+        # test multiple ports option before command
+        self.workspace_command.parse(["rstudio"])
+
+        @timeout_decorator.timeout(10, use_signals=False)
+        def timed_run(timed_run_result):
+            if self.workspace_command.execute():
+                return timed_run_result
+
+        timed_run_result = False
+        try:
+            timed_run_result = timed_run(timed_run_result)
+        except timeout_decorator.timeout_decorator.TimeoutError:
+            timed_run_result = True
+
+        assert timed_run_result
+
+        # Stop all running datmo task
+        self.task_command.parse(["task", "stop", "--all"])
+        self.task_command.execute()

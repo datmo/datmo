@@ -152,7 +152,8 @@ class Helper():
     def get_command_choices(self):
         return [
             "init", "version", "--version", "-v", "status", "cleanup",
-            "snapshot", "task", "session", "notebook", "environment", "run"
+            "snapshot", "task", "session", "notebook", "rstudio",
+            "environment", "run"
         ]
 
     def prompt_available_environments(self, available_environments):
@@ -179,7 +180,7 @@ class Helper():
                     __("error", "cli.environment.setup.argument",
                        input_environment_name))
                 return input_environment_name
-        if 0 < name_environment_index < len(available_environments):
+        if 0 < name_environment_index <= len(available_environments):
             input_environment_name = available_environments[
                 name_environment_index - 1][0]
         return input_environment_name

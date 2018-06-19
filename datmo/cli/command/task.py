@@ -16,13 +16,11 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.task import TaskController
 from datmo.core.util.exceptions import RequiredArgumentMissing
-from datmo.core.util.spinner import Spinner
 
 
 class TaskCommand(ProjectCommand):
     def __init__(self, cli_helper):
         super(TaskCommand, self).__init__(cli_helper)
-        self.spinner = Spinner()
 
     def task(self):
         self.parse(["task", "--help"])
@@ -54,11 +52,10 @@ class TaskCommand(ProjectCommand):
         else:
             task_dict['command_list'] = kwargs['cmd']
 
-        # Pass in the task
         # Create the task object
         task_obj = self.task_controller.create()
         try:
-            self.spinner.start()
+            # Pass in the task
             updated_task_obj = self.task_controller.run(
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
         except Exception as e:
@@ -66,10 +63,9 @@ class TaskCommand(ProjectCommand):
             self.cli_helper.echo("%s" % e)
             self.cli_helper.echo(__("error", "cli.task.run", task_obj.id))
             return False
-        finally:
-            self.spinner.stop()
 
-        self.cli_helper.echo(" Ran task id: %s" % updated_task_obj.id)
+        self.cli_helper.echo(
+            __("info", "cli.task.run.complete", updated_task_obj.id))
         return updated_task_obj
 
     @Helper.notify_no_project_found

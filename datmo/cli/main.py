@@ -44,9 +44,9 @@ def main():
         elif command_name == "cleanup":
             command_name = "project"
             sys.argv[1] = "cleanup"
-        elif command_name == "notebook":
+        elif command_name in ["notebook", "rstudio"]:
+            sys.argv[1] = command_name
             command_name = "workspace"
-            sys.argv[1] = "notebook"
         elif command_name == "run":
             if len(sys.argv) > 2 and sys.argv[2] == "ls":
                 command_name = "run"

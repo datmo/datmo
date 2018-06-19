@@ -40,7 +40,7 @@ except TypeError:
 from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
-from datmo.cli.command.run import RunObject
+from datmo.cli.command.run import Run
 from datmo.cli.command.run import RunCommand
 from datmo.cli.command.task import TaskCommand
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
@@ -103,11 +103,10 @@ class TestRunCommand():
             f.write(to_bytes("FROM python:3.5-alpine"))
 
     def test_run_object_instantiate(self):
-        snapshot_obj = CoreSnapshot(self.snapshot_dict)
         task_obj = CoreTask(self.task_dict)
-        result = RunObject(task_obj, snapshot_obj)
+        result = Run(task_obj)
         assert result
-        assert isinstance(result, RunObject)
+        assert isinstance(result, Run)
 
     def test_run_should_fail1(self):
         self.__set_variables()
@@ -303,6 +302,7 @@ class TestRunCommand():
             exception_thrown = True
         assert exception_thrown
 
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_run_ls(self):
         self.__set_variables()
 

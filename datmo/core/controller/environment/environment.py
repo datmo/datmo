@@ -6,6 +6,7 @@ from datmo.core.controller.file.file_collection import FileCollectionController
 from datmo.core.entity.environment import Environment
 from datmo.core.util.i18n import get as __
 from datmo.core.util.validation import validate
+from datmo.core.util.spinner import Spinner
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.misc_functions import get_datmo_temp_path, parse_path, list_all_filepaths
 from datmo.core.util.exceptions import PathDoesNotExist, RequiredArgumentMissing, TooManyArgumentsFound,\
@@ -36,6 +37,7 @@ class EnvironmentController(BaseController):
     def __init__(self):
         super(EnvironmentController, self).__init__()
         self.file_collection = FileCollectionController()
+        self.spinner = Spinner()
         if not os.path.exists(self.environment_directory):
             os.makedirs(self.environment_directory)
         if not self.is_initialized:
@@ -235,8 +237,12 @@ class EnvironmentController(BaseController):
         datmo_definition_filepath = os.path.join(
             self.home, file_collection_obj.path,
             "datmo" + environment_obj.definition_filename)
-        result = self.environment_driver.build(
-            environment_id, path=datmo_definition_filepath)
+        try:
+            self.spinner.start()
+            result = self.environment_driver.build(
+                environment_id, path=datmo_definition_filepath)
+        finally:
+            self.spinner.stop()
         return result
 
     def run(self, environment_id, options, log_filepath):

@@ -13,6 +13,7 @@
     ["kaggle:python", "environment as provided in kaggle kernels for numerical data science problems (language: py27)"],
     ["spacy:py-2.7", "Spacy for NLP + scipy, numpy (language: py27)"],
     ["pytorch:cpu", "Pytorch (CPU, language in py27)"],
-    ["catboost:cpu", "catboost + sklearn, numpy, scipy (language: py27)"]
+    ["catboost:cpu", "catboost + sklearn, numpy, scipy (language: py27)"],
+    ["rstudio:latest", "Rstudio environment on ubuntu OS"]
   ]
 }

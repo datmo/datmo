@@ -4,7 +4,6 @@ from datmo import __version__
 from datmo.core.util.i18n import get as __
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.base import BaseCommand
-from datmo.core.util.spinner import Spinner
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController, EnvironmentDoesNotExist
 
@@ -13,7 +12,6 @@ class ProjectCommand(BaseCommand):
     def __init__(self, cli_helper):
         super(ProjectCommand, self).__init__(cli_helper)
         self.project_controller = ProjectController()
-        self.spinner = Spinner()
 
     def init(self, name, description):
         """Initialize command
