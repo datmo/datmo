@@ -7,6 +7,7 @@ from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.entity.task import Task
 from datmo.core.util.validation import validate
+from datmo.core.util.spinner import Spinner
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     TaskRunError, RequiredArgumentMissing, ProjectNotInitialized,
@@ -48,6 +49,8 @@ class TaskController(BaseController):
         super(TaskController, self).__init__()
         self.environment = EnvironmentController()
         self.snapshot = SnapshotController()
+        self.spinner = Spinner()
+
         if not self.is_initialized:
             raise ProjectNotInitialized(
                 __("error", "controller.task.__init__"))
@@ -67,8 +70,13 @@ class TaskController(BaseController):
             "session_id": self.current_session.id
         }
 
-        # Create Task
-        return self.dal.task.create(Task(create_dict))
+        try:
+            # Create Task
+            self.spinner.start()
+            task_obj = self.dal.task.create(Task(create_dict))
+        finally:
+            self.spinner.stop()
+        return task_obj
 
     def _run_helper(self, environment_id, options, log_filepath):
         """Run environment with parameters
@@ -120,8 +128,12 @@ class TaskController(BaseController):
             "api": False,
         }
 
-        # Build image for environment
-        self.environment.build(environment_id)
+        try:
+            # Build image for environment
+            self.spinner.start()
+            self.environment.build(environment_id)
+        finally:
+            self.spinner.stop()
 
         # Run container with environment
         return_code, run_id, logs = self.environment.run(
