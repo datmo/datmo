@@ -16,6 +16,8 @@ MESSAGES = {
             "Failed to update project {name} @ ({path}) ",
         "cli.workspace.notebook":
             "Starting a notebook",
+        "cli.workspace.rstudio":
+            "Starting a rstudio",
         "cli.project.pull":
             "Pulling information from the Datmo project url and adding it to local...",
         "cli.project.update":
@@ -114,7 +116,9 @@ MESSAGES = {
         "cli.project":
             "No project found in the current directory: %s",
         "cli.workspace.notebook":
-            "Error while running the notebook with task: %s",
+            "Error while running the notebook with task id: %s",
+        "cli.workspace.rstudio":
+            "Error while running the rstudio with task id: %s",
         "cli.session.update.dne":
             "No session found with given id: %s",
         "cli.session.delete.dne":

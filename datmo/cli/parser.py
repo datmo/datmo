@@ -50,6 +50,33 @@ def get_datmo_parser():
         "maximum amount of memory the notebook environment can use (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes)"
     )
 
+    # Rstudio
+    rstudio_parser = subparsers.add_parser(
+        "rstudio", help="To run Rstudio workspace")
+    rstudio_parser.add_argument(
+        "--environment-id",
+        dest="environment_id",
+        default=None,
+        help="environment id from environment object")
+    rstudio_parser.add_argument(
+        "--environment-paths",
+        dest="environment_paths",
+        default=None,
+        action="append",
+        type=str,
+        help=
+        "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
+    )
+    rstudio_parser.add_argument(
+        "--mem-limit",
+        "-m",
+        dest="mem_limit",
+        default=None,
+        type=str,
+        help=
+        "maximum amount of memory the rstudio environment can use (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes)"
+    )
+
     # Run
     run_parser = subparsers.add_parser("run", help="run module")
 
