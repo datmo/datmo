@@ -55,10 +55,10 @@ class TaskCommand(ProjectCommand):
             task_dict['command_list'] = kwargs['cmd']
 
         # Pass in the task
+        # Create the task object
+        task_obj = self.task_controller.create()
         try:
             self.spinner.start()
-            # Create the task object
-            task_obj = self.task_controller.create()
             updated_task_obj = self.task_controller.run(
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
         except Exception as e:

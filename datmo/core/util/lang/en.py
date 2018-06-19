@@ -65,6 +65,8 @@ MESSAGES = {
             "Moved to snapshot with id: %s",
         "cli.task.run":
             "Running a new task",
+        "cli.task.run.complete":
+            "Completed task: %s",
         "cli.task.stop":
             "Stopping task: %s",
         "cli.task.stop.all":

@@ -22,6 +22,7 @@ from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.util.exceptions import InvalidArgumentType
 from datmo.core.util.misc_functions import prettify_datetime, format_table
 
+
 class RunObject():
     """Run is an object to enable user access to properties
 
@@ -267,10 +268,10 @@ class RunCommand(ProjectCommand):
             task_dict['command_list'] = kwargs['cmd']
 
         # Pass in the task
+        # Create the task object
+        task_obj = self.task_controller.create()
         try:
             self.spinner.start()
-            # Create the task object
-            task_obj = self.task_controller.create()
             updated_task_obj = self.task_controller.run(
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
         except Exception as e:
@@ -280,9 +281,9 @@ class RunCommand(ProjectCommand):
             return False
         finally:
             self.spinner.stop()
-            pass
 
-        self.cli_helper.echo(" Ran task id: %s" % updated_task_obj.id)
+        self.cli_helper.echo(
+            __("info", "cli.task.run.complete", updated_task_obj.id))
         return updated_task_obj
 
     @Helper.notify_no_project_found
@@ -297,8 +298,10 @@ class RunCommand(ProjectCommand):
         download_path = kwargs.get('download_path', None)
         # Get all task meta information
         task_objs = self.task_controller.list(
-            session_id, sort_key='created_at', sort_order='descending')
-        header_list = ["id", "command", "status", "config", "results", "created at"]
+            session_id, sort_key="created_at", sort_order="descending")
+        header_list = [
+            "id", "command", "status", "config", "results", "created at"
+        ]
         item_dict_list = []
         run_obj_list = []
         for task_obj in task_objs:

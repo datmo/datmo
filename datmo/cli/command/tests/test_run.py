@@ -1,5 +1,5 @@
 """
-Tests for TaskCommand
+Tests for RunCommand
 """
 from __future__ import division
 from __future__ import print_function
@@ -40,10 +40,12 @@ except TypeError:
 from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
+from datmo.cli.command.run import RunObject
 from datmo.cli.command.run import RunCommand
 from datmo.cli.command.task import TaskCommand
+from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.util.exceptions import ProjectNotInitialized, SessionDoesNotExist
+from datmo.core.util.exceptions import SessionDoesNotExist
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -56,6 +58,27 @@ class TestRunCommand():
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         Config().set_home(self.temp_dir)
         self.cli_helper = Helper()
+        self.snapshot_dict = {
+            "id": "test",
+            "model_id": "my_model",
+            "session_id": "my_session",
+            "message": "my message",
+            "code_id": "my_code_id",
+            "environment_id": "my_environment_id",
+            "file_collection_id": "my file collection",
+            "config": {
+                "test": 0.56
+            },
+            "stats": {
+                "test": 0.34
+            }
+        }
+        self.task_dict = {
+            "id": "test",
+            "model_id": "my_model",
+            "session_id": "my_session",
+            "command": "python test.py"
+        }
 
     def teardown_method(self):
         pass
@@ -78,6 +101,13 @@ class TestRunCommand():
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(self.env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
+
+    def test_run_object_instantiate(self):
+        snapshot_obj = CoreSnapshot(self.snapshot_dict)
+        task_obj = CoreTask(self.task_dict)
+        result = RunObject(task_obj, snapshot_obj)
+        assert result
+        assert isinstance(result, RunObject)
 
     def test_run_should_fail1(self):
         self.__set_variables()
@@ -230,8 +260,8 @@ class TestRunCommand():
 
         # test single ports option before command
         self.run_command.parse([
-            "run", "--ports", test_ports[0], "--mem-limit",
-            test_mem_limit, test_command
+            "run", "--ports", test_ports[0], "--mem-limit", test_mem_limit,
+            test_command
         ])
 
         # test for desired side effects
@@ -242,7 +272,7 @@ class TestRunCommand():
         # test multiple ports option before command
         self.run_command.parse([
             "run", "--ports", test_ports[0], "--ports", test_ports[1],
-            "--mem-limit", test_mem_limit,"--environment-paths",
+            "--mem-limit", test_mem_limit, "--environment-paths",
             self.env_def_path, test_command
         ])
 
@@ -297,8 +327,7 @@ class TestRunCommand():
         assert run_objs[0].status == 'SUCCESS'
 
         test_session_id = 'test_session_id'
-        self.run_command.parse(
-            ["ls", "--session-id", test_session_id])
+        self.run_command.parse(["ls", "--session-id", test_session_id])
 
         # test for desired side effects
         assert self.run_command.args.session_id == test_session_id
@@ -326,8 +355,7 @@ class TestRunCommand():
         assert run_objs[0].status == 'SUCCESS'
 
         # Test success format csv, download default
-        self.run_command.parse(
-            ["ls", "--format", "csv", "--download"])
+        self.run_command.parse(["ls", "--format", "csv", "--download"])
         run_objs = self.run_command.execute()
         assert run_objs
         assert run_objs[0].status == 'SUCCESS'
@@ -340,8 +368,7 @@ class TestRunCommand():
         # Test success format csv, download exact path
         test_path = os.path.join(self.temp_dir, "my_output")
         self.run_command.parse([
-            "ls", "--format", "csv", "--download", "--download-path",
-            test_path
+            "ls", "--format", "csv", "--download", "--download-path", test_path
         ])
         run_objs = self.run_command.execute()
         assert run_objs
