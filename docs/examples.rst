@@ -21,8 +21,8 @@ Environment setup
     - opening a Jupyter notebook
     - open RStudio
 
-Running a containerized task (with option to create Snapshot)
---------------------------------------------------------------------
+Running a containerized task
+--------------------------------
 
 - `CLI + Python flow <https://github.com/datmo/datmo/blob/master/examples/python>`_
     - Run a single task
