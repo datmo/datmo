@@ -11,6 +11,23 @@ we have listed if there are any example for each type of flow. You can
 navigate to the specific flow folder to find the exact instructions for
 each example. 
 
+Environment setup
+------------------------
+- `Setting up a project environment (CLI) <https://github.com/datmo/datmo/blob/master/examples/cli/environment_setup.sh>`_
+    - From fresh repository
+    - From existing datmo project
+    - Bringing your own
+- `Initializing a workspace (CLI) <https://github.com/datmo/datmo/blob/master/examples/cli/workspace_setup.sh>`_
+    - opening a Jupyter notebook
+    - open RStudio
+
+Running a containerized task (with option to create Snapshot)
+--------------------------------------------------------------------
+
+- `CLI + Python flow <https://github.com/datmo/datmo/blob/master/examples/python>`_
+    - Run a single task
+    - Execute two tasks and compare them
+
 Creating a Snapshot 
 -----------------------
 
@@ -23,23 +40,6 @@ Creating a Snapshot
 - `CLI + R flow <https://github.com/datmo/datmo/blob/master/examples/R>`_
     - Create a snapshot of an R iris dataset caret decision tree
 
-Running a containerized task (with option to create Snapshot)
---------------------------------------------------------------------
-
-- `CLI + Python flow <https://github.com/datmo/datmo/blob/master/examples/python>`_
-    - Run a single task
-    - Execute two tasks and compare them
-
-
-Environment setup
-------------------------
-- `Setting up a project environment (CLI) <https://github.com/datmo/datmo/blob/master/examples/cli/environment_setup.sh>`_
-    - From fresh repository
-    - From existing datmo project
-    - Bringing your own
-- `Initializing a workspace (CLI) <https://github.com/datmo/datmo/blob/master/examples/cli/workspace_setup.sh>`_
-    - opening a Jupyter notebook
-    - open RStudio
 
 
 You can view the latest examples on `the master branch on Github <https://github.com/datmo/datmo/tree/master/examples>`_
