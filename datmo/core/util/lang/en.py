@@ -375,7 +375,8 @@ MESSAGES = {
         "cli.general.confirm":
             "Is it okay?",
         "cli.project.cleanup.confirm":
-            "Are you sure you want to delete all datmo project information? If none found, no changes will be made [yN]",
+            "Are you sure you want to delete all datmo project information along with files and environment directory? "
+            "If none found, no changes will be made [yN]",
         "cli.project.environment.setup":
             "Would you like to setup the environment? [yN]"
     },

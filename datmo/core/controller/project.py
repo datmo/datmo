@@ -173,10 +173,11 @@ class ProjectController(BaseController):
                     self.code_driver.delete_ref(ref)
         except Exception:
             self.logger.warning(__("warn", "controller.project.cleanup.code"))
-
-        # Remove Datmo file structure, give warning if error
         try:
-            self.file_driver.delete_datmo_file_structure()
+            # Remove Hidden Datmo file structure, give warning if error
+            self.file_driver.delete_hidden_datmo_file_structure()
+            # Remove Visible Datmo file structure, give warning if error
+            self.file_driver.delete_visible_datmo_structure()
         except FileIOError:
             self.logger.warning(__("warn", "controller.project.cleanup.files"))
 

@@ -99,7 +99,7 @@ class LocalFileDriver(FileDriver):
 
     @property
     def is_initialized(self):
-        if self.exists_datmo_file_structure():
+        if self.exists_hidden_datmo_file_structure():
             if self.exists_collections_dir():
                 if os.path.isdir(
                         os.path.join(self.root, ".datmo", "collections",
@@ -113,8 +113,10 @@ class LocalFileDriver(FileDriver):
 
     def init(self):
         try:
-            # Ensure the Datmo file structure exists
-            self.ensure_datmo_file_structure()
+            # Ensure the Hidden Datmo file structure exists
+            self.ensure_hidden_datmo_file_structure()
+            # Ensure the Visible Datmo file structure exists
+            self.ensure_visible_datmo_structure()
             # Ensure the collections directory exists
             self.ensure_collections_dir()
             # Ensure the empty collection exists
@@ -350,18 +352,49 @@ class LocalFileDriver(FileDriver):
         filepath = os.path.join(self.root, ".datmo")
         return self.delete(filepath, directory=True)
 
-    # Overall Datmo file structure
-    def create_datmo_file_structure(self):
+    def ensure_datmo_environment_dir(self):
+        filepath = os.path.join(self.root, "datmo_environment")
+        return self.ensure(filepath, directory=True)
+
+    def ensure_datmo_files_dir(self):
+        filepath = os.path.join(self.root, "datmo_files")
+        return self.ensure(filepath, directory=True)
+
+    def delete_datmo_environment_dir(self):
+        filepath = os.path.join(self.root, "datmo_environment")
+        response = True
+        if os.path.exists(os.path.join(self.root, filepath)):
+            response = self.delete(filepath, directory=True)
+        return response
+
+    def delete_datmo_files_dir(self):
+        filepath = os.path.join(self.root, "datmo_files")
+        response = True
+        if os.path.exists(os.path.join(self.root, filepath)):
+            response = self.delete(filepath, directory=True)
+        return response
+
+    # Overall Hidden Datmo file structure
+    def create_hidden_datmo_file_structure(self):
         return self.create_hidden_datmo_dir()
 
-    def exists_datmo_file_structure(self):
+    def exists_hidden_datmo_file_structure(self):
         return self.exists_hidden_datmo_dir()
 
-    def ensure_datmo_file_structure(self):
+    def ensure_hidden_datmo_file_structure(self):
         return self.ensure_hidden_datmo_dir()
 
-    def delete_datmo_file_structure(self):
+    def delete_hidden_datmo_file_structure(self):
         return self.delete_hidden_datmo_dir()
+
+    # Overall Visible Datmo dir structure
+    def ensure_visible_datmo_structure(self):
+        return self.ensure_datmo_files_dir() and \
+               self.ensure_datmo_environment_dir()
+
+    def delete_visible_datmo_structure(self):
+        return self.delete_datmo_environment_dir() and \
+               self.delete_datmo_files_dir()
 
     # Template files handling
 

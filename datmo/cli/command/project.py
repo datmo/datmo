@@ -162,7 +162,7 @@ class ProjectCommand(BaseCommand):
         return status_dict, latest_snapshot, ascending_unstaged_tasks
 
     def cleanup(self):
-        # Prompt user to ensure they would like to remove all datmo information
+        # Prompt user to ensure they would like to remove datmo information along with environment and files folder
         response = self.cli_helper.prompt_bool(
             __("prompt", "cli.project.cleanup.confirm"))
 
