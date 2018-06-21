@@ -32,6 +32,7 @@ class WorkspaceCommand(ProjectCommand):
         # Create the task object
         task_obj = self.task_controller.create()
 
+        updated_task_obj = task_obj
         # Pass in the task
         try:
             updated_task_obj = self.task_controller.run(
@@ -41,9 +42,12 @@ class WorkspaceCommand(ProjectCommand):
             self.cli_helper.echo(
                 __("error", "cli.workspace.notebook", task_obj.id))
             return False
-
-        self.cli_helper.echo(
-            "Ran notebook with task id: %s" % updated_task_obj.id)
+        finally:
+            self.cli_helper.echo(
+                __("info", "cli.task.run.stop"))
+            self.task_controller.stop(updated_task_obj.id)
+            self.cli_helper.echo(
+                __("info", "cli.task.run.complete", updated_task_obj.id))
 
         return updated_task_obj
 
@@ -74,6 +78,7 @@ class WorkspaceCommand(ProjectCommand):
         # Create the task object
         task_obj = self.task_controller.create()
 
+        updated_task_obj = task_obj
         # Pass in the task
         try:
             updated_task_obj = self.task_controller.run(
@@ -83,8 +88,11 @@ class WorkspaceCommand(ProjectCommand):
             self.cli_helper.echo(
                 __("error", "cli.workspace.rstudio", task_obj.id))
             return False
-
-        self.cli_helper.echo(
-            "Ran rstudio server with task id: %s" % updated_task_obj.id)
+        finally:
+            self.cli_helper.echo(
+                __("info", "cli.task.run.stop"))
+            self.task_controller.stop(updated_task_obj.id)
+            self.cli_helper.echo(
+                __("info", "cli.task.run.complete", updated_task_obj.id))
 
         return updated_task_obj

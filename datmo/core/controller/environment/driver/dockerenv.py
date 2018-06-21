@@ -186,7 +186,6 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 else:
                     options['runtime'] = 'nvidia'
             options.pop("gpu", None)
-
         run_return_code, run_id = self.run_container(
             image_name=name, **options)
 

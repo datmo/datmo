@@ -21,7 +21,7 @@ from datmo.core.util.exceptions import InvalidArgumentType
 from datmo.core.util.misc_functions import prettify_datetime, format_table
 
 
-class Run():
+class RunObject():
     """Run is an object to enable user access to properties
 
     Parameters
@@ -71,7 +71,6 @@ class Run():
     """
 
     def __init__(self, task_entity):
-
         if not isinstance(task_entity, CoreTask):
             raise InvalidArgumentType()
 
@@ -138,7 +137,9 @@ class Run():
     @property
     def results(self):
         self._core_task = self.__get_core_task()
-        self._results = self._core_task.results
+        self._results = {}
+        if self._core_task.results is not None:
+            self._results = self._core_task.results
         return self._results
 
     @property
@@ -298,7 +299,7 @@ class RunCommand(ProjectCommand):
         run_obj_list = []
         for task_obj in task_objs:
             # Create a new Run Object from Task Object
-            run_obj = Run(task_obj)
+            run_obj = RunObject(task_obj)
             task_results_printable = printable_object(str(run_obj.results))
             snapshot_config_printable = printable_object(str(run_obj.config))
             item_dict_list.append({

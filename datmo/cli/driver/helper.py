@@ -127,7 +127,6 @@ class Helper():
 
     def get_command_class(self, command_name):
         command_path = "datmo.cli.command." + command_name
-
         try:
             command_class = importlib.import_module(command_path)
         except ImportError:

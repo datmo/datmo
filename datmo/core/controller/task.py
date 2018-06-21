@@ -309,13 +309,12 @@ class TaskController(BaseController):
                 "tty": task_obj.interactive,
                 "api": False
             }
-
             # Run environment via the helper function
             return_code, run_id, logs =  \
                 self._run_helper(before_snapshot_obj.environment_id,
                                  environment_run_options,
                                  os.path.join(self.home, task_obj.log_filepath))
-
+            
         except Exception as e:
             return_code = 1
             logs += "Error running task: %" % e.message

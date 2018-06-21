@@ -40,10 +40,9 @@ except TypeError:
 from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
-from datmo.cli.command.run import Run
+from datmo.cli.command.run import RunObject
 from datmo.cli.command.run import RunCommand
 from datmo.cli.command.task import TaskCommand
-from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.util.exceptions import SessionDoesNotExist
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
@@ -104,9 +103,9 @@ class TestRunCommand():
 
     def test_run_object_instantiate(self):
         task_obj = CoreTask(self.task_dict)
-        result = Run(task_obj)
+        result = RunObject(task_obj)
         assert result
-        assert isinstance(result, Run)
+        assert isinstance(result, RunObject)
 
     def test_run_should_fail1(self):
         self.__set_variables()
