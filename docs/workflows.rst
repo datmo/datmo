@@ -11,34 +11,62 @@ we have listed if there are any example for each type of flow. You can
 navigate to the specific flow folder to find the exact instructions for
 each example. 
 
-Environment setup
-------------------------
-- `Setting up a project environment (CLI) <https://github.com/datmo/datmo/blob/master/examples/cli/environment_setup.sh>`_
-    - From fresh repository
-    - From existing datmo project
-    - Bringing your own
-- `Initializing a workspace (CLI) <https://github.com/datmo/datmo/blob/master/examples/cli/workspace_setup.sh>`_
-    - opening a Jupyter notebook
-    - open RStudio
+Setting up your environment
+------------------------------
 
-Running a containerized task
++----------------------------+--------------------------------------------------+------------------------------------------------------------------------------------------+
+| Environment Setup Examples                                                                                                                                               |
++----------------------------+--------------------------------------------------+------------------------------------------------------------------------------------------+
+| Feature                    | Scenario                                         | Link                                                                                     |
++============================+==================================================+==========================================================================================+
+| Project Environment Setup  | For fresh repository                             | `Docs <https://datmo.readthedocs.io/en/latest/cli.html#setup>`_                          |
++----------------------------+--------------------------------------------------+------------------------------------------------------------------------------------------+
+|                            | For existing datmo project (pre-configured env)  | `GitHub <https://github.com/datmo/datmo/blob/master/examples/python>`_                   |
++----------------------------+--------------------------------------------------+------------------------------------------------------------------------------------------+
+|                            | For existing datmo project (bring your own env)  | `GitHub <https://github.com/datmo/datmo/blob/master/examples/python>`_                   |
++----------------------------+--------------------------------------------------+------------------------------------------------------------------------------------------+
+| Opening a Workspace        | Opening a Jupyter Notebook                       | `GitHub <https://github.com/datmo/datmo/blob/master/examples/cli/workspace_setup.sh>`_   |
++----------------------------+--------------------------------------------------+------------------------------------------------------------------------------------------+
+|                            | Opening RStudio                                  | `Github <https://github.com/datmo/datmo/blob/master/examples/cli/workspace_setup.sh>`_   |
++----------------------------+--------------------------------------------------+------------------------------------------------------------------------------------------+
+|                            | Opening JupyterLab                               | (coming soon)                                                                            |
++----------------------------+--------------------------------------------------+------------------------------------------------------------------------------------------+
+
+
+Running a task
 --------------------------------
 
-- `CLI + Python flow <https://github.com/datmo/datmo/blob/master/examples/python>`_
-    - Run a single task
-    - Execute two tasks and compare them
++-------------------+-----------------------------------+-------------------------------------------------------------------------+
+| Task Run Examples                                                                                                               |
++-------------------+-----------------------------------+-------------------------------------------------------------------------+
+| Method            | Example                           | Link                                                                    |
++===================+===================================+=========================================================================+
+| CLI               | Run a single task                 | `Docs <https://datmo.readthedocs.io/en/latest/cli.html#run>`_           |
++-------------------+-----------------------------------+-------------------------------------------------------------------------+
+| CLI + Python      | Run a single task                 | `GitHub <https://github.com/datmo/datmo/blob/master/examples/python>`_  |
++                   +-----------------------------------+-------------------------------------------------------------------------+
+|                   | Run two tasks and compare results | `GitHub <https://github.com/datmo/datmo/blob/master/examples/python>`_  |
++-------------------+-----------------------------------+-------------------------------------------------------------------------+
+
 
 Creating a Snapshot 
 -----------------------
 
-- `CLI flow <https://github.com/datmo/datmo/tree/master/examples/cli>`_
-    - Create a snapshot of an iris dataset sklearn classifier
-- `CLI + Python flow <https://github.com/datmo/datmo/blob/master/examples/python>`_
-    - Create a snapshot of an iris dataset sklearn classifier
-- `CLI + Jupyter Notebook flow <https://github.com/datmo/datmo/blob/master/examples/jupyter_notebook>`_
-    - Create a snapshot of an iris dataset sklearn classifier
-- `CLI + R flow <https://github.com/datmo/datmo/blob/master/examples/R>`_
-    - Create a snapshot of an R iris dataset caret decision tree
+Note: All of the following flows involve using the CLI to some extent, even in conjunction with the python SDK. The standalone CLI version, while the most manual method, is compatible with any language and files, even those not listed here.
+
++--------------------------+----------------------------------+------------------------------------------------------------------------------------+
+| Snapshot Create Examples                                                                                                                         | 
++--------------------------+----------------------------------+------------------------------------------------------------------------------------+
+| Method                   | Example                          | Link                                                                               |
++==========================+==================================+====================================================================================+
+| CLI                      | Iris dataset sk-learn classifier | `GitHub <https://github.com/datmo/datmo/tree/master/examples/cli>`_                |
++--------------------------+----------------------------------+------------------------------------------------------------------------------------+
+| CLI + Python             | Iris dataset sk-learn classifier | `GitHub <https://github.com/datmo/datmo/tree/master/examples/python>`_             |
++--------------------------+----------------------------------+------------------------------------------------------------------------------------+
+| CLI + Jupyter Notebook   | Iris dataset sk-learn classifier | `GitHub <https://github.com/datmo/datmo/blob/master/examples/jupyter_notebook>`_   |
++--------------------------+----------------------------------+------------------------------------------------------------------------------------+
+| CLI + R                  | Iris dataset caret decision tree | `GitHub <https://github.com/datmo/datmo/blob/master/examples/R>`_                  |
++--------------------------+----------------------------------+------------------------------------------------------------------------------------+
 
 
 
