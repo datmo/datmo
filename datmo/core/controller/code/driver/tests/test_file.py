@@ -181,13 +181,6 @@ class TestFileCodeDriver():
         except CommitDoesNotExist:
             failed = True
         assert failed
-        # Test failure, no files to track
-        failed = False
-        try:
-            self.file_code_manager.create_ref()
-        except CommitFailed:
-            failed = True
-        assert failed
         # Test successful creation of ref
         self.__setup()
         result = self.file_code_manager.create_ref()

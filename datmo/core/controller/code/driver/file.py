@@ -13,7 +13,7 @@ from datmo.core.util.misc_functions import list_all_filepaths
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (PathDoesNotExist, FileIOError,
                                         UnstagedChanges, CodeNotInitialized,
-                                        CommitDoesNotExist, CommitFailed)
+                                        CommitDoesNotExist)
 from datmo.core.controller.code.driver import CodeDriver
 
 
@@ -188,11 +188,6 @@ class FileCodeDriver(CodeDriver):
             return commit_id
         # Find all tracked files (_get_tracked_files)
         tracked_filepaths = self._get_tracked_files()
-        # If no tracked filepaths, then commit fails
-        if not tracked_filepaths:
-            raise CommitFailed(
-                __("error",
-                   "controller.code.driver.file.create_ref.cannot_commit"))
         # Create the hash of the files (_calculate_commit_hash)
         commit_hash = self._calculate_commit_hash(tracked_filepaths)
         # Check if the hash already exists with exists_ref

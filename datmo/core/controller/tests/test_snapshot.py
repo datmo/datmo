@@ -82,17 +82,13 @@ class TestSnapshotController():
             failed = True
         assert failed
 
-    def test_create_fail_no_code(self):
+    def test_create_success_no_code(self):
         self.__setup()
         # Test default values for snapshot, fail due to code
-        failed = False
-        try:
-            self.snapshot_controller.create({"message": "my test snapshot"})
-        except CommitFailed:
-            failed = True
-        assert failed
+        result = self.snapshot_controller.create({"message": "my test snapshot"})
+        assert result
 
-    def test_create_fail_no_code_environment(self):
+    def test_create_success_no_code_environment(self):
         self.__setup()
         # Create environment definition
         env_def_path = os.path.join(
@@ -100,17 +96,14 @@ class TestSnapshotController():
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
-        # test must fail when there is file present in root project folder
-        failed = False
-        try:
-            _ = self.snapshot_controller.create({
-                "message": "my test snapshot"
-            })
-        except CommitFailed:
-            failed = True
-        assert failed
+        # test must pass when there is file present in root project folder
+        result = self.snapshot_controller.create({
+            "message": "my test snapshot"
+        })
 
-    def test_create_fail_no_code_environment_files(self):
+        assert result
+
+    def test_create_success_no_code_environment_files(self):
         self.__setup()
         # Create environment definition
         env_def_path = os.path.join(
@@ -123,15 +116,12 @@ class TestSnapshotController():
         with open(test_file, "wb") as f:
             f.write(to_bytes(str("hello")))
 
-        # test must fail when there is file present in root project folder
-        failed = False
-        try:
-            _ = self.snapshot_controller.create({
+        # test must pass when there is file present in root project folder
+        result = self.snapshot_controller.create({
                 "message": "my test snapshot"
             })
-        except CommitFailed:
-            failed = True
-        assert failed
+
+        assert result
 
     def test_create_no_environment_detected_in_file(self):
         self.__setup()
