@@ -17,8 +17,8 @@ Table of contents
 .. toctree::
     :maxdepth: 3
 
-    hello_world
-    examples
+    quickstart
+    workflows
     tutorials
     concepts
     cli
