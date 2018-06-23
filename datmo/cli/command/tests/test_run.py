@@ -160,7 +160,7 @@ class TestRunCommand():
         assert "accuracy" in result.logs
         assert result.results
         assert result.results == {"accuracy": "0.45"}
-        assert result.status in ['SUCCESS','STOPPED']
+        assert result.status == 'SUCCESS'
 
         # teardown
         self.task_command.parse(["task", "stop", "--all"])
@@ -195,7 +195,7 @@ class TestRunCommand():
         assert "accuracy" in result.logs
         assert result.results
         assert result.results == {"accuracy": "0.45"}
-        assert result.status in ["SUCCESS", "STOPPED"]
+        assert result.status == 'SUCCESS'
 
         # teardown
         self.task_command.parse(["task", "stop", "--all"])
@@ -242,7 +242,7 @@ class TestRunCommand():
     #         assert "accuracy" in result.logs
     #         assert result.results
     #         assert result.results == {"accuracy": "0.45"}
-    #         assert result.status in ['SUCCESS','STOPPED']
+    #         assert result.status == 'SUCCESS'
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_run_notebook(self):
@@ -285,7 +285,7 @@ class TestRunCommand():
         assert isinstance(result, CoreTask)
         assert result.logs
         assert "Currently running servers" in result.logs
-        assert result.status in ['SUCCESS','STOPPED']
+        assert result.status == 'SUCCESS'
 
         # teardown
         self.task_command.parse(["task", "stop", "--all"])
@@ -323,7 +323,7 @@ class TestRunCommand():
         self.run_command.parse(["ls"])
         run_objs = self.run_command.execute()
         assert run_objs
-        assert run_objs[0].status in ['SUCCESS','STOPPED']
+        assert run_objs[0].status == 'SUCCESS'
 
         test_session_id = 'test_session_id'
         self.run_command.parse(["ls", "--session-id", test_session_id])
@@ -351,13 +351,13 @@ class TestRunCommand():
         self.run_command.parse(["ls", "--format", "csv"])
         run_objs = self.run_command.execute()
         assert run_objs
-        assert run_objs[0].status in ['SUCCESS','STOPPED']
+        assert run_objs[0].status == 'SUCCESS'
 
         # Test success format csv, download default
         self.run_command.parse(["ls", "--format", "csv", "--download"])
         run_objs = self.run_command.execute()
         assert run_objs
-        assert run_objs[0].status in ['SUCCESS','STOPPED']
+        assert run_objs[0].status == 'SUCCESS'
         test_wildcard = os.path.join(os.getcwd(), "run_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
@@ -371,7 +371,7 @@ class TestRunCommand():
         ])
         run_objs = self.run_command.execute()
         assert run_objs
-        assert run_objs[0].status in ['SUCCESS','STOPPED']
+        assert run_objs[0].status == 'SUCCESS'
         assert os.path.isfile(test_path)
         assert open(test_path, "r").read()
         os.remove(test_path)
@@ -380,13 +380,13 @@ class TestRunCommand():
         self.run_command.parse(["ls"])
         run_objs = self.run_command.execute()
         assert run_objs
-        assert run_objs[0].status in ['SUCCESS','STOPPED']
+        assert run_objs[0].status == 'SUCCESS'
 
         # Test success format table, download default
         self.run_command.parse(["ls", "--download"])
         run_objs = self.run_command.execute()
         assert run_objs
-        assert run_objs[0].status in ['SUCCESS','STOPPED']
+        assert run_objs[0].status  == 'SUCCESS'
         test_wildcard = os.path.join(os.getcwd(), "run_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
@@ -399,7 +399,7 @@ class TestRunCommand():
             ["ls", "--download", "--download-path", test_path])
         run_objs = self.run_command.execute()
         assert run_objs
-        assert run_objs[0].status in ['SUCCESS','STOPPED']
+        assert run_objs[0].status == 'SUCCESS'
         assert os.path.isfile(test_path)
         assert open(test_path, "r").read()
         os.remove(test_path)

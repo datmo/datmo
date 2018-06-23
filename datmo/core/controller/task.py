@@ -445,7 +445,7 @@ class TaskController(BaseController):
                 __("error", "controller.task.delete.arg", "id"))
         return self.dal.task.delete(task_id)
 
-    def stop(self, task_id=None, all=False):
+    def stop(self, task_id=None, all=False, status='STOPPED'):
         """Stop and remove run for the task and update task object statuses
 
         Parameters
@@ -486,13 +486,13 @@ class TaskController(BaseController):
         # Set stopped task statuses to STOPPED if return success
         if return_code:
             if task_id:
-                self.dal.task.update({"id": task_id, "status": "STOPPED"})
+                self.dal.task.update({"id": task_id, "status": status})
             if all:
                 task_objs = self.dal.task.query({})
                 for task_obj in task_objs:
                     self.dal.task.update({
                         "id": task_obj.id,
-                        "status": "STOPPED"
+                        "status": status
                     })
 
         return return_code
