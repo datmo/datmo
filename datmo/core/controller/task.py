@@ -473,10 +473,16 @@ class TaskController(BaseController):
         if task_id:
             _ = self.dal.task.get_by_id(task_id)  # verify if task_id exists
             task_match_string = "datmo-task-" + self.model.id + "-" + task_id
-            return_code = self.environment.stop(match_string=task_match_string)
+            # Get the environment id associated with the task
+            kwargs = {'match_string': task_match_string}
+            task_obj = self.get(task_id)
+            before_snapshot_id = task_obj.before_snapshot_id
+            if before_snapshot_id:
+                before_snapshot_obj = self.snapshot.get(before_snapshot_id)
+                kwargs['environment_id'] = before_snapshot_obj.environment_id
+            return_code = self.environment.stop(**kwargs)
         if all:
             return_code = self.environment.stop(all=True)
-
         # Set stopped task statuses to STOPPED if return success
         if return_code:
             if task_id:

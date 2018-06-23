@@ -492,7 +492,7 @@ class GitCodeDriver(CodeDriver):
                     __("error", "controller.code.driver.git.status",
                        str(stderr)))
             stdout = stdout.decode().strip()
-            if "working tree clean" not in stdout:
+            if "clean" not in stdout:
                 raise UnstagedChanges()
         except subprocess.CalledProcessError as e:
             raise GitExecutionError(

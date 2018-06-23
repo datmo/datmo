@@ -35,7 +35,7 @@ from datmo.core.entity.environment import Environment
 from datmo.core.util.exceptions import (
     EntityNotFound, RequiredArgumentMissing, TooManyArgumentsFound,
     FileAlreadyExistsError, UnstagedChanges, EnvironmentDoesNotExist,
-    ProjectNotInitialized)
+    ProjectNotInitialized, EnvironmentExecutionError)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -815,6 +815,7 @@ class TestEnvironmentController():
         # 1) Test run_id input to stop
         # 2) Test match_string input to stop
         # 3) Test all input to stop
+        # 4) Test if the image was removed by stop
         self.project_controller.init("test5", "test description")
         self.environment_controller = EnvironmentController()
 
@@ -867,19 +868,26 @@ class TestEnvironmentController():
 
         _, run_id, _ = \
             self.environment_controller.run(environment_obj.id, run_options, log_filepath)
-        return_code = self.environment_controller.stop(run_id=run_id)
+        return_code = self.environment_controller.stop(run_id=run_id, environment_id=environment_obj.id)
 
         assert return_code
 
         # 2) Test option 2
+
+        # Rebuild environment in the project
+        _ = self.environment_controller.build(environment_obj.id)
+
         _, _, _ = \
             self.environment_controller.run(environment_obj.id, run_options, log_filepath)
         return_code = self.environment_controller.stop(
-            match_string="datmo-task-" + self.environment_controller.model.id)
+            match_string="datmo-task-" + self.environment_controller.model.id, environment_id=environment_obj.id)
 
         assert return_code
 
         # 3) Test option 3
+
+        # Rebuild environment in the project
+        _ = self.environment_controller.build(environment_obj.id)
         _, _, _ = \
             self.environment_controller.run(environment_obj.id, run_options, log_filepath)
         run_options_2 = {
@@ -903,9 +911,18 @@ class TestEnvironmentController():
         }
         _, _, _ = \
             self.environment_controller.run(environment_obj.id, run_options_2, log_filepath)
-        return_code = self.environment_controller.stop(all=True)
+        return_code = self.environment_controller.stop(all=True, environment_id=environment_obj.id)
 
         assert return_code
+
+        # 4) Test option 4
+        failed = False
+        try:
+            _, _, _ = \
+                self.environment_controller.run(environment_obj.id, run_options_2, log_filepath)
+        except EnvironmentExecutionError:
+            failed = True
+        assert failed
 
         # teardown
         self.environment_controller.delete(environment_obj.id)

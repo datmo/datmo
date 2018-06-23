@@ -265,6 +265,8 @@ class RunCommand(ProjectCommand):
 
         # Create the task object
         task_obj = self.task_controller.create()
+
+        updated_task_obj = task_obj
         try:
             # Pass in the task to run
             updated_task_obj = self.task_controller.run(
@@ -274,9 +276,13 @@ class RunCommand(ProjectCommand):
             self.cli_helper.echo("%s" % e)
             self.cli_helper.echo(__("error", "cli.task.run", task_obj.id))
             return False
+        finally:
+            self.cli_helper.echo(
+                __("info", "cli.task.run.stop"))
+            self.task_controller.stop(updated_task_obj.id)
+            self.cli_helper.echo(
+                __("info", "cli.task.run.complete", updated_task_obj.id))
 
-        self.cli_helper.echo(
-            __("info", "cli.task.run.complete", updated_task_obj.id))
         return updated_task_obj
 
     @Helper.notify_no_project_found
