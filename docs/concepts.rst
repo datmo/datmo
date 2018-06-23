@@ -22,9 +22,6 @@ Runs
 A **run** is comprised of *tasks* and *snapshots*. Each run contains the initial state (snapshot), followed by the action that was performed to it (task), as well as the final state of the repository (another snapshot).
 
 
-``Diagram explaining runs goes here``
-
-
 Tasks
 ---------
 
