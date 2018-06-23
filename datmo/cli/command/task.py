@@ -58,11 +58,11 @@ class TaskCommand(ProjectCommand):
         updated_task_obj = task_obj
         try:
             # Pass in the task
-            status='SUCCESS'
+            status = 'SUCCESS'
             updated_task_obj = self.task_controller.run(
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
         except Exception as e:
-            status='FAILED'
+            status = 'FAILED'
             self.logger.error("%s %s" % (e, task_dict))
             self.cli_helper.echo("%s" % e)
             self.cli_helper.echo(__("error", "cli.task.run", task_obj.id))

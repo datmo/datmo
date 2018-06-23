@@ -79,11 +79,13 @@ class WorkspaceCommand(ProjectCommand):
         task_obj = self.task_controller.create()
 
         updated_task_obj = task_obj
-        # Pass in the task
         try:
+            # Pass in the task
+            status = 'SUCCESS'
             updated_task_obj = self.task_controller.run(
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
         except Exception as e:
+            status = 'FAILED'
             self.logger.error("%s %s" % (e, task_dict))
             self.cli_helper.echo(
                 __("error", "cli.workspace.rstudio", task_obj.id))
@@ -91,7 +93,7 @@ class WorkspaceCommand(ProjectCommand):
         finally:
             self.cli_helper.echo(
                 __("info", "cli.task.run.stop"))
-            self.task_controller.stop(updated_task_obj.id)
+            self.task_controller.stop(updated_task_obj.id, status=status)
             self.cli_helper.echo(
                 __("info", "cli.task.run.complete", updated_task_obj.id))
 
