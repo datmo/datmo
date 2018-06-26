@@ -1,5 +1,5 @@
 """
-Tests for TaskCommand
+Tests for RunCommand
 """
 from __future__ import division
 from __future__ import print_function
@@ -40,9 +40,11 @@ except TypeError:
 from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
+from datmo.cli.command.run import RunObject
+from datmo.cli.command.run import RunCommand
 from datmo.cli.command.task import TaskCommand
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.util.exceptions import MutuallyExclusiveArguments, RequiredArgumentMissing, SessionDoesNotExist
+from datmo.core.util.exceptions import SessionDoesNotExist
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -50,11 +52,32 @@ tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
 test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 
 
-class TestTaskCommand():
+class TestRunCommand():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         Config().set_home(self.temp_dir)
         self.cli_helper = Helper()
+        self.snapshot_dict = {
+            "id": "test",
+            "model_id": "my_model",
+            "session_id": "my_session",
+            "message": "my message",
+            "code_id": "my_code_id",
+            "environment_id": "my_environment_id",
+            "file_collection_id": "my file collection",
+            "config": {
+                "test": 0.56
+            },
+            "stats": {
+                "test": 0.34
+            }
+        }
+        self.task_dict = {
+            "id": "test",
+            "model_id": "my_model",
+            "session_id": "my_session",
+            "command": "python test.py"
+        }
 
     def teardown_method(self):
         pass
@@ -70,6 +93,7 @@ class TestTaskCommand():
 
         dummy(self)
 
+        self.run_command = RunCommand(self.cli_helper)
         self.task_command = TaskCommand(self.cli_helper)
 
         # Create environment_driver definition
@@ -77,26 +101,27 @@ class TestTaskCommand():
         with open(self.env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
-    def test_task_command(self):
-        self.__set_variables()
-        self.task_command.parse(["task"])
-        assert self.task_command.execute()
+    def test_run_object_instantiate(self):
+        task_obj = CoreTask(self.task_dict)
+        result = RunObject(task_obj)
+        assert result
+        assert isinstance(result, RunObject)
 
-    def test_task_run_should_fail1(self):
+    def test_run_should_fail1(self):
         self.__set_variables()
         # Test failure case
-        self.task_command.parse(["task", "run"])
-        result = self.task_command.execute()
+        self.run_command.parse(["run"])
+        result = self.run_command.execute()
         assert not result
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_task_run(self):
+    def test_run(self):
         # TODO: Adding test with `--interactive` argument and terminate inside container
         self.__set_variables()
         # Test failure command execute
         test_command = ["yo", "yo"]
-        self.task_command.parse(["task", "run", test_command])
-        result = self.task_command.execute()
+        self.run_command.parse(["run", test_command])
+        result = self.run_command.execute()
         assert result
         # Test success case
         test_command = ["sh", "-c", "echo accuracy:0.45"]
@@ -105,29 +130,29 @@ class TestTaskCommand():
         test_mem_limit = "4g"
 
         # test for single set of ports
-        self.task_command.parse([
-            "task", "run", "--ports", test_ports[0], "--environment-paths",
+        self.run_command.parse([
+            "run", "--ports", test_ports[0], "--environment-paths",
             test_dockerfile, "--mem-limit", test_mem_limit, test_command
         ])
         # test for desired side effects
-        assert self.task_command.args.cmd == test_command
-        assert self.task_command.args.ports == [test_ports[0]]
-        assert self.task_command.args.environment_paths == [test_dockerfile]
-        assert self.task_command.args.mem_limit == test_mem_limit
+        assert self.run_command.args.cmd == test_command
+        assert self.run_command.args.ports == [test_ports[0]]
+        assert self.run_command.args.environment_paths == [test_dockerfile]
+        assert self.run_command.args.mem_limit == test_mem_limit
 
-        self.task_command.parse([
-            "task", "run", "-p", test_ports[0], "-p", test_ports[1],
+        self.run_command.parse([
+            "run", "-p", test_ports[0], "-p", test_ports[1],
             "--environment-paths", test_dockerfile, "--mem-limit",
             test_mem_limit, test_command
         ])
         # test for desired side effects
-        assert self.task_command.args.cmd == test_command
-        assert self.task_command.args.ports == test_ports
-        assert self.task_command.args.environment_paths == [test_dockerfile]
-        assert self.task_command.args.mem_limit == test_mem_limit
+        assert self.run_command.args.cmd == test_command
+        assert self.run_command.args.ports == test_ports
+        assert self.run_command.args.environment_paths == [test_dockerfile]
+        assert self.run_command.args.mem_limit == test_mem_limit
 
-        # test proper execution of task run command
-        result = self.task_command.execute()
+        # test proper execution of run command
+        result = self.run_command.execute()
         time.sleep(1)
         assert result
         assert isinstance(result, CoreTask)
@@ -143,7 +168,7 @@ class TestTaskCommand():
         task_stop_command = self.task_command.execute()
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_task_run_string_command(self):
+    def test_run_string_command(self):
         # TODO: Adding test with `--interactive` argument and terminate inside container
         self.__set_variables()
         # Test success case
@@ -151,19 +176,19 @@ class TestTaskCommand():
         test_ports = ["8888:8888", "9999:9999"]
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         test_mem_limit = "4g"
-        self.task_command.parse([
-            "task", "run", "--ports", test_ports[0], "--ports", test_ports[1],
+        self.run_command.parse([
+            "run", "--ports", test_ports[0], "--ports", test_ports[1],
             "--environment-paths", test_dockerfile, "--mem-limit",
             test_mem_limit, test_command
         ])
         # test for desired side effects
-        assert self.task_command.args.cmd == test_command
-        assert self.task_command.args.ports == test_ports
-        assert self.task_command.args.environment_paths == [test_dockerfile]
-        assert self.task_command.args.mem_limit == test_mem_limit
+        assert self.run_command.args.cmd == test_command
+        assert self.run_command.args.ports == test_ports
+        assert self.run_command.args.environment_paths == [test_dockerfile]
+        assert self.run_command.args.mem_limit == test_mem_limit
 
-        # test proper execution of task run command
-        result = self.task_command.execute()
+        # test proper execution of run command
+        result = self.run_command.execute()
         assert result
         assert isinstance(result, CoreTask)
         assert result.logs
@@ -177,30 +202,30 @@ class TestTaskCommand():
         # test when all is passed to stop all
         task_stop_command = self.task_command.execute()
 
-    # def test_multiple_concurrent_task_run_command(self):
+    # def test_multiple_concurrent_run_command(self):
     #     test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
     #     test_command = ["sh", "-c", "echo accuracy:0.45"]
     #     manager = Manager()
     #     return_dict = manager.dict()
     #
-    #     def task_exec_func(procnum, return_dict):
+    #     def run_exec_func(procnum, return_dict):
     #         print("Creating Task object")
-    #         task = TaskCommand(self.cli_helper)
+    #         run = RunCommand(self.temp_dir, self.cli_helper)
     #         print("Parsing command")
-    #         task.parse(
-    #             ["task", "run", "--environment-paths", test_dockerfile, test_command])
+    #         run.parse(
+    #             ["run", "--environment-paths", test_dockerfile, test_command])
     #         print("Executing command")
-    #         result = task.execute()
+    #         result = run.execute()
     #         return_dict[procnum] = result
     #
     #     self.__set_variables()
     #     test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
     #
-    #     # Run all three tasks in parallel
+    #     # Run all three runs in parallel
     #     jobs = []
-    #     number_tasks = 3
-    #     for i in range(number_tasks):
-    #         p = Process(target=task_exec_func, args=(i, return_dict))
+    #     number_runs = 3
+    #     for i in range(number_runs):
+    #         p = Process(target=run_exec_func, args=(i, return_dict))
     #         jobs.append(p)
     #         p.start()
     #
@@ -209,7 +234,7 @@ class TestTaskCommand():
     #         proc.join()
     #
     #     results = return_dict.values()
-    #     assert len(results) == number_tasks
+    #     assert len(results) == number_runs
     #     for result in results:
     #         assert result
     #         assert isinstance(result, CoreTask)
@@ -220,7 +245,7 @@ class TestTaskCommand():
     #         assert result.status == "SUCCESS"
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_task_run_notebook(self):
+    def test_run_notebook(self):
         self.__set_variables()
         # Update the default Dockerfile to test with
         with open(self.env_def_path, "wb") as f:
@@ -232,29 +257,30 @@ class TestTaskCommand():
         test_mem_limit = "4g"
 
         # test single ports option before command
-        self.task_command.parse([
-            "task", "run", "--ports", test_ports[0], "--mem-limit",
-            test_mem_limit, test_command
+        self.run_command.parse([
+            "run", "--ports", test_ports[0], "--mem-limit", test_mem_limit,
+            test_command
         ])
 
         # test for desired side effects
-        assert self.task_command.args.cmd == test_command
-        assert self.task_command.args.ports == [test_ports[0]]
-        assert self.task_command.args.mem_limit == test_mem_limit
+        assert self.run_command.args.cmd == test_command
+        assert self.run_command.args.ports == [test_ports[0]]
+        assert self.run_command.args.mem_limit == test_mem_limit
 
         # test multiple ports option before command
-        self.task_command.parse([
-            "task", "run", "--ports", test_ports[0], "--ports", test_ports[1],
-            "--mem-limit", test_mem_limit, test_command
+        self.run_command.parse([
+            "run", "--ports", test_ports[0], "--ports", test_ports[1],
+            "--mem-limit", test_mem_limit, "--environment-paths",
+            self.env_def_path, test_command
         ])
 
         # test for desired side effects
-        assert self.task_command.args.cmd == test_command
-        assert self.task_command.args.ports == test_ports
-        assert self.task_command.args.mem_limit == test_mem_limit
+        assert self.run_command.args.cmd == test_command
+        assert self.run_command.args.ports == test_ports
+        assert self.run_command.args.mem_limit == test_mem_limit
 
-        # test proper execution of task run command
-        result = self.task_command.execute()
+        # test proper execution of run command
+        result = self.run_command.execute()
         assert result
         assert isinstance(result, CoreTask)
         assert result.logs
@@ -264,36 +290,51 @@ class TestTaskCommand():
         # teardown
         self.task_command.parse(["task", "stop", "--all"])
         # test when all is passed to stop all
-        _ = self.task_command.execute()
+        task_stop_command = self.task_command.execute()
 
-    def test_task_run_invalid_arg(self):
+    def test_run_invalid_arg(self):
         self.__set_variables()
         exception_thrown = False
         try:
-            self.task_command.parse(["task", "run" "--foobar", "foobar"])
+            self.run_command.parse(["run" "--foobar", "foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown
 
-    def test_task_ls(self):
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_run_ls(self):
         self.__set_variables()
 
+        # Running a task
+        test_command = ["sh", "-c", "echo accuracy:0.45"]
+        test_ports = ["8888:8888", "9999:9999"]
+        test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
+        test_mem_limit = "4g"
+
+        # test for single set of ports
+        self.run_command.parse([
+            "run", "--ports", test_ports[0], "--environment-paths",
+            test_dockerfile, "--mem-limit", test_mem_limit, test_command
+        ])
+
+        # test proper execution of run command
+        self.run_command.execute()
         # Test defaults
-        self.task_command.parse(["task", "ls"])
-        task_objs = self.task_command.execute()
-        assert task_objs == []
+        self.run_command.parse(["ls"])
+        run_objs = self.run_command.execute()
+        assert run_objs
+        assert run_objs[0].status == 'SUCCESS'
 
         test_session_id = 'test_session_id'
-        self.task_command.parse(
-            ["task", "ls", "--session-id", test_session_id])
+        self.run_command.parse(["ls", "--session-id", test_session_id])
 
         # test for desired side effects
-        assert self.task_command.args.session_id == test_session_id
+        assert self.run_command.args.session_id == test_session_id
 
         # Test failure no session
         failed = False
         try:
-            _ = self.task_command.execute()
+            _ = self.run_command.execute()
         except SessionDoesNotExist:
             failed = True
         assert failed
@@ -301,23 +342,23 @@ class TestTaskCommand():
         # Test failure (format)
         failed = False
         try:
-            self.task_command.parse(["task", "ls", "--format"])
+            self.run_command.parse(["ls", "--format"])
         except ArgumentError:
             failed = True
         assert failed
 
         # Test success format csv
-        self.task_command.parse(["task", "ls", "--format", "csv"])
-        task_objs = self.task_command.execute()
-        assert task_objs == []
+        self.run_command.parse(["ls", "--format", "csv"])
+        run_objs = self.run_command.execute()
+        assert run_objs
+        assert run_objs[0].status == 'SUCCESS'
 
         # Test success format csv, download default
-        self.task_command.parse(
-            ["task", "ls", "--format", "csv", "--download"])
-        task_objs = self.task_command.execute()
-        assert task_objs == []
-        test_wildcard = os.path.join(self.task_command.task_controller.home,
-                                     "task_ls_*")
+        self.run_command.parse(["ls", "--format", "csv", "--download"])
+        run_objs = self.run_command.execute()
+        assert run_objs
+        assert run_objs[0].status == 'SUCCESS'
+        test_wildcard = os.path.join(os.getcwd(), "run_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()
@@ -325,124 +366,49 @@ class TestTaskCommand():
 
         # Test success format csv, download exact path
         test_path = os.path.join(self.temp_dir, "my_output")
-        self.task_command.parse([
-            "task", "ls", "--format", "csv", "--download", "--download-path",
-            test_path
+        self.run_command.parse([
+            "ls", "--format", "csv", "--download", "--download-path", test_path
         ])
-        task_objs = self.task_command.execute()
-        assert task_objs == []
+        run_objs = self.run_command.execute()
+        assert run_objs
+        assert run_objs[0].status == 'SUCCESS'
         assert os.path.isfile(test_path)
         assert open(test_path, "r").read()
         os.remove(test_path)
 
         # Test success format table
-        self.task_command.parse(["task", "ls"])
-        task_objs = self.task_command.execute()
-        assert task_objs == []
+        self.run_command.parse(["ls"])
+        run_objs = self.run_command.execute()
+        assert run_objs
+        assert run_objs[0].status == 'SUCCESS'
 
         # Test success format table, download default
-        self.task_command.parse(["task", "ls", "--download"])
-        task_objs = self.task_command.execute()
-        assert task_objs == []
-        test_wildcard = os.path.join(self.task_command.task_controller.home,
-                                     "task_ls_*")
+        self.run_command.parse(["ls", "--download"])
+        run_objs = self.run_command.execute()
+        assert run_objs
+        assert run_objs[0].status == 'SUCCESS'
+        test_wildcard = os.path.join(os.getcwd(), "run_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()
         os.remove(paths[0])
+
         # Test success format table, download exact path
         test_path = os.path.join(self.temp_dir, "my_output")
-        self.task_command.parse(
-            ["task", "ls", "--download", "--download-path", test_path])
-        task_objs = self.task_command.execute()
-        assert task_objs == []
+        self.run_command.parse(
+            ["ls", "--download", "--download-path", test_path])
+        run_objs = self.run_command.execute()
+        assert run_objs
+        assert run_objs[0].status == 'SUCCESS'
         assert os.path.isfile(test_path)
         assert open(test_path, "r").read()
         os.remove(test_path)
 
-    def test_task_ls_invalid_arg(self):
+    def test_run_ls_invalid_arg(self):
         self.__set_variables()
         exception_thrown = False
         try:
-            self.task_command.parse(["task", "ls" "--foobar", "foobar"])
+            self.task_command.parse(["ls" "--foobar", "foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown
-
-    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_task_stop_success(self):
-        # 1) Test stop with task_id
-        # 2) Test stop with all
-        self.__set_variables()
-
-        test_command = ["sh", "-c", "echo yo"]
-        test_ports = "8888:8888"
-        test_mem_limit = "4g"
-        test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-
-        self.task_command.parse([
-            "task", "run", "--ports", test_ports, "--environment-paths",
-            test_dockerfile, "--mem-limit", test_mem_limit, test_command
-        ])
-
-        test_task_obj = self.task_command.execute()
-
-        # 1) Test option 1
-        self.task_command.parse(["task", "stop", "--id", test_task_obj.id])
-
-        # test for desired side effects
-        assert self.task_command.args.id == test_task_obj.id
-
-        # test when task id is passed to stop it
-        task_stop_command = self.task_command.execute()
-        assert task_stop_command == True
-
-        # 2) Test option 2
-        self.task_command.parse(["task", "stop", "--all"])
-
-        # test when all is passed to stop all
-        task_stop_command = self.task_command.execute()
-        assert task_stop_command == True
-
-    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_task_stop_failure_required_args(self):
-        self.__set_variables()
-        # Passing wrong task id
-        self.task_command.parse(["task", "stop"])
-        failed = False
-        try:
-            _ = self.task_command.execute()
-        except RequiredArgumentMissing:
-            failed = True
-        assert failed
-
-    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_task_stop_failure_mutually_exclusive_vars(self):
-        self.__set_variables()
-        # Passing wrong task id
-        self.task_command.parse(
-            ["task", "stop", "--id", "invalid-task-id", "--all"])
-        failed = False
-        try:
-            _ = self.task_command.execute()
-        except MutuallyExclusiveArguments:
-            failed = True
-        assert failed
-
-    def test_task_stop_failure_invalid_arg(self):
-        self.__set_variables()
-        exception_thrown = False
-        try:
-            self.task_command.parse(["task", "stop" "--foobar", "foobar"])
-        except Exception:
-            exception_thrown = True
-        assert exception_thrown
-
-    def test_task_stop_invalid_task_id(self):
-        self.__set_variables()
-        # Passing wrong task id
-        self.task_command.parse(["task", "stop", "--id", "invalid-task-id"])
-
-        # test when wrong task id is passed to stop it
-        result = self.task_command.execute()
-        assert not result

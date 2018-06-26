@@ -58,11 +58,13 @@ class TestEnvironmentController():
         with open(os.path.join(self.temp_dir, "test.txt"), "wb") as f:
             f.write(to_bytes("hello"))
         self.random_filepath = os.path.join(
-            self.environment_controller.environment_directory, "test")
+            self.environment_controller.file_driver.environment_directory,
+            "test")
         with open(self.random_filepath, "wb") as f:
             f.write(to_bytes("cool"))
         self.definition_filepath = os.path.join(
-            self.environment_controller.environment_directory, "Dockerfile")
+            self.environment_controller.file_driver.environment_directory,
+            "Dockerfile")
         with open(self.definition_filepath, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
@@ -88,7 +90,8 @@ class TestEnvironmentController():
         options = {"name": "xgboost:cpu"}
         result = self.environment_controller.setup(options=options)
         output_definition_filepath = os.path.join(
-            self.environment_controller.environment_directory, "Dockerfile")
+            self.environment_controller.file_driver.environment_directory,
+            "Dockerfile")
 
         assert isinstance(result, Environment)
         assert result.name == options['name']
@@ -101,7 +104,8 @@ class TestEnvironmentController():
         options = {"name": "xgboost:cpu"}
         result = self.environment_controller.setup(options=options)
         output_definition_filepath = os.path.join(
-            self.environment_controller.environment_directory, "Dockerfile")
+            self.environment_controller.file_driver.environment_directory,
+            "Dockerfile")
 
         assert isinstance(result, Environment)
         assert result.name == options['name']
@@ -202,7 +206,7 @@ class TestEnvironmentController():
         output = open(
             os.path.join(file_collection_dir, "datmoDockerfile"), "r").read()
         print(repr(output))
-        assert environment_obj_0.unique_hash == "92bf199434958cfa7f226d1d0c3cb498"
+        assert environment_obj_0.unique_hash == "c309ae4f58163693a91816988d9dc88b"
         assert environment_obj_0.name == "test"
         assert environment_obj_0.description == "test description"
         # Files ["test", "Dockerfile", "datmoDockerfile"]
@@ -237,13 +241,14 @@ class TestEnvironmentController():
         output = open(
             os.path.join(file_collection_dir, "datmoDockerfile"), "r").read()
         print(repr(output))
-        assert environment_obj.unique_hash == "01c18ce1635911b11faa64b555463631"
+        assert environment_obj.unique_hash == "6e06d7c4d77cb6ae69e7e0efa883ef4b"
         assert environment_obj.name == "test"
         assert environment_obj.description == "test description"
         # Files ["Dockerfile", "datmoDockerfile"]
 
         # remove the project environment directory
-        shutil.rmtree(self.environment_controller.environment_directory)
+        shutil.rmtree(
+            self.environment_controller.file_driver.environment_directory)
 
         # Create environment definition in root directory
         home_definition_filepath = os.path.join(
@@ -273,7 +278,7 @@ class TestEnvironmentController():
         assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
         assert os.path.isfile(
             os.path.join(file_collection_dir, "datmoDockerfile"))
-        assert environment_obj_1.unique_hash == "01c18ce1635911b11faa64b555463631"
+        assert environment_obj_1.unique_hash == "6e06d7c4d77cb6ae69e7e0efa883ef4b"
 
         # 3) Test option 3
         input_dict_2 = {
@@ -304,7 +309,7 @@ class TestEnvironmentController():
         assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
         assert os.path.isfile(
             os.path.join(file_collection_dir, "datmoDockerfile"))
-        assert environment_obj_2.unique_hash == "01c18ce1635911b11faa64b555463631"
+        assert environment_obj_2.unique_hash == "6e06d7c4d77cb6ae69e7e0efa883ef4b"
 
         # 4) Test option 4
         input_dict_3 = {
@@ -333,7 +338,7 @@ class TestEnvironmentController():
         assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
         assert os.path.isfile(
             os.path.join(file_collection_dir, "datmoDockerfile"))
-        assert environment_obj_3.unique_hash == "01c18ce1635911b11faa64b555463631"
+        assert environment_obj_3.unique_hash == "6e06d7c4d77cb6ae69e7e0efa883ef4b"
 
         # 6) Test option 6
         definition_filepath = os.path.join(self.environment_controller.home,
@@ -419,7 +424,8 @@ class TestEnvironmentController():
         # 5) Test option 5
         # Create environment definition in project environment directory
         definition_filepath = os.path.join(
-            self.environment_controller.environment_directory, "Dockerfile")
+            self.environment_controller.file_driver.environment_directory,
+            "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
@@ -440,7 +446,8 @@ class TestEnvironmentController():
         # 0) Test option 0
         # Create environment definition in project environment directory
         definition_filepath = os.path.join(
-            self.environment_controller.environment_directory, "Dockerfile")
+            self.environment_controller.file_driver.environment_directory,
+            "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
@@ -480,7 +487,8 @@ class TestEnvironmentController():
 
         # teardown
         self.environment_controller.delete(environment_obj.id)
-        shutil.rmtree(self.environment_controller.environment_directory)
+        shutil.rmtree(
+            self.environment_controller.file_driver.environment_directory)
 
         # 1) Test option 1
         # Create environment definition
@@ -948,13 +956,13 @@ class TestEnvironmentController():
         # Test hashing the default Dockerfile
         result = self.environment_controller._calculate_project_environment_hash(
             save_hardware_file=False)
-        assert result == "92bf199434958cfa7f226d1d0c3cb498"
+        assert result == "c309ae4f58163693a91816988d9dc88b"
         # Test if hash is the same as that of create
         environment_obj = self.environment_controller.create(
             {}, save_hardware_file=False)
         result = self.environment_controller._calculate_project_environment_hash(
             save_hardware_file=False)
-        assert result == "92bf199434958cfa7f226d1d0c3cb498"
+        assert result == "c309ae4f58163693a91816988d9dc88b"
         assert result == environment_obj.unique_hash
 
         # Test if the hash is the same if the same file is passed in as an input
@@ -965,7 +973,7 @@ class TestEnvironmentController():
             input_dict, save_hardware_file=False)
         result = self.environment_controller._calculate_project_environment_hash(
             save_hardware_file=False)
-        assert result == "92bf199434958cfa7f226d1d0c3cb498"
+        assert result == "c309ae4f58163693a91816988d9dc88b"
         assert result == environment_obj_1.unique_hash
 
     def test_has_unstaged_changes(self):
@@ -978,8 +986,8 @@ class TestEnvironmentController():
 
         # Make a change to the file (update python version)
         with open(
-                os.path.join(self.environment_controller.environment_directory,
-                             "Dockerfile"), "wb") as f:
+                os.path.join(self.environment_controller.file_driver.
+                             environment_directory, "Dockerfile"), "wb") as f:
             f.write(to_bytes("FROM python:3.6-alpine"))
 
         # Check again, should have unstaged changes
@@ -998,8 +1006,8 @@ class TestEnvironmentController():
 
         # Add a new file
         with open(
-                os.path.join(self.environment_controller.environment_directory,
-                             "test2"), "wb") as f:
+                os.path.join(self.environment_controller.file_driver.
+                             environment_directory, "test2"), "wb") as f:
             f.write(to_bytes("cool"))
 
         # 2) Not commiting the changes, should error and raise UnstagedChanges
@@ -1012,8 +1020,9 @@ class TestEnvironmentController():
 
         # Remove new file
         os.remove(
-            os.path.join(self.environment_controller.environment_directory,
-                         "test2"))
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "test2"))
 
         # 3) Files are the same as before but no new commit, should have no unstaged changes
         result = self.environment_controller.check_unstaged_changes()
@@ -1021,8 +1030,9 @@ class TestEnvironmentController():
 
         # 4) Remove another file, now it is different and should have unstaged changes
         os.remove(
-            os.path.join(self.environment_controller.environment_directory,
-                         "test"))
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "test"))
         failed = False
         try:
             self.environment_controller.check_unstaged_changes()
@@ -1032,8 +1042,9 @@ class TestEnvironmentController():
 
         # 5) Remove the rest of the files, now it is empty and should return as already staged
         os.remove(
-            os.path.join(self.environment_controller.environment_directory,
-                         "Dockerfile"))
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "Dockerfile"))
         result = self.environment_controller.check_unstaged_changes()
         assert not result
 
@@ -1052,17 +1063,21 @@ class TestEnvironmentController():
         assert environment_obj.unique_hash == current_hash
         # Check the filenames as well because the hash does not take this into account
         assert os.path.isfile(
-            os.path.join(self.environment_controller.environment_directory,
-                         "test"))
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "test"))
         assert os.path.isfile(
-            os.path.join(self.environment_controller.environment_directory,
-                         "Dockerfile"))
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "Dockerfile"))
         assert not os.path.isfile(
-            os.path.join(self.environment_controller.environment_directory,
-                         "datmoDockerfile"))
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "datmoDockerfile"))
         assert not os.path.isfile(
-            os.path.join(self.environment_controller.environment_directory,
-                         "hardware_info"))
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "hardware_info"))
 
         # Change file contents to make it unstaged
         with open(self.definition_filepath, "wb") as f:
@@ -1089,14 +1104,18 @@ class TestEnvironmentController():
         assert environment_obj_1.unique_hash != current_hash
         # Check the filenames as well because the hash does not take this into account
         assert os.path.isfile(
-            os.path.join(self.environment_controller.environment_directory,
-                         "test"))
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "test"))
         assert os.path.isfile(
-            os.path.join(self.environment_controller.environment_directory,
-                         "Dockerfile"))
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "Dockerfile"))
         assert not os.path.isfile(
-            os.path.join(self.environment_controller.environment_directory,
-                         "datmoDockerfile"))
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "datmoDockerfile"))
         assert not os.path.isfile(
-            os.path.join(self.environment_controller.environment_directory,
-                         "hardware_info"))
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "hardware_info"))

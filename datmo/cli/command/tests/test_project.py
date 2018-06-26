@@ -69,9 +69,8 @@ class TestProjectCommand():
         assert result.description == None
         # Ensure environment is correct
         definition_filepath = os.path.join(
-            self.temp_dir,
-            self.project_command.project_controller.environment_directory,
-            "Dockerfile")
+            self.temp_dir, self.project_command.project_controller.file_driver.
+            environment_directory, "Dockerfile")
         assert os.path.isfile(definition_filepath)
         assert "FROM datmo/xgboost:cpu" in open(definition_filepath,
                                                 "r").read()
@@ -90,9 +89,8 @@ class TestProjectCommand():
         result = dummy(self)
 
         definition_filepath = os.path.join(
-            self.temp_dir,
-            self.project_command.project_controller.environment_directory,
-            "Dockerfile")
+            self.temp_dir, self.project_command.project_controller.file_driver.
+            environment_directory, "Dockerfile")
 
         assert result
         assert not os.path.isfile(definition_filepath)
@@ -114,9 +112,8 @@ class TestProjectCommand():
         result = dummy(self)
 
         definition_filepath = os.path.join(
-            self.temp_dir,
-            self.project_command.project_controller.environment_directory,
-            "Dockerfile")
+            self.temp_dir, self.project_command.project_controller.file_driver.
+            environment_directory, "Dockerfile")
 
         assert result
         assert os.path.isfile(definition_filepath)
@@ -295,40 +292,3 @@ class TestProjectCommand():
         except UnrecognizedCLIArgument:
             exception_thrown = True
         assert exception_thrown
-
-    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_notebook(self):
-        self.project_command.parse(
-            ["init", "--name", "foobar", "--description", "test model"])
-
-        @self.project_command.cli_helper.input("\n")
-        def dummy(self):
-            self.project_command.execute()
-
-        dummy(self)
-
-        # Create environment_driver definition
-        env_def_path = os.path.join(self.temp_dir, "Dockerfile")
-        test_mem_limit = "4g"
-        with open(env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu\n")))
-
-        # test single ports option before command
-        self.project_command.parse([
-            "notebook",
-            "--gpu",
-            "--environment-paths",
-            env_def_path,
-            "--mem-limit",
-            test_mem_limit,
-        ])
-
-        # test for desired side effects
-        assert self.project_command.args.gpu == True
-        assert self.project_command.args.environment_paths == [env_def_path]
-        assert self.project_command.args.mem_limit == test_mem_limit
-
-        # test multiple ports option before command
-        self.project_command.parse(["notebook"])
-
-        assert self.project_command.args.gpu == False

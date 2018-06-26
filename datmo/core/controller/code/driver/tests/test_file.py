@@ -65,8 +65,8 @@ class TestFileCodeDriver():
         self.file_code_manager.init()
         assert self.file_code_manager.is_initialized == True
         # test if code folder is removed from .datmo folder
-        self._datmo_filepath = os.path.join(self.temp_dir, ".datmo")
-        self._code_filepath = os.path.join(self._datmo_filepath, "code")
+        self._code_filepath = os.path.join(
+            self.file_code_manager._datmo_directory_path, "code")
         shutil.rmtree(self._code_filepath)
         assert self.file_code_manager.is_initialized == False
 
@@ -85,14 +85,16 @@ class TestFileCodeDriver():
         self.file_code_manager.init()
         with open(os.path.join(self.temp_dir, "test.txt"), "wb") as f:
             f.write(to_bytes("hello"))
-        os.makedirs(os.path.join(self.temp_dir, "datmo_environment/"))
+        os.makedirs(self.file_code_manager._environment_directory_path)
         with open(
-                os.path.join(self.temp_dir, "datmo_environment", "test"),
-                "wb") as f:
+                os.path.join(
+                    self.file_code_manager._environment_directory_path,
+                    "test"), "wb") as f:
             f.write(to_bytes("cool"))
-        os.makedirs(os.path.join(self.temp_dir, "datmo_files/"))
-        with open(os.path.join(self.temp_dir, "datmo_files", "test"),
-                  "wb") as f:
+        os.makedirs(self.file_code_manager._files_directory_path)
+        with open(
+                os.path.join(self.file_code_manager._files_directory_path,
+                             "test"), "wb") as f:
             f.write(to_bytes("man"))
 
     def test_tracked_files(self):
@@ -109,11 +111,14 @@ class TestFileCodeDriver():
             assert item in ["test.txt", "test2.txt"]
 
         # Test if it ignores any .datmo directory or files within
-        with open(os.path.join(self.temp_dir, ".datmo", "test"), "wb") as f:
+        with open(
+                os.path.join(self.file_code_manager._datmo_directory_path,
+                             "test"), "wb") as f:
             f.write(to_bytes("cool"))
         result = self.file_code_manager._get_tracked_files()
         for item in result:
-            assert os.path.join(".datmo", "test") not in item
+            assert os.path.join(self.file_code_manager._datmo_directory_name,
+                                "test") not in item
             assert item in ["test.txt", "test2.txt"]
 
         # Test if it ignores any .git directory or files within
@@ -127,21 +132,26 @@ class TestFileCodeDriver():
 
         # Test if it ignores any datmo_environment directory or files within
         with open(
-                os.path.join(self.temp_dir, "datmo_environment", "test"),
-                "wb") as f:
+                os.path.join(
+                    self.file_code_manager._environment_directory_path,
+                    "test"), "wb") as f:
             f.write(to_bytes("cool"))
         result = self.file_code_manager._get_tracked_files()
         for item in result:
-            assert os.path.join("datmo_environment", "test") not in item
+            assert os.path.join(
+                self.file_code_manager._environment_directory_name,
+                "test") not in item
             assert item in ["test.txt", "test2.txt"]
 
         # Test if it ignores any datmo_files directory or files within
-        with open(os.path.join(self.temp_dir, "datmo_files", "test"),
-                  "wb") as f:
+        with open(
+                os.path.join(self.file_code_manager._files_directory_path,
+                             "test"), "wb") as f:
             f.write(to_bytes("cool"))
         result = self.file_code_manager._get_tracked_files()
         for item in result:
-            assert os.path.join("datmo_files", "test") not in item
+            assert os.path.join(self.file_code_manager._files_directory_name,
+                                "test") not in item
             assert item in ["test.txt", "test2.txt"]
 
         # Test if ignores one file and only shows one

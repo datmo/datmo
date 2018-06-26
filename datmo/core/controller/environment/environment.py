@@ -6,6 +6,7 @@ from datmo.core.controller.file.file_collection import FileCollectionController
 from datmo.core.entity.environment import Environment
 from datmo.core.util.i18n import get as __
 from datmo.core.util.validation import validate
+from datmo.core.util.spinner import Spinner
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.misc_functions import get_datmo_temp_path, parse_path, list_all_filepaths
 from datmo.core.util.exceptions import PathDoesNotExist, RequiredArgumentMissing, TooManyArgumentsFound,\
@@ -36,8 +37,7 @@ class EnvironmentController(BaseController):
     def __init__(self):
         super(EnvironmentController, self).__init__()
         self.file_collection = FileCollectionController()
-        if not os.path.exists(self.environment_directory):
-            os.makedirs(self.environment_directory)
+        self.spinner = Spinner()
         if not self.is_initialized:
             raise ProjectNotInitialized(
                 __("error", "controller.environment.__init__"))
@@ -84,10 +84,11 @@ class EnvironmentController(BaseController):
         except UnstagedChanges:
             raise UnstagedChanges(
                 __("error", "controller.environment.setup.unstaged",
-                   self.environment_directory))
+                   self.file_driver.environment_directory))
         try:
             _ = self.environment_driver.setup(
-                options, definition_path=self.environment_directory)
+                options,
+                definition_path=self.file_driver.environment_directory)
         except Exception:
             raise
         create_dict = {
@@ -147,10 +148,11 @@ class EnvironmentController(BaseController):
             paths.extend(dictionary['paths'])
 
         # b. if there exists projet environment directory AND no paths exist, add in absolute paths
-        if not paths and os.path.isdir(self.environment_directory):
+        if not paths and os.path.isdir(self.file_driver.environment_directory):
             paths.extend([
-                os.path.join(self.environment_directory, filepath)
-                for filepath in list_all_filepaths(self.environment_directory)
+                os.path.join(self.file_driver.environment_directory,
+                             filepath) for filepath in list_all_filepaths(
+                                 self.file_driver.environment_directory)
             ])
 
         # c. add in default environment definition filepath as specified by the environment driver
@@ -235,8 +237,12 @@ class EnvironmentController(BaseController):
         datmo_definition_filepath = os.path.join(
             self.home, file_collection_obj.path,
             "datmo" + environment_obj.definition_filename)
-        result = self.environment_driver.build(
-            environment_id, path=datmo_definition_filepath)
+        try:
+            self.spinner.start()
+            result = self.environment_driver.build(
+                environment_id, path=datmo_definition_filepath)
+        finally:
+            self.spinner.stop()
         return result
 
     def run(self, environment_id, options, log_filepath):
@@ -474,8 +480,9 @@ class EnvironmentController(BaseController):
         if self._calculate_project_environment_hash() == environment_hash:
             return True
         # Remove all content from project environment directory
-        for file in os.listdir(self.environment_directory):
-            file_path = os.path.join(self.environment_directory, file)
+        for file in os.listdir(self.file_driver.environment_directory):
+            file_path = os.path.join(self.file_driver.environment_directory,
+                                     file)
             try:
                 if os.path.isfile(file_path):
                     os.remove(file_path)
@@ -495,7 +502,8 @@ class EnvironmentController(BaseController):
         ):
             os.remove(os.path.join(_temp_env_dir, filename))
         # Copy from temp folder to project environment directory
-        self.file_driver.copytree(_temp_env_dir, self.environment_directory)
+        self.file_driver.copytree(_temp_env_dir,
+                                  self.file_driver.environment_directory)
         shutil.rmtree(_temp_env_dir)
         return True
 
@@ -574,10 +582,11 @@ class EnvironmentController(BaseController):
         """
         # Populate paths from the project environment directory
         paths = []
-        if os.path.isdir(self.environment_directory):
+        if os.path.isdir(self.file_driver.environment_directory):
             paths.extend([
-                os.path.join(self.environment_directory, filepath)
-                for filepath in list_all_filepaths(self.environment_directory)
+                os.path.join(self.file_driver.environment_directory,
+                             filepath) for filepath in list_all_filepaths(
+                                 self.file_driver.environment_directory)
             ])
 
         # Create a temp dir to save any additional files necessary
@@ -610,7 +619,8 @@ class EnvironmentController(BaseController):
         env_hash = self._calculate_project_environment_hash()
         env_hash_no_hardware = self._calculate_project_environment_hash(
             save_hardware_file=False)
-        environment_files = list_all_filepaths(self.environment_directory)
+        environment_files = list_all_filepaths(
+            self.file_driver.environment_directory)
         if self.exists(environment_unique_hash=env_hash) or self.exists(
                 environment_unique_hash=env_hash_no_hardware
         ) or not environment_files:
