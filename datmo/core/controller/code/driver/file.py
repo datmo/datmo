@@ -29,8 +29,16 @@ class FileCodeDriver(CodeDriver):
             raise PathDoesNotExist(
                 __("error", "controller.code.driver.git.__init__.dne",
                    filepath))
-        self._datmo_filepath = os.path.join(self.filepath, ".datmo")
-        self._code_filepath = os.path.join(self._datmo_filepath, "code")
+        self._datmo_directory_name = ".datmo"
+        self._datmo_directory_path = os.path.join(self.filepath,
+                                                  self._datmo_directory_name)
+        self._environment_directory_name = "datmo_environment"
+        self._environment_directory_path = os.path.join(
+            self.filepath, self._environment_directory_name)
+        self._files_directory_name = "datmo_files"
+        self._files_directory_path = os.path.join(self.filepath,
+                                                  self._files_directory_name)
+        self._code_filepath = os.path.join(self._datmo_directory_path, "code")
         self._datmo_ignore_filepath = os.path.join(self.filepath,
                                                    ".datmoignore")
         self._is_initialized = self.is_initialized
@@ -38,7 +46,7 @@ class FileCodeDriver(CodeDriver):
 
     @property
     def is_initialized(self):
-        if os.path.isdir(self._datmo_filepath) and \
+        if os.path.isdir(self._datmo_directory_path) and \
             os.path.isdir(self._code_filepath):
             self._is_initialized = True
             return self._is_initialized
@@ -66,7 +74,8 @@ class FileCodeDriver(CodeDriver):
         all_files = set(list_all_filepaths(self.filepath))
 
         # Ignore the .datmo/ folder and all contents within it
-        spec = pathspec.PathSpec.from_lines('gitwildmatch', [".datmo"])
+        spec = pathspec.PathSpec.from_lines('gitwildmatch',
+                                            [self._datmo_directory_name])
         dot_datmo_files = set(spec.match_tree(self.filepath))
 
         # Ignore the .git/ folder and all contents within it
@@ -75,11 +84,12 @@ class FileCodeDriver(CodeDriver):
 
         # Ignore the datmo_environment/ folder and all contents within it
         spec = pathspec.PathSpec.from_lines('gitwildmatch',
-                                            ["datmo_environment"])
+                                            [self._environment_directory_name])
         datmo_environment_files = set(spec.match_tree(self.filepath))
 
         # Ignore the datmo_files/ folder and all contents within it
-        spec = pathspec.PathSpec.from_lines('gitwildmatch', ["datmo_files"])
+        spec = pathspec.PathSpec.from_lines('gitwildmatch',
+                                            [self._files_directory_name])
         datmo_files_files = set(spec.match_tree(self.filepath))
 
         # TODO: REMOVE THIS CODE

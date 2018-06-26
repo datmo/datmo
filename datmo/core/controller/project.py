@@ -247,7 +247,8 @@ class ProjectController(BaseController):
 
         ascending_unstaged_tasks = []
         for task in descending_tasks:
-            if task.updated_at >= latest_snapshot.created_at:
+            if not latest_snapshot or \
+                task.updated_at >= latest_snapshot.created_at:
                 ascending_unstaged_tasks.insert(0, task)
             else:
                 break

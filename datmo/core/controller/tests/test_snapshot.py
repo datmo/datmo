@@ -85,14 +85,17 @@ class TestSnapshotController():
     def test_create_success_no_code(self):
         self.__setup()
         # Test default values for snapshot, fail due to code
-        result = self.snapshot_controller.create({"message": "my test snapshot"})
+        result = self.snapshot_controller.create({
+            "message": "my test snapshot"
+        })
         assert result
 
     def test_create_success_no_code_environment(self):
         self.__setup()
         # Create environment definition
         env_def_path = os.path.join(
-            self.project_controller.environment_directory, "Dockerfile")
+            self.project_controller.file_driver.environment_directory,
+            "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
@@ -107,19 +110,20 @@ class TestSnapshotController():
         self.__setup()
         # Create environment definition
         env_def_path = os.path.join(
-            self.project_controller.environment_directory, "Dockerfile")
+            self.project_controller.file_driver.environment_directory,
+            "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
-        test_file = os.path.join(self.project_controller.files_directory,
-                                 "test.txt")
+        test_file = os.path.join(
+            self.project_controller.file_driver.files_directory, "test.txt")
         with open(test_file, "wb") as f:
             f.write(to_bytes(str("hello")))
 
         # test must pass when there is file present in root project folder
         result = self.snapshot_controller.create({
-                "message": "my test snapshot"
-            })
+            "message": "my test snapshot"
+        })
 
         assert result
 
@@ -163,7 +167,8 @@ class TestSnapshotController():
         self.__setup()
         # Create environment definition
         env_def_path = os.path.join(
-            self.project_controller.environment_directory, "Dockerfile")
+            self.project_controller.file_driver.environment_directory,
+            "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
@@ -191,7 +196,8 @@ class TestSnapshotController():
         self.__setup()
         # Create environment definition
         env_def_path = os.path.join(
-            self.project_controller.environment_directory, "Dockerfile")
+            self.project_controller.file_driver.environment_directory,
+            "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
@@ -243,7 +249,8 @@ class TestSnapshotController():
         # Test 2 snapshots with same parameters
         # Create environment definition
         env_def_path = os.path.join(
-            self.project_controller.environment_directory, "Dockerfile")
+            self.project_controller.file_driver.environment_directory,
+            "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
@@ -279,7 +286,8 @@ class TestSnapshotController():
         self.__setup()
         # Create environment definition
         env_def_path = os.path.join(
-            self.project_controller.environment_directory, "Dockerfile")
+            self.project_controller.file_driver.environment_directory,
+            "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
@@ -297,7 +305,7 @@ class TestSnapshotController():
 
         # Create files to add
         _, project_directory_name = os.path.split(
-            self.project_controller.files_directory)
+            self.project_controller.file_driver.files_directory)
         self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "dirpath1"), directory=True)
         self.snapshot_controller.file_driver.create(
@@ -338,7 +346,8 @@ class TestSnapshotController():
         self.__setup()
         # Create environment definition
         env_def_path = os.path.join(
-            self.project_controller.environment_directory, "Dockerfile")
+            self.project_controller.file_driver.environment_directory,
+            "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
@@ -356,7 +365,7 @@ class TestSnapshotController():
 
         # Create files to add
         _, project_directory_name = os.path.split(
-            self.project_controller.files_directory)
+            self.project_controller.file_driver.files_directory)
         self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "dirpath1"), directory=True)
         self.snapshot_controller.file_driver.create(
@@ -394,13 +403,14 @@ class TestSnapshotController():
         self.__setup()
         # Create environment definition
         env_def_path = os.path.join(
-            self.project_controller.environment_directory, "Dockerfile")
+            self.project_controller.file_driver.environment_directory,
+            "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
         # Create files to add
         _, project_directory_name = os.path.split(
-            self.project_controller.files_directory)
+            self.project_controller.file_driver.files_directory)
         self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "dirpath1"), directory=True)
         self.snapshot_controller.file_driver.create(
@@ -550,7 +560,7 @@ class TestSnapshotController():
     def __default_create(self):
         # Create files to add
         _, project_directory_name = os.path.split(
-            self.project_controller.files_directory)
+            self.project_controller.file_driver.files_directory)
         self.snapshot_controller.file_driver.create(
             os.path.join(project_directory_name, "dirpath1"), directory=True)
         self.snapshot_controller.file_driver.create(
@@ -564,7 +574,8 @@ class TestSnapshotController():
             f.write(to_bytes(str("import sys\n")))
         # Create environment_driver definition
         env_def_path = os.path.join(
-            self.project_controller.environment_directory, "Dockerfile")
+            self.project_controller.file_driver.environment_directory,
+            "Dockerfile")
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
