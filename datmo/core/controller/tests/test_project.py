@@ -188,6 +188,35 @@ class TestProjectController():
         assert not latest_snapshot
         assert not ascending_unstaged_task_list
 
+        self.task_controller = TaskController()
+
+        # Create and run a task and test if unstaged task is shown
+        first_task = self.task_controller.create()
+
+        # Create task_dict
+        task_command = ["sh", "-c", "echo accuracy:0.45"]
+        task_dict = {"command_list": task_command}
+
+        # Create a file so it can create a snapshot for the task
+        env_def_path = os.path.join(self.task_controller.home, "Dockerfile")
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes("FROM python:3.5-alpine"))
+
+        updated_first_task = self.task_controller.run(
+            first_task.id, task_dict=task_dict)
+
+        status_dict, latest_snapshot, ascending_unstaged_task_list = \
+            self.project_controller.status()
+
+        assert status_dict
+        assert isinstance(status_dict, dict)
+        assert status_dict['name'] == "test3"
+        assert status_dict['description'] == "test description"
+        assert isinstance(status_dict['config'], dict)
+        assert not latest_snapshot
+        assert ascending_unstaged_task_list
+        assert updated_first_task in ascending_unstaged_task_list
+
     def test_status_snapshot_task(self):
         self.project_controller.init("test4", "test description")
         self.snapshot_controller = SnapshotController()
