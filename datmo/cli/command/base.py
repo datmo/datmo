@@ -4,6 +4,7 @@ from datmo.config import Config
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import ClassMethodNotFound
 from datmo.cli.parser import get_datmo_parser
+from datmo.core.controller.task import TaskController
 from datmo.core.util.logger import DatmoLogger
 from datmo.core.util.misc_functions import parameterized
 
@@ -97,6 +98,48 @@ class BaseCommand(object):
 
         method_result = method(**command_args)
         return method_result
+
+    def task_run_helper(self, task_dict, snapshot_dict, error_identifier):
+        """
+        Run task with given parameters and provide error identifier
+
+        Parameters
+        ----------
+        task_dict : dict
+            input task dictionary for task run controller
+        snapshot_dict : dict
+            input snapshot dictionary for task run controller
+        error_identifier : str
+            identifier to print error
+
+        Returns
+        -------
+        Task or False
+            the Task object which completed its run with updated parameters.
+            returns False if an error occurs
+        """
+        self.task_controller = TaskController()
+        task_obj = self.task_controller.create()
+
+        updated_task_obj = task_obj
+        # Pass in the task
+        try:
+            status = "SUCCESS"
+            updated_task_obj = self.task_controller.run(
+                task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
+        except Exception as e:
+            status = "FAILED"
+            self.logger.error("%s %s" % (e, task_dict))
+            self.cli_helper.echo("%s" % e)
+            self.cli_helper.echo(__("error", error_identifier, task_obj.id))
+            return False
+        finally:
+            self.cli_helper.echo(__("info", "cli.task.run.stop"))
+            self.task_controller.stop(updated_task_obj.id, status=status)
+            self.cli_helper.echo(
+                __("info", "cli.task.run.complete", updated_task_obj.id))
+
+        return updated_task_obj
 
 
 @parameterized

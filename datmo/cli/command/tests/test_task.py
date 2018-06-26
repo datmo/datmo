@@ -135,7 +135,7 @@ class TestTaskCommand():
         assert "accuracy" in result.logs
         assert result.results
         assert result.results == {"accuracy": "0.45"}
-        assert result.status == 'SUCCESS'
+        assert result.status == "SUCCESS"
 
         # teardown
         self.task_command.parse(["task", "stop", "--all"])
@@ -170,7 +170,7 @@ class TestTaskCommand():
         assert "accuracy" in result.logs
         assert result.results
         assert result.results == {"accuracy": "0.45"}
-        assert result.status == 'SUCCESS'
+        assert result.status == "SUCCESS"
 
         # teardown
         self.task_command.parse(["task", "stop", "--all"])
@@ -217,7 +217,7 @@ class TestTaskCommand():
     #         assert "accuracy" in result.logs
     #         assert result.results
     #         assert result.results == {"accuracy": "0.45"}
-    #         assert result.status == 'SUCCESS'
+    #         assert result.status == "SUCCESS"
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_run_notebook(self):
@@ -259,7 +259,7 @@ class TestTaskCommand():
         assert isinstance(result, CoreTask)
         assert result.logs
         assert "Currently running servers" in result.logs
-        assert result.status == 'SUCCESS'
+        assert result.status == "SUCCESS"
 
         # teardown
         self.task_command.parse(["task", "stop", "--all"])
