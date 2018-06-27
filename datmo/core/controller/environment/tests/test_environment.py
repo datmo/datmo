@@ -3,8 +3,6 @@ Tests for EnvironmentController
 """
 import os
 import uuid
-import random
-import string
 import shutil
 import tempfile
 import platform
@@ -35,8 +33,8 @@ from datmo.core.entity.environment import Environment
 from datmo.core.util.exceptions import (
     EntityNotFound, RequiredArgumentMissing, TooManyArgumentsFound,
     FileAlreadyExistsError, UnstagedChanges, EnvironmentDoesNotExist,
-    ProjectNotInitialized)
-from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
+    ProjectNotInitialized, EnvironmentExecutionError)
+from datmo.core.util.misc_functions import check_docker_inactive, pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
 tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
@@ -48,9 +46,15 @@ class TestEnvironmentController():
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         Config().set_home(self.temp_dir)
         self.project_controller = ProjectController()
+        self.environment_ids = []
 
     def teardown_method(self):
-        pass
+        if not check_docker_inactive(test_datmo_dir):
+            if self.project_controller.is_initialized:
+                self.environment_controller = EnvironmentController()
+                for env_id in list(set(self.environment_ids)):
+                    if not self.environment_controller.delete(env_id):
+                        raise Exception
 
     def __setup(self):
         self.project_controller.init("test_setup", "test description")
@@ -149,6 +153,7 @@ class TestEnvironmentController():
 
         # 0) Test option 0 (cannot test hash because hardware is machine-dependent)
         environment_obj_0 = self.environment_controller.create(input_dict_0)
+        self.environment_ids.append(environment_obj_0.id)
         assert environment_obj_0
         assert isinstance(environment_obj_0, Environment)
         assert environment_obj_0.id
@@ -184,6 +189,7 @@ class TestEnvironmentController():
         # 1) Test option 1
         environment_obj_0 = self.environment_controller.create(
             input_dict_0, save_hardware_file=False)
+        self.environment_ids.append(environment_obj_0.id)
         assert environment_obj_0
         assert isinstance(environment_obj_0, Environment)
         assert environment_obj_0.id
@@ -220,6 +226,7 @@ class TestEnvironmentController():
 
         environment_obj = self.environment_controller.create(
             input_dict_1, save_hardware_file=False)
+        self.environment_ids.append(environment_obj.id)
         assert environment_obj
         assert isinstance(environment_obj, Environment)
         assert environment_obj.id
@@ -259,7 +266,7 @@ class TestEnvironmentController():
         # 2) Test option 2
         environment_obj_1 = self.environment_controller.create(
             input_dict_0, save_hardware_file=False)
-
+        self.environment_ids.append(environment_obj_1.id)
         assert environment_obj_1
         assert isinstance(environment_obj_1, Environment)
         assert environment_obj_1.id
@@ -290,7 +297,7 @@ class TestEnvironmentController():
         # Create environment in the project
         environment_obj_2 = self.environment_controller.create(
             input_dict_2, save_hardware_file=False)
-
+        self.environment_ids.append(environment_obj_2.id)
         assert environment_obj_2
         assert isinstance(environment_obj_2, Environment)
         assert environment_obj_2.id
@@ -319,7 +326,7 @@ class TestEnvironmentController():
         # Create environment in the project
         environment_obj_3 = self.environment_controller.create(
             input_dict_3, save_hardware_file=False)
-
+        self.environment_ids.append(environment_obj_3.id)
         assert environment_obj_3
         assert isinstance(environment_obj_3, Environment)
         assert environment_obj_3.id
@@ -392,6 +399,7 @@ class TestEnvironmentController():
         # 2) Test option 2
         # Create environment in the project
         environment_obj_1 = self.environment_controller.create(input_dict)
+        self.environment_ids.append(environment_obj_1.id)
         result = self.environment_controller.build(environment_obj_1.id)
         assert result
 
@@ -431,11 +439,9 @@ class TestEnvironmentController():
             f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
             f.write(to_bytes(str("RUN echo " + random_text)))
         environment_obj_4 = self.environment_controller.create({})
+        self.environment_ids.append(environment_obj_4.id)
         result = self.environment_controller.build(environment_obj_4.id)
         assert result
-
-        # teardown
-        self.environment_controller.delete(environment_obj_1.id)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_run(self):
@@ -453,10 +459,7 @@ class TestEnvironmentController():
             f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
-        random_name = ''.join([
-            random.choice(string.ascii_letters + string.digits)
-            for _ in range(32)
-        ])
+        random_name = str(uuid.uuid1())
         run_options = {
             "command": ["sh", "-c", "echo yo"],
             "ports": ["8888:8888"],
@@ -471,7 +474,7 @@ class TestEnvironmentController():
 
         # Create environment in the project
         environment_obj = self.environment_controller.create({})
-
+        self.environment_ids.append(environment_obj.id)
         log_filepath = os.path.join(self.project_controller.home, "task.log")
 
         # Build environment in the project
@@ -485,8 +488,6 @@ class TestEnvironmentController():
         assert run_id
         assert logs
 
-        # teardown
-        self.environment_controller.delete(environment_obj.id)
         shutil.rmtree(
             self.environment_controller.file_driver.environment_directory)
 
@@ -499,13 +500,10 @@ class TestEnvironmentController():
             f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
-        random_name = ''.join([
-            random.choice(string.ascii_letters + string.digits)
-            for _ in range(32)
-        ])
+        random_name = str(uuid.uuid1())
         run_options = {
             "command": ["sh", "-c", "echo yo"],
-            "ports": ["8888:8888"],
+            "ports": ["8889:8889"],
             "name": random_name,
             "volumes": None,
             "mem_limit": "4g",
@@ -521,7 +519,7 @@ class TestEnvironmentController():
 
         # Create environment in the project
         environment_obj = self.environment_controller.create(input_dict)
-
+        self.environment_ids.append(environment_obj.id)
         log_filepath = os.path.join(self.project_controller.home, "task.log")
 
         # Build environment in the project
@@ -534,9 +532,6 @@ class TestEnvironmentController():
         assert return_code == 0
         assert run_id
         assert logs
-
-        # teardown
-        self.environment_controller.delete(environment_obj.id)
 
         # 2) Test option 2
         os.remove(definition_filepath)
@@ -551,15 +546,13 @@ class TestEnvironmentController():
 
         # Create environment in the project
         environment_obj = self.environment_controller.create({})
+        self.environment_ids.append(environment_obj.id)
         self.environment_controller.build(environment_obj.id)
 
-        random_name = ''.join([
-            random.choice(string.ascii_letters + string.digits)
-            for _ in range(32)
-        ])
+        random_name = str(uuid.uuid1())
         run_options = {
             "command": ["sh", "-c", "echo yo"],
-            "ports": ["8888:8888"],
+            "ports": ["8899:8899"],
             "name": random_name,
             "volumes": {
                 self.environment_controller.home: {
@@ -582,9 +575,6 @@ class TestEnvironmentController():
         assert run_id
         assert logs
 
-        # teardown
-        self.environment_controller.delete(environment_obj.id)
-
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_interactive_run(self):
         # 1) Test run interactive terminal in environment
@@ -597,7 +587,7 @@ class TestEnvironmentController():
                                            "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/xgboost:cpu" + "\n"))
+            f.write(to_bytes("FROM nbgallery/jupyter-alpine:latest" + "\n"))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         input_dict = {
@@ -606,13 +596,14 @@ class TestEnvironmentController():
 
         # Create environment in the project
         environment_obj = self.environment_controller.create(input_dict)
+        self.environment_ids.append(environment_obj.id)
         # 1) Test option 1
         @timeout_decorator.timeout(10, use_signals=False)
         def timed_run(container_name, timed_run):
             run_options = {
                 "command": [],
-                "ports": ["8888:8888"],
-                "name": container_name,
+                "ports": ["8889:8889"],
+                "name": environment_obj.id + "-" + container_name,
                 "volumes": None,
                 "mem_limit": "4g",
                 "detach": True,
@@ -642,18 +633,16 @@ class TestEnvironmentController():
 
         assert timed_run_result
 
-        # teardown
-        self.environment_controller.delete(environment_obj.id)
-
         # 2) Test option 2
         environment_obj = self.environment_controller.create(input_dict)
+        self.environment_ids.append(environment_obj.id)
 
         @timeout_decorator.timeout(10, use_signals=False)
         def timed_run(container_name, timed_run):
             run_options = {
-                "command": ["jupyter", "notebook"],
+                "command": ["jupyter", "notebook", "--allow-root"],
                 "ports": ["8888:8888"],
-                "name": container_name,
+                "name": environment_obj.id + "-" + container_name,
                 "volumes": None,
                 "mem_limit": "4g",
                 "detach": True,
@@ -683,12 +672,6 @@ class TestEnvironmentController():
 
         assert timed_run_result
 
-        # Stop the running environment
-        # self.environment_controller.stop(container_name)
-
-        # teardown
-        self.environment_controller.delete(environment_obj.id)
-
     def test_list(self):
         self.project_controller.init("test4", "test description")
         self.environment_controller = EnvironmentController()
@@ -705,7 +688,7 @@ class TestEnvironmentController():
 
         # Create environment in the project
         environment_obj_1 = self.environment_controller.create(input_dict_1)
-
+        self.environment_ids.append(environment_obj_1.id)
         # Create environment definition for object 2
         definition_path_2 = os.path.join(self.environment_controller.home,
                                          "Dockerfile2")
@@ -718,7 +701,7 @@ class TestEnvironmentController():
 
         # Create second environment in the project
         environment_obj_2 = self.environment_controller.create(input_dict_2)
-
+        self.environment_ids.append(environment_obj_2.id)
         # List all environments and ensure they exist
         result = self.environment_controller.list()
 
@@ -742,7 +725,7 @@ class TestEnvironmentController():
 
         # Create environment in the project
         environment_obj = self.environment_controller.create(input_dict)
-
+        self.environment_ids.append(environment_obj.id)
         # Test success update
         new_name = "test name"
         new_description = "test description"
@@ -823,6 +806,7 @@ class TestEnvironmentController():
         # 1) Test run_id input to stop
         # 2) Test match_string input to stop
         # 3) Test all input to stop
+        # 4) Test if the image was removed by stop
         self.project_controller.init("test5", "test description")
         self.environment_controller = EnvironmentController()
 
@@ -865,7 +849,7 @@ class TestEnvironmentController():
 
         # Create environment in the project
         environment_obj = self.environment_controller.create(input_dict)
-
+        self.environment_ids.append(environment_obj.id)
         log_filepath = os.path.join(self.project_controller.home, "task.log")
 
         # Build environment in the project
@@ -875,24 +859,33 @@ class TestEnvironmentController():
 
         _, run_id, _ = \
             self.environment_controller.run(environment_obj.id, run_options, log_filepath)
-        return_code = self.environment_controller.stop(run_id=run_id)
+        return_code = self.environment_controller.stop(
+            run_id=run_id, environment_id=environment_obj.id)
 
         assert return_code
 
         # 2) Test option 2
+
+        # Rebuild environment in the project
+        _ = self.environment_controller.build(environment_obj.id)
+
         _, _, _ = \
             self.environment_controller.run(environment_obj.id, run_options, log_filepath)
         return_code = self.environment_controller.stop(
-            match_string="datmo-task-" + self.environment_controller.model.id)
+            match_string="datmo-task-" + self.environment_controller.model.id,
+            environment_id=environment_obj.id)
 
         assert return_code
 
         # 3) Test option 3
+
+        # Rebuild environment in the project
+        _ = self.environment_controller.build(environment_obj.id)
         _, _, _ = \
             self.environment_controller.run(environment_obj.id, run_options, log_filepath)
         run_options_2 = {
             "command": ["sh", "-c", "echo yo"],
-            "ports": ["8888:8888"],
+            "ports": ["8889:8889"],
             "name":
                 "datmo-task-" + self.environment_controller.model.id + "-" +
                 "test2",
@@ -911,12 +904,19 @@ class TestEnvironmentController():
         }
         _, _, _ = \
             self.environment_controller.run(environment_obj.id, run_options_2, log_filepath)
-        return_code = self.environment_controller.stop(all=True)
+        return_code = self.environment_controller.stop(
+            all=True, environment_id=environment_obj.id)
 
         assert return_code
 
-        # teardown
-        self.environment_controller.delete(environment_obj.id)
+        # 4) Test option 4
+        failed = False
+        try:
+            _, _, _ = \
+                self.environment_controller.run(environment_obj.id, run_options_2, log_filepath)
+        except EnvironmentExecutionError:
+            failed = True
+        assert failed
 
     def test_exists_env(self):
         # Test failure, not initialized
@@ -930,7 +930,7 @@ class TestEnvironmentController():
         # Setup
         self.__setup()
         environment_obj = self.environment_controller.create({})
-
+        self.environment_ids.append(environment_obj.id)
         # Check by environment id
         result = self.environment_controller.exists(
             environment_id=environment_obj.id)
@@ -960,6 +960,7 @@ class TestEnvironmentController():
         # Test if hash is the same as that of create
         environment_obj = self.environment_controller.create(
             {}, save_hardware_file=False)
+        self.environment_ids.append(environment_obj.id)
         result = self.environment_controller._calculate_project_environment_hash(
             save_hardware_file=False)
         assert result == "c309ae4f58163693a91816988d9dc88b"
@@ -971,6 +972,7 @@ class TestEnvironmentController():
         }
         environment_obj_1 = self.environment_controller.create(
             input_dict, save_hardware_file=False)
+        self.environment_ids.append(environment_obj_1.id)
         result = self.environment_controller._calculate_project_environment_hash(
             save_hardware_file=False)
         assert result == "c309ae4f58163693a91816988d9dc88b"
@@ -979,7 +981,8 @@ class TestEnvironmentController():
     def test_has_unstaged_changes(self):
         # Setup
         self.__setup()
-        _ = self.environment_controller.create({})
+        environment_obj = self.environment_controller.create({})
+        self.environment_ids.append(environment_obj.id)
         # Check for no unstaged changes
         result = self.environment_controller._has_unstaged_changes()
         assert not result
@@ -997,7 +1000,8 @@ class TestEnvironmentController():
     def test_check_unstaged_changes(self):
         # Setup
         self.__setup()
-        obj = self.environment_controller.create({})
+        environment_obj = self.environment_controller.create({})
+        self.environment_ids.append(environment_obj.id)
 
         # 1) After commiting the changes
         # Check for no unstaged changes because already committed
@@ -1054,7 +1058,7 @@ class TestEnvironmentController():
 
         # Create environment to checkout to with defaults
         environment_obj = self.environment_controller.create({})
-
+        self.environment_ids.append(environment_obj.id)
         # Checkout success with there are no unstaged changes
         result = self.environment_controller.checkout(environment_obj.id)
         assert result
@@ -1094,7 +1098,7 @@ class TestEnvironmentController():
         # Create new environment to checkout to with defaults (no hardware)
         environment_obj_1 = self.environment_controller.create(
             {}, save_hardware_file=False)
-
+        self.environment_ids.append(environment_obj_1.id)
         # Checkout success with there are no unstaged changes
         result = self.environment_controller.checkout(environment_obj.id)
         assert result

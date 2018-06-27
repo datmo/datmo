@@ -84,14 +84,10 @@ class TestSnapshotModule():
         assert failed
 
         # Create a snapshot with default params
-        # (fails w/ no commit)
+        # (pass w/ no commit)
         Config().set_home(self.temp_dir)
-        failed = False
-        try:
-            _ = create(message="test")
-        except CommitFailed:
-            failed = True
-        assert failed
+        result = create(message="test")
+        assert result
 
         # Create a snapshot with default params and files to commit
         test_filepath = os.path.join(self.temp_dir, "script.py")

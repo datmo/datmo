@@ -29,7 +29,6 @@ class TaskCommand(ProjectCommand):
     @Helper.notify_environment_active(TaskController)
     @Helper.notify_no_project_found
     def run(self, **kwargs):
-        self.task_controller = TaskController()
         self.cli_helper.echo(__("info", "cli.task.run"))
         # Create input dictionaries
         snapshot_dict = {}
@@ -52,27 +51,8 @@ class TaskCommand(ProjectCommand):
         else:
             task_dict['command_list'] = kwargs['cmd']
 
-        # Create the task object
-        task_obj = self.task_controller.create()
-
-        updated_task_obj = task_obj
-        try:
-            # Pass in the task
-            updated_task_obj = self.task_controller.run(
-                task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
-        except Exception as e:
-            self.logger.error("%s %s" % (e, task_dict))
-            self.cli_helper.echo("%s" % e)
-            self.cli_helper.echo(__("error", "cli.task.run", task_obj.id))
-            return False
-        finally:
-            self.cli_helper.echo(
-                __("info", "cli.task.run.stop"))
-            self.task_controller.stop(updated_task_obj.id)
-            self.cli_helper.echo(
-                __("info", "cli.task.run.complete", updated_task_obj.id))
-
-        return updated_task_obj
+        # Run task and return Task object result
+        return self.task_run_helper(task_dict, snapshot_dict, "cli.task.run")
 
     @Helper.notify_no_project_found
     def ls(self, **kwargs):

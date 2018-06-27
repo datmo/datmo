@@ -147,7 +147,7 @@ class EnvironmentController(BaseController):
         if "paths" in dictionary and dictionary['paths']:
             paths.extend(dictionary['paths'])
 
-        # b. if there exists projet environment directory AND no paths exist, add in absolute paths
+        # b. if there exists project environment directory AND no paths exist, add in absolute paths
         if not paths and os.path.isdir(self.file_driver.environment_directory):
             paths.extend([
                 os.path.join(self.file_driver.environment_directory,
@@ -331,13 +331,17 @@ class EnvironmentController(BaseController):
         # Remove artifacts associated with the environment_driver
         environment_artifacts_removed = self.environment_driver.remove(
             environment_id, force=True)
-        # Delete environment_driver object
+        # Delete environment object
         delete_success = self.dal.environment.delete(environment_obj.id)
 
         return file_collection_deleted and environment_artifacts_removed and \
                delete_success
 
-    def stop(self, run_id=None, match_string=None, all=False):
+    def stop(self,
+             run_id=None,
+             match_string=None,
+             environment_id=None,
+             all=False):
         """Stop the trace of running environment
 
         Parameters
@@ -348,6 +352,8 @@ class EnvironmentController(BaseController):
         match_string : str, optional
             stop environment with a string to match the environment name
             (default is None, which means it is not used)
+        environment_id : str
+            environment object id to remove the artifacts
         all : bool, optional
             stop all environments
 
@@ -384,6 +390,9 @@ class EnvironmentController(BaseController):
             all_match_string = "datmo-task-" + self.model.id
             stop_success = self.environment_driver.stop_remove_containers_by_term(
                 term=all_match_string, force=True)
+        # Remove artifacts associated with the environment_driver
+        if environment_id:
+            self.environment_driver.remove(environment_id, force=True)
         return stop_success
 
     def exists(self, environment_id=None, environment_unique_hash=None):

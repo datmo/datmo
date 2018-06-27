@@ -323,7 +323,7 @@ class TestRunCommand():
         self.run_command.parse(["ls"])
         run_objs = self.run_command.execute()
         assert run_objs
-        assert run_objs[0].status == 'SUCCESS'
+        assert run_objs[0].status == "SUCCESS"
 
         test_session_id = 'test_session_id'
         self.run_command.parse(["ls", "--session-id", test_session_id])
@@ -351,13 +351,13 @@ class TestRunCommand():
         self.run_command.parse(["ls", "--format", "csv"])
         run_objs = self.run_command.execute()
         assert run_objs
-        assert run_objs[0].status == 'SUCCESS'
+        assert run_objs[0].status == "SUCCESS"
 
         # Test success format csv, download default
         self.run_command.parse(["ls", "--format", "csv", "--download"])
         run_objs = self.run_command.execute()
         assert run_objs
-        assert run_objs[0].status == 'SUCCESS'
+        assert run_objs[0].status == "SUCCESS"
         test_wildcard = os.path.join(os.getcwd(), "run_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
@@ -371,7 +371,7 @@ class TestRunCommand():
         ])
         run_objs = self.run_command.execute()
         assert run_objs
-        assert run_objs[0].status == 'SUCCESS'
+        assert run_objs[0].status == "SUCCESS"
         assert os.path.isfile(test_path)
         assert open(test_path, "r").read()
         os.remove(test_path)
@@ -380,13 +380,13 @@ class TestRunCommand():
         self.run_command.parse(["ls"])
         run_objs = self.run_command.execute()
         assert run_objs
-        assert run_objs[0].status == 'SUCCESS'
+        assert run_objs[0].status == "SUCCESS"
 
         # Test success format table, download default
         self.run_command.parse(["ls", "--download"])
         run_objs = self.run_command.execute()
         assert run_objs
-        assert run_objs[0].status == 'SUCCESS'
+        assert run_objs[0].status == "SUCCESS"
         test_wildcard = os.path.join(os.getcwd(), "run_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
@@ -399,7 +399,7 @@ class TestRunCommand():
             ["ls", "--download", "--download-path", test_path])
         run_objs = self.run_command.execute()
         assert run_objs
-        assert run_objs[0].status == 'SUCCESS'
+        assert run_objs[0].status == "SUCCESS"
         assert os.path.isfile(test_path)
         assert open(test_path, "r").read()
         os.remove(test_path)
