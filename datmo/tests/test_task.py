@@ -62,7 +62,7 @@ class TestTaskModule():
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_run(self):
-        # 1) Run task with no commit or code available (cannot save states before), string command
+        # 1) Run task with no commit or code available (can save states before), string command
         # 2) Run task with simple python file, no environment definition, string command (auto generate env)
         # 3) Run task with simple python file and environment definition, string command
         # 4) Run task with simple python file and environment definition, list command
@@ -71,12 +71,8 @@ class TestTaskModule():
         # folder in project
 
         # 1) Test out option 1)
-        failed = False
-        try:
-            _ = run(command="test")
-        except CommitFailed:
-            failed = True
-        assert failed
+        result = run(command="test")
+        assert result
 
         # Create a basic task and run it with string command
         # (fails w/ no environment)

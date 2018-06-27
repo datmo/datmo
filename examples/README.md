@@ -51,3 +51,11 @@ each example.
     * task_run_iris_sklearn_basic
     * task_run_iris_sklearn_compare
 
+#### Environment setup
+* Setting up a project environment [(CLI)](/examples/cli/environment_setup.sh)
+    * From fresh repository
+    * From existing datmo project
+    * Bringing your own
+* Initializing a workspace [(CLI)](/examples/cli/workspace_setup.sh)
+    * opening a Jupyter notebook
+    * open RStudio

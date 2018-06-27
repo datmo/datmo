@@ -13,7 +13,6 @@ from __future__ import unicode_literals
 #     import builtins as __builtin__
 
 import os
-import shutil
 import tempfile
 import platform
 

@@ -1,4 +1,5 @@
 import os
+import time
 import shlex
 from datetime import datetime
 
@@ -167,7 +168,7 @@ class TaskController(BaseController):
         """Run a task with parameters. If dictionary specified, create a new task with new run parameters.
         Snapshot objects are created before and after the task to keep track of the state. During the run,
         you can access task outputs using environment variable DATMO_TASK_DIR or `/task` which points to
-        location of .datmo/tasks/[task-id]. Create config.json, stats.json and any weights or any file such
+        location for the task files. Create config.json, stats.json and any weights or any file such
         as graphs and visualizations within that directory for quick access
 
         Parameters
@@ -314,7 +315,7 @@ class TaskController(BaseController):
                 self._run_helper(before_snapshot_obj.environment_id,
                                  environment_run_options,
                                  os.path.join(self.home, task_obj.log_filepath))
-            
+
         except Exception as e:
             return_code = 1
             logs += "Error running task: %" % e.message
@@ -443,9 +444,11 @@ class TaskController(BaseController):
         if not task_id:
             raise RequiredArgumentMissing(
                 __("error", "controller.task.delete.arg", "id"))
-        return self.dal.task.delete(task_id)
+        stopped_success = self.stop(task_id)
+        delete_task_success = self.dal.task.delete(task_id)
+        return stopped_success and delete_task_success
 
-    def stop(self, task_id=None, all=False):
+    def stop(self, task_id=None, all=False, status="STOPPED"):
         """Stop and remove run for the task and update task object statuses
 
         Parameters
@@ -471,22 +474,37 @@ class TaskController(BaseController):
         if task_id and all:
             raise TooManyArgumentsFound()
         if task_id:
-            _ = self.dal.task.get_by_id(task_id)  # verify if task_id exists
+            try:
+                task_obj = self.get(task_id)
+            except DoesNotExist:
+                time.sleep(1)
+                task_obj = self.get(task_id)
             task_match_string = "datmo-task-" + self.model.id + "-" + task_id
-            return_code = self.environment.stop(match_string=task_match_string)
+            # Get the environment id associated with the task
+            kwargs = {'match_string': task_match_string}
+            # Get the environment from the task
+            before_snapshot_id = task_obj.before_snapshot_id
+            after_snapshot_id = task_obj.after_snapshot_id
+            if not before_snapshot_id and not after_snapshot_id:
+                # TODO: remove...for now database may not be in sync. no task that has run can have NO before_snapshot_id
+                time.sleep(1)
+                task_obj = self.get(task_id)
+            if after_snapshot_id:
+                after_snapshot_obj = self.snapshot.get(after_snapshot_id)
+                kwargs['environment_id'] = after_snapshot_obj.environment_id
+            if not after_snapshot_id and before_snapshot_id:
+                before_snapshot_obj = self.snapshot.get(before_snapshot_id)
+                kwargs['environment_id'] = before_snapshot_obj.environment_id
+            return_code = self.environment.stop(**kwargs)
         if all:
             return_code = self.environment.stop(all=True)
-
         # Set stopped task statuses to STOPPED if return success
         if return_code:
             if task_id:
-                self.dal.task.update({"id": task_id, "status": "STOPPED"})
+                self.dal.task.update({"id": task_id, "status": status})
             if all:
                 task_objs = self.dal.task.query({})
                 for task_obj in task_objs:
-                    self.dal.task.update({
-                        "id": task_obj.id,
-                        "status": "STOPPED"
-                    })
+                    self.dal.task.update({"id": task_obj.id, "status": status})
 
         return return_code

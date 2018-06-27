@@ -12,7 +12,6 @@ class WorkspaceCommand(ProjectCommand):
     @Helper.notify_environment_active(TaskController)
     @Helper.notify_no_project_found
     def notebook(self, **kwargs):
-        self.task_controller = TaskController()
         self.cli_helper.echo(__("info", "cli.workspace.notebook"))
         # Creating input dictionaries
         snapshot_dict = {}
@@ -29,32 +28,13 @@ class WorkspaceCommand(ProjectCommand):
             "mem_limit": kwargs["mem_limit"]
         }
 
-        # Create the task object
-        task_obj = self.task_controller.create()
-
-        updated_task_obj = task_obj
-        # Pass in the task
-        try:
-            updated_task_obj = self.task_controller.run(
-                task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
-        except Exception as e:
-            self.logger.error("%s %s" % (e, task_dict))
-            self.cli_helper.echo(
-                __("error", "cli.workspace.notebook", task_obj.id))
-            return False
-        finally:
-            self.cli_helper.echo(
-                __("info", "cli.task.run.stop"))
-            self.task_controller.stop(updated_task_obj.id)
-            self.cli_helper.echo(
-                __("info", "cli.task.run.complete", updated_task_obj.id))
-
-        return updated_task_obj
+        # Run task and return Task object result
+        return self.task_run_helper(task_dict, snapshot_dict,
+                                    "cli.workspace.notebook")
 
     @Helper.notify_environment_active(TaskController)
     @Helper.notify_no_project_found
     def rstudio(self, **kwargs):
-        self.task_controller = TaskController()
         self.cli_helper.echo(__("info", "cli.workspace.rstudio"))
         # Creating input dictionaries
         snapshot_dict = {}
@@ -75,24 +55,6 @@ class WorkspaceCommand(ProjectCommand):
                 kwargs["mem_limit"]
         }
 
-        # Create the task object
-        task_obj = self.task_controller.create()
-
-        updated_task_obj = task_obj
-        # Pass in the task
-        try:
-            updated_task_obj = self.task_controller.run(
-                task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
-        except Exception as e:
-            self.logger.error("%s %s" % (e, task_dict))
-            self.cli_helper.echo(
-                __("error", "cli.workspace.rstudio", task_obj.id))
-            return False
-        finally:
-            self.cli_helper.echo(
-                __("info", "cli.task.run.stop"))
-            self.task_controller.stop(updated_task_obj.id)
-            self.cli_helper.echo(
-                __("info", "cli.task.run.complete", updated_task_obj.id))
-
-        return updated_task_obj
+        # Run task and return Task object result
+        return self.task_run_helper(task_dict, snapshot_dict,
+                                    "cli.workspace.rstudio")
