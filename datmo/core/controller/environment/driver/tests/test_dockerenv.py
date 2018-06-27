@@ -34,7 +34,7 @@ from datmo.core.util.exceptions import (
     EnvironmentRequirementsCreateError, EnvironmentImageNotFound,
     EnvironmentContainerNotFound, PathDoesNotExist, EnvironmentDoesNotExist,
     EnvironmentExecutionError)
-from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
+from datmo.core.util.misc_functions import check_docker_inactive, pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
 tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
@@ -60,7 +60,8 @@ class TestDockerEnv():
             f.write(to_bytes(str("RUN echo " + self.random_text)))
 
     def teardown_method(self):
-        self.docker_environment_driver.remove(self.image_name, force=True)
+        if not check_docker_inactive(test_datmo_dir):
+            self.docker_environment_driver.remove(self.image_name, force=True)
 
     def test_instantiation(self):
         assert self.docker_environment_driver != None

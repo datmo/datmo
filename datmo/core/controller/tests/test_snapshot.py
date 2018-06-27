@@ -32,7 +32,7 @@ from datmo.core.util.exceptions import (
     EntityNotFound, SessionDoesNotExist, RequiredArgumentMissing,
     TaskNotComplete, InvalidArgumentType, ProjectNotInitialized,
     InvalidProjectPath, DoesNotExist)
-from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
+from datmo.core.util.misc_functions import check_docker_inactive, pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
 tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
@@ -46,11 +46,12 @@ class TestSnapshotController():
         self.environment_ids = []
 
     def teardown_method(self):
-        self.__setup()
-        self.environment_controller = EnvironmentController()
-        for env_id in list(set(self.environment_ids)):
-            if not self.environment_controller.delete(env_id):
-                raise Exception
+        if not check_docker_inactive(test_datmo_dir):
+            self.__setup()
+            self.environment_controller = EnvironmentController()
+            for env_id in list(set(self.environment_ids)):
+                if not self.environment_controller.delete(env_id):
+                    raise Exception
 
     def __setup(self):
         Config().set_home(self.temp_dir)
