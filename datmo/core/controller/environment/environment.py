@@ -147,7 +147,7 @@ class EnvironmentController(BaseController):
         if "paths" in dictionary and dictionary['paths']:
             paths.extend(dictionary['paths'])
 
-        # b. if there exists projet environment directory AND no paths exist, add in absolute paths
+        # b. if there exists project environment directory AND no paths exist, add in absolute paths
         if not paths and os.path.isdir(self.file_driver.environment_directory):
             paths.extend([
                 os.path.join(self.file_driver.environment_directory,

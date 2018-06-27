@@ -123,10 +123,11 @@ class BaseCommand(object):
 
         updated_task_obj = task_obj
         # Pass in the task
+        status = "NOT STARTED"
         try:
-            status = "SUCCESS"
             updated_task_obj = self.task_controller.run(
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
+            status = "SUCCESS"
         except Exception as e:
             status = "FAILED"
             self.logger.error("%s %s" % (e, task_dict))
@@ -135,7 +136,8 @@ class BaseCommand(object):
             return False
         finally:
             self.cli_helper.echo(__("info", "cli.task.run.stop"))
-            self.task_controller.stop(updated_task_obj.id, status=status)
+            self.task_controller.stop(
+                task_id=updated_task_obj.id, status=status)
             self.cli_helper.echo(
                 __("info", "cli.task.run.complete", updated_task_obj.id))
 

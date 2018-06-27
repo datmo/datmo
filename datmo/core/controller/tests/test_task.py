@@ -628,7 +628,7 @@ class TestTaskController():
         thrown = False
         try:
             self.task_controller.stop(task_id="incorrect_task_id")
-        except EntityNotFound:
+        except DoesNotExist:
             thrown = True
         assert thrown
 
