@@ -31,6 +31,7 @@ except TypeError:
 from datmo.config import Config
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
+from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.task import TaskController
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.entity.task import Task
@@ -47,9 +48,15 @@ class TestProjectController():
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         Config().set_home(self.temp_dir)
         self.project_controller = ProjectController()
+        self.environment_ids = []
 
     def teardown_method(self):
-        pass
+        self.project_controller = ProjectController()
+        if self.project_controller.is_initialized:
+            self.environment_controller = EnvironmentController()
+            for env_id in list(set(self.environment_ids)):
+                if not self.environment_controller.delete(env_id):
+                    raise Exception
 
     def test_init_failure_none(self):
         # Test failed case
@@ -204,6 +211,12 @@ class TestProjectController():
 
         updated_first_task = self.task_controller.run(
             first_task.id, task_dict=task_dict)
+        after_snapshot_obj = self.task_controller.dal.snapshot.get_by_id(
+            updated_first_task.after_snapshot_id)
+        environment_obj = self.task_controller.dal.environment.get_by_id(
+            after_snapshot_obj.environment_id)
+        self.environment_ids.append(environment_obj.id)
+
 
         status_dict, latest_snapshot, ascending_unstaged_task_list = \
             self.project_controller.status()
@@ -287,6 +300,11 @@ class TestProjectController():
 
         updated_first_task = self.task_controller.run(
             first_task.id, task_dict=task_dict)
+        after_snapshot_obj = self.task_controller.dal.snapshot.get_by_id(
+            updated_first_task.after_snapshot_id)
+        environment_obj = self.task_controller.dal.environment.get_by_id(
+            after_snapshot_obj.environment_id)
+        self.environment_ids.append(environment_obj.id)
 
         status_dict, latest_snapshot, ascending_unstaged_task_list = \
             self.project_controller.status()

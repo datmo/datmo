@@ -314,7 +314,7 @@ class TaskController(BaseController):
                 self._run_helper(before_snapshot_obj.environment_id,
                                  environment_run_options,
                                  os.path.join(self.home, task_obj.log_filepath))
-            
+
         except Exception as e:
             return_code = 1
             logs += "Error running task: %" % e.message
@@ -443,7 +443,9 @@ class TaskController(BaseController):
         if not task_id:
             raise RequiredArgumentMissing(
                 __("error", "controller.task.delete.arg", "id"))
-        return self.dal.task.delete(task_id)
+        stopped_success = self.stop(task_id)
+        delete_task_success = self.dal.task.delete(task_id)
+        return stopped_success and delete_task_success
 
     def stop(self, task_id=None, all=False, status='STOPPED'):
         """Stop and remove run for the task and update task object statuses
@@ -490,9 +492,6 @@ class TaskController(BaseController):
             if all:
                 task_objs = self.dal.task.query({})
                 for task_obj in task_objs:
-                    self.dal.task.update({
-                        "id": task_obj.id,
-                        "status": status
-                    })
+                    self.dal.task.update({"id": task_obj.id, "status": status})
 
         return return_code

@@ -2,8 +2,7 @@
 Tests for TaskController
 """
 import os
-import random
-import string
+import uuid
 import tempfile
 import platform
 from io import open, TextIOWrapper
@@ -42,9 +41,14 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 class TestTaskController():
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        self.environment_ids = []
 
     def teardown_method(self):
-        pass
+        self.__setup()
+        self.environment_controller = EnvironmentController()
+        for env_id in list(set(self.environment_ids)):
+            if not self.environment_controller.delete(env_id):
+                raise Exception
 
     def __setup(self):
         Config().set_home(self.temp_dir)
@@ -92,6 +96,7 @@ class TestTaskController():
 
         paths = [env_def_path]
         environment_obj = self.environment_controller.create({"paths": paths})
+        self.environment_ids.append(environment_obj.id)
 
         # Set log filepath
         log_filepath = os.path.join(self.task_controller.home, "test.log")
@@ -101,10 +106,7 @@ class TestTaskController():
         os.makedirs(temp_test_dirpath)
 
         # Test option set 1
-        random_name = ''.join([
-            random.choice(string.ascii_letters + string.digits)
-            for _ in range(32)
-        ])
+        random_name = str(uuid.uuid1())
         options_dict = {
             "command": ["sh", "-c", "echo accuracy:0.45"],
             "ports": ["8888:8888"],
@@ -135,10 +137,7 @@ class TestTaskController():
             term=random_name)
 
         # Test option set 2
-        random_name_2 = ''.join([
-            random.choice(string.ascii_letters + string.digits)
-            for _ in range(32)
-        ])
+        random_name_2 = str(uuid.uuid1())
         options_dict = {
             "command": ["sh", "-c", "echo accuracy:0.45"],
             "ports": ["8888:8888"],
@@ -237,6 +236,11 @@ class TestTaskController():
         # 1) Test option 1
         updated_task_obj = self.task_controller.run(
             task_obj.id, task_dict=task_dict)
+        after_snapshot_obj = self.task_controller.dal.snapshot.get_by_id(
+            updated_task_obj.after_snapshot_id)
+        environment_obj = self.task_controller.dal.environment.get_by_id(
+            after_snapshot_obj.environment_id)
+        self.environment_ids.append(environment_obj.id)
 
         assert isinstance(updated_task_obj, Task)
         assert task_obj.id == updated_task_obj.id
@@ -319,6 +323,11 @@ class TestTaskController():
         # Run another task in the project
         updated_task_obj_2 = self.task_controller.run(
             task_obj_2.id, task_dict=task_dict, snapshot_dict=snapshot_dict)
+        after_snapshot_obj = self.task_controller.dal.snapshot.get_by_id(
+            updated_task_obj_2.after_snapshot_id)
+        environment_obj = self.task_controller.dal.environment.get_by_id(
+            after_snapshot_obj.environment_id)
+        self.environment_ids.append(environment_obj.id)
 
         assert isinstance(updated_task_obj_2, Task)
         assert task_obj_2.id == updated_task_obj_2.id
@@ -372,6 +381,11 @@ class TestTaskController():
 
         updated_task_obj_2 = self.task_controller.run(
             task_obj_2.id, task_dict=task_dict)
+        after_snapshot_obj = self.task_controller.dal.snapshot.get_by_id(
+            updated_task_obj_2.after_snapshot_id)
+        environment_obj = self.task_controller.dal.environment.get_by_id(
+            after_snapshot_obj.environment_id)
+        self.environment_ids.append(environment_obj.id)
 
         assert isinstance(updated_task_obj_2, Task)
         assert updated_task_obj_2.before_snapshot_id
@@ -524,6 +538,11 @@ class TestTaskController():
         # Test the default values
         updated_task_obj = self.task_controller.run(
             task_obj.id, task_dict=task_dict, snapshot_dict=snapshot_dict)
+        after_snapshot_obj = self.task_controller.dal.snapshot.get_by_id(
+            updated_task_obj.after_snapshot_id)
+        environment_obj = self.task_controller.dal.environment.get_by_id(
+            after_snapshot_obj.environment_id)
+        self.environment_ids.append(environment_obj.id)
 
         # TODO: Test case for during run and before_snapshot run
         # Get files for the task after run is complete (default)
@@ -634,6 +653,11 @@ class TestTaskController():
         # 1) Test option 1
         updated_task_obj = self.task_controller.run(
             task_obj.id, task_dict=task_dict)
+        after_snapshot_obj = self.task_controller.dal.snapshot.get_by_id(
+            updated_task_obj.after_snapshot_id)
+        environment_obj = self.task_controller.dal.environment.get_by_id(
+            after_snapshot_obj.environment_id)
+        self.environment_ids.append(environment_obj.id)
         task_id = updated_task_obj.id
         result = self.task_controller.stop(task_id=task_id)
         after_task_obj = self.task_controller.dal.task.get_by_id(task_id)
@@ -643,7 +667,13 @@ class TestTaskController():
 
         # 2) Test option 2
         task_obj_2 = self.task_controller.create()
-        _ = self.task_controller.run(task_obj_2.id, task_dict=task_dict)
+        updated_task_obj = self.task_controller.run(
+            task_obj_2.id, task_dict=task_dict)
+        after_snapshot_obj = self.task_controller.dal.snapshot.get_by_id(
+            updated_task_obj.after_snapshot_id)
+        environment_obj = self.task_controller.dal.environment.get_by_id(
+            after_snapshot_obj.environment_id)
+        self.environment_ids.append(environment_obj.id)
         result = self.task_controller.stop(all=True)
         all_task_objs = self.task_controller.dal.task.query({})
 

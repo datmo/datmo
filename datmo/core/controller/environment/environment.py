@@ -331,7 +331,7 @@ class EnvironmentController(BaseController):
         # Remove artifacts associated with the environment_driver
         environment_artifacts_removed = self.environment_driver.remove(
             environment_id, force=True)
-        # Delete environment_driver object
+        # Delete environment object
         delete_success = self.dal.environment.delete(environment_obj.id)
 
         return file_collection_deleted and environment_artifacts_removed and \
