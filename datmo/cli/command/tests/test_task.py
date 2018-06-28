@@ -138,9 +138,9 @@ class TestTaskCommand():
         assert result.status == "SUCCESS"
 
         # teardown
-        self.task_command.parse(["task", "stop", "--all"])
-        # test when all is passed to stop all
-        task_stop_command = self.task_command.execute()
+        # self.task_command.parse(["task", "stop", "--all"])
+        # # test when all is passed to stop all
+        # task_stop_command = self.task_command.execute()
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_task_run_string_command(self):
@@ -172,10 +172,10 @@ class TestTaskCommand():
         assert result.results == {"accuracy": "0.45"}
         assert result.status == "SUCCESS"
 
-        # teardown
-        self.task_command.parse(["task", "stop", "--all"])
-        # test when all is passed to stop all
-        task_stop_command = self.task_command.execute()
+        # # teardown
+        # self.task_command.parse(["task", "stop", "--all"])
+        # # test when all is passed to stop all
+        # task_stop_command = self.task_command.execute()
 
     # def test_multiple_concurrent_task_run_command(self):
     #     test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
@@ -261,10 +261,10 @@ class TestTaskCommand():
         assert "Currently running servers" in result.logs
         assert result.status == "SUCCESS"
 
-        # teardown
-        self.task_command.parse(["task", "stop", "--all"])
-        # test when all is passed to stop all
-        _ = self.task_command.execute()
+        # # teardown
+        # self.task_command.parse(["task", "stop", "--all"])
+        # # test when all is passed to stop all
+        # _ = self.task_command.execute()
 
     def test_task_run_invalid_arg(self):
         self.__set_variables()
@@ -350,7 +350,6 @@ class TestTaskCommand():
         assert paths
         assert open(paths[0], "r").read()
         os.remove(paths[0])
-
         # Test success format table, download exact path
         test_path = os.path.join(self.temp_dir, "my_output")
         self.task_command.parse(

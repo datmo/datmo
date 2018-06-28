@@ -44,9 +44,16 @@ def main():
         elif command_name == "cleanup":
             command_name = "project"
             sys.argv[1] = "cleanup"
-        elif command_name == "notebook":
-            command_name = "project"
-            sys.argv[1] = "notebook"
+        elif command_name in ["notebook", "rstudio"]:
+            sys.argv[1] = command_name
+            command_name = "workspace"
+        elif command_name == "run":
+            if len(sys.argv) > 2 and sys.argv[2] == "ls":
+                command_name = "run"
+                sys.argv.remove('run')
+            else:
+                command_name = "run"
+                sys.argv[1] = "run"
         command_class = cli_helper.get_command_class(command_name)
     elif len(sys.argv) == 1:
         command_name = "datmo_command"

@@ -186,7 +186,6 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 else:
                     options['runtime'] = 'nvidia'
             options.pop("gpu", None)
-
         run_return_code, run_id = self.run_container(
             image_name=name, **options)
 
@@ -348,18 +347,17 @@ class DockerEnvironmentDriver(EnvironmentDriver):
     # running daemon needed
     def remove_image(self, image_id_or_name, force=False):
         try:
+            docker_image_remove_cmd = list(self.prefix)
             if force:
-                docker_image_remove_cmd = list(self.prefix)
                 docker_image_remove_cmd.extend(["rmi", "-f", image_id_or_name])
             else:
-                docker_image_remove_cmd = list(self.prefix)
                 docker_image_remove_cmd.extend(["rmi", image_id_or_name])
             process = subprocess.Popen(
                 docker_image_remove_cmd,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
-            if process.returncode > 0:
+            if process.returncode > 0 or stderr:
                 raise EnvironmentExecutionError(
                     __("error",
                        "controller.environment.driver.docker.remove_image",

@@ -48,9 +48,6 @@ class BaseController(object):
         if not os.path.isdir(self.home):
             raise InvalidProjectPath(
                 __("error", "controller.base.__init__", self.home))
-        self.environment_directory = os.path.join(self.home,
-                                                  "datmo_environment")
-        self.files_directory = os.path.join(self.home, "datmo_files")
         self.config_store = JSONStore(
             os.path.join(self.home, ".datmo", ".config"))
         self.logger = DatmoLogger.get_logger(__name__)

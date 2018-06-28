@@ -33,8 +33,6 @@ class FileCollectionController(BaseController):
         except EnvironmentInitFailed:
             self.logger.warning(
                 __("warn", "controller.general.environment.failed"))
-        if not os.path.isdir(self.files_directory):
-            os.makedirs(self.files_directory)
 
     def create(self, paths):
         """Create a FileCollection
@@ -65,10 +63,11 @@ class FileCollectionController(BaseController):
 
         # a. add in user given paths as is if they exist (already within paths)
         # b. if there are NO paths found from input AND project files directory
-        if not paths and os.path.isdir(self.files_directory):
+        if not paths and os.path.isdir(self.file_driver.files_directory):
             paths.extend([
-                os.path.join(self.files_directory, filepath)
-                for filepath in list_all_filepaths(self.files_directory)
+                os.path.join(self.file_driver.files_directory,
+                             filepath) for filepath in list_all_filepaths(
+                                 self.file_driver.files_directory)
             ])
 
         # Parse paths to create collection and add in filehash
@@ -166,10 +165,11 @@ class FileCollectionController(BaseController):
         """
         # Populate paths from the project files directory
         paths = []
-        if os.path.isdir(self.files_directory):
+        if os.path.isdir(self.file_driver.files_directory):
             paths.extend([
-                os.path.join(self.files_directory, filepath)
-                for filepath in list_all_filepaths(self.files_directory)
+                os.path.join(self.file_driver.files_directory,
+                             filepath) for filepath in list_all_filepaths(
+                                 self.file_driver.files_directory)
             ])
 
         # Create a temp dir to use for calculating the hash
@@ -186,7 +186,7 @@ class FileCollectionController(BaseController):
     def _has_unstaged_changes(self):
         """Return whether there are unstaged changes"""
         file_hash = self._calculate_project_files_hash()
-        files = list_all_filepaths(self.files_directory)
+        files = list_all_filepaths(self.file_driver.files_directory)
         # if already exists in the db or is an empty directory
         if self.exists(file_hash=file_hash) or not files:
             return False
@@ -247,8 +247,8 @@ class FileCollectionController(BaseController):
             return True
         # Remove all content from `datmo_file` folder
         # TODO Use datmo environment path as a class attribute
-        for file in os.listdir(self.files_directory):
-            file_path = os.path.join(self.files_directory, file)
+        for file in os.listdir(self.file_driver.files_directory):
+            file_path = os.path.join(self.file_driver.files_directory, file)
             try:
                 if os.path.isfile(file_path):
                     os.remove(file_path)
@@ -259,5 +259,6 @@ class FileCollectionController(BaseController):
         # Add in files for that file collection id
         file_collection_path = os.path.join(self.home,
                                             file_collection_obj.path)
-        self.file_driver.copytree(file_collection_path, self.files_directory)
+        self.file_driver.copytree(file_collection_path,
+                                  self.file_driver.files_directory)
         return True

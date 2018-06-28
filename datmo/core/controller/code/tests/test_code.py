@@ -48,12 +48,8 @@ class TestCodeController():
         self.project.init("test3", "test description")
 
         # Test failing for nothing to commit, no id
-        failed = False
-        try:
-            self.code.create()
-        except CommitFailed:
-            failed = True
-        assert failed
+        result = self.code.create()
+        assert result
 
         # Test failing for non-existant commit_id
         failed = False

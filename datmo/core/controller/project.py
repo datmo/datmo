@@ -173,10 +173,11 @@ class ProjectController(BaseController):
                     self.code_driver.delete_ref(ref)
         except Exception:
             self.logger.warning(__("warn", "controller.project.cleanup.code"))
-
-        # Remove Datmo file structure, give warning if error
         try:
-            self.file_driver.delete_datmo_file_structure()
+            # Remove Hidden Datmo file structure, give warning if error
+            self.file_driver.delete_hidden_datmo_file_structure()
+            # Remove Visible Datmo file structure, give warning if error
+            self.file_driver.delete_visible_datmo_structure()
         except FileIOError:
             self.logger.warning(__("warn", "controller.project.cleanup.files"))
 
@@ -246,7 +247,8 @@ class ProjectController(BaseController):
 
         ascending_unstaged_tasks = []
         for task in descending_tasks:
-            if task.updated_at >= latest_snapshot.created_at:
+            if not latest_snapshot or \
+                task.updated_at >= latest_snapshot.created_at:
                 ascending_unstaged_tasks.insert(0, task)
             else:
                 break

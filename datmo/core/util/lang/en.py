@@ -14,8 +14,10 @@ MESSAGES = {
             "Updated project {name} @ ({path}) ",
         "cli.project.init.update.failure":
             "Failed to update project {name} @ ({path}) ",
-        "cli.project.notebook":
-            "Starting a notebook...",
+        "cli.workspace.notebook":
+            "Starting a notebook",
+        "cli.workspace.rstudio":
+            "Starting a rstudio",
         "cli.project.pull":
             "Pulling information from the Datmo project url and adding it to local...",
         "cli.project.update":
@@ -65,6 +67,10 @@ MESSAGES = {
             "Moved to snapshot with id: %s",
         "cli.task.run":
             "Running a new task",
+        "cli.task.run.stop":
+            "Stopping the task...",
+        "cli.task.run.complete":
+            "Completed task: %s",
         "cli.task.stop":
             "Stopping task: %s",
         "cli.task.stop.all":
@@ -113,8 +119,10 @@ MESSAGES = {
             "Method %s.%s not found",
         "cli.project":
             "No project found in the current directory: %s",
-        "cli.project.notebook":
-            "Error while running the notebook with task: %s",
+        "cli.workspace.notebook":
+            "Error while running the notebook with task id: %s",
+        "cli.workspace.rstudio":
+            "Error while running the rstudio with task id: %s",
         "cli.session.update.dne":
             "No session found with given id: %s",
         "cli.session.delete.dne":
@@ -369,7 +377,8 @@ MESSAGES = {
         "cli.general.confirm":
             "Is it okay?",
         "cli.project.cleanup.confirm":
-            "Are you sure you want to delete all datmo project information? If none found, no changes will be made [yN]",
+            "Are you sure you want to delete all datmo project information along with files and environment directory? "
+            "If none found, no changes will be made [yN]",
         "cli.project.environment.setup":
             "Would you like to setup the environment? [yN]"
     },
