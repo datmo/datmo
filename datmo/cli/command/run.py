@@ -85,6 +85,8 @@ class RunObject():
 
         # Execution definition
         self.command = self._core_task.command
+        self._core_snapshot_id = None
+        self._environment_id = None
         self._config = {}
 
         # Run parameters
@@ -143,6 +145,16 @@ class RunObject():
         return self._results
 
     @property
+    def core_snapshot_id(self):
+        self._core_snapshot_id = self.get_core_snapshot_id()
+        return self._core_snapshot_id
+
+    @property
+    def environment_id(self):
+        self._environment_id = self.get_environment_id()
+        return self._environment_id
+
+    @property
     def files(self):
         self._files = self.get_files()
         return self._files
@@ -170,6 +182,28 @@ class RunObject():
         snapshot_id = self.after_snapshot_id if self.after_snapshot_id else self.before_snapshot_id
         snapshot_obj = snapshot_controller.get(snapshot_id)
         return snapshot_obj
+
+    def get_environment_id(self):
+        """Returns the environment id for the run
+
+        Returns
+        -------
+        str
+            string for environment id associated with the task
+        """
+        self._core_snapshot = self.__get_core_snapshot()
+        return self._core_snapshot.environment_id
+
+    def get_core_snapshot_id(self):
+        """Returns the core snapshot id for the run
+
+        Returns
+        -------
+        str
+            string for core snapshot id associated with the task
+        """
+        self._core_snapshot = self.__get_core_snapshot()
+        return self._core_snapshot.id
 
     def get_files(self, mode="r"):
         """Returns a list of file objects for the task
@@ -311,3 +345,47 @@ class RunCommand(ProjectCommand):
         self.cli_helper.print_items(
             header_list, item_dict_list, print_format=print_format)
         return run_obj_list
+
+    @Helper.notify_environment_active(TaskController)
+    @Helper.notify_no_project_found
+    def rerun(self, **kwargs):
+        self.task_controller = TaskController()
+        # Get task id
+        task_id = kwargs.get("id", None)
+        self.cli_helper.echo(__("info", "cli.task.rerun", task_id))
+        # Create the task_obj
+        task_obj = self.task_controller.get(task_id)
+        # Create the run obj
+        run_obj = RunObject(task_obj)
+
+        environment_id = run_obj.environment_id
+        command = run_obj.command
+        snapshot_id = run_obj.core_snapshot_id
+
+        # Checkout to the core snapshot id before rerunning the task
+        self.snapshot_controller = SnapshotController()
+        checkout_success = self.snapshot_controller.checkout(snapshot_id)
+        if checkout_success:
+            self.cli_helper.echo(
+                __("info", "cli.snapshot.checkout.success", snapshot_id))
+
+        # Rerunning the task
+        # Create input dictionary for the new task
+        snapshot_dict = {}
+        snapshot_dict["environment_id"] = environment_id
+
+        task_dict = {
+            "ports": task_obj.ports,
+            "interactive": task_obj.interactive,
+            "mem_limit": task_obj.mem_limit,
+        }
+        if not isinstance(command, list):
+            if platform.system() == "Windows":
+                task_dict['command'] = command
+            elif isinstance(command, basestring):
+                task_dict['command_list'] = shlex.split(command)
+        else:
+            task_dict['command_list'] = command
+
+        # Run task and return Task object result
+        return self.task_run_helper(task_dict, snapshot_dict, "cli.task.run")

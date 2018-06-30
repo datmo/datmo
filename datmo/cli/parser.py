@@ -157,6 +157,10 @@ def get_datmo_parser():
         "checked only if download is specified. saves output to location specified"
     )
 
+    # Rerun
+    rerun_parser = subparsers.add_parser("rerun", help="To rerun an experiment")
+    rerun_parser.add_argument("id", help="run id to be rerun")
+
     # Session
     session_parser = subparsers.add_parser("session", help="session module")
     session_subcommand_parsers = session_parser.add_subparsers(

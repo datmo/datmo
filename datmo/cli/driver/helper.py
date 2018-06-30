@@ -152,7 +152,7 @@ class Helper():
         return [
             "init", "version", "--version", "-v", "status", "cleanup",
             "snapshot", "task", "session", "notebook", "rstudio",
-            "environment", "run"
+            "environment", "run", "rerun"
         ]
 
     def prompt_available_environments(self, available_environments):

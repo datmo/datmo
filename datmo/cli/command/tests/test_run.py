@@ -44,7 +44,7 @@ from datmo.cli.command.run import RunObject
 from datmo.cli.command.run import RunCommand
 from datmo.cli.command.task import TaskCommand
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.util.exceptions import SessionDoesNotExist
+from datmo.core.util.exceptions import SessionDoesNotExist, DoesNotExist
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -410,5 +410,50 @@ class TestRunCommand():
         try:
             self.task_command.parse(["ls" "--foobar", "foobar"])
         except Exception:
+            exception_thrown = True
+        assert exception_thrown
+
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_rerun(self):
+        self.__set_variables()
+        # Test success case
+        test_command = ["sh", "-c", "echo accuracy:0.45"]
+        test_ports = ["8888:8888", "9999:9999"]
+        test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
+        test_mem_limit = "4g"
+
+        # test for single set of ports
+        self.run_command.parse([
+            "run", "-p", test_ports[0],
+            "--environment-paths", test_dockerfile, "--mem-limit",
+            test_mem_limit, test_command
+        ])
+
+        # test proper execution of run command
+        task_obj = self.run_command.execute()
+        run_id = task_obj.id
+        # Test success rerun
+        self.run_command.parse(
+            ["rerun", run_id])
+        result = self.run_command.execute()
+        assert result
+        assert isinstance(result, CoreTask)
+        assert result.command == task_obj.command
+        assert result.status == "SUCCESS"
+        assert result.logs
+
+        # teardown
+        self.task_command.parse(["task", "stop", "--all"])
+        # test when all is passed to stop all
+        task_stop_command = self.task_command.execute()
+
+    def test_rerun_invalid_arg(self):
+        self.__set_variables()
+        exception_thrown = False
+        try:
+            self.run_command.parse(["rerun", "foobar"])
+            self.run_command.execute()
+        except DoesNotExist:
             exception_thrown = True
         assert exception_thrown
