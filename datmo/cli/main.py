@@ -47,6 +47,9 @@ def main():
         elif command_name in ["notebook", "rstudio"]:
             sys.argv[1] = command_name
             command_name = "workspace"
+        elif command_name == "rerun":
+            command_name = "run"
+            sys.argv[1] = "rerun"
         elif command_name == "run":
             if len(sys.argv) > 2 and sys.argv[2] == "ls":
                 command_name = "run"
