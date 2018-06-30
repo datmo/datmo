@@ -140,6 +140,10 @@ class TaskController(BaseController):
     def _parse_logs_for_results(self, logs):
         """Parse log string to extract results and return dictionary.
 
+        The format of the log line must be "key:value", whitespace will not matter
+        and if there are more than 2 items found when split on ":", it will not
+        log this as a key/value result
+
         Note
         ----
         If the same key is found multiple times in the logs, the last occurring

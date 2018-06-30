@@ -112,7 +112,7 @@ MESSAGES = {
         "general.project.dne":
             "No project found in current directory. Run `datmo init` to create one",
         "general.environment.docker.na":
-            "Docker environment is not initialized. This command cannot be run",
+            "Docker daemon is not initialized. This command cannot be run. Please start Docker and try again.",
         "sdk.snapshot.create.task.args":
             "Error due to passing excluded args while creating snapshot from task: %s",
         "cli.general":
