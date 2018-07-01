@@ -433,9 +433,19 @@ class TestRunCommand():
         # test proper execution of run command
         task_obj = self.run_command.execute()
         run_id = task_obj.id
-        # Test success rerun
+        # 1. Test success rerun
         self.run_command.parse(
             ["rerun", run_id])
+        result = self.run_command.execute()
+        assert result
+        assert isinstance(result, CoreTask)
+        assert result.command == task_obj.command
+        assert result.status == "SUCCESS"
+        assert result.logs
+
+        # 2. Test success rerun
+        self.run_command.parse(
+            ["rerun", "--initial", run_id])
         result = self.run_command.execute()
         assert result
         assert isinstance(result, CoreTask)
@@ -448,6 +458,7 @@ class TestRunCommand():
         # test when all is passed to stop all
         task_stop_command = self.task_command.execute()
 
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_rerun_invalid_arg(self):
         self.__set_variables()
         exception_thrown = False

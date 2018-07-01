@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import os
+import sys
 import shlex
 import platform
 from datetime import datetime
@@ -352,6 +353,7 @@ class RunCommand(ProjectCommand):
         self.task_controller = TaskController()
         # Get task id
         task_id = kwargs.get("id", None)
+        initial = kwargs.get("initial", False)
         self.cli_helper.echo(__("info", "cli.task.rerun", task_id))
         # Create the task_obj
         task_obj = self.task_controller.get(task_id)
@@ -360,11 +362,17 @@ class RunCommand(ProjectCommand):
 
         environment_id = run_obj.environment_id
         command = run_obj.command
-        snapshot_id = run_obj.core_snapshot_id
+        snapshot_id = run_obj.core_snapshot_id if not initial else run_obj.before_snapshot_id
 
         # Checkout to the core snapshot id before rerunning the task
         self.snapshot_controller = SnapshotController()
-        checkout_success = self.snapshot_controller.checkout(snapshot_id)
+
+        try:
+            checkout_success = self.snapshot_controller.checkout(snapshot_id)
+        except Exception:
+            self.cli_helper.echo(__("error", "cli.snapshot.checkout.failure"))
+            sys.exit(1)
+
         if checkout_success:
             self.cli_helper.echo(
                 __("info", "cli.snapshot.checkout.success", snapshot_id))

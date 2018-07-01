@@ -145,6 +145,8 @@ MESSAGES = {
             "Error while stopping all tasks",
         "cli.snapshot.create.task.args":
             "Error due to passing excluded args while creating snapshot from task: %s",
+        "cli.snapshot.checkout.failure":
+            "Error while checking out to a snapshot due to unstaged changes",
         "util.misc_functions.get_filehash":
             "Filepath does not point to a valid file: %s",
         "util.misc_functions.mutually_exclusive":
