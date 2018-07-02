@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import os
+import sys
 import shlex
 import platform
 from datetime import datetime
@@ -167,8 +168,7 @@ class RunObject():
         datmo.core.entity.task.Task
             core task object fo the task
         """
-        task_controller = TaskController()
-        return task_controller.get(self.id)
+        return self._core_task
 
     def __get_core_snapshot(self):
         """Returns the latest core snapshot object for id
@@ -275,7 +275,6 @@ class RunCommand(ProjectCommand):
         self.cli_helper.echo(__("info", "cli.task.run"))
         # Create input dictionaries
         snapshot_dict = {}
-
         # Environment
         if kwargs.get("environment_id", None) or kwargs.get(
                 "environment_paths", None):
@@ -295,7 +294,13 @@ class RunCommand(ProjectCommand):
             task_dict['command_list'] = kwargs['cmd']
 
         # Run task and return Task object result
-        return self.task_run_helper(task_dict, snapshot_dict, "cli.task.run")
+        task_obj = self.task_run_helper(task_dict, snapshot_dict, "cli.task.run")
+        if not task_obj:
+            return False
+        # Creating the run object
+        run_obj = RunObject(task_obj)
+        return run_obj
+
 
     @Helper.notify_no_project_found
     def ls(self, **kwargs):
@@ -352,6 +357,7 @@ class RunCommand(ProjectCommand):
         self.task_controller = TaskController()
         # Get task id
         task_id = kwargs.get("id", None)
+        initial = kwargs.get("initial", False)
         self.cli_helper.echo(__("info", "cli.task.rerun", task_id))
         # Create the task_obj
         task_obj = self.task_controller.get(task_id)
@@ -359,12 +365,17 @@ class RunCommand(ProjectCommand):
         run_obj = RunObject(task_obj)
 
         environment_id = run_obj.environment_id
-        command = run_obj.command
-        snapshot_id = run_obj.core_snapshot_id
+        command = task_obj.command_list
+        snapshot_id = run_obj.core_snapshot_id if not initial else run_obj.before_snapshot_id
 
         # Checkout to the core snapshot id before rerunning the task
         self.snapshot_controller = SnapshotController()
-        checkout_success = self.snapshot_controller.checkout(snapshot_id)
+        try:
+            checkout_success = self.snapshot_controller.checkout(snapshot_id)
+        except Exception:
+            self.cli_helper.echo(__("error", "cli.snapshot.checkout.failure"))
+            sys.exit(1)
+
         if checkout_success:
             self.cli_helper.echo(
                 __("info", "cli.snapshot.checkout.success", snapshot_id))
@@ -373,19 +384,16 @@ class RunCommand(ProjectCommand):
         # Create input dictionary for the new task
         snapshot_dict = {}
         snapshot_dict["environment_id"] = environment_id
-
         task_dict = {
             "ports": task_obj.ports,
             "interactive": task_obj.interactive,
             "mem_limit": task_obj.mem_limit,
+            "command_list": command
         }
-        if not isinstance(command, list):
-            if platform.system() == "Windows":
-                task_dict['command'] = command
-            elif isinstance(command, basestring):
-                task_dict['command_list'] = shlex.split(command)
-        else:
-            task_dict['command_list'] = command
-
         # Run task and return Task object result
-        return self.task_run_helper(task_dict, snapshot_dict, "cli.task.run")
+        new_task_obj = self.task_run_helper(task_dict, snapshot_dict, "cli.task.run")
+        if not new_task_obj:
+            return False
+        # Creating the run object
+        new_run_obj = RunObject(new_task_obj)
+        return new_run_obj
