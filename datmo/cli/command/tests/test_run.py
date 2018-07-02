@@ -165,6 +165,7 @@ class TestRunCommand():
         assert result.end_time
         assert result.duration
         assert result.core_snapshot_id
+        assert result.core_snapshot_id == result.after_snapshot_id
         assert result.environment_id
 
         # teardown
@@ -205,6 +206,7 @@ class TestRunCommand():
         assert result.end_time
         assert result.duration
         assert result.core_snapshot_id
+        assert result.core_snapshot_id == result.after_snapshot_id
         assert result.environment_id
         assert result
 
