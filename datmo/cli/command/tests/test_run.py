@@ -155,12 +155,17 @@ class TestRunCommand():
         result = self.run_command.execute()
         time.sleep(1)
         assert result
-        assert isinstance(result, CoreTask)
+        assert isinstance(result, RunObject)
         assert result.logs
         assert "accuracy" in result.logs
         assert result.results
         assert result.results == {"accuracy": "0.45"}
         assert result.status == "SUCCESS"
+        assert result.start_time
+        assert result.end_time
+        assert result.duration
+        assert result.core_snapshot_id
+        assert result.environment_id
 
         # teardown
         self.task_command.parse(["task", "stop", "--all"])
@@ -190,12 +195,18 @@ class TestRunCommand():
         # test proper execution of run command
         result = self.run_command.execute()
         assert result
-        assert isinstance(result, CoreTask)
+        assert isinstance(result, RunObject)
         assert result.logs
         assert "accuracy" in result.logs
         assert result.results
         assert result.results == {"accuracy": "0.45"}
         assert result.status == "SUCCESS"
+        assert result.start_time
+        assert result.end_time
+        assert result.duration
+        assert result.core_snapshot_id
+        assert result.environment_id
+        assert result
 
         # teardown
         self.task_command.parse(["task", "stop", "--all"])
@@ -282,7 +293,7 @@ class TestRunCommand():
         # test proper execution of run command
         result = self.run_command.execute()
         assert result
-        assert isinstance(result, CoreTask)
+        assert isinstance(result, RunObject)
         assert result.logs
         assert "Currently running servers" in result.logs
         assert result.status == "SUCCESS"
@@ -431,27 +442,29 @@ class TestRunCommand():
         ])
 
         # test proper execution of run command
-        task_obj = self.run_command.execute()
-        run_id = task_obj.id
+        run_obj = self.run_command.execute()
+        run_id = run_obj.id
         # 1. Test success rerun
         self.run_command.parse(
             ["rerun", run_id])
-        result = self.run_command.execute()
-        assert result
-        assert isinstance(result, CoreTask)
-        assert result.command == task_obj.command
-        assert result.status == "SUCCESS"
-        assert result.logs
+        result_run_obj = self.run_command.execute()
+        assert result_run_obj
+        assert isinstance(result_run_obj, RunObject)
+        assert result_run_obj.command == run_obj.command
+        assert result_run_obj.status == "SUCCESS"
+        assert result_run_obj.logs
+        assert result_run_obj.before_snapshot_id == run_obj.after_snapshot_id
 
         # 2. Test success rerun
         self.run_command.parse(
             ["rerun", "--initial", run_id])
-        result = self.run_command.execute()
-        assert result
-        assert isinstance(result, CoreTask)
-        assert result.command == task_obj.command
-        assert result.status == "SUCCESS"
-        assert result.logs
+        result_run_obj = self.run_command.execute()
+        assert result_run_obj
+        assert isinstance(result_run_obj, RunObject)
+        assert result_run_obj.command == run_obj.command
+        assert result_run_obj.status == "SUCCESS"
+        assert result_run_obj.logs
+        assert result_run_obj.before_snapshot_id == run_obj.before_snapshot_id
 
         # teardown
         self.task_command.parse(["task", "stop", "--all"])

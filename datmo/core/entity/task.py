@@ -183,7 +183,8 @@ class Task():
         if self.results:
             table_data.append(["Results", "-> " + str(self.results)])
         final_str = final_str + format_table(table_data)
-        final_str = final_str + "\n" + "    " + self.command + "\n" + "\n"
+        if self.command:
+            final_str = final_str + "\n" + "    " + self.command + "\n" + "\n"
         return final_str
 
     def __repr__(self):
