@@ -141,7 +141,10 @@ def get_datmo_parser():
         type=str,
         help="pass in the session id to list the tasks in that session")
     run_ls_parser.add_argument(
-        "--format", dest="format", default="table", help="output format")
+        "--format",
+        dest="format",
+        default="table",
+        help="output format ['table', 'csv']")
     run_ls_parser.add_argument(
         "--download",
         dest="download",
@@ -158,13 +161,16 @@ def get_datmo_parser():
     )
 
     # Rerun
-    rerun_parser = subparsers.add_parser("rerun", help="To rerun an experiment")
+    rerun_parser = subparsers.add_parser(
+        "rerun", help="To rerun an experiment")
     rerun_parser.add_argument("id", help="run id to be rerun")
     rerun_parser.add_argument(
         "--initial",
         dest="initial",
         action="store_true",
-        help="boolean if you want to rerun the experiment with the state at the beginning of the run")
+        help=
+        "boolean if you want to rerun the experiment with the state at the beginning of the run"
+    )
 
     # Session
     session_parser = subparsers.add_parser("session", help="session module")
@@ -198,7 +204,10 @@ def get_datmo_parser():
     session_ls = session_subcommand_parsers.add_parser(
         "ls", help="list sessions")
     session_ls.add_argument(
-        "--format", dest="format", default="table", help="output format")
+        "--format",
+        dest="format",
+        default="table",
+        help="output format ['table', 'csv']")
     session_ls.add_argument(
         "--download",
         dest="download",
@@ -283,7 +292,10 @@ def get_datmo_parser():
     environment_ls = environment_subcommand_parsers.add_parser(
         "ls", help="list environments")
     environment_ls.add_argument(
-        "--format", dest="format", default="table", help="output format")
+        "--format",
+        dest="format",
+        default="table",
+        help="output format ['table', 'csv']")
     environment_ls.add_argument(
         "--download",
         dest="download",
@@ -452,13 +464,20 @@ def get_datmo_parser():
         default=None,
         help="session id to filter")
     snapshot_ls.add_argument(
-        "--all",
-        "-a",
+        "--details",
         dest="details",
         action="store_true",
         help="show detailed snapshot information")
     snapshot_ls.add_argument(
-        "--format", dest="format", default="table", help="output format")
+        "--all",
+        dest="show_all",
+        action="store_true",
+        help="show all visible and hidden snapshots")
+    snapshot_ls.add_argument(
+        "--format",
+        dest="format",
+        default="table",
+        help="output format ['table', 'csv']")
     snapshot_ls.add_argument(
         "--download",
         dest="download",
@@ -564,7 +583,10 @@ def get_datmo_parser():
         type=str,
         help="pass in the session id to list the tasks in that session")
     task_ls.add_argument(
-        "--format", dest="format", default="table", help="output format")
+        "--format",
+        dest="format",
+        default="table",
+        help="output format ['table', 'csv']")
     task_ls.add_argument(
         "--download",
         dest="download",

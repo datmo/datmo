@@ -640,7 +640,35 @@ class TestSnapshotCommand():
 
     def test_snapshot_ls(self):
         self.__set_variables()
-        # Test when optional parameters are not given
+
+        # Test invisible snapshot from task
+        # create task
+        test_command = "sh -c 'echo accuracy:0.45'"
+        test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
+        self.task = TaskCommand(self.cli_helper)
+        self.task.parse([
+            "task", "run", "--environment-paths", test_dockerfile, test_command
+        ])
+
+        # test proper execution of task run command
+        task_obj = self.task.execute()
+
+        # test no visible snapshots
+        self.snapshot_command.parse(["snapshot", "ls"])
+
+        result = self.snapshot_command.execute()
+
+        assert not result
+
+        # test invisible snapshot from task_id was created
+        self.snapshot_command.parse(["snapshot", "ls", "--all"])
+
+        result = self.snapshot_command.execute()
+
+        assert result
+        assert task_obj.after_snapshot_id in [obj.id for obj in result]
+
+        # create a visible snapshot
         self.snapshot_command.parse(
             ["snapshot", "create", "-m", "my test snapshot"])
 
@@ -655,7 +683,7 @@ class TestSnapshotCommand():
         assert created_snapshot_obj in result
 
         # Test when optional parameters are not given
-        self.snapshot_command.parse(["snapshot", "ls", "-a"])
+        self.snapshot_command.parse(["snapshot", "ls", "--details"])
 
         result = self.snapshot_command.execute()
 
