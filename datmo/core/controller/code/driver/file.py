@@ -357,7 +357,6 @@ class FileCodeDriver(CodeDriver):
         ------
         CodeNotInitialized
             error if not initialized (must initialize first)
-
         UnstagedChanges
             error if not there exists unstaged changes in code
         """

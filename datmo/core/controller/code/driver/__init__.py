@@ -19,6 +19,8 @@ class CodeDriver(with_metaclass(ABCMeta, object)):
         push commit reference given
     fetch_ref()
         fetch commit reference given
+    check_unstaged_changes()
+        check if there exists any unstaged changes for code
     checkout_ref()
         checkout to commit reference given
     """
@@ -158,6 +160,7 @@ class CodeDriver(with_metaclass(ABCMeta, object)):
     #     """
     #     pass
 
+    @abstractmethod
     def check_unstaged_changes(self):
         """Checks if there exists any unstaged changes for code
 
