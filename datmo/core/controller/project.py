@@ -1,10 +1,13 @@
 from datmo.core.util.validation import validate
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
+from datmo.core.controller.code.code import CodeController
+from datmo.core.controller.environment.environment import EnvironmentController
+from datmo.core.controller.file.file_collection import FileCollectionController
 from datmo.core.entity.model import Model
 from datmo.core.entity.session import Session
-from datmo.core.util.exceptions import (ProjectNotInitialized,
-                                        EnvironmentInitFailed, FileIOError)
+from datmo.core.util.exceptions import (
+    ProjectNotInitialized, EnvironmentInitFailed, FileIOError, UnstagedChanges)
 
 
 class ProjectController(BaseController):
@@ -207,8 +210,14 @@ class ProjectController(BaseController):
             dictionary with project metadata and config
         latest_snapshot : datmo.core.entity.snapshot.Snapshot
             snapshot object of the latest snapshot if present else None
-        ascending_unstaged_tasks : list
-            list of datmo.core.entity.task.Task objects in ascending order of updated_at time
+        tasks_after_latest_snapshot : list
+            list of datmo.core.entity.task.Task objects from the latest snapshot in ascending order of updated_at time
+        unstaged_code : bool
+            True if code has unstaged changes
+        unstaged_environment : bool
+            True if environment has unstaged changes
+        unstaged_files : bool
+            True if files have unstaged changes
         """
         if not self.is_initialized:
             raise ProjectNotInitialized(
@@ -245,12 +254,33 @@ class ProjectController(BaseController):
         descending_tasks = self.dal.task.query(
             {}, sort_key="updated_at", sort_order="descending")
 
-        ascending_unstaged_tasks = []
+        tasks_after_latest_snapshot = []
         for task in descending_tasks:
             if not latest_snapshot or \
                 task.updated_at >= latest_snapshot.created_at:
-                ascending_unstaged_tasks.insert(0, task)
+                tasks_after_latest_snapshot.insert(0, task)
             else:
                 break
 
-        return status_dict, latest_snapshot, ascending_unstaged_tasks
+        self.code_controller = CodeController()
+        try:
+            unstaged_code = self.code_controller.check_unstaged_changes()
+        except UnstagedChanges:
+            unstaged_code = True
+
+        self.environment_controller = EnvironmentController()
+        try:
+            unstaged_environment = self.environment_controller.check_unstaged_changes(
+            )
+        except UnstagedChanges:
+            unstaged_environment = True
+
+        self.file_collection_controller = FileCollectionController()
+        try:
+            unstaged_files = self.file_collection_controller.check_unstaged_changes(
+            )
+        except UnstagedChanges:
+            unstaged_files = True
+
+        return status_dict, latest_snapshot, tasks_after_latest_snapshot, \
+               unstaged_code, unstaged_environment, unstaged_files

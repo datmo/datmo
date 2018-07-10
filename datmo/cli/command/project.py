@@ -126,7 +126,7 @@ class ProjectCommand(BaseCommand):
 
     @Helper.notify_no_project_found
     def status(self):
-        status_dict, latest_snapshot, ascending_unstaged_tasks = self.project_controller.status(
+        status_dict, latest_snapshot, tasks_after_latest_snapshot, unstaged_code, unstaged_environment, unstaged_files = self.project_controller.status(
         )
 
         # Print out simple project meta data
@@ -143,7 +143,8 @@ class ProjectCommand(BaseCommand):
         self.cli_helper.echo("")
 
         # Print out latest snapshot info
-        self.cli_helper.echo("latest snapshot id: ")
+        self.cli_helper.echo(
+            "latest snapshot id (run `datmo snapshot ls` for more info): ")
         if latest_snapshot:
             self.cli_helper.echo(latest_snapshot.id)
         else:
@@ -151,15 +152,30 @@ class ProjectCommand(BaseCommand):
 
         self.cli_helper.echo("")
 
-        # Print out unstaged tasks
-        self.cli_helper.echo("unstaged task ids:")
-        if ascending_unstaged_tasks:
-            for task in ascending_unstaged_tasks:
+        # Print out tasks from
+        self.cli_helper.echo(
+            "tasks since last snapshot (run `datmo task ls` for more info):")
+        if tasks_after_latest_snapshot:
+            for task in tasks_after_latest_snapshot:
                 self.cli_helper.echo(task.id)
         else:
-            self.cli_helper.echo("no unstaged tasks")
+            self.cli_helper.echo("no tasks run since last snapshot")
 
-        return status_dict, latest_snapshot, ascending_unstaged_tasks
+        self.cli_helper.echo("")
+
+        # Print out unstaged changes
+        self.cli_helper.echo("unstaged changes since last snapshot:")
+        if unstaged_code:
+            self.cli_helper.echo("code has been changed")
+        if unstaged_environment:
+            self.cli_helper.echo("environment has been changed")
+        if unstaged_files:
+            self.cli_helper.echo("files have been changed")
+        if not unstaged_code and not unstaged_environment and not unstaged_files:
+            self.cli_helper.echo(
+                "all changes have been saved, no unstaged changed detected")
+
+        return status_dict, latest_snapshot, tasks_after_latest_snapshot, unstaged_code, unstaged_environment, unstaged_files
 
     def cleanup(self):
         # Prompt user to ensure they would like to remove datmo information along with environment and files folder

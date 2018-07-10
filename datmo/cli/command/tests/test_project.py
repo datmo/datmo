@@ -250,9 +250,13 @@ class TestProjectCommand():
 
         self.project_command.parse(["status"])
         result = self.project_command.execute()
-        assert isinstance(result[0], dict)
-        assert not result[1]
-        assert not result[2]
+        status_dict, latest_snapshot, tasks_after_latest_snapshot, unstaged_code, unstaged_environment, unstaged_files = result
+        assert isinstance(status_dict, dict)
+        assert not latest_snapshot
+        assert not tasks_after_latest_snapshot
+        assert unstaged_code
+        assert not unstaged_environment
+        assert not unstaged_files
 
     def test_status_invalid_arg(self):
         exception_thrown = False
