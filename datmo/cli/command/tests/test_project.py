@@ -55,7 +55,7 @@ class TestProjectCommand():
         self.project_command.parse(["init"])
 
         # Test when environment is created
-        @self.project_command.cli_helper.input("\n\ny\n1\n")
+        @self.project_command.cli_helper.input("\n\ny\n\n\n\n")
         def dummy(self):
             return self.project_command.execute()
 
@@ -72,7 +72,7 @@ class TestProjectCommand():
             self.temp_dir, self.project_command.project_controller.file_driver.
             environment_directory, "Dockerfile")
         assert os.path.isfile(definition_filepath)
-        assert "FROM datmo/xgboost:cpu" in open(definition_filepath,
+        assert "FROM datmo/python-base:cpu-py27" in open(definition_filepath,
                                                 "r").read()
 
     def test_init_create_success_no_environment(self):
@@ -103,9 +103,8 @@ class TestProjectCommand():
         test_description = "test model"
         self.project_command.parse(
             ["init", "--name", test_name, "--description", test_description])
-
         # Test when environment is created
-        @self.project_command.cli_helper.input("y\n1\n")
+        @self.project_command.cli_helper.input("y\n\n\n\n")
         def dummy(self):
             return self.project_command.execute()
 
@@ -117,7 +116,7 @@ class TestProjectCommand():
 
         assert result
         assert os.path.isfile(definition_filepath)
-        assert "FROM datmo/xgboost:cpu" in open(definition_filepath,
+        assert "FROM datmo/python-base:cpu-py27" in open(definition_filepath,
                                                 "r").read()
 
         # test for desired side effects

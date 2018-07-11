@@ -104,21 +104,19 @@ class ProjectCommand(BaseCommand):
         if environment_setup:
             # Setting up the environment definition file
             self.environment_controller = EnvironmentController()
-            available_environments = self.environment_controller.get_supported_environments(
-            )
-            input_environment_name = self.cli_helper.prompt_available_environments(
-                available_environments)
-            try:
-                options = {"name": input_environment_name}
-                environment_obj = self.environment_controller.setup(
-                    options=options)
-                self.cli_helper.echo(
-                    __("info", "cli.environment.setup.success",
-                       (environment_obj.name, environment_obj.id)))
-            except EnvironmentDoesNotExist:
-                self.cli_helper.echo(
-                    __("error", "cli.environment.setup.argument",
-                       input_environment_name))
+            environment_types = self.environment_controller.get_environment_type()
+            type = self.cli_helper.prompt_available_options(environment_types, option_type="type")
+            available_environments = self.environment_controller.get_supported_environments(type)
+            env = self.cli_helper.prompt_available_options(available_environments, option_type="env")
+            available_environment_languages = self.environment_controller.get_supported_languages(type, env)
+            language = self.cli_helper.prompt_available_options(available_environment_languages, option_type="language")
+            options = {"type": type, "env": env, "language": language}
+            environment_obj = self.environment_controller.setup(
+                options=options)
+            self.cli_helper.echo(
+                __("info", "cli.environment.setup.success",
+                   (environment_obj.name, environment_obj.id)))
+
         return self.project_controller.model
 
     def version(self):

@@ -64,7 +64,7 @@ class TestWorkspace():
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(self.env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/xgboost:cpu\n")))
+            f.write(to_bytes(str("FROM datmo/data-analytics:cpu-py27\n")))
 
     def teardown_method(self):
         pass

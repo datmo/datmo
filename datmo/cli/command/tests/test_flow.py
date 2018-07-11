@@ -63,11 +63,9 @@ class TestFlow():
 
     def __environment_setup(self):
         self.environment_command.parse(["environment", "setup"])
-
-        @self.environment_command.cli_helper.input("1\n")
+        @self.environment_command.cli_helper.input("\n\n\n")
         def dummy(self):
             return self.environment_command.execute()
-
         environment_setup_result = dummy(self)
         return environment_setup_result
 
