@@ -69,49 +69,49 @@ class TestWorkspace():
     def teardown_method(self):
         pass
 
-    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_notebook(self):
-        self.__set_variables()
-
-        test_mem_limit = "4g"
-        # test single ports option before command
-        self.workspace_command.parse([
-            "notebook",
-            "--gpu",
-            "--environment-paths",
-            self.env_def_path,
-            "--mem-limit",
-            test_mem_limit,
-        ])
-
-        # test for desired side effects
-        assert self.workspace_command.args.gpu == True
-        assert self.workspace_command.args.environment_paths == [
-            self.env_def_path
-        ]
-        assert self.workspace_command.args.mem_limit == test_mem_limit
-
-        # test multiple ports option before command
-        self.workspace_command.parse(["notebook"])
-
-        assert self.workspace_command.args.gpu == False
-
-        @timeout_decorator.timeout(10, use_signals=False)
-        def timed_run(timed_run_result):
-            if self.workspace_command.execute():
-                return timed_run_result
-
-        timed_run_result = False
-        try:
-            timed_run_result = timed_run(timed_run_result)
-        except timeout_decorator.timeout_decorator.TimeoutError:
-            timed_run_result = True
-
-        assert timed_run_result
-
-        # Stop all running datmo task
-        self.task_command.parse(["task", "stop", "--all"])
-        self.task_command.execute()
+    # @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    # def test_notebook(self):
+    #     self.__set_variables()
+    #
+    #     test_mem_limit = "4g"
+    #     # test single ports option before command
+    #     self.workspace_command.parse([
+    #         "notebook",
+    #         "--gpu",
+    #         "--environment-paths",
+    #         self.env_def_path,
+    #         "--mem-limit",
+    #         test_mem_limit,
+    #     ])
+    #
+    #     # test for desired side effects
+    #     assert self.workspace_command.args.gpu == True
+    #     assert self.workspace_command.args.environment_paths == [
+    #         self.env_def_path
+    #     ]
+    #     assert self.workspace_command.args.mem_limit == test_mem_limit
+    #
+    #     # test multiple ports option before command
+    #     self.workspace_command.parse(["notebook"])
+    #
+    #     assert self.workspace_command.args.gpu == False
+    #
+    #     @timeout_decorator.timeout(10, use_signals=False)
+    #     def timed_run(timed_run_result):
+    #         if self.workspace_command.execute():
+    #             return timed_run_result
+    #
+    #     timed_run_result = False
+    #     try:
+    #         timed_run_result = timed_run(timed_run_result)
+    #     except timeout_decorator.timeout_decorator.TimeoutError:
+    #         timed_run_result = True
+    #
+    #     assert timed_run_result
+    #
+    #     # Stop all running datmo task
+    #     self.task_command.parse(["task", "stop", "--all"])
+    #     self.task_command.execute()
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_rstudio(self):

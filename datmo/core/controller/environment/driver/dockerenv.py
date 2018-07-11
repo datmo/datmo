@@ -132,7 +132,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
     def get_environment_type(self):
         # To get the current environment type
-        return self.docker_config["environment_type"].keys()
+        return list(self.docker_config["environment_type"])
 
     def get_supported_environments(self, type):
         # To get the current environments
