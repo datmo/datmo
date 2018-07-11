@@ -81,9 +81,22 @@ class TestEnvironmentController():
             failed = True
         assert failed
 
+    def test_get_environment_type(self):
+        self.__setup()
+        result = self.environment_controller.get_environment_type()
+        assert result
+
     def test_get_supported_environments(self):
         self.__setup()
-        result = self.environment_controller.get_supported_environments()
+        type='cpu'
+        result = self.environment_controller.get_supported_environments(type)
+        assert result
+
+    def test_get_supported_languages(self):
+        self.__setup()
+        type='cpu'
+        environment_name='data-analytics'
+        result = self.environment_controller.get_supported_languages(type, environment_name)
         assert result
 
     def test_setup(self):
@@ -91,31 +104,30 @@ class TestEnvironmentController():
         self.environment_controller = EnvironmentController()
 
         # Test success setup once (no files present)
-        options = {"name": "xgboost:cpu"}
+        options = {"env": "data-analytics", "type": "cpu", "language": "py27"}
         result = self.environment_controller.setup(options=options)
         output_definition_filepath = os.path.join(
             self.environment_controller.file_driver.environment_directory,
             "Dockerfile")
 
         assert isinstance(result, Environment)
-        assert result.name == options['name']
-        assert result.description == "supported base environment created by datmo"
+        assert result.name == "%s:%s-%s" % (options['env'], options['type'], options['language'])
+        assert result.description == "supported environment created by datmo"
         assert os.path.isfile(output_definition_filepath)
-        assert "FROM datmo/xgboost:cpu" in open(output_definition_filepath,
+        assert "FROM datmo/data-analytics:cpu-py27" in open(output_definition_filepath,
                                                 "r").read()
-
         # Test success setup again (files present, but staged)
-        options = {"name": "xgboost:cpu"}
+        options = {"env": "data-analytics", "type": "cpu", "language": "py27"}
         result = self.environment_controller.setup(options=options)
         output_definition_filepath = os.path.join(
             self.environment_controller.file_driver.environment_directory,
             "Dockerfile")
 
         assert isinstance(result, Environment)
-        assert result.name == options['name']
-        assert result.description == "supported base environment created by datmo"
+        assert result.name == "%s:%s-%s" % (options['env'], options['type'], options['language'])
+        assert result.description == "supported environment created by datmo"
         assert os.path.isfile(output_definition_filepath)
-        assert "FROM datmo/xgboost:cpu" in open(output_definition_filepath,
+        assert "FROM datmo/data-analytics:cpu-py27" in open(output_definition_filepath,
                                                 "r").read()
 
         # Test failure in downstream function (e.g. bad inputs, no name given)
@@ -254,8 +266,8 @@ class TestEnvironmentController():
         # Files ["Dockerfile", "datmoDockerfile"]
 
         # remove the project environment directory
-        shutil.rmtree(
-            self.environment_controller.file_driver.environment_directory)
+        os.remove(os.path.join(self.environment_controller.file_driver.environment_directory, "Dockerfile"))
+        os.remove(os.path.join(self.environment_controller.file_driver.environment_directory, "test"))
 
         # Create environment definition in root directory
         home_definition_filepath = os.path.join(
@@ -487,9 +499,8 @@ class TestEnvironmentController():
         assert return_code == 0
         assert run_id
         assert logs
-
-        shutil.rmtree(
-            self.environment_controller.file_driver.environment_directory)
+        # remove Dockerfile
+        os.remove(os.path.join(self.environment_controller.file_driver.environment_directory, "Dockerfile"))
 
         # 1) Test option 1
         # Create environment definition

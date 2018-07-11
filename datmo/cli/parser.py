@@ -236,7 +236,35 @@ def get_datmo_parser():
         default=None,
         type=str,
         help=
-        "name of environment to be used for environment (e.g. xgboost:cpu). if none is given, a prompt will present the supported names"
+        "name of environment to be used for environment (e.g. data-analytics). if none is given, "
+        "a prompt will present the supported names"
+    )
+    environment_setup.add_argument(
+        "--env",
+        dest="env",
+        default=None,
+        type=str,
+        help=
+        "environment to be used for environment (e.g. data-analytics). if none is given, "
+        "a prompt will present the supported names"
+    )
+    environment_setup.add_argument(
+        "--type",
+        dest="type",
+        default=None,
+        type=str,
+        help=
+        "type of environment to be used for environment (e.g. cpu). if none is given, a prompt "
+        "will present the supported type"
+    )
+    environment_setup.add_argument(
+        "--language",
+        dest="language",
+        default=None,
+        type=str,
+        help=
+        "language of environment to be used for environment (e.g. py27). if none is given, a prompt will "
+        "present the supported language for the name and type"
     )
 
     environment_create = environment_subcommand_parsers.add_parser(

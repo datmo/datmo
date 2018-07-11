@@ -42,7 +42,7 @@ MESSAGES = {
         "cli.general.tuple.test":
             "%s, %s",
         "cli.environment.setup.success":
-            "Setup a new base environment with name: %s and id: %s",
+            "Successful setup of an environment with name: %s and id: %s",
         "cli.environment.create":
             "Creating a new environment",
         "cli.environment.create.success":
@@ -104,13 +104,19 @@ MESSAGES = {
         "controller.project.cleanup.code":
             "Error cleaning up project code",
         "controller.project.cleanup.files":
-            "Error cleaning up project files"
+            "Error cleaning up project files",
+        "cli.environment.setup.argument.type":
+            "This name or index does not match any supported environment types: %s, using default: cpu ",
+        "cli.environment.setup.argument.env":
+            "This name or index does not match any supported environments: %s, using default: python-base",
+        "cli.environment.setup.argument.language":
+            "This name or index does not match any supported environment language: %s, using default: py27",
     },
     "error": {
         "exception.validationfailed":
             "Validation failed: %s",
         "general.project.dne":
-            "No project found in current directory. Run `datmo init` to create one",
+            "datmo project structure not found in current directory. Run `datmo init` to initialize",
         "general.environment.docker.na":
             "Docker daemon is not initialized. This command cannot be run. Please start Docker and try again.",
         "sdk.snapshot.create.task.args":
@@ -133,8 +139,6 @@ MESSAGES = {
             "Cannot delete default session",
         "cli.session.select.dne":
             "No session found with given name or id: %s",
-        "cli.environment.setup.argument":
-            "This name or index does not match any supported environments: %s, ",
         "cli.task.run":
             "Error while running the task: %s",
         "cli.task.run.already_running":
@@ -232,7 +236,7 @@ MESSAGES = {
         "controller.code.delete":
             "Code with id %s does NOT exist",
         "controller.environment.__init__":
-            "Project has not been initialized",
+            "Project has not been initialized ",
         "controller.environment.driver.docker.__init__.dne":
             "File path does not exist: %s",
         "controller.environment.driver.docker.__init__":
@@ -370,8 +374,12 @@ MESSAGES = {
     "trace": {},
     "fatal": {},
     "prompt": {
-        "cli.environment.setup.name":
-            "Please select one of the above environments (e.g. 1 or xgboost:cpu)",
+        "cli.environment.setup.env":
+            "Please select one of the above environments (e.g. 1 or data-analytics)",
+        "cli.environment.setup.type":
+            "Please select one of the above environment type (e.g. 1 or gpu)",
+        "cli.environment.setup.language":
+            "Please select one of the above environment language (e.g. py27)",
         "cli.project.init.name":
             "Enter name for the project",
         "cli.project.init.description":

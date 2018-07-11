@@ -87,8 +87,19 @@ class TestDockerEnv():
             thrown = True
         assert thrown
 
+    def test_get_current_type(self):
+        result = self.docker_environment_driver.get_environment_type()
+        assert result
+
     def test_get_current_name(self):
-        result = self.docker_environment_driver.get_supported_environments()
+        type='cpu'
+        result = self.docker_environment_driver.get_supported_environments(type)
+        assert result
+
+    def test_get_supported_languages(self):
+        type='cpu'
+        env='data-analytics'
+        result = self.docker_environment_driver.get_supported_languages(type, env)
         assert result
 
     def test_setup(self):
@@ -114,7 +125,7 @@ class TestDockerEnv():
             failed = True
         assert failed
 
-        options = {"name": "xgboost:cpu"}
+        options = {"env": "data-analytics", "type": "cpu", "language": "py27"}
 
         # Test if failure if the path does not exist
         failed = False

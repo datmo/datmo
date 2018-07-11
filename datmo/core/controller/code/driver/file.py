@@ -93,13 +93,13 @@ class FileCodeDriver(CodeDriver):
         datmo_files_files = set(spec.match_tree(self.filepath))
 
         # TODO: REMOVE THIS CODE
-        # Ignore the datmo_snapshots/ folder and all contents within it
+        # Ignore the datmo_environments/ folder and all contents within it
         spec = pathspec.PathSpec.from_lines('gitwildmatch',
-                                            ["datmo_snapshots"])
+                                            ["datmo_environments"])
         datmo_snapshots_files = set(spec.match_tree(self.filepath))
 
-        # Ignore the datmo_tasks/ folder and all contents within it
-        spec = pathspec.PathSpec.from_lines('gitwildmatch', ["datmo_tasks"])
+        # Ignore the datmo_files/ folder and all contents within it
+        spec = pathspec.PathSpec.from_lines('gitwildmatch', ["datmo_files"])
         datmo_tasks_files = set(spec.match_tree(self.filepath))
 
         # TODO: REMOVE THE ABOVE

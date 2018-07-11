@@ -40,13 +40,44 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         """
 
     @abstractmethod
-    def get_supported_environments(self):
-        """Get all the supported environments
+    def get_environment_type(self):
+        """Get the environment types
 
         Returns
         -------
         list
-            List of all available environments
+            List of supported environment type
+        """
+    @abstractmethod
+    def get_supported_environments(self, type):
+        """Get all the supported environments
+
+        Parameters
+        ----------
+        type : str
+            the type of environment
+
+        Returns
+        -------
+        list
+            List of available environment names and their information
+        """
+
+    @abstractmethod
+    def get_supported_languages(self, type, environment_name):
+        """Get all the supported environment languages
+
+        Parameters
+        ----------
+        type : str
+            the type of environment
+        environment_name : str
+            the name of the environment
+
+        Returns
+        -------
+        list
+            List of available languages for the environments
         """
 
     @abstractmethod

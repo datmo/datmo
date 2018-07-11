@@ -42,15 +42,47 @@ class EnvironmentController(BaseController):
             raise ProjectNotInitialized(
                 __("error", "controller.environment.__init__"))
 
-    def get_supported_environments(self):
-        """Get all the supported environments
+    def get_environment_type(self):
+        """Get the environment types
 
         Returns
         -------
         list
-            List of all available environments
+            List of supported environment type
         """
-        return self.environment_driver.get_supported_environments()
+        return self.environment_driver.get_environment_type()
+
+    def get_supported_environments(self, type):
+        """Get all the supported environments
+
+        Parameters
+        ----------
+        type : str
+            the type of environment
+
+        Returns
+        -------
+        list
+            List of available environments and their info
+        """
+        return self.environment_driver.get_supported_environments(type)
+
+    def get_supported_languages(self, type, environment_name):
+        """Get all the supported languages for the environment
+
+        Parameters
+        ----------
+        type : str
+            the type of environment
+        environment_name : str
+            the name of the environment
+
+        Returns
+        -------
+        list
+            List of available languages for the environments
+        """
+        return self.environment_driver.get_supported_languages(type, environment_name)
 
     def setup(self, options, save_hardware_file=True):
         """Create a pre-defined supported environment and add it to the project environment directory
@@ -92,8 +124,9 @@ class EnvironmentController(BaseController):
         except Exception:
             raise
         create_dict = {
-            "name": options['name'],
-            "description": "supported base environment created by datmo"
+            "name": options['name'] if options.get('name', None) else "%s:%s-%s" % (options['env'],
+                                                                          options['type'], options['language']),
+            "description": "supported environment created by datmo"
         }
         return self.create(create_dict, save_hardware_file=save_hardware_file)
 
