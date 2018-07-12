@@ -46,10 +46,14 @@ each example.
 * [CLI + R flow](/examples/R)
     * snapshot_create_iris_caret
 
-#### Running a containerized task (with option to create Snapshot)
+#### Running a containerized task
 * [CLI + Python flow](/examples/python)
     * task_run_iris_sklearn_basic
     * task_run_iris_sklearn_compare
+
+#### Re-run a previous task
+Rerun a single task (command/script or workspace) [CLI](/examples/cli/)
+    * task_rerun
 
 #### Environment setup
 * Setting up a project environment [(CLI)](/examples/cli/environment_setup.sh)

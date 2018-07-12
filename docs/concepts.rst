@@ -6,6 +6,7 @@ Environments
 
 **Environments** contain the hardware and software necessary for running code. These involve everything from programming languages, language-level packages/libraries, operating systems, and GPU drivers. Users can store multiple environments and choose which to use at the time of a task run.
 
+You can setup environments on initialization with ``$ datmo init`` or at any point in time using ``$ datmo environment setup``
 
 Workspaces
 ------------
@@ -21,6 +22,9 @@ Runs
 
 A **run** is comprised of *tasks* and *snapshots*. Each run contains the initial state (snapshot), followed by the action that was performed to it (task), as well as the final state of the repository (another snapshot).
 
+You can view all of your past runs at any time with ``$ datmo run ls``
+
+You can replicate a run at any time with the ``$ datmo rerun`` command.
 
 Tasks
 ---------
