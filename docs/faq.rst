@@ -9,13 +9,15 @@ A: The open source project acts as a user-controlled project manager (available 
 
 Q: Do I have to know how to use Docker to use Datmo?
 
-A: Not at all! If you do know Docker however, it will be helpful to understand better how the environments are created and setup.
+A: Not at all! However, knowledge of Docker will be helpful for understanding how the environments are created and setup.
 
 ------
 
 Q: How can I add my own environments to be used with Datmo?
 
 A: The ``environment setup`` command adds in a default environment provided by datmo in the ``datmo_environment`` directory. You can add in your own environment by modifying these files, or adding your own files to the ``datmo_environment`` directory (ie: Dockerfile, requirements.txt, package.json, etc). You can run a `datmo environment create` and use the environment ID at the time you run a task or run a workspace. You can also just directly run a task or workspace and Datmo will create a new environment from ``datmo_environment`` and will set the most recent environment that was setup as the default for running tasks.
+
+Check out our guide full guide on :ref:`bring-your-own` here.
 
 ------
 

@@ -21,6 +21,7 @@ Table of contents
     workflows
     tutorials
     concepts
+    env-setup
     cli
     python_sdk
     faq
