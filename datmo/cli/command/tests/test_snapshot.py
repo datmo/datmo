@@ -638,7 +638,8 @@ class TestSnapshotCommand():
             exception_thrown = True
         assert exception_thrown
 
-    def test_snapshot_ls(self):
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_snapshot_ls_invisible(self):
         self.__set_variables()
 
         # Test invisible snapshot from task
@@ -667,6 +668,9 @@ class TestSnapshotCommand():
 
         assert result
         assert task_obj.after_snapshot_id in [obj.id for obj in result]
+
+    def test_snapshot_ls(self):
+        self.__set_variables()
 
         # create a visible snapshot
         self.snapshot_command.parse(
