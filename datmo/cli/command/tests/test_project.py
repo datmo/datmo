@@ -250,10 +250,10 @@ class TestProjectCommand():
 
         self.project_command.parse(["status"])
         result = self.project_command.execute()
-        status_dict, latest_snapshot, tasks_after_latest_snapshot, unstaged_code, unstaged_environment, unstaged_files = result
+        status_dict, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = result
         assert isinstance(status_dict, dict)
-        assert not latest_snapshot
-        assert not tasks_after_latest_snapshot
+        assert not latest_snapshot_user_generated
+        assert not latest_snapshot_auto_generated
         assert unstaged_code
         assert not unstaged_environment
         assert not unstaged_files
