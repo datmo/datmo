@@ -33,7 +33,7 @@ from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.workspace import WorkspaceCommand
-from datmo.cli.command.task import TaskCommand
+from datmo.cli.command.run import RunCommand
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -59,7 +59,7 @@ class TestWorkspace():
         dummy(self)
 
         self.workspace_command = WorkspaceCommand(self.cli_helper)
-        self.task_command = TaskCommand(self.cli_helper)
+        self.run_command = RunCommand(self.cli_helper)
 
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
@@ -109,8 +109,8 @@ class TestWorkspace():
         assert timed_run_result
 
         # Stop all running datmo task
-        self.task_command.parse(["task", "stop", "--all"])
-        self.task_command.execute()
+        self.run_command.parse(["stop", "--all"])
+        self.run_command.execute()
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_jupyterlab(self):
@@ -152,8 +152,8 @@ class TestWorkspace():
         assert timed_run_result
 
         # Stop all running datmo task
-        self.task_command.parse(["task", "stop", "--all"])
-        self.task_command.execute()
+        self.run_command.parse(["stop", "--all"])
+        self.run_command.execute()
 
     # Test doesn't take tty as True for docker
     # @pytest_docker_environment_failed_instantiation(test_datmo_dir)
@@ -192,8 +192,8 @@ class TestWorkspace():
     #     assert timed_run_result
 
         # Stop all running datmo task
-        self.task_command.parse(["task", "stop", "--all"])
-        self.task_command.execute()
+        self.run_command.parse(["stop", "--all"])
+        self.run_command.execute()
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_rstudio(self):
@@ -236,5 +236,5 @@ class TestWorkspace():
         assert timed_run_result
 
         # Stop all running datmo task
-        self.task_command.parse(["task", "stop", "--all"])
-        self.task_command.execute()
+        self.run_command.parse(["stop", "--all"])
+        self.run_command.execute()

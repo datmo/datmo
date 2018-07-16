@@ -151,7 +151,7 @@ class Helper():
     def get_command_choices(self):
         return [
             "init", "version", "--version", "-v", "status", "cleanup",
-            "snapshot", "task", "session", "notebook", "jupyterlab", "terminal",
+            "snapshot", "session", "notebook", "jupyterlab", "terminal",
             "rstudio", "environment", "run", "rerun"
         ]
 
