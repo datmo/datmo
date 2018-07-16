@@ -102,11 +102,11 @@ class TestMain():
         assert success
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_task_run(self):
+    def test_run(self):
         try:
             success = True
             p = self.command_run(
-                [self.execpath, 'task', 'run', 'python script.py'])
+                [self.execpath, 'run', 'python script.py'])
             out, err = p.communicate()
             out, err = out.decode(), err.decode()
             if err:
@@ -117,10 +117,10 @@ class TestMain():
             success = False
         assert success
 
-    def test_task_ls(self):
+    def test_run_ls(self):
         try:
             success = True
-            p = self.command_run([self.execpath, 'task', 'ls'])
+            p = self.command_run([self.execpath, 'run', 'ls'])
             out, err = p.communicate()
             out, err = out.decode(), err.decode()
             if err:

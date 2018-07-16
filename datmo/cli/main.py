@@ -51,7 +51,7 @@ def main():
             command_name = "run"
             sys.argv[1] = "rerun"
         elif command_name == "run":
-            if len(sys.argv) > 2 and sys.argv[2] == "ls":
+            if len(sys.argv) > 2 and sys.argv[2] in ["ls", "stop"]:
                 command_name = "run"
                 sys.argv.remove('run')
             else:
