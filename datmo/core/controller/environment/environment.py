@@ -171,7 +171,6 @@ class EnvironmentController(BaseController):
 
         # Create temp environment folder
         _temp_env_dir = get_datmo_temp_path(self.home)
-
         # Step 1: Populate a path list from the user inputs in a format compatible
         # with the input of the File Collection create function
         paths = []
@@ -240,14 +239,15 @@ class EnvironmentController(BaseController):
         # Step 7: Create environment and return
         return self.dal.environment.create(Environment(create_dict))
 
-    def build(self, environment_id):
+    def build(self, environment_id, workspace=None):
         """Build environment from definition file
 
         Parameters
         ----------
         environment_id : str
             environment object id to build
-
+        workspace : str
+            workspace to be used
         Returns
         -------
         bool
@@ -266,16 +266,25 @@ class EnvironmentController(BaseController):
         file_collection_obj = self.dal.file_collection.\
             get_by_id(environment_obj.file_collection_id)
         # TODO: Check hardware info here if different from creation time
-        # Build the Environment with the driver
-        datmo_definition_filepath = os.path.join(
-            self.home, file_collection_obj.path,
-            "datmo" + environment_obj.definition_filename)
+        # Add in files for that environment id
+        environment_definition_path = os.path.join(self.home,
+                                                   file_collection_obj.path)
+        # Copy to temp folder and remove files that are datmo specific
+        _temp_env_dir = get_datmo_temp_path(self.home)
+        self.file_driver.copytree(environment_definition_path, _temp_env_dir)
+        # get definition filepath for the temp folder
+        environment_definition_filepath = os.path.join(
+            _temp_env_dir, environment_obj.definition_filename)
         try:
+            # Build the Environment with the driver
             self.spinner.start()
             result = self.environment_driver.build(
-                environment_id, path=datmo_definition_filepath)
+                environment_id, path=environment_definition_filepath,
+                workspace=workspace)
         finally:
             self.spinner.stop()
+        # Remove both temporary directories
+        shutil.rmtree(_temp_env_dir)
         return result
 
     def run(self, environment_id, options, log_filepath):
@@ -576,28 +585,14 @@ class EnvironmentController(BaseController):
             returns the input paths with the paths of the new files created appended
         """
         # a. look for the default definition, if not present add it to the directory, and add it to paths
-        original_definition_filepath = ""
         if all(create_dict['definition_filename'] not in path
                for path in paths):
             self.environment_driver.create_default_definition(directory)
             original_definition_filepath = os.path.join(
                 directory, create_dict['definition_filename'])
             paths.append(original_definition_filepath)
-        else:
-            for idx, path in enumerate(paths):
-                if create_dict['definition_filename'] in path:
-                    src_path, dest_path = parse_path(path)
-                    original_definition_filepath = src_path
 
-        # b. use the default definition and create a datmo definition in the directory, and add to paths
-        datmo_definition_filepath = \
-            os.path.join(directory, "datmo" + create_dict['definition_filename'])
-        if not os.path.isfile(datmo_definition_filepath):
-            _, original_definition_filepath, datmo_definition_filepath = \
-                self.environment_driver.create(path=original_definition_filepath, output_path=datmo_definition_filepath)
-        paths.append(datmo_definition_filepath)
-
-        # c. get the hardware info and save it to the entity, if save_hardware_file is True
+        # b. get the hardware info and save it to the entity, if save_hardware_file is True
         # then save it to file and add it to the paths
         create_dict[
             'hardware_info'] = self.environment_driver.get_hardware_info()

@@ -136,7 +136,7 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         """
 
     @abstractmethod
-    def build(self, name, path):
+    def build(self, name, path, workspace):
         """Build an environment from a definition path
 
         Parameters
@@ -145,6 +145,8 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
             name to give to the environment built
         path : str
             absolute path to the definition file
+        workspace : str
+
 
         Returns
         -------
