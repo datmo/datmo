@@ -44,7 +44,7 @@ def main():
         elif command_name == "cleanup":
             command_name = "project"
             sys.argv[1] = "cleanup"
-        elif command_name in ["notebook", "rstudio"]:
+        elif command_name in ["notebook", "jupyterlab", "terminal", "rstudio"]:
             sys.argv[1] = command_name
             command_name = "workspace"
         elif command_name == "rerun":

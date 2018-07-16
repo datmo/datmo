@@ -24,13 +24,62 @@ class WorkspaceCommand(ProjectCommand):
 
         task_dict = {
             "ports": ["8888:8888"],
-            "command_list": ["jupyter", "notebook"],
-            "mem_limit": kwargs["mem_limit"]
+            "command_list": ["jupyter", "notebook", "--allow-root"],
+            "mem_limit": kwargs["mem_limit"],
+            "workspace": "notebook"
         }
 
         # Run task and return Task object result
         return self.task_run_helper(task_dict, snapshot_dict,
                                     "cli.workspace.notebook")
+
+    @Helper.notify_environment_active(TaskController)
+    @Helper.notify_no_project_found
+    def jupyterlab(self, **kwargs):
+        self.cli_helper.echo(__("info", "cli.workspace.jupyterlab"))
+        # Creating input dictionaries
+        snapshot_dict = {}
+
+        # Environment
+        if kwargs.get("environment_id", None) or kwargs.get(
+                "environment_paths", None):
+            mutually_exclusive_args = ["environment_id", "environment_paths"]
+            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+
+        task_dict = {
+            "ports": ["8888:8888"],
+            "command_list": ["jupyter", "lab", "--allow-root"],
+            "mem_limit": kwargs["mem_limit"],
+            "workspace": "jupyterlab"
+        }
+
+        # Run task and return Task object result
+        return self.task_run_helper(task_dict, snapshot_dict,
+                                    "cli.workspace.jupyterlab")
+
+
+    @Helper.notify_environment_active(TaskController)
+    @Helper.notify_no_project_found
+    def terminal(self, **kwargs):
+        self.cli_helper.echo(__("info", "cli.workspace.terminal"))
+        # Creating input dictionaries
+        snapshot_dict = {}
+
+        # Environment
+        if kwargs.get("environment_id", None) or kwargs.get(
+                "environment_paths", None):
+            mutually_exclusive_args = ["environment_id", "environment_paths"]
+            mutually_exclusive(mutually_exclusive_args, kwargs, snapshot_dict)
+
+        task_dict = {
+            "interactive": True,
+            "mem_limit": kwargs["mem_limit"],
+            "command_list": ["/bin/bash"]
+        }
+
+        # Run task and return Task object result
+        return self.task_run_helper(task_dict, snapshot_dict,
+                                    "cli.workspace.terminal")
 
     @Helper.notify_environment_active(TaskController)
     @Helper.notify_no_project_found
@@ -52,9 +101,10 @@ class WorkspaceCommand(ProjectCommand):
                 "--server-app-armor-enabled=0"
             ],
             "mem_limit":
-                kwargs["mem_limit"]
+                kwargs["mem_limit"],
+            "workspace": "rstudio"
         }
-
+        self.cli_helper.echo(__("info", "cli.workspace.run.rstudio"))
         # Run task and return Task object result
         return self.task_run_helper(task_dict, snapshot_dict,
                                     "cli.workspace.rstudio")

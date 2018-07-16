@@ -64,19 +64,105 @@ class TestWorkspace():
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(self.env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/data-analytics:cpu-py27\n")))
+            f.write(to_bytes(str("FROM datmo/python-base:cpu-py27\n")))
 
     def teardown_method(self):
         pass
 
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_notebook(self):
+        self.__set_variables()
+        test_mem_limit = "4g"
+        # test single ports option before command
+        self.workspace_command.parse([
+            "notebook",
+            "--gpu",
+            "--environment-paths",
+            self.env_def_path,
+            "--mem-limit",
+            test_mem_limit,
+        ])
+
+        # test for desired side effects
+        assert self.workspace_command.args.gpu == True
+        assert self.workspace_command.args.environment_paths == [
+            self.env_def_path
+        ]
+        assert self.workspace_command.args.mem_limit == test_mem_limit
+
+        # test multiple ports option before command
+        self.workspace_command.parse(["notebook"])
+
+        assert self.workspace_command.args.gpu == False
+
+        @timeout_decorator.timeout(10, use_signals=False)
+        def timed_run(timed_run_result):
+            if self.workspace_command.execute():
+                return timed_run_result
+
+        timed_run_result = False
+        try:
+            timed_run_result = timed_run(timed_run_result)
+        except timeout_decorator.timeout_decorator.TimeoutError:
+            timed_run_result = True
+
+        assert timed_run_result
+
+        # Stop all running datmo task
+        self.task_command.parse(["task", "stop", "--all"])
+        self.task_command.execute()
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_jupyterlab(self):
+        self.__set_variables()
+        test_mem_limit = "4g"
+        # test single ports option before command
+        self.workspace_command.parse([
+            "jupyterlab",
+            "--gpu",
+            "--environment-paths",
+            self.env_def_path,
+            "--mem-limit",
+            test_mem_limit,
+        ])
+
+        # test for desired side effects
+        assert self.workspace_command.args.gpu == True
+        assert self.workspace_command.args.environment_paths == [
+            self.env_def_path
+        ]
+        assert self.workspace_command.args.mem_limit == test_mem_limit
+
+        # test multiple ports option before command
+        self.workspace_command.parse(["jupyterlab"])
+
+        assert self.workspace_command.args.gpu == False
+
+        @timeout_decorator.timeout(10, use_signals=False)
+        def timed_run(timed_run_result):
+            if self.workspace_command.execute():
+                return timed_run_result
+
+        timed_run_result = False
+        try:
+            timed_run_result = timed_run(timed_run_result)
+        except timeout_decorator.timeout_decorator.TimeoutError:
+            timed_run_result = True
+
+        assert timed_run_result
+
+        # Stop all running datmo task
+        self.task_command.parse(["task", "stop", "--all"])
+        self.task_command.execute()
+
+    # Test doesn't take tty as True for docker
     # @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    # def test_notebook(self):
+    # def test_terminal(self):
     #     self.__set_variables()
-    #
     #     test_mem_limit = "4g"
     #     # test single ports option before command
     #     self.workspace_command.parse([
-    #         "notebook",
+    #         "terminal",
     #         "--gpu",
     #         "--environment-paths",
     #         self.env_def_path,
@@ -92,35 +178,30 @@ class TestWorkspace():
     #     assert self.workspace_command.args.mem_limit == test_mem_limit
     #
     #     # test multiple ports option before command
-    #     self.workspace_command.parse(["notebook"])
+    #     self.workspace_command.parse(["terminal"])
     #
     #     assert self.workspace_command.args.gpu == False
-    #
     #     @timeout_decorator.timeout(10, use_signals=False)
     #     def timed_run(timed_run_result):
     #         if self.workspace_command.execute():
     #             return timed_run_result
     #
     #     timed_run_result = False
-    #     try:
-    #         timed_run_result = timed_run(timed_run_result)
-    #     except timeout_decorator.timeout_decorator.TimeoutError:
-    #         timed_run_result = True
+    #     timed_run_result = timed_run(timed_run_result)
     #
     #     assert timed_run_result
-    #
-    #     # Stop all running datmo task
-    #     self.task_command.parse(["task", "stop", "--all"])
-    #     self.task_command.execute()
+
+        # Stop all running datmo task
+        self.task_command.parse(["task", "stop", "--all"])
+        self.task_command.execute()
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_rstudio(self):
         self.__set_variables()
-
         # Update environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(self.env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/rstudio:latest\n")))
+            f.write(to_bytes(str("FROM datmo/r-base:cpu\n")))
 
         test_mem_limit = "4g"
         # test single ports option before command
