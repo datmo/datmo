@@ -156,6 +156,8 @@ class FileCodeDriver(CodeDriver):
 
     def _has_unstaged_changes(self):
         """Return whether there are unstaged changes"""
+        # TODO: fix circular logic: for empty tracked filepaths, must return "unstaged" until commit is created.
+        # TODO: otherwise initial commit will always fail because of no unstaged changes
         tracked_filepaths = self._get_tracked_files()
         commit_hash = self._calculate_commit_hash(tracked_filepaths)
         if self.exists_ref(commit_hash):
@@ -357,7 +359,6 @@ class FileCodeDriver(CodeDriver):
         ------
         CodeNotInitialized
             error if not initialized (must initialize first)
-
         UnstagedChanges
             error if not there exists unstaged changes in code
         """
