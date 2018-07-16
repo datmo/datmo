@@ -14,7 +14,8 @@ Workspaces
 **Workspaces** are interactive programming environments/IDE's. Depending on which environment is chosen during setup, there are a handful of workspaces that are available out of the box including:
     - Jupyter Notebook via ``$ datmo notebook``
     - RStudio via ``$ datmo rstudio``
-    - JupyterLab *(coming soon)*
+    - JupyterLab via ``$ datmo jupyterlab``
+    - Terminal via ``$ datmo terminal``
 
 
 Runs
