@@ -140,6 +140,7 @@ class Task():
         self.detach = dictionary.get('detach', False)
         self.gpu = dictionary.get('gpu', False)
         self.mem_limit = dictionary.get('mem_limit', None)
+        self.workspace = dictionary.get('workspace', None)
         self.ports = dictionary.get('ports', None)
         self.task_dirpath = dictionary.get('task_dirpath', None)
         self.log_filepath = dictionary.get('log_filepath', None)
