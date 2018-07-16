@@ -151,8 +151,8 @@ class Helper():
     def get_command_choices(self):
         return [
             "init", "version", "--version", "-v", "status", "cleanup",
-            "snapshot", "task", "session", "notebook", "rstudio",
-            "environment", "run", "rerun"
+            "snapshot", "task", "session", "notebook", "jupyterlab", "terminal",
+            "rstudio", "environment", "run", "rerun"
         ]
 
     def prompt_available_options(self, available_options, option_type):
