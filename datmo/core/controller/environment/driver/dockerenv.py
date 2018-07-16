@@ -869,7 +869,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                     for line in input_file:
                         bool_workspace_update = (to_bytes('FROM datmo/') in line.strip() and workspace)
                         if to_bytes(os.linesep) in line and bool_workspace_update:
-                            updated_line = line.strip() + to_bytes('-') + to_bytes(workspace) + to_bytes("\n")
+                            updated_line = line.strip() + to_bytes("-%s\n" % workspace)
                         elif to_bytes(os.linesep) in line:
                             updated_line = line.strip() + to_bytes("\n")
                         else:

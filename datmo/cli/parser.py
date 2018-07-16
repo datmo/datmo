@@ -224,11 +224,6 @@ def get_datmo_parser():
     # Rerun
     rerun_parser = subparsers.add_parser("rerun", help="To rerun an experiment")
     rerun_parser.add_argument("id", help="run id to be rerun")
-    rerun_parser.add_argument(
-        "--initial",
-        dest="initial",
-        action="store_true",
-        help="boolean if you want to rerun the experiment with the state at the beginning of the run")
 
     # Session
     session_parser = subparsers.add_parser("session", help="session module")

@@ -44,6 +44,8 @@ class RunObject():
         id of snapshot associated after the run
     command : str
         command that is used by the run
+    type : str
+        type of task, script or workspace (jupyterlab, notebook, rstudio, terminal)
     status : str or None
         status of the current run
     start_time : datetime.datetime or None
@@ -86,6 +88,7 @@ class RunObject():
 
         # Execution definition
         self.command = self._core_task.command
+        self._type = None
         self._core_snapshot_id = None
         self._environment_id = None
         self._config = {}
@@ -106,6 +109,12 @@ class RunObject():
         self._core_task = self.__get_core_task()
         self._status = self._core_task.status
         return self._status
+
+    @property
+    def type(self):
+        self._type = self._core_task.workspace\
+            if self._core_task.workspace else 'script'
+        return self._type
 
     @property
     def start_time(self):
@@ -314,7 +323,7 @@ class RunCommand(ProjectCommand):
         task_objs = self.task_controller.list(
             session_id, sort_key="created_at", sort_order="descending")
         header_list = [
-            "id", "command", "status", "config", "results", "created at"
+            "id", "command", "type", "status", "config", "results", "created at"
         ]
         item_dict_list = []
         run_obj_list = []
@@ -326,6 +335,7 @@ class RunCommand(ProjectCommand):
             item_dict_list.append({
                 "id": run_obj.id,
                 "command": run_obj.command,
+                "type": run_obj.type,
                 "status": run_obj.status,
                 "config": snapshot_config_printable,
                 "results": task_results_printable,
@@ -357,13 +367,13 @@ class RunCommand(ProjectCommand):
         self.task_controller = TaskController()
         # Get task id
         task_id = kwargs.get("id", None)
-        initial = kwargs.get("initial", False)
         self.cli_helper.echo(__("info", "cli.task.rerun", task_id))
         # Create the task_obj
         task_obj = self.task_controller.get(task_id)
         # Create the run obj
         run_obj = RunObject(task_obj)
-
+        # Select the initial snapshot if it's a script else the final snapshot
+        initial = True if run_obj.type == 'script' else False
         environment_id = run_obj.environment_id
         command = task_obj.command_list
         snapshot_id = run_obj.core_snapshot_id if not initial else run_obj.before_snapshot_id
