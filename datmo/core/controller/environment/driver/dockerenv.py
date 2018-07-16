@@ -173,10 +173,13 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         # To setup the environment definition file
         definition_filepath = os.path.join(definition_path, "Dockerfile")
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/%s:%s-%s\n\n" % (env, type, language)))
+            if language:
+                f.write(to_bytes("FROM datmo/%s:%s-%s\n\n" % (env, type, language)))
+            else:
+                f.write(to_bytes("FROM datmo/%s:%s\n\n" % (env, type)))
         return True
 
-    def create(self, path=None, output_path=None):
+    def create(self, path=None, output_path=None, workspace=None):
         if not path:
             path = os.path.join(self.filepath, "Dockerfile")
         if not output_path:
@@ -192,13 +195,14 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                    "controller.environment.driver.docker.create.exists",
                    output_path))
         success = self.create_datmo_definition(
-            input_definition_path=path, output_definition_path=output_path)
+            input_definition_path=path, output_definition_path=output_path,
+            workspace=workspace)
 
         return success, path, output_path
 
     # running daemon needed
-    def build(self, name, path):
-        return self.build_image(name, path)
+    def build(self, name, path, workspace=None):
+        return self.build_image(name, path, workspace)
 
     # running daemon needed
     def run(self, name, options, log_filepath):
@@ -303,7 +307,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         return list_tag_names
 
     # running daemon needed
-    def build_image(self, tag, definition_path="Dockerfile"):
+    def build_image(self, tag, definition_path="Dockerfile", workspace=None):
         """Builds docker image
 
         Parameters
@@ -312,6 +316,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             name to tag image with
         definition_path : str
             absolute file path to the definition
+        workspace : str
+            workspace to be used for the run
 
         Returns
         -------
@@ -332,9 +338,13 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             docker_shell_cmd_list.append(tag)
 
             # Passing path of Dockerfile
-            docker_shell_cmd_list.append("-f")
-            docker_shell_cmd_list.append(definition_path)
+            # Creating datmoDockerfile for new build
             dockerfile_dirpath = os.path.split(definition_path)[0]
+            input_dockerfile = os.path.split(definition_path)[1]
+            output_dockerfile_path = os.path.join(dockerfile_dirpath, "datmo%s" % input_dockerfile)
+            self.create(definition_path, output_dockerfile_path, workspace)
+            docker_shell_cmd_list.append("-f")
+            docker_shell_cmd_list.append(output_dockerfile_path)
             docker_shell_cmd_list.append(str(dockerfile_dirpath))
 
             # Remove intermediate containers after a successful build
@@ -472,7 +482,6 @@ class DockerEnvironmentDriver(EnvironmentDriver):
              error in running the environment command
         """
         try:
-            container_id = None
             if api:  # calling the docker client via the API
                 # TODO: Test this out for the API (need to verify ports work)
                 if detach:
@@ -830,7 +839,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         return "Dockerfile"
 
     def get_datmo_definition_filenames(self):
-        return ["datmoDockerfile", "hardware_info"]
+        return ["hardware_info"]
 
     def get_hardware_info(self):
         # Extract hardware info of the container (currently taking from system platform)
@@ -846,23 +855,26 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         }
 
     @staticmethod
-    def create_datmo_definition(input_definition_path, output_definition_path):
+    def create_datmo_definition(input_definition_path, output_definition_path, workspace=None):
         """
         Creates a datmo dockerfiles to run at the output path specified
         """
         datmo_base_dockerfile_path = os.path.join(
             os.path.dirname(os.path.abspath(__file__)), "templates",
             "baseDockerfile")
-
         # Combine dockerfiles
         with open(input_definition_path, "rb") as input_file:
             with open(datmo_base_dockerfile_path, "rb") as datmo_base_file:
                 with open(output_definition_path, "wb") as output_file:
                     for line in input_file:
-                        if to_bytes(os.linesep) in line:
-                            output_file.write(line.strip() + to_bytes("\n"))
+                        bool_workspace_update = (to_bytes('FROM datmo/') in line.strip() and workspace)
+                        if to_bytes(os.linesep) in line and bool_workspace_update:
+                            updated_line = line.strip() + to_bytes('-') + to_bytes(workspace) + to_bytes("\n")
+                        elif to_bytes(os.linesep) in line:
+                            updated_line = line.strip() + to_bytes("\n")
                         else:
-                            output_file.write(line.strip())
+                            updated_line = line.strip()
+                        output_file.write(updated_line)
                     for line in datmo_base_file:
                         if to_bytes(os.linesep) in line:
                             output_file.write(line.strip() + to_bytes("\n"))
