@@ -122,6 +122,9 @@ create_task:
   mem_limit:
     nullable: true
     type: string
+  workspace:
+    nullable: true
+    type: string
   task_dirpath:
     nullable: true
     type: string
