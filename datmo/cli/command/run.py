@@ -18,7 +18,7 @@ from datmo.core.controller.task import TaskController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.cli.driver.helper import Helper
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.util.exceptions import InvalidArgumentType
+from datmo.core.util.exceptions import InvalidArgumentType, RequiredArgumentMissing
 from datmo.core.util.misc_functions import prettify_datetime, format_table
 
 
@@ -407,3 +407,40 @@ class RunCommand(ProjectCommand):
         # Creating the run object
         new_run_obj = RunObject(new_task_obj)
         return new_run_obj
+
+    @Helper.notify_environment_active(TaskController)
+    @Helper.notify_no_project_found
+    def stop(self, **kwargs):
+        self.task_controller = TaskController()
+        input_dict = {}
+        mutually_exclusive(["id", "all"], kwargs, input_dict)
+        if "id" in input_dict:
+            self.cli_helper.echo(__("info", "cli.task.stop", input_dict['id']))
+        elif "all" in input_dict:
+            self.cli_helper.echo(__("info", "cli.task.stop.all"))
+        else:
+            raise RequiredArgumentMissing()
+        try:
+            if "id" in input_dict:
+                result = self.task_controller.stop(task_id=input_dict['id'])
+                if not result:
+                    self.cli_helper.echo(
+                        __("error", "cli.task.stop", input_dict['id']))
+                else:
+                    self.cli_helper.echo(
+                        __("info", "cli.task.stop.success", input_dict['id']))
+            if "all" in input_dict:
+                result = self.task_controller.stop(all=input_dict['all'])
+                if not result:
+                    self.cli_helper.echo(__("error", "cli.task.stop.all"))
+                else:
+                    self.cli_helper.echo(
+                        __("info", "cli.task.stop.all.success"))
+            return result
+        except Exception:
+            if "id" in input_dict:
+                self.cli_helper.echo(
+                    __("error", "cli.task.stop", input_dict['id']))
+            if "all" in input_dict:
+                self.cli_helper.echo(__("error", "cli.task.stop.all"))
+            return False

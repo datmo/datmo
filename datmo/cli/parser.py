@@ -158,7 +158,7 @@ def get_datmo_parser():
         action="append",
         type=str,
         help="""
-            network port mapping during task (e.g. 8888:8888). Left is the host machine port and right
+            network port mapping during run (e.g. 8888:8888). Left is the host machine port and right
             is the environment port available during a run.
         """)
     run_parser.add_argument(
@@ -220,6 +220,17 @@ def get_datmo_parser():
         help=
         "checked only if download is specified. saves output to location specified"
     )
+
+    # Run stop arguments
+    run_stop = subparsers.add_parser("stop", help="stop runs")
+    run_stop.add_argument(
+        "--id", dest="id", default=None, type=str, help="run id to stop")
+    run_stop.add_argument(
+        "--all",
+        "-a",
+        dest="all",
+        action="store_true",
+        help="stop all datmo runs")
 
     # Rerun
     rerun_parser = subparsers.add_parser("rerun", help="To rerun an experiment")
@@ -414,10 +425,10 @@ def get_datmo_parser():
         help="user given session id")
 
     snapshot_create.add_argument(
-        "--task-id",
-        dest="task_id",
+        "--run-id",
+        dest="run_id",
         default=None,
-        help="specify task id to pull information from")
+        help="specify run id to pull information from")
 
     snapshot_create.add_argument(
         "--environment-id",
@@ -573,109 +584,5 @@ def get_datmo_parser():
     snapshot_inspect = snapshot_subcommand_parsers.add_parser(
         "inspect", help="inspect a snapshot by id")
     snapshot_inspect.add_argument("id", default=None, help="snapshot id")
-
-    # Task
-    task_parser = subparsers.add_parser("task", help="task module")
-    task_subcommand_parsers = task_parser.add_subparsers(
-        title="subcommands", dest="subcommand")
-
-    # Task run arguments
-    task_run = task_subcommand_parsers.add_parser("run", help="run task")
-    task_run.add_argument(
-        "--gpu",
-        dest="gpu",
-        action="store_true",
-        help="boolean if you want to run using GPUs")
-    task_run.add_argument(
-        "--ports",
-        "-p",
-        dest="ports",
-        default=None,
-        action="append",
-        type=str,
-        help="""
-        network port mapping during task (e.g. 8888:8888). Left is the host machine port and right
-        is the environment port available during a run.
-    """)
-    task_run.add_argument(
-        "--environment-id",
-        dest="environment_id",
-        default=None,
-        help="environment id from environment object")
-    task_run.add_argument(
-        "--environment-paths",
-        dest="environment_paths",
-        default=None,
-        action="append",
-        type=str,
-        help=
-        "list of absolute or relative filepaths and/or dirpaths to collect; can specify destination names with '>' (e.g. /path/to/file>hello, /path/to/file2, /path/to/dir>newdir)"
-    )
-    task_run.add_argument(
-        "--mem-limit",
-        "-m",
-        dest="mem_limit",
-        default=None,
-        type=str,
-        help=
-        "maximum amount of memory the task environment can use (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes. e.g. 4g)"
-    )
-    # task_run.add_argument(
-    #     "--environment-name",
-    #     dest="environment_name",
-    #     default=None,
-    #     help="name given to the environment")
-    # task_run.add_argument(
-    #     "--environment-description",
-    #     dest="environment_description",
-    #     default=None,
-    #     help="description of environment")
-    task_run.add_argument(
-        "--interactive",
-        dest="interactive",
-        action="store_true",
-        help="run the environment in interactive mode (keeps STDIN open)")
-    task_run.add_argument(
-        "cmd",
-        nargs="?",
-        default=None,
-        help="command to run within environment")
-
-    # Task list arguments
-    task_ls = task_subcommand_parsers.add_parser("ls", help="list tasks")
-    task_ls.add_argument(
-        "--session-id",
-        dest="session_id",
-        default=None,
-        nargs="?",
-        type=str,
-        help="pass in the session id to list the tasks in that session")
-    task_ls.add_argument(
-        "--format", dest="format", default="table", help="output format")
-    task_ls.add_argument(
-        "--download",
-        dest="download",
-        action="store_true",
-        help=
-        "boolean is true if user would like to download. use --download-path to specify a path"
-    )
-    task_ls.add_argument(
-        "--download-path",
-        dest="download_path",
-        default=None,
-        help=
-        "checked only if download is specified. saves output to location specified"
-    )
-
-    # Task stop arguments
-    task_stop = task_subcommand_parsers.add_parser("stop", help="stop tasks")
-    task_stop.add_argument(
-        "--id", dest="id", default=None, type=str, help="task id to stop")
-    task_stop.add_argument(
-        "--all",
-        "-a",
-        dest="all",
-        action="store_true",
-        help="stop all datmo tasks")
 
     return parser
