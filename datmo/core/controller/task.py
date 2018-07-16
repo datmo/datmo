@@ -100,6 +100,7 @@ class TaskController(BaseController):
             name : str
             volumes : dict
             mem_limit : str
+            workspace : str
             detach : bool
             stdin_open : bool
             tty : bool
@@ -128,9 +129,8 @@ class TaskController(BaseController):
             "tty": options.get('tty', False),
             "api": False,
         }
-
-        self.environment.build(environment_id)
-
+        workspace = options.get('workspace', None)
+        self.environment.build(environment_id, workspace)
         # Run container with environment
         return_code, run_id, logs = self.environment.run(
             environment_id, run_options, log_filepath)
@@ -244,7 +244,9 @@ class TaskController(BaseController):
             if task_dict.get('command', task_obj.command):
                 task_dict['command_list'] = shlex.split(
                     task_dict.get('command', task_obj.command))
-            else:
+            elif not task_dict.get('interactive',
+                                   task_obj.interactive):
+                # If it's not interactive then there is not expected task
                 raise TaskNoCommandGiven()
 
         validate("create_task", task_dict)
@@ -261,6 +263,8 @@ class TaskController(BaseController):
                 task_dict.get('gpu', False),
             "mem_limit":
                 task_dict.get('mem_limit', None),
+            "workspace":
+                task_dict.get('workspace', None),
             "interactive":
                 task_dict.get('interactive', task_obj.interactive),
             "detach":
@@ -308,6 +312,7 @@ class TaskController(BaseController):
                     }
                 },
                 "mem_limit": task_obj.mem_limit,
+                "workspace": task_obj.workspace,
                 "gpu": task_obj.gpu,
                 "detach": task_obj.detach,
                 "stdin_open": task_obj.interactive,

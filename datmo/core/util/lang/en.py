@@ -16,8 +16,15 @@ MESSAGES = {
             "Failed to update project {name} @ ({path}) ",
         "cli.workspace.notebook":
             "Starting a notebook",
+        "cli.workspace.jupyterlab":
+            "Starting a jupyter lab",
+        "cli.workspace.terminal":
+            "Starting a terminal",
         "cli.workspace.rstudio":
             "Starting a rstudio",
+        "cli.workspace.run.rstudio":
+            "Open http://localhost:8787/auth-sign-in to login to rstudio, "
+            "enter username: rstudio and password: rstudio",
         "cli.project.pull":
             "Pulling information from the Datmo project url and adding it to local...",
         "cli.project.update":
@@ -129,6 +136,10 @@ MESSAGES = {
             "No project found in the current directory: %s",
         "cli.workspace.notebook":
             "Error while running the notebook with task id: %s",
+        "cli.workspace.jupyterlab":
+            "Error while running the jupyterlab with task id: %s",
+        "cli.workspace.terminal":
+            "Error while running the terminal with task id: %s",
         "cli.workspace.rstudio":
             "Error while running the rstudio with task id: %s",
         "cli.session.update.dne":
