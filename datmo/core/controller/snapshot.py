@@ -288,21 +288,20 @@ class SnapshotController(BaseController):
             get_by_id(snapshot_obj.environment_id)
 
         # check for unstaged changes in code
-        self.code_driver.check_unstaged_changes()
+        self.code.check_unstaged_changes()
         # check for unstaged changes in environment
         self.environment.check_unstaged_changes()
         # check for unstaged changes in file
         self.file_collection.check_unstaged_changes()
 
-        # Checkout code_driver to the relevant commit ref
-        code_checkout_success = self.code_driver.checkout_ref(
-            code_obj.commit_id)
+        # Checkout code to the relevant commit ref
+        code_checkout_success = self.code.checkout(code_obj.id)
 
-        # Checkout environment_driver to relevant environment id
+        # Checkout environment to relevant environment id
         environment_checkout_success = self.environment.checkout(
             environment_obj.id)
 
-        # Checkout file_driver to relevant file collection id
+        # Checkout files to relevant file collection id
         file_checkout_success = self.file_collection.checkout(
             file_collection_obj.id)
 

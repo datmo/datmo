@@ -918,7 +918,7 @@ class TestEnvironmentController():
             failed = True
         assert failed
 
-    def test_exists_env(self):
+    def test_exists(self):
         # Test failure, not initialized
         failed = False
         try:

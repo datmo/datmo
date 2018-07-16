@@ -174,14 +174,21 @@ class SnapshotCommand(ProjectCommand):
         session_id = kwargs.get('session_id',
                                 self.snapshot_controller.current_session.id)
         detailed_info = kwargs.get('details', None)
+        show_all = kwargs.get('show_all', None)
         print_format = kwargs.get('format', "table")
         download = kwargs.get('download', None)
         download_path = kwargs.get('download_path', None)
-        snapshot_objs = self.snapshot_controller.list(
-            session_id=session_id,
-            visible=True,
-            sort_key="created_at",
-            sort_order="descending")
+        if show_all:
+            snapshot_objs = self.snapshot_controller.list(
+                session_id=session_id,
+                sort_key="created_at",
+                sort_order="descending")
+        else:
+            snapshot_objs = self.snapshot_controller.list(
+                session_id=session_id,
+                visible=True,
+                sort_key="created_at",
+                sort_order="descending")
         item_dict_list = []
         if detailed_info:
             header_list = [

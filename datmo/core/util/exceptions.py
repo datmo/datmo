@@ -122,6 +122,10 @@ class SessionDoesNotExist(DoesNotExist):
     pass
 
 
+class CodeDoesNotExist(DoesNotExist):
+    pass
+
+
 class EnvironmentDoesNotExist(DoesNotExist):
     pass
 
