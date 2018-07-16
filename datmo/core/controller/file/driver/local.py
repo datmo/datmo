@@ -244,6 +244,8 @@ class LocalFileDriver(FileDriver):
             for file in [os.path.join(root, f) for f in files]:
                 os.chmod(file, mode)
 
+        # Removing temp collection path
+        shutil.rmtree(temp_collection_path)
         return filehash
 
     def calculate_hash_paths(self, paths, directory):
