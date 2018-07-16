@@ -246,6 +246,8 @@ MESSAGES = {
             "Required argument not present in input",
         "controller.code.delete":
             "Code with id %s does NOT exist",
+        "controller.code.checkout":
+            "Code id does not exist: %s",
         "controller.environment.__init__":
             "Project has not been initialized ",
         "controller.environment.driver.docker.__init__.dne":
@@ -254,8 +256,6 @@ MESSAGES = {
             "Docker environment management initialization failed. Platform: %s",
         "controller.environment.driver.docker.init":
             "Error in docker initialization: %s",
-        "controller.environment.checkout_env":
-            "Environement id does not exist: %s",
         "controller.environment.driver.docker.get_tags":
             "Error in getting tags: %s",
         "controller.environment.driver.docker.create.dne":
@@ -284,16 +284,18 @@ MESSAGES = {
             "Required argument paths not present in input",
         "controller.environment.create.filepath.dne":
             "Path specified in definition paths does not exist: %s",
-        "controller.file.driver.create_collection.file_exists":
-            "File name has already been specified and exists: %s",
-        "controller.file.driver.create_collection.dir_exists":
-            "Dir name has already been specified and exists: %s",
+        "controller.environment.checkout":
+            "Environment id does not exist: %s",
         "controller.environment.requirements.create":
             "Error while creating requirements file for python: %s",
         "controller.environment.build":
             "Environment with id %s does NOT exist",
         "controller.environment.delete":
             "Environment with id %s does NOT exist",
+        "controller.file.driver.create_collection.file_exists":
+            "File name has already been specified and exists: %s",
+        "controller.file.driver.create_collection.dir_exists":
+            "Dir name has already been specified and exists: %s",
         "controller.file.driver.local.__init__":
             "File path does not exist: %s",
         "controller.file.driver.local.get_safe_dst_filepath.src":
