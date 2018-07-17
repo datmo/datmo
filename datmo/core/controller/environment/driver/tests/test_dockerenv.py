@@ -850,6 +850,7 @@ class TestDockerEnv():
         with open(input_dockerfile_path, "wb") as f:
             f.write(to_bytes("FROM datmo/python-base:cpu-py27" + "\n"))
             f.write(to_bytes(str("RUN echo " + self.random_text)))
+        import pdb; pdb.set_trace()
         result = self.docker_environment_driver.create_datmo_definition(
             input_dockerfile_path, output_dockerfile_path, workspace="notebook")
         assert result

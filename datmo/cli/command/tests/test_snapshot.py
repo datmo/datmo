@@ -647,13 +647,13 @@ class TestSnapshotCommand():
         # create task
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-        self.task = TaskCommand(self.cli_helper)
-        self.task.parse([
-            "task", "run", "--environment-paths", test_dockerfile, test_command
+        self.run = RunCommand(self.cli_helper)
+        self.run.parse([
+            "run", "--environment-paths", test_dockerfile, test_command
         ])
 
         # test proper execution of task run command
-        task_obj = self.task.execute()
+        task_obj = self.run.execute()
 
         # test no visible snapshots
         self.snapshot_command.parse(["snapshot", "ls"])
