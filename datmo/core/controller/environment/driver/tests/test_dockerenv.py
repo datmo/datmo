@@ -256,229 +256,230 @@ class TestDockerEnv():
         # teardown container
         self.docker_environment_driver.stop(run_id, force=True)
 
-    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_interactive_run(self):
-        # keeping stdin_open, tty as True
-        log_filepath = os.path.join(self.docker_environment_driver.filepath,
-                                    "test.log")
-        self.docker_environment_driver.build(self.image_name,
-                                             self.dockerfile_path)
-
-        @timeout_decorator.timeout(10, use_signals=False)
-        def timed_run(container_name, timed_run_result):
-            run_options = {
-                "command": [],
-                "ports": ["8888:9999", "5000:5001"],
-                "name": container_name,
-                "volumes": {
-                    self.docker_environment_driver.filepath: {
-                        'bind': '/home/',
-                        'mode': 'rw'
-                    }
-                },
-                "detach": True,
-                "stdin_open": True,
-                "tty": True,
-                "api": False
-            }
-
-            self.docker_environment_driver.run(self.image_name, run_options,
-                                               log_filepath)
-            return timed_run_result
-
-        container_name = str(uuid.uuid1())
-        timed_run_result = False
-        try:
-            timed_run_result = timed_run(container_name, timed_run_result)
-        except timeout_decorator.timeout_decorator.TimeoutError:
-            timed_run_result = True
-
-        assert timed_run_result
-
-        # teardown
-        self.docker_environment_driver.remove(self.image_name, force=True)
-        # remove datmoDockerfile
-        output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
-                                              "datmoDockerfile")
-        os.remove(output_dockerfile_path)
-
-        # new jupyter dockerfile
-        new_docker_filepath = os.path.join(
-            self.docker_environment_driver.filepath, "Dockerfile")
-        random_text = str(uuid.uuid1())
-        with open(new_docker_filepath, "wb") as f:
-            f.write(to_bytes("FROM nbgallery/jupyter-alpine:latest\n"))
-            f.write(to_bytes(str("RUN echo " + random_text)))
-        self.docker_environment_driver.build(self.image_name,
-                                             new_docker_filepath)
-
-        @timeout_decorator.timeout(10, use_signals=False)
-        def timed_run(container_name, timed_run_result):
-            run_options = {
-                "command": ["jupyter", "notebook", "--allow-root"],
-                "ports": ["8888:8888"],
-                "name": container_name,
-                "volumes": {
-                    self.docker_environment_driver.filepath: {
-                        'bind': '/home/',
-                        'mode': 'rw'
-                    }
-                },
-                "detach": True,
-                "stdin_open": False,
-                "tty": False,
-                "api": False
-            }
-
-            self.docker_environment_driver.run(self.image_name, run_options,
-                                               log_filepath)
-            return timed_run_result
-
-        # teardown
-        self.docker_environment_driver.remove(self.image_name, force=True)
-        # remove datmoDockerfile
-        output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
-                                              "datmoDockerfile")
-        os.remove(output_dockerfile_path)
-
-        # new dockerfile
-        new_docker_filepath = os.path.join(
-            self.docker_environment_driver.filepath, "Dockerfile")
-        random_text = str(uuid.uuid1())
-        with open(new_docker_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/python-base:cpu-py27" + os.linesep))
-            f.write(to_bytes(str("RUN echo " + random_text)))
-        self.docker_environment_driver.build(self.image_name,
-                                             new_docker_filepath,
-                                             workspace='notebook')
-
-        @timeout_decorator.timeout(10, use_signals=False)
-        def timed_run(container_name, timed_run_result):
-            run_options = {
-                "command": ["jupyter", "notebook", "--allow-root"],
-                "ports": ["8888:8888"],
-                "name": container_name,
-                "volumes": {
-                    self.docker_environment_driver.filepath: {
-                        'bind': '/home/',
-                        'mode': 'rw'
-                    }
-                },
-                "detach": True,
-                "stdin_open": False,
-                "tty": False,
-                "api": False
-            }
-
-            self.docker_environment_driver.run(self.image_name, run_options,
-                                               log_filepath)
-            return timed_run_result
-
-        container_name = str(uuid.uuid1())
-        timed_run_result = False
-        try:
-            timed_run_result = timed_run(container_name, timed_run_result)
-        except timeout_decorator.timeout_decorator.TimeoutError:
-            timed_run_result = True
-        assert timed_run_result
-
-        # teardown container
-        self.docker_environment_driver.stop(container_name, force=True)
-
-        # remove datmoDockerfile
-        output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
-                                              "datmoDockerfile")
-        os.remove(output_dockerfile_path)
-
-        # new dockerfile
-        new_docker_filepath = os.path.join(
-            self.docker_environment_driver.filepath, "Dockerfile")
-        random_text = str(uuid.uuid1())
-        with open(new_docker_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/python-base:cpu-py27" + os.linesep))
-            f.write(to_bytes(str("RUN echo " + random_text)))
-        self.docker_environment_driver.build(self.image_name,
-                                             new_docker_filepath,
-                                             workspace='notebook')
-
-        @timeout_decorator.timeout(10, use_signals=False)
-        def timed_run(container_name, timed_run_result):
-            run_options = {
-                "command": ["jupyter", "notebook", "--allow-root"],
-                "ports": ["8888:8888"],
-                "name": container_name,
-                "volumes": {
-                    self.docker_environment_driver.filepath: {
-                        'bind': '/home/',
-                        'mode': 'rw'
-                    }
-                },
-                "detach": True,
-                "stdin_open": False,
-                "tty": False,
-                "api": False
-            }
-
-            self.docker_environment_driver.run(self.image_name, run_options,
-                                               log_filepath)
-            return timed_run_result
-
-        container_name = str(uuid.uuid1())
-        timed_run_result = False
-        try:
-            timed_run_result = timed_run(container_name, timed_run_result)
-        except timeout_decorator.timeout_decorator.TimeoutError:
-            timed_run_result = True
-        assert timed_run_result
-
-        # teardown container
-        self.docker_environment_driver.stop(container_name, force=True)
-
-        # remove datmoDockerfile
-        output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
-                                              "datmoDockerfile")
-        os.remove(output_dockerfile_path)
-
-        # new dockerfile
-        new_docker_filepath = os.path.join(
-            self.docker_environment_driver.filepath, "Dockerfile")
-        random_text = str(uuid.uuid1())
-        with open(new_docker_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/python-base:cpu-py27" + os.linesep))
-            f.write(to_bytes(str("RUN echo " + random_text)))
-        self.docker_environment_driver.build(self.image_name,
-                                             new_docker_filepath,
-                                             workspace='jupyterlab')
-
-        @timeout_decorator.timeout(10, use_signals=False)
-        def timed_run(container_name, timed_run_result):
-            run_options = {
-                "command": ["jupyter", "lab", "--allow-root"],
-                "ports": ["8888:8888"],
-                "name": container_name,
-                "volumes": {
-                    self.docker_environment_driver.filepath: {
-                        'bind': '/home/',
-                        'mode': 'rw'
-                    }
-                },
-                "detach": True,
-                "stdin_open": False,
-                "tty": False,
-                "api": False
-            }
-
-            self.docker_environment_driver.run(self.image_name, run_options,
-                                               log_filepath)
-            return timed_run_result
-
-        container_name = str(uuid.uuid1())
-        timed_run_result = False
-        try:
-            timed_run_result = timed_run(container_name, timed_run_result)
-        except timeout_decorator.timeout_decorator.TimeoutError:
-            timed_run_result = True
-        assert timed_run_result
+    # commenting due to test being unreliable
+    # @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    # def test_interactive_run(self):
+    #     # keeping stdin_open, tty as True
+    #     log_filepath = os.path.join(self.docker_environment_driver.filepath,
+    #                                 "test.log")
+    #     self.docker_environment_driver.build(self.image_name,
+    #                                          self.dockerfile_path)
+    #
+    #     @timeout_decorator.timeout(10, use_signals=False)
+    #     def timed_run(container_name, timed_run_result):
+    #         run_options = {
+    #             "command": [],
+    #             "ports": ["8888:9999", "5000:5001"],
+    #             "name": container_name,
+    #             "volumes": {
+    #                 self.docker_environment_driver.filepath: {
+    #                     'bind': '/home/',
+    #                     'mode': 'rw'
+    #                 }
+    #             },
+    #             "detach": True,
+    #             "stdin_open": True,
+    #             "tty": True,
+    #             "api": False
+    #         }
+    #
+    #         self.docker_environment_driver.run(self.image_name, run_options,
+    #                                            log_filepath)
+    #         return timed_run_result
+    #
+    #     container_name = str(uuid.uuid1())
+    #     timed_run_result = False
+    #     try:
+    #         timed_run_result = timed_run(container_name, timed_run_result)
+    #     except timeout_decorator.timeout_decorator.TimeoutError:
+    #         timed_run_result = True
+    #
+    #     assert timed_run_result
+    #
+    #     # teardown
+    #     self.docker_environment_driver.remove(self.image_name, force=True)
+    #     # remove datmoDockerfile
+    #     output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+    #                                           "datmoDockerfile")
+    #     os.remove(output_dockerfile_path)
+    #
+    #     # new jupyter dockerfile
+    #     new_docker_filepath = os.path.join(
+    #         self.docker_environment_driver.filepath, "Dockerfile")
+    #     random_text = str(uuid.uuid1())
+    #     with open(new_docker_filepath, "wb") as f:
+    #         f.write(to_bytes("FROM nbgallery/jupyter-alpine:latest\n"))
+    #         f.write(to_bytes(str("RUN echo " + random_text)))
+    #     self.docker_environment_driver.build(self.image_name,
+    #                                          new_docker_filepath)
+    #
+    #     @timeout_decorator.timeout(10, use_signals=False)
+    #     def timed_run(container_name, timed_run_result):
+    #         run_options = {
+    #             "command": ["jupyter", "notebook", "--allow-root"],
+    #             "ports": ["8888:8888"],
+    #             "name": container_name,
+    #             "volumes": {
+    #                 self.docker_environment_driver.filepath: {
+    #                     'bind': '/home/',
+    #                     'mode': 'rw'
+    #                 }
+    #             },
+    #             "detach": True,
+    #             "stdin_open": False,
+    #             "tty": False,
+    #             "api": False
+    #         }
+    #
+    #         self.docker_environment_driver.run(self.image_name, run_options,
+    #                                            log_filepath)
+    #         return timed_run_result
+    #
+    #     # teardown
+    #     self.docker_environment_driver.remove(self.image_name, force=True)
+    #     # remove datmoDockerfile
+    #     output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+    #                                           "datmoDockerfile")
+    #     os.remove(output_dockerfile_path)
+    #
+    #     # new dockerfile
+    #     new_docker_filepath = os.path.join(
+    #         self.docker_environment_driver.filepath, "Dockerfile")
+    #     random_text = str(uuid.uuid1())
+    #     with open(new_docker_filepath, "wb") as f:
+    #         f.write(to_bytes("FROM datmo/python-base:cpu-py27" + os.linesep))
+    #         f.write(to_bytes(str("RUN echo " + random_text)))
+    #     self.docker_environment_driver.build(self.image_name,
+    #                                          new_docker_filepath,
+    #                                          workspace='notebook')
+    #
+    #     @timeout_decorator.timeout(10, use_signals=False)
+    #     def timed_run(container_name, timed_run_result):
+    #         run_options = {
+    #             "command": ["jupyter", "notebook", "--allow-root"],
+    #             "ports": ["8888:8888"],
+    #             "name": container_name,
+    #             "volumes": {
+    #                 self.docker_environment_driver.filepath: {
+    #                     'bind': '/home/',
+    #                     'mode': 'rw'
+    #                 }
+    #             },
+    #             "detach": True,
+    #             "stdin_open": False,
+    #             "tty": False,
+    #             "api": False
+    #         }
+    #
+    #         self.docker_environment_driver.run(self.image_name, run_options,
+    #                                            log_filepath)
+    #         return timed_run_result
+    #
+    #     container_name = str(uuid.uuid1())
+    #     timed_run_result = False
+    #     try:
+    #         timed_run_result = timed_run(container_name, timed_run_result)
+    #     except timeout_decorator.timeout_decorator.TimeoutError:
+    #         timed_run_result = True
+    #     assert timed_run_result
+    #
+    #     # teardown container
+    #     self.docker_environment_driver.stop(container_name, force=True)
+    #
+    #     # remove datmoDockerfile
+    #     output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+    #                                           "datmoDockerfile")
+    #     os.remove(output_dockerfile_path)
+    #
+    #     # new dockerfile
+    #     new_docker_filepath = os.path.join(
+    #         self.docker_environment_driver.filepath, "Dockerfile")
+    #     random_text = str(uuid.uuid1())
+    #     with open(new_docker_filepath, "wb") as f:
+    #         f.write(to_bytes("FROM datmo/python-base:cpu-py27" + os.linesep))
+    #         f.write(to_bytes(str("RUN echo " + random_text)))
+    #     self.docker_environment_driver.build(self.image_name,
+    #                                          new_docker_filepath,
+    #                                          workspace='notebook')
+    #
+    #     @timeout_decorator.timeout(10, use_signals=False)
+    #     def timed_run(container_name, timed_run_result):
+    #         run_options = {
+    #             "command": ["jupyter", "notebook", "--allow-root"],
+    #             "ports": ["8888:8888"],
+    #             "name": container_name,
+    #             "volumes": {
+    #                 self.docker_environment_driver.filepath: {
+    #                     'bind': '/home/',
+    #                     'mode': 'rw'
+    #                 }
+    #             },
+    #             "detach": True,
+    #             "stdin_open": False,
+    #             "tty": False,
+    #             "api": False
+    #         }
+    #
+    #         self.docker_environment_driver.run(self.image_name, run_options,
+    #                                            log_filepath)
+    #         return timed_run_result
+    #
+    #     container_name = str(uuid.uuid1())
+    #     timed_run_result = False
+    #     try:
+    #         timed_run_result = timed_run(container_name, timed_run_result)
+    #     except timeout_decorator.timeout_decorator.TimeoutError:
+    #         timed_run_result = True
+    #     assert timed_run_result
+    #
+    #     # teardown container
+    #     self.docker_environment_driver.stop(container_name, force=True)
+    #
+    #     # remove datmoDockerfile
+    #     output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+    #                                           "datmoDockerfile")
+    #     os.remove(output_dockerfile_path)
+    #
+    #     # new dockerfile
+    #     new_docker_filepath = os.path.join(
+    #         self.docker_environment_driver.filepath, "Dockerfile")
+    #     random_text = str(uuid.uuid1())
+    #     with open(new_docker_filepath, "wb") as f:
+    #         f.write(to_bytes("FROM datmo/python-base:cpu-py27" + os.linesep))
+    #         f.write(to_bytes(str("RUN echo " + random_text)))
+    #     self.docker_environment_driver.build(self.image_name,
+    #                                          new_docker_filepath,
+    #                                          workspace='jupyterlab')
+    #
+    #     @timeout_decorator.timeout(10, use_signals=False)
+    #     def timed_run(container_name, timed_run_result):
+    #         run_options = {
+    #             "command": ["jupyter", "lab", "--allow-root"],
+    #             "ports": ["8888:8888"],
+    #             "name": container_name,
+    #             "volumes": {
+    #                 self.docker_environment_driver.filepath: {
+    #                     'bind': '/home/',
+    #                     'mode': 'rw'
+    #                 }
+    #             },
+    #             "detach": True,
+    #             "stdin_open": False,
+    #             "tty": False,
+    #             "api": False
+    #         }
+    #
+    #         self.docker_environment_driver.run(self.image_name, run_options,
+    #                                            log_filepath)
+    #         return timed_run_result
+    #
+    #     container_name = str(uuid.uuid1())
+    #     timed_run_result = False
+    #     try:
+    #         timed_run_result = timed_run(container_name, timed_run_result)
+    #     except timeout_decorator.timeout_decorator.TimeoutError:
+    #         timed_run_result = True
+    #     assert timed_run_result
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_stop(self):
