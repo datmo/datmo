@@ -864,13 +864,12 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             os.path.dirname(os.path.abspath(__file__)), "templates",
             "baseDockerfile")
         # Combine dockerfiles
-        import pdb; pdb.set_trace()
         with open(input_definition_path, "rb") as input_file:
             with open(datmo_base_dockerfile_path, "rb") as datmo_base_file:
                 with open(output_definition_path, "wb") as output_file:
                     for line in input_file:
                         bool_workspace_update = (to_bytes('FROM datmo/') in line.strip() and workspace)
-                        if to_bytes(os.linesep) in line and bool_workspace_update:
+                        if to_bytes("\n") in line and bool_workspace_update:
                             updated_line = line.strip() + to_bytes("-%s%s" % (workspace, os.linesep))
                         elif to_bytes(os.linesep) in line:
                             updated_line = line.strip() + to_bytes(os.linesep)
@@ -878,7 +877,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                             updated_line = line.strip()
                         output_file.write(updated_line)
                     for line in datmo_base_file:
-                        if to_bytes(os.linesep) in line:
+                        if to_bytes("\n") in line:
                             output_file.write(line.strip() + to_bytes(os.linesep))
                         else:
                             output_file.write(line.strip())

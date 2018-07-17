@@ -190,10 +190,10 @@ class TestWorkspace():
     #     timed_run_result = timed_run(timed_run_result)
     #
     #     assert timed_run_result
-
-        # Stop all running datmo task
-        self.run_command.parse(["stop", "--all"])
-        self.run_command.execute()
+    #
+    #     # Stop all running datmo task
+    #     self.run_command.parse(["stop", "--all"])
+    #     self.run_command.execute()
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_rstudio(self):
