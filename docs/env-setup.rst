@@ -100,6 +100,8 @@ At the top of your Dockerfile, you will need a line of the following format:
         iii. datmo/python-base:py27-cpu
         iv. datmo/python-base:py27-gpu
 
+    To see the full list of officially supported Python environment versions, check out the `Dockerhub page here <https://hub.docker.com/r/datmo/python-base/tags/>`_.
+
 **3. Designate installation of system level packages**
 
 All base datmo environments utilize Ubuntu, so the ``apt-get`` package tool will be used to install any necessary system dependencies. 
