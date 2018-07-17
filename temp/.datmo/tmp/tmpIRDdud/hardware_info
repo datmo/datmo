@@ -1,8 +1,0 @@
-{
-    "machine": "x86_64",
-    "node": "Shabazs-MacBook-Pro.local",
-    "processor": "i386",
-    "release": "17.5.0",
-    "system": "Darwin",
-    "version": "Darwin Kernel Version 17.5.0: Mon Mar  5 22:24:32 PST 2018; root:xnu-4570.51.1~1/RELEASE_X86_64"
-}
