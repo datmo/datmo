@@ -174,9 +174,10 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         definition_filepath = os.path.join(definition_path, "Dockerfile")
         with open(definition_filepath, "wb") as f:
             if language:
-                f.write(to_bytes("FROM datmo/%s:%s-%s\n\n" % (env, type, language)))
+                f.write(to_bytes("FROM datmo/%s:%s-%s%s%s" % (env, type, language,
+                                                              os.linesep, os.linesep)))
             else:
-                f.write(to_bytes("FROM datmo/%s:%s\n\n" % (env, type)))
+                f.write(to_bytes("FROM datmo/%s:%s%s%s" % (env, type, os.linesep, os.linesep)))
         return True
 
     def create(self, path=None, output_path=None, workspace=None):
@@ -667,7 +668,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             with open(filepath, "wb") as log_file:
                 for line in self.client.containers.get(container_id).logs(
                         stream=True):
-                    log_file.write(to_bytes(line.strip() + "\n"))
+                    log_file.write(to_bytes(line.strip() + os.linesep))
         else:
             command = list(self.prefix)
             if follow:
@@ -683,7 +684,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                         break
                     if output:
                         printable_output = output.strip().replace("\x08", " ")
-                        log_file.write(to_bytes(printable_output + "\n"))
+                        log_file.write(to_bytes(printable_output + os.linesep))
             return_code = process.poll()
             with open(filepath, "rb") as log_file:
                 logs = log_file.read()
@@ -830,7 +831,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             with open(destination_dockerfile, "wb") as output_file:
                 for line in input_file:
                     if to_bytes(os.linesep) in line:
-                        output_file.write(line.strip() + to_bytes("\n"))
+                        output_file.write(line.strip() + to_bytes(os.linesep))
                     else:
                         output_file.write(line.strip())
         return destination_dockerfile
@@ -869,15 +870,15 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                     for line in input_file:
                         bool_workspace_update = (to_bytes('FROM datmo/') in line.strip() and workspace)
                         if to_bytes(os.linesep) in line and bool_workspace_update:
-                            updated_line = line.strip() + to_bytes("-%s\n" % workspace)
+                            updated_line = line.strip() + to_bytes("-%s%s" % (workspace, os.linesep))
                         elif to_bytes(os.linesep) in line:
-                            updated_line = line.strip() + to_bytes("\n")
+                            updated_line = line.strip() + to_bytes(os.linesep)
                         else:
                             updated_line = line.strip()
                         output_file.write(updated_line)
                     for line in datmo_base_file:
                         if to_bytes(os.linesep) in line:
-                            output_file.write(line.strip() + to_bytes("\n"))
+                            output_file.write(line.strip() + to_bytes(os.linesep))
                         else:
                             output_file.write(line.strip())
         return True

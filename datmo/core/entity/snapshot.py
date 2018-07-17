@@ -115,11 +115,11 @@ class Snapshot():
             final_str = '\033[94m' + "snapshot " + self.id + '\033[0m'
             final_str = final_str + '\033[94m' + " (" + '\033[0m'
             final_str = final_str + '\033[93m' + '\033[1m' + "label: " + self.label + '\033[0m'
-            final_str = final_str + '\033[94m' + ")" + '\033[0m' + "\n"
+            final_str = final_str + '\033[94m' + ")" + '\033[0m' + os.linesep
         else:
-            final_str = '\033[94m' + "snapshot " + self.id + '\033[0m' + "\n"
+            final_str = '\033[94m' + "snapshot " + self.id + '\033[0m' + os.linesep
         final_str = final_str + "Date: " + prettify_datetime(
-            self.created_at) + "\n"
+            self.created_at) + os.linesep
         table_data = []
         if self.session_id:
             table_data.append(["Session", "-> " + self.session_id])
@@ -133,7 +133,7 @@ class Snapshot():
         table_data.append(["Config", "-> " + str(self.config)])
         table_data.append(["Stats", "-> " + str(self.stats)])
         final_str = final_str + format_table(table_data)
-        final_str = final_str + "\n" + "    " + self.message + "\n" + "\n"
+        final_str = final_str + os.linesep + "    " + self.message + os.linesep + os.linesep
         return final_str
 
     def __repr__(self):

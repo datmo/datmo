@@ -83,14 +83,14 @@ class Helper():
             for idx, header in enumerate(header_list):
                 output += header if idx == len(
                     header_list) - 1 else header + ","
-            output += "\n"
+            output += os.linesep
             for item_dict in item_dict_list:
                 for idx, header in enumerate(header_list):
                     output += item_dict.get(
                         header, "N/A"
                     ) if idx == len(header_list) - 1 else item_dict.get(
                         header, "N/A") + ","
-                output += "\n"
+                output += os.linesep
         else:
             output = ""
 

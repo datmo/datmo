@@ -1,3 +1,4 @@
+import os
 import shlex
 import platform
 try:
@@ -152,7 +153,7 @@ class Task():
         return self.id == other.id if other else False
 
     def __str__(self):
-        final_str = '\033[94m' + "task " + self.id + "\n" + '\033[0m'
+        final_str = '\033[94m' + "task " + self.id + os.linesep + '\033[0m'
         table_data = []
         if self.session_id:
             table_data.append(["Session", "-> " + self.session_id])
@@ -181,7 +182,7 @@ class Task():
                 for f in self.files[1:]:
                     table_data.append(["     ", "-> " + f.name])
         final_str = final_str + format_table(table_data)
-        final_str = final_str + "\n" + "    " + self.command + "\n" + "\n"
+        final_str = final_str + os.linesep + "    " + self.command + os.linesep + os.linesep
         return final_str
 
     def __repr__(self):

@@ -64,7 +64,7 @@ class TestWorkspace():
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(self.env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/python-base:cpu-py27\n")))
+            f.write(to_bytes(str("FROM datmo/python-base:cpu-py27%s" %os.linesep)))
 
     def teardown_method(self):
         pass
@@ -201,7 +201,7 @@ class TestWorkspace():
         # Update environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(self.env_def_path, "wb") as f:
-            f.write(to_bytes(str("FROM datmo/r-base:cpu\n")))
+            f.write(to_bytes(str("FROM datmo/r-base:cpu%s" %os.linesep)))
 
         test_mem_limit = "4g"
         # test single ports option before command

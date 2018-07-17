@@ -56,7 +56,7 @@ class TestDockerEnv():
         self.random_text = str(uuid.uuid1())
         self.dockerfile_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(self.dockerfile_path, "wb") as f:
-            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + os.linesep))
             f.write(to_bytes(str("RUN echo " + self.random_text)))
 
     def teardown_method(self):
@@ -307,7 +307,7 @@ class TestDockerEnv():
             self.docker_environment_driver.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(new_docker_filepath, "wb") as f:
-            f.write(to_bytes("FROM nbgallery/jupyter-alpine:latest" + "\n"))
+            f.write(to_bytes("FROM nbgallery/jupyter-alpine:latest\n"))
             f.write(to_bytes(str("RUN echo " + random_text)))
         self.docker_environment_driver.build(self.image_name,
                                              new_docker_filepath)
@@ -346,7 +346,7 @@ class TestDockerEnv():
             self.docker_environment_driver.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(new_docker_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/python-base:cpu-py27" + "\n"))
+            f.write(to_bytes("FROM datmo/python-base:cpu-py27" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
         self.docker_environment_driver.build(self.image_name,
                                              new_docker_filepath,
@@ -395,7 +395,7 @@ class TestDockerEnv():
             self.docker_environment_driver.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(new_docker_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/python-base:cpu-py27" + "\n"))
+            f.write(to_bytes("FROM datmo/python-base:cpu-py27" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
         self.docker_environment_driver.build(self.image_name,
                                              new_docker_filepath,
@@ -444,7 +444,7 @@ class TestDockerEnv():
             self.docker_environment_driver.filepath, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(new_docker_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/python-base:cpu-py27" + "\n"))
+            f.write(to_bytes("FROM datmo/python-base:cpu-py27" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
         self.docker_environment_driver.build(self.image_name,
                                              new_docker_filepath,
@@ -848,9 +848,8 @@ class TestDockerEnv():
         # Test 2: With workspaces on datmo base image
         os.remove(output_dockerfile_path)
         with open(input_dockerfile_path, "wb") as f:
-            f.write(to_bytes("FROM datmo/python-base:cpu-py27" + "\n"))
+            f.write(to_bytes("FROM datmo/python-base:cpu-py27" + os.linesep))
             f.write(to_bytes(str("RUN echo " + self.random_text)))
-        import pdb; pdb.set_trace()
         result = self.docker_environment_driver.create_datmo_definition(
             input_dockerfile_path, output_dockerfile_path, workspace="notebook")
         assert result

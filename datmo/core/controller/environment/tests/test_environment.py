@@ -384,7 +384,7 @@ class TestEnvironmentController():
                                            "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
         input_dict = {
             "paths": [definition_filepath],
@@ -407,7 +407,7 @@ class TestEnvironmentController():
         test_filepath = os.path.join(self.environment_controller.home,
                                      "script.py")
         with open(test_filepath, "wb") as f:
-            f.write(to_bytes("import numpy\n"))
+            f.write(to_bytes("import numpy\n") )
             f.write(to_bytes("import sklearn\n"))
             f.write(to_bytes("print('hello')\n"))
 
@@ -430,7 +430,7 @@ class TestEnvironmentController():
             "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
         environment_obj_4 = self.environment_controller.create({})
         self.environment_ids.append(environment_obj_4.id)
@@ -444,7 +444,7 @@ class TestEnvironmentController():
             "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/data-analytics:cpu-py27" + "\n"))
+            f.write(to_bytes("FROM datmo/data-analytics:cpu-py27%s" %os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
         environment_obj_4 = self.environment_controller.create({})
         self.environment_ids.append(environment_obj_4.id)
@@ -464,7 +464,7 @@ class TestEnvironmentController():
             "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         random_name = str(uuid.uuid1())
@@ -504,7 +504,7 @@ class TestEnvironmentController():
                                            "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         random_name = str(uuid.uuid1())
@@ -594,7 +594,7 @@ class TestEnvironmentController():
                                            "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM nbgallery/jupyter-alpine:latest" + "\n"))
+            f.write(to_bytes("FROM nbgallery/jupyter-alpine:latest" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         input_dict = {
@@ -847,7 +847,7 @@ class TestEnvironmentController():
         env_def_path = os.path.join(self.project_controller.home, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         input_dict = {

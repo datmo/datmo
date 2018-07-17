@@ -292,7 +292,7 @@ class GitCodeDriver(CodeDriver):
         try:
             if not self.exists_datmo_files_ignored():
                 with open(exclude_file, "ab") as f:
-                    f.write(to_bytes("\n.datmo/*\n"))
+                    f.write(to_bytes("%s.datmo/*%s" %(os.linesep, os.linesep)))
         except Exception as e:
             raise FileIOError(
                 __("error", "controller.code.driver.git.ensure_code_refs_dir",
@@ -903,11 +903,11 @@ class GitHostDriver(object):
         netrc_file = open(netrc_filepath, "wb")
         netrc_file.truncate()
         netrc_file.write(to_bytes("machine %s" % (self.host)))
-        netrc_file.write(to_bytes("\n"))
+        netrc_file.write(to_bytes(os.linesep))
         netrc_file.write(to_bytes("login " + str(username)))
-        netrc_file.write(to_bytes("\n"))
+        netrc_file.write(to_bytes(os.linesep))
         netrc_file.write(to_bytes("password " + str(password)))
-        netrc_file.write(to_bytes("\n"))
+        netrc_file.write(to_bytes(os.linesep))
         netrc_file.close()
         return True
 
@@ -917,7 +917,7 @@ class GitHostDriver(object):
             return {"login": None, "password": None}
         netrc_file = open(netrc_filepath, "r")
         file_content = netrc_file.read()
-        lines = file_content.split("\n")
+        lines = file_content.split(os.linesep)
         initial_index = lines.index("machine %s" % (self.host))
         login = lines[initial_index + 1].split(" ")[-1]
         password = lines[initial_index + 2].split(" ")[-1]
