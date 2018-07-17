@@ -39,6 +39,8 @@ Tasks
 **Tasks** are command line actions or commands a user can perform within a project. For example, the commands ``python train.py`` or ``python predict.py`` would both be examples of tasks. Tasks are declarative entities and are applied to states (snapshots) to form execute runs.
 
 
+.. _snapshots:
+
 Snapshots
 -------------
 

@@ -22,6 +22,7 @@ Table of contents
     tutorials
     concepts
     env-setup
+    visualize-snapshots
     cli
     python_sdk
     faq
