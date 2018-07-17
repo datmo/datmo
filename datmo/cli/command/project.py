@@ -5,7 +5,7 @@ from datmo.core.util.i18n import get as __
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.base import BaseCommand
 from datmo.core.controller.project import ProjectController
-from datmo.core.controller.environment.environment import EnvironmentController, EnvironmentDoesNotExist
+from datmo.core.controller.environment.environment import EnvironmentController
 
 
 class ProjectCommand(BaseCommand):
@@ -105,12 +105,12 @@ class ProjectCommand(BaseCommand):
             # Setting up the environment definition file
             self.environment_controller = EnvironmentController()
             environment_types = self.environment_controller.get_environment_type()
-            type = self.cli_helper.prompt_available_options(environment_types, option_type="type")
-            available_environments = self.environment_controller.get_supported_environments(type)
+            environment_type = self.cli_helper.prompt_available_options(environment_types, option_type="type")
+            available_environments = self.environment_controller.get_supported_environments(environment_type)
             env = self.cli_helper.prompt_available_options(available_environments, option_type="env")
-            available_environment_languages = self.environment_controller.get_supported_languages(type, env)
+            available_environment_languages = self.environment_controller.get_supported_languages(environment_type, env)
             language = self.cli_helper.prompt_available_options(available_environment_languages, option_type="language")
-            options = {"type": type, "env": env, "language": language}
+            options = {"environment_type": environment_type, "env": env, "language": language}
             environment_obj = self.environment_controller.setup(
                 options=options)
             self.cli_helper.echo(

@@ -104,27 +104,27 @@ class TestEnvironmentController():
         self.environment_controller = EnvironmentController()
 
         # Test success setup once (no files present)
-        options = {"env": "data-analytics", "type": "cpu", "language": "py27"}
+        options = {"env": "data-analytics", "environment_type": "cpu", "language": "py27"}
         result = self.environment_controller.setup(options=options)
         output_definition_filepath = os.path.join(
             self.environment_controller.file_driver.environment_directory,
             "Dockerfile")
 
         assert isinstance(result, Environment)
-        assert result.name == "%s:%s-%s" % (options['env'], options['type'], options['language'])
+        assert result.name == "%s:%s-%s" % (options['env'], options['environment_type'], options['language'])
         assert result.description == "supported environment created by datmo"
         assert os.path.isfile(output_definition_filepath)
         assert "FROM datmo/data-analytics:cpu-py27" in open(output_definition_filepath,
                                                 "r").read()
         # Test success setup again (files present, but staged)
-        options = {"env": "data-analytics", "type": "cpu", "language": "py27"}
+        options = {"env": "data-analytics", "environment_type": "cpu", "language": "py27"}
         result = self.environment_controller.setup(options=options)
         output_definition_filepath = os.path.join(
             self.environment_controller.file_driver.environment_directory,
             "Dockerfile")
 
         assert isinstance(result, Environment)
-        assert result.name == "%s:%s-%s" % (options['env'], options['type'], options['language'])
+        assert result.name == "%s:%s-%s" % (options['env'], options['environment_type'], options['language'])
         assert result.description == "supported environment created by datmo"
         assert os.path.isfile(output_definition_filepath)
         assert "FROM datmo/data-analytics:cpu-py27" in open(output_definition_filepath,

@@ -28,7 +28,6 @@ from datmo.cli.driver.helper import Helper
 from datmo.core.util.exceptions import ArgumentError
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
-from datmo.cli.command.task import TaskCommand
 from datmo.cli.command.session import SessionCommand
 from datmo.cli.command.environment import EnvironmentCommand
 
@@ -207,15 +206,13 @@ class TestHelper():
     def test_get_command_class(self):
         # Test success
         for command in [
-                "project", "snapshot", "task", "session", "environment"
+                "project", "snapshot", "session", "environment"
         ]:
             result = self.cli.get_command_class(command)
             if command == "project":
                 assert result == ProjectCommand
             elif command == "snapshot":
                 assert result == SnapshotCommand
-            elif command == "task":
-                assert result == TaskCommand
             elif command == "session":
                 assert result == SessionCommand
             elif command == "environment":

@@ -42,7 +42,6 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.run import RunObject
 from datmo.cli.command.run import RunCommand
-from datmo.cli.command.task import TaskCommand
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.util.exceptions import SessionDoesNotExist, DoesNotExist, \
     MutuallyExclusiveArguments, RequiredArgumentMissing
@@ -95,7 +94,6 @@ class TestRunCommand():
         dummy(self)
 
         self.run_command = RunCommand(self.cli_helper)
-        self.task_command = TaskCommand(self.cli_helper)
 
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")

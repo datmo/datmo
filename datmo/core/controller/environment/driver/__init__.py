@@ -49,12 +49,12 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
             List of supported environment type
         """
     @abstractmethod
-    def get_supported_environments(self, type):
+    def get_supported_environments(self, environment_type):
         """Get all the supported environments
 
         Parameters
         ----------
-        type : str
+        environment_type : str
             the type of environment
 
         Returns
@@ -64,12 +64,12 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         """
 
     @abstractmethod
-    def get_supported_languages(self, type, environment_name):
+    def get_supported_languages(self, environment_type, environment_name):
         """Get all the supported environment languages
 
         Parameters
         ----------
-        type : str
+        environment_type : str
             the type of environment
         environment_name : str
             the name of the environment
@@ -109,7 +109,7 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         """
 
     @abstractmethod
-    def create(self, path=None, output_path=None):
+    def create(self, path=None, output_path=None, workspace=None):
         """Create datmo environment definition
 
         Parameters
@@ -123,7 +123,8 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
             (default is None, which creates a name of above file with `datmo` prefixed
             in the same directory as `path`. e.g. `datmoDockerfile` in
             the project root for the default above for docker driver)
-
+        workspace : str, optional
+            workspace being used while running the task
         Returns
         -------
         tuple
@@ -272,7 +273,7 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
 
     @staticmethod
     @abstractmethod
-    def create_datmo_definition(input_definition_path, output_definition_path):
+    def create_datmo_definition(input_definition_path, output_definition_path, workspace=None):
         """Create a datmo version of the definition
 
         Parameters
@@ -281,7 +282,8 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
             input original definition path to read from
         output_definition_path : str
             output datmo definition path to write to
-
+        workspace : str, optional
+            workspace being used while running the task
         Returns
         -------
         bool

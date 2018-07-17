@@ -92,14 +92,14 @@ class TestDockerEnv():
         assert result
 
     def test_get_current_name(self):
-        type='cpu'
-        result = self.docker_environment_driver.get_supported_environments(type)
+        environment_type='cpu'
+        result = self.docker_environment_driver.get_supported_environments(environment_type)
         assert result
 
     def test_get_supported_languages(self):
-        type='cpu'
+        environment_type='cpu'
         env='data-analytics'
-        result = self.docker_environment_driver.get_supported_languages(type, env)
+        result = self.docker_environment_driver.get_supported_languages(environment_type, env)
         assert result
 
     def test_setup(self):
@@ -125,7 +125,7 @@ class TestDockerEnv():
             failed = True
         assert failed
 
-        options = {"env": "data-analytics", "type": "cpu", "language": "py27"}
+        options = {"env": "data-analytics", "environment_type": "cpu", "language": "py27"}
 
         # Test if failure if the path does not exist
         failed = False

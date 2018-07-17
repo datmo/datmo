@@ -132,36 +132,36 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
     def get_environment_type(self):
         # To get the current environment type
-        return list(self.docker_config["environment_type"])
+        return list(self.docker_config["environment_types"])
 
-    def get_supported_environments(self, type):
+    def get_supported_environments(self, environment_type):
         # To get the current environments
         environment_names = []
-        for environment_name in self.docker_config["environment_type"][type]["environments"]:
+        for environment_name in self.docker_config["environment_types"][environment_type]["environments"]:
             environment_names.append([environment_name,
-                                      self.docker_config["environment_type"][type]["environments"][environment_name]["info"]])
+                                      self.docker_config["environment_types"][environment_type]["environments"][environment_name]["info"]])
         return environment_names
 
-    def get_supported_languages(self, type, environment_name):
+    def get_supported_languages(self, environment_type, environment_name):
         # To get the current environments
-        return self.docker_config["environment_type"][type]["environments"][environment_name]["languages"]
+        return self.docker_config["environment_types"][environment_type]["environments"][environment_name]["languages"]
 
     def setup(self, options, definition_path):
-        type = options.get("type", None)
+        environment_type = options.get("environment_type", None)
         env = options.get("env", None)
         language = options.get("language", None)
         environment_types = self.get_environment_type()
-        if type not in environment_types:
+        if environment_type not in environment_types:
             raise EnvironmentDoesNotExist(
                 __("error", "controller.environment.driver.docker.setup.dne",
-                   type))
-        available_environment_info = self.get_supported_environments(type)
+                   environment_type))
+        available_environment_info = self.get_supported_environments(environment_type)
         available_environments = [item[0] for item in available_environment_info]
         if env not in available_environments:
             raise EnvironmentDoesNotExist(
                 __("error", "controller.environment.driver.docker.setup.dne",
                    env))
-        available_environment_languages = self.get_supported_languages(type, env)
+        available_environment_languages = self.get_supported_languages(environment_type, env)
         if available_environment_languages and language not in available_environment_languages:
             raise EnvironmentDoesNotExist(
                 __("error", "controller.environment.driver.docker.setup.dne",
@@ -174,10 +174,10 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         definition_filepath = os.path.join(definition_path, "Dockerfile")
         with open(definition_filepath, "wb") as f:
             if language:
-                f.write(to_bytes("FROM datmo/%s:%s-%s%s%s" % (env, type, language,
+                f.write(to_bytes("FROM datmo/%s:%s-%s%s%s" % (env, environment_type, language,
                                                               os.linesep, os.linesep)))
             else:
-                f.write(to_bytes("FROM datmo/%s:%s%s%s" % (env, type, os.linesep, os.linesep)))
+                f.write(to_bytes("FROM datmo/%s:%s%s%s" % (env, environment_type, os.linesep, os.linesep)))
         return True
 
     def create(self, path=None, output_path=None, workspace=None):

@@ -152,6 +152,10 @@ class RunObject():
         self._results = {}
         if self._core_task.results is not None:
             self._results = self._core_task.results
+        else:
+            self._core_snapshot = self.__get_core_snapshot()
+            self._results = self._core_snapshot.stats if self._core_snapshot.stats else None
+
         return self._results
 
     @property

@@ -96,6 +96,22 @@ class TestEnvironmentCommand():
         assert "FROM datmo/python-base:cpu-py27" in open(definition_filepath,
                                                             "r").read()
 
+        # Test fail with wrong input
+        test_name = "wrong_name"
+        test_type = "cpu"
+        test_language = "wrong_language"
+        self.environment_command.parse(
+            ["environment", "setup", "--env", test_name,
+             "--type", test_type, "--language", test_language])
+
+        failed = False
+        try:
+            self.environment_command.execute()
+        except ValueError:
+            failed = True
+
+        assert failed
+
     def test_environment_setup_prompt(self):
         self.__set_variables()
         # Setup the environement by passing name
