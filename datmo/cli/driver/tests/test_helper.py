@@ -121,7 +121,7 @@ class TestHelper():
             header_list=header_list,
             item_dict_list=item_dict_list,
             print_format="csv")
-        assert result == "foo,bar\nyo,hello\ncool,N/A\n"
+        assert result == "foo,bar%syo,hello%scool,N/A%s" % (os.linesep, os.linesep, os.linesep)
         assert "there" not in result
         # Test without download in random print_format
         result = self.cli.print_items(

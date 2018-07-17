@@ -864,6 +864,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             os.path.dirname(os.path.abspath(__file__)), "templates",
             "baseDockerfile")
         # Combine dockerfiles
+        import pdb; pdb.set_trace()
         with open(input_definition_path, "rb") as input_file:
             with open(datmo_base_dockerfile_path, "rb") as datmo_base_file:
                 with open(output_definition_path, "wb") as output_file:
