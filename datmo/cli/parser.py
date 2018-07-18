@@ -235,6 +235,11 @@ def get_datmo_parser():
         action="store_true",
         help="stop all datmo runs")
 
+    # Delete runs
+    delete_run_parser = subparsers.add_parser("delete", help="delete runs")
+    delete_run_parser.add_argument(
+        "--id", dest="id", default=None, type=str, help="run id to delete")
+
     # Rerun
     rerun_parser = subparsers.add_parser(
         "rerun", help="To rerun an experiment")

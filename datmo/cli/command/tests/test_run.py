@@ -504,6 +504,63 @@ class TestRunCommand():
         assert not result
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_run_delete_success(self):
+        # 1) Test delete with run_id
+        self.__set_variables()
+
+        test_command = ["sh", "-c", "echo yo"]
+        test_ports = "8888:8888"
+        test_mem_limit = "4g"
+        test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
+
+        self.run_command.parse([
+            "run", "--ports", test_ports, "--environment-paths",
+            test_dockerfile, "--mem-limit", test_mem_limit, test_command
+        ])
+
+        test_run_obj = self.run_command.execute()
+
+        # 1) Test option 1
+        self.run_command.parse(["delete", "--id", test_run_obj.id])
+
+        # test for desired side effects
+        assert self.run_command.args.id == test_run_obj.id
+
+        # test when task id is passed to delete it
+        run_delete_command = self.run_command.execute()
+        assert run_delete_command == True
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_run_delete_failure_required_args(self):
+        self.__set_variables()
+        # Passing wrong task id
+        self.run_command.parse(["delete"])
+        failed = False
+        try:
+            _ = self.run_command.execute()
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
+
+    def test_run_delete_failure_invalid_arg(self):
+        self.__set_variables()
+        exception_thrown = False
+        try:
+            self.run_command.parse(["delete" "--foobar", "foobar"])
+        except Exception:
+            exception_thrown = True
+        assert exception_thrown
+
+    def test_run_delete_invalid_task_id(self):
+        self.__set_variables()
+        # Passing wrong task id
+        self.run_command.parse(["delete", "--id", "invalid-task-id"])
+
+        # test when wrong task id is passed to stop it
+        result = self.run_command.execute()
+        assert not result
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_rerun(self):
         self.__set_variables()
         # Test success case

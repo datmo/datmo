@@ -88,6 +88,10 @@ MESSAGES = {
             "Stopped run: %s",
         "cli.run.stop.all.success":
             "Stopped all runs",
+        "cli.run.delete":
+            "Deleting a run: %s",
+        "cli.run.delete.success":
+            "Deleted run: %s",
         "cli.session.create":
             "Created session '%s'",
         "cli.session.select":
@@ -158,6 +162,8 @@ MESSAGES = {
             "Error while stopping the run: %s",
         "cli.run.stop.all":
             "Error while stopping all runs",
+        "cli.run.delete":
+            "Error while deleting the run: %s",
         "cli.snapshot.create.run.args":
             "Error due to passing excluded args while creating snapshot from run: %s",
         "cli.snapshot.checkout.failure":

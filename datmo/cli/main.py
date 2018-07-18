@@ -67,6 +67,8 @@ def main():
                 command_name = "run"
         elif command_name == "ls":  # ls command in run.py
             command_name = "run"
+        elif command_name == "delete":  # delete command in run.py
+            command_name = "run"
         command_class = cli_helper.get_command_class(command_name)
     elif len(sys.argv) == 1:
         command_name = "datmo_command"
