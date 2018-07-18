@@ -29,24 +29,27 @@ Setting up your environment
 +----------------------------+--------------------------------------------------+------------------------------------------------------------------------------------------+
 |                            | Opening RStudio                                  | `Github <https://github.com/datmo/datmo/blob/master/examples/cli/workspace_setup.sh>`_   |
 +----------------------------+--------------------------------------------------+------------------------------------------------------------------------------------------+
-|                            | Opening JupyterLab                               | (coming soon)                                                                            |
+|                            | Opening JupyterLab                               | `Github <https://github.com/datmo/datmo/blob/master/examples/cli/workspace_setup.sh>`_   |
++----------------------------+--------------------------------------------------+------------------------------------------------------------------------------------------+
+|                            | Opening a Terminal                               | `Github <https://github.com/datmo/datmo/blob/master/examples/cli/workspace_setup.sh>`_   |
 +----------------------------+--------------------------------------------------+------------------------------------------------------------------------------------------+
 
 
-Running a task
+Running an experiment
 --------------------------------
 
 +-------------------+-----------------------------------+-------------------------------------------------------------------------+
-| Task Run Examples                                                                                                               |
+| Experiment Run Examples                                                                                                         |
 +-------------------+-----------------------------------+-------------------------------------------------------------------------+
 | Method            | Example                           | Link                                                                    |
 +===================+===================================+=========================================================================+
-| CLI               | Run a single task                 | `Docs <https://datmo.readthedocs.io/en/latest/cli.html#run>`_           |
+| CLI               | Run a single experiment           | Coming Soon                                                             |
 +-------------------+-----------------------------------+-------------------------------------------------------------------------+
-| CLI + Python      | Run a single task                 | `GitHub <https://github.com/datmo/datmo/blob/master/examples/python>`_  |
+| CLI + Python      | Run a single experiment           | Coming Soon                                                             |
 +                   +-----------------------------------+-------------------------------------------------------------------------+
-|                   | Run two tasks and compare results | `GitHub <https://github.com/datmo/datmo/blob/master/examples/python>`_  |
+|                   | Run two tasks and compare results | Coming Soon                                                             |
 +-------------------+-----------------------------------+-------------------------------------------------------------------------+
+
 
 
 Creating a Snapshot 

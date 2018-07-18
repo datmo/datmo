@@ -62,8 +62,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Datmo'
-copyright = u'2018, Anand Sampat'
-author = u'Anand Sampat'
+copyright = u'2018, Acusense Technologies'
+author = u'Acusense Technologies'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
