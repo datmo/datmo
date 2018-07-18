@@ -521,7 +521,7 @@ class TestRunCommand():
         test_run_obj = self.run_command.execute()
 
         # 1) Test option 1
-        self.run_command.parse(["delete", "--id", test_run_obj.id])
+        self.run_command.parse(["delete", test_run_obj.id])
 
         # test for desired side effects
         assert self.run_command.args.id == test_run_obj.id
@@ -530,31 +530,10 @@ class TestRunCommand():
         run_delete_command = self.run_command.execute()
         assert run_delete_command == True
 
-    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_run_delete_failure_required_args(self):
-        self.__set_variables()
-        # Passing wrong task id
-        self.run_command.parse(["delete"])
-        failed = False
-        try:
-            _ = self.run_command.execute()
-        except RequiredArgumentMissing:
-            failed = True
-        assert failed
-
-    def test_run_delete_failure_invalid_arg(self):
-        self.__set_variables()
-        exception_thrown = False
-        try:
-            self.run_command.parse(["delete" "--foobar", "foobar"])
-        except Exception:
-            exception_thrown = True
-        assert exception_thrown
-
     def test_run_delete_invalid_task_id(self):
         self.__set_variables()
         # Passing wrong task id
-        self.run_command.parse(["delete", "--id", "invalid-task-id"])
+        self.run_command.parse(["delete", "invalid-task-id"])
 
         # test when wrong task id is passed to stop it
         result = self.run_command.execute()

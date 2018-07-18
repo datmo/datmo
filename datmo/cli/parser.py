@@ -237,8 +237,7 @@ def get_datmo_parser():
 
     # Delete runs
     delete_run_parser = subparsers.add_parser("delete", help="delete runs")
-    delete_run_parser.add_argument(
-        "--id", dest="id", default=None, type=str, help="run id to delete")
+    delete_run_parser.add_argument("id", default=None, help="run id to delete")
 
     # Rerun
     rerun_parser = subparsers.add_parser(
