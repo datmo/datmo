@@ -42,7 +42,7 @@ class EnvironmentController(BaseController):
             raise ProjectNotInitialized(
                 __("error", "controller.environment.__init__"))
 
-    def get_environment_type(self):
+    def get_environment_types(self):
         """Get the environment types
 
         Returns
@@ -50,10 +50,10 @@ class EnvironmentController(BaseController):
         list
             List of supported environment type
         """
-        return self.environment_driver.get_environment_type()
+        return self.environment_driver.get_environment_types()
 
-    def get_supported_environments(self, environment_type):
-        """Get all the supported environments
+    def get_supported_frameworks(self, environment_type):
+        """Get all the supported frameworks
 
         Parameters
         ----------
@@ -63,20 +63,20 @@ class EnvironmentController(BaseController):
         Returns
         -------
         list
-            List of available environments and their info
+            List of available frameworks and their info
         """
-        return self.environment_driver.get_supported_environments(
+        return self.environment_driver.get_supported_frameworks(
             environment_type)
 
-    def get_supported_languages(self, environment_type, environment_name):
+    def get_supported_languages(self, environment_type, environment_framework):
         """Get all the supported languages for the environment
 
         Parameters
         ----------
         environment_type : str
             the type of environment
-        environment_name : str
-            the name of the environment
+        environment_framework : str
+            the framework for the environment
 
         Returns
         -------
@@ -84,7 +84,7 @@ class EnvironmentController(BaseController):
             List of available languages for the environments
         """
         return self.environment_driver.get_supported_languages(
-            environment_type, environment_name)
+            environment_type, environment_framework)
 
     def setup(self, options, save_hardware_file=True):
         """Create a pre-defined supported environment and add it to the project environment directory
@@ -127,9 +127,9 @@ class EnvironmentController(BaseController):
             raise
         create_dict = {
             "name":
-                options['name'] if options.get('name', None) else
-                "%s:%s-%s" % (options['env'], options['environment_type'],
-                              options['language']),
+                options['name'] if options.get('name', None) else "%s:%s-%s" %
+                (options['environment_framework'], options['environment_type'],
+                 options['environment_language']),
             "description":
                 "supported environment created by datmo"
         }

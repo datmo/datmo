@@ -83,8 +83,7 @@ def get_datmo_parser():
     )
 
     # Terminal
-    terminal_parser = subparsers.add_parser(
-        "terminal", help="To run terminal")
+    terminal_parser = subparsers.add_parser("terminal", help="To run terminal")
     terminal_parser.add_argument(
         "--gpu",
         dest="gpu",
@@ -240,7 +239,6 @@ def get_datmo_parser():
         "rerun", help="To rerun an experiment")
     rerun_parser.add_argument("id", help="run id to be rerun")
 
-
     # Session
     session_parser = subparsers.add_parser("session", help="session module")
     session_subcommand_parsers = session_parser.add_subparsers(
@@ -314,18 +312,8 @@ def get_datmo_parser():
         default=None,
         type=str,
         help=
-        "name of environment to be used for environment (e.g. data-analytics). if none is given, "
-        "a prompt will present the supported names"
-    )
-    environment_setup.add_argument(
-        "--env",
-        dest="env",
-        default=None,
-        type=str,
-        help=
-        "environment to be used for environment (e.g. data-analytics). if none is given, "
-        "a prompt will present the supported names"
-    )
+        "name of environment to be used for environment (e.g. my-new-environment). if none is given, "
+        "a prompt will present the supported names")
     environment_setup.add_argument(
         "--type",
         dest="type",
@@ -333,8 +321,15 @@ def get_datmo_parser():
         type=str,
         help=
         "type of environment to be used for environment (e.g. cpu). if none is given, a prompt "
-        "will present the supported type"
-    )
+        "will present the supported type")
+    environment_setup.add_argument(
+        "--framework",
+        dest="framework",
+        default=None,
+        type=str,
+        help=
+        "framework (and relevant libraries) to be used for environment (e.g. data-analytics). if none is given, "
+        "a prompt will present the supported names")
     environment_setup.add_argument(
         "--language",
         dest="language",
@@ -342,8 +337,7 @@ def get_datmo_parser():
         type=str,
         help=
         "language of environment to be used for environment (e.g. py27). if none is given, a prompt will "
-        "present the supported language for the name and type"
-    )
+        "present the supported language for the name and type")
 
     environment_create = environment_subcommand_parsers.add_parser(
         "create",

@@ -88,18 +88,20 @@ class TestDockerEnv():
         assert thrown
 
     def test_get_current_type(self):
-        result = self.docker_environment_driver.get_environment_type()
+        result = self.docker_environment_driver.get_environment_types()
         assert result
 
     def test_get_current_name(self):
-        environment_type='cpu'
-        result = self.docker_environment_driver.get_supported_environments(environment_type)
+        environment_type = "cpu"
+        result = self.docker_environment_driver.get_supported_frameworks(
+            environment_type)
         assert result
 
     def test_get_supported_languages(self):
-        environment_type='cpu'
-        env='data-analytics'
-        result = self.docker_environment_driver.get_supported_languages(environment_type, env)
+        environment_type = "cpu"
+        environment_framework = "data-analytics"
+        result = self.docker_environment_driver.get_supported_languages(
+            environment_type, environment_framework)
         assert result
 
     def test_setup(self):
@@ -125,7 +127,11 @@ class TestDockerEnv():
             failed = True
         assert failed
 
-        options = {"env": "data-analytics", "environment_type": "cpu", "language": "py27"}
+        options = {
+            "environment_framework": "data-analytics",
+            "environment_type": "cpu",
+            "environment_language": "py27"
+        }
 
         # Test if failure if the path does not exist
         failed = False
@@ -515,8 +521,8 @@ class TestDockerEnv():
         result = self.docker_environment_driver.remove(self.image_name)
         assert result == True
         # remove datmoDockerfile
-        output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
-                                              "datmoDockerfile")
+        output_dockerfile_path = os.path.join(
+            self.docker_environment_driver.filepath, "datmoDockerfile")
         os.remove(output_dockerfile_path)
 
         # With force
@@ -602,8 +608,8 @@ class TestDockerEnv():
         result = self.docker_environment_driver.remove_image(self.image_name)
         assert result == True
         # remove datmoDockerfile
-        output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
-                                              "datmoDockerfile")
+        output_dockerfile_path = os.path.join(
+            self.docker_environment_driver.filepath, "datmoDockerfile")
         os.remove(output_dockerfile_path)
         # With force
         self.docker_environment_driver.build_image(self.image_name,
@@ -612,10 +618,9 @@ class TestDockerEnv():
             self.image_name, force=True)
         assert result == True
         # remove datmoDockerfile
-        output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
-                                              "datmoDockerfile")
+        output_dockerfile_path = os.path.join(
+            self.docker_environment_driver.filepath, "datmoDockerfile")
         os.remove(output_dockerfile_path)
-
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_remove_images(self):
@@ -627,8 +632,8 @@ class TestDockerEnv():
             name=self.image_name)
         assert result == True
         # remove datmoDockerfile
-        output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
-                                              "datmoDockerfile")
+        output_dockerfile_path = os.path.join(
+            self.docker_environment_driver.filepath, "datmoDockerfile")
         os.remove(output_dockerfile_path)
         # With force
         self.docker_environment_driver.build_image(self.image_name,
@@ -852,7 +857,9 @@ class TestDockerEnv():
             f.write(to_bytes("FROM datmo/python-base:cpu-py27" + os.linesep))
             f.write(to_bytes(str("RUN echo " + self.random_text)))
         result = self.docker_environment_driver.create_datmo_definition(
-            input_dockerfile_path, output_dockerfile_path, workspace="notebook")
+            input_dockerfile_path,
+            output_dockerfile_path,
+            workspace="notebook")
         assert result
         assert os.path.isfile(output_dockerfile_path)
         output = open(output_dockerfile_path, "r").read()
@@ -866,7 +873,9 @@ class TestDockerEnv():
             f.write(to_bytes("FROM datmo/python-base:cpu-py27" + "\n"))
             f.write(to_bytes(str("RUN echo " + self.random_text)))
         result = self.docker_environment_driver.create_datmo_definition(
-            input_dockerfile_path, output_dockerfile_path, workspace="jupyterlab")
+            input_dockerfile_path,
+            output_dockerfile_path,
+            workspace="jupyterlab")
         assert result
         assert os.path.isfile(output_dockerfile_path)
         output = open(output_dockerfile_path, "r").read()

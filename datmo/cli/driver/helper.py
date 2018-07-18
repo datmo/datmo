@@ -157,16 +157,14 @@ class Helper():
 
     def prompt_available_options(self, available_options, option_type):
         """Prompt user to choose an available environment. Returns the environment name"""
-        if option_type == 'env':
+        if option_type == "framework":
             available_options_info = available_options
             available_options = []
-            for idx, option in enumerate(
-                    available_options_info):
+            for idx, option in enumerate(available_options_info):
                 available_options.append(option[0])
                 self.echo("(%s) %s : %s" % (idx + 1, option[0], option[1]))
         else:
-            for idx, option in enumerate(
-                    available_options):
+            for idx, option in enumerate(available_options):
                 self.echo("(%s) %s" % (idx + 1, option))
         input_environment_option = self.prompt(
             __("prompt", "cli.environment.setup.%s" % option_type))
@@ -181,7 +179,8 @@ class Helper():
                     input_environment_option) + 1
             except ValueError:
                 self.echo(
-                    __("warn", "cli.environment.setup.argument.%s" % option_type,
+                    __("warn",
+                       "cli.environment.setup.argument.%s" % option_type,
                        input_environment_option))
                 option_environment_index, input_environment_option = None, None
         if option_environment_index is not None and \
@@ -191,12 +190,12 @@ class Helper():
 
         if input_environment_option is None or option_environment_index <= 0 or\
                 option_environment_index > len(available_options):
-            if option_type == 'type':
-                input_environment_option = 'cpu'
-            elif option_type == 'env':
-                input_environment_option = 'python-base'
-            elif option_type == 'language':
-                input_environment_option = 'py27'
+            if option_type == "type":
+                input_environment_option = "cpu"
+            elif option_type == "framework":
+                input_environment_option = "python-base"
+            elif option_type == "language":
+                input_environment_option = "py27"
 
         return input_environment_option
 

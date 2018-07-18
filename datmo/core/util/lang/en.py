@@ -114,7 +114,7 @@ MESSAGES = {
             "Error cleaning up project files",
         "cli.environment.setup.argument.type":
             "This name or index does not match any supported environment types: %s, using default: cpu ",
-        "cli.environment.setup.argument.env":
+        "cli.environment.setup.argument.framework":
             "This name or index does not match any supported environments: %s, using default: python-base",
         "cli.environment.setup.argument.language":
             "This name or index does not match any supported environment language: %s, using default: py27",
@@ -387,7 +387,7 @@ MESSAGES = {
     "trace": {},
     "fatal": {},
     "prompt": {
-        "cli.environment.setup.env":
+        "cli.environment.setup.framework":
             "Please select one of the above environments (e.g. 1 or data-analytics)",
         "cli.environment.setup.type":
             "Please select one of the above environment type (e.g. 1 or gpu)",

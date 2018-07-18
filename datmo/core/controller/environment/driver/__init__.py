@@ -40,17 +40,18 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         """
 
     @abstractmethod
-    def get_environment_type(self):
+    def get_environment_types(self):
         """Get the environment types
 
         Returns
         -------
         list
-            List of supported environment type
+            List of supported environment types
         """
+
     @abstractmethod
-    def get_supported_environments(self, environment_type):
-        """Get all the supported environments
+    def get_supported_frameworks(self, environment_type):
+        """Get all the supported frameworks
 
         Parameters
         ----------
@@ -60,24 +61,24 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         Returns
         -------
         list
-            List of available environment names and their information
+            List of available environment frameworks and their information
         """
 
     @abstractmethod
-    def get_supported_languages(self, environment_type, environment_name):
+    def get_supported_languages(self, environment_type, environment_framework):
         """Get all the supported environment languages
 
         Parameters
         ----------
         environment_type : str
             the type of environment
-        environment_name : str
-            the name of the environment
+        environment_framework : str
+            the framework for the environment
 
         Returns
         -------
         list
-            List of available languages for the environments
+            List of available languages for these environment options
         """
 
     @abstractmethod
@@ -273,7 +274,9 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
 
     @staticmethod
     @abstractmethod
-    def create_datmo_definition(input_definition_path, output_definition_path, workspace=None):
+    def create_datmo_definition(input_definition_path,
+                                output_definition_path,
+                                workspace=None):
         """Create a datmo version of the definition
 
         Parameters

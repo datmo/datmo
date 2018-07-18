@@ -130,42 +130,52 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                    platform.system()))
         return True
 
-    def get_environment_type(self):
+    def get_environment_types(self):
         # To get the current environment type
         return list(self.docker_config["environment_types"])
 
-    def get_supported_environments(self, environment_type):
+    def get_supported_frameworks(self, environment_type):
         # To get the current environments
         environment_names = []
-        for environment_name in self.docker_config["environment_types"][environment_type]["environments"]:
-            environment_names.append([environment_name,
-                                      self.docker_config["environment_types"][environment_type]["environments"][environment_name]["info"]])
+        for environment_name in self.docker_config["environment_types"][
+                environment_type]["environment_frameworks"]:
+            environment_names.append([
+                environment_name,
+                self.docker_config["environment_types"][environment_type][
+                    "environment_frameworks"][environment_name]["info"]
+            ])
         return environment_names
 
-    def get_supported_languages(self, environment_type, environment_name):
+    def get_supported_languages(self, environment_type, environment_framework):
         # To get the current environments
-        return self.docker_config["environment_types"][environment_type]["environments"][environment_name]["languages"]
+        return self.docker_config["environment_types"][environment_type][
+            "environment_frameworks"][environment_framework][
+                "environment_languages"]
 
     def setup(self, options, definition_path):
         environment_type = options.get("environment_type", None)
-        env = options.get("env", None)
-        language = options.get("language", None)
-        environment_types = self.get_environment_type()
+        environment_framework = options.get("environment_framework", None)
+        environment_language = options.get("environment_language", None)
+        environment_types = self.get_environment_types()
         if environment_type not in environment_types:
             raise EnvironmentDoesNotExist(
                 __("error", "controller.environment.driver.docker.setup.dne",
                    environment_type))
-        available_environment_info = self.get_supported_environments(environment_type)
-        available_environments = [item[0] for item in available_environment_info]
-        if env not in available_environments:
+        available_environment_info = self.get_supported_frameworks(
+            environment_type)
+        available_environments = [
+            item[0] for item in available_environment_info
+        ]
+        if environment_framework not in available_environments:
             raise EnvironmentDoesNotExist(
                 __("error", "controller.environment.driver.docker.setup.dne",
-                   env))
-        available_environment_languages = self.get_supported_languages(environment_type, env)
-        if available_environment_languages and language not in available_environment_languages:
+                   environment_framework))
+        available_environment_languages = self.get_supported_languages(
+            environment_type, environment_framework)
+        if available_environment_languages and environment_language not in available_environment_languages:
             raise EnvironmentDoesNotExist(
                 __("error", "controller.environment.driver.docker.setup.dne",
-                   language))
+                   environment_language))
 
         # Validate the given definition path exists
         if not os.path.isdir(definition_path):
@@ -173,11 +183,16 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         # To setup the environment definition file
         definition_filepath = os.path.join(definition_path, "Dockerfile")
         with open(definition_filepath, "wb") as f:
-            if language:
-                f.write(to_bytes("FROM datmo/%s:%s-%s%s%s" % (env, environment_type, language,
-                                                              os.linesep, os.linesep)))
+            if environment_language:
+                f.write(
+                    to_bytes("FROM datmo/%s:%s-%s%s%s" %
+                             (environment_framework, environment_type,
+                              environment_language, os.linesep, os.linesep)))
             else:
-                f.write(to_bytes("FROM datmo/%s:%s%s%s" % (env, environment_type, os.linesep, os.linesep)))
+                f.write(
+                    to_bytes("FROM datmo/%s:%s%s%s" %
+                             (environment_framework, environment_type,
+                              os.linesep, os.linesep)))
         return True
 
     def create(self, path=None, output_path=None, workspace=None):
@@ -196,7 +211,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                    "controller.environment.driver.docker.create.exists",
                    output_path))
         success = self.create_datmo_definition(
-            input_definition_path=path, output_definition_path=output_path,
+            input_definition_path=path,
+            output_definition_path=output_path,
             workspace=workspace)
 
         return success, path, output_path
@@ -342,7 +358,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             # Creating datmoDockerfile for new build
             dockerfile_dirpath = os.path.split(definition_path)[0]
             input_dockerfile = os.path.split(definition_path)[1]
-            output_dockerfile_path = os.path.join(dockerfile_dirpath, "datmo%s" % input_dockerfile)
+            output_dockerfile_path = os.path.join(dockerfile_dirpath,
+                                                  "datmo%s" % input_dockerfile)
             self.create(definition_path, output_dockerfile_path, workspace)
             docker_shell_cmd_list.append("-f")
             docker_shell_cmd_list.append(output_dockerfile_path)
@@ -856,7 +873,9 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         }
 
     @staticmethod
-    def create_datmo_definition(input_definition_path, output_definition_path, workspace=None):
+    def create_datmo_definition(input_definition_path,
+                                output_definition_path,
+                                workspace=None):
         """
         Creates a datmo dockerfiles to run at the output path specified
         """
@@ -868,9 +887,12 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             with open(datmo_base_dockerfile_path, "rb") as datmo_base_file:
                 with open(output_definition_path, "wb") as output_file:
                     for line in input_file:
-                        bool_workspace_update = (to_bytes('FROM datmo/') in line.strip() and workspace)
+                        bool_workspace_update = (
+                            to_bytes('FROM datmo/') in line.strip()
+                            and workspace)
                         if to_bytes("\n") in line and bool_workspace_update:
-                            updated_line = line.strip() + to_bytes("-%s%s" % (workspace, os.linesep))
+                            updated_line = line.strip() + to_bytes(
+                                "-%s%s" % (workspace, os.linesep))
                         elif to_bytes(os.linesep) in line:
                             updated_line = line.strip() + to_bytes(os.linesep)
                         else:
@@ -878,7 +900,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                         output_file.write(updated_line)
                     for line in datmo_base_file:
                         if to_bytes("\n") in line:
-                            output_file.write(line.strip() + to_bytes(os.linesep))
+                            output_file.write(
+                                line.strip() + to_bytes(os.linesep))
                         else:
                             output_file.write(line.strip())
         return True

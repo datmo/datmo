@@ -56,6 +56,7 @@ class TestEnvironmentCommand():
         self.project_command.parse(
             ["init", "--name", "foobar", "--description", "test model"])
         time.sleep(1)
+
         @self.project_command.cli_helper.input("y\n\n\n\n")
         def dummy(self):
             return self.project_command.execute()
@@ -69,40 +70,45 @@ class TestEnvironmentCommand():
         definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
                                            "Dockerfile")
         # Test pass with correct input
-        test_name = "data-analytics"
+        test_framework = "data-analytics"
         test_type = "cpu"
         test_language = "py27"
-        self.environment_command.parse(
-            ["environment", "setup", "--env", test_name,
-             "--type", test_type, "--language", test_language])
+        self.environment_command.parse([
+            "environment", "setup", "--framework", test_framework, "--type",
+            test_type, "--language", test_language
+        ])
         result = self.environment_command.execute()
 
         assert result
         assert os.path.isfile(definition_filepath)
-        assert "FROM datmo/data-analytics:cpu-py27" in open(definition_filepath,
-                                                "r").read()
+        assert "FROM datmo/data-analytics:cpu-py27" in open(
+            definition_filepath, "r").read()
 
-        # Test fail with wrong input
-        test_name = "random"
-        self.environment_command.parse(
-            ["environment", "setup", "--type", test_type,
-             "--env", test_name, "--language", test_language])
+        # Test fail with wrong framework input
+        test_framework = "random"
+        self.environment_command.parse([
+            "environment", "setup", "--type", test_type, "--framework",
+            test_framework, "--language", test_language
+        ])
+
         @self.environment_command.cli_helper.input("\n\n")
         def dummy(self):
             return self.environment_command.execute()
+
         result = dummy(self)
         assert result
         assert os.path.isfile(definition_filepath)
-        assert "FROM datmo/python-base:cpu-py27" in open(definition_filepath,
-                                                            "r").read()
+        assert "FROM datmo/python-base:cpu-py27" in open(
+            definition_filepath, "r").read()
 
-        # Test fail with wrong input
-        test_name = "wrong_name"
+        # Test fail with wrong framework input and wrong language input
+        test_framework = "wrong_name"
         test_type = "cpu"
         test_language = "wrong_language"
-        self.environment_command.parse(
-            ["environment", "setup", "--env", test_name,
-             "--type", test_type, "--language", test_language])
+        self.environment_command.parse([
+            "environment", "setup", "--framework", test_framework, "--type",
+            test_type, "--language", test_language
+        ])
 
         failed = False
         try:
@@ -121,15 +127,16 @@ class TestEnvironmentCommand():
         # Test success with correct prompt input using numbers
         self.environment_command.parse(["environment", "setup"])
 
-        @self.environment_command.cli_helper.input("cpu\ndata-analytics\npy27\n")
+        @self.environment_command.cli_helper.input(
+            "cpu\ndata-analytics\npy27\n")
         def dummy(self):
             return self.environment_command.execute()
 
         result = dummy(self)
         assert result
         assert os.path.isfile(definition_filepath)
-        assert "FROM datmo/data-analytics:cpu-py27" in open(definition_filepath,
-                                                "r").read()
+        assert "FROM datmo/data-analytics:cpu-py27" in open(
+            definition_filepath, "r").read()
 
         # Test success with correct prompt input using string
         self.environment_command.parse(["environment", "setup"])
@@ -141,8 +148,7 @@ class TestEnvironmentCommand():
         result = dummy(self)
         assert result
         assert os.path.isfile(definition_filepath)
-        assert "FROM datmo" in open(definition_filepath,
-                                                "r").read()
+        assert "FROM datmo" in open(definition_filepath, "r").read()
 
         # Test with prompt input number out of range
         self.environment_command.parse(["environment", "setup"])
@@ -154,8 +160,8 @@ class TestEnvironmentCommand():
         result = dummy(self)
         assert result
         assert os.path.isfile(definition_filepath)
-        assert "FROM datmo/python-base:cpu-py27" in open(definition_filepath,
-                                    "r").read()
+        assert "FROM datmo/python-base:cpu-py27" in open(
+            definition_filepath, "r").read()
 
         # Test with prompt input string incorrect
         self.environment_command.parse(["environment", "setup"])
@@ -168,8 +174,8 @@ class TestEnvironmentCommand():
 
         assert result
         assert os.path.isfile(definition_filepath)
-        assert "FROM datmo/python-base:cpu-py27" in open(definition_filepath,
-                                                         "r").read()
+        assert "FROM datmo/python-base:cpu-py27" in open(
+            definition_filepath, "r").read()
 
     def test_environment_create(self):
         # 1) Environment definition file in project environment directory (with name / description)

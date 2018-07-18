@@ -102,15 +102,26 @@ class ProjectCommand(BaseCommand):
         environment_setup = self.cli_helper.prompt_bool(
             __("prompt", "cli.project.environment.setup"))
         if environment_setup:
+            # TODO: ramove business logic from here and create common helper
             # Setting up the environment definition file
             self.environment_controller = EnvironmentController()
-            environment_types = self.environment_controller.get_environment_type()
-            environment_type = self.cli_helper.prompt_available_options(environment_types, option_type="type")
-            available_environments = self.environment_controller.get_supported_environments(environment_type)
-            env = self.cli_helper.prompt_available_options(available_environments, option_type="env")
-            available_environment_languages = self.environment_controller.get_supported_languages(environment_type, env)
-            language = self.cli_helper.prompt_available_options(available_environment_languages, option_type="language")
-            options = {"environment_type": environment_type, "env": env, "language": language}
+            environment_types = self.environment_controller.get_environment_types(
+            )
+            environment_type = self.cli_helper.prompt_available_options(
+                environment_types, option_type="type")
+            available_environments = self.environment_controller.get_supported_frameworks(
+                environment_type)
+            environment_framework = self.cli_helper.prompt_available_options(
+                available_environments, option_type="framework")
+            available_environment_languages = self.environment_controller.get_supported_languages(
+                environment_type, environment_framework)
+            environment_language = self.cli_helper.prompt_available_options(
+                available_environment_languages, option_type="language")
+            options = {
+                "environment_type": environment_type,
+                "environment_framework": environment_framework,
+                "environment_language": environment_language
+            }
             environment_obj = self.environment_controller.setup(
                 options=options)
             self.cli_helper.echo(

@@ -1,3 +1,4 @@
+\
 # ![Datmo Logo](images/datmo-logo.png)
 [![PyPI version](https://badge.fury.io/py/datmo.svg)](https://badge.fury.io/py/datmo)
 [![Coverage Status](https://coveralls.io/repos/github/datmo/datmo/badge.svg?branch=master)](https://coveralls.io/github/datmo/datmo?branch=master)
@@ -10,7 +11,15 @@
 | <img height="20" src="http://icons.iconarchive.com/icons/icons8/windows-8/128/Systems-Mac-Os-icon.png"> | [![CircleCI branch](https://circleci.com/gh/datmo/datmo.svg?style=shield)](https://circleci.com/gh/datmo/datmo) |
 | <img height="20" src="http://icons.iconarchive.com/icons/dakirby309/windows-8-metro/128/Folders-OS-Windows-8-Metro-icon.png"> | [![Windows](https://ci.appveyor.com/api/projects/status/5302d8a23qr4ui4y/branch/master?svg=true)](https://ci.appveyor.com/project/asampat3090/datmo/branch/master) |
 
+# Datmo Alpha Release
+
 **Datmo** is an open source model tracking and reproducibility tool for developers. Use `datmo init` to turn any repository into a trackable task record with reusable environments and metrics logging.
+
+
+**Note**: The current version of Datmo is an alpha release. This means commands are subject to change. If you find any bugs please
+feel free contribute by adding issues so the contributors can address them.  
+
+
 
 ## Features
 
