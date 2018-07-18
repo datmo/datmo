@@ -222,7 +222,7 @@ class TaskController(BaseController):
             task_obj.status = "RUNNING"
         else:
             raise TaskRunError(
-                __("error", "cli.task.run.already_running", task_obj.id))
+                __("error", "cli.run.run.already_running", task_obj.id))
         # Create Task directory for user during run
         task_dirpath = os.path.join(".datmo", "tasks", task_obj.id)
         try:
@@ -244,8 +244,7 @@ class TaskController(BaseController):
             if task_dict.get('command', task_obj.command):
                 task_dict['command_list'] = shlex.split(
                     task_dict.get('command', task_obj.command))
-            elif not task_dict.get('interactive',
-                                   task_obj.interactive):
+            elif not task_dict.get('interactive', task_obj.interactive):
                 # If it's not interactive then there is not expected task
                 raise TaskNoCommandGiven()
 

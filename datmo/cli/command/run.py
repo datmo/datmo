@@ -286,7 +286,7 @@ class RunCommand(ProjectCommand):
     @Helper.notify_environment_active(TaskController)
     @Helper.notify_no_project_found
     def run(self, **kwargs):
-        self.cli_helper.echo(__("info", "cli.task.run"))
+        self.cli_helper.echo(__("info", "cli.run.run"))
         # Create input dictionaries
         snapshot_dict = {}
         # Environment
@@ -309,7 +309,7 @@ class RunCommand(ProjectCommand):
 
         # Run task and return Task object result
         task_obj = self.task_run_helper(task_dict, snapshot_dict,
-                                        "cli.task.run")
+                                        "cli.run.run")
         if not task_obj:
             return False
         # Creating the run object
@@ -373,7 +373,7 @@ class RunCommand(ProjectCommand):
         self.task_controller = TaskController()
         # Get task id
         task_id = kwargs.get("id", None)
-        self.cli_helper.echo(__("info", "cli.task.rerun", task_id))
+        self.cli_helper.echo(__("info", "cli.run.rerun", task_id))
         # Create the task_obj
         task_obj = self.task_controller.get(task_id)
         # Create the run obj
@@ -408,7 +408,7 @@ class RunCommand(ProjectCommand):
         }
         # Run task and return Task object result
         new_task_obj = self.task_run_helper(task_dict, snapshot_dict,
-                                            "cli.task.run")
+                                            "cli.run.run")
         if not new_task_obj:
             return False
         # Creating the run object
@@ -422,9 +422,9 @@ class RunCommand(ProjectCommand):
         input_dict = {}
         mutually_exclusive(["id", "all"], kwargs, input_dict)
         if "id" in input_dict:
-            self.cli_helper.echo(__("info", "cli.task.stop", input_dict['id']))
+            self.cli_helper.echo(__("info", "cli.run.stop", input_dict['id']))
         elif "all" in input_dict:
-            self.cli_helper.echo(__("info", "cli.task.stop.all"))
+            self.cli_helper.echo(__("info", "cli.run.stop.all"))
         else:
             raise RequiredArgumentMissing()
         try:
@@ -432,22 +432,22 @@ class RunCommand(ProjectCommand):
                 result = self.task_controller.stop(task_id=input_dict['id'])
                 if not result:
                     self.cli_helper.echo(
-                        __("error", "cli.task.stop", input_dict['id']))
+                        __("error", "cli.run.stop", input_dict['id']))
                 else:
                     self.cli_helper.echo(
-                        __("info", "cli.task.stop.success", input_dict['id']))
+                        __("info", "cli.run.stop.success", input_dict['id']))
             if "all" in input_dict:
                 result = self.task_controller.stop(all=input_dict['all'])
                 if not result:
-                    self.cli_helper.echo(__("error", "cli.task.stop.all"))
+                    self.cli_helper.echo(__("error", "cli.run.stop.all"))
                 else:
                     self.cli_helper.echo(
-                        __("info", "cli.task.stop.all.success"))
+                        __("info", "cli.run.stop.all.success"))
             return result
         except Exception:
             if "id" in input_dict:
                 self.cli_helper.echo(
-                    __("error", "cli.task.stop", input_dict['id']))
+                    __("error", "cli.run.stop", input_dict['id']))
             if "all" in input_dict:
-                self.cli_helper.echo(__("error", "cli.task.stop.all"))
+                self.cli_helper.echo(__("error", "cli.run.stop.all"))
             return False

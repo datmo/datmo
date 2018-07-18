@@ -28,6 +28,7 @@ from datmo.snapshot import Snapshot
 # from datmo.task import run
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.controller.project import ProjectController
+from datmo.core.controller.task import TaskController
 from datmo.core.util.exceptions import (
     CommitFailed, InvalidProjectPath, SessionDoesNotExist,
     SnapshotCreateFromTaskArgs, EntityNotFound, DoesNotExist)
@@ -138,88 +139,94 @@ class TestSnapshotModule():
         assert snapshot_obj_3.stats == {}
         assert snapshot_obj_3 != snapshot_obj_1
 
-    # @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    # def test_create_from_task(self):
-    #     # 1) Test if success with task files, results, and message
-    #     # 2) Test if success with user given config and stats
-    #     # TODO: test for failure case where tasks is not complete
-    #
-    #     # Setup task
-    #
-    #     # Create environment definition
-    #     env_def_path = os.path.join(self.temp_dir, "Dockerfile")
-    #     with open(env_def_path, "wb") as f:
-    #         f.write(to_bytes("FROM python:3.5-alpine"))
-    #
-    #     task_obj = run("sh -c echo accuracy:0.45")
-    #
-    #     # 1) Test option 1
-    #     snapshot_obj = create(
-    #         message="my test snapshot",
-    #         task_id=task_obj.id,
-    #         label="best",
-    #         config={"foo": "bar"})
-    #
-    #     assert isinstance(snapshot_obj, Snapshot)
-    #     assert snapshot_obj.message == "my test snapshot"
-    #     assert snapshot_obj.label == "best"
-    #     assert len(snapshot_obj.files) == 1
-    #     assert "task.log" in snapshot_obj.files[0].name
-    #     assert snapshot_obj.config == {"foo": "bar"}
-    #     assert snapshot_obj.stats == task_obj.results
-    #
-    #     # Test option 2
-    #     snapshot_obj_2 = create(
-    #         message="my test snapshot",
-    #         task_id=task_obj.id,
-    #         label="best",
-    #         config={"foo": "bar"},
-    #         stats={"foo": "bar"})
-    #
-    #     assert isinstance(snapshot_obj, Snapshot)
-    #     assert snapshot_obj_2.message == "my test snapshot"
-    #     assert snapshot_obj_2.label == "best"
-    #     assert len(snapshot_obj.files) == 1
-    #     assert "task.log" in snapshot_obj.files[0].name
-    #     assert snapshot_obj_2.config == {"foo": "bar"}
-    #     assert snapshot_obj_2.stats == {"foo": "bar"}
-    #
-    # def test_create_from_task_fail_user_inputs(self):
-    #     # Setup task
-    #
-    #     # Create environment definition
-    #     env_def_path = os.path.join(self.temp_dir, "Dockerfile")
-    #     with open(env_def_path, "wb") as f:
-    #         f.write(to_bytes("FROM python:3.5-alpine"))
-    #
-    #     task_obj = run("sh -c echo accuracy:0.45")
-    #
-    #     # Test if failure if user gives environment_id with task_id
-    #     failed = False
-    #     try:
-    #         _ = create(
-    #             message="my test snapshot",
-    #             task_id=task_obj.id,
-    #             label="best",
-    #             config={"foo": "bar"},
-    #             stats={"foo": "bar"},
-    #             environment_id="test_id")
-    #     except SnapshotCreateFromTaskArgs:
-    #         failed = True
-    #     assert failed
-    #     # Test if failure if user gives filepaths with task_id
-    #     failed = False
-    #     try:
-    #         _ = create(
-    #             message="my test snapshot",
-    #             task_id=task_obj.id,
-    #             label="best",
-    #             config={"foo": "bar"},
-    #             stats={"foo": "bar"},
-    #             paths=["mypath"])
-    #     except SnapshotCreateFromTaskArgs:
-    #         failed = True
-    #     assert failed
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_create_from_task(self):
+        # 1) Test if success with task files, results, and message
+        # 2) Test if success with user given config and stats
+        # TODO: test for failure case where tasks is not complete
+
+        # Setup task
+
+        # Create environment definition
+        env_def_path = os.path.join(self.temp_dir, "Dockerfile")
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes("FROM python:3.5-alpine"))
+
+        task_controller = TaskController()
+        task_obj = task_controller.create()
+        task_obj = task_controller.run(
+            task_obj.id, task_dict={"command": "sh -c echo accuracy:0.45"})
+
+        # 1) Test option 1
+        snapshot_obj = create(
+            message="my test snapshot",
+            run_id=task_obj.id,
+            label="best",
+            config={"foo": "bar"})
+
+        assert isinstance(snapshot_obj, Snapshot)
+        assert snapshot_obj.message == "my test snapshot"
+        assert snapshot_obj.label == "best"
+        assert len(snapshot_obj.files) == 1
+        assert "task.log" in snapshot_obj.files[0].name
+        assert snapshot_obj.config == {"foo": "bar"}
+        assert snapshot_obj.stats == task_obj.results
+
+        # Test option 2
+        snapshot_obj_2 = create(
+            message="my test snapshot",
+            run_id=task_obj.id,
+            label="best",
+            config={"foo": "bar"},
+            stats={"foo": "bar"})
+
+        assert isinstance(snapshot_obj, Snapshot)
+        assert snapshot_obj_2.message == "my test snapshot"
+        assert snapshot_obj_2.label == "best"
+        assert len(snapshot_obj.files) == 1
+        assert "task.log" in snapshot_obj.files[0].name
+        assert snapshot_obj_2.config == {"foo": "bar"}
+        assert snapshot_obj_2.stats == {"foo": "bar"}
+
+    def test_create_from_task_fail_user_inputs(self):
+        # Setup task
+
+        # Create environment definition
+        env_def_path = os.path.join(self.temp_dir, "Dockerfile")
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes("FROM python:3.5-alpine"))
+
+        task_controller = TaskController()
+        task_obj = task_controller.create()
+        task_obj = task_controller.run(
+            task_obj.id, task_dict={"command": "sh -c echo accuracy:0.45"})
+
+        # Test if failure if user gives environment_id with task_id
+        failed = False
+        try:
+            _ = create(
+                message="my test snapshot",
+                run_id=task_obj.id,
+                label="best",
+                config={"foo": "bar"},
+                stats={"foo": "bar"},
+                environment_id="test_id")
+        except SnapshotCreateFromTaskArgs:
+            failed = True
+        assert failed
+        # Test if failure if user gives filepaths with task_id
+        failed = False
+        try:
+            _ = create(
+                message="my test snapshot",
+                run_id=task_obj.id,
+                label="best",
+                config={"foo": "bar"},
+                stats={"foo": "bar"},
+                paths=["mypath"])
+        except SnapshotCreateFromTaskArgs:
+            failed = True
+        assert failed
 
     def test_ls(self):
         # check project is not initialized if wrong home

@@ -135,11 +135,11 @@ class BaseCommand(object):
             self.cli_helper.echo(__("error", error_identifier, task_obj.id))
             return False
         finally:
-            self.cli_helper.echo(__("info", "cli.task.run.stop"))
+            self.cli_helper.echo(__("info", "cli.run.run.stop"))
             self.task_controller.stop(
                 task_id=updated_task_obj.id, status=status)
             self.cli_helper.echo(
-                __("info", "cli.task.run.complete", updated_task_obj.id))
+                __("info", "cli.run.run.complete", updated_task_obj.id))
 
         return updated_task_obj
 

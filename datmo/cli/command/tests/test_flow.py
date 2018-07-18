@@ -63,17 +63,18 @@ class TestFlow():
 
     def __environment_setup(self):
         self.environment_command.parse(["environment", "setup"])
+
         @self.environment_command.cli_helper.input("\n\n\n")
         def dummy(self):
             return self.environment_command.execute()
+
         environment_setup_result = dummy(self)
         return environment_setup_result
 
     def __run(self):
         test_command = ["sh", "-c", "echo accuracy:0.45"]
         test_ports = ["8888:8888"]
-        self.run_command.parse(
-            ["run", "-p", test_ports[0], test_command])
+        self.run_command.parse(["run", "-p", test_ports[0], test_command])
         run_result = self.run_command.execute()
         return run_result
 
@@ -99,7 +100,7 @@ class TestFlow():
         # Flow
         # Step 1: environment setup
         # Step 2: run
-        # Step 3: run ls
+        # Step 3: ls
         # Step 4: snapshot create
         # Step 5: snapshot ls
         self.__set_variables()
@@ -112,7 +113,7 @@ class TestFlow():
         run_result = self.__run()
         assert run_result
 
-        # Step 3: run ls
+        # Step 3: ls
         run_ls_result = self.__run_ls()
         assert run_ls_result
 
@@ -130,7 +131,7 @@ class TestFlow():
         # Step 1: interrupted environment setup
         # Step 2: environment setup
         # Step 3: run
-        # Step 4: run ls
+        # Step 4: ls
         # Step 5: snapshot create
         # Step 6: snapshot ls
         self.__set_variables()
@@ -157,7 +158,7 @@ class TestFlow():
         run_result = self.__run()
         assert run_result
 
-        # Step 4: run ls
+        # Step 4: ls
         run_ls_result = self.__run_ls()
         assert run_ls_result
 
@@ -175,7 +176,7 @@ class TestFlow():
         # Step 1: environment setup
         # Step 2: interrupted run
         # Step 3: run
-        # Step 4: run ls
+        # Step 4: ls
         # Step 5: snapshot create
         # Step 6: snapshot ls
         self.__set_variables()
@@ -218,7 +219,7 @@ class TestFlow():
         # Flow interruption in snapshot create
         # Step 1: environment setup
         # Step 2: run
-        # Step 3: run ls
+        # Step 3: ls
         # Step 4: interrupted snapshot create
         # Step 5: snapshot create
         # Step 6: snapshot ls
@@ -232,7 +233,7 @@ class TestFlow():
         run_result = self.__run()
         assert run_result
 
-        # Step 3: run ls
+        # Step 3: ls
         run_ls_result = self.__run_ls()
         assert run_ls_result
 

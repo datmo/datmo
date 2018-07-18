@@ -120,7 +120,9 @@ class TestHelper():
             header_list=header_list,
             item_dict_list=item_dict_list,
             print_format="csv")
-        assert result == "foo,bar%syo,hello%scool,N/A%s" % (os.linesep, os.linesep, os.linesep)
+        assert result == "foo,bar%syo,hello%scool,N/A%s" % (os.linesep,
+                                                            os.linesep,
+                                                            os.linesep)
         assert "there" not in result
         # Test without download in random print_format
         result = self.cli.print_items(
@@ -205,9 +207,7 @@ class TestHelper():
 
     def test_get_command_class(self):
         # Test success
-        for command in [
-                "project", "snapshot", "session", "environment"
-        ]:
+        for command in ["project", "snapshot", "session", "environment"]:
             result = self.cli.get_command_class(command)
             if command == "project":
                 assert result == ProjectCommand
@@ -225,5 +225,5 @@ class TestHelper():
         assert self.cli.get_command_choices() == [
             "init", "version", "--version", "-v", "status", "cleanup",
             "snapshot", "session", "notebook", "jupyterlab", "terminal",
-            "rstudio", "environment", "run", "rerun"
+            "rstudio", "environment", "run", "rerun", "stop", "ls"
         ]

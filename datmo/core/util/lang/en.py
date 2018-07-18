@@ -72,22 +72,22 @@ MESSAGES = {
             "Updated snapshot with id: %s",
         "cli.snapshot.checkout.success":
             "Moved to snapshot with id: %s",
-        "cli.task.run":
-            "Running a new task",
-        "cli.task.rerun":
-            "Rerunning the task with id: %s",
-        "cli.task.run.stop":
-            "Stopping the task...",
-        "cli.task.run.complete":
-            "Completed task: %s",
-        "cli.task.stop":
-            "Stopping task: %s",
-        "cli.task.stop.all":
-            "Stopping all tasks",
-        "cli.task.stop.success":
-            "Stopped task: %s",
-        "cli.task.stop.all.success":
-            "Stopped all tasks",
+        "cli.run.run":
+            "Running a script",
+        "cli.run.rerun":
+            "Rerunning run with id: %s",
+        "cli.run.run.stop":
+            "Stopping the run...",
+        "cli.run.run.complete":
+            "Completed run: %s",
+        "cli.run.stop":
+            "Stopping the run: %s",
+        "cli.run.stop.all":
+            "Stopping all runs",
+        "cli.run.stop.success":
+            "Stopped run: %s",
+        "cli.run.stop.all.success":
+            "Stopped all runs",
         "cli.session.create":
             "Created session '%s'",
         "cli.session.select":
@@ -126,8 +126,8 @@ MESSAGES = {
             "datmo project structure not found in current directory. Run `datmo init` to initialize",
         "general.environment.docker.na":
             "Docker daemon is not initialized. This command cannot be run. Please start Docker and try again.",
-        "sdk.snapshot.create.task.args":
-            "Error due to passing excluded args while creating snapshot from task: %s",
+        "sdk.snapshot.create.run.args":
+            "Error due to passing excluded args while creating snapshot from run: %s",
         "cli.general":
             "An exception occurred: %s",
         "cli.general.method.not_found":
@@ -135,13 +135,13 @@ MESSAGES = {
         "cli.project":
             "No project found in the current directory: %s",
         "cli.workspace.notebook":
-            "Error while running the notebook with task id: %s",
+            "Error while running the notebook with id: %s",
         "cli.workspace.jupyterlab":
-            "Error while running the jupyterlab with task id: %s",
+            "Error while running the jupyterlab with id: %s",
         "cli.workspace.terminal":
-            "Error while running the terminal with task id: %s",
+            "Error while running the terminal with id: %s",
         "cli.workspace.rstudio":
-            "Error while running the rstudio with task id: %s",
+            "Error while running the rstudio with id: %s",
         "cli.session.update.dne":
             "No session found with given id: %s",
         "cli.session.delete.dne":
@@ -150,16 +150,16 @@ MESSAGES = {
             "Cannot delete default session",
         "cli.session.select.dne":
             "No session found with given name or id: %s",
-        "cli.task.run":
-            "Error while running the task: %s",
-        "cli.task.run.already_running":
-            "Already task running with id: %s",
-        "cli.task.stop":
-            "Error while stopping the task: %s",
-        "cli.task.stop.all":
-            "Error while stopping all tasks",
-        "cli.snapshot.create.task.args":
-            "Error due to passing excluded args while creating snapshot from task: %s",
+        "cli.run.run":
+            "Error while running the script: %s",
+        "cli.run.run.already_running":
+            "Already running with id: %s",
+        "cli.run.stop":
+            "Error while stopping the run: %s",
+        "cli.run.stop.all":
+            "Error while stopping all runs",
+        "cli.snapshot.create.run.args":
+            "Error due to passing excluded args while creating snapshot from run: %s",
         "cli.snapshot.checkout.failure":
             "Error while checking out to a snapshot due to unstaged changes",
         "util.misc_functions.get_filehash":

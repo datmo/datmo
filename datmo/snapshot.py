@@ -145,7 +145,7 @@ class Snapshot():
 
 def create(message,
            label=None,
-           task_id=None,
+           run_id=None,
            environment_id=None,
            env=None,
            paths=None,
@@ -167,10 +167,10 @@ def create(message,
     label : str, optional
         a short description of the snapshot for later reference
         (default is None, which means a blank label is stored)
-    task_id : str, optional
-        task object id to use to create snapshot
-        if task id is passed then subsequent parameters would be ignored.
-        when using task id, it will overwrite the following inputs
+    run_id : str, optional
+        run object id to use to create snapshot
+        if run id is passed then subsequent parameters would be ignored.
+        when using run id, it will overwrite the following inputs
 
         *environment_id*: used to run the task,
 
@@ -221,16 +221,16 @@ def create(message,
 
     snapshot_controller = SnapshotController()
 
-    if task_id is not None:
+    if run_id is not None:
         excluded_args = ["environment_id", "paths"]
         for arg in excluded_args:
             if eval(arg) is not None:
                 raise SnapshotCreateFromTaskArgs(
-                    "error", "sdk.snapshot.create.task.args", arg)
+                    "error", "sdk.snapshot.create.run.args", arg)
 
         # Create a new core snapshot object
         core_snapshot_obj = snapshot_controller.create_from_task(
-            message, task_id, label=label, config=config, stats=stats)
+            message, run_id, label=label, config=config, stats=stats)
 
         # Create a new snapshot object
         client_snapshot_obj = Snapshot(core_snapshot_obj)
