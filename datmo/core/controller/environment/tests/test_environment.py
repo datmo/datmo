@@ -88,15 +88,15 @@ class TestEnvironmentController():
 
     def test_get_supported_environments(self):
         self.__setup()
-        type='cpu'
-        result = self.environment_controller.get_supported_environments(type)
+        environment_type='cpu'
+        result = self.environment_controller.get_supported_environments(environment_type)
         assert result
 
     def test_get_supported_languages(self):
         self.__setup()
-        type='cpu'
+        environment_type='cpu'
         environment_name='data-analytics'
-        result = self.environment_controller.get_supported_languages(type, environment_name)
+        result = self.environment_controller.get_supported_languages(environment_type, environment_name)
         assert result
 
     def test_setup(self):

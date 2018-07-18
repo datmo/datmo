@@ -52,12 +52,12 @@ class EnvironmentController(BaseController):
         """
         return self.environment_driver.get_environment_type()
 
-    def get_supported_environments(self, type):
+    def get_supported_environments(self, environment_type):
         """Get all the supported environments
 
         Parameters
         ----------
-        type : str
+        environment_type : str
             the type of environment
 
         Returns
@@ -65,7 +65,7 @@ class EnvironmentController(BaseController):
         list
             List of available environments and their info
         """
-        return self.environment_driver.get_supported_environments(type)
+        return self.environment_driver.get_supported_environments(environment_type)
 
     def get_supported_languages(self, environment_type, environment_name):
         """Get all the supported languages for the environment
