@@ -88,15 +88,17 @@ class TestEnvironmentController():
 
     def test_get_supported_environments(self):
         self.__setup()
-        type='cpu'
-        result = self.environment_controller.get_supported_environments(type)
+        environment_type = 'cpu'
+        result = self.environment_controller.get_supported_environments(
+            environment_type)
         assert result
 
     def test_get_supported_languages(self):
         self.__setup()
-        type='cpu'
-        environment_name='data-analytics'
-        result = self.environment_controller.get_supported_languages(type, environment_name)
+        environment_type = 'cpu'
+        environment_name = 'data-analytics'
+        result = self.environment_controller.get_supported_languages(
+            environment_type, environment_name)
         assert result
 
     def test_setup(self):
@@ -104,31 +106,43 @@ class TestEnvironmentController():
         self.environment_controller = EnvironmentController()
 
         # Test success setup once (no files present)
-        options = {"env": "data-analytics", "environment_type": "cpu", "language": "py27"}
+        options = {
+            "env": "data-analytics",
+            "environment_type": "cpu",
+            "language": "py27"
+        }
         result = self.environment_controller.setup(options=options)
         output_definition_filepath = os.path.join(
             self.environment_controller.file_driver.environment_directory,
             "Dockerfile")
 
         assert isinstance(result, Environment)
-        assert result.name == "%s:%s-%s" % (options['env'], options['environment_type'], options['language'])
+        assert result.name == "%s:%s-%s" % (options['env'],
+                                            options['environment_type'],
+                                            options['language'])
         assert result.description == "supported environment created by datmo"
         assert os.path.isfile(output_definition_filepath)
-        assert "FROM datmo/data-analytics:cpu-py27" in open(output_definition_filepath,
-                                                "r").read()
+        assert "FROM datmo/data-analytics:cpu-py27" in open(
+            output_definition_filepath, "r").read()
         # Test success setup again (files present, but staged)
-        options = {"env": "data-analytics", "environment_type": "cpu", "language": "py27"}
+        options = {
+            "env": "data-analytics",
+            "environment_type": "cpu",
+            "language": "py27"
+        }
         result = self.environment_controller.setup(options=options)
         output_definition_filepath = os.path.join(
             self.environment_controller.file_driver.environment_directory,
             "Dockerfile")
 
         assert isinstance(result, Environment)
-        assert result.name == "%s:%s-%s" % (options['env'], options['environment_type'], options['language'])
+        assert result.name == "%s:%s-%s" % (options['env'],
+                                            options['environment_type'],
+                                            options['language'])
         assert result.description == "supported environment created by datmo"
         assert os.path.isfile(output_definition_filepath)
-        assert "FROM datmo/data-analytics:cpu-py27" in open(output_definition_filepath,
-                                                "r").read()
+        assert "FROM datmo/data-analytics:cpu-py27" in open(
+            output_definition_filepath, "r").read()
 
         # Test failure in downstream function (e.g. bad inputs, no name given)
         failed = False
@@ -254,8 +268,14 @@ class TestEnvironmentController():
         # Files ["Dockerfile"]
 
         # remove the project environment directory
-        os.remove(os.path.join(self.environment_controller.file_driver.environment_directory, "Dockerfile"))
-        os.remove(os.path.join(self.environment_controller.file_driver.environment_directory, "test"))
+        os.remove(
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "Dockerfile"))
+        os.remove(
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "test"))
 
         # Create environment definition in root directory
         home_definition_filepath = os.path.join(
@@ -407,7 +427,7 @@ class TestEnvironmentController():
         test_filepath = os.path.join(self.environment_controller.home,
                                      "script.py")
         with open(test_filepath, "wb") as f:
-            f.write(to_bytes("import numpy\n") )
+            f.write(to_bytes("import numpy\n"))
             f.write(to_bytes("import sklearn\n"))
             f.write(to_bytes("print('hello')\n"))
 
@@ -444,11 +464,13 @@ class TestEnvironmentController():
             "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/data-analytics:cpu-py27%s" %os.linesep))
+            f.write(
+                to_bytes("FROM datmo/data-analytics:cpu-py27%s" % os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
         environment_obj_4 = self.environment_controller.create({})
         self.environment_ids.append(environment_obj_4.id)
-        result = self.environment_controller.build(environment_obj_4.id, workspace="notebook")
+        result = self.environment_controller.build(
+            environment_obj_4.id, workspace="notebook")
         assert result
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
@@ -496,7 +518,10 @@ class TestEnvironmentController():
         assert run_id
         assert logs
         # remove Dockerfile
-        os.remove(os.path.join(self.environment_controller.file_driver.environment_directory, "Dockerfile"))
+        os.remove(
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "Dockerfile"))
 
         # 1) Test option 1
         # Create environment definition
@@ -594,7 +619,8 @@ class TestEnvironmentController():
                                            "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM nbgallery/jupyter-alpine:latest" + os.linesep))
+            f.write(
+                to_bytes("FROM nbgallery/jupyter-alpine:latest" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         input_dict = {
