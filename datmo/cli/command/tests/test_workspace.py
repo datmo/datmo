@@ -25,12 +25,14 @@ except TypeError:
     to_bytes("test")
 
 import os
+import uuid
 import tempfile
 import platform
 import timeout_decorator
 
 from datmo.config import Config
 from datmo.cli.driver.helper import Helper
+from datmo.cli.command.environment import EnvironmentCommand
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.workspace import WorkspaceCommand
 from datmo.cli.command.run import RunCommand
@@ -58,6 +60,7 @@ class TestWorkspace():
 
         dummy(self)
 
+        self.environment_command = EnvironmentCommand(self.cli_helper)
         self.workspace_command = WorkspaceCommand(self.cli_helper)
         self.run_command = RunCommand(self.cli_helper)
 
@@ -90,10 +93,42 @@ class TestWorkspace():
         ]
         assert self.workspace_command.args.mem_limit == test_mem_limit
 
-        # test multiple ports option before command
+        # test notebook command
         self.workspace_command.parse(["notebook"])
 
         assert self.workspace_command.args.gpu == False
+
+        @timeout_decorator.timeout(10, use_signals=False)
+        def timed_run(timed_run_result):
+            if self.workspace_command.execute():
+                return timed_run_result
+
+        timed_run_result = False
+        try:
+            timed_run_result = timed_run(timed_run_result)
+        except timeout_decorator.timeout_decorator.TimeoutError:
+            timed_run_result = True
+
+        assert timed_run_result
+
+        # Stop all running datmo task to not have any containers
+        self.run_command.parse(["stop", "--all"])
+        self.run_command.execute()
+
+        # creating and passing environment id
+        random_text = str(uuid.uuid1())
+        with open(self.env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/python-base:cpu-py27%s" % os.linesep)))
+            f.write(to_bytes(str("RUN echo " + random_text)))
+
+        self.environment_command.parse([
+            "environment", "create", "--name", "test", "--description",
+            "test description"
+        ])
+        result = self.environment_command.execute()
+
+        # test notebook command
+        self.workspace_command.parse(["notebook", "--environment-id", result.id])
 
         @timeout_decorator.timeout(10, use_signals=False)
         def timed_run(timed_run_result):
@@ -137,6 +172,38 @@ class TestWorkspace():
         self.workspace_command.parse(["jupyterlab"])
 
         assert self.workspace_command.args.gpu == False
+
+        @timeout_decorator.timeout(10, use_signals=False)
+        def timed_run(timed_run_result):
+            if self.workspace_command.execute():
+                return timed_run_result
+
+        timed_run_result = False
+        try:
+            timed_run_result = timed_run(timed_run_result)
+        except timeout_decorator.timeout_decorator.TimeoutError:
+            timed_run_result = True
+
+        assert timed_run_result
+
+        # Stop all running datmo task to not have any containers
+        self.run_command.parse(["stop", "--all"])
+        self.run_command.execute()
+
+        # creating and passing environment id
+        random_text = str(uuid.uuid1())
+        with open(self.env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/python-base:cpu-py27%s" % os.linesep)))
+            f.write(to_bytes(str("RUN echo " + random_text)))
+
+        self.environment_command.parse([
+            "environment", "create", "--name", "test", "--description",
+            "test description"
+        ])
+        result = self.environment_command.execute()
+
+        # test notebook command
+        self.workspace_command.parse(["jupyterlab", "--environment-id", result.id])
 
         @timeout_decorator.timeout(10, use_signals=False)
         def timed_run(timed_run_result):
@@ -221,6 +288,38 @@ class TestWorkspace():
 
         # test multiple ports option before command
         self.workspace_command.parse(["rstudio"])
+
+        @timeout_decorator.timeout(10, use_signals=False)
+        def timed_run(timed_run_result):
+            if self.workspace_command.execute():
+                return timed_run_result
+
+        timed_run_result = False
+        try:
+            timed_run_result = timed_run(timed_run_result)
+        except timeout_decorator.timeout_decorator.TimeoutError:
+            timed_run_result = True
+
+        assert timed_run_result
+
+        # Stop all running datmo task to not have any containers
+        self.run_command.parse(["stop", "--all"])
+        self.run_command.execute()
+
+        # creating and passing environment id
+        random_text = str(uuid.uuid1())
+        with open(self.env_def_path, "wb") as f:
+            f.write(to_bytes(str("FROM datmo/r-base:cpu%s" % os.linesep)))
+            f.write(to_bytes(str("RUN echo " + random_text)))
+
+        self.environment_command.parse([
+            "environment", "create", "--name", "test", "--description",
+            "test description"
+        ])
+        result = self.environment_command.execute()
+
+        # test notebook command
+        self.workspace_command.parse(["rstudio", "--environment-id", result.id])
 
         @timeout_decorator.timeout(10, use_signals=False)
         def timed_run(timed_run_result):
