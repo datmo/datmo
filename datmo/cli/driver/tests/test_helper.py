@@ -225,5 +225,5 @@ class TestHelper():
         assert self.cli.get_command_choices() == [
             "init", "version", "--version", "-v", "status", "cleanup",
             "snapshot", "session", "notebook", "jupyterlab", "terminal",
-            "rstudio", "environment", "run", "rerun", "stop", "ls"
+            "rstudio", "environment", "run", "rerun", "stop", "delete","ls"
         ]
