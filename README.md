@@ -1,4 +1,3 @@
-\
 # ![Datmo Logo](images/datmo-logo.png)
 [![PyPI version](https://badge.fury.io/py/datmo.svg)](https://badge.fury.io/py/datmo)
 [![Coverage Status](https://coveralls.io/repos/github/datmo/datmo/badge.svg?branch=master)](https://coveralls.io/github/datmo/datmo?branch=master)
