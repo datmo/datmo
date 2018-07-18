@@ -80,19 +80,19 @@ def main():
     try:
         command_instance = command_class(cli_helper)
     except TypeError as ex:
-        cli_helper.echo(__("error", "cli.general", str(type(ex))))
+        cli_helper.echo(__("error", "cli.general", "%s %s" %(type(ex), ex)))
         return 1
 
     # parse the command line arguments
     try:
         command_instance.parse(sys.argv[1:])
     except CLIArgumentError as ex:
-        cli_helper.echo(__("error", "cli.general", str(type(ex))))
+        cli_helper.echo(__("error", "cli.general", "%s %s" %(type(ex), ex)))
         return 1
 
     try:
         command_instance.execute()
         return 0
     except Exception as ex:
-        cli_helper.echo(__("error", "cli.general", str(type(ex))))
+        cli_helper.echo(__("error", "cli.general", "%s %s" %(type(ex), ex)))
         return 1
