@@ -16,6 +16,7 @@ Using a Default Environment
 
 Default Datmo environments are maintained by the Datmo team and are guaranteed to work out of the box. We've provided many of the most popular environments for data science and AI, including:
 
+- data-analytics (general data science/computational programming)
 - kaggle
 - keras/tensorflow
 - mxnet 
@@ -59,7 +60,11 @@ There are instances where you may want to add additional components to your envi
      **Adding packages froma build/package list**
 
      If you have a list of python packages you'd like to install, like a `requirements.txt` file, you can do so by appending the following to the end of your Dockerfile:
-     ``RUN pip install -r requirements.txt``
+
+     .. code-block:: none
+         
+         COPY requirements.txt
+         RUN pip install -r requirements.txt
 
 -----
 
