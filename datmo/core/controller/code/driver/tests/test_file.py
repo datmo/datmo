@@ -166,12 +166,6 @@ class TestFileCodeDriver():
         tracked_filepaths = self.file_code_manager._get_tracked_files()
         result = self.file_code_manager._calculate_commit_hash(
             tracked_filepaths)
-        temp_dir_path = os.path.join(
-            self.file_code_manager._code_filepath,
-            os.listdir(self.file_code_manager._code_filepath)[0])
-        # Assert temp directory was created and populated correctly
-        for item in list_all_filepaths(temp_dir_path):
-            assert item in tracked_filepaths
         # Assert the correct commit hash was returned
         assert result == "69a329523ce1ec88bf63061863d9cb14"
 
