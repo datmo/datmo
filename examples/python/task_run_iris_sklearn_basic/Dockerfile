@@ -1,1 +1,0 @@
-FROM datmo/xgboost:cpu
