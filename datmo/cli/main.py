@@ -31,6 +31,7 @@ def main():
     if len(sys.argv) > 1 and \
         sys.argv[1] in cli_helper.get_command_choices():
         command_name = sys.argv[1]
+        # commands in project.py
         if command_name == "init":
             command_name = "project"
         elif command_name == "version" or \
@@ -44,19 +45,28 @@ def main():
         elif command_name == "cleanup":
             command_name = "project"
             sys.argv[1] = "cleanup"
+        # commands in workspace.py
         elif command_name in ["notebook", "jupyterlab", "terminal", "rstudio"]:
             sys.argv[1] = command_name
             command_name = "workspace"
+        # commands in run.py
         elif command_name == "rerun":
             command_name = "run"
             sys.argv[1] = "rerun"
         elif command_name == "run":
-            if len(sys.argv) > 2 and sys.argv[2] in ["ls", "stop"]:
+            if len(sys.argv) == 2:
                 command_name = "run"
-                sys.argv.remove('run')
+                sys.argv.append("--help")
             else:
                 command_name = "run"
-                sys.argv[1] = "run"
+        elif command_name == "stop":  # stop command in run.py
+            if len(sys.argv) == 2:
+                command_name = "run"
+                sys.argv.append("--help")
+            else:
+                command_name = "run"
+        elif command_name == "ls":  # ls command in run.py
+            command_name = "run"
         command_class = cli_helper.get_command_class(command_name)
     elif len(sys.argv) == 1:
         command_name = "datmo_command"
@@ -68,19 +78,19 @@ def main():
     try:
         command_instance = command_class(cli_helper)
     except TypeError as ex:
-        cli_helper.echo(__("error", "cli.general", str(ex)))
+        cli_helper.echo(__("error", "cli.general", str(type(ex))))
         return 1
 
     # parse the command line arguments
     try:
         command_instance.parse(sys.argv[1:])
     except CLIArgumentError as ex:
-        cli_helper.echo(__("error", "cli.general", str(ex)))
+        cli_helper.echo(__("error", "cli.general", str(type(ex))))
         return 1
 
     try:
         command_instance.execute()
         return 0
     except Exception as ex:
-        cli_helper.echo(__("error", "cli.general", str(ex)))
+        cli_helper.echo(__("error", "cli.general", str(type(ex))))
         return 1

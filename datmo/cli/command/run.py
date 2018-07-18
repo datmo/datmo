@@ -143,7 +143,7 @@ class RunObject():
     @property
     def config(self):
         self._core_snapshot = self.__get_core_snapshot()
-        self._config = self._core_snapshot.config
+        self._config = self._core_snapshot.config if self._core_snapshot else {}
         return self._config
 
     @property
@@ -154,8 +154,7 @@ class RunObject():
             self._results = self._core_task.results
         else:
             self._core_snapshot = self.__get_core_snapshot()
-            self._results = self._core_snapshot.stats if self._core_snapshot.stats else None
-
+            self._results = self._core_snapshot.stats if self._core_snapshot else {}
         return self._results
 
     @property
@@ -188,12 +187,13 @@ class RunObject():
 
         Returns
         -------
-        datmo.core.entity.snapshot.Snapshot
+        datmo.core.entity.snapshot.Snapshot or None
             core snapshot object for the Snapshot
         """
         snapshot_controller = SnapshotController()
         snapshot_id = self.after_snapshot_id if self.after_snapshot_id else self.before_snapshot_id
-        snapshot_obj = snapshot_controller.get(snapshot_id)
+        snapshot_obj = snapshot_controller.get(
+            snapshot_id) if snapshot_id else None
         return snapshot_obj
 
     def get_environment_id(self):
@@ -201,22 +201,22 @@ class RunObject():
 
         Returns
         -------
-        str
+        str or None
             string for environment id associated with the task
         """
         self._core_snapshot = self.__get_core_snapshot()
-        return self._core_snapshot.environment_id
+        return self._core_snapshot.environment_id if self._core_snapshot else None
 
     def get_core_snapshot_id(self):
         """Returns the core snapshot id for the run
 
         Returns
         -------
-        str
+        str or None
             string for core snapshot id associated with the task
         """
         self._core_snapshot = self.__get_core_snapshot()
-        return self._core_snapshot.id
+        return self._core_snapshot.id if self._core_snapshot else None
 
     def get_files(self, mode="r"):
         """Returns a list of file objects for the task
@@ -229,12 +229,13 @@ class RunObject():
 
         Returns
         -------
-        list
+        list or None
             list of file objects associated with the task
         """
         snapshot_controller = SnapshotController()
         self._core_snapshot = self.__get_core_snapshot()
-        return snapshot_controller.get_files(self._core_snapshot.id, mode=mode)
+        return snapshot_controller.get_files(
+            self._core_snapshot.id, mode=mode) if self._core_snapshot else None
 
     def __eq__(self, other):
         return self.id == other.id if other else False
@@ -307,35 +308,36 @@ class RunCommand(ProjectCommand):
             task_dict['command_list'] = kwargs['cmd']
 
         # Run task and return Task object result
-        task_obj = self.task_run_helper(task_dict, snapshot_dict, "cli.task.run")
+        task_obj = self.task_run_helper(task_dict, snapshot_dict,
+                                        "cli.task.run")
         if not task_obj:
             return False
         # Creating the run object
         run_obj = RunObject(task_obj)
         return run_obj
 
-
     @Helper.notify_no_project_found
     def ls(self, **kwargs):
-        self.task_controller = TaskController()
-        session_id = kwargs.get('session_id',
-                                self.task_controller.current_session.id)
         print_format = kwargs.get('format', "table")
         download = kwargs.get('download', None)
         download_path = kwargs.get('download_path', None)
         # Get all task meta information
+        self.task_controller = TaskController()
+        session_id = kwargs.get('session_id', None)
+        session_id = self.task_controller.current_session.id if session_id == None else session_id
         task_objs = self.task_controller.list(
             session_id, sort_key="created_at", sort_order="descending")
         header_list = [
-            "id", "command", "type", "status", "config", "results", "created at"
+            "id", "command", "type", "status", "config", "results",
+            "created at"
         ]
         item_dict_list = []
         run_obj_list = []
         for task_obj in task_objs:
             # Create a new Run Object from Task Object
             run_obj = RunObject(task_obj)
-            task_results_printable = printable_object(str(run_obj.results))
-            snapshot_config_printable = printable_object(str(run_obj.config))
+            task_results_printable = printable_object(run_obj.results)
+            snapshot_config_printable = printable_object(run_obj.config)
             item_dict_list.append({
                 "id": run_obj.id,
                 "command": run_obj.command,
@@ -405,7 +407,8 @@ class RunCommand(ProjectCommand):
             "command_list": command
         }
         # Run task and return Task object result
-        new_task_obj = self.task_run_helper(task_dict, snapshot_dict, "cli.task.run")
+        new_task_obj = self.task_run_helper(task_dict, snapshot_dict,
+                                            "cli.task.run")
         if not new_task_obj:
             return False
         # Creating the run object

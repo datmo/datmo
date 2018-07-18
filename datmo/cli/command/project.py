@@ -109,10 +109,10 @@ class ProjectCommand(BaseCommand):
             )
             environment_type = self.cli_helper.prompt_available_options(
                 environment_types, option_type="type")
-            available_environments = self.environment_controller.get_supported_frameworks(
+            available_environment_frameworks = self.environment_controller.get_supported_frameworks(
                 environment_type)
             environment_framework = self.cli_helper.prompt_available_options(
-                available_environments, option_type="framework")
+                available_environment_frameworks, option_type="framework")
             available_environment_languages = self.environment_controller.get_supported_languages(
                 environment_type, environment_framework)
             environment_language = self.cli_helper.prompt_available_options(

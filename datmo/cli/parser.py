@@ -194,28 +194,29 @@ def get_datmo_parser():
         default=None,
         help="command to run within environment")
 
-    # Run list
-    run_ls_parser = subparsers.add_parser("ls", help="To list all experiments")
-    run_ls_parser.add_argument(
+    # List runs
+    ls_runs_parser = subparsers.add_parser(
+        "ls", help="To list all experiment runs")
+    ls_runs_parser.add_argument(
         "--session-id",
         dest="session_id",
         default=None,
         nargs="?",
         type=str,
         help="pass in the session id to list the tasks in that session")
-    run_ls_parser.add_argument(
+    ls_runs_parser.add_argument(
         "--format",
         dest="format",
         default="table",
         help="output format ['table', 'csv']")
-    run_ls_parser.add_argument(
+    ls_runs_parser.add_argument(
         "--download",
         dest="download",
         action="store_true",
         help=
         "boolean is true if user would like to download. use --download-path to specify a path"
     )
-    run_ls_parser.add_argument(
+    ls_runs_parser.add_argument(
         "--download-path",
         dest="download_path",
         default=None,
@@ -223,11 +224,11 @@ def get_datmo_parser():
         "checked only if download is specified. saves output to location specified"
     )
 
-    # Run stop arguments
-    run_stop = subparsers.add_parser("stop", help="stop runs")
-    run_stop.add_argument(
+    # Stop runs
+    stop_run_parser = subparsers.add_parser("stop", help="stop runs")
+    stop_run_parser.add_argument(
         "--id", dest="id", default=None, type=str, help="run id to stop")
-    run_stop.add_argument(
+    stop_run_parser.add_argument(
         "--all",
         "-a",
         dest="all",
@@ -404,7 +405,9 @@ def get_datmo_parser():
 
     # Snapshot
     snapshot_parser = subparsers.add_parser(
-        "snapshot", description=__("argparser", "cli.snapshot.description"))
+        "snapshot",
+        description=__("argparser", "cli.snapshot.description"),
+        help="snapshot module")
     snapshot_subcommand_parsers = snapshot_parser.add_subparsers(
         title="subcommands", dest="subcommand")
 
