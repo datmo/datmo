@@ -26,9 +26,9 @@ class SnapshotCommand(ProjectCommand):
     def create(self, **kwargs):
         self.snapshot_controller = SnapshotController()
         self.cli_helper.echo(__("info", "cli.snapshot.create"))
-        task_id = kwargs.get("task_id", None)
+        run_id = kwargs.get("run_id", None)
         # creating snapshot with task id if it exists
-        if task_id is not None:
+        if run_id is not None:
             excluded_args = [
                 "environment_id", "environment_paths", "paths",
                 "config_filepath", "config_filename", "stats_filepath",
@@ -37,13 +37,13 @@ class SnapshotCommand(ProjectCommand):
             for arg in excluded_args:
                 if arg in kwargs and kwargs[arg] is not None:
                     raise SnapshotCreateFromTaskArgs(
-                        "error", "cli.snapshot.create.task.args", arg)
+                        "error", "cli.snapshot.create.run.args", arg)
 
             message = kwargs.get("message", None)
             label = kwargs.get("label", None)
             # Create a new core snapshot object
             snapshot_task_obj = self.snapshot_controller.create_from_task(
-                message, task_id, label=label)
+                message, run_id, label=label)
             self.cli_helper.echo(
                 "Created snapshot id: %s" % snapshot_task_obj.id)
             return snapshot_task_obj

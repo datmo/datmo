@@ -24,7 +24,7 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.command.environment import EnvironmentCommand
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
-from datmo.cli.command.task import TaskCommand
+from datmo.cli.command.run import RunCommand
 
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
@@ -53,7 +53,7 @@ class TestFlow():
 
         dummy(self)
         self.environment_command = EnvironmentCommand(self.cli_helper)
-        self.task_command = TaskCommand(self.cli_helper)
+        self.run_command = RunCommand(self.cli_helper)
         self.snapshot_command = SnapshotCommand(self.cli_helper)
 
         # Create test file
@@ -64,25 +64,24 @@ class TestFlow():
     def __environment_setup(self):
         self.environment_command.parse(["environment", "setup"])
 
-        @self.environment_command.cli_helper.input("1\n")
+        @self.environment_command.cli_helper.input("\n\n\n")
         def dummy(self):
             return self.environment_command.execute()
 
         environment_setup_result = dummy(self)
         return environment_setup_result
 
-    def __task_run(self):
+    def __run(self):
         test_command = ["sh", "-c", "echo accuracy:0.45"]
         test_ports = ["8888:8888"]
-        self.task_command.parse(
-            ["task", "run", "-p", test_ports[0], test_command])
-        task_run_result = self.task_command.execute()
-        return task_run_result
+        self.run_command.parse(["run", "-p", test_ports[0], test_command])
+        run_result = self.run_command.execute()
+        return run_result
 
-    def __task_ls(self):
-        self.task_command.parse(["task", "ls"])
-        task_ls_result = self.task_command.execute()
-        return task_ls_result
+    def __run_ls(self):
+        self.run_command.parse(["ls"])
+        run_ls_result = self.run_command.execute()
+        return run_ls_result
 
     def __snapshot_create(self):
         test_message = "creating a snapshot"
@@ -100,8 +99,8 @@ class TestFlow():
     def test_flow_1(self):
         # Flow
         # Step 1: environment setup
-        # Step 2: task run
-        # Step 3: task ls
+        # Step 2: run
+        # Step 3: ls
         # Step 4: snapshot create
         # Step 5: snapshot ls
         self.__set_variables()
@@ -110,13 +109,13 @@ class TestFlow():
         environment_setup_result = self.__environment_setup()
         assert environment_setup_result
 
-        # Step 2: task run
-        task_run_result = self.__task_run()
-        assert task_run_result
+        # Step 2: run command
+        run_result = self.__run()
+        assert run_result
 
-        # Step 3: task ls
-        task_ls_result = self.__task_ls()
-        assert task_ls_result
+        # Step 3: ls
+        run_ls_result = self.__run_ls()
+        assert run_ls_result
 
         # Step 4: snapshot create
         snapshot_create_result = self.__snapshot_create()
@@ -131,8 +130,8 @@ class TestFlow():
         # Flow interruption in environment
         # Step 1: interrupted environment setup
         # Step 2: environment setup
-        # Step 3: task run
-        # Step 4: task ls
+        # Step 3: run
+        # Step 4: ls
         # Step 5: snapshot create
         # Step 6: snapshot ls
         self.__set_variables()
@@ -155,13 +154,13 @@ class TestFlow():
         environment_setup_result = self.__environment_setup()
         assert environment_setup_result
 
-        # Step 3: task run
-        task_run_result = self.__task_run()
-        assert task_run_result
+        # Step 3: run
+        run_result = self.__run()
+        assert run_result
 
-        # Step 4: task ls
-        task_ls_result = self.__task_ls()
-        assert task_ls_result
+        # Step 4: ls
+        run_ls_result = self.__run_ls()
+        assert run_ls_result
 
         # Step 5: snapshot create
         snapshot_create_result = self.__snapshot_create()
@@ -173,11 +172,11 @@ class TestFlow():
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_flow_3(self):
-        # Flow interruption in task run
+        # Flow interruption in run
         # Step 1: environment setup
-        # Step 2: interrupted task run
-        # Step 3: task run
-        # Step 4: task ls
+        # Step 2: interrupted run
+        # Step 3: run
+        # Step 4: ls
         # Step 5: snapshot create
         # Step 6: snapshot ls
         self.__set_variables()
@@ -186,10 +185,10 @@ class TestFlow():
         assert environment_setup_result
 
         # TODO: Test more fundamental functions first
-        # Step 2: interrupted task run
+        # Step 2: interrupted run
         # @timeout_decorator.timeout(0.0001, use_signals=False)
         # def timed_command_with_interuption():
-        #     result = self.__task_run()
+        #     result = self.__run()
         #     return result
         #
         # failed = False
@@ -199,13 +198,13 @@ class TestFlow():
         #     failed = True
         # assert failed
 
-        # Step 3: task run
-        task_run_result = self.__task_run()
-        assert task_run_result
+        # Step 3: run
+        run_result = self.__run()
+        assert run_result
 
         # Step 4: task ls
-        task_ls_result = self.__task_ls()
-        assert task_ls_result
+        run_ls_result = self.__run_ls()
+        assert run_ls_result
 
         # Step 5: snapshot create
         snapshot_create_result = self.__snapshot_create()
@@ -219,8 +218,8 @@ class TestFlow():
     def test_flow_4(self):
         # Flow interruption in snapshot create
         # Step 1: environment setup
-        # Step 2: task run
-        # Step 3: task ls
+        # Step 2: run
+        # Step 3: ls
         # Step 4: interrupted snapshot create
         # Step 5: snapshot create
         # Step 6: snapshot ls
@@ -230,13 +229,13 @@ class TestFlow():
         environment_setup_result = self.__environment_setup()
         assert environment_setup_result
 
-        # Step 2: task run
-        task_run_result = self.__task_run()
-        assert task_run_result
+        # Step 2: run
+        run_result = self.__run()
+        assert run_result
 
-        # Step 3: task ls
-        task_ls_result = self.__task_ls()
-        assert task_ls_result
+        # Step 3: ls
+        run_ls_result = self.__run_ls()
+        assert run_ls_result
 
         # TODO: Test more fundamental functions first
         # Step 4: interrupted snapshot create

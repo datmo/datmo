@@ -16,8 +16,15 @@ MESSAGES = {
             "Failed to update project {name} @ ({path}) ",
         "cli.workspace.notebook":
             "Starting a notebook",
+        "cli.workspace.jupyterlab":
+            "Starting a jupyter lab",
+        "cli.workspace.terminal":
+            "Starting a terminal",
         "cli.workspace.rstudio":
             "Starting a rstudio",
+        "cli.workspace.run.rstudio":
+            "Open http://localhost:8787/auth-sign-in to login to rstudio, "
+            "enter username: rstudio and password: rstudio",
         "cli.project.pull":
             "Pulling information from the Datmo project url and adding it to local...",
         "cli.project.update":
@@ -42,7 +49,7 @@ MESSAGES = {
         "cli.general.tuple.test":
             "%s, %s",
         "cli.environment.setup.success":
-            "Setup a new base environment with name: %s and id: %s",
+            "Successful setup of an environment with name: %s and id: %s",
         "cli.environment.create":
             "Creating a new environment",
         "cli.environment.create.success":
@@ -65,22 +72,26 @@ MESSAGES = {
             "Updated snapshot with id: %s",
         "cli.snapshot.checkout.success":
             "Moved to snapshot with id: %s",
-        "cli.task.run":
-            "Running a new task",
-        "cli.task.rerun":
-            "Rerunning the task with id: %s",
-        "cli.task.run.stop":
-            "Stopping the task...",
-        "cli.task.run.complete":
-            "Completed task: %s",
-        "cli.task.stop":
-            "Stopping task: %s",
-        "cli.task.stop.all":
-            "Stopping all tasks",
-        "cli.task.stop.success":
-            "Stopped task: %s",
-        "cli.task.stop.all.success":
-            "Stopped all tasks",
+        "cli.run.run":
+            "Running a script",
+        "cli.run.rerun":
+            "Rerunning run with id: %s",
+        "cli.run.run.stop":
+            "Stopping the run...",
+        "cli.run.run.complete":
+            "Completed run: %s",
+        "cli.run.stop":
+            "Stopping the run: %s",
+        "cli.run.stop.all":
+            "Stopping all runs",
+        "cli.run.stop.success":
+            "Stopped run: %s",
+        "cli.run.stop.all.success":
+            "Stopped all runs",
+        "cli.run.delete":
+            "Deleting a run: %s",
+        "cli.run.delete.success":
+            "Deleted run: %s",
         "cli.session.create":
             "Created session '%s'",
         "cli.session.select":
@@ -104,17 +115,23 @@ MESSAGES = {
         "controller.project.cleanup.code":
             "Error cleaning up project code",
         "controller.project.cleanup.files":
-            "Error cleaning up project files"
+            "Error cleaning up project files",
+        "cli.environment.setup.argument.type":
+            "This name or index does not match any supported environment types: %s, using default: cpu ",
+        "cli.environment.setup.argument.framework":
+            "This name or index does not match any supported environments: %s, using default: python-base",
+        "cli.environment.setup.argument.language":
+            "This name or index does not match any supported environment language: %s, using default: py27",
     },
     "error": {
         "exception.validationfailed":
             "Validation failed: %s",
         "general.project.dne":
-            "No project found in current directory. Run `datmo init` to create one",
+            "datmo project structure not found in current directory. Run `datmo init` to initialize",
         "general.environment.docker.na":
             "Docker daemon is not initialized. This command cannot be run. Please start Docker and try again.",
-        "sdk.snapshot.create.task.args":
-            "Error due to passing excluded args while creating snapshot from task: %s",
+        "sdk.snapshot.create.run.args":
+            "Error due to passing excluded args while creating snapshot from run: %s",
         "cli.general":
             "An exception occurred: %s",
         "cli.general.method.not_found":
@@ -122,9 +139,13 @@ MESSAGES = {
         "cli.project":
             "No project found in the current directory: %s",
         "cli.workspace.notebook":
-            "Error while running the notebook with task id: %s",
+            "Error while running the notebook with id: %s",
+        "cli.workspace.jupyterlab":
+            "Error while running the jupyterlab with id: %s",
+        "cli.workspace.terminal":
+            "Error while running the terminal with id: %s",
         "cli.workspace.rstudio":
-            "Error while running the rstudio with task id: %s",
+            "Error while running the rstudio with id: %s",
         "cli.session.update.dne":
             "No session found with given id: %s",
         "cli.session.delete.dne":
@@ -133,18 +154,18 @@ MESSAGES = {
             "Cannot delete default session",
         "cli.session.select.dne":
             "No session found with given name or id: %s",
-        "cli.environment.setup.argument":
-            "This name or index does not match any supported environments: %s, ",
-        "cli.task.run":
-            "Error while running the task: %s",
-        "cli.task.run.already_running":
-            "Already task running with id: %s",
-        "cli.task.stop":
-            "Error while stopping the task: %s",
-        "cli.task.stop.all":
-            "Error while stopping all tasks",
-        "cli.snapshot.create.task.args":
-            "Error due to passing excluded args while creating snapshot from task: %s",
+        "cli.run.run":
+            "Error while running the script: %s",
+        "cli.run.run.already_running":
+            "Already running with id: %s",
+        "cli.run.stop":
+            "Error while stopping the run: %s",
+        "cli.run.stop.all":
+            "Error while stopping all runs",
+        "cli.run.delete":
+            "Error while deleting the run: %s",
+        "cli.snapshot.create.run.args":
+            "Error due to passing excluded args while creating snapshot from run: %s",
         "cli.snapshot.checkout.failure":
             "Error while checking out to a snapshot due to unstaged changes",
         "util.misc_functions.get_filehash":
@@ -234,7 +255,7 @@ MESSAGES = {
         "controller.code.checkout":
             "Code id does not exist: %s",
         "controller.environment.__init__":
-            "Project has not been initialized",
+            "Project has not been initialized ",
         "controller.environment.driver.docker.__init__.dne":
             "File path does not exist: %s",
         "controller.environment.driver.docker.__init__":
@@ -372,8 +393,12 @@ MESSAGES = {
     "trace": {},
     "fatal": {},
     "prompt": {
-        "cli.environment.setup.name":
-            "Please select one of the above environments (e.g. 1 or xgboost:cpu)",
+        "cli.environment.setup.framework":
+            "Please select one of the above environments (e.g. 1 or data-analytics)",
+        "cli.environment.setup.type":
+            "Please select one of the above environment type (e.g. 1 or gpu)",
+        "cli.environment.setup.language":
+            "Please select one of the above environment language (e.g. py27)",
         "cli.project.init.name":
             "Enter name for the project",
         "cli.project.init.description":

@@ -40,13 +40,45 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         """
 
     @abstractmethod
-    def get_supported_environments(self):
-        """Get all the supported environments
+    def get_environment_types(self):
+        """Get the environment types
 
         Returns
         -------
         list
-            List of all available environments
+            List of supported environment types
+        """
+
+    @abstractmethod
+    def get_supported_frameworks(self, environment_type):
+        """Get all the supported frameworks
+
+        Parameters
+        ----------
+        environment_type : str
+            the type of environment
+
+        Returns
+        -------
+        list
+            List of available environment frameworks and their information
+        """
+
+    @abstractmethod
+    def get_supported_languages(self, environment_type, environment_framework):
+        """Get all the supported environment languages
+
+        Parameters
+        ----------
+        environment_type : str
+            the type of environment
+        environment_framework : str
+            the framework for the environment
+
+        Returns
+        -------
+        list
+            List of available languages for these environment options
         """
 
     @abstractmethod
@@ -78,7 +110,7 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         """
 
     @abstractmethod
-    def create(self, path=None, output_path=None):
+    def create(self, path=None, output_path=None, workspace=None):
         """Create datmo environment definition
 
         Parameters
@@ -92,7 +124,8 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
             (default is None, which creates a name of above file with `datmo` prefixed
             in the same directory as `path`. e.g. `datmoDockerfile` in
             the project root for the default above for docker driver)
-
+        workspace : str, optional
+            workspace being used while running the task
         Returns
         -------
         tuple
@@ -105,7 +138,7 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         """
 
     @abstractmethod
-    def build(self, name, path):
+    def build(self, name, path, workspace):
         """Build an environment from a definition path
 
         Parameters
@@ -114,6 +147,8 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
             name to give to the environment built
         path : str
             absolute path to the definition file
+        workspace : str
+
 
         Returns
         -------
@@ -239,7 +274,9 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
 
     @staticmethod
     @abstractmethod
-    def create_datmo_definition(input_definition_path, output_definition_path):
+    def create_datmo_definition(input_definition_path,
+                                output_definition_path,
+                                workspace=None):
         """Create a datmo version of the definition
 
         Parameters
@@ -248,7 +285,8 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
             input original definition path to read from
         output_definition_path : str
             output datmo definition path to write to
-
+        workspace : str, optional
+            workspace being used while running the task
         Returns
         -------
         bool

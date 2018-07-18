@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 
 import os
 import glob
+import time
 import uuid
 import tempfile
 import shutil
@@ -42,20 +43,21 @@ test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 
 
 class TestEnvironmentCommand():
-    def setup_class(self):
+    def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.cli_helper = Helper()
         Config().set_home(self.temp_dir)
 
-    def teardown_class(self):
+    def teardown_method(self):
         pass
 
     def __set_variables(self):
         self.project_command = ProjectCommand(self.cli_helper)
         self.project_command.parse(
             ["init", "--name", "foobar", "--description", "test model"])
+        time.sleep(1)
 
-        @self.project_command.cli_helper.input("\n")
+        @self.project_command.cli_helper.input("y\n\n\n\n")
         def dummy(self):
             return self.project_command.execute()
 
@@ -63,54 +65,108 @@ class TestEnvironmentCommand():
         self.environment_command = EnvironmentCommand(self.cli_helper)
 
     def test_environment_setup_parameter(self):
-        # Setup the environement by passing name
         self.__set_variables()
+        # Setup the environement by passing name
         definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
                                            "Dockerfile")
-
         # Test pass with correct input
-        test_name = "xgboost:cpu"
-        self.environment_command.parse(
-            ["environment", "setup", "--name", test_name])
+        test_framework = "data-analytics"
+        test_type = "cpu"
+        test_language = "py27"
+        self.environment_command.parse([
+            "environment", "setup", "--framework", test_framework, "--type",
+            test_type, "--language", test_language
+        ])
         result = self.environment_command.execute()
 
         assert result
         assert os.path.isfile(definition_filepath)
-        assert "FROM datmo/xgboost:cpu" in open(definition_filepath,
-                                                "r").read()
+        assert "FROM datmo/data-analytics:cpu-py27" in open(
+            definition_filepath, "r").read()
 
-        # Test fail with wrong input
-        test_name = "random"
-        self.environment_command.parse(
-            ["environment", "setup", "--name", test_name])
-        result = self.environment_command.execute()
-        assert not result
+        # Test fail with wrong framework input
+        test_framework = "random"
+        self.environment_command.parse([
+            "environment", "setup", "--type", test_type, "--framework",
+            test_framework, "--language", test_language
+        ])
+
+        @self.environment_command.cli_helper.input("\n\n")
+        def dummy(self):
+            return self.environment_command.execute()
+
+        result = dummy(self)
+        assert result
+        assert os.path.isfile(definition_filepath)
+        assert "FROM datmo/python-base:cpu-py27" in open(
+            definition_filepath, "r").read()
+
+        # Test fail with wrong framework input and wrong language input
+        test_framework = "wrong_name"
+        test_type = "cpu"
+        test_language = "wrong_language"
+        self.environment_command.parse([
+            "environment", "setup", "--framework", test_framework, "--type",
+            test_type, "--language", test_language
+        ])
+
+        failed = False
+        try:
+            self.environment_command.execute()
+        except ValueError:
+            failed = True
+
+        assert failed
 
     def test_environment_setup_prompt(self):
-        # Setup the environement by passing name
         self.__set_variables()
+        # Setup the environement by passing name
         definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
                                            "Dockerfile")
 
         # Test success with correct prompt input using numbers
         self.environment_command.parse(["environment", "setup"])
 
-        @self.environment_command.cli_helper.input("1\n")
+        @self.environment_command.cli_helper.input(
+            "cpu\ndata-analytics\npy27\n")
         def dummy(self):
             return self.environment_command.execute()
 
         result = dummy(self)
-
         assert result
         assert os.path.isfile(definition_filepath)
-        assert "FROM datmo/xgboost:cpu" in open(definition_filepath,
-                                                "r").read()
+        assert "FROM datmo/data-analytics:cpu-py27" in open(
+            definition_filepath, "r").read()
 
         # Test success with correct prompt input using string
-        test_name = "xgboost:cpu"
         self.environment_command.parse(["environment", "setup"])
 
-        @self.environment_command.cli_helper.input(test_name + "\n")
+        @self.environment_command.cli_helper.input("1\n1\n1\n")
+        def dummy(self):
+            return self.environment_command.execute()
+
+        result = dummy(self)
+        assert result
+        assert os.path.isfile(definition_filepath)
+        assert "FROM datmo" in open(definition_filepath, "r").read()
+
+        # Test with prompt input number out of range
+        self.environment_command.parse(["environment", "setup"])
+
+        @self.environment_command.cli_helper.input("-1\n\n\n")
+        def dummy(self):
+            return self.environment_command.execute()
+
+        result = dummy(self)
+        assert result
+        assert os.path.isfile(definition_filepath)
+        assert "FROM datmo/python-base:cpu-py27" in open(
+            definition_filepath, "r").read()
+
+        # Test with prompt input string incorrect
+        self.environment_command.parse(["environment", "setup"])
+
+        @self.environment_command.cli_helper.input("random\n\n\n")
         def dummy(self):
             return self.environment_command.execute()
 
@@ -118,30 +174,8 @@ class TestEnvironmentCommand():
 
         assert result
         assert os.path.isfile(definition_filepath)
-        assert "FROM datmo/xgboost:cpu" in open(definition_filepath,
-                                                "r").read()
-
-        # Test failure with prompt input number out of range
-        self.environment_command.parse(["environment", "setup"])
-
-        @self.environment_command.cli_helper.input("-1\n")
-        def dummy(self):
-            return self.environment_command.execute()
-
-        result = dummy(self)
-
-        assert not result
-
-        # Test failure with prompt input string incorrect
-        self.environment_command.parse(["environment", "setup"])
-
-        @self.environment_command.cli_helper.input("random\n")
-        def dummy(self):
-            return self.environment_command.execute()
-
-        result = dummy(self)
-
-        assert not result
+        assert "FROM datmo/python-base:cpu-py27" in open(
+            definition_filepath, "r").read()
 
     def test_environment_create(self):
         # 1) Environment definition file in project environment directory (with name / description)
@@ -174,9 +208,9 @@ class TestEnvironmentCommand():
         shutil.rmtree(os.path.join(self.temp_dir, "datmo_environment"))
 
         # Test option 2
+        self.__set_variables()
         random_dir = os.path.join(self.temp_dir, "random_datmo_dir")
         os.makedirs(random_dir)
-
         definition_filepath = os.path.join(random_dir, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
@@ -229,8 +263,8 @@ class TestEnvironmentCommand():
             ["environment", "update", environment_obj.id])
         result = self.environment_command.execute()
         assert result
-        assert not result.name
-        assert not result.description
+        assert result.name
+        assert result.description
 
         # Test successful update (name and description given)
         new_name = "test name"

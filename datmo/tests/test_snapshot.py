@@ -25,9 +25,10 @@ except TypeError:
 from datmo.snapshot import create, ls, update, delete
 from datmo.config import Config
 from datmo.snapshot import Snapshot
-from datmo.task import run
+# from datmo.task import run
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.controller.project import ProjectController
+from datmo.core.controller.task import TaskController
 from datmo.core.util.exceptions import (
     CommitFailed, InvalidProjectPath, SessionDoesNotExist,
     SnapshotCreateFromTaskArgs, EntityNotFound, DoesNotExist)
@@ -151,12 +152,15 @@ class TestSnapshotModule():
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
-        task_obj = run("sh -c echo accuracy:0.45")
+        task_controller = TaskController()
+        task_obj = task_controller.create()
+        task_obj = task_controller.run(
+            task_obj.id, task_dict={"command": "sh -c echo accuracy:0.45"})
 
         # 1) Test option 1
         snapshot_obj = create(
             message="my test snapshot",
-            task_id=task_obj.id,
+            run_id=task_obj.id,
             label="best",
             config={"foo": "bar"})
 
@@ -171,7 +175,7 @@ class TestSnapshotModule():
         # Test option 2
         snapshot_obj_2 = create(
             message="my test snapshot",
-            task_id=task_obj.id,
+            run_id=task_obj.id,
             label="best",
             config={"foo": "bar"},
             stats={"foo": "bar"})
@@ -192,14 +196,17 @@ class TestSnapshotModule():
         with open(env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
-        task_obj = run("sh -c echo accuracy:0.45")
+        task_controller = TaskController()
+        task_obj = task_controller.create()
+        task_obj = task_controller.run(
+            task_obj.id, task_dict={"command": "sh -c echo accuracy:0.45"})
 
         # Test if failure if user gives environment_id with task_id
         failed = False
         try:
             _ = create(
                 message="my test snapshot",
-                task_id=task_obj.id,
+                run_id=task_obj.id,
                 label="best",
                 config={"foo": "bar"},
                 stats={"foo": "bar"},
@@ -212,7 +219,7 @@ class TestSnapshotModule():
         try:
             _ = create(
                 message="my test snapshot",
-                task_id=task_obj.id,
+                run_id=task_obj.id,
                 label="best",
                 config={"foo": "bar"},
                 stats={"foo": "bar"},

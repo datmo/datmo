@@ -18,7 +18,7 @@ from datmo.core.controller.task import TaskController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.cli.driver.helper import Helper
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.util.exceptions import InvalidArgumentType
+from datmo.core.util.exceptions import InvalidArgumentType, RequiredArgumentMissing
 from datmo.core.util.misc_functions import prettify_datetime, format_table
 
 
@@ -44,6 +44,8 @@ class RunObject():
         id of snapshot associated after the run
     command : str
         command that is used by the run
+    type : str
+        type of task, script or workspace (jupyterlab, notebook, rstudio, terminal)
     status : str or None
         status of the current run
     start_time : datetime.datetime or None
@@ -86,6 +88,7 @@ class RunObject():
 
         # Execution definition
         self.command = self._core_task.command
+        self._type = None
         self._core_snapshot_id = None
         self._environment_id = None
         self._config = {}
@@ -106,6 +109,12 @@ class RunObject():
         self._core_task = self.__get_core_task()
         self._status = self._core_task.status
         return self._status
+
+    @property
+    def type(self):
+        self._type = self._core_task.workspace\
+            if self._core_task.workspace else 'script'
+        return self._type
 
     @property
     def start_time(self):
@@ -134,7 +143,7 @@ class RunObject():
     @property
     def config(self):
         self._core_snapshot = self.__get_core_snapshot()
-        self._config = self._core_snapshot.config
+        self._config = self._core_snapshot.config if self._core_snapshot else {}
         return self._config
 
     @property
@@ -143,6 +152,9 @@ class RunObject():
         self._results = {}
         if self._core_task.results is not None:
             self._results = self._core_task.results
+        else:
+            self._core_snapshot = self.__get_core_snapshot()
+            self._results = self._core_snapshot.stats if self._core_snapshot else {}
         return self._results
 
     @property
@@ -175,12 +187,13 @@ class RunObject():
 
         Returns
         -------
-        datmo.core.entity.snapshot.Snapshot
+        datmo.core.entity.snapshot.Snapshot or None
             core snapshot object for the Snapshot
         """
         snapshot_controller = SnapshotController()
         snapshot_id = self.after_snapshot_id if self.after_snapshot_id else self.before_snapshot_id
-        snapshot_obj = snapshot_controller.get(snapshot_id)
+        snapshot_obj = snapshot_controller.get(
+            snapshot_id) if snapshot_id else None
         return snapshot_obj
 
     def get_environment_id(self):
@@ -188,22 +201,22 @@ class RunObject():
 
         Returns
         -------
-        str
+        str or None
             string for environment id associated with the task
         """
         self._core_snapshot = self.__get_core_snapshot()
-        return self._core_snapshot.environment_id
+        return self._core_snapshot.environment_id if self._core_snapshot else None
 
     def get_core_snapshot_id(self):
         """Returns the core snapshot id for the run
 
         Returns
         -------
-        str
+        str or None
             string for core snapshot id associated with the task
         """
         self._core_snapshot = self.__get_core_snapshot()
-        return self._core_snapshot.id
+        return self._core_snapshot.id if self._core_snapshot else None
 
     def get_files(self, mode="r"):
         """Returns a list of file objects for the task
@@ -216,18 +229,19 @@ class RunObject():
 
         Returns
         -------
-        list
+        list or None
             list of file objects associated with the task
         """
         snapshot_controller = SnapshotController()
         self._core_snapshot = self.__get_core_snapshot()
-        return snapshot_controller.get_files(self._core_snapshot.id, mode=mode)
+        return snapshot_controller.get_files(
+            self._core_snapshot.id, mode=mode) if self._core_snapshot else None
 
     def __eq__(self, other):
         return self.id == other.id if other else False
 
     def __str__(self):
-        final_str = '\033[94m' + "run " + self.id + "\n" + '\033[0m'
+        final_str = '\033[94m' + "run " + self.id + os.linesep + '\033[0m'
         table_data = []
         if self.session_id:
             table_data.append(["Session", "-> " + self.session_id])
@@ -258,7 +272,7 @@ class RunObject():
                 for f in self.files[1:]:
                     table_data.append(["     ", "-> " + f.name])
         final_str = final_str + format_table(table_data)
-        final_str = final_str + "\n" + "    " + self.command + "\n" + "\n"
+        final_str = final_str + os.linesep + "    " + self.command + os.linesep + os.linesep
         return final_str
 
     def __repr__(self):
@@ -272,7 +286,7 @@ class RunCommand(ProjectCommand):
     @Helper.notify_environment_active(TaskController)
     @Helper.notify_no_project_found
     def run(self, **kwargs):
-        self.cli_helper.echo(__("info", "cli.task.run"))
+        self.cli_helper.echo(__("info", "cli.run.run"))
         # Create input dictionaries
         snapshot_dict = {}
         # Environment
@@ -294,38 +308,40 @@ class RunCommand(ProjectCommand):
             task_dict['command_list'] = kwargs['cmd']
 
         # Run task and return Task object result
-        task_obj = self.task_run_helper(task_dict, snapshot_dict, "cli.task.run")
+        task_obj = self.task_run_helper(task_dict, snapshot_dict,
+                                        "cli.run.run")
         if not task_obj:
             return False
         # Creating the run object
         run_obj = RunObject(task_obj)
         return run_obj
 
-
     @Helper.notify_no_project_found
     def ls(self, **kwargs):
-        self.task_controller = TaskController()
-        session_id = kwargs.get('session_id',
-                                self.task_controller.current_session.id)
         print_format = kwargs.get('format', "table")
         download = kwargs.get('download', None)
         download_path = kwargs.get('download_path', None)
         # Get all task meta information
+        self.task_controller = TaskController()
+        session_id = kwargs.get('session_id', None)
+        session_id = self.task_controller.current_session.id if session_id == None else session_id
         task_objs = self.task_controller.list(
             session_id, sort_key="created_at", sort_order="descending")
         header_list = [
-            "id", "command", "status", "config", "results", "created at"
+            "id", "command", "type", "status", "config", "results",
+            "created at"
         ]
         item_dict_list = []
         run_obj_list = []
         for task_obj in task_objs:
             # Create a new Run Object from Task Object
             run_obj = RunObject(task_obj)
-            task_results_printable = printable_object(str(run_obj.results))
-            snapshot_config_printable = printable_object(str(run_obj.config))
+            task_results_printable = printable_object(run_obj.results)
+            snapshot_config_printable = printable_object(run_obj.config)
             item_dict_list.append({
                 "id": run_obj.id,
                 "command": run_obj.command,
+                "type": run_obj.type,
                 "status": run_obj.status,
                 "config": snapshot_config_printable,
                 "results": task_results_printable,
@@ -357,13 +373,13 @@ class RunCommand(ProjectCommand):
         self.task_controller = TaskController()
         # Get task id
         task_id = kwargs.get("id", None)
-        initial = kwargs.get("initial", False)
-        self.cli_helper.echo(__("info", "cli.task.rerun", task_id))
+        self.cli_helper.echo(__("info", "cli.run.rerun", task_id))
         # Create the task_obj
         task_obj = self.task_controller.get(task_id)
         # Create the run obj
         run_obj = RunObject(task_obj)
-
+        # Select the initial snapshot if it's a script else the final snapshot
+        initial = True if run_obj.type == 'script' else False
         environment_id = run_obj.environment_id
         command = task_obj.command_list
         snapshot_id = run_obj.core_snapshot_id if not initial else run_obj.before_snapshot_id
@@ -391,9 +407,67 @@ class RunCommand(ProjectCommand):
             "command_list": command
         }
         # Run task and return Task object result
-        new_task_obj = self.task_run_helper(task_dict, snapshot_dict, "cli.task.run")
+        new_task_obj = self.task_run_helper(task_dict, snapshot_dict,
+                                            "cli.run.run")
         if not new_task_obj:
             return False
         # Creating the run object
         new_run_obj = RunObject(new_task_obj)
         return new_run_obj
+
+    @Helper.notify_environment_active(TaskController)
+    @Helper.notify_no_project_found
+    def stop(self, **kwargs):
+        self.task_controller = TaskController()
+        input_dict = {}
+        mutually_exclusive(["id", "all"], kwargs, input_dict)
+        if "id" in input_dict:
+            self.cli_helper.echo(__("info", "cli.run.stop", input_dict['id']))
+        elif "all" in input_dict:
+            self.cli_helper.echo(__("info", "cli.run.stop.all"))
+        else:
+            raise RequiredArgumentMissing()
+        try:
+            if "id" in input_dict:
+                result = self.task_controller.stop(task_id=input_dict['id'])
+                if not result:
+                    self.cli_helper.echo(
+                        __("error", "cli.run.stop", input_dict['id']))
+                else:
+                    self.cli_helper.echo(
+                        __("info", "cli.run.stop.success", input_dict['id']))
+            if "all" in input_dict:
+                result = self.task_controller.stop(all=input_dict['all'])
+                if not result:
+                    self.cli_helper.echo(__("error", "cli.run.stop.all"))
+                else:
+                    self.cli_helper.echo(
+                        __("info", "cli.run.stop.all.success"))
+            return result
+        except Exception:
+            if "id" in input_dict:
+                self.cli_helper.echo(
+                    __("error", "cli.run.stop", input_dict['id']))
+            if "all" in input_dict:
+                self.cli_helper.echo(__("error", "cli.run.stop.all"))
+            return False
+
+    @Helper.notify_environment_active(TaskController)
+    @Helper.notify_no_project_found
+    def delete(self, **kwargs):
+        self.task_controller = TaskController()
+        task_id = kwargs.get("id", None)
+        if task_id:
+            self.cli_helper.echo(__("info", "cli.run.delete", task_id))
+        else:
+            raise RequiredArgumentMissing()
+        try:
+            # Delete the task for the run
+            result = self.task_controller.delete(task_id)
+            if result:
+                self.cli_helper.echo(__("info", "cli.run.delete.success", task_id))
+            return result
+        except Exception:
+            self.cli_helper.echo(
+                __("error", "cli.run.delete", task_id))
+            return False

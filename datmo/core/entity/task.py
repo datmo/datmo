@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 from datmo.core.util.misc_functions import prettify_datetime, format_table
@@ -140,6 +141,7 @@ class Task():
         self.detach = dictionary.get('detach', False)
         self.gpu = dictionary.get('gpu', False)
         self.mem_limit = dictionary.get('mem_limit', None)
+        self.workspace = dictionary.get('workspace', None)
         self.ports = dictionary.get('ports', None)
         self.task_dirpath = dictionary.get('task_dirpath', None)
         self.log_filepath = dictionary.get('log_filepath', None)
@@ -161,7 +163,7 @@ class Task():
         return self.id == other.id if other else False
 
     def __str__(self):
-        final_str = '\033[94m' + "task " + self.id + "\n" + '\033[0m'
+        final_str = '\033[94m' + "task " + self.id + os.linesep + '\033[0m'
         table_data = []
         if self.session_id:
             table_data.append(["Session", "-> " + self.session_id])
@@ -184,7 +186,7 @@ class Task():
             table_data.append(["Results", "-> " + str(self.results)])
         final_str = final_str + format_table(table_data)
         if self.command:
-            final_str = final_str + "\n" + "    " + self.command + "\n" + "\n"
+            final_str = final_str + os.linesep + "    " + self.command + os.linesep + os.linesep
         return final_str
 
     def __repr__(self):

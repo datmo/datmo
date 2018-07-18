@@ -76,6 +76,8 @@ class SnapshotController(BaseController):
             environment :
                 environment_id : str, optional
                     id for environment used to create snapshot
+                workspace : str, optional
+                    type of workspace being used
                 environment_paths : list, optional
                     list of absolute or relative filepaths and/or dirpaths to collect with destination names
                     (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")

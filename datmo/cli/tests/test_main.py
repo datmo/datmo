@@ -78,7 +78,7 @@ class TestMain():
             out, err = out.decode(), err.decode()
             if err:
                 success = False
-            elif 'datmo version:' not in out:
+            elif "datmo version:" not in out:
                 success = False
         except Exception:
             success = False
@@ -88,25 +88,24 @@ class TestMain():
         try:
             success = True
             p = self.command_run([
-                self.execpath, 'init', '--name', '"test"', '--description',
+                self.execpath, "init", "--name", '"test"', "--description",
                 '"test"'
             ])
             out, err = p.communicate(to_bytes("\n"))
             out, err = out.decode(), err.decode()
             if err:
                 success = False
-            elif 'Initializing project' not in out:
+            elif "Initializing project" not in out:
                 success = False
         except Exception:
             success = False
         assert success
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_task_run(self):
+    def test_run(self):
         try:
             success = True
-            p = self.command_run(
-                [self.execpath, 'task', 'run', 'python script.py'])
+            p = self.command_run([self.execpath, "run", "python script.py"])
             out, err = p.communicate()
             out, err = out.decode(), err.decode()
             if err:
@@ -117,10 +116,10 @@ class TestMain():
             success = False
         assert success
 
-    def test_task_ls(self):
+    def test_run_ls(self):
         try:
             success = True
-            p = self.command_run([self.execpath, 'task', 'ls'])
+            p = self.command_run([self.execpath, "ls"])
             out, err = p.communicate()
             out, err = out.decode(), err.decode()
             if err:
@@ -135,7 +134,7 @@ class TestMain():
         try:
             success = True
             p = self.command_run(
-                [self.execpath, 'snapshot', 'create', '-m', "message"])
+                [self.execpath, "snapshot", "create", "-m", "message"])
             out, err = p.communicate()
             out, err = out.decode(), err.decode()
             if err:
@@ -149,7 +148,7 @@ class TestMain():
     def test_snapshot_ls(self):
         try:
             success = True
-            p = self.command_run([self.execpath, 'snapshot', 'ls'])
+            p = self.command_run([self.execpath, "snapshot", "ls"])
             out, err = p.communicate()
             out, err = out.decode(), err.decode()
             if err:

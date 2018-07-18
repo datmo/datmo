@@ -1,19 +1,106 @@
 {
-  "supported_environments": [
-    ["xgboost:cpu", "sklearn, numpy, scipy, matplotlib and xgboost for numerical data science problems (language: py27)"],
-    ["keras-tensorflow:cpu", "keras with tensorflow backend (CPU) + sklearn, numpy, scipy, matplotlib (language: py27)"],
-    ["keras-tensorflow:gpu", "keras with tensorflow backend (GPU) + sklearn, numpy, scipy, matplotlib (language: py27)"],
-    ["tensorflow:cpu", "tensorflow (CPU) + sklearn, numpy, scipy, matplotlib (language: py27)"],
-    ["tensorflow:gpu", "tensorflow (GPU) + sklearn, numpy, scipy, matplotlib (language: py27)"],
-    ["scikit-opencv:py-2.7", "sklearn, scipy, opencv, Pillow, numpy (language: py27)"],
-    ["theano:cpu", "theano (CPU) + scipy, numpy (language: py27)"],
-    ["theano:gpu", "theano (GPU) + scipy, numpy (language: py27)"],
-    ["keras-theano:cpu", "keras with theano (CPU) + scipy, numpy (language: py27)"],
-    ["keras-theano:gpu", "keras with theano (GPU) + scipy, numpy (language: py27)"],
-    ["kaggle:python", "environment as provided in kaggle kernels for numerical data science problems (language: py27)"],
-    ["spacy:py-2.7", "Spacy for NLP + scipy, numpy (language: py27)"],
-    ["pytorch:cpu", "Pytorch (CPU, language in py27)"],
-    ["catboost:cpu", "catboost + sklearn, numpy, scipy (language: py27)"],
-    ["rstudio:latest", "Rstudio environment on ubuntu OS"]
-  ]
+    "environment_types":{
+        "cpu":{
+            "environment_frameworks":{
+                "data-analytics":{
+                    "environment_languages":[
+                        "py27",
+                        "py35"
+                    ],
+                    "info":"has libraries such as xgboost, lightgbm, sklearn etc."
+                },
+                "kaggle":{
+                    "environment_languages":[
+
+                    ],
+                    "info":"has the environment provided by kaggle"
+                },
+                "keras-tensorflow":{
+                    "environment_languages":[
+                        "py27",
+                        "py35"
+                    ],
+                    "info":"has libraries for keras(v2.1.6) and tensorflow(v1.9.0) along with sklearn, opencv etc."
+                },
+                "mxnet":{
+                    "environment_languages":[
+                        "py27",
+                        "py35"
+                    ],
+                    "info":"has libraries for mxnet(v1.1.0) along with sklearn, opencv etc."
+                },
+                "pytorch":{
+                    "environment_languages":[
+                        "py27",
+                        "py35"
+                    ],
+                    "info":"has libraries for pytorch(v0.4.0) along with sklearn, opencv etc."
+                },
+                "caffe2":{
+                    "environment_languages":[
+
+                    ],
+                    "info":"has libraries for caffe2(v0.8.0) along with sklearn, opencv etc."
+                },
+                "python-base":{
+                    "environment_languages":[
+                        "py27",
+                        "py35"
+                    ],
+                    "info":"has base python image with no libraries installed"
+                },
+                "r-base":{
+                    "environment_languages":[
+
+                    ],
+                    "info":"has base R image with no libraries installed. Use this environment for rstudio workspace"
+                }
+            }
+        },
+        "gpu":{
+            "environment_frameworks":{
+                "data-analytics":{
+                    "environment_languages":[
+                        "py27",
+                        "py35"
+                    ],
+                    "info":"has libraries such as xgboost, lightgbm, sklearn etc."
+                },
+                "keras-tensorflow":{
+                    "environment_languages":[
+                        "py27",
+                        "py35"
+                    ],
+                    "info":"has libraries for keras(v2.1.6) and tensorflow(v1.9.0) along with sklearn, opencv etc."
+                },
+                "mxnet":{
+                    "environment_languages":[
+                        "py27",
+                        "py35"
+                    ],
+                    "info":"has libraries for mxnet(v1.1.0) along with sklearn, opencv etc."
+                },
+                "pytorch":{
+                    "environment_languages":[
+                        "py27",
+                        "py35"
+                    ],
+                    "info":"has libraries for pytorch(v0.4.0) along with sklearn, opencv etc."
+                },
+                "caffe2":{
+                    "environment_languages":[
+
+                    ],
+                    "info":"has libraries for caffe2(v0.8.0) along with sklearn, opencv etc."
+                },
+                "python-base":{
+                    "environment_languages":[
+                        "py27",
+                        "py35"
+                    ],
+                    "info":"has base python image with no libraries installed"
+                }
+            }
+        }
+    }
 }

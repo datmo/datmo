@@ -81,42 +81,69 @@ class TestEnvironmentController():
             failed = True
         assert failed
 
+    def test_get_environment_type(self):
+        self.__setup()
+        result = self.environment_controller.get_environment_types()
+        assert result
+
     def test_get_supported_environments(self):
         self.__setup()
-        result = self.environment_controller.get_supported_environments()
+        environment_type = "cpu"
+        result = self.environment_controller.get_supported_frameworks(
+            environment_type)
+        assert result
+
+    def test_get_supported_languages(self):
+        self.__setup()
+        environment_type = "cpu"
+        environment_name = "data-analytics"
+        result = self.environment_controller.get_supported_languages(
+            environment_type, environment_name)
         assert result
 
     def test_setup(self):
+        # TODO: Run all environment options and test if success
         self.project_controller.init("test_setup", "test description")
         self.environment_controller = EnvironmentController()
 
         # Test success setup once (no files present)
-        options = {"name": "xgboost:cpu"}
+        options = {
+            "environment_framework": "data-analytics",
+            "environment_type": "cpu",
+            "environment_language": "py27"
+        }
         result = self.environment_controller.setup(options=options)
         output_definition_filepath = os.path.join(
             self.environment_controller.file_driver.environment_directory,
             "Dockerfile")
 
         assert isinstance(result, Environment)
-        assert result.name == options['name']
-        assert result.description == "supported base environment created by datmo"
+        assert result.name == "%s:%s-%s" % (options['environment_framework'],
+                                            options['environment_type'],
+                                            options['environment_language'])
+        assert result.description == "supported environment created by datmo"
         assert os.path.isfile(output_definition_filepath)
-        assert "FROM datmo/xgboost:cpu" in open(output_definition_filepath,
-                                                "r").read()
-
+        assert "FROM datmo/data-analytics:cpu-py27" in open(
+            output_definition_filepath, "r").read()
         # Test success setup again (files present, but staged)
-        options = {"name": "xgboost:cpu"}
+        options = {
+            "environment_framework": "data-analytics",
+            "environment_type": "cpu",
+            "environment_language": "py27"
+        }
         result = self.environment_controller.setup(options=options)
         output_definition_filepath = os.path.join(
             self.environment_controller.file_driver.environment_directory,
             "Dockerfile")
 
         assert isinstance(result, Environment)
-        assert result.name == options['name']
-        assert result.description == "supported base environment created by datmo"
+        assert result.name == "%s:%s-%s" % (options['environment_framework'],
+                                            options['environment_type'],
+                                            options['environment_language'])
+        assert result.description == "supported environment created by datmo"
         assert os.path.isfile(output_definition_filepath)
-        assert "FROM datmo/xgboost:cpu" in open(output_definition_filepath,
-                                                "r").read()
+        assert "FROM datmo/data-analytics:cpu-py27" in open(
+            output_definition_filepath, "r").read()
 
         # Test failure in downstream function (e.g. bad inputs, no name given)
         failed = False
@@ -176,11 +203,6 @@ class TestEnvironmentController():
                       "r").read()
         print(repr(output))
         assert os.path.isfile(
-            os.path.join(file_collection_dir, "datmoDockerfile"))
-        output = open(
-            os.path.join(file_collection_dir, "datmoDockerfile"), "r").read()
-        print(repr(output))
-        assert os.path.isfile(
             os.path.join(file_collection_dir, "hardware_info"))
         output = open(os.path.join(file_collection_dir, "hardware_info"),
                       "r").read()
@@ -207,15 +229,10 @@ class TestEnvironmentController():
         output = open(os.path.join(file_collection_dir, "Dockerfile"),
                       "r").read()
         print(repr(output))
-        assert os.path.isfile(
-            os.path.join(file_collection_dir, "datmoDockerfile"))
-        output = open(
-            os.path.join(file_collection_dir, "datmoDockerfile"), "r").read()
-        print(repr(output))
-        assert environment_obj_0.unique_hash == "c309ae4f58163693a91816988d9dc88b"
+        assert environment_obj_0.unique_hash == "1e32ff083520f792cbe4bafdc2de2a01"
         assert environment_obj_0.name == "test"
         assert environment_obj_0.description == "test description"
-        # Files ["test", "Dockerfile", "datmoDockerfile"]
+        # Files ["test", "Dockerfile"]
 
         # 5) Test option 5
         input_dict_1 = {
@@ -243,19 +260,23 @@ class TestEnvironmentController():
         output = open(os.path.join(file_collection_dir, "Dockerfile"),
                       "r").read()
         print(repr(output))
-        assert os.path.isfile(
+        assert not os.path.isfile(
             os.path.join(file_collection_dir, "datmoDockerfile"))
-        output = open(
-            os.path.join(file_collection_dir, "datmoDockerfile"), "r").read()
         print(repr(output))
-        assert environment_obj.unique_hash == "6e06d7c4d77cb6ae69e7e0efa883ef4b"
+        assert environment_obj.unique_hash == "fd725be022ce93f870c81e2ee170189c"
         assert environment_obj.name == "test"
         assert environment_obj.description == "test description"
-        # Files ["Dockerfile", "datmoDockerfile"]
+        # Files ["Dockerfile"]
 
         # remove the project environment directory
-        shutil.rmtree(
-            self.environment_controller.file_driver.environment_directory)
+        os.remove(
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "Dockerfile"))
+        os.remove(
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "test"))
 
         # Create environment definition in root directory
         home_definition_filepath = os.path.join(
@@ -283,9 +304,7 @@ class TestEnvironmentController():
         assert environment_obj_1.name == "test"
         assert environment_obj_1.description == "test description"
         assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
-        assert os.path.isfile(
-            os.path.join(file_collection_dir, "datmoDockerfile"))
-        assert environment_obj_1.unique_hash == "6e06d7c4d77cb6ae69e7e0efa883ef4b"
+        assert environment_obj_1.unique_hash == "fd725be022ce93f870c81e2ee170189c"
 
         # 3) Test option 3
         input_dict_2 = {
@@ -314,9 +333,7 @@ class TestEnvironmentController():
         assert environment_obj_2.name == "test"
         assert environment_obj_2.description == "test description"
         assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
-        assert os.path.isfile(
-            os.path.join(file_collection_dir, "datmoDockerfile"))
-        assert environment_obj_2.unique_hash == "6e06d7c4d77cb6ae69e7e0efa883ef4b"
+        assert environment_obj_2.unique_hash == "fd725be022ce93f870c81e2ee170189c"
 
         # 4) Test option 4
         input_dict_3 = {
@@ -343,9 +360,7 @@ class TestEnvironmentController():
         assert environment_obj_3.name == "test"
         assert environment_obj_3.description == "test description"
         assert os.path.isfile(os.path.join(file_collection_dir, "Dockerfile"))
-        assert os.path.isfile(
-            os.path.join(file_collection_dir, "datmoDockerfile"))
-        assert environment_obj_3.unique_hash == "6e06d7c4d77cb6ae69e7e0efa883ef4b"
+        assert environment_obj_3.unique_hash == "fd725be022ce93f870c81e2ee170189c"
 
         # 6) Test option 6
         definition_filepath = os.path.join(self.environment_controller.home,
@@ -390,7 +405,7 @@ class TestEnvironmentController():
                                            "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
         input_dict = {
             "paths": [definition_filepath],
@@ -436,11 +451,27 @@ class TestEnvironmentController():
             "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
         environment_obj_4 = self.environment_controller.create({})
         self.environment_ids.append(environment_obj_4.id)
         result = self.environment_controller.build(environment_obj_4.id)
+        assert result
+
+        # 6) Test option 6
+        # Create environment definition in project environment directory with datmo base image
+        definition_filepath = os.path.join(
+            self.environment_controller.file_driver.environment_directory,
+            "Dockerfile")
+        random_text = str(uuid.uuid1())
+        with open(definition_filepath, "wb") as f:
+            f.write(
+                to_bytes("FROM datmo/data-analytics:cpu-py27%s" % os.linesep))
+            f.write(to_bytes(str("RUN echo " + random_text)))
+        environment_obj_4 = self.environment_controller.create({})
+        self.environment_ids.append(environment_obj_4.id)
+        result = self.environment_controller.build(
+            environment_obj_4.id, workspace="notebook")
         assert result
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
@@ -456,7 +487,7 @@ class TestEnvironmentController():
             "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         random_name = str(uuid.uuid1())
@@ -487,9 +518,11 @@ class TestEnvironmentController():
         assert return_code == 0
         assert run_id
         assert logs
-
-        shutil.rmtree(
-            self.environment_controller.file_driver.environment_directory)
+        # remove Dockerfile
+        os.remove(
+            os.path.join(
+                self.environment_controller.file_driver.environment_directory,
+                "Dockerfile"))
 
         # 1) Test option 1
         # Create environment definition
@@ -497,7 +530,7 @@ class TestEnvironmentController():
                                            "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         random_name = str(uuid.uuid1())
@@ -587,7 +620,8 @@ class TestEnvironmentController():
                                            "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM nbgallery/jupyter-alpine:latest" + "\n"))
+            f.write(
+                to_bytes("FROM nbgallery/jupyter-alpine:latest" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         input_dict = {
@@ -840,7 +874,7 @@ class TestEnvironmentController():
         env_def_path = os.path.join(self.project_controller.home, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(env_def_path, "wb") as f:
-            f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
+            f.write(to_bytes("FROM python:3.5-alpine" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         input_dict = {
@@ -956,14 +990,14 @@ class TestEnvironmentController():
         # Test hashing the default Dockerfile
         result = self.environment_controller._calculate_project_environment_hash(
             save_hardware_file=False)
-        assert result == "c309ae4f58163693a91816988d9dc88b"
+        assert result == "1e32ff083520f792cbe4bafdc2de2a01"
         # Test if hash is the same as that of create
         environment_obj = self.environment_controller.create(
             {}, save_hardware_file=False)
         self.environment_ids.append(environment_obj.id)
         result = self.environment_controller._calculate_project_environment_hash(
             save_hardware_file=False)
-        assert result == "c309ae4f58163693a91816988d9dc88b"
+        assert result == "1e32ff083520f792cbe4bafdc2de2a01"
         assert result == environment_obj.unique_hash
 
         # Test if the hash is the same if the same file is passed in as an input
@@ -975,7 +1009,7 @@ class TestEnvironmentController():
         self.environment_ids.append(environment_obj_1.id)
         result = self.environment_controller._calculate_project_environment_hash(
             save_hardware_file=False)
-        assert result == "c309ae4f58163693a91816988d9dc88b"
+        assert result == "1e32ff083520f792cbe4bafdc2de2a01"
         assert result == environment_obj_1.unique_hash
 
     def test_has_unstaged_changes(self):

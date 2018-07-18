@@ -83,14 +83,14 @@ class Helper():
             for idx, header in enumerate(header_list):
                 output += header if idx == len(
                     header_list) - 1 else header + ","
-            output += "\n"
+            output += os.linesep
             for item_dict in item_dict_list:
                 for idx, header in enumerate(header_list):
                     output += item_dict.get(
                         header, "N/A"
                     ) if idx == len(header_list) - 1 else item_dict.get(
                         header, "N/A") + ","
-                output += "\n"
+                output += os.linesep
         else:
             output = ""
 
@@ -151,38 +151,53 @@ class Helper():
     def get_command_choices(self):
         return [
             "init", "version", "--version", "-v", "status", "cleanup",
-            "snapshot", "task", "session", "notebook", "rstudio",
-            "environment", "run", "rerun"
+            "snapshot", "session", "notebook", "jupyterlab", "terminal",
+            "rstudio", "environment", "run", "rerun", "stop", "delete", "ls"
         ]
 
-    def prompt_available_environments(self, available_environments):
+    def prompt_available_options(self, available_options, option_type):
         """Prompt user to choose an available environment. Returns the environment name"""
-        for idx, environment_name_description in enumerate(
-                available_environments):
-            environment_name = environment_name_description[0]
-            environment_description = environment_name_description[1]
-            self.echo("(%s) %s: %s" % (idx + 1, environment_name,
-                                       environment_description))
-        input_environment_name = self.prompt(
-            __("prompt", "cli.environment.setup.name"))
+        if option_type == "framework":
+            available_options_info = available_options
+            available_options = []
+            for idx, option in enumerate(available_options_info):
+                available_options.append(option[0])
+                self.echo("(%s) %s : %s" % (idx + 1, option[0], option[1]))
+        else:
+            for idx, option in enumerate(available_options):
+                self.echo("(%s) %s" % (idx + 1, option))
+        input_environment_option = self.prompt(
+            __("prompt", "cli.environment.setup.%s" % option_type))
         try:
-            name_environment_index = int(input_environment_name)
+            if input_environment_option:
+                option_environment_index = int(input_environment_option)
+            else:
+                raise ValueError
         except ValueError:
-            available_names = [
-                name for name, description in available_environments
-            ]
             try:
-                name_environment_index = available_names.index(
-                    input_environment_name) + 1
+                option_environment_index = available_options.index(
+                    input_environment_option) + 1
             except ValueError:
                 self.echo(
-                    __("error", "cli.environment.setup.argument",
-                       input_environment_name))
-                return input_environment_name
-        if 0 < name_environment_index <= len(available_environments):
-            input_environment_name = available_environments[
-                name_environment_index - 1][0]
-        return input_environment_name
+                    __("warn",
+                       "cli.environment.setup.argument.%s" % option_type,
+                       input_environment_option))
+                option_environment_index, input_environment_option = None, None
+        if option_environment_index is not None and \
+                0 < option_environment_index <= len(available_options):
+            input_environment_option = available_options[
+                option_environment_index - 1]
+
+        if input_environment_option is None or option_environment_index <= 0 or\
+                option_environment_index > len(available_options):
+            if option_type == "type":
+                input_environment_option = "cpu"
+            elif option_type == "framework":
+                input_environment_option = "python-base"
+            elif option_type == "language":
+                input_environment_option = "py27"
+
+        return input_environment_option
 
     @staticmethod
     def notify_no_project_found(function):

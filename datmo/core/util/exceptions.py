@@ -232,7 +232,8 @@ class DatmoFolderInWorkTree(CodeException):
 
 
 class UnstagedChanges(Exception):
-    pass
+    def __str__(self):
+      return "Unstaged changes exists. Create a snapshot to remove any unstaged changes"
 
 
 class NothingToStage(Exception):

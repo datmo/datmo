@@ -5,7 +5,7 @@ from datmo.core.util.i18n import get as __
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.base import BaseCommand
 from datmo.core.controller.project import ProjectController
-from datmo.core.controller.environment.environment import EnvironmentController, EnvironmentDoesNotExist
+from datmo.core.controller.environment.environment import EnvironmentController
 
 
 class ProjectCommand(BaseCommand):
@@ -102,23 +102,32 @@ class ProjectCommand(BaseCommand):
         environment_setup = self.cli_helper.prompt_bool(
             __("prompt", "cli.project.environment.setup"))
         if environment_setup:
+            # TODO: ramove business logic from here and create common helper
             # Setting up the environment definition file
             self.environment_controller = EnvironmentController()
-            available_environments = self.environment_controller.get_supported_environments(
+            environment_types = self.environment_controller.get_environment_types(
             )
-            input_environment_name = self.cli_helper.prompt_available_environments(
-                available_environments)
-            try:
-                options = {"name": input_environment_name}
-                environment_obj = self.environment_controller.setup(
-                    options=options)
-                self.cli_helper.echo(
-                    __("info", "cli.environment.setup.success",
-                       (environment_obj.name, environment_obj.id)))
-            except EnvironmentDoesNotExist:
-                self.cli_helper.echo(
-                    __("error", "cli.environment.setup.argument",
-                       input_environment_name))
+            environment_type = self.cli_helper.prompt_available_options(
+                environment_types, option_type="type")
+            available_environment_frameworks = self.environment_controller.get_supported_frameworks(
+                environment_type)
+            environment_framework = self.cli_helper.prompt_available_options(
+                available_environment_frameworks, option_type="framework")
+            available_environment_languages = self.environment_controller.get_supported_languages(
+                environment_type, environment_framework)
+            environment_language = self.cli_helper.prompt_available_options(
+                available_environment_languages, option_type="language")
+            options = {
+                "environment_type": environment_type,
+                "environment_framework": environment_framework,
+                "environment_language": environment_language
+            }
+            environment_obj = self.environment_controller.setup(
+                options=options)
+            self.cli_helper.echo(
+                __("info", "cli.environment.setup.success",
+                   (environment_obj.name, environment_obj.id)))
+
         return self.project_controller.model
 
     def version(self):

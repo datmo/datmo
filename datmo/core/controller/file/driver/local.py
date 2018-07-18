@@ -108,7 +108,8 @@ class LocalFileDriver(FileDriver):
 
     @property
     def is_initialized(self):
-        if self.exists_hidden_datmo_file_structure():
+        if self.exists_hidden_datmo_file_structure() and \
+                self.exists_visible_datmo_structure():
             if self.exists_collections_dir():
                 if os.path.isdir(
                         os.path.join(self.datmo_directory, "collections",
@@ -243,6 +244,8 @@ class LocalFileDriver(FileDriver):
             for file in [os.path.join(root, f) for f in files]:
                 os.chmod(file, mode)
 
+        # Removing temp collection path
+        shutil.rmtree(temp_collection_path)
         return filehash
 
     def calculate_hash_paths(self, paths, directory):
@@ -347,6 +350,10 @@ class LocalFileDriver(FileDriver):
     def exists_hidden_datmo_dir(self):
         return self.exists(self.datmo_directory_name, directory=True)
 
+    def exists_visible_datmo_dir(self):
+        return self.exists(self.environment_directory_name, directory=True) and \
+               self.exists(self.files_directory_name, directory=True)
+
     def ensure_hidden_datmo_dir(self):
         return self.ensure(self.datmo_directory_name, directory=True)
 
@@ -386,6 +393,9 @@ class LocalFileDriver(FileDriver):
         return self.delete_hidden_datmo_dir()
 
     # Overall Visible Datmo dir structure
+    def exists_visible_datmo_structure(self):
+        return self.exists_visible_datmo_dir()
+
     def ensure_visible_datmo_structure(self):
         return self.ensure_datmo_files_dir() and \
                self.ensure_datmo_environment_dir()

@@ -39,8 +39,10 @@ from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
-from datmo.cli.command.task import TaskCommand
-from datmo.core.util.exceptions import (MutuallyExclusiveArguments,
+
+from datmo.cli.command.run import RunCommand
+from datmo.core.util.exceptions import (ProjectNotInitialized,
+                                        MutuallyExclusiveArguments,
                                         SnapshotCreateFromTaskArgs)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
@@ -135,7 +137,7 @@ class TestSnapshotCommand():
         test_message = "this is a test message"
         test_label = "test label"
         test_session_id = "test_session_id"
-        test_task_id = "test_task_id"
+        test_run_id = "test_run_id"
         test_environment_definition_filepath = self.env_def_path
         test_config_filepath = self.config_filepath
         test_stats_filepath = self.config_filepath
@@ -143,13 +145,13 @@ class TestSnapshotCommand():
 
         # try single filepath
         self.snapshot_command.parse([
-            "snapshot", "create", "--message", test_message, "--task-id",
-            test_task_id
+            "snapshot", "create", "--message", test_message, "--run-id",
+            test_run_id
         ])
 
         # testing for proper parsing
         assert self.snapshot_command.args.message == test_message
-        assert self.snapshot_command.args.task_id == test_task_id
+        assert self.snapshot_command.args.run_id == test_run_id
 
         # try single filepath
         self.snapshot_command.parse([
@@ -249,27 +251,27 @@ class TestSnapshotCommand():
         assert snapshot_obj
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_snapshot_create_from_task(self):
+    def test_snapshot_create_from_run(self):
         self.__set_variables()
         test_message = "this is a test message"
 
         # create task
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-        self.task = TaskCommand(self.cli_helper)
-        self.task.parse([
-            "task", "run", "--environment-paths", test_dockerfile, test_command
+        self.run = RunCommand(self.cli_helper)
+        self.run.parse([
+            "run", "--environment-paths", test_dockerfile, test_command
         ])
 
         # test proper execution of task run command
-        task_obj = self.task.execute()
+        run_obj = self.run.execute()
 
-        task_id = task_obj.id
+        run_id = run_obj.id
 
-        # test task id
+        # test run id
         self.snapshot_command.parse([
-            "snapshot", "create", "--message", test_message, "--task-id",
-            task_id
+            "snapshot", "create", "--message", test_message, "--run-id",
+            run_id
         ])
 
         # test for desired side effects
@@ -279,29 +281,29 @@ class TestSnapshotCommand():
         assert snapshot_obj
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_snapshot_create_from_task_fail_user_inputs(self):
+    def test_snapshot_create_from_run_fail_user_inputs(self):
         self.__set_variables()
         test_message = "this is a test message"
 
-        # create task
+        # create run
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-        self.task = TaskCommand(self.cli_helper)
-        self.task.parse([
-            "task", "run", "--environment-paths", test_dockerfile, test_command
+        self.run = RunCommand(self.cli_helper)
+        self.run.parse([
+            "run", "--environment-paths", test_dockerfile, test_command
         ])
 
         # test proper execution of task run command
-        task_obj = self.task.execute()
+        run_obj = self.run.execute()
 
-        task_id = task_obj.id
+        run_id = run_obj.id
 
         failed = False
         try:
-            # test task id with environment-id
+            # test run id with environment-id
             self.snapshot_command.parse([
-                "snapshot", "create", "--message", test_message, "--task-id",
-                task_id, "--environment-id", "test_environment_id"
+                "snapshot", "create", "--message", test_message, "--run-id",
+                run_id, "--environment-id", "test_environment_id"
             ])
             _ = self.snapshot_command.execute()
         except SnapshotCreateFromTaskArgs:
@@ -310,10 +312,10 @@ class TestSnapshotCommand():
 
         failed = False
         try:
-            # test task id with environment-def
+            # test run id with environment-def
             self.snapshot_command.parse([
-                "snapshot", "create", "--message", test_message, "--task-id",
-                task_id, "--environment-paths", "test_environment_path"
+                "snapshot", "create", "--message", test_message, "--run-id",
+                run_id, "--environment-paths", "test_environment_path"
             ])
             _ = self.snapshot_command.execute()
         except SnapshotCreateFromTaskArgs:
@@ -322,10 +324,10 @@ class TestSnapshotCommand():
 
         failed = False
         try:
-            # test task id with filepaths
+            # test run id with filepaths
             self.snapshot_command.parse([
-                "snapshot", "create", "--message", test_message, "--task-id",
-                task_id, "--paths", "mypath"
+                "snapshot", "create", "--message", test_message, "--run-id",
+                run_id, "--paths", "mypath"
             ])
             _ = self.snapshot_command.execute()
         except SnapshotCreateFromTaskArgs:
@@ -334,10 +336,10 @@ class TestSnapshotCommand():
 
         failed = False
         try:
-            # test task id with config-filepath
+            # test run id with config-filepath
             self.snapshot_command.parse([
-                "snapshot", "create", "--message", test_message, "--task-id",
-                task_id, "--config-filepath", "mypath"
+                "snapshot", "create", "--message", test_message, "--run-id",
+                run_id, "--config-filepath", "mypath"
             ])
             _ = self.snapshot_command.execute()
         except SnapshotCreateFromTaskArgs:
@@ -346,10 +348,10 @@ class TestSnapshotCommand():
 
         failed = False
         try:
-            # test task id with config-filename
+            # test run id with config-filename
             self.snapshot_command.parse([
-                "snapshot", "create", "--message", test_message, "--task-id",
-                task_id, "--config-filename", "myname"
+                "snapshot", "create", "--message", test_message, "--run-id",
+                run_id, "--config-filename", "myname"
             ])
             _ = self.snapshot_command.execute()
         except SnapshotCreateFromTaskArgs:
@@ -358,10 +360,10 @@ class TestSnapshotCommand():
 
         failed = False
         try:
-            # test task id with stats-filepath
+            # test run id with stats-filepath
             self.snapshot_command.parse([
-                "snapshot", "create", "--message", test_message, "--task-id",
-                task_id, "--stats-filepath", "mypath"
+                "snapshot", "create", "--message", test_message, "--run-id",
+                run_id, "--stats-filepath", "mypath"
             ])
             _ = self.snapshot_command.execute()
         except SnapshotCreateFromTaskArgs:
@@ -370,10 +372,10 @@ class TestSnapshotCommand():
 
         failed = False
         try:
-            # test task id with stats-filename
+            # test run id with stats-filename
             self.snapshot_command.parse([
-                "snapshot", "create", "--message", test_message, "--task-id",
-                task_id, "--stats-filename", "myname"
+                "snapshot", "create", "--message", test_message, "--run-id",
+                run_id, "--stats-filename", "myname"
             ])
             _ = self.snapshot_command.execute()
         except SnapshotCreateFromTaskArgs:
@@ -645,13 +647,13 @@ class TestSnapshotCommand():
         # create task
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
-        self.task = TaskCommand(self.cli_helper)
-        self.task.parse([
-            "task", "run", "--environment-paths", test_dockerfile, test_command
+        self.run = RunCommand(self.cli_helper)
+        self.run.parse([
+            "run", "--environment-paths", test_dockerfile, test_command
         ])
 
         # test proper execution of task run command
-        task_obj = self.task.execute()
+        task_obj = self.run.execute()
 
         # test no visible snapshots
         self.snapshot_command.parse(["snapshot", "ls"])

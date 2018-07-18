@@ -1,5 +1,6 @@
 import os
 import shutil
+import errno
 import pathspec
 import tempfile
 import hashlib
@@ -93,13 +94,13 @@ class FileCodeDriver(CodeDriver):
         datmo_files_files = set(spec.match_tree(self.filepath))
 
         # TODO: REMOVE THIS CODE
-        # Ignore the datmo_snapshots/ folder and all contents within it
+        # Ignore the datmo_environments/ folder and all contents within it
         spec = pathspec.PathSpec.from_lines('gitwildmatch',
-                                            ["datmo_snapshots"])
+                                            ["datmo_environments"])
         datmo_snapshots_files = set(spec.match_tree(self.filepath))
 
-        # Ignore the datmo_tasks/ folder and all contents within it
-        spec = pathspec.PathSpec.from_lines('gitwildmatch', ["datmo_tasks"])
+        # Ignore the datmo_files/ folder and all contents within it
+        spec = pathspec.PathSpec.from_lines('gitwildmatch', ["datmo_files"])
         datmo_tasks_files = set(spec.match_tree(self.filepath))
 
         # TODO: REMOVE THE ABOVE
@@ -119,20 +120,27 @@ class FileCodeDriver(CodeDriver):
         """Return the commit hash of the repository"""
         # Move tracked files to temp directory within _code_filepath
         # Hash files and return hash
-        temp_dir = tempfile.mkdtemp(dir=self._code_filepath)
-        for rel_filepath in tracked_files:
-            # Ensure new directory will exist in the temp dir
-            filename = os.path.basename(rel_filepath)
-            rel_dirpath = rel_filepath.replace(filename, "")
-            new_dirpath = os.path.join(temp_dir, rel_dirpath)
-            # Ensure directory exists
-            if not os.path.isdir(new_dirpath):
-                os.makedirs(new_dirpath)
-            # Move individual file from old_filepath to new_filepath
-            old_filepath = os.path.join(self.filepath, rel_filepath)
-            new_filepath = os.path.join(new_dirpath, filename)
-            shutil.copy2(old_filepath, new_filepath)
-        return self._get_dirhash(temp_dir)
+        try:
+            temp_dir = tempfile.mkdtemp(dir=self._code_filepath)
+            for rel_filepath in tracked_files:
+                # Ensure new directory will exist in the temp dir
+                filename = os.path.basename(rel_filepath)
+                rel_dirpath = rel_filepath.replace(filename, "")
+                new_dirpath = os.path.join(temp_dir, rel_dirpath)
+                # Ensure directory exists
+                if not os.path.isdir(new_dirpath):
+                    os.makedirs(new_dirpath)
+                # Move individual file from old_filepath to new_filepath
+                old_filepath = os.path.join(self.filepath, rel_filepath)
+                new_filepath = os.path.join(new_dirpath, filename)
+                shutil.copy2(old_filepath, new_filepath)
+            return self._get_dirhash(temp_dir)
+        finally:
+            try:
+                shutil.rmtree(temp_dir)  # delete directory
+            except OSError as exc:
+                if exc.errno != errno.ENOENT:  # ENOENT - no such file or directory
+                    raise  # re-raise exception
 
     @staticmethod
     def _get_filehash(absolute_filepath):

@@ -22,14 +22,36 @@ class EnvironmentCommand(ProjectCommand):
     @Helper.notify_no_project_found
     def setup(self, **kwargs):
         self.environment_controller = EnvironmentController()
-        name = kwargs.get("name", None)
-        available_environments = self.environment_controller.get_supported_environments(
-        )
-        if not name:
-            name = self.cli_helper.prompt_available_environments(
-                available_environments)
+        environment_type = kwargs.get("type", None)
+        environment_framework = kwargs.get("framework", None)
+        environment_language = kwargs.get("language", None)
+        # TODO: remove business logic from here and create common helper
+        # environment types
+        environment_types = self.environment_controller.get_environment_types()
+        if not environment_type or environment_type not in environment_types:
+            environment_type = self.cli_helper.prompt_available_options(
+                environment_types, option_type="type")
+        # environment frameworks
+        available_framework_details = self.environment_controller.get_supported_frameworks(
+            environment_type)
+        available_frameworks = [
+            item[0] for item in available_framework_details
+        ]
+        if not environment_framework or environment_framework not in available_frameworks:
+            environment_framework = self.cli_helper.prompt_available_options(
+                available_framework_details, option_type="framework")
+        # environment languages
+        available_environment_languages = self.environment_controller.get_supported_languages(
+            environment_type, environment_framework)
+        if available_environment_languages and not environment_language or environment_language not in available_environment_languages:
+            environment_language = self.cli_helper.prompt_available_options(
+                available_environment_languages, option_type="language")
         try:
-            options = {"name": name}
+            options = {
+                "environment_type": environment_type,
+                "environment_framework": environment_framework,
+                "environment_language": environment_language
+            }
             environment_obj = self.environment_controller.setup(
                 options=options)
             self.cli_helper.echo(
@@ -38,7 +60,9 @@ class EnvironmentCommand(ProjectCommand):
             return environment_obj
         except EnvironmentDoesNotExist:
             self.cli_helper.echo(
-                __("error", "cli.environment.setup.argument", name))
+                __("error", "cli.environment.setup.argument",
+                   "%s:%s-%s" % (environment_framework, environment_type,
+                                 environment_language)))
 
     @Helper.notify_no_project_found
     def create(self, **kwargs):

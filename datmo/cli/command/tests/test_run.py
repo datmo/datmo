@@ -42,9 +42,9 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.run import RunObject
 from datmo.cli.command.run import RunCommand
-from datmo.cli.command.task import TaskCommand
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.util.exceptions import SessionDoesNotExist, DoesNotExist
+from datmo.core.util.exceptions import SessionDoesNotExist, DoesNotExist, \
+    MutuallyExclusiveArguments, RequiredArgumentMissing
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -94,7 +94,6 @@ class TestRunCommand():
         dummy(self)
 
         self.run_command = RunCommand(self.cli_helper)
-        self.task_command = TaskCommand(self.cli_helper)
 
         # Create environment_driver definition
         self.env_def_path = os.path.join(self.temp_dir, "Dockerfile")
@@ -169,9 +168,9 @@ class TestRunCommand():
         assert result.environment_id
 
         # teardown
-        self.task_command.parse(["task", "stop", "--all"])
+        self.run_command.parse(["stop", "--all"])
         # test when all is passed to stop all
-        task_stop_command = self.task_command.execute()
+        self.run_command.execute()
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_run_string_command(self):
@@ -211,9 +210,9 @@ class TestRunCommand():
         assert result
 
         # teardown
-        self.task_command.parse(["task", "stop", "--all"])
+        self.run_command.parse(["stop", "--all"])
         # test when all is passed to stop all
-        task_stop_command = self.task_command.execute()
+        self.run_command.execute()
 
     # def test_multiple_concurrent_run_command(self):
     #     test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
@@ -301,9 +300,9 @@ class TestRunCommand():
         assert result.status == "SUCCESS"
 
         # teardown
-        self.task_command.parse(["task", "stop", "--all"])
+        self.run_command.parse(["stop", "--all"])
         # test when all is passed to stop all
-        task_stop_command = self.task_command.execute()
+        self.run_command.execute()
 
     def test_run_invalid_arg(self):
         self.__set_variables()
@@ -421,11 +420,124 @@ class TestRunCommand():
         self.__set_variables()
         exception_thrown = False
         try:
-            self.task_command.parse(["ls" "--foobar", "foobar"])
+            self.run_command.parse(["ls" "--foobar", "foobar"])
         except Exception:
             exception_thrown = True
         assert exception_thrown
 
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_run_stop_success(self):
+        # 1) Test stop with task_id
+        # 2) Test stop with all
+        self.__set_variables()
+
+        test_command = ["sh", "-c", "echo yo"]
+        test_ports = "8888:8888"
+        test_mem_limit = "4g"
+        test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
+
+        self.run_command.parse([
+            "run", "--ports", test_ports, "--environment-paths",
+            test_dockerfile, "--mem-limit", test_mem_limit, test_command
+        ])
+
+        test_run_obj = self.run_command.execute()
+
+        # 1) Test option 1
+        self.run_command.parse(["stop", "--id", test_run_obj.id])
+
+        # test for desired side effects
+        assert self.run_command.args.id == test_run_obj.id
+
+        # test when task id is passed to stop it
+        run_stop_command = self.run_command.execute()
+        assert run_stop_command == True
+
+        # 2) Test option 2
+        self.run_command.parse(["stop", "--all"])
+
+        # test when all is passed to stop all
+        run_stop_command = self.run_command.execute()
+        assert run_stop_command == True
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_run_stop_failure_required_args(self):
+        self.__set_variables()
+        # Passing wrong task id
+        self.run_command.parse(["stop"])
+        failed = False
+        try:
+            _ = self.run_command.execute()
+        except RequiredArgumentMissing:
+            failed = True
+        assert failed
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_run_stop_failure_mutually_exclusive_vars(self):
+        self.__set_variables()
+        # Passing wrong task id
+        self.run_command.parse(
+            ["stop", "--id", "invalid-task-id", "--all"])
+        failed = False
+        try:
+            _ = self.run_command.execute()
+        except MutuallyExclusiveArguments:
+            failed = True
+        assert failed
+
+    def test_run_stop_failure_invalid_arg(self):
+        self.__set_variables()
+        exception_thrown = False
+        try:
+            self.run_command.parse(["stop" "--foobar", "foobar"])
+        except Exception:
+            exception_thrown = True
+        assert exception_thrown
+
+    def test_run_stop_invalid_task_id(self):
+        self.__set_variables()
+        # Passing wrong task id
+        self.run_command.parse(["stop", "--id", "invalid-task-id"])
+
+        # test when wrong task id is passed to stop it
+        result = self.run_command.execute()
+        assert not result
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_run_delete_success(self):
+        # 1) Test delete with run_id
+        self.__set_variables()
+
+        test_command = ["sh", "-c", "echo yo"]
+        test_ports = "8888:8888"
+        test_mem_limit = "4g"
+        test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
+
+        self.run_command.parse([
+            "run", "--ports", test_ports, "--environment-paths",
+            test_dockerfile, "--mem-limit", test_mem_limit, test_command
+        ])
+
+        test_run_obj = self.run_command.execute()
+
+        # 1) Test option 1
+        self.run_command.parse(["delete", test_run_obj.id])
+
+        # test for desired side effects
+        assert self.run_command.args.id == test_run_obj.id
+
+        # test when task id is passed to delete it
+        run_delete_command = self.run_command.execute()
+        assert run_delete_command == True
+
+    def test_run_delete_invalid_task_id(self):
+        self.__set_variables()
+        # Passing wrong task id
+        self.run_command.parse(["delete", "invalid-task-id"])
+
+        # test when wrong task id is passed to stop it
+        result = self.run_command.execute()
+        assert not result
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_rerun(self):
@@ -455,23 +567,12 @@ class TestRunCommand():
         assert result_run_obj.command == run_obj.command
         assert result_run_obj.status == "SUCCESS"
         assert result_run_obj.logs
-        assert result_run_obj.before_snapshot_id == run_obj.after_snapshot_id
-
-        # 2. Test success rerun
-        self.run_command.parse(
-            ["rerun", "--initial", run_id])
-        result_run_obj = self.run_command.execute()
-        assert result_run_obj
-        assert isinstance(result_run_obj, RunObject)
-        assert result_run_obj.command == run_obj.command
-        assert result_run_obj.status == "SUCCESS"
-        assert result_run_obj.logs
         assert result_run_obj.before_snapshot_id == run_obj.before_snapshot_id
 
         # teardown
-        self.task_command.parse(["task", "stop", "--all"])
+        self.run_command.parse(["stop", "--all"])
         # test when all is passed to stop all
-        task_stop_command = self.task_command.execute()
+        self.run_command.execute()
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_rerun_invalid_arg(self):
