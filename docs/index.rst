@@ -21,6 +21,8 @@ Table of contents
     workflows
     tutorials
     concepts
+    env-setup
+    visualize-snapshots
     cli
     python_sdk
     faq

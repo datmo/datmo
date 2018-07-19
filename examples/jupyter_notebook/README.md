@@ -29,3 +29,4 @@ $ pip install datmo
 | feature  | filename(s) | Instructions |
 | ------------- |:-------------:| -----|
 | Create Snapshot | `snapshot_create_iris_sklearn.ipynb`| (1) Run `$ jupyter notebook snapshot_create_iris_sklearn.ipynb` <br>(2) Run cells in order |
+| Opening a new Jupyter Notebook workspace | N/A | (1) `$ datmo environment setup`, choose any image containing python <br> (2) Run `$ datmo notebook`  |

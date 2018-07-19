@@ -50,3 +50,4 @@ in the example.
 | ------------- |:-------------:| -----|
 | Create Snapshot | `snapshot_create_iris_caret.R`| (1) Open and run `snapshot_create_iris_caret.R` in RStudio <br> (2) See snapshot created with `$ datmo snapshot ls` |
 | Create Snapshot Notebook | `snapshot_create_notebook.Rmd`| (1) Open and run `snapshot_create_notebook.Rmd` in RStudio <br> (2) See snapshot created with `$ datmo snapshot ls` |
+| Open a new RStudio workspace | N/A | (1) `$ datmo environment setup`, choose an image that contains RStudio <br> (2) Run `$ datmo rstudio` |
