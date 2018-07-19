@@ -4,6 +4,10 @@ Quickstart
 Spinning up a TensorFlow Jupyter Notebook
 --------------------------------------------
 
+0. Install Docker on your system
+
+Find the proper version for your operating system and install Docker from `this page <https://docs.docker.com/install/#supported-platforms>`_. Check that Docker is installed and running before moving forward.
+
 1. Install datmo using pip:
 
 ``$ pip install datmo``
@@ -12,9 +16,11 @@ Spinning up a TensorFlow Jupyter Notebook
 
 ``$ datmo init``
 
-3. Create a name and description. When prompted for a desired environment, type:
-
-``tensorflow:cpu``
+3. Create a name and description. When prompted to setup an environment, respond with the following answers:
+    - Would you like to set up an environment? : ``y``
+    - Please select one of the above enviornment type (e.g. 1 or gpu): ``cpu``
+    - Please select one of the above environments (e.g. 1 or data-analytics): ``keras-tensorflow``
+    - Please select one of the above environment language (e.g. py27): ``py27``
 
 4. Open a jupyter notebook automatically with:
 
