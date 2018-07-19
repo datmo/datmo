@@ -11,6 +11,3 @@ your current code with current Python projects. If you aren't using Python, see 
    :maxdepth: 3
 
    source/datmo.snapshot.rst
-   source/datmo.task.rst
-   source/datmo.config.rst
-
