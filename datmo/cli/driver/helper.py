@@ -168,28 +168,36 @@ class Helper():
                 self.echo("(%s) %s" % (idx + 1, option))
         input_environment_option = self.prompt(
             __("prompt", "cli.environment.setup.%s" % option_type))
-        try:
-            if input_environment_option:
-                option_environment_index = int(input_environment_option)
-            else:
-                raise ValueError
-        except ValueError:
+        option_environment_index = None
+        valid_option = False
+        while input_environment_option is not None and not valid_option:
             try:
-                option_environment_index = available_options.index(
-                    input_environment_option) + 1
+                option_environment_index = int(input_environment_option)
+                if 0 < option_environment_index <= len(available_options):
+                    valid_option = True
+                else:
+                    raise ValueError
             except ValueError:
-                self.echo(
-                    __("warn",
-                       "cli.environment.setup.argument.%s" % option_type,
-                       input_environment_option))
-                option_environment_index, input_environment_option = None, None
-        if option_environment_index is not None and \
-                0 < option_environment_index <= len(available_options):
+                try:
+                    option_environment_index = available_options.index(
+                        input_environment_option) + 1
+                    valid_option = True
+                except ValueError:
+                    self.echo(
+                        __("warn",
+                           "cli.environment.setup.argument.unavailable.%s" % option_type,
+                           input_environment_option))
+                    input_environment_option = self.prompt(
+                        __("prompt", "cli.environment.setup.%s" % option_type))
+        if option_environment_index is not None:
             input_environment_option = available_options[
                 option_environment_index - 1]
 
         if input_environment_option is None or option_environment_index <= 0 or\
                 option_environment_index > len(available_options):
+            self.echo(
+                __("warn",
+                   "cli.environment.setup.argument.%s" % option_type))
             if option_type == "type":
                 input_environment_option = "cpu"
             elif option_type == "framework":
