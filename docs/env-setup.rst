@@ -63,8 +63,8 @@ There are instances where you may want to add additional components to your envi
 
      .. code-block:: none
          
-         COPY requirements.txt
-         RUN pip install -r requirements.txt
+         COPY requirements.txt /tmp/requirements.txt
+         RUN pip install -r /tmp/requirements.txt
 
 -----
 
