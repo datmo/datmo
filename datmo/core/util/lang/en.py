@@ -116,12 +116,18 @@ MESSAGES = {
             "Error cleaning up project code",
         "controller.project.cleanup.files":
             "Error cleaning up project files",
+        "cli.environment.setup.argument.unavailable.type":
+            "This name or index does not match any supported environment types: %s, please re-enter the type",
+        "cli.environment.setup.argument.unavailable.framework":
+            "This name or index does not match any supported environment frameworks: %s, please re-enter the framework",
+        "cli.environment.setup.argument.unavailable.language":
+            "This name or index does not match any supported environment language: %s, please re-enter the option",
         "cli.environment.setup.argument.type":
-            "This name or index does not match any supported environment types: %s, using default: cpu ",
+            "No user input detected for environment type, defaulting to option: cpu",
         "cli.environment.setup.argument.framework":
-            "This name or index does not match any supported environments: %s, using default: python-base",
+            "No user input detected for environment framework, defaulting to option: python-base",
         "cli.environment.setup.argument.language":
-            "This name or index does not match any supported environment language: %s, using default: py27",
+            "No user input detected for environment language, defaulting to option: py27",
     },
     "error": {
         "exception.validationfailed":

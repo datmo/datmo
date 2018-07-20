@@ -417,7 +417,8 @@ def get_datmo_parser():
 
     snapshot_create = snapshot_subcommand_parsers.add_parser(
         "create",
-        description=__("argparser", "cli.snapshot.create.description"))
+        description=__("argparser", "cli.snapshot.create.description"),
+        help="create a snapshot")
     snapshot_create.add_argument(
         "--message",
         "-m",
