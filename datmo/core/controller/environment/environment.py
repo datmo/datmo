@@ -438,9 +438,6 @@ class EnvironmentController(BaseController):
             all_match_string = "datmo-task-" + self.model.id
             stop_success = self.environment_driver.stop_remove_containers_by_term(
                 term=all_match_string, force=True)
-        # Remove artifacts associated with the environment_driver
-        if environment_id:
-            self.environment_driver.remove(environment_id, force=True)
         return stop_success
 
     def exists(self, environment_id=None, environment_unique_hash=None):
