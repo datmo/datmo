@@ -57,6 +57,33 @@ and get started with your own projects.
 
 For more advanced tutorials, check out our dedicated tutorial repository [here](https://github.com/datmo/datmo-tutorials).
 
+
+### Environment Setup
+
+Setting up an environment is extremely easy in datmo. Simply run `datmo environment setup` and follow the prompts. 
+
+<p align="center">
+    One example is shown below, for setting up a Python 2.7 TensorFlow with CPU reqs/drivers.
+    <br><br>
+    <img src="/images/env-setup.gif">
+</p>
+
+For the full guide on setting up your environment with datmo, see this page in our documentation [here](https://datmo.readthedocs.io/en/latest/env-setup.html).
+
+
+### Opening a workspace
+
+After getting your environment setup, most developers want to open what we call a workspace (IDE or Notebook programming environment)
+
+<p align="center">
+    One example is shown below, for quickly opening a Jupyter Notebook and showing the import of TensorFlow working as intended.
+    <br><br>
+    <img src="/images/datmo-notebook.gif">
+</p>
+
+
+### Experiment Running and Tracking
+
 Here's a comparison of a typical logistic regression model with one leveraging Datmo.
 
 <table class="tg">
