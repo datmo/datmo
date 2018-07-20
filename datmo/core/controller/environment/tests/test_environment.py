@@ -943,15 +943,6 @@ class TestEnvironmentController():
 
         assert return_code
 
-        # 4) Test option 4
-        failed = False
-        try:
-            _, _, _ = \
-                self.environment_controller.run(environment_obj.id, run_options_2, log_filepath)
-        except EnvironmentExecutionError:
-            failed = True
-        assert failed
-
     def test_exists(self):
         # Test failure, not initialized
         failed = False
