@@ -125,11 +125,17 @@ class EnvironmentController(BaseController):
                 definition_path=self.file_driver.environment_directory)
         except Exception:
             raise
+        name = options.get('name', None)
+        if name is None:
+            environment_framework = options['environment_framework']
+            environment_type = options['environment_type']
+            environment_language = options['environment_language']
+            if environment_language:
+                name = "%s:%s-%s" % (environment_framework, environment_type, environment_language)
+            else:
+                name = "%s:%s" % (environment_framework, environment_type)
         create_dict = {
-            "name":
-                options['name'] if options.get('name', None) else "%s:%s-%s" %
-                (options['environment_framework'], options['environment_type'],
-                 options['environment_language']),
+            "name": name,
             "description":
                 "supported environment created by datmo"
         }

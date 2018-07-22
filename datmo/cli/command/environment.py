@@ -28,7 +28,7 @@ class EnvironmentCommand(ProjectCommand):
         # TODO: remove business logic from here and create common helper
         # environment types
         environment_types = self.environment_controller.get_environment_types()
-        if not environment_type or environment_type not in environment_types:
+        if environment_types and environment_type not in environment_types:
             environment_type = self.cli_helper.prompt_available_options(
                 environment_types, option_type="type")
         # environment frameworks
@@ -37,13 +37,13 @@ class EnvironmentCommand(ProjectCommand):
         available_frameworks = [
             item[0] for item in available_framework_details
         ]
-        if not environment_framework or environment_framework not in available_frameworks:
+        if available_frameworks and environment_framework not in available_frameworks:
             environment_framework = self.cli_helper.prompt_available_options(
                 available_framework_details, option_type="framework")
         # environment languages
         available_environment_languages = self.environment_controller.get_supported_languages(
             environment_type, environment_framework)
-        if available_environment_languages and not environment_language or environment_language not in available_environment_languages:
+        if available_environment_languages and environment_language not in available_environment_languages:
             environment_language = self.cli_helper.prompt_available_options(
                 available_environment_languages, option_type="language")
         try:
