@@ -139,6 +139,19 @@ class TestEnvironmentCommand():
         assert "FROM datmo/data-analytics:cpu-py27" in open(
             definition_filepath, "r").read()
 
+        # Test success with correct prompt input using numbers
+        self.environment_command.parse(["environment", "setup"])
+
+        @self.environment_command.cli_helper.input(
+            "cpu\ncaffe2\n")
+        def dummy(self):
+            return self.environment_command.execute()
+        result = dummy(self)
+        assert result
+        assert os.path.isfile(definition_filepath)
+        assert "FROM datmo/caffe2:cpu" in open(
+            definition_filepath, "r").read()
+
         # Test success with correct prompt input using string
         self.environment_command.parse(["environment", "setup"])
 
