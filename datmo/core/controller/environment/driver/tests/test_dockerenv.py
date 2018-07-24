@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import os
 import tempfile
 import platform
+import threading
 import uuid
 import timeout_decorator
 from io import open
@@ -662,6 +663,34 @@ class TestDockerEnv():
         container_obj = self.docker_environment_driver.run_container(
             self.image_name, api=True, detach=True)
         assert container_obj
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_extract_workspace_url(self):
+        # TODO: test with all variables provided
+        with open(self.dockerfile_path, "wb") as f:
+            f.write(to_bytes("FROM datmo/python-base:cpu-py27-notebook" + os.linesep))
+            f.write(to_bytes(str("RUN echo " + self.random_text)))
+        self.docker_environment_driver.build_image(self.image_name,
+                                                   self.dockerfile_path)
+
+        def dummy(self, name, workspace):
+            workspace_url = self.environment_driver.extract_workspace_url(name, workspace)
+            assert workspace_url
+
+        thread = threading.Thread(target=dummy, args=(self.image_name, "notebook"))
+        thread.daemon = True  # Daemonize thread
+        thread.start()  # Start the execution
+
+        @timeout_decorator.timeout(10, use_signals=False)
+        def timed_run(self):
+            return_code, container_id = \
+                self.docker_environment_driver.run_container(self.image_name)
+            return return_code, container_id
+
+        return_code, container_id  = timed_run(self)
+        # teardown container
+        self.docker_environment_driver.stop(container_id, force=True)
+
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_get_container(self):

@@ -162,6 +162,24 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
+    def extract_workspace_url(self, container_name, workspace=None):
+        """Extract workspace url from the container
+
+        Parameters
+        ----------
+        container_name : str
+            name of the container being run
+        workspace : str
+            workspace being used for the run
+
+        Returns
+        -------
+        str
+            web url for the workspace being run, None if it doesn't exist
+        """
+        pass
+
+    @abstractmethod
     def run(self, name, options, log_filepath):
         """Run and log an instance of the environment with the options given
 
