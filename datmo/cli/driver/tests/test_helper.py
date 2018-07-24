@@ -10,6 +10,7 @@ from builtins import input
 
 import os
 import sys
+import pytest
 import tempfile
 import platform
 try:
@@ -174,6 +175,79 @@ class TestHelper():
 
         i = dummy()
         assert i == False
+
+    def test_prompt_available_options(self):
+
+        # Setting up environment type
+        available_options = ["cpu", "gpu"]
+        option_type = "type"
+
+        @self.cli.input("cpu\n")
+        def dummy(self):
+            return self.cli.prompt_available_options(available_options, option_type)
+
+        result = dummy(self)
+        assert result
+        assert result == "cpu"
+
+        @self.cli.input("\n")
+        def dummy(self):
+            return self.cli.prompt_available_options(available_options, option_type)
+
+        result = dummy(self)
+        assert result
+        assert result == "cpu"
+
+        # Setting up environment framework
+        available_options = [["keras-tensorflow", "has libraries for keras(v2.1.6) and tensorflow(v1.9.0) along with sklearn, opencv etc."],
+                             ["mxnet", "has libraries for mxnet(v1.1.0) along with sklearn, opencv etc."]]
+        option_type = "framework"
+
+        @self.cli.input("mxnet\n")
+        def dummy(self):
+            return self.cli.prompt_available_options(available_options, option_type)
+
+        result = dummy(self)
+        assert result
+        assert result == "mxnet"
+
+        @self.cli.input("\n")
+        def dummy(self):
+            return self.cli.prompt_available_options(available_options, option_type)
+
+        result = dummy(self)
+        assert result
+        assert result == "python-base"
+
+        available_options = ["py27", "py35"]
+        option_type = "language"
+
+        @self.cli.input("py27\n")
+        def dummy(self):
+            return self.cli.prompt_available_options(available_options, option_type)
+
+        result = dummy(self)
+        assert result
+        assert result == "py27"
+
+        @self.cli.input("\n")
+        def dummy(self):
+            return self.cli.prompt_available_options(available_options, option_type)
+
+        result = dummy(self)
+        assert result
+        assert result == "py27"
+
+        # quit
+        @self.cli.input("quit\n")
+        def dummy(self):
+            return self.cli.prompt_available_options(available_options, option_type)
+
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            dummy(self)
+
+        assert pytest_wrapped_e.type == SystemExit
+        assert pytest_wrapped_e.value.code == 0
 
     def test_prompt_validator(self):
         def validate_y(val):
