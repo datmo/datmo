@@ -44,8 +44,6 @@ more granular control and workflow integration.
 Requirements
 ------------
 
--  `openssl <https://github.com/openssl/openssl/blob/master/INSTALL>`__
--  `git <https://git-scm.com/book/en/v2/Getting-Started-Installing-Git>`__
 -  `docker <https://docs.docker.com/engine/installation/>`__
 
 Installation
