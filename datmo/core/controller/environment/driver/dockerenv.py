@@ -473,9 +473,11 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 if process.returncode > 0:
                     time.sleep(1)
                     timeout_count += 1
-                workspace_url = re.search("(?P<url>https?://[^\s]+)", stdout).group("url") if stdout else None
+                result = re.search("(?P<url>https?://[^\s]+)", stdout) if stdout else None
+                workspace_url = result.group("url") if result else None
             return workspace_url
         elif workspace == 'rstudio':
+            # Having a pause for two seconds before returning url
             time.sleep(2)
             workspace_url = 'http://localhost:8787'
         else:
