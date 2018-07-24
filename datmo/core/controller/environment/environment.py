@@ -299,6 +299,23 @@ class EnvironmentController(BaseController):
         shutil.rmtree(_temp_env_dir)
         return result
 
+    def extract_workspace_url(self, name, workspace=None):
+        """Extract workspace url from the environment
+
+        Parameters
+        ----------
+        name : str
+            name of the environment being run
+        workspace : str
+            workspace being used for the run
+
+        Returns
+        -------
+        str
+            web url for the workspace being run, None if it doesn't exist
+        """
+        return self.environment_driver.extract_workspace_url(name, workspace)
+
     def run(self, environment_id, options, log_filepath):
         """Run and log an instance of the environment with the options given
 
