@@ -32,6 +32,10 @@ class Task():
         command_list : list or None
             command that is used by the task in list form (same as above)
             (default is None, which means it isn't set yet)
+        data_file_path_map: list
+            list of tuple, mapping the source absolute file path to destination relative file path
+        data_directory_path_map: list
+            list of tuple, mapping the source absolute directory path to destination relative directory path
         interactive : bool, optional
             boolean to signify if task should be run in interactive mode
             (default is False, which means no interactive mode unless specified)
@@ -106,6 +110,10 @@ class Task():
         (e.g. ["9999:9999", "8888:8888"])
     task_dirpath : str or None
         task directory path relative to the project root
+    data_file_path_map: list
+            list of tuple, mapping the source absolute file path to destination relative file path
+    data_directory_path_map: list
+        list of tuple, mapping the source absolute directory path to destination relative directory path
     log_filepath : str or None
         log filepath relative to the project root
     start_time : datetime.datetime or None
@@ -143,6 +151,9 @@ class Task():
         self.mem_limit = dictionary.get('mem_limit', None)
         self.workspace = dictionary.get('workspace', None)
         self.ports = dictionary.get('ports', None)
+        self.task_dirpath = dictionary.get('task_dirpath', None)
+        self.data_file_path_map = dictionary.get('data_file_path_map', None)
+        self.data_directory_path_map = dictionary.get('data_directory_path_map', None)
         self.task_dirpath = dictionary.get('task_dirpath', None)
         self.log_filepath = dictionary.get('log_filepath', None)
         self.start_time = dictionary.get('start_time', None)

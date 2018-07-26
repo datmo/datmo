@@ -313,7 +313,7 @@ class TestLocalFileDriver():
                                         "collections")
 
         # Test empty file collection already exists
-        filehash_empty = self.local_file_driver. \
+        filehash_empty, _, _ = self.local_file_driver. \
             create_collection([])
         collection_path_empty = os.path.join(collections_path, filehash_empty)
 
@@ -321,7 +321,7 @@ class TestLocalFileDriver():
         assert len(os.listdir(collections_path)) == 1
 
         # Test creating another empty file collection (should not fail again)
-        filehash_empty = self.local_file_driver. \
+        filehash_empty, _, _ = self.local_file_driver. \
             create_collection([])
         collection_path_empty = os.path.join(collections_path, filehash_empty)
 
@@ -336,7 +336,7 @@ class TestLocalFileDriver():
         dirpath1 = os.path.join(self.local_file_driver.root, "dirpath1")
         dirpath2 = os.path.join(self.local_file_driver.root, "dirpath2")
         filepath1 = os.path.join(self.local_file_driver.root, "filepath1")
-        filehash = self.local_file_driver.\
+        filehash, _, _ = self.local_file_driver.\
             create_collection([dirpath1, dirpath2, filepath1])
         collection_path = os.path.join(collections_path, filehash)
 
@@ -494,7 +494,7 @@ class TestLocalFileDriver():
 
     def test_get_absolute_collection_path(self):
         self.local_file_driver.init()
-        filehash = self.local_file_driver. \
+        filehash, _, _ = self.local_file_driver. \
             create_collection([])
         collection_path = os.path.join(self.local_file_driver.datmo_directory,
                                        "collections", filehash)
@@ -504,7 +504,7 @@ class TestLocalFileDriver():
 
     def test_get_relative_collection_path(self):
         self.local_file_driver.init()
-        filehash = self.local_file_driver. \
+        filehash, _, _ = self.local_file_driver. \
             create_collection([])
         relative_collection_path = os.path.join(
             self.local_file_driver.datmo_directory_name, "collections",
@@ -515,7 +515,7 @@ class TestLocalFileDriver():
 
     def test_exists_collection(self):
         self.local_file_driver.init()
-        filehash = self.local_file_driver.create_collection([])
+        filehash, _, _ = self.local_file_driver.create_collection([])
         collection_path = os.path.join(self.local_file_driver.datmo_directory,
                                        "collections", filehash)
         result = self.local_file_driver.exists_collection(filehash)
@@ -525,7 +525,7 @@ class TestLocalFileDriver():
     def test_get_collection_files(self):
         self.local_file_driver.init()
         # Test empty file collection default mode
-        filehash_empty = self.local_file_driver. \
+        filehash_empty, _, _ = self.local_file_driver. \
             create_collection([])
         result = self.local_file_driver.get_collection_files(filehash_empty)
         assert not result
@@ -542,7 +542,7 @@ class TestLocalFileDriver():
         dirpath2 = os.path.join(self.local_file_driver.root, "dirpath2")
         filepath3 = os.path.join(self.local_file_driver.root, "filepath3")
 
-        filehash = self.local_file_driver. \
+        filehash, _, _ = self.local_file_driver. \
             create_collection([dirpath1, dirpath2, filepath3])
 
         # Absolute file paths after added to collection (to test)
@@ -567,7 +567,7 @@ class TestLocalFileDriver():
 
     def test_delete_collection(self):
         self.local_file_driver.init()
-        filehash = self.local_file_driver.create_collection([])
+        filehash, _, _ = self.local_file_driver.create_collection([])
         collection_path = os.path.join(self.local_file_driver.datmo_directory,
                                        "collections", filehash)
         result = self.local_file_driver.delete_collection(filehash)
@@ -576,10 +576,10 @@ class TestLocalFileDriver():
 
     def test_list_file_collections(self):
         self.local_file_driver.init()
-        filehash_1 = self.local_file_driver.create_collection([])
+        filehash_1, _, _ = self.local_file_driver.create_collection([])
         self.local_file_driver.create("filepath1")
         filepath1 = os.path.join(self.local_file_driver.root, "filepath1")
-        filehash_2 = self.local_file_driver.create_collection([filepath1])
+        filehash_2, _, _ = self.local_file_driver.create_collection([filepath1])
         collection_list = self.local_file_driver.list_file_collections()
         assert filehash_1 in collection_list and \
                filehash_2 in collection_list
@@ -594,7 +594,7 @@ class TestLocalFileDriver():
         dirpath2 = os.path.join(self.local_file_driver.root, "dirpath2")
         filepath1 = os.path.join(self.local_file_driver.root, "filepath1")
         self.local_file_driver.init()
-        filehash = self.local_file_driver. \
+        filehash, _, _ = self.local_file_driver. \
             create_collection([dirpath1, dirpath2, filepath1])
         dst_dirpath = os.path.join(self.temp_dir, "new_dir")
         self.local_file_driver.create(dst_dirpath, directory=True)

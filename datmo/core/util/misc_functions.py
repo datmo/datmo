@@ -320,9 +320,13 @@ def parse_paths(default_src_prefix, paths, dest_prefix):
     Returns
     -------
     files : list
-        list of tuples of the form (absolute_source_path, absolute_dest_filepath)
+        list of file tuples of the form (absolute_source_path, absolute_dest_filepath)
     directories : list
-        list of tuples of the form (absolute_source_path, absolute_dest_filepath)
+        list of directory tuples of the form (absolute_source_path, absolute_dest_filepath)
+    files_rel : list
+        list of file tuples of the form (absolute_source_path, relative_dest_path)
+    directories_rel : list
+        list of directory tuples of the form (absolute_source_path, relative_dest_path)
 
     Raises
     ------
@@ -331,8 +335,7 @@ def parse_paths(default_src_prefix, paths, dest_prefix):
     PathDoesNotExist
         if the path does not exist
     """
-    files = []
-    directories = []
+    files, files_rel, directories, directories_rel = [], [], [], []
     for path in paths:
         src_path, dest_name = parse_path(path)
         # For dest_name, append the dest_prefix
@@ -345,8 +348,10 @@ def parse_paths(default_src_prefix, paths, dest_prefix):
         # Check if source is file or directory and save accordingly
         if os.path.isfile(src_abs_path):
             files.append((src_abs_path, dest_abs_path))
+            files_rel.append((src_abs_path, dest_name))
         elif os.path.isdir(src_abs_path):
             directories.append((src_abs_path, dest_abs_path))
+            directories_rel.append((src_abs_path, dest_name))
         else:
             raise PathDoesNotExist(src_abs_path)
-    return files, directories
+    return files, directories, files_rel, directories_rel

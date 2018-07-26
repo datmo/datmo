@@ -71,7 +71,8 @@ class FileCollectionController(BaseController):
             ])
 
         # Parse paths to create collection and add in filehash
-        create_dict['filehash'] = self.file_driver.create_collection(paths)
+        create_dict['filehash'], create_dict['file_path_map'], create_dict['directory_path_map'] =\
+            self.file_driver.create_collection(paths)
         # If file collection with filehash exists, return it
         results = self.dal.file_collection.query({
             "filehash": create_dict['filehash']

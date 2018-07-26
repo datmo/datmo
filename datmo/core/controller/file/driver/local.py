@@ -222,13 +222,15 @@ class LocalFileDriver(FileDriver):
         self.ensure_collections_dir()
         temp_collection_path = get_datmo_temp_path(self.root)
 
+        _, _, files_rel, dirs_rel = parse_paths(self.root, paths, temp_collection_path)
+
         filehash = self.calculate_hash_paths(paths, temp_collection_path)
 
         # Move contents to folder with filehash as name and remove temp_collection_path
         collection_path = os.path.join(self.datmo_directory, "collections",
                                        filehash)
         if os.path.isdir(collection_path):
-            return filehash
+            return filehash, files_rel, dirs_rel
             # raise FileStructureError("exception.file.create_collection", {
             #     "exception": "File collection with id already exists."
             # })
@@ -246,11 +248,11 @@ class LocalFileDriver(FileDriver):
 
         # Removing temp collection path
         shutil.rmtree(temp_collection_path)
-        return filehash
+        return filehash, files_rel, dirs_rel
 
     def calculate_hash_paths(self, paths, directory):
         try:
-            files, dirs = parse_paths(self.root, paths, directory)
+            files, dirs, _, _ = parse_paths(self.root, paths, directory)
         except PathDoesNotExist as e:
             raise PathDoesNotExist(
                 __("error",
