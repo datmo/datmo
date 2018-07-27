@@ -101,20 +101,20 @@ class TestMain():
             success = False
         assert success
 
-    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_run(self):
-        try:
-            success = True
-            p = self.command_run([self.execpath, "run", "python script.py"])
-            out, err = p.communicate()
-            out, err = out.decode(), err.decode()
-            if err:
-                success = False
-            elif 'hello' not in out:
-                success = False
-        except Exception:
-            success = False
-        assert success
+    # @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    # def test_run(self):
+    #     try:
+    #         success = True
+    #         p = self.command_run([self.execpath, "run", "python script.py"])
+    #         out, err = p.communicate()
+    #         out, err = out.decode(), err.decode()
+    #         if err:
+    #             success = False
+    #         elif 'hello' not in out:
+    #             success = False
+    #     except Exception:
+    #         success = False
+    #     assert success
 
     def test_run_ls(self):
         try:
