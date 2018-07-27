@@ -168,6 +168,68 @@ class TaskController(BaseController):
             results = None
         return results
 
+    def _update_environment_run_options(self, environment_run_option, data_file_path_map, data_directory_path_map):
+        """Update environment run option dictionary with data file and directory mapping and return dictionary.
+
+        Parameters
+        ----------
+        data_file_path_map : list
+            list of tuple containing source file absolute path and destination file name
+
+        data_directory_path_map : list
+            list of tuple containing source directory absolute path and destination directory
+
+        Returns
+        -------
+        dict
+            updated dictionary having the environment run options
+        """
+        if data_file_path_map:
+            # Mount the directory for file path
+            if len(data_file_path_map) > 1:
+                raise TaskRunError(
+                    __("error", "cli.run.run.data.files.limit_exceeded"))
+            # select only one tuple, the latest file
+            data_tuple = data_file_path_map[-1]
+            data_file_src_abs_path, data_dst_rel_path = data_tuple
+            # check if the file exists
+            if not os.path.isfile(data_file_src_abs_path):
+                raise TaskRunError(
+                    __("error", "cli.run.run.data.src_file.dne",
+                       data_file_src_abs_path))
+
+            data_file_dirname = os.path.dirname(data_file_src_abs_path)
+            # check if the directory exists
+            if not os.path.isdir(data_file_dirname):
+                raise TaskRunError(
+                    __("error", "cli.run.run.data.src_dir.dne",
+                       data_file_dirname))
+
+            data_volume = {os.path.dirname(data_file_src_abs_path):
+                               {'bind': '/data/',
+                                'mode': 'rw'}}
+            if environment_run_option["volumes"]:
+                environment_run_option["volumes"].update(data_volume)
+            else:
+                environment_run_option["volumes"] = data_volume
+
+        if data_directory_path_map:
+            # Mount the directory for data
+            for data_tuple in data_directory_path_map:
+                data_src_abs_path, data_dst_rel_path = data_tuple
+                if not os.path.isdir(data_src_abs_path):
+                    raise TaskRunError(
+                        __("error", "cli.run.run.data.src_dir.dne",
+                           data_src_abs_path))
+                data_volume = {data_src_abs_path:
+                                   {'bind': '/data/%s' % data_dst_rel_path,
+                                    'mode': 'rw'}}
+                if environment_run_option["volumes"]:
+                    environment_run_option["volumes"].update(data_volume)
+                else:
+                    environment_run_option["volumes"] = data_volume
+        return environment_run_option
+
     def run(self, task_id, snapshot_dict=None, task_dict=None):
         """Run a task with parameters. If dictionary specified, create a new task with new run parameters.
         Snapshot objects are created before and after the task to keep track of the state. During the run,
@@ -264,6 +326,12 @@ class TaskController(BaseController):
                 task_dict.get('mem_limit', None),
             "workspace":
                 task_dict.get('workspace', None),
+            "data_file_path_map":
+                task_dict.get('data_file_path_map',
+                              task_obj.data_file_path_map),
+            "data_directory_path_map":
+                task_dict.get('data_directory_path_map',
+                              task_obj.data_directory_path_map),
             "interactive":
                 task_dict.get('interactive', task_obj.interactive),
             "detach":
@@ -300,16 +368,7 @@ class TaskController(BaseController):
                 "command": task_obj.command_list,
                 "ports": [] if task_obj.ports is None else task_obj.ports,
                 "name": "datmo-task-" + self.model.id + "-" + task_obj.id,
-                "volumes": {
-                    os.path.join(self.home, task_obj.task_dirpath): {
-                        'bind': '/task/',
-                        'mode': 'rw'
-                    },
-                    self.home: {
-                        'bind': '/home/',
-                        'mode': 'rw'
-                    }
-                },
+                "volumes": {},
                 "mem_limit": task_obj.mem_limit,
                 "workspace": task_obj.workspace,
                 "gpu": task_obj.gpu,
@@ -318,6 +377,21 @@ class TaskController(BaseController):
                 "tty": task_obj.interactive,
                 "api": False
             }
+            # mount the data volume
+            environment_run_options = self._update_environment_run_options(environment_run_options,
+                                                                           data_file_path_map=task_obj.data_file_path_map,
+                                                                           data_directory_path_map=task_obj.data_directory_path_map)
+            # mount the project and task folder
+            environment_run_options["volumes"].update({
+                    os.path.join(self.home, task_obj.task_dirpath): {
+                        'bind': '/task/',
+                        'mode': 'rw'
+                    },
+                    self.home: {
+                        'bind': '/home/',
+                        'mode': 'rw'
+                    }
+                })
             # Run environment via the helper function
             return_code, run_id, logs =  \
                 self._run_helper(before_snapshot_obj.environment_id,

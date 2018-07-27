@@ -131,3 +131,9 @@ create_task:
   log_filepath:
     nullable: true
     type: string
+  data_file_path_map:
+    nullable: true
+    type: list
+  data_directory_path_map:
+    nullable: true
+    type: list

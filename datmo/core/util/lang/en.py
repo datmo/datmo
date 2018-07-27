@@ -162,6 +162,12 @@ MESSAGES = {
             "No session found with given name or id: %s",
         "cli.run.run":
             "Error while running the script: %s",
+        "cli.run.run.data.files.limit_exceeded":
+            "Limit by passing only one file. Else, pass directories for data",
+        "cli.run.run.data.src_dir.dne":
+            "Data directory being passed doesn't exist: %s",
+        "cli.run.run.data.src_file.dne":
+            "Data file being passed doesn't exist: %s",
         "cli.run.run.already_running":
             "Already running with id: %s",
         "cli.run.stop":
