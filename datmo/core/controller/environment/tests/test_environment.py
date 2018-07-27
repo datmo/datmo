@@ -3,7 +3,7 @@ Tests for EnvironmentController
 """
 import os
 import uuid
-import shutil
+import threading
 import tempfile
 import platform
 import timeout_decorator
@@ -473,6 +473,32 @@ class TestEnvironmentController():
         result = self.environment_controller.build(
             environment_obj_4.id, workspace="notebook")
         assert result
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_extract_workspace_url(self):
+        # Create environment definition
+        self.project_controller.init("test5", "test description")
+        self.environment_controller = EnvironmentController()
+        definition_filepath = os.path.join(self.environment_controller.home,
+                                           "Dockerfile")
+        random_text = str(uuid.uuid1())
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes("FROM datmo/python-base:cpu-py27-notebook" + os.linesep))
+            f.write(to_bytes(str("RUN echo " + random_text)))
+
+        image_name = "test"
+        input_dict = {
+            "name": image_name,
+            "description": "test description"
+        }
+        # Create environment in the project
+        environment_obj = self.environment_controller.create(input_dict,
+                                                             save_hardware_file=False)
+        self.environment_controller.build(environment_obj.id)
+
+        # Test when there is no container being run
+        workspace_url = self.environment_controller.extract_workspace_url(image_name, "notebook")
+        assert workspace_url == None
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_run(self):

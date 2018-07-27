@@ -9,6 +9,7 @@ import os
 import tempfile
 import platform
 import threading
+import Queue
 import uuid
 import timeout_decorator
 from io import open
@@ -673,23 +674,43 @@ class TestDockerEnv():
         self.docker_environment_driver.build_image(self.image_name,
                                                    self.dockerfile_path)
 
-        def dummy(self, name, workspace):
-            workspace_url = self.environment_driver.extract_workspace_url(name, workspace)
-            assert workspace_url
+        random_container_id = str(uuid.uuid1())
+        my_queue = Queue.Queue()
 
-        thread = threading.Thread(target=dummy, args=(self.image_name, "notebook"))
+        def dummy(self, name, workspace, out_queue):
+            workspace_url = self.docker_environment_driver.extract_workspace_url(name, workspace)
+            out_queue.put(workspace_url)
+
+        @timeout_decorator.timeout(20, use_signals=False)
+        def timed_run(self):
+            return_code, container_id = \
+                self.docker_environment_driver.run_container(self.image_name,
+                                                             name=random_container_id,
+                                                             command=['jupyter', 'notebook', '--allow-root'])
+            return return_code, container_id
+
+        thread = threading.Thread(target=dummy, args=(self, random_container_id,
+                                                      "notebook", my_queue))
         thread.daemon = True  # Daemonize thread
         thread.start()  # Start the execution
 
-        @timeout_decorator.timeout(10, use_signals=False)
-        def timed_run(self):
-            return_code, container_id = \
-                self.docker_environment_driver.run_container(self.image_name)
-            return return_code, container_id
+        timed_run_result = False
+        try:
+            _, _ = timed_run(self)
+        except timeout_decorator.timeout_decorator.TimeoutError:
+            timed_run_result = True
+        thread.join()
+        assert timed_run_result
+        # asserting the workspace url to be passed
+        workspace_url = my_queue.get() # get the workspace url
+        assert 'http' in workspace_url
 
-        return_code, container_id  = timed_run(self)
+        # Test when there is no container being run
+        workspace_url = self.docker_environment_driver.extract_workspace_url(self.image_name, "notebook")
+        assert workspace_url == None
+
         # teardown container
-        self.docker_environment_driver.stop(container_id, force=True)
+        self.docker_environment_driver.stop(random_container_id, force=True)
 
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
