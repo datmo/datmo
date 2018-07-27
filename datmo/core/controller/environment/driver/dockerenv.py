@@ -1,5 +1,7 @@
 import ast
 import os
+import re
+import time
 import json
 import subprocess
 import platform
@@ -436,6 +438,51 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                    "controller.environment.driver.docker.remove_images",
                    str(e)))
         return True
+
+    def extract_workspace_url(self, container_name, workspace=None):
+        """Extract workspace url from the container
+
+        Parameters
+        ----------
+        container_name : str
+            name of the container being run
+        workspace : str
+            workspace being used for the run
+
+        Returns
+        -------
+        str
+            web url for the workspace being run, None if it doesn't exist
+
+        """
+        if workspace in ['notebook', 'jupyterlab']:
+            docker_shell_cmd_list = list(self.prefix)
+            docker_shell_cmd_list.append("exec")
+            docker_shell_cmd_list.append(container_name)
+            docker_shell_cmd_list.append("jupyter")
+            docker_shell_cmd_list.append("notebook")
+            docker_shell_cmd_list.append("list")
+            workspace_url = None
+            timeout_count = 0
+            while workspace_url is None and timeout_count < 10:
+                process = subprocess.Popen(
+                    docker_shell_cmd_list,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE)
+                stdout, stderr = process.communicate()
+                if process.returncode > 0:
+                    time.sleep(1)
+                    timeout_count += 1
+                result = re.search("(?P<url>https?://[^\s]+)", stdout.decode('utf-8')) if stdout else None
+                workspace_url = result.group("url") if result else None
+            return workspace_url
+        elif workspace == 'rstudio':
+            # Having a pause for two seconds before returning url
+            time.sleep(2)
+            workspace_url = 'http://localhost:8787'
+        else:
+            workspace_url = None
+        return workspace_url
 
     # running daemon needed
     def run_container(self,

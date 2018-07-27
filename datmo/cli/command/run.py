@@ -404,7 +404,8 @@ class RunCommand(ProjectCommand):
             "ports": task_obj.ports,
             "interactive": task_obj.interactive,
             "mem_limit": task_obj.mem_limit,
-            "command_list": command
+            "command_list": command,
+            "workspace": task_obj.workspace
         }
         # Run task and return Task object result
         new_task_obj = self.task_run_helper(task_dict, snapshot_dict,
