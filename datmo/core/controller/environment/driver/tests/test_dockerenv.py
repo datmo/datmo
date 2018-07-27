@@ -9,7 +9,12 @@ import os
 import tempfile
 import platform
 import threading
-import Queue
+import sys
+is_py2 = sys.version[0] == '2'
+if is_py2:
+    import Queue as queue
+else:
+    import queue as queue
 import uuid
 import timeout_decorator
 from io import open
@@ -675,7 +680,7 @@ class TestDockerEnv():
                                                    self.dockerfile_path)
 
         random_container_id = str(uuid.uuid1())
-        my_queue = Queue.Queue()
+        my_queue = queue.Queue()
 
         def dummy(self, name, workspace, out_queue):
             workspace_url = self.docker_environment_driver.extract_workspace_url(name, workspace)
