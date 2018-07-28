@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 import os
 import glob
 import time
+import pytest
 import uuid
 import tempfile
 import shutil
@@ -138,6 +139,19 @@ class TestEnvironmentCommand():
         assert "FROM datmo/data-analytics:cpu-py27" in open(
             definition_filepath, "r").read()
 
+        # Test success with correct prompt input using numbers
+        self.environment_command.parse(["environment", "setup"])
+
+        @self.environment_command.cli_helper.input(
+            "cpu\ncaffe2\n")
+        def dummy(self):
+            return self.environment_command.execute()
+        result = dummy(self)
+        assert result
+        assert os.path.isfile(definition_filepath)
+        assert "FROM datmo/caffe2:cpu" in open(
+            definition_filepath, "r").read()
+
         # Test success with correct prompt input using string
         self.environment_command.parse(["environment", "setup"])
 
@@ -166,16 +180,38 @@ class TestEnvironmentCommand():
         # Test with prompt input string incorrect
         self.environment_command.parse(["environment", "setup"])
 
-        @self.environment_command.cli_helper.input("random\n\n\n")
+        # quit at environment type
+        @self.environment_command.cli_helper.input("quit\n")
         def dummy(self):
             return self.environment_command.execute()
 
-        result = dummy(self)
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            dummy(self)
 
-        assert result
-        assert os.path.isfile(definition_filepath)
-        assert "FROM datmo/python-base:cpu-py27" in open(
-            definition_filepath, "r").read()
+        assert pytest_wrapped_e.type == SystemExit
+        assert pytest_wrapped_e.value.code == 0
+
+        # quit at environment framework
+        @self.environment_command.cli_helper.input("\nquit\n")
+        def dummy(self):
+            return self.environment_command.execute()
+
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            dummy(self)
+
+        assert pytest_wrapped_e.type == SystemExit
+        assert pytest_wrapped_e.value.code == 0
+
+        # quit at environment language
+        @self.environment_command.cli_helper.input("\n\nquit\n")
+        def dummy(self):
+            return self.environment_command.execute()
+
+        with pytest.raises(SystemExit) as pytest_wrapped_e:
+            dummy(self)
+
+        assert pytest_wrapped_e.type == SystemExit
+        assert pytest_wrapped_e.value.code == 0
 
     def test_environment_create(self):
         # 1) Environment definition file in project environment directory (with name / description)

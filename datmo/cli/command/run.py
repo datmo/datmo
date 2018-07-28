@@ -408,7 +408,8 @@ class RunCommand(ProjectCommand):
             "mem_limit": task_obj.mem_limit,
             "command_list": command,
             "data_file_path_map": task_obj.data_file_path_map,
-            "data_directory_path_map": task_obj.data_directory_path_map
+            "data_directory_path_map": task_obj.data_directory_path_map,
+            "workspace": task_obj.workspace
         }
         # Run task and return Task object result
         new_task_obj = self.task_run_helper(task_dict, snapshot_dict,

@@ -157,6 +157,10 @@ class Helper():
 
     def prompt_available_options(self, available_options, option_type):
         """Prompt user to choose an available environment. Returns the environment name"""
+        # If there are no options
+        if not available_options:
+            return None
+        # If there exists list of options
         if option_type == "framework":
             available_options_info = available_options
             available_options = []
@@ -171,6 +175,9 @@ class Helper():
         option_environment_index = None
         valid_option = False
         while input_environment_option is not None and not valid_option:
+            # exit when user wants to quit
+            if input_environment_option in ["q", "quit"]:
+                sys.exit(0)
             try:
                 option_environment_index = int(input_environment_option)
                 if 0 < option_environment_index <= len(available_options):

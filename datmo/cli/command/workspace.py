@@ -28,8 +28,8 @@ class WorkspaceCommand(ProjectCommand):
             "mem_limit": kwargs["mem_limit"],
             "workspace": "notebook"
         }
-
         data_paths = kwargs['data']
+        self.cli_helper.echo(__("info", "cli.workspace.run.notebook"))
         # Run task and return Task object result
         return self.task_run_helper(task_dict, snapshot_dict,
                                     "cli.workspace.notebook",
@@ -55,6 +55,7 @@ class WorkspaceCommand(ProjectCommand):
             "workspace": "jupyterlab"
         }
         data_paths = kwargs['data']
+        self.cli_helper.echo(__("info", "cli.workspace.run.jupyterlab"))
         # Run task and return Task object result
         return self.task_run_helper(task_dict, snapshot_dict,
                                     "cli.workspace.jupyterlab",

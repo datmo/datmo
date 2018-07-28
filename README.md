@@ -41,8 +41,6 @@ feel free contribute by adding issues so the contributors can address them.
 
 ## Requirements
 
-* [openssl](https://github.com/openssl/openssl/blob/master/INSTALL)
-* [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 * [docker](https://docs.docker.com/engine/installation/)
 
 ## Installation
@@ -60,7 +58,7 @@ For more advanced tutorials, check out our dedicated tutorial repository [here](
 
 ### Environment Setup
 
-Setting up an environment is extremely easy in datmo. Simply run `datmo environment setup` and follow the prompts. 
+Setting up an environment is extremely easy in datmo. Simply respond with `y` when asked about environment setup during initialization, or use `datmo environment setup` at any point. Then follow the resulting prompts. 
 
 <p align="center">
     One example is shown below, for setting up a Python 2.7 TensorFlow with CPU reqs/drivers.

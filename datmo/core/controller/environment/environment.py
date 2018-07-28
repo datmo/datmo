@@ -125,11 +125,17 @@ class EnvironmentController(BaseController):
                 definition_path=self.file_driver.environment_directory)
         except Exception:
             raise
+        name = options.get('name', None)
+        if name is None:
+            environment_framework = options['environment_framework']
+            environment_type = options['environment_type']
+            environment_language = options['environment_language']
+            if environment_language:
+                name = "%s:%s-%s" % (environment_framework, environment_type, environment_language)
+            else:
+                name = "%s:%s" % (environment_framework, environment_type)
         create_dict = {
-            "name":
-                options['name'] if options.get('name', None) else "%s:%s-%s" %
-                (options['environment_framework'], options['environment_type'],
-                 options['environment_language']),
+            "name": name,
             "description":
                 "supported environment created by datmo"
         }
@@ -292,6 +298,23 @@ class EnvironmentController(BaseController):
         # Remove both temporary directories
         shutil.rmtree(_temp_env_dir)
         return result
+
+    def extract_workspace_url(self, name, workspace=None):
+        """Extract workspace url from the environment
+
+        Parameters
+        ----------
+        name : str
+            name of the environment being run
+        workspace : str
+            workspace being used for the run
+
+        Returns
+        -------
+        str
+            web url for the workspace being run, None if it doesn't exist
+        """
+        return self.environment_driver.extract_workspace_url(name, workspace)
 
     def run(self, environment_id, options, log_filepath):
         """Run and log an instance of the environment with the options given

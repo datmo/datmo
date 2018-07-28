@@ -1,6 +1,8 @@
 import os
 import time
 import shlex
+import threading
+import webbrowser
 from datetime import datetime
 
 from datmo.core.controller.base import BaseController
@@ -131,11 +133,30 @@ class TaskController(BaseController):
         }
         workspace = options.get('workspace', None)
         self.environment.build(environment_id, workspace)
+        # Start a daemon to run workspace on web browser
+        name = options.get('name', None)
+        if workspace is not None:
+            thread = threading.Thread(target=self._open_workspace, args=(name, workspace))
+            thread.daemon = True  # Daemonize thread
+            thread.start()  # Start the execution
+
         # Run container with environment
         return_code, run_id, logs = self.environment.run(
             environment_id, run_options, log_filepath)
 
         return return_code, run_id, logs
+
+    def _open_workspace(self, name, workspace):
+        """Run a daemon to open workspace
+
+        :param name: name of the environment being run
+        :param workspace: name of the workspace
+        :return:
+        """
+        workspace_url = self.environment_driver.extract_workspace_url(name, workspace)
+        result = webbrowser.open(workspace_url, new=2)
+
+        return result
 
     def _parse_logs_for_results(self, logs):
         """Parse log string to extract results and return dictionary.

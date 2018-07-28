@@ -16,14 +16,18 @@ MESSAGES = {
             "Failed to update project {name} @ ({path}) ",
         "cli.workspace.notebook":
             "Starting a notebook",
+        "cli.workspace.run.notebook":
+            "Automatically opens on the browser if it exists",
         "cli.workspace.jupyterlab":
             "Starting a jupyter lab",
+        "cli.workspace.run.jupyterlab":
+            "Automatically opens on the browser if it exists",
         "cli.workspace.terminal":
             "Starting a terminal",
         "cli.workspace.rstudio":
             "Starting a rstudio",
         "cli.workspace.run.rstudio":
-            "Open http://localhost:8787/auth-sign-in to login to rstudio, "
+            "Automatically opens http://localhost:8787 to login to rstudio,"
             "enter username: rstudio and password: rstudio",
         "cli.project.pull":
             "Pulling information from the Datmo project url and adding it to local...",
@@ -290,6 +294,8 @@ MESSAGES = {
             "Error in running multiple rmi commands: %s",
         "controller.environment.driver.docker.run_container":
             "Error running docker container. Failed command: %s",
+        "controller.environment.driver.docker.exec_container":
+            "Error executing inside docker container. Failed command: %s",
         "controller.environment.driver.docker.stop_container":
             "Error stopping docker container: %s",
         "controller.environment.driver.docker.remove_container":
