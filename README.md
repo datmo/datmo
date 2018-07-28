@@ -41,8 +41,6 @@ feel free contribute by adding issues so the contributors can address them.
 
 ## Requirements
 
-* [openssl](https://github.com/openssl/openssl/blob/master/INSTALL)
-* [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 * [docker](https://docs.docker.com/engine/installation/)
 
 ## Installation
