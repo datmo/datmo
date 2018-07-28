@@ -189,7 +189,8 @@ class TaskController(BaseController):
             results = None
         return results
 
-    def _update_environment_run_options(self, environment_run_option, data_file_path_map, data_directory_path_map):
+    @staticmethod
+    def _update_environment_run_options(environment_run_option, data_file_path_map, data_directory_path_map):
         """Update environment run option dictionary with data file and directory mapping and return dictionary.
 
         Parameters
