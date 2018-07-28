@@ -307,9 +307,11 @@ class RunCommand(ProjectCommand):
         else:
             task_dict['command_list'] = kwargs['cmd']
 
+        data_paths = kwargs['data']
         # Run task and return Task object result
         task_obj = self.task_run_helper(task_dict, snapshot_dict,
-                                        "cli.run.run")
+                                        "cli.run.run",
+                                        data_paths=data_paths)
         if not task_obj:
             return False
         # Creating the run object
@@ -404,7 +406,9 @@ class RunCommand(ProjectCommand):
             "ports": task_obj.ports,
             "interactive": task_obj.interactive,
             "mem_limit": task_obj.mem_limit,
-            "command_list": command
+            "command_list": command,
+            "data_file_path_map": task_obj.data_file_path_map,
+            "data_directory_path_map": task_obj.data_directory_path_map
         }
         # Run task and return Task object result
         new_task_obj = self.task_run_helper(task_dict, snapshot_dict,

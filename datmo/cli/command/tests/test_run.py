@@ -173,6 +173,75 @@ class TestRunCommand():
         self.run_command.execute()
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_run_data_dir(self):
+        # TODO: Adding test with `--interactive` argument and terminate inside container
+        self.__set_variables()
+        # Test success case
+        test_filename = "script.py"
+        test_command = ["python", test_filename]
+        test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
+        test_mem_limit = "4g"
+        # Test success for run with directory being passed
+        test_data_dir_1 = os.path.join(tempfile.mkdtemp(dir=test_datmo_dir), "data1")
+        os.mkdir(test_data_dir_1)
+        test_data_dir_2 = os.path.join(tempfile.mkdtemp(dir=test_datmo_dir), "data2")
+        os.mkdir(test_data_dir_2)
+        with open(os.path.join(test_data_dir_1, "file.txt"), "wb") as f:
+            f.write(to_bytes('my initial line in 1\n'))
+        with open(os.path.join(test_data_dir_2, "file.txt"), "wb") as f:
+            f.write(to_bytes('my initial line in 2\n'))
+        test_filename = "script.py"
+        test_filepath = os.path.join(self.temp_dir, test_filename)
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("import os\n"))
+            f.write(to_bytes("print('hello')\n"))
+            f.write(to_bytes("import shutil\n"))
+
+            f.write(
+                to_bytes(
+                    "with open(os.path.join('/data', 'data1', 'file.txt'), 'a') as f:\n"
+                ))
+            f.write(to_bytes("    f.write('my test file in 1')\n"))
+
+            f.write(
+                to_bytes(
+                    "with open(os.path.join('/data', 'data2', 'file.txt'), 'a') as f:\n"
+                ))
+            f.write(to_bytes("    f.write('my test file in 2')\n"))
+
+        self.run_command.parse([
+            "run", "--environment-paths", test_dockerfile,
+            "--data", test_data_dir_1, "--data", test_data_dir_2,
+            "--mem-limit", test_mem_limit, test_command
+        ])
+
+        # test proper execution of run command
+        result = self.run_command.execute()
+        time.sleep(1)
+        assert result
+        assert isinstance(result, RunObject)
+        assert result.logs
+        assert result.status == "SUCCESS"
+        assert result.start_time
+        assert result.end_time
+        assert result.duration
+        assert result.core_snapshot_id
+        assert result.core_snapshot_id == result.after_snapshot_id
+        assert result.environment_id
+        assert "my initial line in 1" in open(os.path.join(test_data_dir_1,
+                                                      "file.txt"), "r").read()
+        assert "my test file in 1" in open(os.path.join(test_data_dir_1,
+                                                      "file.txt"), "r").read()
+        assert "my initial line in 2" in open(os.path.join(test_data_dir_2,
+                                                           "file.txt"), "r").read()
+        assert "my test file in 2" in open(os.path.join(test_data_dir_2,
+                                                        "file.txt"), "r").read()
+        # teardown
+        self.run_command.parse(["stop", "--all"])
+        # test when all is passed to stop all
+        self.run_command.execute()
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_run_string_command(self):
         # TODO: Adding test with `--interactive` argument and terminate inside container
         self.__set_variables()

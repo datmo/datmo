@@ -29,9 +29,11 @@ class WorkspaceCommand(ProjectCommand):
             "workspace": "notebook"
         }
 
+        data_paths = kwargs['data']
         # Run task and return Task object result
         return self.task_run_helper(task_dict, snapshot_dict,
-                                    "cli.workspace.notebook")
+                                    "cli.workspace.notebook",
+                                    data_paths=data_paths)
 
     @Helper.notify_environment_active(TaskController)
     @Helper.notify_no_project_found
@@ -52,10 +54,11 @@ class WorkspaceCommand(ProjectCommand):
             "mem_limit": kwargs["mem_limit"],
             "workspace": "jupyterlab"
         }
-
+        data_paths = kwargs['data']
         # Run task and return Task object result
         return self.task_run_helper(task_dict, snapshot_dict,
-                                    "cli.workspace.jupyterlab")
+                                    "cli.workspace.jupyterlab",
+                                    data_paths=data_paths)
 
 
     @Helper.notify_environment_active(TaskController)
@@ -77,9 +80,11 @@ class WorkspaceCommand(ProjectCommand):
             "command_list": ["/bin/bash"]
         }
 
+        data_paths = kwargs['data']
         # Run task and return Task object result
         return self.task_run_helper(task_dict, snapshot_dict,
-                                    "cli.workspace.terminal")
+                                    "cli.workspace.terminal",
+                                    data_paths=data_paths)
 
     @Helper.notify_environment_active(TaskController)
     @Helper.notify_no_project_found
@@ -104,7 +109,9 @@ class WorkspaceCommand(ProjectCommand):
                 kwargs["mem_limit"],
             "workspace": "rstudio"
         }
+        data_paths = kwargs['data']
         self.cli_helper.echo(__("info", "cli.workspace.run.rstudio"))
         # Run task and return Task object result
         return self.task_run_helper(task_dict, snapshot_dict,
-                                    "cli.workspace.rstudio")
+                                    "cli.workspace.rstudio",
+                                    data_paths=data_paths)
