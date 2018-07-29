@@ -11,6 +11,8 @@ class TestFileCollection():
             "driver_type": "docker",
             "filehash": "myhash",
             "path": "/path/to/file",
+            "file_path_map": [("/absolute/path/to/file", "file")],
+            "directory_path_map": [("/absolute/path/to/directory", "directory")]
         }
 
     def test_init_no_id(self):

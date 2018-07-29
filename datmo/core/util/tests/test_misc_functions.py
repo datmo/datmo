@@ -248,11 +248,19 @@ class TestMiscFunctions():
                               os.path.join(dest_prefix, "test.txt"))]
         assert result[1] == [(os.path.join(default_source_prefix, "test_dir"),
                               os.path.join(dest_prefix, "test_dir"))]
+        assert result[2] == [(os.path.join(default_source_prefix, "test.txt"),
+                              "test.txt")]
+        assert result[3] == [(os.path.join(default_source_prefix, "test_dir"),
+                              "test_dir")]
         # Test absolute source path and no dest path
         paths = [filepath, dirpath]
         result = parse_paths(default_source_prefix, paths, dest_prefix)
         assert result[0] == [(filepath, os.path.join(dest_prefix, "test.txt"))]
         assert result[1] == [(dirpath, os.path.join(dest_prefix, "test_dir"))]
+        assert result[2] == [(os.path.join(default_source_prefix, "test.txt"),
+                              "test.txt")]
+        assert result[3] == [(os.path.join(default_source_prefix, "test_dir"),
+                              "test_dir")]
         # Test default source path and given dest path
         paths = ["test.txt>new_name.txt", "test_dir>new_dirname"]
         result = parse_paths(default_source_prefix, paths, dest_prefix)
@@ -260,6 +268,10 @@ class TestMiscFunctions():
                               os.path.join(dest_prefix, "new_name.txt"))]
         assert result[1] == [(os.path.join(default_source_prefix, "test_dir"),
                               os.path.join(dest_prefix, "new_dirname"))]
+        assert result[2] == [(os.path.join(default_source_prefix, "test.txt"),
+                              "new_name.txt")]
+        assert result[3] == [(os.path.join(default_source_prefix, "test_dir"),
+                              "new_dirname")]
         # Test failure if path does not exist
         paths = ["sldfkj.txt>new_name.txt", "sldkfj>new_dirname"]
         failed = False
@@ -275,3 +287,7 @@ class TestMiscFunctions():
                               os.path.join(dest_prefix, "new_name.txt"))]
         assert result[1] == [(dirpath, os.path.join(dest_prefix,
                                                     "new_dirname"))]
+        assert result[2] == [(os.path.join(default_source_prefix, "test.txt"),
+                              "new_name.txt")]
+        assert result[3] == [(os.path.join(default_source_prefix, "test_dir"),
+                              "new_dirname")]

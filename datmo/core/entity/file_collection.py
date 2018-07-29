@@ -39,6 +39,10 @@ class FileCollection():
         hash of file collection contents
     path : str
         path to collection relative to project root
+    file_path_map: list
+        list of tuple, mapping the source absolute file path to destination relative file path
+    directory_path_map: list
+        list of tuple, mapping the source absolute directory path to destination relative directory path
     created_at : datetime.datetime
     updated_at : datetime.datetime
     """
@@ -50,6 +54,9 @@ class FileCollection():
 
         self.filehash = dictionary['filehash']
         self.path = dictionary['path']
+
+        self.file_path_map = dictionary.get('file_path_map', None)
+        self.directory_path_map = dictionary.get('directory_path_map', None)
 
         self.created_at = dictionary.get('created_at', datetime.utcnow())
         self.updated_at = dictionary.get('updated_at', self.created_at)

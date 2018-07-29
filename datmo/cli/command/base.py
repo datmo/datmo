@@ -2,12 +2,11 @@
 
 from datmo.config import Config
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import ClassMethodNotFound
+from datmo.core.util.exceptions import ClassMethodNotFound, PathDoesNotExist
 from datmo.cli.parser import get_datmo_parser
 from datmo.core.controller.task import TaskController
 from datmo.core.util.logger import DatmoLogger
-from datmo.core.util.misc_functions import parameterized
-
+from datmo.core.util.misc_functions import parameterized, parse_paths
 
 class BaseCommand(object):
     def __init__(self, cli_helper):
@@ -99,7 +98,7 @@ class BaseCommand(object):
         method_result = method(**command_args)
         return method_result
 
-    def task_run_helper(self, task_dict, snapshot_dict, error_identifier):
+    def task_run_helper(self, task_dict, snapshot_dict, error_identifier, data_paths=None):
         """
         Run task with given parameters and provide error identifier
 
@@ -111,6 +110,8 @@ class BaseCommand(object):
             input snapshot dictionary for task run controller
         error_identifier : str
             identifier to print error
+        data_paths : list
+            list of data paths being passed for task run
 
         Returns
         -------
@@ -125,6 +126,14 @@ class BaseCommand(object):
         # Pass in the task
         status = "NOT STARTED"
         try:
+            if data_paths:
+                try:
+                    _, _, task_dict['data_file_path_map'], task_dict['data_directory_path_map'] = \
+                        parse_paths(self.task_controller.home, data_paths, '/data')
+                except PathDoesNotExist as e:
+                    self.cli_helper.echo(__("error", "cli.run.parse.paths", str(e)))
+                    return False
+
             updated_task_obj = self.task_controller.run(
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
             status = "SUCCESS"

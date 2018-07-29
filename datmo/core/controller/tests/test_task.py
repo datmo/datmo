@@ -189,6 +189,55 @@ class TestTaskController():
         result = self.task_controller._parse_logs_for_results(test_logs)
         assert result is None
 
+    def test_update_environment_run_options(self):
+        self.__setup()
+        environment_run_option = {
+            "command": ["python", "script.py"],
+            "volumes": {
+                    os.path.join(self.temp_dir, "/temp_task"): {
+                        'bind': '/task/',
+                        'mode': 'rw'
+                    },
+                    self.temp_dir: {
+                        'bind': '/home/',
+                        'mode': 'rw'
+                    }
+                }
+        }
+        # create data file
+        data_dirpath = os.path.join(self.temp_dir, "data")
+        data_file_dirpath = os.path.join(self.temp_dir, "data_folder")
+        data_filepath = os.path.join(data_file_dirpath, "data_file.txt")
+        os.mkdir(data_dirpath)
+        os.mkdir(data_file_dirpath)
+        with open(data_filepath, "wb") as f:
+            f.write(to_bytes("data file"))
+
+        data_file_path_map = [(data_filepath, "data_file.txt")]
+        data_directory_path_map = [(data_dirpath, "data_directory")]
+
+        environment_run_option = self.task_controller._update_environment_run_options(environment_run_option,
+                                                                                      data_file_path_map,
+                                                                                      data_directory_path_map)
+
+        assert environment_run_option["volumes"][data_file_dirpath] == {'bind': '/data/', 'mode': 'rw'}
+        assert environment_run_option["volumes"][data_dirpath] == {'bind': '/data/data_directory', 'mode': 'rw'}
+
+        # Error by passing directory which does not exist
+        data_dirpath = os.path.join(self.temp_dir, "data_dne")
+        data_filepath = os.path.join(self.temp_dir, "data_dne", "data_file.txt")
+        data_file_path_map = [(data_filepath, "data_file.txt")]
+        data_directory_path_map = [(data_dirpath, "data_directory")]
+        failed = False
+        try:
+            self.task_controller._update_environment_run_options(environment_run_option,
+                                                                 data_file_path_map,
+                                                                 data_directory_path_map)
+        except TaskRunError:
+            failed = True
+
+        assert failed
+
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_run(self):
         self.__setup()
@@ -198,6 +247,8 @@ class TestTaskController():
         # 3) Test failure case if running same task with snapshot_dict (conflicting containers)
         # 4) Test success case with snapshot_dict
         # 5) Test success case with saved file during task run
+        # 6) Test success case with data file path being passed
+        # 7) Test success case with data directory path being passed
 
         # TODO: look into log filepath randomness, sometimes logs are not written
 
@@ -355,7 +406,6 @@ class TestTaskController():
         # 5) Test option 5
 
         # Create a basic script
-        # (fails w/ no environment)
         test_filepath = os.path.join(self.temp_dir, "script.py")
         with open(test_filepath, "wb") as f:
             f.write(to_bytes("import os\n"))
@@ -419,6 +469,151 @@ class TestTaskController():
         assert os.path.isfile(os.path.join(files_absolute_path, "task.log"))
         assert os.path.isfile(
             os.path.join(files_absolute_path, "new_file.txt"))
+
+        # 6) Test Option 6
+        self.project_controller.file_driver.create("dirpath1", directory=True)
+        self.project_controller.file_driver.create(os.path.join("dirpath1", "file.txt"))
+        with open(os.path.join(self.project_controller.home, "dirpath1", "file.txt"), "wb") as f:
+            f.write(to_bytes('my initial line\n'))
+        test_filename = "script.py"
+        test_filepath = os.path.join(self.temp_dir, test_filename)
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("import os\n"))
+            f.write(to_bytes("print('hello')\n"))
+            f.write(to_bytes("import shutil\n"))
+
+            f.write(
+                to_bytes(
+                    "with open(os.path.join('/data', 'file.txt'), 'a') as f:\n"
+                ))
+            f.write(to_bytes("    f.write('my test file')\n"))
+
+        # Create task in the project
+        task_obj_3 = self.task_controller.create()
+
+        # Create task_dict
+        task_command = ["python", test_filename]
+        task_dict = {"command_list": task_command, "data_file_path_map": [(os.path.join(self.project_controller.home,
+                                                                                        "dirpath1", "file.txt"),
+                                                                           'file.txt')]}
+
+        # Create environment definition
+        env_def_path = os.path.join(self.project_controller.home, "Dockerfile")
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes("FROM python:3.5-alpine"))
+
+        updated_task_obj_3 = self.task_controller.run(
+            task_obj_3.id, task_dict=task_dict)
+        after_snapshot_obj = self.task_controller.dal.snapshot.get_by_id(
+            updated_task_obj_3.after_snapshot_id)
+        environment_obj = self.task_controller.dal.environment.get_by_id(
+            after_snapshot_obj.environment_id)
+        self.environment_ids.append(environment_obj.id)
+
+        assert isinstance(updated_task_obj_3, Task)
+        assert updated_task_obj_3.before_snapshot_id
+        assert updated_task_obj_3.ports == None
+        assert updated_task_obj_3.interactive == False
+        assert updated_task_obj_3.task_dirpath
+        assert updated_task_obj_3.log_filepath
+        assert updated_task_obj_3.start_time
+
+        assert updated_task_obj_3.after_snapshot_id
+        assert updated_task_obj_3.run_id
+        assert updated_task_obj_3.logs
+        assert updated_task_obj_3.status == "SUCCESS"
+        assert updated_task_obj_3.end_time
+        assert updated_task_obj_3.duration
+
+        self.task_controller.stop(task_obj_3.id)
+
+        # test if after snapshot has the file written
+        after_snapshot_obj = self.task_controller.dal.snapshot.get_by_id(
+            updated_task_obj_3.after_snapshot_id)
+        file_collection_obj = self.task_controller.dal.file_collection.get_by_id(
+            after_snapshot_obj.file_collection_id)
+        files_absolute_path = os.path.join(self.task_controller.home,
+                                           file_collection_obj.path)
+
+        assert os.path.isfile(os.path.join(files_absolute_path, "task.log"))
+        assert os.path.isfile(os.path.join(self.project_controller.home,
+                                           "dirpath1", "file.txt"))
+        assert "my initial line" in open(os.path.join(self.project_controller.home,
+                                                   "dirpath1", "file.txt"), "r").read()
+        assert "my test file" in open(os.path.join(self.project_controller.home,
+                                           "dirpath1", "file.txt"), "r").read()
+
+        # 7) Test Option 7
+        self.project_controller.file_driver.create("dirpath1", directory=True)
+        self.project_controller.file_driver.create(os.path.join("dirpath1", "file.txt"))
+        with open(os.path.join(self.project_controller.home, "dirpath1", "file.txt"), "wb") as f:
+            f.write(to_bytes('my initial line\n'))
+        test_filename = "script.py"
+        test_filepath = os.path.join(self.temp_dir, test_filename)
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes("import os\n"))
+            f.write(to_bytes("print('hello')\n"))
+            f.write(to_bytes("import shutil\n"))
+
+            f.write(
+                to_bytes(
+                    "with open(os.path.join('/data', 'dirpath1', 'file.txt'), 'a') as f:\n"
+                ))
+            f.write(to_bytes("    f.write('my test file')\n"))
+
+        # Create task in the project
+        task_obj_4 = self.task_controller.create()
+
+        # Create task_dict
+        task_command = ["python", test_filename]
+        task_dict = {"command_list": task_command, "data_directory_path_map": [(os.path.join(self.project_controller.home,
+                                                                                        "dirpath1"), 'dirpath1')]}
+
+        # Create environment definition
+        env_def_path = os.path.join(self.project_controller.home, "Dockerfile")
+        with open(env_def_path, "wb") as f:
+            f.write(to_bytes("FROM python:3.5-alpine"))
+
+        updated_task_obj_4 = self.task_controller.run(
+            task_obj_4.id, task_dict=task_dict)
+        after_snapshot_obj = self.task_controller.dal.snapshot.get_by_id(
+            updated_task_obj_4.after_snapshot_id)
+        environment_obj = self.task_controller.dal.environment.get_by_id(
+            after_snapshot_obj.environment_id)
+        self.environment_ids.append(environment_obj.id)
+
+        assert isinstance(updated_task_obj_4, Task)
+        assert updated_task_obj_4.before_snapshot_id
+        assert updated_task_obj_4.ports == None
+        assert updated_task_obj_4.interactive == False
+        assert updated_task_obj_4.task_dirpath
+        assert updated_task_obj_4.log_filepath
+        assert updated_task_obj_4.start_time
+
+        assert updated_task_obj_4.after_snapshot_id
+        assert updated_task_obj_4.run_id
+        assert updated_task_obj_4.logs
+        assert updated_task_obj_4.status == "SUCCESS"
+        assert updated_task_obj_4.end_time
+        assert updated_task_obj_4.duration
+
+        self.task_controller.stop(task_obj_4.id)
+
+        # test if after snapshot has the file written
+        after_snapshot_obj = self.task_controller.dal.snapshot.get_by_id(
+            updated_task_obj_4.after_snapshot_id)
+        file_collection_obj = self.task_controller.dal.file_collection.get_by_id(
+            after_snapshot_obj.file_collection_id)
+        files_absolute_path = os.path.join(self.task_controller.home,
+                                           file_collection_obj.path)
+
+        assert os.path.isfile(os.path.join(files_absolute_path, "task.log"))
+        assert os.path.isfile(os.path.join(self.project_controller.home,
+                                           "dirpath1", "file.txt"))
+        assert "my initial line" in open(os.path.join(self.project_controller.home,
+                                                      "dirpath1", "file.txt"), "r").read()
+        assert "my test file" in open(os.path.join(self.project_controller.home,
+                                                   "dirpath1", "file.txt"), "r").read()
 
     def test_list(self):
         self.__setup()

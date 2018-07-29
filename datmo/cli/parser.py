@@ -49,6 +49,16 @@ def get_datmo_parser():
         help=
         "maximum amount of memory the notebook environment can use (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes)"
     )
+    notebook_parser.add_argument(
+        "--data",
+        dest="data",
+        default=None,
+        action="append",
+        type=str,
+        help=
+        "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
+        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
+    )
 
     # Jupyterlab
     jupyterlab_parser = subparsers.add_parser(
@@ -81,6 +91,16 @@ def get_datmo_parser():
         help=
         "maximum amount of memory the jupyterlab environment can use (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes)"
     )
+    jupyterlab_parser.add_argument(
+        "--data",
+        dest="data",
+        default=None,
+        action="append",
+        type=str,
+        help=
+        "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
+        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
+    )
 
     # Terminal
     terminal_parser = subparsers.add_parser("terminal", help="To run terminal")
@@ -112,6 +132,16 @@ def get_datmo_parser():
         help=
         "maximum amount of memory the terminal environment can use (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes)"
     )
+    terminal_parser.add_argument(
+        "--data",
+        dest="data",
+        default=None,
+        action="append",
+        type=str,
+        help=
+        "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
+        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
+    )
 
     # Rstudio
     rstudio_parser = subparsers.add_parser(
@@ -138,6 +168,16 @@ def get_datmo_parser():
         type=str,
         help=
         "maximum amount of memory the rstudio environment can use (these options take a positive integer, followed by a suffix of b, k, m, g, to indicate bytes, kilobytes, megabytes, or gigabytes)"
+    )
+    rstudio_parser.add_argument(
+        "--data",
+        dest="data",
+        default=None,
+        action="append",
+        type=str,
+        help=
+        "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
+        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
     )
 
     # Run
@@ -193,6 +233,16 @@ def get_datmo_parser():
         nargs="?",
         default=None,
         help="command to run within environment")
+    run_parser.add_argument(
+        "--data",
+        dest="data",
+        default=None,
+        action="append",
+        type=str,
+        help=
+        "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
+        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
+    )
 
     # List runs
     ls_runs_parser = subparsers.add_parser(
