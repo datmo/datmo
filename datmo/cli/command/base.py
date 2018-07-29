@@ -2,7 +2,7 @@
 
 from datmo.config import Config
 from datmo.core.util.i18n import get as __
-from datmo.core.util.exceptions import ClassMethodNotFound
+from datmo.core.util.exceptions import ClassMethodNotFound, PathDoesNotExist
 from datmo.cli.parser import get_datmo_parser
 from datmo.core.controller.task import TaskController
 from datmo.core.util.logger import DatmoLogger
@@ -127,8 +127,12 @@ class BaseCommand(object):
         status = "NOT STARTED"
         try:
             if data_paths:
-                _, _, task_dict['data_file_path_map'], task_dict['data_directory_path_map'] = \
-                    parse_paths(self.task_controller.home, data_paths, '/data')
+                try:
+                    _, _, task_dict['data_file_path_map'], task_dict['data_directory_path_map'] = \
+                        parse_paths(self.task_controller.home, data_paths, '/data')
+                except PathDoesNotExist as e:
+                    self.cli_helper.echo(__("error", "cli.run.parse.paths", str(e)))
+                    return False
 
             updated_task_obj = self.task_controller.run(
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)

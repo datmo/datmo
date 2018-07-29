@@ -135,7 +135,15 @@ class SnapshotDoesNotExist(DoesNotExist):
 
 
 class PathDoesNotExist(FileExecutionError):
-    pass
+
+    def __init__(self, file_path=None):
+        self.file_path = file_path
+
+    def __str__(self):
+        if self.file_path:
+            return "Path being passed doesn't exist: %s" % self.file_path
+        else:
+            return "Path being passed doesn't exist"
 
 
 class LoggingPathDoesNotExist(PathDoesNotExist):

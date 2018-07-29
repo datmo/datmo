@@ -176,6 +176,8 @@ MESSAGES = {
             "Already running with id: %s",
         "cli.run.stop":
             "Error while stopping the run: %s",
+        "cli.run.parse.paths":
+            "Error with Data: %s",
         "cli.run.stop.all":
             "Error while stopping all runs",
         "cli.run.delete":
