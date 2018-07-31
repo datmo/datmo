@@ -798,6 +798,19 @@ class TestTaskController():
         assert updated_task_obj.command == test_command
         assert updated_task_obj.command_list == ["python", "script.py"]
 
+        # Test 3: When meta data for workspace is passed
+        test_interactive = True
+        updated_task_obj = self.task_controller.update(task_obj.id,
+                                                       interactive=test_interactive)
+        assert updated_task_obj.interactive == test_interactive
+
+        # Test 4: When meta data for workspace is passed
+        test_command_list = ["python", "script.py"]
+        updated_task_obj = self.task_controller.update(task_obj.id,
+                                                       command_list=test_command_list)
+        assert updated_task_obj.command_list == ["python", "script.py"]
+
+
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_delete(self):
         self.__setup()
