@@ -778,6 +778,26 @@ class TestTaskController():
 
         self.task_controller.stop(task_obj.id)
 
+    def test_update(self):
+        self.__setup()
+        # Create task in the project
+        task_obj = self.task_controller.create()
+        assert isinstance(task_obj, Task)
+
+        # Test 1: When no meta data is passed
+        updated_task_obj = self.task_controller.update(task_obj.id)
+        assert updated_task_obj.workspace is None
+
+        # Test 2: When meta data for workspace is passed
+        test_workspace = "notebook"
+        test_command = "python script.py"
+        updated_task_obj = self.task_controller.update(task_obj.id,
+                                                       workspace=test_workspace,
+                                                       command=test_command)
+        assert updated_task_obj.workspace == test_workspace
+        assert updated_task_obj.command == test_command
+        assert updated_task_obj.command_list == ["python", "script.py"]
+
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_delete(self):
         self.__setup()
