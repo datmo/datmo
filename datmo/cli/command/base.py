@@ -131,12 +131,23 @@ class BaseCommand(object):
                     _, _, task_dict['data_file_path_map'], task_dict['data_directory_path_map'] = \
                         parse_paths(self.task_controller.home, data_paths, '/data')
                 except PathDoesNotExist as e:
+                    status = "NOT STARTED"
+                    workspace = task_dict.get('workspace', None)
+                    command = task_dict.get('command', None)
+                    command_list = task_dict.get('command_list', None)
+                    interactive = task_dict.get('interactive', False)
+                    self.task_controller.update(task_obj.id,
+                                                workspace=workspace,
+                                                command=command,
+                                                command_list=command_list,
+                                                interactive=interactive)
                     self.cli_helper.echo(__("error", "cli.run.parse.paths", str(e)))
                     return False
 
             updated_task_obj = self.task_controller.run(
                 task_obj.id, snapshot_dict=snapshot_dict, task_dict=task_dict)
             status = "SUCCESS"
+            self.cli_helper.echo(__("info", "cli.run.run.stop"))
         except Exception as e:
             status = "FAILED"
             self.logger.error("%s %s" % (e, task_dict))
@@ -144,11 +155,10 @@ class BaseCommand(object):
             self.cli_helper.echo(__("error", error_identifier, task_obj.id))
             return False
         finally:
-            self.cli_helper.echo(__("info", "cli.run.run.stop"))
             self.task_controller.stop(
                 task_id=updated_task_obj.id, status=status)
-            self.cli_helper.echo(
-                __("info", "cli.run.run.complete", updated_task_obj.id))
+        self.cli_helper.echo(
+            __("info", "cli.run.run.complete", updated_task_obj.id))
 
         return updated_task_obj
 
