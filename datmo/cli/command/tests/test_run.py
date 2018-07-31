@@ -44,7 +44,7 @@ from datmo.cli.command.run import RunObject
 from datmo.cli.command.run import RunCommand
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.util.exceptions import SessionDoesNotExist, DoesNotExist, \
-    MutuallyExclusiveArguments, RequiredArgumentMissing
+    MutuallyExclusiveArguments, RequiredArgumentMissing, PathDoesNotExist
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -240,6 +240,15 @@ class TestRunCommand():
         self.run_command.parse(["stop", "--all"])
         # test when all is passed to stop all
         self.run_command.execute()
+
+        # test failure
+        test_data_dir_dne = os.path.join(tempfile.mkdtemp(dir=test_datmo_dir), "data_dne")
+        self.run_command.parse([
+                "run", "--environment-paths", test_dockerfile,
+                "--data", test_data_dir_dne
+            ])
+        result = self.run_command.execute()
+        assert not result
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_run_string_command(self):

@@ -137,3 +137,16 @@ create_task:
   data_directory_path_map:
     nullable: true
     type: list
+
+update_task:
+  workspace:
+    nullable: true
+    type: string
+  command:
+    nullable: true
+    type: string
+  command_list:
+    nullable: true
+    type: list
+  interactive:
+    type: boolean

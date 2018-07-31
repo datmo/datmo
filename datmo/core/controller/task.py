@@ -544,6 +544,41 @@ class TaskController(BaseController):
             # Error because the task does not have any files associated with it
             raise PathDoesNotExist()
 
+    def update(self,
+               task_id,
+               workspace=None,
+               command=None,
+               command_list=None,
+               interactive=False):
+        """Update the task metadata"""
+        if not task_id:
+            raise RequiredArgumentMissing(
+                __("error", "controller.task.delete.arg", "id"))
+        if command_list:
+            command = " ".join(command_list)
+        elif command:
+            command_list = shlex.split(command)
+
+        validate(
+            "update_task", {
+                "workspace": workspace,
+                "command": command,
+                "command_list": command_list,
+                "interactive": interactive
+            })
+        update_task_input_dict = {'id': task_id}
+
+        if workspace is not None:
+            update_task_input_dict['workspace'] = workspace
+        if command is not None:
+            update_task_input_dict['command'] = command
+        if command_list is not None:
+            update_task_input_dict['command_list'] = command_list
+        if interactive:
+            update_task_input_dict['interactive'] = interactive
+
+        return self.dal.task.update(update_task_input_dict)
+
     def delete(self, task_id):
         if not task_id:
             raise RequiredArgumentMissing(
