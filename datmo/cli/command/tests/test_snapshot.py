@@ -14,6 +14,7 @@ from __future__ import unicode_literals
 import os
 import glob
 import time
+import json
 import tempfile
 import platform
 from io import open
@@ -784,6 +785,15 @@ class TestSnapshotCommand():
 
     def test_snapshot_diff(self):
         self.__set_variables()
+
+        # Create config file
+        with open(self.config_filepath, "wb") as f:
+            f.write(to_bytes(str('{"depth":6}')))
+
+        # Create stats file
+        with open(self.stats_filepath, "wb") as f:
+            f.write(to_bytes(str('{"acc":0.97}')))
+
         # Create snapshots to test
         self.snapshot_command.parse(
             ["snapshot", "create", "-m", "my test snapshot"])
@@ -793,6 +803,14 @@ class TestSnapshotCommand():
         self.filepath_3 = os.path.join(self.snapshot_command.home, "file3.txt")
         with open(self.filepath_3, "wb") as f:
             f.write(to_bytes(str("test")))
+
+        # Create config file
+        with open(self.config_filepath, "wb") as f:
+            f.write(to_bytes(str('{"depth":5}')))
+
+        # Create stats file
+        with open(self.stats_filepath, "wb") as f:
+            f.write(to_bytes(str('{"acc":0.91}')))
 
         self.snapshot_command.parse(
             ["snapshot", "create", "-m", "my second snapshot"])
