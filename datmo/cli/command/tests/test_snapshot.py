@@ -822,6 +822,13 @@ class TestSnapshotCommand():
 
         result = self.snapshot_command.execute()
         assert result
+        assert 'message' in result
+        assert 'label' in result
+        assert 'code_id' in result
+        assert 'environment_id' in result
+        assert 'file_collection_id' in result
+        assert 'config' in result
+        assert 'stats' in result
 
     def test_snapshot_inspect(self):
         self.__set_variables()
