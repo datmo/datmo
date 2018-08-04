@@ -260,9 +260,8 @@ class TestSnapshotCommand():
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         self.run = RunCommand(self.cli_helper)
-        self.run.parse([
-            "run", "--environment-paths", test_dockerfile, test_command
-        ])
+        self.run.parse(
+            ["run", "--environment-paths", test_dockerfile, test_command])
 
         # test proper execution of task run command
         run_obj = self.run.execute()
@@ -271,8 +270,7 @@ class TestSnapshotCommand():
 
         # test run id
         self.snapshot_command.parse([
-            "snapshot", "create", "--message", test_message, "--run-id",
-            run_id
+            "snapshot", "create", "--message", test_message, "--run-id", run_id
         ])
 
         # test for desired side effects
@@ -290,9 +288,8 @@ class TestSnapshotCommand():
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         self.run = RunCommand(self.cli_helper)
-        self.run.parse([
-            "run", "--environment-paths", test_dockerfile, test_command
-        ])
+        self.run.parse(
+            ["run", "--environment-paths", test_dockerfile, test_command])
 
         # test proper execution of task run command
         run_obj = self.run.execute()
@@ -649,9 +646,8 @@ class TestSnapshotCommand():
         test_command = "sh -c 'echo accuracy:0.45'"
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         self.run = RunCommand(self.cli_helper)
-        self.run.parse([
-            "run", "--environment-paths", test_dockerfile, test_command
-        ])
+        self.run.parse(
+            ["run", "--environment-paths", test_dockerfile, test_command])
 
         # test proper execution of task run command
         task_obj = self.run.execute()
@@ -822,13 +818,13 @@ class TestSnapshotCommand():
 
         result = self.snapshot_command.execute()
         assert result
-        assert 'message' in result
-        assert 'label' in result
-        assert 'code_id' in result
-        assert 'environment_id' in result
-        assert 'file_collection_id' in result
-        assert 'config' in result
-        assert 'stats' in result
+        assert "message" in result
+        assert "label" in result
+        assert "code_id" in result
+        assert "environment_id" in result
+        assert "file_collection_id" in result
+        assert "config" in result
+        assert "stats" in result
 
     def test_snapshot_inspect(self):
         self.__set_variables()
@@ -841,3 +837,8 @@ class TestSnapshotCommand():
 
         result = self.snapshot_command.execute()
         assert result
+        assert "Code" in result
+        assert "Environment" in result
+        assert "Files" in result
+        assert "Config" in result
+        assert "Stats" in result
