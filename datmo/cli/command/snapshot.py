@@ -269,7 +269,7 @@ class SnapshotCommand(ProjectCommand):
         snapshot_obj_2 = self.snapshot_controller.get(snapshot_id_2)
         comparison_attributes = [
             "id", "created_at", "message", "label", "code_id",
-            "environment_id", "file_collection_id"
+            "environment_id", "file_collection_id", "config", "stats"
         ]
         table_data = [["Attributes", "Snapshot 1", "", "Snapshot 2"],
                       ["", "", "", ""]]
@@ -282,7 +282,17 @@ class SnapshotCommand(ProjectCommand):
                 value_1 = prettify_datetime(value_1)
             if isinstance(value_2, datetime):
                 value_2 = prettify_datetime(value_2)
-            table_data.append([attribute, value_1, "->", value_2])
+            if attribute in ["config", "stats"]:
+                alldict = []
+                if isinstance(value_1, dict): alldict.append(value_1)
+                if isinstance(value_2, dict): alldict.append(value_2)
+                allkey = set().union(*alldict)
+                for key in allkey:
+                    key_value_1 = "%s: %s" % (key, value_1[key]) if value_1.get(key, None) else "N/A"
+                    key_value_2 = "%s: %s" % (key, value_2[key]) if value_2.get(key, None) else "N/A"
+                    table_data.append([attribute, key_value_1, "->", key_value_2])
+            else:
+                table_data.append([attribute, value_1, "->", value_2])
         output = format_table(table_data)
         self.cli_helper.echo(output)
         return output
