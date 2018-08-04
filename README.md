@@ -28,6 +28,18 @@ feel free contribute by adding issues so the contributors can address them.
 - **Experiment reproducibility** (re-run tasks)
 - **Visualize + export** experiment history
 
+
+| Feature  | Commands|
+| ------------- | ---------------------------- |
+| Initializing a Project | `$ datmo init` |
+| Setup a new environment | `$ datmo environment setup` |
+| Run an experiment | `$ datmo run "python filename.py"` |
+| Reproduce a previous experiment | `$ datmo ls` (Find the desired ID) <br> `$ datmo rerun EXPERIMENT_ID` |
+| Open a workspace |   `$ datmo notebook`  (Jupyter Notebook) <br> `$ datmo jupyterlab` (JupyterLab) <br> `$ datmo rstudio` (RStudio) <br> `$ datmo terminal` (Terminal)|
+| Record your project state <br> (Files, code, env, config, stats) |   `$ datmo snapshot create -m "My first snapshot!"` |
+| Switch to a previous project state | `$ datmo snapshot ls` (Find the desired ID) <br> `$ datmo snapshot checkout SNAPSHOT_ID` |
+| Visualize project entities | `$ datmo ls` (Experiments) <br> `$ datmo snapshot ls` (Snapshots) <br> `$ datmo environment ls` (Environments) |
+
 ---
 
 ### Table of Contents
