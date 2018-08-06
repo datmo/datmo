@@ -205,7 +205,7 @@ class SnapshotCommand(ProjectCommand):
                 snapshot_label = printable_object(snapshot_obj.label)
                 printable_snapshot_id = snapshot_obj.id if current_snapshot_id is not None and \
                                                            snapshot_obj.id != current_snapshot_id\
-                    else snapshot_obj.id+" --> current state"
+                    else "(active) " + snapshot_obj.id
                 item_dict_list.append({
                     "id": printable_snapshot_id,
                     "created at": prettify_datetime(snapshot_obj.created_at),
@@ -229,7 +229,7 @@ class SnapshotCommand(ProjectCommand):
                 snapshot_label = printable_object(snapshot_obj.label)
                 printable_snapshot_id = snapshot_obj.id if current_snapshot_id is not None and \
                                                            snapshot_obj.id != current_snapshot_id \
-                    else snapshot_obj.id + " --> current state"
+                    else "(active) " + snapshot_obj.id
                 item_dict_list.append({
                     "id": printable_snapshot_id,
                     "created at": prettify_datetime(snapshot_obj.created_at),
