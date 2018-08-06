@@ -145,11 +145,6 @@ class ProjectCommand(BaseCommand):
 
         self.cli_helper.echo("")
 
-        # Print out project config meta data
-        self.cli_helper.echo("config: ")
-        self.cli_helper.echo(status_dict['config'])
-
-        self.cli_helper.echo("")
 
         # Print out info for the latest snapshot created by the user
         self.cli_helper.echo(
