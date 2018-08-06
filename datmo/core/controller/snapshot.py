@@ -608,3 +608,139 @@ class SnapshotController(BaseController):
             # If any such path exists, transform file to stats dict
             json_file = JSONStore(existing_possible_paths[0])
             return json_file.to_dict()
+
+    def check_snapshot_status(self, dictionary=None):
+        """Check for snapshot object
+
+        Parameters
+        ----------
+        dictionary : dict or None
+
+            for each of the 5 key components, this function will search for
+            one of the variables below starting from the top. Default functionality
+            is described below for each component as well for reference if none
+            of the variables are given.
+
+            code :
+                code_id : str, optional
+                    code reference associated with the snapshot; if not
+                    provided will look to inputs below for code creation
+                commit_id : str, optional
+                    commit id provided by the user if already available
+
+                Default
+                -------
+                commits will be taken and code created via the  CodeController
+                and are added to the snapshot at the time of snapshot creation
+
+            environment :
+                environment_id : str, optional
+                    id for environment used to create snapshot
+                workspace : str, optional
+                    type of workspace being used
+                environment_paths : list, optional
+                    list of absolute or relative filepaths and/or dirpaths to collect with destination names
+                    (e.g. "/path/to/file>hello", "/path/to/file2", "/path/to/dir>newdir")
+
+                Default
+                -------
+                default environment files will be searched and environment will
+                be created with the EnvironmentController and added to the snapshot
+                at the time of snapshot creation
+
+            file_collection :
+                file_collection_id : str, optional
+                    file collection associated with the snapshot
+                paths : list, optional
+                    list of absolute or relative filepaths and/or dirpaths to collect with destination names
+                    (e.g. "/path/to/file:hello", "/path/to/file2", "/path/to/dir:newdir")
+
+                Default
+                -------
+                paths will be considered empty ([]), and the FileCollectionController
+                will create a blank FileCollection that is empty.
+
+            config :
+                config : dict, optional
+                    key, value pairs of configurations
+                config_filepath : str, optional
+                    absolute filepath to configuration parameters file
+                config_filename : str, optional
+                    name of file with configuration parameters
+
+                Default
+                -------
+                config will be considered empty ({}) and saved to the snapshot
+
+            stats :
+                stats : dict, optional
+                    key, value pairs of metrics and statistics
+                stats_filepath : str, optional
+                    absolute filepath to stats parameters file
+                stats_filename : str, optional
+                    name of file with metrics and statistics.
+
+                Default
+                -------
+                stats will be considered empty ({}) and saved to the snapshot
+
+            for the remaining optional arguments it will search for them
+            in the input dictionary
+
+                message : str
+                    long description of snapshot
+                session_id : str, optional
+                    session id within which snapshot is created,
+                    will overwrite default if given
+                task_id : str, optional
+                    task id associated with snapshot
+                label : str, optional
+                    short description of snapshot
+                visible : bool, optional
+                    True if visible to user via list command else False
+
+        Returns
+        -------
+        datmo.core.entity.snapshot.Snapshot or None
+            snapshot object with all relevant parameters if it Exists
+
+        Raises
+        ------
+        FileIOError
+            if files are not present or there is an error in File IO
+        """
+        if dictionary is None: dictionary = dict()
+
+        status_dict = {
+            "model_id": self.model.id,
+            "session_id": self.current_session.id,
+        }
+
+        # Code setup
+        self._code_setup(dictionary, status_dict)
+
+        # Environment setup
+        self._env_setup(dictionary, status_dict)
+
+        # File setup
+        self._file_setup(dictionary, status_dict)
+
+        # Config setup
+        self._config_setup(dictionary, status_dict)
+
+        # Stats setup
+        self._stats_setup(dictionary, status_dict)
+
+        # If snapshot object with required args already exists, return it
+        results = self.dal.snapshot.query({
+            "model_id": status_dict["model_id"],
+            "code_id": status_dict['code_id'],
+            "environment_id": status_dict['environment_id'],
+            "file_collection_id": status_dict['file_collection_id'],
+            "config": status_dict['config'],
+            "stats": status_dict['stats']
+        })
+        if results:
+            return results[0]
+        else:
+            return None

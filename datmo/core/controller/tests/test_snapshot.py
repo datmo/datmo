@@ -886,3 +886,14 @@ class TestSnapshotController():
 
         assert result == True and \
             thrown == True
+
+    def test_check_snapshot_status(self):
+        self.__setup()
+        # Create snapshot in the project
+        snapshot_obj = self.__default_create()
+
+        # Get the current snapshot status based on the project
+        status_snapshot_obj = self.snapshot_controller.check_snapshot_status()
+
+        # Check if the current status of the snapshot is the same as just created
+        assert status_snapshot_obj.id == snapshot_obj.id
