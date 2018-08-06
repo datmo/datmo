@@ -178,6 +178,8 @@ class SnapshotCommand(ProjectCommand):
         print_format = kwargs.get('format', "table")
         download = kwargs.get('download', None)
         download_path = kwargs.get('download_path', None)
+        current_snapshot_obj = self.snapshot_controller.check_snapshot_status()
+        current_snapshot_id = current_snapshot_obj.id if current_snapshot_obj else None
         if show_all:
             snapshot_objs = self.snapshot_controller.list(
                 session_id=session_id,
@@ -201,8 +203,11 @@ class SnapshotCommand(ProjectCommand):
                 snapshot_stats_printable = printable_object(snapshot_obj.stats)
                 snapshot_message = printable_object(snapshot_obj.message)
                 snapshot_label = printable_object(snapshot_obj.label)
+                printable_snapshot_id = snapshot_obj.id if current_snapshot_id is not None and \
+                                                           snapshot_obj.id != current_snapshot_id\
+                    else snapshot_obj.id+" --> current state"
                 item_dict_list.append({
-                    "id": snapshot_obj.id,
+                    "id": printable_snapshot_id,
                     "created at": prettify_datetime(snapshot_obj.created_at),
                     "config": snapshot_config_printable,
                     "stats": snapshot_stats_printable,
@@ -222,8 +227,11 @@ class SnapshotCommand(ProjectCommand):
                 snapshot_stats_printable = printable_object(snapshot_obj.stats)
                 snapshot_message = printable_object(snapshot_obj.message)
                 snapshot_label = printable_object(snapshot_obj.label)
+                printable_snapshot_id = snapshot_obj.id if current_snapshot_id is not None and \
+                                                           snapshot_obj.id != current_snapshot_id \
+                    else snapshot_obj.id + " --> current state"
                 item_dict_list.append({
-                    "id": snapshot_obj.id,
+                    "id": printable_snapshot_id,
                     "created at": prettify_datetime(snapshot_obj.created_at),
                     "config": snapshot_config_printable,
                     "stats": snapshot_stats_printable,

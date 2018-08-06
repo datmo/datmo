@@ -683,6 +683,10 @@ class TestSnapshotCommand():
 
         assert result
         assert created_snapshot_obj in result
+        # Check if current snapshot id is the same as the latest created id
+        current_snapshot_obj = self.snapshot_command.snapshot_controller.check_snapshot_status()
+        current_snapshot_id = current_snapshot_obj.id if current_snapshot_obj else None
+        assert current_snapshot_id == created_snapshot_obj.id
 
         # Test when optional parameters are not given
         self.snapshot_command.parse(["snapshot", "ls", "--details"])
