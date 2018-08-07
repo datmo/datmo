@@ -24,4 +24,5 @@ log = DatmoLogger.get_logger(__name__)
 log.info("handling command %s", config.home)
 
 import datmo.snapshot
+import datmo.run
 import datmo.config
