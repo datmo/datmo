@@ -10,7 +10,7 @@ from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import InvalidArgumentType
 
 
-class Run():
+class Logger():
     """Run is an class to enable user to store properties
 
     Parameters
@@ -42,7 +42,6 @@ class Run():
         self.task_dir = task_dir
 
     def __save_dictionary(self, dictionary, path):
-        import pdb; pdb.set_trace()
         json_obj = JSONStore(path)
         data = json_obj.to_dict()
         data.update(dictionary)
