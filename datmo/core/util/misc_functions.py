@@ -29,6 +29,11 @@ except TypeError:
         return bytes(val, "utf-8")
 
     to_bytes("test")
+try:
+    basestring
+except NameError:
+    basestring = str
+
 from glob import glob
 
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
@@ -61,7 +66,7 @@ def convert_keys_to_string(data):
     if isinstance(data, basestring):
         return str(data)
     elif isinstance(data, collections.Mapping):
-        return dict(map(convert_keys_to_string, data.iteritems()))
+        return dict(map(convert_keys_to_string, data.items()))
     elif isinstance(data, collections.Iterable):
         return type(data)(map(convert_keys_to_string, data))
     else:
