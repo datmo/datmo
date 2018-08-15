@@ -293,6 +293,7 @@ class TestMiscFunctions():
                               "new_dirname")]
 
     def test_convert_keys_to_string(self):
+        import pdb; pdb.set_trace()
         test_data = { u'spam': u'eggs', u'foo': frozenset([u'Gah!']), u'bar': { u'baz': 97 },
          u'list': [u'list', (True, u'Maybe'), set([u'and', u'a', u'set', 1])]}
 
