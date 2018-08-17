@@ -567,7 +567,6 @@ class TestSnapshotController():
             message="my test snapshot",
             task_id=updated_task_obj_2.id,
             label="best")
-
         updated_stats_dict = {}
         updated_stats_dict.update(test_stats)
         updated_stats_dict.update(updated_task_obj.results)

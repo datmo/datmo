@@ -296,8 +296,10 @@ class SnapshotCommand(ProjectCommand):
                 if isinstance(value_2, dict): alldict.append(value_2)
                 allkey = set().union(*alldict)
                 for key in allkey:
-                    key_value_1 = "%s: %s" % (key, value_1[key]) if value_1.get(key, None) else "N/A"
-                    key_value_2 = "%s: %s" % (key, value_2[key]) if value_2.get(key, None) else "N/A"
+                    key_value_1 = "%s: %s" % (key, value_1[key]) if value_1 != "N/A" and value_1.get(key, None) \
+                        else "N/A"
+                    key_value_2 = "%s: %s" % (key, value_2[key]) if value_2 != "N/A" and value_2.get(key, None) \
+                        else "N/A"
                     table_data.append([attribute, key_value_1, "->", key_value_2])
             else:
                 table_data.append([attribute, value_1, "->", value_2])
