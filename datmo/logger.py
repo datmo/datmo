@@ -11,12 +11,7 @@ from datmo.core.util.exceptions import InvalidArgumentType
 
 
 class Logger():
-    """Run is an class to enable user to store properties
-
-    Parameters
-    ----------
-    task_entity : datmo.core.entity.task.Task
-        core task entity to reference
+    """Logger is a class to enable user to store properties
 
     Attributes
     ----------
@@ -46,6 +41,7 @@ class Logger():
         data = json_obj.to_dict()
         data.update(dictionary)
         json_obj.to_file(data)
+        return data
 
     def log_config(self, config):
 
@@ -56,7 +52,7 @@ class Logger():
             if os.path.isdir(self.task_dir) else\
             os.path.join(os.getcwd(), "config.json")
 
-        self.__save_dictionary(config, config_path)
+        return self.__save_dictionary(config, config_path)
 
     def log_result(self, results):
         if not isinstance(results, dict):
@@ -66,4 +62,4 @@ class Logger():
             if os.path.isdir(self.task_dir) else\
             os.path.join(os.getcwd(), "stats.json")
 
-        self.__save_dictionary(results, results_path)
+        return self.__save_dictionary(results, results_path)
