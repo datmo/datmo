@@ -610,7 +610,7 @@ class SnapshotController(BaseController):
             return json_file.to_dict()
 
     def check_snapshot_status(self, dictionary=None):
-        """Check for snapshot object
+        """Check for snapshot object based on code and environment
 
         Parameters
         ----------
@@ -647,42 +647,6 @@ class SnapshotController(BaseController):
                 default environment files will be searched and environment will
                 be created with the EnvironmentController and added to the snapshot
                 at the time of snapshot creation
-
-            file_collection :
-                file_collection_id : str, optional
-                    file collection associated with the snapshot
-                paths : list, optional
-                    list of absolute or relative filepaths and/or dirpaths to collect with destination names
-                    (e.g. "/path/to/file:hello", "/path/to/file2", "/path/to/dir:newdir")
-
-                Default
-                -------
-                paths will be considered empty ([]), and the FileCollectionController
-                will create a blank FileCollection that is empty.
-
-            config :
-                config : dict, optional
-                    key, value pairs of configurations
-                config_filepath : str, optional
-                    absolute filepath to configuration parameters file
-                config_filename : str, optional
-                    name of file with configuration parameters
-
-                Default
-                -------
-                config will be considered empty ({}) and saved to the snapshot
-
-            stats :
-                stats : dict, optional
-                    key, value pairs of metrics and statistics
-                stats_filepath : str, optional
-                    absolute filepath to stats parameters file
-                stats_filename : str, optional
-                    name of file with metrics and statistics.
-
-                Default
-                -------
-                stats will be considered empty ({}) and saved to the snapshot
 
             for the remaining optional arguments it will search for them
             in the input dictionary
@@ -722,24 +686,15 @@ class SnapshotController(BaseController):
         # Environment setup
         self._env_setup(dictionary, status_dict)
 
-        # File setup
-        self._file_setup(dictionary, status_dict)
-
-        # Config setup
-        self._config_setup(dictionary, status_dict)
-
-        # Stats setup
-        self._stats_setup(dictionary, status_dict)
-
         # If snapshot object with required args already exists, return it
-        results = self.dal.snapshot.query({
-            "model_id": status_dict["model_id"],
-            "code_id": status_dict['code_id'],
-            "environment_id": status_dict['environment_id'],
-            "file_collection_id": status_dict['file_collection_id'],
-            "config": status_dict['config'],
-            "stats": status_dict['stats']
-        })
+        query = {
+                  "model_id": status_dict["model_id"],
+                  "code_id": status_dict["code_id"],
+                  "environment_id": status_dict["environment_id"]
+        }
+        results = self.dal.snapshot.query(query,
+                                          sort_key="created_at",
+                                          sort_order="descending")
         if results:
             return results[0]
         else:
