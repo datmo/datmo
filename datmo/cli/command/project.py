@@ -136,7 +136,7 @@ class ProjectCommand(BaseCommand):
 
     @Helper.notify_no_project_found
     def status(self):
-        status_dict, current_snapshot_obj, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = \
+        status_dict, current_snapshot, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = \
             self.project_controller.status()
         # Print out simple project meta data
         for k, v in status_dict.items():
@@ -150,6 +150,8 @@ class ProjectCommand(BaseCommand):
             self.cli_helper.echo(
                 "all changes have been saved, no unstaged changes")
             self.cli_helper.echo("")
+            if current_snapshot:
+                self.cli_helper.echo(current_snapshot)
         else:
             # Print out the unstaged components if unstaged
             self.cli_helper.echo("unstaged changes since latest snapshot:")
@@ -187,7 +189,7 @@ class ProjectCommand(BaseCommand):
             )
             self.cli_helper.echo(latest_snapshot_user_generated)
 
-        return status_dict, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files
+        return status_dict, current_snapshot, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files
 
     def cleanup(self):
         # Prompt user to ensure they would like to remove datmo information along with environment and files folder

@@ -33,6 +33,7 @@ from datmo import __version__
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
+from datmo.core.entity.snapshot import Snapshot
 from datmo.cli.command.run import RunCommand
 from datmo.core.util.exceptions import UnrecognizedCLIArgument
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
@@ -251,8 +252,9 @@ class TestProjectCommand():
 
         self.project_command.parse(["status"])
         result = self.project_command.execute()
-        status_dict, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = result
+        status_dict, current_snapshot, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = result
         assert isinstance(status_dict, dict)
+        assert not current_snapshot
         assert not latest_snapshot_user_generated
         assert not latest_snapshot_auto_generated
         assert unstaged_code
@@ -265,6 +267,12 @@ class TestProjectCommand():
         self.project_command.parse(
             ["init", "--name", test_name, "--description", test_description])
 
+        @self.project_command.cli_helper.input("\n")
+        def dummy(self):
+            return self.project_command.execute()
+
+        _ = dummy(self)
+
         # Create a snapshot
         self.snapshot_command = SnapshotCommand(self.cli_helper)
         with open(os.path.join(self.project_command.home, "test.py"),
@@ -274,17 +282,14 @@ class TestProjectCommand():
             ["snapshot", "create", "--message", "test"])
         snapshot_obj = self.snapshot_command.execute()
 
-        @self.project_command.cli_helper.input("\n")
-        def dummy(self):
-            return self.project_command.execute()
-
-        _ = dummy(self)
-
         self.project_command.parse(["status"])
         result = self.project_command.execute()
-        status_dict, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = result
+        status_dict, current_snapshot, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = result
         assert isinstance(status_dict, dict)
-        assert latest_snapshot_user_generated
+        assert isinstance(current_snapshot, Snapshot)
+        assert isinstance(latest_snapshot_user_generated, Snapshot)
+        assert snapshot_obj == latest_snapshot_user_generated
+        assert current_snapshot == latest_snapshot_user_generated
         assert not latest_snapshot_auto_generated
         assert not unstaged_code
         assert not unstaged_environment
