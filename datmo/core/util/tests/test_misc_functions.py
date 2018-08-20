@@ -27,7 +27,7 @@ except TypeError:
 
 from datmo.core.util.misc_functions import (
     create_unique_hash, mutually_exclusive, is_project_dir, find_project_dir,
-    grep, prettify_datetime, format_table, parse_cli_key_value,
+    grep, prettify_datetime, format_table, parse_cli_key_value, convert_keys_to_string,
     get_datmo_temp_path, parse_path, parse_paths, list_all_filepaths)
 
 from datmo.core.util.exceptions import MutuallyExclusiveArguments, RequiredArgumentMissing, InvalidDestinationName, PathDoesNotExist, TooManyArgumentsFound
@@ -291,3 +291,15 @@ class TestMiscFunctions():
                               "new_name.txt")]
         assert result[3] == [(os.path.join(default_source_prefix, "test_dir"),
                               "new_dirname")]
+
+    def test_convert_keys_to_string(self):
+        test_data = { u'spam': u'eggs', u'foo': frozenset([u'Gah!']), u'bar': { u'baz': 97 },
+         u'list': [u'list', (True, u'Maybe'), set([u'and', u'a', u'set', 1])]}
+
+        converted_data = convert_keys_to_string(test_data)
+
+        assert converted_data == {'bar': {'baz': 97},
+                                  'foo': frozenset(['Gah!']),
+                                  'list': ['list', (True, 'Maybe'),
+                                           set(['and', 'a', 'set', 1])],
+                                  'spam': 'eggs'}

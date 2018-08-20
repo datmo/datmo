@@ -9,6 +9,7 @@ import datetime
 import pytz
 import tzlocal
 import pytest
+import collections
 import platform
 import tempfile
 from io import open
@@ -28,6 +29,11 @@ except TypeError:
         return bytes(val, "utf-8")
 
     to_bytes("test")
+try:
+    basestring
+except NameError:
+    basestring = str
+
 from glob import glob
 
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
@@ -52,8 +58,19 @@ def printable_dict(input_dictionary):
     printable_output = ""
     if input_dictionary:
         for key, value in input_dictionary.items():
-            printable_output = printable_output + key + ": " + str(value) + "\n"
+            printable_output = printable_output + str(key) + ": " + str(value) + "\n"
     return printable_output
+
+
+def convert_keys_to_string(data):
+    if isinstance(data, basestring):
+        return str(data)
+    elif isinstance(data, collections.Mapping):
+        return dict(map(convert_keys_to_string, data.items()))
+    elif isinstance(data, collections.Iterable):
+        return type(data)(map(convert_keys_to_string, data))
+    else:
+        return data
 
 
 def printable_object(object, max_width=40):
