@@ -131,15 +131,31 @@ class EnvironmentController(BaseController):
             environment_type = options['environment_type']
             environment_language = options['environment_language']
             if environment_language:
-                name = "%s:%s-%s" % (environment_framework, environment_type, environment_language)
+                name = "%s:%s-%s" % (environment_framework, environment_type,
+                                     environment_language)
             else:
                 name = "%s:%s" % (environment_framework, environment_type)
         create_dict = {
             "name": name,
-            "description":
-                "supported environment created by datmo"
+            "description": "supported environment created by datmo"
         }
         return self.create(create_dict, save_hardware_file=save_hardware_file)
+
+    def current_environment(self):
+        """Get the current environment object
+
+        Returns
+        -------
+        Environment
+            returns an object representing the current environment state
+
+        Raises
+        ------
+        UnstagedChanges
+            if there are unstaged changes error out because no current environment
+        """
+        self.check_unstaged_changes()
+        return self.create({})
 
     def create(self, dictionary, save_hardware_file=True):
         """Create an environment

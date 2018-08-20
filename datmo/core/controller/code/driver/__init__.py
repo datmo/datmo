@@ -30,6 +30,21 @@ class CodeDriver(with_metaclass(ABCMeta, object)):
         pass
 
     @abstractmethod
+    def current_hash(self):
+        """Get the current hash or commit id of the code if not unstaged
+
+        Returns
+        -------
+        hash : str
+            the hash of the code or commit id only if it has already been created
+
+        Raises
+        ------
+        UnstagedChanges
+            does not proceed to return hash unless the changes are already staged
+        """
+
+    @abstractmethod
     def create_ref(self, commit_id=None):
         """Add remaining files, make a commit and add to datmo ref
 

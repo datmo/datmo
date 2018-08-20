@@ -185,7 +185,7 @@ class TestProjectController():
 
     def test_status_basic(self):
         self.project_controller.init("test3", "test description")
-        status_dict, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = \
+        status_dict, current_snapshot, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = \
             self.project_controller.status()
 
         assert status_dict
@@ -193,46 +193,10 @@ class TestProjectController():
         assert status_dict['name'] == "test3"
         assert status_dict['description'] == "test description"
         assert isinstance(status_dict['config'], dict)
+        assert not current_snapshot
         assert not latest_snapshot_user_generated
         assert not latest_snapshot_auto_generated
         assert unstaged_code  # no files, but unstaged because blank commit id has not yet been created (no initial snapshot)
-        assert not unstaged_environment
-        assert not unstaged_files
-
-        self.task_controller = TaskController()
-
-        # Create and run a task and test if unstaged task is shown
-        first_task = self.task_controller.create()
-
-        # Create task_dict
-        task_command = ["sh", "-c", "echo accuracy:0.45"]
-        task_dict = {"command_list": task_command}
-
-        # Create a file so it can create a snapshot for the task
-        env_def_path = os.path.join(self.task_controller.home, "Dockerfile")
-        with open(env_def_path, "wb") as f:
-            f.write(to_bytes("FROM python:3.5-alpine"))
-
-        updated_first_task = self.task_controller.run(
-            first_task.id, task_dict=task_dict)
-        after_snapshot_obj = self.task_controller.dal.snapshot.get_by_id(
-            updated_first_task.after_snapshot_id)
-        environment_obj = self.task_controller.dal.environment.get_by_id(
-            after_snapshot_obj.environment_id)
-        self.environment_ids.append(environment_obj.id)
-
-        status_dict, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = \
-            self.project_controller.status()
-
-        assert status_dict
-        assert isinstance(status_dict, dict)
-        assert status_dict['name'] == "test3"
-        assert status_dict['description'] == "test description"
-        assert isinstance(status_dict['config'], dict)
-        assert not latest_snapshot_user_generated
-        assert latest_snapshot_auto_generated
-        # after task has been completed, all states are saved to ensure no lost work
-        assert not unstaged_code
         assert not unstaged_environment
         assert not unstaged_files
 
@@ -247,7 +211,7 @@ class TestProjectController():
         self.snapshot_controller.file_driver.create("dirpath2", directory=True)
         self.snapshot_controller.file_driver.create("filepath1")
 
-        # Create environment_driver definition
+        # Create environment definition
         env_def_path = os.path.join(self.snapshot_controller.home,
                                     "Dockerfile")
         with open(env_def_path, "wb") as f:
@@ -283,10 +247,10 @@ class TestProjectController():
                 stats_filepath,
         }
 
-        # Create snapshot in the project
+        # Create snapshot in the project, then wait, and try status
         first_snapshot = self.snapshot_controller.create(input_dict)
 
-        status_dict, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = \
+        status_dict, current_snapshot, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = \
             self.project_controller.status()
 
         assert status_dict
@@ -294,8 +258,9 @@ class TestProjectController():
         assert status_dict['name'] == "test4"
         assert status_dict['description'] == "test description"
         assert isinstance(status_dict['config'], dict)
+        assert not current_snapshot  # snapshot was created from other environments and files (so user is not on any current snapshot)
         assert isinstance(latest_snapshot_user_generated, Snapshot)
-        assert latest_snapshot_user_generated.id == first_snapshot.id
+        assert latest_snapshot_user_generated == first_snapshot
         assert not latest_snapshot_auto_generated
         assert not unstaged_code
         assert not unstaged_environment
@@ -310,13 +275,18 @@ class TestProjectController():
 
         updated_first_task = self.task_controller.run(
             first_task.id, task_dict=task_dict)
+        before_snapshot_obj = self.task_controller.dal.snapshot.get_by_id(
+            updated_first_task.before_snapshot_id)
         after_snapshot_obj = self.task_controller.dal.snapshot.get_by_id(
             updated_first_task.after_snapshot_id)
-        environment_obj = self.task_controller.dal.environment.get_by_id(
+        before_environment_obj = self.task_controller.dal.environment.get_by_id(
+            before_snapshot_obj.environment_id)
+        after_environment_obj = self.task_controller.dal.environment.get_by_id(
             after_snapshot_obj.environment_id)
-        self.environment_ids.append(environment_obj.id)
+        assert before_environment_obj == after_environment_obj
+        self.environment_ids.append(after_environment_obj.id)
 
-        status_dict, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = \
+        status_dict, current_snapshot, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = \
             self.project_controller.status()
 
         assert status_dict
@@ -324,10 +294,20 @@ class TestProjectController():
         assert status_dict['name'] == "test4"
         assert status_dict['description'] == "test description"
         assert isinstance(status_dict['config'], dict)
+        assert isinstance(current_snapshot, Snapshot)
         assert isinstance(latest_snapshot_user_generated, Snapshot)
-        assert latest_snapshot_user_generated.id == first_snapshot.id
+        assert latest_snapshot_user_generated == first_snapshot
         assert isinstance(latest_snapshot_auto_generated, Snapshot)
-        assert latest_snapshot_auto_generated.id == after_snapshot_obj.id
+        # current snapshot is the before snapshot for the run
+        assert current_snapshot == before_snapshot_obj
+        assert current_snapshot != latest_snapshot_auto_generated
+        assert current_snapshot != latest_snapshot_user_generated
+        # latest autogenerated snapshot is the after snapshot id
+        assert latest_snapshot_auto_generated == after_snapshot_obj
+        assert latest_snapshot_auto_generated != latest_snapshot_user_generated
+        # user generated snapshot is not associated with any before or after snapshot
+        assert latest_snapshot_user_generated != before_snapshot_obj
+        assert latest_snapshot_user_generated != after_snapshot_obj
         assert not unstaged_code
         assert not unstaged_environment
         assert not unstaged_files

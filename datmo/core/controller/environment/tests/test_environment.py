@@ -165,6 +165,23 @@ class TestEnvironmentController():
             failed = True
         assert failed
 
+    def test_current_environment(self):
+        self.__setup()
+        # Test failure with unstaged changes
+        failed = False
+        try:
+            self.environment_controller.current_environment()
+        except UnstagedChanges:
+            failed = True
+        assert failed
+        # Test successful current environment
+        input_dict = {"name": "test", "description": "test description"}
+        environment_obj = self.environment_controller.create(input_dict)
+        self.environment_ids.append(environment_obj.id)
+        current_environment_obj = self.environment_controller.current_environment(
+        )
+        assert current_environment_obj == environment_obj
+
     def test_create(self):
         # 0) Test SUCCESS create when definition path exists in project environment directory (no input, no root) -- with hardware file
         # 1) Test SUCCESS create when definition path exists in project environment directory (no input, no root)
@@ -483,21 +500,21 @@ class TestEnvironmentController():
                                            "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
-            f.write(to_bytes("FROM datmo/python-base:cpu-py27-notebook" + os.linesep))
+            f.write(
+                to_bytes(
+                    "FROM datmo/python-base:cpu-py27-notebook" + os.linesep))
             f.write(to_bytes(str("RUN echo " + random_text)))
 
         image_name = "test"
-        input_dict = {
-            "name": image_name,
-            "description": "test description"
-        }
+        input_dict = {"name": image_name, "description": "test description"}
         # Create environment in the project
-        environment_obj = self.environment_controller.create(input_dict,
-                                                             save_hardware_file=False)
+        environment_obj = self.environment_controller.create(
+            input_dict, save_hardware_file=False)
         self.environment_controller.build(environment_obj.id)
 
         # Test when there is no container being run
-        workspace_url = self.environment_controller.extract_workspace_url(image_name, "notebook")
+        workspace_url = self.environment_controller.extract_workspace_url(
+            image_name, "notebook")
         assert workspace_url == None
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)

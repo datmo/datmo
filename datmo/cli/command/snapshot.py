@@ -178,7 +178,7 @@ class SnapshotCommand(ProjectCommand):
         print_format = kwargs.get('format', "table")
         download = kwargs.get('download', None)
         download_path = kwargs.get('download_path', None)
-        current_snapshot_obj = self.snapshot_controller.check_snapshot_status()
+        current_snapshot_obj = self.snapshot_controller.current_snapshot()
         current_snapshot_id = current_snapshot_obj.id if current_snapshot_obj else None
         if show_all:
             snapshot_objs = self.snapshot_controller.list(
@@ -205,7 +205,7 @@ class SnapshotCommand(ProjectCommand):
                 snapshot_label = printable_object(snapshot_obj.label)
                 printable_snapshot_id = snapshot_obj.id if current_snapshot_id is not None and \
                                                            snapshot_obj.id != current_snapshot_id\
-                    else "(active) " + snapshot_obj.id
+                    else "(current) " + snapshot_obj.id
                 item_dict_list.append({
                     "id": printable_snapshot_id,
                     "created at": prettify_datetime(snapshot_obj.created_at),
@@ -229,7 +229,7 @@ class SnapshotCommand(ProjectCommand):
                 snapshot_label = printable_object(snapshot_obj.label)
                 printable_snapshot_id = snapshot_obj.id if current_snapshot_id is not None and \
                                                            snapshot_obj.id != current_snapshot_id \
-                    else "(active) " + snapshot_obj.id
+                    else "(current) " + snapshot_obj.id
                 item_dict_list.append({
                     "id": printable_snapshot_id,
                     "created at": prettify_datetime(snapshot_obj.created_at),
@@ -300,7 +300,8 @@ class SnapshotCommand(ProjectCommand):
                         else "N/A"
                     key_value_2 = "%s: %s" % (key, value_2[key]) if value_2 != "N/A" and value_2.get(key, None) \
                         else "N/A"
-                    table_data.append([attribute, key_value_1, "->", key_value_2])
+                    table_data.append(
+                        [attribute, key_value_1, "->", key_value_2])
             else:
                 table_data.append([attribute, value_1, "->", value_2])
         output = format_table(table_data)

@@ -136,7 +136,7 @@ class ProjectCommand(BaseCommand):
 
     @Helper.notify_no_project_found
     def status(self):
-        status_dict, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = \
+        status_dict, current_snapshot_obj, latest_snapshot_user_generated, latest_snapshot_auto_generated, unstaged_code, unstaged_environment, unstaged_files = \
             self.project_controller.status()
         # Print out simple project meta data
         for k, v in status_dict.items():
@@ -150,14 +150,6 @@ class ProjectCommand(BaseCommand):
             self.cli_helper.echo(
                 "all changes have been saved, no unstaged changes")
             self.cli_helper.echo("")
-            # Check if current snapshot id is the same as the latest created id
-            self.snapshot_controller = SnapshotController()
-            current_snapshot_obj = self.snapshot_controller.check_snapshot_status(
-            )
-            if current_snapshot_obj:
-                self.cli_helper.echo(
-                    "current snapshot state of the repository: ")
-                self.cli_helper.echo(current_snapshot_obj)
         else:
             # Print out the unstaged components if unstaged
             self.cli_helper.echo("unstaged changes since latest snapshot:")

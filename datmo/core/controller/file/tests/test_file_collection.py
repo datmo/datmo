@@ -58,6 +58,22 @@ class TestFileCollectionController():
             pass
         return filepath1, dirpath1
 
+    def test_current_file_collection(self):
+        self.project_controller.init("test3", "test description")
+        _ = self.__setup()
+        # Test failure because of unstaged changes
+        failed = False
+        try:
+            self.file_collection_controller.current_file_collection()
+        except UnstagedChanges:
+            failed = True
+        assert failed
+        # Test success with created files
+        file_collection_obj = self.file_collection_controller.create([])
+        current_file_collection_obj = self.file_collection_controller.current_file_collection(
+        )
+        assert current_file_collection_obj == file_collection_obj
+
     def test_create(self):
         self.project_controller.init("test3", "test description")
 

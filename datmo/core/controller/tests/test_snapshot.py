@@ -31,7 +31,7 @@ from datmo.core.entity.snapshot import Snapshot
 from datmo.core.util.exceptions import (
     EntityNotFound, SessionDoesNotExist, RequiredArgumentMissing,
     TaskNotComplete, InvalidArgumentType, ProjectNotInitialized,
-    InvalidProjectPath, DoesNotExist)
+    InvalidProjectPath, DoesNotExist, UnstagedChanges)
 from datmo.core.util.misc_functions import check_docker_inactive, pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -78,6 +78,20 @@ class TestSnapshotController():
         except InvalidProjectPath:
             failed = True
         assert failed
+
+    def test_current_snapshot(self):
+        self.__setup()
+        # Test failure for unstaged changes
+        failed = False
+        try:
+            self.snapshot_controller.current_snapshot()
+        except UnstagedChanges:
+            failed = True
+        assert failed
+        # Test success after snapshot created
+        snapshot_obj = self.__default_create()
+        current_snapshot_obj = self.snapshot_controller.current_snapshot()
+        assert current_snapshot_obj == snapshot_obj
 
     def test_create_fail_no_message(self):
         self.__setup()
@@ -621,6 +635,20 @@ class TestSnapshotController():
         # Create snapshot in the project
         return self.snapshot_controller.create(input_dict)
 
+    def test_check_unstaged_changes(self):
+        self.__setup()
+        # Check unstaged changes
+        failed = False
+        try:
+            self.snapshot_controller.check_unstaged_changes()
+        except UnstagedChanges:
+            failed = True
+        assert failed
+        # Check no unstaged changes
+        _ = self.__default_create()
+        result = self.snapshot_controller.check_unstaged_changes()
+        assert result == False
+
     def test_checkout(self):
         self.__setup()
         # Create snapshot
@@ -885,14 +913,3 @@ class TestSnapshotController():
 
         assert result == True and \
             thrown == True
-
-    def test_check_snapshot_status(self):
-        self.__setup()
-        # Create snapshot in the project
-        snapshot_obj = self.__default_create()
-
-        # Get the current snapshot status based on the project
-        status_snapshot_obj = self.snapshot_controller.check_snapshot_status()
-
-        # Check if the current status of the snapshot is the same as just created
-        assert status_snapshot_obj.id == snapshot_obj.id

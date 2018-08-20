@@ -30,6 +30,24 @@ class CodeController(BaseController):
             self.logger.warning(
                 __("warn", "controller.general.environment.failed"))
 
+    def current_code(self):
+        """Get the current code object
+
+        Returns
+        -------
+        Code
+            an object representing the current code reference state
+
+        Raises
+        ------
+        UnstagedChanges
+            if there are unstaged changes error out because no current code
+        """
+        self.check_unstaged_changes()
+        current_commit_id = self.code_driver.current_hash()
+        # Return the code object with this hash id
+        return self.create(commit_id=current_commit_id)
+
     def create(self, commit_id=None):
         """Create a Code object
 
@@ -145,7 +163,7 @@ class CodeController(BaseController):
         CodeNotInitialized
             error if not initialized (must initialize first)
         UnstagedChanges
-            error if not there exists unstaged changes in environment
+            error if not there exists unstaged changes in code
         """
         return self.code_driver.check_unstaged_changes()
 
@@ -169,7 +187,7 @@ class CodeController(BaseController):
         CodeNotInitialized
             error if not initialized (must initialize first)
         UnstagedChanges
-            error if not there exists unstaged changes in environment
+            error if not there exists unstaged changes in code
 
         """
         if not self.exists(code_id):
