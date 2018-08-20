@@ -23,10 +23,6 @@ class TestLoggerModule():
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         self.logger = Logger(task_dir=self.temp_dir)
 
-        # Consider case for using `/task` as default folder
-        if not os.path.isdir("/task"): os.mkdir("/task")
-        self.run_logger = Logger()
-
     def teardown_method(self):
         pass
 
@@ -35,31 +31,16 @@ class TestLoggerModule():
         saved_config = self.logger.log_config(config)
         assert saved_config == config
 
-        if os.path.isdir("/task"):
-            saved_run_config = self.run_logger.log_config(config)
-            assert saved_run_config == config
-
         config = {'b': 2}
         saved_config = self.logger.log_config(config)
         assert saved_config == {'a': 1, 'b': 2}
 
-        if os.path.isdir("/task"):
-            saved_run_config = self.run_logger.log_config(config)
-            assert saved_run_config == {'a': 1, 'b': 2}
 
     def test_log_results(self):
         result = {'a': 1}
         saved_result = self.logger.log_result(result)
         assert saved_result == result
 
-        if os.path.isdir("/task"):
-            saved_run_result = self.run_logger.log_result(saved_result)
-            assert saved_run_result == result
-
         result = {'b': 2}
         saved_result = self.logger.log_result(result)
         assert saved_result == {'a': 1, 'b': 2}
-
-        if os.path.isdir("/task"):
-            saved_run_result = self.run_logger.log_result(saved_result)
-            assert saved_run_result == {'a': 1, 'b': 2}
