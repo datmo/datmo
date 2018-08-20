@@ -310,6 +310,7 @@ class TestTaskController():
         assert "accuracy" in updated_task_obj.logs
         assert updated_task_obj.results
         assert updated_task_obj.results == {"accuracy": "0.45"}
+        assert after_snapshot_obj.stats == {"accuracy": "0.45"}
         assert updated_task_obj.status == "SUCCESS"
         assert updated_task_obj.end_time
         assert updated_task_obj.duration

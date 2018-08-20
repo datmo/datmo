@@ -26,7 +26,7 @@ from datmo.config import Config
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.code.code import CodeController
 from datmo.core.util.exceptions import (EntityNotFound, CommitDoesNotExist,
-                                        CodeDoesNotExist)
+                                        CodeDoesNotExist, UnstagedChanges)
 
 
 class TestCodeController():
@@ -43,6 +43,27 @@ class TestCodeController():
 
     def teardown_method(self):
         pass
+
+    def test_current_code(self):
+        self.project_controller.init("test4", "test description")
+
+        # Create test file
+        definition_filepath = os.path.join(self.code_controller.home,
+                                           "test.txt")
+        with open(definition_filepath, "wb") as f:
+            f.write(to_bytes(str("test")))
+
+        # Test failing with unstaged changes
+        failed = False
+        try:
+            self.code_controller.current_code()
+        except UnstagedChanges:
+            failed = True
+        assert failed
+        # Test passing with something to commit
+        code_obj = self.code_controller.create()
+        current_code_obj = self.code_controller.current_code()
+        assert code_obj == current_code_obj
 
     def test_create(self):
         self.project_controller.init("test3", "test description")

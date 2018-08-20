@@ -172,6 +172,13 @@ class FileCodeDriver(CodeDriver):
             return False
         return True
 
+    def current_hash(self):
+        self.check_unstaged_changes()
+        # Find all tracked files (_get_tracked_files)
+        tracked_filepaths = self._get_tracked_files()
+        # Return hash of the files (_calculate_commit_hash)
+        return self._calculate_commit_hash(tracked_filepaths)
+
     def create_ref(self, commit_id=None):
         """Add all files except for those in .datmoignore, and make a commit
 

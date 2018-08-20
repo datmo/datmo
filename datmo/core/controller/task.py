@@ -459,6 +459,14 @@ class TaskController(BaseController):
             if logs is not None:
                 update_task_dict["results"] = self._parse_logs_for_results(
                     logs)
+                if update_task_dict["results"] is not None:
+                    snapshot_update_dict = dict({'id': after_snapshot_obj.id})
+                    if after_snapshot_obj.stats:
+                        after_snapshot_obj.stats.update(update_task_dict["results"])
+                    else:
+                        after_snapshot_obj.stats = update_task_dict["results"]
+                    snapshot_update_dict["stats"] = after_snapshot_obj.stats.copy()
+                    self.dal.snapshot.update(snapshot_update_dict)
             if run_id is not None:
                 update_task_dict["run_id"] = run_id
             return self.dal.task.update(update_task_dict)

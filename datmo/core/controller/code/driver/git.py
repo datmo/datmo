@@ -148,6 +148,10 @@ class GitCodeDriver(CodeDriver):
 
     # Implemented functions for every CodeDriver
 
+    def current_hash(self):
+        self.check_unstaged_changes()
+        return self.latest_commit()
+
     def create_ref(self, commit_id=None):
         """Add remaining files, make a commit and add it to a datmo code ref
 
@@ -196,9 +200,6 @@ class GitCodeDriver(CodeDriver):
         with open(code_ref_path, "wb") as f:
             f.write(to_bytes(commit_id))
         return commit_id
-
-    def current_ref(self):
-        return self.latest_commit()
 
     def latest_ref(self):
         def getmtime(absolute_filepath):
@@ -292,7 +293,8 @@ class GitCodeDriver(CodeDriver):
         try:
             if not self.exists_datmo_files_ignored():
                 with open(exclude_file, "ab") as f:
-                    f.write(to_bytes("%s.datmo/*%s" %(os.linesep, os.linesep)))
+                    f.write(
+                        to_bytes("%s.datmo/*%s" % (os.linesep, os.linesep)))
         except Exception as e:
             raise FileIOError(
                 __("error", "controller.code.driver.git.ensure_code_refs_dir",

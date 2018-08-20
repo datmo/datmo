@@ -117,6 +117,37 @@ class TestGitCodeDriver():
             failed = True
         assert failed
 
+    def test_current_hash(self):
+        self.git_code_manager.init()
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test.txt")
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes(str("test")))
+        # Test failure unstaged commits
+        failed = False
+        try:
+            self.git_code_manager.current_hash()
+        except UnstagedChanges:
+            failed = True
+        assert failed
+        # Test success (single commit)
+        commit_hash = self.git_code_manager.create_ref()
+        result = self.git_code_manager.current_hash()
+        assert result == commit_hash
+        # Test success (multiple commits)
+        test_filepath = os.path.join(self.git_code_manager.filepath,
+                                     "test2.txt")
+        with open(test_filepath, "wb") as f:
+            f.write(to_bytes(str("test")))
+        commit_hash_2 = self.git_code_manager.create_ref()
+        result = self.git_code_manager.current_hash()
+        assert commit_hash != commit_hash_2
+        assert result == commit_hash_2
+        # Test success (checkout)
+        self.git_code_manager.checkout_ref(commit_id=commit_hash)
+        result = self.git_code_manager.current_hash()
+        assert result == commit_hash
+
     def test_create_ref(self):
         self.git_code_manager.init()
         # Test failing case with no code_id and nothing to commit
@@ -159,30 +190,6 @@ class TestGitCodeDriver():
             failed = True
         assert failed
 
-    def test_current_ref(self):
-        self.git_code_manager.init()
-        # Test success (single commit)
-        test_filepath = os.path.join(self.git_code_manager.filepath,
-                                     "test.txt")
-        with open(test_filepath, "wb") as f:
-            f.write(to_bytes(str("test")))
-        commit_hash = self.git_code_manager.create_ref()
-        result = self.git_code_manager.current_ref()
-        assert result == commit_hash
-        # Test success (multiple commits)
-        test_filepath = os.path.join(self.git_code_manager.filepath,
-                                     "test2.txt")
-        with open(test_filepath, "wb") as f:
-            f.write(to_bytes(str("test")))
-        commit_hash_2 = self.git_code_manager.create_ref()
-        result = self.git_code_manager.current_ref()
-        assert commit_hash != commit_hash_2
-        assert result == commit_hash_2
-        # Test success (checkout)
-        self.git_code_manager.checkout_ref(commit_id=commit_hash)
-        result = self.git_code_manager.current_ref()
-        assert result == commit_hash
-
     def test_latest_ref(self):
         self.git_code_manager.init()
         # Test success (single commit)
@@ -205,7 +212,7 @@ class TestGitCodeDriver():
         assert result == commit_hash_2
         # Test success (checkout)
         self.git_code_manager.checkout_ref(commit_id=commit_hash)
-        result = self.git_code_manager.current_ref()
+        result = self.git_code_manager.current_hash()
         assert result == commit_hash
 
     def test_exists_ref(self):

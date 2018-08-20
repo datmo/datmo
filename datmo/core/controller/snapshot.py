@@ -10,7 +10,8 @@ from datmo.core.util.validation import validate
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import (
     FileIOError, RequiredArgumentMissing, ProjectNotInitialized,
-    SessionDoesNotExist, EntityNotFound, TaskNotComplete, DoesNotExist)
+    SessionDoesNotExist, EntityNotFound, TaskNotComplete, DoesNotExist,
+    UnstagedChanges)
 
 
 class SnapshotController(BaseController):
@@ -42,12 +43,43 @@ class SnapshotController(BaseController):
 
     def __init__(self):
         super(SnapshotController, self).__init__()
-        self.code = CodeController()
-        self.file_collection = FileCollectionController()
-        self.environment = EnvironmentController()
+        self.code_controller = CodeController()
+        self.file_collection_controller = FileCollectionController()
+        self.environment_controller = EnvironmentController()
         if not self.is_initialized:
             raise ProjectNotInitialized(
                 __("error", "controller.snapshot.__init__"))
+
+    def current_snapshot(self):
+        """Get current snapshot and return if no unstaged changes
+
+        Returns
+        -------
+        datmo.core.entity.snapshot.Snapshot or None
+            current snapshot object state if not unstaged and exists. if DNE return None (should never occur)
+
+        Raises
+        ------
+        UnstagedChanges
+            if there are unstaged changes error out because no current snapshot
+        """
+        current_code_obj = self.code_controller.current_code()
+        current_environment_obj = self.environment_controller.current_environment(
+        )
+        current_file_collection_obj = self.file_collection_controller.current_file_collection(
+        )
+
+        # If snapshot object with required args already exists, return it
+        query = {
+            "model_id": self.model.id,
+            "code_id": current_code_obj.id,
+            "environment_id": current_environment_obj.id,
+            "file_collection_id": current_file_collection_obj.id
+        }
+        results = self.dal.snapshot.query(
+            query, sort_key="created_at", sort_order="descending")
+        return results[
+            0] if results else None  # Should never return None, unless DB is out of sync
 
     def create(self, dictionary):
         """Create snapshot object
@@ -280,6 +312,30 @@ class SnapshotController(BaseController):
 
         return self.dal.snapshot.update(snapshot_update_dict)
 
+    def check_unstaged_changes(self):
+        """Checks if there exists any unstaged changes for the snapshot in the project.
+
+        Returns
+        -------
+        bool
+            False if it's already staged else error
+
+        Raises
+        ------
+        UnstagedChanges
+            error if not there exists unstaged changes in snapshot
+        """
+        try:
+            # check for unstaged changes in code
+            self.code_controller.check_unstaged_changes()
+            # check for unstaged changes in environment
+            self.environment_controller.check_unstaged_changes()
+            # check for unstaged changes in file
+            self.file_collection_controller.check_unstaged_changes()
+            return False
+        except UnstagedChanges:
+            raise UnstagedChanges()
+
     def checkout(self, snapshot_id):
         # Get snapshot object
         snapshot_obj = self.dal.snapshot.get_by_id(snapshot_id)
@@ -289,22 +345,18 @@ class SnapshotController(BaseController):
         environment_obj = self.dal.environment. \
             get_by_id(snapshot_obj.environment_id)
 
-        # check for unstaged changes in code
-        self.code.check_unstaged_changes()
-        # check for unstaged changes in environment
-        self.environment.check_unstaged_changes()
-        # check for unstaged changes in file
-        self.file_collection.check_unstaged_changes()
+        # Check for unstaged changes, if so error with UnstagedChanges
+        self.check_unstaged_changes()
 
         # Checkout code to the relevant commit ref
-        code_checkout_success = self.code.checkout(code_obj.id)
+        code_checkout_success = self.code_controller.checkout(code_obj.id)
 
         # Checkout environment to relevant environment id
-        environment_checkout_success = self.environment.checkout(
+        environment_checkout_success = self.environment_controller.checkout(
             environment_obj.id)
 
         # Checkout files to relevant file collection id
-        file_checkout_success = self.file_collection.checkout(
+        file_checkout_success = self.file_collection_controller.checkout(
             file_collection_obj.id)
 
         return (code_checkout_success and environment_checkout_success
@@ -453,10 +505,10 @@ class SnapshotController(BaseController):
         if "code_id" in incoming_dictionary:
             create_dict['code_id'] = incoming_dictionary['code_id']
         elif "commit_id" in incoming_dictionary:
-            create_dict['code_id'] = self.code.\
+            create_dict['code_id'] = self.code_controller.\
                 create(commit_id=incoming_dictionary['commit_id']).id
         else:
-            create_dict['code_id'] = self.code.create().id
+            create_dict['code_id'] = self.code_controller.create().id
 
     def _env_setup(self, incoming_dictionary, create_dict):
         """ TODO:
@@ -472,12 +524,13 @@ class SnapshotController(BaseController):
             create_dict['environment_id'] = incoming_dictionary[
                 'environment_id']
         elif "environment_paths" in incoming_dictionary:
-            create_dict['environment_id'] = self.environment.create({
-                "paths": incoming_dictionary['environment_paths']
-            }).id
+            create_dict['environment_id'] = self.environment_controller.create(
+                {
+                    "paths": incoming_dictionary['environment_paths']
+                }).id
         else:
             # create some default environment
-            create_dict['environment_id'] = self.environment.\
+            create_dict['environment_id'] = self.environment_controller.\
                 create({}).id
 
     def _file_setup(self, incoming_dictionary, create_dict):
@@ -498,11 +551,11 @@ class SnapshotController(BaseController):
                 'file_collection_id']
         elif "paths" in incoming_dictionary:
             # transform file paths to file_collection_id
-            create_dict['file_collection_id'] = self.file_collection.\
+            create_dict['file_collection_id'] = self.file_collection_controller.\
                 create(incoming_dictionary['paths']).id
         else:
             # create some default file collection
-            create_dict['file_collection_id'] = self.file_collection.\
+            create_dict['file_collection_id'] = self.file_collection_controller.\
                 create([]).id
 
     def _config_setup(self, incoming_dictionary, create_dict):
@@ -587,10 +640,10 @@ class SnapshotController(BaseController):
             output dictionary of the JSON file
         """
 
-        file_collection_obj = self.file_collection.dal.file_collection.\
+        file_collection_obj = self.file_collection_controller.dal.file_collection.\
             get_by_id(file_collection_id)
         file_collection_path = \
-            self.file_collection.file_driver.get_collection_path(
+            self.file_collection_controller.file_driver.get_collection_path(
                 file_collection_obj.filehash)
         # find all of the possible paths it could exist
         possible_paths = [os.path.join(self.home, file_to_find)] + \

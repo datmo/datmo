@@ -34,6 +34,22 @@ class FileCollectionController(BaseController):
             self.logger.warning(
                 __("warn", "controller.general.environment.failed"))
 
+    def current_file_collection(self):
+        """Get the current file collection object
+
+        Returns
+        -------
+        FileCollection
+            an object representing the current file collection state
+
+        Raises
+        ------
+        UnstagedChanges
+            if there are unstaged changes error out because no current files
+        """
+        self.check_unstaged_changes()
+        return self.create([])
+
     def create(self, paths):
         """Create a FileCollection
 

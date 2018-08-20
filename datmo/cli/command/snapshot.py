@@ -178,6 +178,8 @@ class SnapshotCommand(ProjectCommand):
         print_format = kwargs.get('format', "table")
         download = kwargs.get('download', None)
         download_path = kwargs.get('download_path', None)
+        current_snapshot_obj = self.snapshot_controller.current_snapshot()
+        current_snapshot_id = current_snapshot_obj.id if current_snapshot_obj else None
         if show_all:
             snapshot_objs = self.snapshot_controller.list(
                 session_id=session_id,
@@ -201,8 +203,11 @@ class SnapshotCommand(ProjectCommand):
                 snapshot_stats_printable = printable_object(snapshot_obj.stats)
                 snapshot_message = printable_object(snapshot_obj.message)
                 snapshot_label = printable_object(snapshot_obj.label)
+                printable_snapshot_id = snapshot_obj.id if current_snapshot_id is not None and \
+                                                           snapshot_obj.id != current_snapshot_id\
+                    else "(current) " + snapshot_obj.id
                 item_dict_list.append({
-                    "id": snapshot_obj.id,
+                    "id": printable_snapshot_id,
                     "created at": prettify_datetime(snapshot_obj.created_at),
                     "config": snapshot_config_printable,
                     "stats": snapshot_stats_printable,
@@ -222,8 +227,11 @@ class SnapshotCommand(ProjectCommand):
                 snapshot_stats_printable = printable_object(snapshot_obj.stats)
                 snapshot_message = printable_object(snapshot_obj.message)
                 snapshot_label = printable_object(snapshot_obj.label)
+                printable_snapshot_id = snapshot_obj.id if current_snapshot_id is not None and \
+                                                           snapshot_obj.id != current_snapshot_id \
+                    else "(current) " + snapshot_obj.id
                 item_dict_list.append({
-                    "id": snapshot_obj.id,
+                    "id": printable_snapshot_id,
                     "created at": prettify_datetime(snapshot_obj.created_at),
                     "config": snapshot_config_printable,
                     "stats": snapshot_stats_printable,
@@ -288,9 +296,12 @@ class SnapshotCommand(ProjectCommand):
                 if isinstance(value_2, dict): alldict.append(value_2)
                 allkey = set().union(*alldict)
                 for key in allkey:
-                    key_value_1 = "%s: %s" % (key, value_1[key]) if value_1.get(key, None) else "N/A"
-                    key_value_2 = "%s: %s" % (key, value_2[key]) if value_2.get(key, None) else "N/A"
-                    table_data.append([attribute, key_value_1, "->", key_value_2])
+                    key_value_1 = "%s: %s" % (key, value_1[key]) if value_1 != "N/A" and value_1.get(key, None) \
+                        else "N/A"
+                    key_value_2 = "%s: %s" % (key, value_2[key]) if value_2 != "N/A" and value_2.get(key, None) \
+                        else "N/A"
+                    table_data.append(
+                        [attribute, key_value_1, "->", key_value_2])
             else:
                 table_data.append([attribute, value_1, "->", value_2])
         output = format_table(table_data)

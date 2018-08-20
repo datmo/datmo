@@ -169,6 +169,20 @@ class TestFileCodeDriver():
         # Assert the correct commit hash was returned
         assert result == "69a329523ce1ec88bf63061863d9cb14"
 
+    def test_current_hash(self):
+        self.__setup()
+        # Test failure with UnstagedChanges
+        failed = False
+        try:
+            self.file_code_manager.current_hash()
+        except UnstagedChanges:
+            failed = True
+        assert failed
+        # Test successful creation of ref
+        current_hash = self.file_code_manager.create_ref()
+        result = self.file_code_manager.current_hash()
+        assert result == current_hash
+
     def test_create_ref(self):
         # Test failure, not initialized
         failed = False
