@@ -6,9 +6,11 @@ Hello World
 
 Setup:
 
-    - docker (installed and running before starting)    
+    - docker (installed and running before starting) 
+        Instructions for `Ubuntu <https://docs.docker.com/install/linux/docker-ce/ubuntu/#uninstall-old-versions>`_, `MacOS <https://docs.docker.com/docker-for-mac/install/#install-and-run-docker-for-mac>`_   
 
-    - datmo (install with ``$ pip install datmo``)
+    - datmo 
+        install with ``$ pip install datmo``
 
 
 Steps:
