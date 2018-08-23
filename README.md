@@ -52,14 +52,12 @@ feel free contribute by adding issues so the contributors can address them.
 * [Sharing](#sharing)
 * [Contributing to Datmo](/CONTRIBUTING.md)
 
-## Requirements
-
-* [docker](https://docs.docker.com/engine/installation/)
-
 ## Installation
-```
-pip install datmo
-```
+
+   ### Requirements:  <br />    
+   docker (installed and running before starting) : Instructions for [Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/#uninstall-old-versions), [MacOS](https://docs.docker.com/docker-for-mac/install/#install-and-run-docker-for-mac), [Windows](https://docs.docker.com/docker-for-windows/install/)                 
+    
+    $ pip install datmo
 
 ## Hello-World
 Our hello world guide includes showing environment setup and changes, as well as experiment reproducibility. It's available [in our docs here](https://datmo.readthedocs.io/en/latest/quickstart.html).
