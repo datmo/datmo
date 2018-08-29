@@ -29,6 +29,12 @@ A **run** is comprised of *tasks* and *snapshots*. In Datmo's paradigm, states (
 
 Each run contains the initial state (snapshot), followed by the action that was performed to it (task), as well as the final state of the repository (another snapshot).
 
+For a typical use case, this would appear as follows:
+
+.. image:: img/run-diagram.png
+    :width: 800
+    :alt: Diagram explaining recording of state during an experiment run
+
 You can view all of your past runs at any time with ``$ datmo run ls``
 
 You can replicate a run at any time with the ``$ datmo rerun`` command.
