@@ -226,19 +226,6 @@ or you can run the following command
 ```
 $ datmo cleanup
 ```
-### Optional: Mark your GitHub repository as a Datmo project
-Once you initialize your project, you can denote your repository as a datmo project by adding the following badge to your README file.
-This helps someone pulling the code to know how to setup and run Datmo commands, as the badge will link them to usage instructions here.
-
-#### Markdown
-```markdown
-[![Datmo Model](https://github.com/datmo/datmo/blob/master/images/badge.svg)](https://github.com/datmo/datmo)
-```
-#### ReStructuredText
-```
-.. image:: https://github.com/datmo/datmo/blob/master/images/badge.svg
-    :target: https://github.com/datmo/datmo
-```
 
 ## Sharing (Workaround)
 **DISCLAIMER:** This is not currently an officially supported option and only works for 
