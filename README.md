@@ -12,7 +12,7 @@
 
 # Datmo Alpha Release
 
-**Datmo** is an open source model tracking and reproducibility tool for developers. Use `datmo init` to turn any repository into a trackable task record with reusable environments and metrics logging.
+**Datmo** is an open source model tracking and reproducibility tool for developers. Use `datmo init` to turn any repository into a trackable experiment record with reusable environments and metrics logging.
 
 
 **Note**: The current version of Datmo is an alpha release. This means commands are subject to change. If you find any bugs please
