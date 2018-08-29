@@ -48,8 +48,8 @@ feel free contribute by adding issues so the contributors can address them.
 * [Hello World](#hello-world)
 * [Examples](#examples)
 * [Documentation](#documentation)
-* [Transform a Current Project](#transform)
-* [Sharing](#sharing)
+* [Transform a Current Project](#transform-a-current-project)
+* [Sharing](#sharing-workaround)
 * [Contributing to Datmo](/CONTRIBUTING.md)
 
 ## Installation
