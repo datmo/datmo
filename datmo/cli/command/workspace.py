@@ -77,6 +77,7 @@ class WorkspaceCommand(ProjectCommand):
 
         task_dict = {
             "interactive": True,
+            "ports": kwargs['ports'],
             "mem_limit": kwargs["mem_limit"],
             "command_list": ["/bin/bash"]
         }
