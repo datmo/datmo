@@ -12,7 +12,7 @@
 
 # Datmo Alpha Release
 
-**Datmo** is an open source model tracking and reproducibility tool for developers. Use `datmo init` to turn any repository into a trackable experiment record with reusable environments and metrics logging.
+**Datmo** is an open source model tracking and reproducibility tool for data scientists. Use `datmo init` to turn any repository into a trackable experiment record with reusable environments and metrics logging.
 
 
 **Note**: The current version of Datmo is an alpha release. This means commands are subject to change. If you find any bugs please
@@ -85,7 +85,7 @@ For the full guide on setting up your environment with datmo, see this page in o
 
 ### Opening a workspace
 
-After getting your environment setup, most developers want to open what we call a workspace (IDE or Notebook programming environment)
+After getting your environment setup, most data scientists want to open what we call a workspace (IDE or Notebook programming environment)
 
 <p align="center">
     One example is shown below, for quickly opening a Jupyter Notebook and showing the import of TensorFlow working as intended.
