@@ -127,6 +127,9 @@ class ProjectCommand(BaseCommand):
             self.cli_helper.echo(
                 __("info", "cli.environment.setup.success",
                    (environment_obj.name, environment_obj.id)))
+        else:
+            self.cli_helper.echo("there was no environment setup. you can get information"
+                                 " here: https://datmo.readthedocs.io/en/latest/env-setup.html")
 
         return self.project_controller.model
 

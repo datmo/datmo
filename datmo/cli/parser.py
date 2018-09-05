@@ -142,6 +142,17 @@ def get_datmo_parser():
         "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
         " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
     )
+    terminal_parser.add_argument(
+        "--ports",
+        "-p",
+        dest="ports",
+        default=None,
+        action="append",
+        type=str,
+        help="""
+            network port mapping during run (e.g. 8888:8888). Left is the host machine port and right
+            is the environment port available during a run.
+        """)
 
     # Rstudio
     rstudio_parser = subparsers.add_parser(
