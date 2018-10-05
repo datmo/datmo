@@ -102,7 +102,7 @@ class ProjectCommand(BaseCommand):
         environment_setup = self.cli_helper.prompt_bool(
             __("prompt", "cli.project.environment.setup"))
         if environment_setup:
-            # TODO: ramove business logic from here and create common helper
+            # TODO: remove business logic from here and create common helper
             # Setting up the environment definition file
             self.environment_controller = EnvironmentController()
             environment_types = self.environment_controller.get_environment_types(

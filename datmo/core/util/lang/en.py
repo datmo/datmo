@@ -80,6 +80,8 @@ MESSAGES = {
             "Running a script",
         "cli.run.rerun":
             "Rerunning run with id: %s",
+        "cli.deploy.service":
+            "Deploying a service...",
         "cli.run.run.stop":
             "Stopping the run...",
         "cli.run.run.complete":
@@ -431,7 +433,21 @@ MESSAGES = {
             "Are you sure you want to delete all datmo project information along with files and environment directory? "
             "If none found, no changes will be made [yN]",
         "cli.project.environment.setup":
-            "Would you like to setup the environment? [yN]"
+            "Would you like to setup the environment? [yN]",
+        "cli.project.deploy.service.cluster_name":
+            "Enter name for the Datmo Cluster where you would want to deploy model",
+        "cli.project.deploy.update.cluster_name":
+            "Enter name for the Datmo Cluster where you would want to update model or service count",
+        "cli.project.deploy.service.server_type":
+            "Enter the type of AWS EC2 server to be used for the Datmo Cluster",
+        "cli.project.deploy.service.size":
+            "Enter the number of AWS EC2 servers for the Datmo Cluster",
+        "cli.project.deploy.update.size":
+            "Enter the number of AWS EC2 servers for the Datmo Cluster",
+        "cli.project.deploy.logs.service_path":
+            "Enter the service path to get the logs for the deployed datmo service",
+        "cli.project.deploy.rm.service_name":
+            "Enter name for the Datmo Cluster to be removed"
     },
     "argparser": {
         "cli.datmo.usage":

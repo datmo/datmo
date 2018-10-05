@@ -53,6 +53,9 @@ def main():
         elif command_name == "rerun":
             command_name = "run"
             sys.argv[1] = "rerun"
+        elif command_name == "deploy":
+            command_name = "deploy"
+            sys.argv[1:] = sys.argv[2:]
         elif command_name == "run":
             if len(sys.argv) == 2:
                 command_name = "run"

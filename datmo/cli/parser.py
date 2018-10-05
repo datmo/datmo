@@ -1,3 +1,4 @@
+import os
 from datmo.core.util.i18n import get as __
 from datmo.cli.driver.parser import Parser
 
@@ -304,6 +305,35 @@ def get_datmo_parser():
     rerun_parser = subparsers.add_parser(
         "rerun", help="To rerun an experiment")
     rerun_parser.add_argument("id", help="run id to be rerun")
+
+    # Deploy
+    deploy_parser = subparsers.add_parser("deploy", help="deploy module")
+
+    # run arguments
+    deploy_parser.add_argument(
+        "--cluster-name",
+        dest="cluster_name",
+        default=None,
+        type=str,
+        help="Pass in the name of the cluster")
+    deploy_parser.add_argument(
+        "--server-type",
+        dest="server_type",
+        default=None,
+        type=str,
+        help="Type of server to be used(eg: t2.small)")
+    deploy_parser.add_argument(
+        "--size",
+        dest="size",
+        default=None,
+        type=int,
+        help="The number of servers required for the cluster")
+    deploy_parser.add_argument(
+        "--path",
+        dest="path",
+        default=os.getcwd(),
+        type=int,
+        help="Path for the project to be deployed")
 
     # Session
     session_parser = subparsers.add_parser("session", help="session module")

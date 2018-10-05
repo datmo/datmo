@@ -33,10 +33,26 @@ class Config(object):
             DatmoLogger.get_logger(__name__).info("initializing")
             self.data_cache = JSONStore(
                 os.path.join(os.path.expanduser("~"), ".datmo", "cache.json"))
+            self.docker_cli = '/usr/bin/docker'
 
         @property
         def home(self):
             return self._home
+
+        @property
+        def deployment_setup(self):
+            # TODO: Change this to set config in a .datmo/config global file
+            MASTER_SERVER_IP, DATMO_ACCESS_KEY, END_POINT = None, None, None
+            if os.environ.get('MASTER_SERVER_DNS') and os.environ.get('DATMO_ACCESS_KEY'):
+                MASTER_SERVER_DNS = os.environ.get('MASTER_SERVER_DNS')
+                END_POINT = 'http://' + MASTER_SERVER_DNS + ':2083/api/v1'
+                DATMO_ACCESS_KEY = os.environ.get('DATMO_ACCESS_KEY')
+            elif os.environ.get('MASTER_SERVER_IP') and os.environ.get('DATMO_ACCESS_KEY'):
+                MASTER_SERVER_IP = os.environ.get('MASTER_SERVER_IP')
+                DATMO_ACCESS_KEY = os.environ.get('DATMO_ACCESS_KEY')
+                END_POINT = 'http://' + MASTER_SERVER_IP + ':2083/api/v1'
+
+            return MASTER_SERVER_IP, DATMO_ACCESS_KEY, END_POINT
 
         def set_home(self, home_path):
             self._home = home_path
