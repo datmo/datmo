@@ -45,8 +45,6 @@ except NameError:
 from glob import glob
 
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
-from datmo.config import Config
-from datmo.core.util.logger import DatmoLogger
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     PathDoesNotExist, MutuallyExclusiveArguments, RequiredArgumentMissing,
@@ -62,7 +60,6 @@ def grep(pattern, fileObj):
         if re.search(pattern, line):
             r.append((linenumber, line))
     return r
-
 
 def printable_dict(input_dictionary):
     printable_output = ""
@@ -428,6 +425,8 @@ class bcolors:
 class Commands(object):
 
     def __init__(self):
+        from datmo.core.util.logger import DatmoLogger
+        from datmo.config import Config
         self.config = Config()
         self.docker_cli = self.config.docker_cli
         self.log = DatmoLogger.get_logger(__name__)
