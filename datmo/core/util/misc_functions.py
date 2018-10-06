@@ -12,8 +12,6 @@ import pytest
 import collections
 import platform
 import tempfile
-import ssl
-import urllib2
 import subprocess
 import zipfile
 import sys
@@ -60,6 +58,7 @@ def grep(pattern, fileObj):
         if re.search(pattern, line):
             r.append((linenumber, line))
     return r
+
 
 def printable_dict(input_dictionary):
     printable_output = ""
@@ -432,15 +431,6 @@ class Commands(object):
         self.log = DatmoLogger.get_logger(__name__)
         self.log.info("handling command %s", self.config.home)
 
-    def internet_on(self):
-        try:
-            # TODO: remove unverified context -- fix SSL install
-            context = ssl._create_unverified_context()
-            urllib2.urlopen('https://google.com', timeout=1, context=context)
-            return True
-        except urllib2.URLError as err:
-            self.log.info(err)
-            return False
 
     def run_cmd(self, shell_cmd):
         try:
@@ -499,14 +489,17 @@ class Commands(object):
                         absolute_path = os.path.join(root, file_name)
                         relative_path = absolute_path.replace(folder_path, '')
                         zip_file.write(absolute_path, relative_path)
-        except IOError, message:
-            print message
+        except IOError as err:
+            _, strerror = err.args
+            self.log.info(strerror)
             sys.exit(1)
-        except OSError, message:
-            print message
+        except OSError as err:
+            _, strerror = err.args
+            self.log.info(strerror)
             sys.exit(1)
-        except zipfile.BadZipfile, message:
-            print message
+        except zipfile.BadZipfile as err:
+            _, strerror = err.args
+            self.log.info(strerror)
             sys.exit(1)
         finally:
             zip_file.close()
