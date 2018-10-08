@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from datmo.core.util.i18n import get as __
 from datmo.cli.driver.parser import Parser
 
@@ -257,15 +258,7 @@ def get_datmo_parser():
     )
 
     # List runs
-    ls_runs_parser = subparsers.add_parser(
-        "ls", help="To list all experiment runs")
-    ls_runs_parser.add_argument(
-        "--session-id",
-        dest="session_id",
-        default=None,
-        nargs="?",
-        type=str,
-        help="pass in the session id to list the tasks in that session")
+    ls_runs_parser = subparsers.add_parser("ls", help="list module")
     ls_runs_parser.add_argument(
         "--format",
         dest="format",
@@ -306,34 +299,107 @@ def get_datmo_parser():
         "rerun", help="To rerun an experiment")
     rerun_parser.add_argument("id", help="run id to be rerun")
 
-    # Deploy
-    deploy_parser = subparsers.add_parser("deploy", help="deploy module")
+    # deploy setup
+    subparsers.add_parser("setup", help="deploy setup module")
 
-    # run arguments
-    deploy_parser.add_argument(
+    # deploy service
+    deploy_service_parser = subparsers.add_parser("service", help="deploy service module")
+
+    # deploy service argument
+    deploy_service_parser.add_argument(
         "--cluster-name",
         dest="cluster_name",
         default=None,
         type=str,
         help="Pass in the name of the cluster")
-    deploy_parser.add_argument(
+    deploy_service_parser.add_argument(
         "--server-type",
         dest="server_type",
         default=None,
         type=str,
         help="Type of server to be used(eg: t2.small)")
-    deploy_parser.add_argument(
+    deploy_service_parser.add_argument(
         "--size",
         dest="size",
         default=None,
         type=int,
         help="The number of servers required for the cluster")
-    deploy_parser.add_argument(
+    deploy_service_parser.add_argument(
         "--path",
         dest="path",
         default=os.getcwd(),
-        type=int,
+        type=str,
         help="Path for the project to be deployed")
+
+    # deploy update
+    deploy_update_parser = subparsers.add_parser("update", help="deploy update module")
+
+    deploy_update_parser.add_argument(
+        "--cluster-name",
+        dest="cluster_name",
+        default=None,
+        type=str,
+        help="Pass in the name of the cluster")
+    deploy_update_parser.add_argument(
+        "--size",
+        dest="size",
+        default=None,
+        type=int,
+        help="The number of servers required for the cluster")
+    deploy_update_parser.add_argument(
+        "--path",
+        dest="path",
+        default=os.getcwd(),
+        type=str,
+        help="Path for the project to be deployed")
+
+    # deploy
+    deploy_ls_parser = subparsers.add_parser("ls", help="list module")
+    deploy_ls_parser.add_argument(
+        "--format",
+        dest="format",
+        default="table",
+        help="output format ['table', 'csv']")
+    deploy_ls_parser.add_argument(
+        "--download",
+        dest="download",
+        action="store_true",
+        help=
+        "boolean is true if user would like to download. use --download-path to specify a path"
+    )
+    deploy_ls_parser.add_argument(
+        "--download-path",
+        dest="download_path",
+        default=None,
+        help=
+        "checked only if download is specified. saves output to location specified"
+    )
+
+    # deploy logs
+    deploy_logs_parser = subparsers.add_parser("logs", help="deploy logs module")
+
+    deploy_logs_parser.add_argument(
+        "--service-path",
+        dest="service_path",
+        default=None,
+        type=str,
+        help="Pass in the service route used in the datmo deploy yml file")
+    deploy_logs_parser.add_argument(
+        "--date",
+        dest="date",
+        default=datetime.utcnow().strftime("%Y-%m-%d"),
+        type=str,
+        help="Date for which logs are required (format:- YEAR-MONTH-DATE)")
+
+    # deploy rm
+    deploy_rm_parser = subparsers.add_parser("rm", help="deploy rm module")
+
+    deploy_rm_parser.add_argument(
+        "--cluster-name",
+        dest="cluster_name",
+        default=None,
+        type=str,
+        help="Pass in the name of the cluster")
 
     # Session
     session_parser = subparsers.add_parser("session", help="session module")

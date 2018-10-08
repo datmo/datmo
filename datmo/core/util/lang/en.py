@@ -188,6 +188,8 @@ MESSAGES = {
             "Error due to passing excluded args while creating snapshot from run: %s",
         "cli.snapshot.checkout.failure":
             "Error while checking out to a snapshot due to unstaged changes",
+        "cli.deploy.subcommand":
+            "Error in usage of the command. Select amongst setup, service, update, ls, rm, logs for deploy command",
         "util.misc_functions.get_filehash":
             "Filepath does not point to a valid file: %s",
         "util.misc_functions.mutually_exclusive":

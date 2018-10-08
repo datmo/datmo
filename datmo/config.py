@@ -41,15 +41,20 @@ class Config(object):
 
         @property
         def deployment_setup(self):
-            # TODO: Change this to set config in a .datmo/config global file
+            # Load from .datmo/config global file
             MASTER_SERVER_IP, DATMO_ACCESS_KEY, END_POINT = None, None, None
-            if os.environ.get('MASTER_SERVER_DNS') and os.environ.get('DATMO_ACCESS_KEY'):
-                MASTER_SERVER_DNS = os.environ.get('MASTER_SERVER_DNS')
+            # loading the datmo config
+            datmo_config = JSONStore(
+                os.path.join(os.path.expanduser("~"), ".datmo", "config"))
+            config_dict = datmo_config.to_dict()
+
+            MASTER_SERVER_DNS = config_dict.get('MASTER_SERVER_DNS', None)
+            MASTER_SERVER_IP = config_dict.get('MASTER_SERVER_IP', None)
+            DATMO_ACCESS_KEY = config_dict.get('DATMO_ACCESS_KEY', None)
+
+            if MASTER_SERVER_DNS:
                 END_POINT = 'http://' + MASTER_SERVER_DNS + ':2083/api/v1'
-                DATMO_ACCESS_KEY = os.environ.get('DATMO_ACCESS_KEY')
-            elif os.environ.get('MASTER_SERVER_IP') and os.environ.get('DATMO_ACCESS_KEY'):
-                MASTER_SERVER_IP = os.environ.get('MASTER_SERVER_IP')
-                DATMO_ACCESS_KEY = os.environ.get('DATMO_ACCESS_KEY')
+            elif MASTER_SERVER_IP:
                 END_POINT = 'http://' + MASTER_SERVER_IP + ':2083/api/v1'
 
             return MASTER_SERVER_IP, DATMO_ACCESS_KEY, END_POINT

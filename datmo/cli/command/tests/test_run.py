@@ -415,20 +415,6 @@ class TestRunCommand():
         assert run_objs
         assert run_objs[0].status == "SUCCESS"
 
-        test_session_id = 'test_session_id'
-        self.run_command.parse(["ls", "--session-id", test_session_id])
-
-        # test for desired side effects
-        assert self.run_command.args.session_id == test_session_id
-
-        # Test failure no session
-        failed = False
-        try:
-            _ = self.run_command.execute()
-        except SessionDoesNotExist:
-            failed = True
-        assert failed
-
         # Test failure (format)
         failed = False
         try:

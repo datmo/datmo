@@ -2,7 +2,7 @@ import os
 import tempfile
 import shutil
 from datmo.core.util.misc_functions import Commands
-from datmo.core.controller.deploy.driver.datmo import DatmoDriver
+from datmo.core.controller.deploy.driver.microservice import DatmoDriver
 from datmo.config import Config
 
 
@@ -19,7 +19,7 @@ class DeployController(object):
         """Initialize the Orchestrator service"""
         self.commands = Commands()
         self.config = Config()
-        self.master_server_ip, self.datmo_access_key, self.datmo_end_point = self.config.deployment_setup()
+        self.master_server_ip, self.datmo_access_key, self.datmo_end_point = self.config.deployment_setup
         self.service_container_management = service_container_management
         self.manager = None
         # src folder from CLI folder

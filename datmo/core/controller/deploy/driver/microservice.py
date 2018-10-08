@@ -1,4 +1,5 @@
 import os
+from datmo.core.util.json_store import JSONStore
 from datmo.core.util.misc_functions import Commands, \
     bcolors, authenticated_get_call, Response, Status
 
@@ -14,6 +15,15 @@ class DatmoDriver(object):
         self.commands = Commands()
         self.status = Status
 
+    def check_setup(self, response):
+        # in case of no proper setup
+        if self.end_point is not None:
+            return True, response
+        response.message = bcolors.FAIL + "Setup for datmo deploy isn't done. " \
+                                          "Run `datmo deploy setup` with the credentials" + bcolors.ENDC
+        response.status = self.status.FAILURE
+        return False, response
+
     def setup(self):
         response = Response()
         master_server_dns = None
@@ -26,24 +36,34 @@ class DatmoDriver(object):
                 master_server_dns = raw_input(bcolors.BOLD + "---> Enter master server DNS address for Datmo Deployment: "
                                                            + bcolors.ENDC)
             datmo_access_key = raw_input(bcolors.BOLD + "---> Enter access key for Datmo Deployment: " + bcolors.ENDC)
+
+        # Create a config file
+        self.datmo_config = JSONStore(
+            os.path.join(os.path.expanduser("~"), ".datmo", "config"))
+
+        config = dict()
         if master_server_ip:
-            os.putenv('MASTER_SERVER_IP', master_server_ip)
-            os.system('bash')
+            config["MASTER_SERVER_IP"] = master_server_ip
         elif master_server_dns:
-            os.putenv('MASTER_SERVER_DNS', master_server_dns)
-            os.system('bash')
-        os.putenv('DATMO_ACCESS_KEY', datmo_access_key)
-        os.system('bash')
+            config["MASTER_SERVER_DNS"] = master_server_dns
+        config["DATMO_ACCESS_KEY"] = datmo_access_key
+
+        self.datmo_config.to_file(config)
+
         return response
 
     def create_cluster(self, cluster_name=None, server_type=None, count=None):
         response = Response()
+        bool_setup, response = self.check_setup(response)
+        if not bool_setup:
+            return response
         if cluster_name:
             self.cluster_name = cluster_name
         if server_type:
             self.server_type = server_type
         if count:
             self.count = str(count)
+
         shell_cmd = 'curl -d \'{"cluster_name": "%s", "server_type": "%s", "count": %s}\' -H "Content-Type: application/json" -H "authorization:%s" -X POST %s/cluster' % (self.cluster_name, self.server_type, self.count, self.access_key, self.end_point)
         command_run = self.commands.run_cmd(shell_cmd)
         if not command_run['status']:
@@ -53,6 +73,9 @@ class DatmoDriver(object):
 
     def update_cluster(self, count, cluster_name=None):
         response = Response()
+        bool_setup, response = self.check_setup(response)
+        if not bool_setup:
+            return response
         self.count = count
         if cluster_name:
             self.cluster_name = cluster_name
@@ -66,6 +89,9 @@ class DatmoDriver(object):
 
     def get_cluster_info(self, cluster_name):
         response = Response()
+        bool_setup, response = self.check_setup(response)
+        if not bool_setup:
+            return response
         self.cluster_name = cluster_name
         url = '%s/cluster/%s' % (self.end_point, self.cluster_name)
         res = authenticated_get_call(url, access_key=self.access_key)
@@ -82,6 +108,9 @@ class DatmoDriver(object):
         """
 
         response = Response()
+        bool_setup, response = self.check_setup(response)
+        if not bool_setup:
+            return response
         url = '%s/info' % self.end_point
         res = authenticated_get_call(url, access_key=self.access_key)
         if res.status_code != 200:
@@ -97,6 +126,9 @@ class DatmoDriver(object):
         """
 
         response = Response()
+        bool_setup, response = self.check_setup(response)
+        if not bool_setup:
+            return response
         url = '%s/cost_estimate' % self.end_point
         res = authenticated_get_call(url, access_key=self.access_key)
         if res.status_code != 200:
@@ -107,7 +139,11 @@ class DatmoDriver(object):
         return response
 
     def model_deploy(self, cluster_name, file=None):
+
         response = Response()
+        bool_setup, response = self.check_setup(response)
+        if not bool_setup:
+            return response
         self.cluster_name = cluster_name
         shell_cmd = 'curl  -H "authorization:%s" -F \'service=@%s\' %s/cluster/%s/deploy' % (self.access_key, file,
                                                                                               self.end_point, self.cluster_name)
@@ -118,7 +154,11 @@ class DatmoDriver(object):
         return response
 
     def get_service_iologs(self, service_path, date):
+
         response = Response()
+        bool_setup, response = self.check_setup(response)
+        if not bool_setup:
+            return response
         # get the proper service path
         service_path = service_path.strip()
         if service_path[0]=='/':

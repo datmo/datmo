@@ -54,8 +54,11 @@ def main():
             command_name = "run"
             sys.argv[1] = "rerun"
         elif command_name == "deploy":
-            command_name = "deploy"
-            sys.argv[1:] = sys.argv[2:]
+            if len(sys.argv) == 2:
+                cli_helper.echo(__("error", "cli.deploy.subcommand"))
+                return 1
+            elif sys.argv[2] in ["setup", "service", "rm", "update", "ls", "logs"]:
+                del sys.argv[1]
         elif command_name == "run":
             if len(sys.argv) == 2:
                 command_name = "run"
