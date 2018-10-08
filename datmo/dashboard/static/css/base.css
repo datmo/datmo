@@ -1,0 +1,25 @@
+input[type="password"] {
+    box-sizing: border-box;
+    border: 1px solid #e1e1e1;
+    padding: 10px 20px;
+    color: #505050;
+    width: 100%;
+    background: #fff;
+    font-family: 'geomanist'
+}
+.hidden {
+  display: none !important;
+}
+
+#login-wrapper {
+  margin-top: 20px;
+  margin-bottom: 80px;
+}
+
+.form-message {
+  padding: 0 0 25px;
+}
+
+#login-wrapper .content-box {
+    padding-top: 25px;
+}

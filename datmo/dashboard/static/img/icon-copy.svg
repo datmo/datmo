@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="13px" height="17px" viewBox="0 0 13 17" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 43.2 (39069) - http://www.bohemiancoding.com/sketch -->
+    <title>files.3</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="dashboard-hifi" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="7)-Model-Snapshot---Summary" transform="translate(-1233.000000, -264.000000)" fill-rule="nonzero" fill="#505050">
+            <g id="content-box" transform="translate(151.000000, 232.000000)">
+                <g id="Group-3" transform="translate(656.000000, 20.500000)">
+                    <g id="files.3" transform="translate(426.000000, 12.000000)">
+                        <g id="Layer_1">
+                            <g id="Group">
+                                <path d="M10.075,0 L4.225,0 C4.21005,0 4.1977,0.0065 4.1834,0.00845 C4.1691,0.0104 4.1561,0.013 4.14245,0.0169 C4.08655,0.03185 4.03455,0.0559 3.9949,0.09555 L0.09555,3.9949 C0.0559,4.03455 0.03185,4.0859 0.0169,4.1418 C0.013,4.1561 0.0104,4.1691 0.00845,4.1834 C0.0065,4.1977 0,4.21005 0,4.225 L0,13.325 C0,13.5044 0.1456,13.65 0.325,13.65 L10.075,13.65 C10.2544,13.65 10.4,13.5044 10.4,13.325 L10.4,0.325 C10.4,0.1456 10.2544,0 10.075,0 Z M3.9,1.10955 L3.9,3.575 C3.9,3.7544 3.7544,3.9 3.575,3.9 L1.10955,3.9 L3.9,1.10955 Z" id="Shape"></path>
+                                <path d="M12.075,2 L11.1,2 L11.1,14.025 C11.1,14.2044 10.9544,14.35 10.775,14.35 L2,14.35 L2,15.325 C2,15.5044 2.1456,15.65 2.325,15.65 L12.075,15.65 C12.2544,15.65 12.4,15.5044 12.4,15.325 L12.4,2.325 C12.4,2.1456 12.2544,2 12.075,2 Z" id="Shape"></path>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

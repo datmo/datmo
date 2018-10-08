@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="10px" height="9px" viewBox="0 0 10 9" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 43.2 (39069) - http://www.bohemiancoding.com/sketch -->
+    <title>Page 1</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#409DFF" offset="0%"></stop>
+            <stop stop-color="#3F93EB" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="dashboard-hifi" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Signup" transform="translate(-949.000000, -1080.000000)" fill="url(#linearGradient-1)">
+            <g id="signup" transform="translate(789.000000, 185.000000)">
+                <path d="M168.518837,895.031824 L169.952287,896.254043 C170.009184,896.302868 170.01597,896.388311 169.968468,896.446164 L164.1279,903.52262 C164.098668,903.558178 164.055343,903.574629 164.013061,903.570915 C163.985918,903.568261 163.959296,903.558178 163.936328,903.538542 L160.048495,900.221631 C159.991076,900.172805 159.983768,900.086831 160.031269,900.02951 L161.233418,898.572672 C161.281442,898.514826 161.365482,898.507927 161.422906,898.556751 L163.777601,900.565456 L168.330376,895.04882 C168.3784,894.990973 168.46244,894.983543 168.518821,895.031837 L168.518837,895.031824 Z" id="Page-1"></path>
+            </g>
+        </g>
+    </g>
+</svg>
