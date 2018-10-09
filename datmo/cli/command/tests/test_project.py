@@ -27,6 +27,7 @@ except TypeError:
 import os
 import tempfile
 import platform
+import timeout_decorator
 
 from datmo.config import Config
 from datmo import __version__
@@ -522,3 +523,20 @@ class TestProjectCommand():
         except UnrecognizedCLIArgument:
             exception_thrown = True
         assert exception_thrown
+
+    def test_dashboard(self):
+        # test dashboard command
+        self.project_command.parse(["dashboard"])
+
+        @timeout_decorator.timeout(10, use_signals=False)
+        def timed_run(timed_run_result):
+            if self.project_command.execute():
+                return timed_run_result
+
+        timed_run_result = False
+        try:
+            timed_run_result = timed_run(timed_run_result)
+        except timeout_decorator.timeout_decorator.TimeoutError:
+            timed_run_result = True
+
+        assert timed_run_result

@@ -18,6 +18,9 @@ def get_datmo_parser():
 
     cleanup_parser = subparsers.add_parser("cleanup", help="remove project")
 
+    dashboard_parser = subparsers.add_parser(
+        "dashboard", help="start dashboard")
+
     # Notebook
     notebook_parser = subparsers.add_parser(
         "notebook", help="To run jupyter notebook")
@@ -57,8 +60,7 @@ def get_datmo_parser():
         type=str,
         help=
         "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
-        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
-    )
+        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)")
 
     # Jupyterlab
     jupyterlab_parser = subparsers.add_parser(
@@ -99,8 +101,7 @@ def get_datmo_parser():
         type=str,
         help=
         "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
-        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
-    )
+        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)")
 
     # Terminal
     terminal_parser = subparsers.add_parser("terminal", help="To run terminal")
@@ -140,8 +141,7 @@ def get_datmo_parser():
         type=str,
         help=
         "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
-        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
-    )
+        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)")
     terminal_parser.add_argument(
         "--ports",
         "-p",
@@ -188,8 +188,7 @@ def get_datmo_parser():
         type=str,
         help=
         "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
-        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
-    )
+        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)")
 
     # Run
     run_parser = subparsers.add_parser("run", help="run module")
@@ -252,8 +251,7 @@ def get_datmo_parser():
         type=str,
         help=
         "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
-        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
-    )
+        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)")
 
     # List runs
     ls_runs_parser = subparsers.add_parser(

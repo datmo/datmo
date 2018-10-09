@@ -6,6 +6,7 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.command.base import BaseCommand
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController
+from datmo.dashboard.app import app
 
 
 class ProjectCommand(BaseCommand):
@@ -128,8 +129,9 @@ class ProjectCommand(BaseCommand):
                 __("info", "cli.environment.setup.success",
                    (environment_obj.name, environment_obj.id)))
         else:
-            self.cli_helper.echo("there was no environment setup. you can get information"
-                                 " here: https://datmo.readthedocs.io/en/latest/env-setup.html")
+            self.cli_helper.echo(
+                "there was no environment setup. you can get information"
+                " here: https://datmo.readthedocs.io/en/latest/env-setup.html")
 
         return self.project_controller.model
 
@@ -220,3 +222,9 @@ class ProjectCommand(BaseCommand):
                             "path": self.project_controller.home
                         }))
         return False
+
+    def dashboard(self):
+        dir_path = os.path.dirname(os.path.abspath(__file__))
+        os.chdir(os.path.join(dir_path, "../../dashboard"))
+        app.run(host='0.0.0.0')
+        return True

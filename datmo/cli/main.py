@@ -45,6 +45,9 @@ def main():
         elif command_name == "cleanup":
             command_name = "project"
             sys.argv[1] = "cleanup"
+        elif command_name == "dashboard":
+            command_name = "project"
+            sys.argv[1] = "dashboard"
         # commands in workspace.py
         elif command_name in ["notebook", "jupyterlab", "terminal", "rstudio"]:
             sys.argv[1] = command_name
@@ -80,19 +83,19 @@ def main():
     try:
         command_instance = command_class(cli_helper)
     except TypeError as ex:
-        cli_helper.echo(__("error", "cli.general", "%s %s" %(type(ex), ex)))
+        cli_helper.echo(__("error", "cli.general", "%s %s" % (type(ex), ex)))
         return 1
 
     # parse the command line arguments
     try:
         command_instance.parse(sys.argv[1:])
     except CLIArgumentError as ex:
-        cli_helper.echo(__("error", "cli.general", "%s %s" %(type(ex), ex)))
+        cli_helper.echo(__("error", "cli.general", "%s %s" % (type(ex), ex)))
         return 1
 
     try:
         command_instance.execute()
         return 0
     except Exception as ex:
-        cli_helper.echo(__("error", "cli.general", "%s %s" %(type(ex), ex)))
+        cli_helper.echo(__("error", "cli.general", "%s %s" % (type(ex), ex)))
         return 1

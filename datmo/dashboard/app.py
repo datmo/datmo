@@ -4,11 +4,6 @@ from flask import render_template
 app = Flask(__name__)
 
 
-@app.route("/test")
-def test():
-    return render_template("home.html")
-
-
 @app.route("/")
 def home():
     user = {"name": "test", "username": "test_username", "email": "test_email"}
