@@ -1,14 +1,16 @@
 import os
 import tempfile
 import shutil
+
+from datmo.core.controller.base import BaseController
 from datmo.core.util.misc_functions import Commands
 from datmo.core.controller.deploy.driver.microservice import MicroserviceDeployDriver
 from datmo.config import Config
 
 
-class DeployController(object):
+class DeployController(BaseController):
     """
-    A orchestrator tool which works with AWS ECS and Datmo Orchestrators
+    A controller for deploying a model
 
     Parameters
     ----------
@@ -31,7 +33,7 @@ class DeployController(object):
         To return the information about the System and Logging portal
     system_cost()
         To return the information about the cost due to datmo deploy from cloud systems
-    model_deploy(cluster_name, model_path=os.getcwd())
+    model_deploy(cluster_name)
         Deploy the model after building it from the docker compose file
     service_iologs(service_path, date)
         Extract io logs for a particular service
@@ -39,13 +41,11 @@ class DeployController(object):
 
     def __init__(self, service_container_management=False):
         """Initialize the Orchestrator service"""
+        super(DeployController, self).__init__()
         self.commands = Commands()
         self.config = Config()
-        self.master_server_ip, self.datmo_api_key, self.datmo_end_point = self.config.remote_setup
+        self.master_server_ip, self.datmo_api_key, self.datmo_end_point = self.config.remote_credentials
         self.service_container_management = service_container_management
-        # src folder from CLI folder
-        self.src_file_dir = os.path.join(
-            os.path.dirname(os.path.abspath(__file__)), 'src_files')
         self.driver = MicroserviceDeployDriver(
             end_point=self.datmo_end_point, api_key=self.datmo_api_key)
 
@@ -111,7 +111,7 @@ class DeployController(object):
         response = self.driver.get_system_cost()
         return response
 
-    def model_deploy(self, cluster_name, model_path=os.getcwd()):
+    def model_deploy(self, cluster_name):
         """
         Deploy the model after building it from the docker compose file
 
@@ -119,14 +119,12 @@ class DeployController(object):
         ----------
         cluster_name : str
             Name of the cluster
-        model_path : str
-            path to model
         """
         # Specific for datmo service logic
         tmp_dirpath = tempfile.mkdtemp()
         # copy the content for project directory to tmp folder and the environment to root location in tmp folder
         try:
-            self.commands.copy(model_path, tmp_dirpath)
+            self.commands.copy(self.home, tmp_dirpath)
             environment_dirpath = os.path.join(tmp_dirpath,
                                                'datmo_environment')
             if os.path.exists(environment_dirpath):

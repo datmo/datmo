@@ -40,7 +40,7 @@ class Config(object):
             return self._home
 
         @property
-        def remote_setup(self):
+        def remote_credentials(self):
             # Load from .datmo/config global file
             MASTER_SERVER_IP, DATMO_API_KEY, END_POINT = None, None, None
             # loading the datmo config

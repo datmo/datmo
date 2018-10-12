@@ -122,7 +122,7 @@ class DeployCommand(ProjectCommand):
             sys.exit(response.status)
         # deploy the model onto the cluster
         response = self.deploy_controller.model_deploy(
-            cluster_name=cluster_name, model_path=path)
+            cluster_name=cluster_name)
         if response.status:
             self.cli_helper.echo(response.message)
             sys.exit(response.status)
@@ -190,7 +190,7 @@ class DeployCommand(ProjectCommand):
 
         # deploy the model code onto the cluster
         response = self.deploy_controller.model_deploy(
-            cluster_name=cluster_name, model_path=path)
+            cluster_name=cluster_name)
         if response.status:
             self.cli_helper.echo(response.message)
             sys.exit(response.status)

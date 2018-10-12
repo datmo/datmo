@@ -441,11 +441,11 @@ MESSAGES = {
         "cli.project.deploy.update.cluster_name":
             "Enter name for the Datmo Cluster where you would want to update model or service count",
         "cli.project.deploy.service.server_type":
-            "Enter the type of AWS EC2 server to be used for the Datmo Cluster",
+            "Enter the type of AWS EC2 server to be used for the Datmo Cluster (e.g. t2.small, etc)",
         "cli.project.deploy.service.size":
-            "Enter the number of AWS EC2 servers for the Datmo Cluster",
+            "Enter the number of AWS EC2 servers for the Datmo Cluster (e.g. 1, 2, etc)",
         "cli.project.deploy.update.size":
-            "Enter the number of AWS EC2 servers for the Datmo Cluster",
+            "Enter the number of AWS EC2 servers to updated for the Datmo Cluster (e.g. 1, 2, etc)",
         "cli.project.deploy.logs.service_path":
             "Enter the service path to get the logs for the deployed datmo service",
         "cli.project.deploy.rm.service_name":
