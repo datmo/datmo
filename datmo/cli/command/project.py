@@ -79,13 +79,13 @@ class ProjectCommand(BaseCommand):
                     name = self.cli_helper.prompt(
                         __("prompt", "cli.project.init.name"),
                         default=self.project_controller.model.name)
-            else:
+            elif force:
                 name = self.project_controller.model.name
             if not description and not force:
                     description = self.cli_helper.prompt(
                         __("prompt", "cli.project.init.description"),
                         default=self.project_controller.model.description)
-            else:
+            elif force:
                 description = self.project_controller.model.description
             # Update the project with the values given
             try:
