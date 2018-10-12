@@ -20,6 +20,8 @@ def get_datmo_parser():
 
     cleanup_parser = subparsers.add_parser("cleanup", help="remove project")
 
+    setup_parser = subparsers.add_parser("setup", help="setup datmo")
+
     # Notebook
     notebook_parser = subparsers.add_parser(
         "notebook", help="To run jupyter notebook")
@@ -59,8 +61,7 @@ def get_datmo_parser():
         type=str,
         help=
         "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
-        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
-    )
+        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)")
 
     # Jupyterlab
     jupyterlab_parser = subparsers.add_parser(
@@ -101,8 +102,7 @@ def get_datmo_parser():
         type=str,
         help=
         "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
-        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
-    )
+        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)")
 
     # Terminal
     terminal_parser = subparsers.add_parser("terminal", help="To run terminal")
@@ -142,8 +142,7 @@ def get_datmo_parser():
         type=str,
         help=
         "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
-        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
-    )
+        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)")
     terminal_parser.add_argument(
         "--ports",
         "-p",
@@ -190,8 +189,7 @@ def get_datmo_parser():
         type=str,
         help=
         "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
-        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
-    )
+        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)")
 
     # Run
     run_parser = subparsers.add_parser("run", help="run module")
@@ -254,8 +252,7 @@ def get_datmo_parser():
         type=str,
         help=
         "list of absolute or relative filepath and/or dirpaths for data; can specify destination names"
-        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)"
-    )
+        " with '>' (e.g. /path/to/dir, /path/to/dir>newdir, /path/to/file)")
 
     # List runs
     ls_runs_parser = subparsers.add_parser("ls", help="list module")
@@ -299,11 +296,9 @@ def get_datmo_parser():
         "rerun", help="To rerun an experiment")
     rerun_parser.add_argument("id", help="run id to be rerun")
 
-    # deploy setup
-    subparsers.add_parser("setup", help="deploy setup module")
-
     # deploy service
-    deploy_service_parser = subparsers.add_parser("service", help="deploy service module")
+    deploy_service_parser = subparsers.add_parser(
+        "service", help="deploy service module")
 
     # deploy service argument
     deploy_service_parser.add_argument(
@@ -332,7 +327,8 @@ def get_datmo_parser():
         help="Path for the project to be deployed")
 
     # deploy update
-    deploy_update_parser = subparsers.add_parser("update", help="deploy update module")
+    deploy_update_parser = subparsers.add_parser(
+        "update", help="deploy update module")
 
     deploy_update_parser.add_argument(
         "--cluster-name",
@@ -376,7 +372,8 @@ def get_datmo_parser():
     )
 
     # deploy logs
-    deploy_logs_parser = subparsers.add_parser("logs", help="deploy logs module")
+    deploy_logs_parser = subparsers.add_parser(
+        "logs", help="deploy logs module")
 
     deploy_logs_parser.add_argument(
         "--service-path",
