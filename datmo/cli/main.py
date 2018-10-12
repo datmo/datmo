@@ -10,8 +10,6 @@ from datmo.core.util.i18n import get as __
 from datmo.core.util.logger import DatmoLogger
 from datmo.config import Config
 
-#from datmo.core.util.misc_functions import get_logger, create_logger
-
 
 def main():
     cli_helper = Helper()
@@ -45,6 +43,9 @@ def main():
         elif command_name == "cleanup":
             command_name = "project"
             sys.argv[1] = "cleanup"
+        elif command_name == "configure":
+            command_name = "project"
+            sys.argv[1] = "configure"
         # commands in workspace.py
         elif command_name in ["notebook", "jupyterlab", "terminal", "rstudio"]:
             sys.argv[1] = command_name
@@ -53,12 +54,6 @@ def main():
         elif command_name == "rerun":
             command_name = "run"
             sys.argv[1] = "rerun"
-        elif command_name == "deploy":
-            if len(sys.argv) == 2:
-                cli_helper.echo(__("error", "cli.deploy.subcommand"))
-                return 1
-            elif sys.argv[2] in ["setup", "service", "rm", "update", "ls", "logs"]:
-                del sys.argv[1]
         elif command_name == "run":
             if len(sys.argv) == 2:
                 command_name = "run"
@@ -86,19 +81,19 @@ def main():
     try:
         command_instance = command_class(cli_helper)
     except TypeError as ex:
-        cli_helper.echo(__("error", "cli.general", "%s %s" %(type(ex), ex)))
+        cli_helper.echo(__("error", "cli.general", "%s %s" % (type(ex), ex)))
         return 1
 
     # parse the command line arguments
     try:
         command_instance.parse(sys.argv[1:])
     except CLIArgumentError as ex:
-        cli_helper.echo(__("error", "cli.general", "%s %s" %(type(ex), ex)))
+        cli_helper.echo(__("error", "cli.general", "%s %s" % (type(ex), ex)))
         return 1
 
     try:
         command_instance.execute()
         return 0
     except Exception as ex:
-        cli_helper.echo(__("error", "cli.general", "%s %s" %(type(ex), ex)))
+        cli_helper.echo(__("error", "cli.general", "%s %s" % (type(ex), ex)))
         return 1

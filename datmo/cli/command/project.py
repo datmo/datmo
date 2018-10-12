@@ -2,6 +2,7 @@ import os
 
 from datmo import __version__
 from datmo.core.util.i18n import get as __
+from datmo.core.util.json_store import JSONStore
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.base import BaseCommand
 from datmo.core.controller.project import ProjectController
@@ -128,13 +129,55 @@ class ProjectCommand(BaseCommand):
                 __("info", "cli.environment.setup.success",
                    (environment_obj.name, environment_obj.id)))
         else:
-            self.cli_helper.echo("there was no environment setup. you can get information"
-                                 " here: https://datmo.readthedocs.io/en/latest/env-setup.html")
+            self.cli_helper.echo(
+                "there was no environment setup. you can get information"
+                " here: https://datmo.readthedocs.io/en/latest/env-setup.html")
 
         return self.project_controller.model
 
     def version(self):
         return self.cli_helper.echo("datmo version: %s" % __version__)
+
+    def configure(self):
+        """
+        Configure datmo installation
+        """
+        # General setup
+        setup_remote_bool = self.cli_helper.prompt_bool(
+            "Would you like to setup your remote credentials? [yN]")
+
+        if setup_remote_bool:
+            datmo_api_key = None
+            master_server_ip = None
+
+            while not datmo_api_key:
+                datmo_api_key = self.cli_helper.prompt(
+                    "---> Enter API key for Datmo Deployment")
+
+            while not master_server_ip:
+                master_server_ip = self.cli_helper.prompt(
+                    "---> Enter master server IP address for Datmo Deployment")
+
+            # Create a config file
+            self.datmo_config = JSONStore(
+                os.path.join(os.path.expanduser("~"), ".datmo", "config"))
+
+            config = dict()
+            if master_server_ip and datmo_api_key:
+                config["MASTER_SERVER_IP"] = master_server_ip
+                config["DATMO_API_KEY"] = datmo_api_key
+                self.datmo_config.to_file(config)
+            else:
+                self.cli_helper.echo(
+                    "Remote credentials could not be saved because they weren't input correctly. Please try again"
+                )
+
+        # Setup project specific things
+        if self.project_controller.model:
+            pass
+        else:
+            self.cli_helper.echo(
+                "No datmo project found. Skipping configuration for project.")
 
     @Helper.notify_no_project_found
     def status(self):

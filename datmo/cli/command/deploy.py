@@ -11,7 +11,6 @@ except NameError:
     basestring = str
 
 from datmo.core.util.i18n import get as __
-from datmo.core.util.json_store import JSONStore
 from datmo.cli.driver.helper import Helper
 from datmo.core.util.misc_functions import bcolors
 from datmo.cli.command.project import ProjectCommand
@@ -22,36 +21,6 @@ class DeployCommand(ProjectCommand):
     def __init__(self, cli_helper):
         super(DeployCommand, self).__init__(cli_helper)
         self.deploy_controller = DeployController()
-
-    @Helper.notify_no_project_found
-    def setup(self):
-        """
-        Creates the service with the specified server type in a cluster
-        """
-        datmo_api_key = None
-        master_server_ip = None
-
-        while not datmo_api_key:
-            datmo_api_key = self.cli_helper.prompt(
-                "---> Enter API key for Datmo Deployment")
-
-        while not master_server_ip:
-            master_server_ip = self.cli_helper.prompt(
-                "---> Enter master server IP address for Datmo Deployment")
-
-        # Create a config file
-        self.datmo_config = JSONStore(
-            os.path.join(os.path.expanduser("~"), ".datmo", "config"))
-
-        config = dict()
-        if master_server_ip and datmo_api_key:
-            config["MASTER_SERVER_IP"] = master_server_ip
-            config["DATMO_API_KEY"] = datmo_api_key
-            self.datmo_config.to_file(config)
-        else:
-            self.cli_helper.echo(
-                "Remote credentials could not be saved because they weren't input correctly. Please try again"
-            )
 
     @Helper.notify_no_project_found
     def service(self, **kwargs):

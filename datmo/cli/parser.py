@@ -20,7 +20,8 @@ def get_datmo_parser():
 
     cleanup_parser = subparsers.add_parser("cleanup", help="remove project")
 
-    setup_parser = subparsers.add_parser("setup", help="setup datmo")
+    configure_parser = subparsers.add_parser(
+        "configure", help="configure datmo")
 
     # Notebook
     notebook_parser = subparsers.add_parser(
@@ -296,11 +297,13 @@ def get_datmo_parser():
         "rerun", help="To rerun an experiment")
     rerun_parser.add_argument("id", help="run id to be rerun")
 
-    # deploy service
-    deploy_service_parser = subparsers.add_parser(
-        "service", help="deploy service module")
+    # Deploy
+    deploy_parser = subparsers.add_parser("deploy", help="deploy module")
+    deploy_subcommand_parsers = deploy_parser.add_subparsers(
+        title="subcommands", dest="subcommand")
 
-    # deploy service argument
+    deploy_service_parser = deploy_subcommand_parsers.add_parser(
+        "service", help="deploy service module")
     deploy_service_parser.add_argument(
         "--cluster-name",
         dest="cluster_name",
@@ -326,10 +329,8 @@ def get_datmo_parser():
         type=str,
         help="Path for the project to be deployed")
 
-    # deploy update
-    deploy_update_parser = subparsers.add_parser(
+    deploy_update_parser = deploy_subcommand_parsers.add_parser(
         "update", help="deploy update module")
-
     deploy_update_parser.add_argument(
         "--cluster-name",
         dest="cluster_name",
@@ -349,8 +350,8 @@ def get_datmo_parser():
         type=str,
         help="Path for the project to be deployed")
 
-    # deploy
-    deploy_ls_parser = subparsers.add_parser("ls", help="list module")
+    deploy_ls_parser = deploy_subcommand_parsers.add_parser(
+        "ls", help="list module")
     deploy_ls_parser.add_argument(
         "--format",
         dest="format",
@@ -371,10 +372,8 @@ def get_datmo_parser():
         "checked only if download is specified. saves output to location specified"
     )
 
-    # deploy logs
-    deploy_logs_parser = subparsers.add_parser(
+    deploy_logs_parser = deploy_subcommand_parsers.add_parser(
         "logs", help="deploy logs module")
-
     deploy_logs_parser.add_argument(
         "--service-path",
         dest="service_path",
@@ -388,9 +387,8 @@ def get_datmo_parser():
         type=str,
         help="Date for which logs are required (format:- YEAR-MONTH-DATE)")
 
-    # deploy rm
-    deploy_rm_parser = subparsers.add_parser("rm", help="deploy rm module")
-
+    deploy_rm_parser = deploy_subcommand_parsers.add_parser(
+        "rm", help="deploy rm module")
     deploy_rm_parser.add_argument(
         "--cluster-name",
         dest="cluster_name",
