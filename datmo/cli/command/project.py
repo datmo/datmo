@@ -14,7 +14,7 @@ class ProjectCommand(BaseCommand):
         super(ProjectCommand, self).__init__(cli_helper)
         self.project_controller = ProjectController()
 
-    def init(self, name, description):
+    def init(self, name, description, force):
         """Initialize command
 
         Parameters
@@ -23,6 +23,8 @@ class ProjectCommand(BaseCommand):
             name for the project
         description : str
             description of the project
+        force : bool
+            Boolean to force initialization without prompts
 
         Returns
         -------
@@ -39,12 +41,18 @@ class ProjectCommand(BaseCommand):
                    {"path": self.project_controller.home}))
             if not name:
                 _, default_name = os.path.split(self.project_controller.home)
-                name = self.cli_helper.prompt(
-                    __("prompt", "cli.project.init.name"),
-                    default=default_name)
+                if not force:
+                    name = self.cli_helper.prompt(
+                        __("prompt", "cli.project.init.name"),
+                        default=default_name)
+                else:
+                    name = default_name
             if not description:
-                description = self.cli_helper.prompt(
-                    __("prompt", "cli.project.init.description"))
+                if not force:
+                    description = self.cli_helper.prompt(
+                        __("prompt", "cli.project.init.description"))
+                else:
+                    description = ""
             try:
                 success = self.project_controller.init(name, description)
                 if success:
@@ -68,14 +76,18 @@ class ProjectCommand(BaseCommand):
                         "path": self.project_controller.home
                     }))
             # Prompt for the name and description and add default if not given
-            if not name:
-                name = self.cli_helper.prompt(
-                    __("prompt", "cli.project.init.name"),
-                    default=self.project_controller.model.name)
-            if not description:
-                description = self.cli_helper.prompt(
-                    __("prompt", "cli.project.init.description"),
-                    default=self.project_controller.model.description)
+            if not name and not force:
+                    name = self.cli_helper.prompt(
+                        __("prompt", "cli.project.init.name"),
+                        default=self.project_controller.model.name)
+            elif force:
+                name = self.project_controller.model.name
+            if not description and not force:
+                    description = self.cli_helper.prompt(
+                        __("prompt", "cli.project.init.description"),
+                        default=self.project_controller.model.description)
+            elif force:
+                description = self.project_controller.model.description
             # Update the project with the values given
             try:
                 success = self.project_controller.init(name, description)
@@ -101,7 +113,7 @@ class ProjectCommand(BaseCommand):
                 self.cli_helper.echo(str(k) + ": " + str(v))
         # Ask question if the user would like to setup environment
         environment_setup = self.cli_helper.prompt_bool(
-            __("prompt", "cli.project.environment.setup"))
+            __("prompt", "cli.project.environment.setup")) if not force else False
         if environment_setup:
             # TODO: remove business logic from here and create common helper
             # Setting up the environment definition file

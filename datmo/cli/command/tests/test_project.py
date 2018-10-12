@@ -79,6 +79,14 @@ class TestProjectCommand():
         assert "FROM datmo/python-base:cpu-py27" in open(
             definition_filepath, "r").read()
 
+    def test_init_create_success_force(self):
+        self.project_command.parse(
+            ["init", "--force"])
+
+        result = self.project_command.execute()
+        assert result
+        assert os.path.exists(os.path.join(self.temp_dir, '.datmo'))
+
     def test_init_create_success_no_environment(self):
         test_name = "foobar"
         test_description = "test model"
@@ -139,6 +147,26 @@ class TestProjectCommand():
         assert result
         assert result.name
         assert not result.description
+
+    def test_init_update_force_success(self):
+        test_name = "foobar"
+        test_description = "test model"
+        self.project_command.parse(
+            ["init", "--name", test_name, "--description", test_description])
+
+        @self.project_command.cli_helper.input("\n")
+        def dummy(self):
+            return self.project_command.execute()
+
+        result_1 = dummy(self)
+
+        self.project_command.parse([
+            "init", "--force"])
+
+        result_2 = self.project_command.execute()
+        # test for desired side effects
+        assert os.path.exists(os.path.join(self.temp_dir, '.datmo'))
+        assert result_2.id == result_1.id
 
     def test_init_update_success(self):
         test_name = "foobar"
