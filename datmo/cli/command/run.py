@@ -325,8 +325,7 @@ class RunCommand(ProjectCommand):
         download_path = kwargs.get('download_path', None)
         # Get all task meta information
         self.task_controller = TaskController()
-        session_id = kwargs.get('session_id', None)
-        session_id = self.task_controller.current_session.id if session_id == None else session_id
+        session_id = self.task_controller.current_session.id
         task_objs = self.task_controller.list(
             session_id, sort_key="created_at", sort_order="descending")
         header_list = [

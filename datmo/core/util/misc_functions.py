@@ -12,6 +12,12 @@ import pytest
 import collections
 import platform
 import tempfile
+import subprocess
+import zipfile
+import sys
+import shutil
+import requests
+from enum import Enum
 from io import open
 try:
     to_unicode = unicode
@@ -372,3 +378,162 @@ def parse_paths(default_src_prefix, paths, dest_prefix):
         else:
             raise PathDoesNotExist(src_abs_path)
     return files, directories, files_rel, directories_rel
+
+
+def get_headers(access_key):
+    return {'Authorization':str(access_key),
+            'Content-type': 'application/json'}
+
+
+def authenticated_get_call(url, access_key=None, stream=False):
+    headers = get_headers(access_key)
+    res = requests.get(url, headers=headers, stream=stream)
+    return res
+
+
+def authenticated_post_call(url, data, access_key=None, content_type="application/json"):
+    headers = get_headers(access_key)
+    res = requests.post(url, data=data, headers=headers)
+    return res
+
+
+def authenticated_put_call(url, data, access_key=None):
+    headers = get_headers(access_key)
+    res = requests.put(url, data=data, headers=headers)
+    return res
+
+
+def authenticated_delete_call(url, access_key=None):
+    headers = get_headers(access_key)
+    res = requests.delete(url, headers=headers)
+    return res
+
+
+# class for colors
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+class Commands(object):
+
+    def __init__(self):
+        from datmo.core.util.logger import DatmoLogger
+        from datmo.config import Config
+        self.config = Config()
+        self.docker_cli = self.config.docker_cli
+        self.log = DatmoLogger.get_logger(__name__)
+        self.log.info("handling command %s", self.config.home)
+
+
+    def run_cmd(self, shell_cmd):
+        try:
+            if type(shell_cmd) is list:
+                p = subprocess.Popen(shell_cmd, stdout=subprocess.PIPE)
+                out, e = p.communicate()
+                self.log.info("")
+                if e:
+                    self.log.info(e)
+                    self.log.info(bcolors.FAIL + "error while running the command %s" %(shell_cmd))
+                else:
+                    return {'output': out, 'status': True}
+            else:
+                process_returncode = subprocess.Popen(shell_cmd, shell=True).wait()
+                self.log.info("")
+                if process_returncode == 0:
+                    return {'status': True}
+                else:
+                    return {'status': False}
+        except Exception as e:
+            self.log.info(e)
+            self.log.info(bcolors.FAIL + "error while running the command %s" %(shell_cmd))
+            return {'status': False}
+
+    def docker_build(self, dockerfile_path=None, project_name=None):
+        if dockerfile_path:
+            shell_cmd = '%s build -t %s -f %s .' % (self.docker_cli, project_name, dockerfile_path)
+        else:
+            shell_cmd = '%s build -t %s .' % (self.docker_cli, project_name)
+
+        self.run_cmd(shell_cmd)
+
+    def docker_tag(self, project_name, old_image_tag, new_image_tag):
+        old_image_name_tag = project_name + ':' + old_image_tag
+        new_image_name_tag = project_name + ':' + new_image_tag
+        shell_cmd = '%s tag %s  %s' % (self.docker_cli, old_image_name_tag, new_image_name_tag)
+        self.run_cmd(shell_cmd)
+
+    def zip_folder(self, folder_path, output_path):
+        """Zip the contents of an entire folder (with that folder included
+        in the archive). Empty subfolders will be included in the archive
+        as well.
+        """
+        # Retrieve the paths of the folder contents.
+        contents = os.walk(folder_path)
+        try:
+            zip_file = zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED)
+            for root, folders, files in contents:
+                # Include all subfolders, including empty ones.
+                for folder_name in folders:
+                    absolute_path = os.path.join(root, folder_name)
+                    relative_path = absolute_path.replace(folder_path, '')
+                    zip_file.write(absolute_path, relative_path)
+                for file_name in files:
+                    if file_name != 'datmo_model.zip':
+                        absolute_path = os.path.join(root, file_name)
+                        relative_path = absolute_path.replace(folder_path, '')
+                        zip_file.write(absolute_path, relative_path)
+        except IOError as err:
+            _, strerror = err.args
+            self.log.info(strerror)
+            sys.exit(1)
+        except OSError as err:
+            _, strerror = err.args
+            self.log.info(strerror)
+            sys.exit(1)
+        except zipfile.BadZipfile as err:
+            _, strerror = err.args
+            self.log.info(strerror)
+            sys.exit(1)
+        finally:
+            zip_file.close()
+
+    def create_datmo_dockerfile(self, dockerfile='Dockerfile', filepath=os.getcwd()):
+        """
+        in order to create intermediate dockerfile to run
+        """
+
+        file_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src_files')
+
+        # Combine dockerfiles
+        destination = open(os.path.join(filepath, 'datmoDockerfile'), 'wb')
+        shutil.copyfileobj(open(os.path.join(filepath, dockerfile), 'rb'), destination)
+        shutil.copyfileobj(open(os.path.join(file_dir, 'stubDockerfile'), 'rb'), destination)
+        destination.close()
+
+    def copy(self, src, dst, symlinks=False, ignore=None):
+        for item in os.listdir(src):
+            s = os.path.join(src, item)
+            d = os.path.join(dst, item)
+            if os.path.isdir(s):
+                shutil.copytree(s, d, symlinks, ignore)
+            else:
+                shutil.copy2(s, d)
+
+
+class Status(Enum):
+    SUCCESS = 0
+    FAILURE = 1
+
+
+class Response(object):
+    # success by default
+    result = {}
+    message = 'passed'
+    status = 0

@@ -184,7 +184,8 @@ class TestHelper():
 
         @self.cli.input("cpu\n")
         def dummy(self):
-            return self.cli.prompt_available_options(available_options, option_type)
+            return self.cli.prompt_available_options(available_options,
+                                                     option_type)
 
         result = dummy(self)
         assert result
@@ -192,20 +193,27 @@ class TestHelper():
 
         @self.cli.input("\n")
         def dummy(self):
-            return self.cli.prompt_available_options(available_options, option_type)
+            return self.cli.prompt_available_options(available_options,
+                                                     option_type)
 
         result = dummy(self)
         assert result
         assert result == "cpu"
 
         # Setting up environment framework
-        available_options = [["keras-tensorflow", "has libraries for keras(v2.1.6) and tensorflow(v1.9.0) along with sklearn, opencv etc."],
-                             ["mxnet", "has libraries for mxnet(v1.1.0) along with sklearn, opencv etc."]]
+        available_options = [[
+            "keras-tensorflow",
+            "has libraries for keras(v2.1.6) and tensorflow(v1.9.0) along with sklearn, opencv etc."
+        ], [
+            "mxnet",
+            "has libraries for mxnet(v1.1.0) along with sklearn, opencv etc."
+        ]]
         option_type = "framework"
 
         @self.cli.input("mxnet\n")
         def dummy(self):
-            return self.cli.prompt_available_options(available_options, option_type)
+            return self.cli.prompt_available_options(available_options,
+                                                     option_type)
 
         result = dummy(self)
         assert result
@@ -213,7 +221,8 @@ class TestHelper():
 
         @self.cli.input("\n")
         def dummy(self):
-            return self.cli.prompt_available_options(available_options, option_type)
+            return self.cli.prompt_available_options(available_options,
+                                                     option_type)
 
         result = dummy(self)
         assert result
@@ -224,7 +233,8 @@ class TestHelper():
 
         @self.cli.input("py27\n")
         def dummy(self):
-            return self.cli.prompt_available_options(available_options, option_type)
+            return self.cli.prompt_available_options(available_options,
+                                                     option_type)
 
         result = dummy(self)
         assert result
@@ -232,7 +242,8 @@ class TestHelper():
 
         @self.cli.input("\n")
         def dummy(self):
-            return self.cli.prompt_available_options(available_options, option_type)
+            return self.cli.prompt_available_options(available_options,
+                                                     option_type)
 
         result = dummy(self)
         assert result
@@ -241,7 +252,8 @@ class TestHelper():
         # quit
         @self.cli.input("quit\n")
         def dummy(self):
-            return self.cli.prompt_available_options(available_options, option_type)
+            return self.cli.prompt_available_options(available_options,
+                                                     option_type)
 
         with pytest.raises(SystemExit) as pytest_wrapped_e:
             dummy(self)
@@ -298,6 +310,7 @@ class TestHelper():
         # assert same as output
         assert self.cli.get_command_choices() == [
             "init", "version", "--version", "-v", "status", "cleanup",
-            "snapshot", "session", "notebook", "jupyterlab", "terminal",
-            "rstudio", "environment", "run", "rerun", "stop", "delete","ls"
+            "configure", "snapshot", "session", "notebook", "jupyterlab",
+            "terminal", "rstudio", "environment", "run", "rerun", "stop",
+            "delete", "ls", "deploy"
         ]

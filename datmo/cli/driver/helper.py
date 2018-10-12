@@ -151,8 +151,9 @@ class Helper():
     def get_command_choices(self):
         return [
             "init", "version", "--version", "-v", "status", "cleanup",
-            "snapshot", "session", "notebook", "jupyterlab", "terminal",
-            "rstudio", "environment", "run", "rerun", "stop", "delete", "ls"
+            "configure", "snapshot", "session", "notebook", "jupyterlab",
+            "terminal", "rstudio", "environment", "run", "rerun", "stop",
+            "delete", "ls", "deploy"
         ]
 
     def prompt_available_options(self, available_options, option_type):
@@ -192,8 +193,8 @@ class Helper():
                 except ValueError:
                     self.echo(
                         __("warn",
-                           "cli.environment.setup.argument.unavailable.%s" % option_type,
-                           input_environment_option))
+                           "cli.environment.setup.argument.unavailable.%s" %
+                           option_type, input_environment_option))
                     input_environment_option = self.prompt(
                         __("prompt", "cli.environment.setup.%s" % option_type))
         if option_environment_index is not None:
@@ -203,8 +204,7 @@ class Helper():
         if input_environment_option is None or option_environment_index <= 0 or\
                 option_environment_index > len(available_options):
             self.echo(
-                __("warn",
-                   "cli.environment.setup.argument.%s" % option_type))
+                __("warn", "cli.environment.setup.argument.%s" % option_type))
             if option_type == "type":
                 input_environment_option = "cpu"
             elif option_type == "framework":
