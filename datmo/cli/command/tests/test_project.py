@@ -79,6 +79,14 @@ class TestProjectCommand():
         assert "FROM datmo/python-base:cpu-py27" in open(
             definition_filepath, "r").read()
 
+    def test_init_create_success_force(self):
+        self.project_command.parse(
+            ["init", "--force"])
+
+        result = self.project_command.execute()
+        assert result
+        assert os.path.exists(os.path.join(self.temp_dir, '.datmo'))
+
     def test_init_create_success_no_environment(self):
         test_name = "foobar"
         test_description = "test model"
