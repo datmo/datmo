@@ -8,11 +8,6 @@ from datmo.core.util.validation import validate
 class SessionController(BaseController):
     """SessionController inherits from BaseController and manages business logic related to session
 
-    Parameters
-    ----------
-    home : str
-        home path of the project
-
     Methods
     -------
     create(dictionary)

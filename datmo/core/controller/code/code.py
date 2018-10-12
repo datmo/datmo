@@ -8,11 +8,6 @@ class CodeController(BaseController):
     """CodeController inherits from BaseController and manages business logic related to the
     code.
 
-    Parameters
-    ----------
-    home : str
-        home path of the project
-
     Methods
     -------
     create(code_id=None)

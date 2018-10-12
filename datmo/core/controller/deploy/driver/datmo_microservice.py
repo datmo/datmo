@@ -2,7 +2,7 @@ from datmo.core.util.misc_functions import Commands, \
     bcolors, authenticated_get_call, Response, Status
 
 
-class MicroserviceDeployDriver(object):
+class DatmoMicroserviceDeployDriver(object):
     """
     Datmo Microservice deployment driver
     """

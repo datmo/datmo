@@ -15,11 +15,6 @@ class ProjectController(BaseController):
     """ProjectController inherits from BaseController and manages business logic related to the
     project. One model is associated with each project currently.
 
-    Parameters
-    ----------
-    home : str
-        home path of the project
-
     Methods
     -------
     init(name, description)

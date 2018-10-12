@@ -14,15 +14,15 @@ class BaseController(object):
 
     Parameters
     ----------
-    home : str
-        home path of the project
+    home : str, optional
+        directory for the project, default is to pull from config
 
     Attributes
     ----------
     home : str
-        Filepath for the location of the project
+        absolute filepath for the location of the project
     config : JSONStore
-        This is the set of configurations used to create a project
+        this is the set of configurations used to create a project
     dal : datmo.core.storage.DAL
     model : datmo.core.entity.model.Model
     current_session : datmo.core.entity.session.Session
@@ -43,8 +43,8 @@ class BaseController(object):
         Return the configuration defaults
     """
 
-    def __init__(self):
-        self.home = Config().home
+    def __init__(self, home=None):
+        self.home = Config().home if not home else home
         if not os.path.isdir(self.home):
             raise InvalidProjectPath(
                 __("error", "controller.base.__init__", self.home))

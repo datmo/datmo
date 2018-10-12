@@ -14,10 +14,9 @@ class Config(object):
     Parameters
     ----------
     home : string
-      project home directory
+        project home directory
+    remote_credentials : tuple
 
-    logging_level : int
-      logging level
     Returns
     -------
     Config

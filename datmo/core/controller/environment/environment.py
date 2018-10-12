@@ -17,11 +17,6 @@ class EnvironmentController(BaseController):
     """EnvironmentController inherits from BaseController and manages business logic related to the
     environment.
 
-    Parameters
-    ----------
-    home : str
-        home path of the project
-
     Methods
     -------
     create(dictionary)
