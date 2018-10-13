@@ -27,7 +27,7 @@ setup(
         "kids.cache>=0.0.7", "pymongo>=3.6.0", "checksumdir>=1.1.4",
         "semver>=2.7.8", "backports.ssl-match-hostname>=3.5.0.1",
         "timeout-decorator==0.4.0", "cerberus>=1.2", "pytest==3.0.4",
-        "pathspec==0.5.6"
+        "pathspec==0.5.6", "psutil==4.4.2"
     ],
     tests_require=["pytest==3.0.4"],
     entry_points={'console_scripts': ['datmo = datmo.cli.main:main']},
