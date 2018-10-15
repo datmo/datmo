@@ -22,11 +22,6 @@ class TaskController(BaseController):
     """TaskController inherits from BaseController and manages business logic associated with tasks
     within the project.
 
-    Parameters
-    ----------
-    home : str
-        home path of the project
-
     Attributes
     ----------
     environment : datmo.core.controller.environment.environment.EnvironmentController
@@ -136,7 +131,8 @@ class TaskController(BaseController):
         # Start a daemon to run workspace on web browser
         name = options.get('name', None)
         if workspace is not None:
-            thread = threading.Thread(target=self._open_workspace, args=(name, workspace))
+            thread = threading.Thread(
+                target=self._open_workspace, args=(name, workspace))
             thread.daemon = True  # Daemonize thread
             thread.start()  # Start the execution
 
@@ -153,7 +149,8 @@ class TaskController(BaseController):
         :param workspace: name of the workspace
         :return:
         """
-        workspace_url = self.environment_driver.extract_workspace_url(name, workspace)
+        workspace_url = self.environment_driver.extract_workspace_url(
+            name, workspace)
         result = webbrowser.open(workspace_url, new=2)
 
         return result
@@ -190,7 +187,9 @@ class TaskController(BaseController):
         return results
 
     @staticmethod
-    def _update_environment_run_options(environment_run_option, data_file_path_map, data_directory_path_map):
+    def _update_environment_run_options(environment_run_option,
+                                        data_file_path_map,
+                                        data_directory_path_map):
         """Update environment run option dictionary with data file and directory mapping and return dictionary.
 
         Parameters
@@ -227,9 +226,12 @@ class TaskController(BaseController):
                     __("error", "cli.run.run.data.src_dir.dne",
                        data_file_dirname))
 
-            data_volume = {os.path.dirname(data_file_src_abs_path):
-                               {'bind': '/data/',
-                                'mode': 'rw'}}
+            data_volume = {
+                os.path.dirname(data_file_src_abs_path): {
+                    'bind': '/data/',
+                    'mode': 'rw'
+                }
+            }
             if environment_run_option["volumes"]:
                 environment_run_option["volumes"].update(data_volume)
             else:
@@ -243,9 +245,12 @@ class TaskController(BaseController):
                     raise TaskRunError(
                         __("error", "cli.run.run.data.src_dir.dne",
                            data_src_abs_path))
-                data_volume = {data_src_abs_path:
-                                   {'bind': '/data/%s' % data_dst_rel_path,
-                                    'mode': 'rw'}}
+                data_volume = {
+                    data_src_abs_path: {
+                        'bind': '/data/%s' % data_dst_rel_path,
+                        'mode': 'rw'
+                    }
+                }
                 if environment_run_option["volumes"]:
                     environment_run_option["volumes"].update(data_volume)
                 else:
@@ -400,20 +405,21 @@ class TaskController(BaseController):
                 "api": False
             }
             # mount the data volume
-            environment_run_options = self._update_environment_run_options(environment_run_options,
-                                                                           data_file_path_map=task_obj.data_file_path_map,
-                                                                           data_directory_path_map=task_obj.data_directory_path_map)
+            environment_run_options = self._update_environment_run_options(
+                environment_run_options,
+                data_file_path_map=task_obj.data_file_path_map,
+                data_directory_path_map=task_obj.data_directory_path_map)
             # mount the project and task folder
             environment_run_options["volumes"].update({
-                    os.path.join(self.home, task_obj.task_dirpath): {
-                        'bind': '/task/',
-                        'mode': 'rw'
-                    },
-                    self.home: {
-                        'bind': '/home/',
-                        'mode': 'rw'
-                    }
-                })
+                os.path.join(self.home, task_obj.task_dirpath): {
+                    'bind': '/task/',
+                    'mode': 'rw'
+                },
+                self.home: {
+                    'bind': '/home/',
+                    'mode': 'rw'
+                }
+            })
             # Run environment via the helper function
             return_code, run_id, logs =  \
                 self._run_helper(before_snapshot_obj.environment_id,
@@ -462,10 +468,12 @@ class TaskController(BaseController):
                 if update_task_dict["results"] is not None:
                     snapshot_update_dict = dict({'id': after_snapshot_obj.id})
                     if after_snapshot_obj.stats:
-                        after_snapshot_obj.stats.update(update_task_dict["results"])
+                        after_snapshot_obj.stats.update(
+                            update_task_dict["results"])
                     else:
                         after_snapshot_obj.stats = update_task_dict["results"]
-                    snapshot_update_dict["stats"] = after_snapshot_obj.stats.copy()
+                    snapshot_update_dict[
+                        "stats"] = after_snapshot_obj.stats.copy()
                     self.dal.snapshot.update(snapshot_update_dict)
             if run_id is not None:
                 update_task_dict["run_id"] = run_id

@@ -3,7 +3,6 @@ Tests for CodeDriver
 """
 from __future__ import division
 from __future__ import unicode_literals
-
 import unittest
 from datmo.core.controller.code.driver import CodeDriver
 

@@ -12,11 +12,6 @@ class FileCollectionController(BaseController):
     """FileCollectionController inherits from BaseController and manages business logic related to the
     file system.
 
-    Parameters
-    ----------
-    home : str
-        home path of the project
-
     Methods
     -------
     create(paths)

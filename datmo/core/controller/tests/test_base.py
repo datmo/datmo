@@ -42,6 +42,10 @@ class TestBaseController():
             failed = True
         assert failed
 
+    def test_instantiation_with_home(self):
+        test_controller = BaseController(home=os.getcwd())
+        assert test_controller.home == os.getcwd()
+
     def test_instantiation(self):
         assert self.base_controller != None
 

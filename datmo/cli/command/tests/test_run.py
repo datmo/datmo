@@ -182,9 +182,11 @@ class TestRunCommand():
         test_dockerfile = os.path.join(self.temp_dir, "Dockerfile")
         test_mem_limit = "4g"
         # Test success for run with directory being passed
-        test_data_dir_1 = os.path.join(tempfile.mkdtemp(dir=test_datmo_dir), "data1")
+        test_data_dir_1 = os.path.join(
+            tempfile.mkdtemp(dir=test_datmo_dir), "data1")
         os.mkdir(test_data_dir_1)
-        test_data_dir_2 = os.path.join(tempfile.mkdtemp(dir=test_datmo_dir), "data2")
+        test_data_dir_2 = os.path.join(
+            tempfile.mkdtemp(dir=test_datmo_dir), "data2")
         os.mkdir(test_data_dir_2)
         with open(os.path.join(test_data_dir_1, "file.txt"), "wb") as f:
             f.write(to_bytes('my initial line in 1\n'))
@@ -210,9 +212,9 @@ class TestRunCommand():
             f.write(to_bytes("    f.write('my test file in 2')\n"))
 
         self.run_command.parse([
-            "run", "--environment-paths", test_dockerfile,
-            "--data", test_data_dir_1, "--data", test_data_dir_2,
-            "--mem-limit", test_mem_limit, test_command
+            "run", "--environment-paths", test_dockerfile, "--data",
+            test_data_dir_1, "--data", test_data_dir_2, "--mem-limit",
+            test_mem_limit, test_command
         ])
 
         # test proper execution of run command
@@ -228,25 +230,26 @@ class TestRunCommand():
         assert result.core_snapshot_id
         assert result.core_snapshot_id == result.after_snapshot_id
         assert result.environment_id
-        assert "my initial line in 1" in open(os.path.join(test_data_dir_1,
-                                                      "file.txt"), "r").read()
-        assert "my test file in 1" in open(os.path.join(test_data_dir_1,
-                                                      "file.txt"), "r").read()
-        assert "my initial line in 2" in open(os.path.join(test_data_dir_2,
-                                                           "file.txt"), "r").read()
-        assert "my test file in 2" in open(os.path.join(test_data_dir_2,
-                                                        "file.txt"), "r").read()
+        assert "my initial line in 1" in open(
+            os.path.join(test_data_dir_1, "file.txt"), "r").read()
+        assert "my test file in 1" in open(
+            os.path.join(test_data_dir_1, "file.txt"), "r").read()
+        assert "my initial line in 2" in open(
+            os.path.join(test_data_dir_2, "file.txt"), "r").read()
+        assert "my test file in 2" in open(
+            os.path.join(test_data_dir_2, "file.txt"), "r").read()
         # teardown
         self.run_command.parse(["stop", "--all"])
         # test when all is passed to stop all
         self.run_command.execute()
 
         # test failure
-        test_data_dir_dne = os.path.join(tempfile.mkdtemp(dir=test_datmo_dir), "data_dne")
+        test_data_dir_dne = os.path.join(
+            tempfile.mkdtemp(dir=test_datmo_dir), "data_dne")
         self.run_command.parse([
-                "run", "--environment-paths", test_dockerfile,
-                "--data", test_data_dir_dne
-            ])
+            "run", "--environment-paths", test_dockerfile, "--data",
+            test_data_dir_dne
+        ])
         result = self.run_command.execute()
         assert not result
 
@@ -415,20 +418,6 @@ class TestRunCommand():
         assert run_objs
         assert run_objs[0].status == "SUCCESS"
 
-        test_session_id = 'test_session_id'
-        self.run_command.parse(["ls", "--session-id", test_session_id])
-
-        # test for desired side effects
-        assert self.run_command.args.session_id == test_session_id
-
-        # Test failure no session
-        failed = False
-        try:
-            _ = self.run_command.execute()
-        except SessionDoesNotExist:
-            failed = True
-        assert failed
-
         # Test failure (format)
         failed = False
         try:
@@ -554,8 +543,7 @@ class TestRunCommand():
     def test_run_stop_failure_mutually_exclusive_vars(self):
         self.__set_variables()
         # Passing wrong task id
-        self.run_command.parse(
-            ["stop", "--id", "invalid-task-id", "--all"])
+        self.run_command.parse(["stop", "--id", "invalid-task-id", "--all"])
         failed = False
         try:
             _ = self.run_command.execute()
@@ -628,17 +616,15 @@ class TestRunCommand():
 
         # test for single set of ports
         self.run_command.parse([
-            "run", "-p", test_ports[0],
-            "--environment-paths", test_dockerfile, "--mem-limit",
-            test_mem_limit, test_command
+            "run", "-p", test_ports[0], "--environment-paths", test_dockerfile,
+            "--mem-limit", test_mem_limit, test_command
         ])
 
         # test proper execution of run command
         run_obj = self.run_command.execute()
         run_id = run_obj.id
         # 1. Test success rerun
-        self.run_command.parse(
-            ["rerun", run_id])
+        self.run_command.parse(["rerun", run_id])
         result_run_obj = self.run_command.execute()
         assert result_run_obj
         assert isinstance(result_run_obj, RunObject)

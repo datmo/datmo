@@ -14,10 +14,9 @@ class Config(object):
     Parameters
     ----------
     home : string
-      project home directory
+        project home directory
+    remote_credentials : tuple
 
-    logging_level : int
-      logging level
     Returns
     -------
     Config
@@ -33,10 +32,28 @@ class Config(object):
             DatmoLogger.get_logger(__name__).info("initializing")
             self.data_cache = JSONStore(
                 os.path.join(os.path.expanduser("~"), ".datmo", "cache.json"))
+            self.docker_cli = '/usr/bin/docker'
 
         @property
         def home(self):
             return self._home
+
+        @property
+        def remote_credentials(self):
+            # Load from .datmo/config global file
+            MASTER_SERVER_IP, DATMO_API_KEY, END_POINT = None, None, None
+            # loading the datmo config
+            datmo_config = JSONStore(
+                os.path.join(os.path.expanduser("~"), ".datmo", "config"))
+            config_dict = datmo_config.to_dict()
+
+            MASTER_SERVER_IP = config_dict.get('MASTER_SERVER_IP', None)
+            DATMO_API_KEY = config_dict.get('DATMO_API_KEY', None)
+
+            if MASTER_SERVER_IP:
+                END_POINT = 'http://' + MASTER_SERVER_IP + ':2083/api/v1'
+
+            return MASTER_SERVER_IP, DATMO_API_KEY, END_POINT
 
         def set_home(self, home_path):
             self._home = home_path

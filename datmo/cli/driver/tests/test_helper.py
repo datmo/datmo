@@ -310,7 +310,7 @@ class TestHelper():
         # assert same as output
         assert self.cli.get_command_choices() == [
             "init", "version", "--version", "-v", "status", "cleanup",
-            "dashboard", "snapshot", "session", "notebook", "jupyterlab",
-            "terminal", "rstudio", "environment", "run", "rerun", "stop",
-            "delete", "ls"
+            "configure", "dashboard", "snapshot", "session", "notebook",
+            "jupyterlab", "terminal", "rstudio", "environment", "run", "rerun",
+            "stop", "delete", "ls", "deploy"
         ]

@@ -17,7 +17,7 @@ if sys.version_info[0] < 3:  # python 2
         "kids.cache>=0.0.7", "pymongo>=3.6.0", "checksumdir>=1.1.4",
         "semver>=2.7.8", "backports.ssl-match-hostname>=3.5.0.1",
         "timeout-decorator>=0.4.0", "cerberus>=1.2", "pytest==3.0.4",
-        "pathspec==0.5.6", "flask>=0.10.1", "jinja2>=2.7.3",
+        "pathspec==0.5.6", "psutil==4.4.2", "flask>=0.10.1", "jinja2>=2.7.3",
         "markupsafe>=0.23", "werkzeug>=0.9.6", "beautifulsoup4>=4.3.2",
         "gunicorn>=19.1.1", "itsdangerous>=0.24", "six>=1.8.0",
         "wsgiref>=0.1.2"
@@ -31,7 +31,7 @@ else:  # python 3
         "kids.cache>=0.0.7", "pymongo>=3.6.0", "checksumdir>=1.1.4",
         "semver>=2.7.8", "backports.ssl-match-hostname>=3.5.0.1",
         "timeout-decorator>=0.4.0", "cerberus>=1.2", "pytest==3.0.4",
-        "pathspec==0.5.6", "flask>=0.10.1", "jinja2>=2.7.3",
+        "pathspec==0.5.6", "psutil==4.4.2", "flask>=0.10.1", "jinja2>=2.7.3",
         "markupsafe>=0.23", "werkzeug>=0.9.6", "beautifulsoup4>=4.3.2",
         "gunicorn>=19.1.1", "itsdangerous>=0.24", "six>=1.8.0"
     ]
