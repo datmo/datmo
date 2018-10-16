@@ -157,6 +157,7 @@ class Monitoring():
         else:
             latency = None
         self._start_time, self._end_time = None, None  # reset both for next data point
+        created_at = int(round(time.time() * 1000))
         cpu_percent = psutil.cpu_percent()
         memory_dict = {}
         memory_object = psutil.virtual_memory()
@@ -171,7 +172,8 @@ class Monitoring():
             "memory_dict": memory_dict,
             "input": json.dumps(input),
             "prediction": json.dumps(prediction),
-            "model_id": self._model_id
+            "model_id": self._model_id,
+            "created_at": created_at
         }
         if latency is not None:
             input_data['latency'] = latency
@@ -202,7 +204,9 @@ class Monitoring():
         """
         if not isinstance(actual, dict):
             return False
-        response = self.remote_api.update_actual(id, json.dumps(actual))
+        updated_at = int(round(time.time() * 1000))
+        update_dict = {'updated_at': updated_at, 'actual': json.dumps(actual)}
+        response = self.remote_api.update_actual(id, update_dict)
         if response['body']['updated'] > 0:
             return True
 
@@ -223,6 +227,10 @@ class Monitoring():
                 deployment version id tracked for monitoring
             id  : str, optional
                 tracked prediction id
+            start : int, optional
+                initial index of doc to get from storage for pagination purpose
+            count : int, optional
+                total number of docs to get from storage in single call from start
 
         Returns
         -------
@@ -236,7 +244,7 @@ class Monitoring():
         # Check if all input dictionary keys are valid
         if not all(
                 key in
-            ["model_id", "model_version_id", "deployment_version_id", "id"]
+            ["model_id", "model_version_id", "deployment_version_id", "id", "start", "count"]
                 for key in filter.keys()):
             raise InputError
         response = self.remote_api.get_data(filter)
@@ -246,12 +254,15 @@ class Monitoring():
             input = meta_data.get('input')
             prediction = meta_data.get('prediction')
             actual = meta_data.get('actual')
+            updated_at = meta_data.get('updated_at')
             meta_data['input'] = json.loads(
                 input) if input is not None else None
             meta_data['prediction'] = json.loads(
                 prediction) if prediction is not None else None
             meta_data['actual'] = json.loads(
                 actual) if actual is not None else None
+            meta_data['updated_at'] = int(
+                updated_at) if updated_at is not None else None
             meta_data_list.append(meta_data)
         return meta_data_list
 

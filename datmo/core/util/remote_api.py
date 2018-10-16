@@ -66,14 +66,14 @@ class RemoteAPI():
             response['status_code'] = 500
         return response
 
-    def update_actual(self, id, actual):
+    def update_actual(self, id, update_dict):
         response = {"status_code": 200}
         try:
             headers = {"content-type": "application/json"}
-            update_dict = dict()
+            if not isinstance(update_dict, dict):
+                raise Exception
             update_dict['api_key'] = self._api_key
             update_dict['id'] = id
-            update_dict['actual'] = actual
             r = requests.put(
                 self.put_meta_data_endpoint,
                 data=json.dumps(update_dict),

@@ -38,7 +38,8 @@ class TestMonitoringModule():
         pass
 
     def test_set_track(self):
-        assert isinstance(self.test_data_id, str)
+        assert isinstance(self.test_data_id, str) \
+               or isinstance(self.test_data_id, basestring)
 
     def test_set_track_double(self):
         data_id = self.monitoring.track(
@@ -74,14 +75,21 @@ class TestMonitoringModule():
         result = self.monitoring.search_metadata(filter)
         assert isinstance(result, list)
         assert len(result) == 1
+        assert result[0]["updated_at"] > result[0]["created_at"]
         assert result[0]['id'] == self.test_data_id
+
+        filter = {"model_id": "model_id", "start": 0, "count": 1}
+        result = self.monitoring.search_metadata(filter)
+        assert isinstance(result, list)
+        assert len(result) == 1
 
     # TODO: separate deployment into another file
 
     def test_get_deployment_master_info(self):
         result = self.monitoring.get_deployment_master_info()
         assert isinstance(result, dict)
-        assert isinstance(result['datmo_master_ip'], str)
+        assert isinstance(result['datmo_master_ip'], str) \
+               or isinstance(self.test_data_id, basestring)
         assert isinstance(result['kibana_dashboard'], dict)
         assert isinstance(result['grafana_dashboard'], dict)
 
