@@ -1,6 +1,8 @@
 import time
 import json
 import psutil
+
+from datmo.core.util.exceptions import InputError
 from datmo.core.util.misc_functions import bytes2human
 from datmo.core.util.remote_api import RemoteAPI
 from datmo.core.controller.base import BaseController
@@ -72,7 +74,11 @@ class Monitoring():
     def set_start(self):
         """
         Set the start time
-        :return: start time in milliseconds
+
+        Returns
+        -------
+        start_time : int
+            start time in milliseconds
         """
         self._start_time = int(round(time.time() * 1000))
         return self._start_time
@@ -81,7 +87,12 @@ class Monitoring():
     def set_end(self):
         """
         Set the end time
-        :return: end time in milliseconds
+
+        Returns
+        -------
+        end_time : int
+            end time in milliseconds
+
         """
         self._end_time = int(round(time.time() * 1000))
         return self._end_time
@@ -89,52 +100,79 @@ class Monitoring():
     def set_model_id(self, id):
         """
         Set the model id
-        :param id: the id representing the model
+
+        Parameters
+        ----------
+        id : str
+            model id to track during monitoring
         """
         self._model_id = id
 
     def set_model_version(self, id):
         # TODO change for model to deployment version
         """
-        Set the model version
-        :param id: id for the model version
+        Set the model version id
+
+        Parameters
+        ----------
+        id : str
+            model version id to track during monitoring
         """
         self._model_version = id
 
     def set_deployment_id(self, id):
         """
         Set the deployment id
-        :param id: id for the deployment
+
+        Parameters
+        ----------
+        id : str
+            model deployment id to track during monitoring
         """
         self._deployment_id = id
 
     def track(self, input, prediction):
         """
         To track the prediction of during the inference stage
-        :param input: input dictionary with features being used for the prediction
-        :param prediction: The output prediction from the model from the prediction being made
-        :return: the id of the tracked prediction
+
+        Parameters
+        ----------
+        input : dict
+            input dictionary with features being used for the prediction
+        prediction : dict
+            The output prediction from the model from the prediction being made
+
+        Returns
+        -------
+        str
+            the id of the tracked prediction
         """
         if not (isinstance(input, dict) and isinstance(prediction, dict)):
             return None
 
-        latency = self._end_time - self._start_time \
-            if (self._end_time is not None and self._start_time is not None) else None
+        if self._start_time and self._end_time:
+            latency = self._end_time - self._start_time
+        elif self._start_time and not self._end_time:
+            self._end_time = int(round(time.time() * 1000))
+            latency = self._end_time - self._start_time
+        else:
+            latency = None
+        self._start_time, self._end_time = None, None  # reset both for next data point
         cpu_percent = psutil.cpu_percent()
         memory_dict = {}
         memory_object = psutil.virtual_memory()
         for name in memory_object._fields:
             value = getattr(memory_object, name)
-            if name != 'percent':
+            if name != "percent":
                 value = bytes2human(value)
             memory_dict[name] = value
 
         input_data = {
-            'cpu_percent': cpu_percent,
-            'memory_dict': memory_dict,
-            'input': json.dumps(input),
-            'prediction': json.dumps(prediction),
-            'model_id': self._model_id
+            "cpu_percent": cpu_percent,
+            "memory_dict": memory_dict,
+            "input": json.dumps(input),
+            "prediction": json.dumps(prediction),
+            "model_id": self._model_id
         }
         if latency is not None:
             input_data['latency'] = latency
@@ -149,57 +187,91 @@ class Monitoring():
 
     def track_actual(self, id, actual):
         """
-        Return bool as True if it was a successful update
-        :param actual: dictionary with actual data
-        :return: bool
-        """
+        Track actual value (y_hat) for the prediction
 
+        Parameters
+        ----------
+        id : str
+            tracked prediction id as returned by "track" function above
+        actual : dict
+            dictionary with ground truth data for the actual prediction
+
+        Returns
+        -------
+        bool
+            True if successful update
+        """
         if not isinstance(actual, dict):
             return False
         response = self.remote_api.update_actual(id, json.dumps(actual))
         if response['body']['updated'] > 0:
             return True
 
-    def get_meta_data(self,
-                      model_id,
-                      model_version=None,
-                      deployment_id=None,
-                      id=None):
+    def search_metadata(self, filter):
         """
-        Get and search for meta data from the remote storage
-        :param model_id: id for the model
-        :param model_version: version of the model
-        :param deployment_id: id or type of deployment
-        :param id: the id of the tracked prediction
-        :return: list of all results for predictions which were tracked
+        Search metadata from the remote storage
+
+        Parameters
+        ----------
+        filter : dict
+            dictionary to filter search results
+
+            model_id : str, optional
+                model id tracked for monitoring
+            model_version : str, optional
+                model version id tracked for monitoring
+            deployment_id : str, optional
+                deployment id tracked for monitoring
+            id  : str, optional
+                tracked prediction id
+
+        Returns
+        -------
+        list
+            list of data dictionary for predictions which were tracked
+
+        Raises
+        ------
+        IncorrectType
         """
-        filter = {'model_id': model_id}
-        if model_version:
-            filter['model_version'] = model_version
-        if deployment_id:
-            filter['deployment_id'] = deployment_id
-        if id:
-            filter['id'] = id
+        # Check if all input dictionary keys are valid
+        if not all(key in ["model_id", "model_version", "deployment_id", "id"]
+                   for key in filter.keys()):
+            raise InputError
         response = self.remote_api.get_data(filter)
         body = response['body']
         meta_data_list = []
         for meta_data in body:
-            input = meta_data.get("input")
-            prediction = meta_data.get("prediction")
-            actual = meta_data.get("actual")
-            meta_data["input"] = json.loads(
+            input = meta_data.get('input')
+            prediction = meta_data.get('prediction')
+            actual = meta_data.get('actual')
+            meta_data['input'] = json.loads(
                 input) if input is not None else None
-            meta_data["prediction"] = json.loads(
+            meta_data['prediction'] = json.loads(
                 prediction) if prediction is not None else None
-            meta_data["actual"] = json.loads(
+            meta_data['actual'] = json.loads(
                 actual) if actual is not None else None
             meta_data_list.append(meta_data)
         return meta_data_list
 
+    # TODO: separate deployment into another file
+
     def get_deployment_master_info(self):
         """
-        To extract the master server of the deployment
-        :return: dictionary containing the master server ip, grafana and kibana dashboard information
+        Extract the master server of the deployment
+
+        Returns
+        -------
+        dict
+            dictionary containing the master server ip, grafana and kibana dashboard information
+
+            datmo_master_ip : str
+            kibana_dashboard : dict
+                end_point : str
+            grafana_dashboard : dict
+                end_point : str
+                user_name : str
+                password : str
         """
         response = self.remote_api.get_deployment_info()
         master_system_info = response['body']['master_system_info']
@@ -208,7 +280,159 @@ class Monitoring():
     def get_deployment_cluster_info(self):
         """
         To extract the information about the deployments and services
-        :return: dictionary containing the cluster information
+
+        Returns
+        -------
+        dict
+            dictionary containing the cluster information
+
+            Example
+            -------
+            {
+               'clusters':[
+                  {
+                     'count':1,
+                     'services':[
+                        {
+                           'url':'http://acme-company-deploy.datmo.com:2053/credit/shabazp/xgboost-model/v1/predict',
+                           'route':'/credit/shabazp/xgboost-model/v1/predict'
+                        },
+                        {
+                           'url':'http://acme-company-deploy.datmo.com:2053/credit/shabazp/xgboost-model/v1/add',
+                           'route':'/credit/shabazp/xgboost-model/v1/add'
+                        }
+                     ],
+                     'instances':[
+                        {
+                           'Monitoring':{
+                              'State':'disabled'
+                           },
+                           'PublicDnsName':'ec2-18-202-54-17.eu-west-1.compute.amazonaws.com',
+                           'ElasticGpuAssociations':[
+
+                           ],
+                           'State':{
+                              'Code':16,
+                              'Name':'running'
+                           },
+                           'EbsOptimized':False,
+                           'LaunchTime':'2018-10-12T03:05:43.000Z',
+                           'PublicIpAddress':'18.202.54.17',
+                           'PrivateIpAddress':'10.0.14.216',
+                           'ProductCodes':[
+
+                           ],
+                           'VpcId':'vpc-0562003fd66d02b39',
+                           'CpuOptions':{
+                              'CoreCount':1,
+                              'ThreadsPerCore':1
+                           },
+                           'StateTransitionReason':'',
+                           'InstanceId':'i-06f20e7a98674d402',
+                           'EnaSupport':True,
+                           'ImageId':'ami-1557d26c',
+                           'PrivateDnsName':'ip-10-0-14-216.eu-west-1.compute.internal',
+                           'KeyName':'datmo-key',
+                           'SecurityGroups':[
+                              {
+                                 'GroupName':'datmo-cluster',
+                                 'GroupId':'sg-0484ece16c5263c3e'
+                              }
+                           ],
+                           'ClientToken':'',
+                           'SubnetId':'subnet-0569e7224a5dc81f3',
+                           'InstanceType':'t2.small',
+                           'NetworkInterfaces':[
+                              {
+                                 'Status':'in-use',
+                                 'MacAddress':'0a:8b:b0:a8:61:a2',
+                                 'SourceDestCheck':True,
+                                 'VpcId':'vpc-0562003fd66d02b39',
+                                 'Description':'',
+                                 'NetworkInterfaceId':'eni-09bb85544df95ad2b',
+                                 'PrivateIpAddresses':[
+                                    {
+                                       'PrivateDnsName':'ip-10-0-14-216.eu-west-1.compute.internal',
+                                       'PrivateIpAddress':'10.0.14.216',
+                                       'Primary':True,
+                                       'Association':{
+                                          'PublicIp':'18.202.54.17',
+                                          'PublicDnsName':'ec2-18-202-54-17.eu-west-1.compute.amazonaws.com',
+                                          'IpOwnerId':'amazon'
+                                       }
+                                    }
+                                 ],
+                                 'PrivateDnsName':'ip-10-0-14-216.eu-west-1.compute.internal',
+                                 'Attachment':{
+                                    'Status':'attached',
+                                    'DeviceIndex':0,
+                                    'DeleteOnTermination':True,
+                                    'AttachmentId':'eni-attach-0e2d2d5e6f8b1389c',
+                                    'AttachTime':'2018-10-12T03:05:43.000Z'
+                                 },
+                                 'Groups':[
+                                    {
+                                       'GroupName':'datmo-cluster',
+                                       'GroupId':'sg-0484ece16c5263c3e'
+                                    }
+                                 ],
+                                 'Ipv6Addresses':[
+
+                                 ],
+                                 'OwnerId':'373706122488',
+                                 'PrivateIpAddress':'10.0.14.216',
+                                 'SubnetId':'subnet-0569e7224a5dc81f3',
+                                 'Association':{
+                                    'PublicIp':'18.202.54.17',
+                                    'PublicDnsName':'ec2-18-202-54-17.eu-west-1.compute.amazonaws.com',
+                                    'IpOwnerId':'amazon'
+                                 }
+                              }
+                           ],
+                           'SourceDestCheck':True,
+                           'Placement':{
+                              'Tenancy':'default',
+                              'GroupName':'',
+                              'AvailabilityZone':'eu-west-1a'
+                           },
+                           'Hypervisor':'xen',
+                           'BlockDeviceMappings':[
+                              {
+                                 'DeviceName':'/dev/sda1',
+                                 'Ebs':{
+                                    'Status':'attached',
+                                    'DeleteOnTermination':True,
+                                    'VolumeId':'vol-01e2990ce94b6d700',
+                                    'AttachTime':'2018-10-12T03:05:44.000Z'
+                                 }
+                              }
+                           ],
+                           'Architecture':'x86_64',
+                           'RootDeviceType':'ebs',
+                           'RootDeviceName':'/dev/sda1',
+                           'VirtualizationType':'hvm',
+                           'Tags':[
+                              {
+                                 'Value':'credit',
+                                 'Key':'cluster'
+                              },
+                              {
+                                 'Value':'datmo',
+                                 'Key':'Creator'
+                              },
+                              {
+                                 'Value':'datmo-cluster-credit-0',
+                                 'Key':'Name'
+                              }
+                           ],
+                           'AmiLaunchIndex':0
+                        }
+                     ],
+                     'name':'credit',
+                     'server_type':'t2.small'
+                  }
+               ]
+            }
         """
         response = self.remote_api.get_deployment_info()
         cluster_info = response['body']['cluster_info']
