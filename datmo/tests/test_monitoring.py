@@ -83,6 +83,13 @@ class TestMonitoringModule():
         assert isinstance(result, list)
         assert len(result) == 1
 
+    def test_delete_meta_data(self):
+        filter = {"model_id": "model_id", "id": self.test_data_id}
+        result = self.monitoring.delete_metadata(filter)
+        assert isinstance(result, dict)
+        assert result['total'] == 1
+        assert result['deleted'] == 1
+
     # TODO: separate deployment into another file
 
     def test_get_deployment_master_info(self):
