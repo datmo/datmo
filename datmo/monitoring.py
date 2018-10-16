@@ -36,14 +36,14 @@ class Monitoring():
     the monitoring dashboard
 
     >>> from datmo.monitoring import Monitoring
-    >>> datmo_client = Monitoring(api_key='my_data_api_key')
-    >>> datmo_client.set_model_version('v3')
-    >>> datmo_client.set_model_id('model_id')
-    >>> datmo_client.set_deployment_id('microservice')
+    >>> datmo_client = Monitoring(api_key="my_data_api_key")
+    >>> datmo_client.set_model_version_id("v3")
+    >>> datmo_client.set_model_id("model_id")
+    >>> datmo_client.set_deployment_version_id("microservice")
     >>> def predict(x):
-    >>>     datmo_client.set_start()
+    >>>     datmo_client.set_start_time()
     >>>     y_predict = model_predict(x) # using a machine learning model for inference
-    >>>     datmo_model.set_end()
+    >>>     datmo_model.set_end_time()
     >>>     datmo_id = datmo_client.track(input=x, prediction=y_predict) # Track predictions
     >>>     response = {'y': y, 'datmo_id': datmo_id}
     >>>     return response
@@ -59,7 +59,7 @@ class Monitoring():
         self._base_controller = BaseController(home=home)
         self.remote_api = RemoteAPI(self._api_key)
         self._start_time, self._end_time, self._model_id, \
-        self._model_version, self._deployment_id = None, None, None, None, None
+        self._model_version_id, self._deployment_version_id = None, None, None, None, None
 
     def __eq__(self, other):
         return self.id == other.id if other else False
@@ -71,7 +71,7 @@ class Monitoring():
         return self.__str__()
 
     @property
-    def set_start(self):
+    def set_start_time(self):
         """
         Set the start time
 
@@ -84,7 +84,7 @@ class Monitoring():
         return self._start_time
 
     @property
-    def set_end(self):
+    def set_end_time(self):
         """
         Set the end time
 
@@ -92,7 +92,6 @@ class Monitoring():
         -------
         end_time : int
             end time in milliseconds
-
         """
         self._end_time = int(round(time.time() * 1000))
         return self._end_time
@@ -108,7 +107,7 @@ class Monitoring():
         """
         self._model_id = id
 
-    def set_model_version(self, id):
+    def set_model_version_id(self, id):
         # TODO change for model to deployment version
         """
         Set the model version id
@@ -118,18 +117,18 @@ class Monitoring():
         id : str
             model version id to track during monitoring
         """
-        self._model_version = id
+        self._model_version_id = id
 
-    def set_deployment_id(self, id):
+    def set_deployment_version_id(self, id):
         """
-        Set the deployment id
+        Set the deployment version id
 
         Parameters
         ----------
         id : str
-            model deployment id to track during monitoring
+            deployment version id to track during monitoring
         """
-        self._deployment_id = id
+        self._deployment_version_id = id
 
     def track(self, input, prediction):
         """
@@ -144,7 +143,7 @@ class Monitoring():
 
         Returns
         -------
-        str
+        id : str
             the id of the tracked prediction
         """
         if not (isinstance(input, dict) and isinstance(prediction, dict)):
@@ -176,10 +175,10 @@ class Monitoring():
         }
         if latency is not None:
             input_data['latency'] = latency
-        if self._model_version is not None:
-            input_data['model_version'] = self._model_version
-        if self._deployment_id is not None:
-            input_data['deployment_id'] = self._deployment_id
+        if self._model_version_id is not None:
+            input_data['model_version_id'] = self._model_version_id
+        if self._deployment_version_id is not None:
+            input_data['deployment_version_id'] = self._deployment_version_id
 
         response = self.remote_api.post_data(input_data)
 
@@ -218,10 +217,10 @@ class Monitoring():
 
             model_id : str, optional
                 model id tracked for monitoring
-            model_version : str, optional
+            model_version_id : str, optional
                 model version id tracked for monitoring
-            deployment_id : str, optional
-                deployment id tracked for monitoring
+            deployment_version_id : str, optional
+                deployment version id tracked for monitoring
             id  : str, optional
                 tracked prediction id
 
@@ -235,8 +234,10 @@ class Monitoring():
         IncorrectType
         """
         # Check if all input dictionary keys are valid
-        if not all(key in ["model_id", "model_version", "deployment_id", "id"]
-                   for key in filter.keys()):
+        if not all(
+                key in
+            ["model_id", "model_version_id", "deployment_version_id", "id"]
+                for key in filter.keys()):
             raise InputError
         response = self.remote_api.get_data(filter)
         body = response['body']

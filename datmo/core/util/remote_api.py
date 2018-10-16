@@ -9,8 +9,6 @@ class RemoteAPI():
     ----------
     api_key : str
         credentials to access remote
-    home : str, optional
-        directory for the project, default is to pull from config
 
     Attributes
     ----------
@@ -18,8 +16,14 @@ class RemoteAPI():
 
     Methods
     -------
-
-
+    post_data(input_data)
+        post single data point to Datmo scoped by model
+    get_data(filter)
+        get data information from Datmo scoped by filter
+    update_actual(id, actual)
+        update the data id with actual values (y_hat)
+    get_deployment_info()
+        returns deployment info from Datmo deployed models
     """
 
     # TODO: move url into configurations (to be setup `datmo configure`
@@ -33,15 +37,6 @@ class RemoteAPI():
             "https://6xav2qlolf.execute-api.eu-west-1.amazonaws.com/production/datmo_monitoring"
         self.get_deployment_info_endpoint = \
             "https://hb0c2py3sh.execute-api.eu-west-1.amazonaws.com/production/datmo_deployments"
-
-    def __eq__(self, other):
-        return self.id == other.id if other else False
-
-    def __str__(self):
-        pass
-
-    def __repr__(self):
-        return self.__str__()
 
     def post_data(self, input_data):
         # Run post request and gather result and return to user

@@ -24,9 +24,9 @@ class TestMonitoringModule():
         # TODO: move API key to environment variable
         self.monitoring = Monitoring(
             api_key="d41d8cd98f00b204e9800998ecf8427e")
-        self.monitoring.set_model_version("v3")
         self.monitoring.set_model_id("model_id")
-        self.monitoring.set_deployment_id("microservice")
+        self.monitoring.set_model_version_id("v3")
+        self.monitoring.set_deployment_version_id("microservice")
         self.input_dict = {"test": 0.43}
         self.prediction_dict = {"test_output": 0.39}
         self.feedback_dict = {"real_output": 0.40}
@@ -57,12 +57,15 @@ class TestMonitoringModule():
         assert isinstance(result, list)
         assert len(result) >= 2
 
-        filter = {"model_id": "model_id", "model_version": "v3"}
+        filter = {"model_id": "model_id", "model_version_id": "v3"}
         result = self.monitoring.search_metadata(filter)
         assert isinstance(result, list)
         assert len(result) >= 2
 
-        filter = {"model_id": "model_id", "deployment_id": "microservice"}
+        filter = {
+            "model_id": "model_id",
+            "deployment_version_id": "microservice"
+        }
         result = self.monitoring.search_metadata(filter)
         assert isinstance(result, list)
         assert len(result) >= 2
