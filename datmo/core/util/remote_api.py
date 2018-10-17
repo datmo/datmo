@@ -37,6 +37,8 @@ class RemoteAPI():
             "https://6xav2qlolf.execute-api.eu-west-1.amazonaws.com/production/datmo_monitoring"
         self.get_deployment_info_endpoint = \
             "https://hb0c2py3sh.execute-api.eu-west-1.amazonaws.com/production/datmo_deployments"
+        self.delete_meta_data_endpoint = \
+            "https://ynpas9m577.execute-api.eu-west-1.amazonaws.com/production/datmo_monitoring"
 
     def post_data(self, input_data):
         # Run post request and gather result and return to user
@@ -47,6 +49,21 @@ class RemoteAPI():
             r = requests.post(
                 self.post_meta_data_endpoint,
                 data=json.dumps(input_data),
+                headers=headers)
+            response = {"status_code": r.status_code, "body": r.json()}
+        except:
+            response['status_code'] = 500
+        return response
+
+    def delete_data(self, filter):
+        # Run post request and gather result and return to user
+        response = {"status_code": 200}
+        try:
+            headers = {"content-type": "application/json"}
+            filter['api_key'] = self._api_key
+            r = requests.delete(
+                self.delete_meta_data_endpoint,
+                data=json.dumps(filter),
                 headers=headers)
             response = {"status_code": r.status_code, "body": r.json()}
         except:

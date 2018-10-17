@@ -267,6 +267,44 @@ class Monitoring():
             meta_data_list.append(meta_data)
         return meta_data_list
 
+    def delete_metadata(self, filter):
+        """
+        Delete metadata from the remote storage
+
+        Parameters
+        ----------
+        filter : dict
+            dictionary to delete filtered search results
+
+            model_id : str, optional
+                model id tracked for monitoring
+            model_version_id : str, optional
+                model version id tracked for monitoring
+            deployment_version_id : str, optional
+                deployment version id tracked for monitoring
+            id  : str, optional
+                tracked prediction id
+
+        Returns
+        -------
+        dict
+            dictionary with response after deletion of docs in remote storage
+
+        Raises
+        ------
+        IncorrectType
+        """
+        # Check if all input dictionary keys are valid
+        if not all(
+                key in
+            ["model_id", "model_version_id", "deployment_version_id", "id"]
+                for key in filter.keys()):
+            raise InputError
+        response = self.remote_api.delete_data(filter)
+        body = response['body']
+
+        return body
+
     # TODO: separate deployment into another file
 
     def get_deployment_info(self, type="datmo", deployment_version_id=None):
