@@ -33,6 +33,8 @@ class TestMonitoringModule():
         # TODO: move this only into test_set_track
         self.test_data_id = self.monitoring.track(
             input=self.input_dict, prediction=self.prediction_dict)
+        self.extra_test_data_id = self.monitoring.track(
+            input=self.input_dict, prediction=self.prediction_dict)
 
     def teardown_class(self):
         pass
@@ -60,6 +62,13 @@ class TestMonitoringModule():
         filter = {"model_id": "model_id", "model_version_id": "v3"}
         result = self.monitoring.search_metadata(filter)
         assert isinstance(result, list)
+        assert result[0]["created_at"] < result[1]["created_at"]
+        assert len(result) >= 2
+
+        filter = {"model_id": "model_id", "model_version_id": "v3", "sort_created_at": "desc"}
+        result = self.monitoring.search_metadata(filter)
+        assert isinstance(result, list)
+        assert result[0]["created_at"] > result[1]["created_at"]
         assert len(result) >= 2
 
         filter = {
@@ -89,6 +98,12 @@ class TestMonitoringModule():
         assert result['total'] == 1
         assert result['deleted'] == 1
 
+        filter = {"model_id": "model_id", "id": self.extra_test_data_id}
+        result = self.monitoring.delete_metadata(filter)
+        assert isinstance(result, dict)
+        assert result['total'] == 1
+        assert result['deleted'] == 1
+
     # TODO: separate deployment into another file
 
     def test_get_deployment_master_info(self):
@@ -102,4 +117,3 @@ class TestMonitoringModule():
         result = self.monitoring._get_datmo_deployment_cluster_info()
         assert isinstance(result, dict)
         assert isinstance(result['clusters'], list)
-        assert len(result['clusters']) == 1
