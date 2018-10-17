@@ -1,6 +1,7 @@
 import time
 import json
 import psutil
+from datetime import datetime
 
 from datmo.core.util.exceptions import InputError
 from datmo.core.util.misc_functions import bytes2human
@@ -242,10 +243,10 @@ class Monitoring():
         IncorrectType
         """
         # Check if all input dictionary keys are valid
-        if not all(
-                key in
-            ["model_id", "model_version_id", "deployment_version_id", "id", "start", "count"]
-                for key in filter.keys()):
+        if not all(key in [
+                "model_id", "model_version_id", "deployment_version_id", "id",
+                "start", "count"
+        ] for key in filter.keys()):
             raise InputError
         response = self.remote_api.get_data(filter)
         body = response['body']
@@ -268,10 +269,76 @@ class Monitoring():
 
     # TODO: separate deployment into another file
 
-    def get_deployment_master_info(self):
+    def get_deployment_info(self, type="datmo", deployment_version_id=None):
+        """
+
+        Parameters
+        ----------
+        type : str, optional
+            type of deployment (e.g. "datmo", "sagemaker", etc)
+        deployment_version_id : str, optional
+            deployment version id for the deployment to get info
+
+        Returns
+        -------
+        dict
+            dictionary containing the information for the deployment
+
+            type : str
+                deployment type (e.g. "datmo", "sagemaker", etc)
+            deployment_version_id : str
+                deployment version id for the deployment
+            model_version_id : str
+                model version id for the deployment
+            created_at : datetime.datetime
+                launch time of deployment
+            endpoints : list
+                list of urls to access prediction for the deployment
+            service_paths : list
+                list of relative path and identifier for specific deployment
+            system_monitoring : dict
+                endpoint : str
+                    url to access the grafana dashboard for system monitoring
+                username : str
+                    username for authentication
+                password : str
+                    password for authentication
+            log_monitoring : str
+                url to access the kibana dashboard for log monitoring
+        """
+        master_info = self._get_datmo_deployment_master_info()
+        cluster_info = self._get_datmo_deployment_cluster_info()
+        launch_time = datetime.strptime(
+            cluster_info['clusters'][0]['instances'][0]['LaunchTime'],
+            '%Y-%m-%dT%H:%M:%S.%fZ')
+        endpoints = [
+            service['url']
+            for service in cluster_info['clusters'][0]['services']
+        ]
+        service_paths = [
+            service['route']
+            for service in cluster_info['clusters'][0]['services']
+        ]
+        deployment_info = {
+            "type": type,
+            "deployment_version_id": None,
+            "model_version_id": None,
+            "created_at": launch_time,
+            "endpoints": endpoints,
+            "service_paths": service_paths,
+            "system_monitoring": {
+                "endpoint": master_info['grafana_dashboard']['end_point'],
+                "username": master_info['grafana_dashboard']['user_name'],
+                "password": master_info['grafana_dashboard']['password']
+            },
+            "log_monitoring": master_info['kibana_dashboard']['end_point']
+        }
+        return deployment_info
+
+    def _get_datmo_deployment_master_info(self):
         """
         Extract the master server of the deployment
-
+    
         Returns
         -------
         dict
@@ -289,7 +356,7 @@ class Monitoring():
         master_system_info = response['body']['master_system_info']
         return master_system_info
 
-    def get_deployment_cluster_info(self):
+    def _get_datmo_deployment_cluster_info(self):
         """
         To extract the information about the deployments and services
 

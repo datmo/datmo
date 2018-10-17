@@ -11,29 +11,30 @@ with open(os.path.join(project_root, 'datmo', 'VERSION')) as file:
 if sys.version_info[0] < 3:  # python 2
     prerequisites = [
         "future>=0.16.0", "enum34>=1.1.6", "glob2>=0.5", "docker>=2.2.1",
-        "pyyaml>=3.12", "pytz>=2017.3", "tzlocal>=1.5.1", "requests>=2.11.1",
-        "prettytable>=0.7.2", "rsfile>=2.1", "humanfriendly>=3.6.1",
-        "python-slugify>=1.2.4", "giturlparse.py>=0.0.5", "blitzdb>=0.2.12",
-        "kids.cache>=0.0.7", "pymongo>=3.6.0", "checksumdir>=1.1.4",
-        "semver>=2.7.8", "backports.ssl-match-hostname>=3.5.0.1",
-        "timeout-decorator>=0.4.0", "cerberus>=1.2", "pytest==3.0.4",
-        "pathspec==0.5.6", "psutil==4.4.2", "flask>=0.10.1", "jinja2>=2.7.3",
-        "markupsafe>=0.23", "werkzeug>=0.9.6", "beautifulsoup4>=4.3.2",
-        "gunicorn>=19.1.1", "itsdangerous>=0.24", "six>=1.8.0",
-        "wsgiref>=0.1.2"
+        "pyyaml>=3.12", "pytz>=2017.3", "tzlocal>=1.5.1", "urllib3==1.23",
+        "requests>=2.11.1", "prettytable>=0.7.2", "rsfile>=2.1",
+        "humanfriendly>=3.6.1", "python-slugify>=1.2.4",
+        "giturlparse.py>=0.0.5", "blitzdb>=0.2.12", "kids.cache>=0.0.7",
+        "pymongo>=3.6.0", "checksumdir>=1.1.4", "semver>=2.7.8",
+        "backports.ssl-match-hostname>=3.5.0.1", "timeout-decorator>=0.4.0",
+        "cerberus>=1.2", "pytest==3.0.4", "pathspec>=0.5.6", "psutil>=4.4.2",
+        "flask>=0.10.1", "jinja2>=2.7.3", "markupsafe>=0.23",
+        "werkzeug>=0.9.6", "beautifulsoup4>=4.3.2", "gunicorn>=19.1.1",
+        "itsdangerous>=0.24", "six>=1.8.0", "wsgiref>=0.1.2"
     ]
 else:  # python 3
     prerequisites = [
         "future>=0.16.0", "enum34>=1.1.6", "glob2>=0.5", "docker>=2.2.1",
-        "pyyaml>=3.12", "pytz>=2017.3", "tzlocal>=1.5.1", "requests>=2.11.1",
-        "prettytable>=0.7.2", "rsfile>=2.1", "humanfriendly>=3.6.1",
-        "python-slugify>=1.2.4", "giturlparse.py>=0.0.5", "blitzdb>=0.2.12",
-        "kids.cache>=0.0.7", "pymongo>=3.6.0", "checksumdir>=1.1.4",
-        "semver>=2.7.8", "backports.ssl-match-hostname>=3.5.0.1",
-        "timeout-decorator>=0.4.0", "cerberus>=1.2", "pytest==3.0.4",
-        "pathspec==0.5.6", "psutil==4.4.2", "flask>=0.10.1", "jinja2>=2.7.3",
-        "markupsafe>=0.23", "werkzeug>=0.9.6", "beautifulsoup4>=4.3.2",
-        "gunicorn>=19.1.1", "itsdangerous>=0.24", "six>=1.8.0"
+        "pyyaml>=3.12", "pytz>=2017.3", "tzlocal>=1.5.1", "urllib3==1.23",
+        "requests>=2.11.1", "prettytable>=0.7.2", "rsfile>=2.1",
+        "humanfriendly>=3.6.1", "python-slugify>=1.2.4",
+        "giturlparse.py>=0.0.5", "blitzdb>=0.2.12", "kids.cache>=0.0.7",
+        "pymongo>=3.6.0", "checksumdir>=1.1.4", "semver>=2.7.8",
+        "backports.ssl-match-hostname>=3.5.0.1", "timeout-decorator>=0.4.0",
+        "cerberus>=1.2", "pytest==3.0.4", "pathspec>=0.5.6", "psutil>=4.4.2",
+        "flask>=0.10.1", "jinja2>=2.7.3", "markupsafe>=0.23",
+        "werkzeug>=0.9.6", "beautifulsoup4>=4.3.2", "gunicorn>=19.1.1",
+        "itsdangerous>=0.24", "six>=1.8.0"
     ]
 
 setup(

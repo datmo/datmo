@@ -37,95 +37,132 @@
         </div>
     </div>
 </div>
+<div class="model-section-content-wrapper">
 
+    <div class="content-box multi-item">
+        <div class="multi-item-content-wrap">
 
-
-            <div class="model-section-content-wrapper">
-
-                <div class="content-box multi-item">
-                    <div class="multi-item-content-wrap">
-
-                        <div class="multi-item-content-row snapshot-filters">
-                            <div class="input-group pull-right">
-                                <a href="/model/{{ model.id }}/snapshots/.csv" target="_blank"><span class="btn"><i class="fa fa-download"></i></span></a>
-                            </div>
-                            <div class="">
-                                <p>
-                                   <div class="col-xs-12 col-sm-3 col-md-4 col-lg-3 nav-search">
-                                        <form method="get" action="/search">
-                                        <input type="text" name="q" placeholder="Search Datmo" required="" class="search">
-                                        <input type="hidden" name="type" placeholder="Search Datmo" required="" class="search">
-                                        </form>
-                                    </div>
-                                </p>
-                            </div>
+            <div class="multi-item-content-row snapshot-filters">
+                <div class="input-group pull-right">
+                    <a href="/model/{{ model.id }}/snapshots/.csv" target="_blank"><span class="btn"><i class="fa fa-download"></i></span></a>
+                </div>
+                <div class="">
+                    <p>
+                       <div class="col-xs-12 col-sm-3 col-md-4 col-lg-3 nav-search">
+                            <form method="get" action="/search">
+                            <input type="text" name="q" placeholder="Search Datmo" required="" class="search">
+                            <input type="hidden" name="type" placeholder="Search Datmo" required="" class="search">
+                            </form>
                         </div>
-
-
-                            <div class="multi-item-content-row overflow-scroll" >
-    <table class="sortable snapshot-grid" data-giturl="datmo/hello-world">
-        <thead>
-            <tr>
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span class="no-wrap">diff</span></th>
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span>id</span></th>
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span>user</span></th>
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span>timestamp</span></th>
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span>label</span></th>
-                {% for key in config_keys %}
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span>{{ key }}</span></th>
-                {% endfor %}
-                {% for key in stats_keys %}
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span>{{ key }}</span></th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-        {% for snapshot in snapshots %}
-        <tr data-id="{{ snapshot.id }}"  class="snapshot-hover-menu">
-
-            <td class="snapshot-diff">
-                <input class="snapshot-diff-selected" type="checkbox" name="diff" data-snapshotid="{{ snapshot.id }}" >
-            </td>
-
-            <td><a href="#">{{ snapshot.id }}</a></td>
-
-            <td>
-                <a href="/" class="snapshot-owner-avatar">
-                    <img src="" alt="profile">
-                    {{ user.name }}
-                </a>
-            </td>
-
-            <td>{{ snapshot.created_at }}</td>
-
-            {% if snapshot.labels %}
-                <td class="label">
-                    {% for l in snapshot.labels %}
-                    <span class="snapshot-label tag">{{ l }}</span>
-                    {% endfor %}
-                </td>
-            {% else %}
-                <td class="label">None</td>
-            {% endif %}
-
-            {% for k in config_keys %}
-                <td>{{ snapshot.config[k] }}</td>
-            {% endfor %}
-
-            {% for k in stats_keys %}
-                <td>{{ snapshot.stats[k] }}</td>
-            {% endfor %}
-
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-    <script src='{{ url_for("static", filename="./js/snapshot.js") }}'></script>
-</div>
-
-
-
-                    </div>
+                    </p>
                 </div>
             </div>
+            <div class="multi-item-content-row overflow-scroll" >
+            <table class="sortable snapshot-grid" data-giturl="datmo/hello-world">
+                <thead>
+                    <tr>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>deployment_version_id</span></th>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>model_version_id</span></th>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>created_at</span></th>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>type</span></th>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>endpoints</span></th>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>service_paths</span></th>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>system_monitoring</span></th>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>log_monitoring</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for deployment in deployments %}
+                <tr data-id="{{ deployment.deployment_version_id }}"  class="snapshot-hover-menu">
+                    <td><a href="#">{{ deployment.deployment_version_id }}</a></td>
+                    <td><a href="#">{{ deployment.model_version_id }}</a></td>
+                    <td><a href="#">{{ deployment.created_at }}</a></td>
+                    <td><a href="#">{{ deployment.type }}</a></td>
+                    <td><a href="#">{{ deployment.endpoints }}</a></td>
+                    <td><a href="#">{{ deployment.service_paths }}</a></td>
+                    <td><a href="{{ deployment.system_monitoring.endpoint }}" target="_blank">system dashboard<br>username: {{ deployment.system_monitoring.username }}<br>password: {{ deployment.system_monitoring.password }} </a></td>
+                    <td><a href="{{ deployment.log_monitoring }}" target="_blank">log dashboard</a></td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <script src='{{ url_for("static", filename="./js/snapshot.js") }}'></script>
+            </div>
+
+            <div id="d3graphdiv"></div>
+            <script src="http://d3js.org/d3.v3.min.js"></script>
+            <script>
+                // Our Custom D3 JavaScript here!
+                var graphData = {{ data | safe }}
+                var margin = {top: 30, right: 50, bottom: 30, left: 50};
+                var svgWidth = 600;
+                var svgHeight = 270;
+                var graphWidth = svgWidth - margin.left - margin.right;
+                var graphHeight = svgHeight - margin.top - margin.bottom;
+
+                var parseDate = d3.time.format("%Y-%m-%d").parse;
+                var x = d3.time.scale().range([0, graphWidth]);
+                var y = d3.scale.linear().range([graphHeight, 0]);
+                var xAxis = d3.svg.axis().scale(x)
+                    .orient("bottom").ticks(5);
+                var yAxis = d3.svg.axis().scale(y)
+                    .orient("left").ticks(5);
+                var highLine = d3.svg.line()
+                    .x(function(d) { return x(d.Date); })
+                    .y(function(d) { return y(d.High); });
+                var closeLine = d3.svg.line()
+                    .x(function(d) { return x(d.Date); })
+                    .y(function(d) { return y(d.Close); });
+                var lowLine = d3.svg.line()
+                    .x(function(d) { return x(d.Date); })
+                    .y(function(d) { return y(d.Low); });
+                var svg = d3.select("#d3graphdiv")
+                    .append("svg")
+                        .attr("width", svgWidth)
+                        .attr("height", svgHeight)
+                    .append("g")
+                        .attr("transform",
+                        "translate(" + margin.left + "," + margin.top + ")")
+
+                function drawGraph(data) {
+                    // For each row in the data, parse the date
+                    // and use + to make sure data is numerical
+                    data.forEach(function(d) {
+                        d.Date = d.created_at;
+                        d.Close = d.input.V2;
+                    });
+                    // Scale the range of the data
+                    x.domain(d3.extent(data, function(d) { return d.Date; }));
+                    y.domain([d3.min(data, function(d) {
+                      return Math.min(d.Close) }),
+                      d3.max(data, function(d) {
+                      return Math.max(d.Close) })]);
+                    // Add the closeLine as a blue dashed line
+                    svg.append("path")
+                    .style("stroke", "blue")
+                    .style("fill", "none")
+                    .style("stroke-dasharray", ("3, 3"))
+                    .attr("d", closeLine(data));
+                    // Add the X Axis
+                    svg.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + graphHeight + ")")
+                      .call(xAxis);
+                    // Add the Y Axis
+                    svg.append("g")
+                    .attr("class", "y axis")
+                    .call(yAxis);
+                    // Add the text for the "Close" line
+                    svg.append("text")
+                    .attr("transform", "translate("+(graphWidth+3)+","+y(graphData[0].Close)+")")
+                    .attr("dy", ".35em")
+                    .attr("text-anchor", "start")
+                    .style("fill", "blue")
+                    .text("Close");
+                    };
+                drawGraph(graphData);
+            </script>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -6,9 +6,9 @@ import os
 import tempfile
 import platform
 try:
-    to_unicode = unicode
+    basestring
 except NameError:
-    to_unicode = str
+    basestring = str
 
 from datmo.monitoring import Monitoring
 
@@ -38,8 +38,7 @@ class TestMonitoringModule():
         pass
 
     def test_set_track(self):
-        assert isinstance(self.test_data_id, str) \
-               or isinstance(self.test_data_id, basestring)
+        assert isinstance(self.test_data_id, basestring)
 
     def test_set_track_double(self):
         data_id = self.monitoring.track(
@@ -86,15 +85,14 @@ class TestMonitoringModule():
     # TODO: separate deployment into another file
 
     def test_get_deployment_master_info(self):
-        result = self.monitoring.get_deployment_master_info()
+        result = self.monitoring._get_datmo_deployment_master_info()
         assert isinstance(result, dict)
-        assert isinstance(result['datmo_master_ip'], str) \
-               or isinstance(self.test_data_id, basestring)
+        assert isinstance(result['datmo_master_ip'], basestring)
         assert isinstance(result['kibana_dashboard'], dict)
         assert isinstance(result['grafana_dashboard'], dict)
 
     def test_get_deployment_cluster_info(self):
-        result = self.monitoring.get_deployment_cluster_info()
+        result = self.monitoring._get_datmo_deployment_cluster_info()
         assert isinstance(result, dict)
         assert isinstance(result['clusters'], list)
         assert len(result['clusters']) == 1
