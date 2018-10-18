@@ -10,6 +10,9 @@ install:
 - pip install pytest pytest-cov
 - pip install yapf==0.20.0
 - pip install coveralls
+- pip install urllib3==1.23
+- pip install chardet==3.0.2
+- pip install requests==2.19.1
 - python setup.py install
 script:
 - pytest --cov-config .coveragerc --cov=datmo -s -v

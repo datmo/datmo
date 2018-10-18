@@ -550,6 +550,7 @@ class TestProjectCommand():
             exception_thrown = True
         assert exception_thrown
 
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_dashboard(self):
         # test dashboard command
         self.project_command.parse(["dashboard"])

@@ -232,6 +232,8 @@ class Monitoring():
                 initial index of doc to get from storage for pagination purpose
             count : int, optional
                 total number of docs to get from storage in single call from start
+            sort_created_at : str, optional
+                to sort the docs based on created at, by default it sorts on asc
 
         Returns
         -------
@@ -245,7 +247,7 @@ class Monitoring():
         # Check if all input dictionary keys are valid
         if not all(key in [
                 "model_id", "model_version_id", "deployment_version_id", "id",
-                "start", "count"
+                "start", "count", "sort_created_at"
         ] for key in filter.keys()):
             raise InputError
         response = self.remote_api.get_data(filter)
