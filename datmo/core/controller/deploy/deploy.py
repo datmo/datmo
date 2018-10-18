@@ -128,10 +128,15 @@ class DeployController(BaseController):
             environment_dirpath = os.path.join(tmp_dirpath,
                                                'datmo_environment')
             if os.path.exists(environment_dirpath):
+                shutil.rmtree(os.path.join(tmp_dirpath, '.datmo'))
                 self.commands.copy(environment_dirpath, tmp_dirpath)
                 shutil.rmtree(os.path.join(tmp_dirpath, 'datmo_environment'))
-                shutil.rmtree(os.path.join(tmp_dirpath, '.datmo'))
                 shutil.rmtree(os.path.join(tmp_dirpath, 'datmo_files'))
+                list_dir = os.listdir(tmp_dirpath)
+
+                for item in list_dir:
+                    if item.endswith(".zip") or item.endswith(".csv"):
+                        os.remove(os.path.join(tmp_dirpath, item))
         except Exception as e:
             print(e)
 
