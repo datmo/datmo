@@ -76,9 +76,11 @@ class DatmoMicroserviceDeployDriver(object):
 
     def get_system_info(self):
         """
-        :return: To return the Kibana and Grafana links and credentials for it
-        """
 
+        Returns
+        -------
+        To return the Kibana and Grafana links and credentials for it
+        """
         response = Response()
         bool_setup, response = self.check_setup(response)
         if not bool_setup:
@@ -94,9 +96,11 @@ class DatmoMicroserviceDeployDriver(object):
 
     def get_system_cost(self):
         """
-        :return: To return the cost of the current system from the cloud service
-        """
 
+        Returns
+        -------
+        cost of the current system from the cloud service
+        """
         response = Response()
         bool_setup, response = self.check_setup(response)
         if not bool_setup:
@@ -111,7 +115,6 @@ class DatmoMicroserviceDeployDriver(object):
         return response
 
     def model_deploy(self, cluster_name, file=None):
-
         response = Response()
         bool_setup, response = self.check_setup(response)
         if not bool_setup:
@@ -126,7 +129,6 @@ class DatmoMicroserviceDeployDriver(object):
         return response
 
     def get_service_iologs(self, service_path, date):
-
         response = Response()
         bool_setup, response = self.check_setup(response)
         if not bool_setup:
