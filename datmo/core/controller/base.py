@@ -35,7 +35,7 @@ class BaseController(object):
     -------
     dal_instantiate()
         Instantiate a version of the DAL
-    get_or_set_default(key, default_value)
+    set_config_value(key, default_value)
         Returns value adn sets to default if no value present
     config_loader(key)
         Return the config dictionary based on key
@@ -48,8 +48,6 @@ class BaseController(object):
         if not os.path.isdir(self.home):
             raise InvalidProjectPath(
                 __("error", "controller.base.__init__", self.home))
-        self.config_store = JSONStore(
-            os.path.join(self.home, ".datmo", ".config"))
         self.logger = DatmoLogger.get_logger(__name__)
         # property caches and initial values
         self._dal = None
@@ -59,6 +57,10 @@ class BaseController(object):
         self._file_driver = None
         self._environment_driver = None
         self._is_initialized = False
+        # load the config JSON store if the model is initialized
+        if self.is_initialized:
+            self.config_store = JSONStore(
+                os.path.join(self.home, ".datmo", ".config"))
 
     @property
     # Controller objects are only in sync if the data drivers are the same between objects
@@ -130,15 +132,9 @@ class BaseController(object):
         dal_dict["options"]["driver"] = dal_driver
         return dal_dict["constructor"](**dal_dict["options"])
 
-    def get_or_set_default(self, key, default_value):
-        # Discard current value (always overwrite the value to default)
-        # value = self.config_store.get(key)s
-        self.config_store.save(key, default_value)
-        return default_value
-
     def config_loader(self, key):
         defaults = self.get_config_defaults()
-        module_details = self.get_or_set_default(key, defaults[key])
+        module_details = defaults[key]
         module_details["constructor"] = get_class_contructor(
             module_details["class_constructor"])
         return module_details
