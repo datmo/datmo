@@ -196,7 +196,8 @@ def model_deployment_data(model_id, deployment_version_id):
         datum = new_data[0]
         input_features = datum['input'].keys()
         prediction_features = datum['prediction'].keys()
-        # feedback_features = datum.get('feedback', {}).keys() if datum.get('feedback', {}) else {}
+        feedback_features = datum['feedback'].keys() if datum[
+            'feedback'] else []
 
         # Loop through input and predictions to populate the graphs
         new_time_data = [datum['created_at'] for datum in new_data]
@@ -222,6 +223,46 @@ def model_deployment_data(model_id, deployment_version_id):
             cumulative_feature_data = [
                 datum['prediction'][prediction_feature]
                 for datum in cumulative_data
+            ]
+            import numpy as np
+            counts, binedges = np.histogram(cumulative_feature_data)
+            binsize = binedges[1] - binedges[0]
+            bin_names = [
+                str(round(binedge, 2)) + " : " +
+                str(round(binedge + binsize, 2)) for binedge in binedges
+            ]
+            histogram_graphs_update.append({
+                "cumulative_data": {
+                    "x": [bin_names],
+                    "y": [counts]
+                }
+            })
+
+        # add updated_at time if not None
+        new_time_data_update = [datum['updated_at'] for datum in new_data]
+        new_time_data_update_datetime = [
+            datetime.fromtimestamp(
+                float(t) / 1000).strftime('%Y-%m-%d %H:%M:%S')
+            for t in new_time_data_update if t
+        ]
+
+        for feedback_feature in feedback_features:
+            # time series data chart (if not None)
+            new_feature_data = [
+                datum['feedback'][feedback_feature] for datum in new_data
+                if datum['feedback']
+            ]
+            time_series_graphs_extension.append({
+                "new_data": {
+                    "x": [new_time_data_update_datetime],
+                    "y": [new_feature_data],
+                }
+            })
+
+            # histogram data chart (if not None)
+            cumulative_feature_data = [
+                datum['feedback'][feedback_feature]
+                for datum in cumulative_data if datum['feedback']
             ]
             import numpy as np
             counts, binedges = np.histogram(cumulative_feature_data)
@@ -342,7 +383,7 @@ def model_deployments(model_id):
         data = datmo_monitoring.search_metadata(filter)
         datum = data[0]
 
-        def __plotly_graphs(variable_name):
+        def __plotly_graphs(variable_name, time_name="created at"):
             color_choices = [
                 "rgb(40,165,187)", "rgb(124,159,57)", "rgb(238,93,134)",
                 "rgb(93,147,228)"
@@ -366,7 +407,7 @@ def model_deployments(model_id):
                 "layout": {
                     "title": "time series for " + variable_name,
                     "xaxis": {
-                        "title": "time"
+                        "title": "time (" + time_name + ")"
                     },
                     "yaxis": {
                         "title": variable_name
@@ -398,23 +439,21 @@ def model_deployments(model_id):
             })
 
         # prediction
-        for key in datum['prediction'].keys():
-            ts, hist = __plotly_graphs(key)
-            time_series_graphs.append(ts)
-            histogram_graphs.append(hist)
 
-        # input
-        for key in datum['input'].keys():
-            ts, hist = __plotly_graphs(key)
-            time_series_graphs.append(ts)
-            histogram_graphs.append(hist)
+        graph_keys = list(datum['prediction'].keys())
 
         # feedback
-        # if datum.get('feedback', None):
-        #     for key in datum['feedback'].keys():
-        #         ts, hist = __plotly_graphs(key)
-        #         time_series_graphs.append(ts)
-        #         histogram_graphs.append(hist)
+        if datum['feedback'] is not None:
+            graph_keys.extend(list(datum['feedback'].keys()))
+
+        # input
+        graph_keys.extend(list(datum['input'].keys()))
+
+        # add all graphs to the appropriate lists
+        for key in graph_keys:
+            ts, hist = __plotly_graphs(key)
+            time_series_graphs.append(ts)
+            histogram_graphs.append(hist)
 
     # Add "ids" to each of the graphs to pass up to the client
     # for templating
