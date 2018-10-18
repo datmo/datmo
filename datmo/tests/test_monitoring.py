@@ -23,7 +23,7 @@ class TestMonitoringModule():
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         # TODO: move API key to environment variable
         self.monitoring = Monitoring(
-            api_key="d41d8cd98f00b204e9800998ecf8427e")
+            api_key="6a3a3cd900eaf7b406a41d68f8ca7969")
         self.monitoring.set_model_id("model_id")
         self.monitoring.set_model_version_id("v3")
         self.monitoring.set_deployment_version_id("microservice")

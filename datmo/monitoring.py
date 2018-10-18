@@ -211,8 +211,13 @@ class Monitoring():
             'feedback': json.dumps(feedback)
         }
         response = self.remote_api.update_actual(id, update_dict)
-        if response['body']['updated'] > 0:
+        body = response.get('body')
+        updated_at = body.get('updated') if body else 0
+        if updated_at > 0:
             return True
+        else:
+            return False
+
 
     def search_metadata(self, filter):
         """
