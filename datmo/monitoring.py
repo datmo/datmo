@@ -254,13 +254,13 @@ class Monitoring():
         ] for key in filter.keys()):
             raise InputError
         filter['model_id'] = filter.get('model_id', self._model_id)
-        if filter['model_id']: del filter['model_id']
+        if filter['model_id'] is None: del filter['model_id']
         filter['model_version_id'] = filter.get('model_version_id',
                                                 self._model_version_id)
-        if filter['model_version_id']: del filter['model_version_id']
+        if filter['model_version_id'] is None: del filter['model_version_id']
         filter['deployment_version_id'] = filter.get(
             'deployment_version_id', self._deployment_version_id)
-        if filter['deployment_version_id']: del filter['deployment_version_id']
+        if filter['deployment_version_id'] is None:  del filter['deployment_version_id']
         response = self.remote_api.get_data(filter)
         body = response['body']
         meta_data_list = []
