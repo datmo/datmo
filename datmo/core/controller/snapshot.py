@@ -17,11 +17,6 @@ from datmo.core.util.exceptions import (
 class SnapshotController(BaseController):
     """SnapshotController inherits from BaseController and manages business logic related to snapshots
 
-    Parameters
-    ----------
-    home : str
-        home path of the project
-
     Attributes
     ----------
     code : datmo.core.controller.code.code.CodeController

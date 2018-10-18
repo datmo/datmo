@@ -7,6 +7,7 @@ from datmo.cli.driver.helper import Helper
 from datmo.cli.command.base import BaseCommand
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController
+from datmo.dashboard.app import app
 
 
 class ProjectCommand(BaseCommand):
@@ -77,15 +78,15 @@ class ProjectCommand(BaseCommand):
                     }))
             # Prompt for the name and description and add default if not given
             if not name and not force:
-                    name = self.cli_helper.prompt(
-                        __("prompt", "cli.project.init.name"),
-                        default=self.project_controller.model.name)
+                name = self.cli_helper.prompt(
+                    __("prompt", "cli.project.init.name"),
+                    default=self.project_controller.model.name)
             elif force:
                 name = self.project_controller.model.name
             if not description and not force:
-                    description = self.cli_helper.prompt(
-                        __("prompt", "cli.project.init.description"),
-                        default=self.project_controller.model.description)
+                description = self.cli_helper.prompt(
+                    __("prompt", "cli.project.init.description"),
+                    default=self.project_controller.model.description)
             elif force:
                 description = self.project_controller.model.description
             # Update the project with the values given
@@ -113,7 +114,8 @@ class ProjectCommand(BaseCommand):
                 self.cli_helper.echo(str(k) + ": " + str(v))
         # Ask question if the user would like to setup environment
         environment_setup = self.cli_helper.prompt_bool(
-            __("prompt", "cli.project.environment.setup")) if not force else False
+            __("prompt",
+               "cli.project.environment.setup")) if not force else False
         if environment_setup:
             # TODO: remove business logic from here and create common helper
             # Setting up the environment definition file
@@ -275,3 +277,9 @@ class ProjectCommand(BaseCommand):
                             "path": self.project_controller.home
                         }))
         return False
+
+    def dashboard(self):
+        dir_path = os.path.dirname(os.path.abspath(__file__))
+        os.chdir(os.path.join(dir_path, "../../dashboard"))
+        app.run(host='0.0.0.0')
+        return True

@@ -309,9 +309,8 @@ class RunCommand(ProjectCommand):
 
         data_paths = kwargs['data']
         # Run task and return Task object result
-        task_obj = self.task_run_helper(task_dict, snapshot_dict,
-                                        "cli.run.run",
-                                        data_paths=data_paths)
+        task_obj = self.task_run_helper(
+            task_dict, snapshot_dict, "cli.run.run", data_paths=data_paths)
         if not task_obj:
             return False
         # Creating the run object
@@ -469,9 +468,9 @@ class RunCommand(ProjectCommand):
             # Delete the task for the run
             result = self.task_controller.delete(task_id)
             if result:
-                self.cli_helper.echo(__("info", "cli.run.delete.success", task_id))
+                self.cli_helper.echo(
+                    __("info", "cli.run.delete.success", task_id))
             return result
         except Exception:
-            self.cli_helper.echo(
-                __("error", "cli.run.delete", task_id))
+            self.cli_helper.echo(__("error", "cli.run.delete", task_id))
             return False

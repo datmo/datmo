@@ -13,14 +13,22 @@ def get_datmo_parser():
     init_parser = subparsers.add_parser("init", help="initialize project")
     init_parser.add_argument("--name", default=None)
     init_parser.add_argument("--description", default=None)
-    init_parser.add_argument("--force", "-f", "--no-prompt", dest="force", action="store_true",
-                             help="boolean if you want to run init without prompts")
+    init_parser.add_argument(
+        "--force",
+        "-f",
+        "--no-prompt",
+        dest="force",
+        action="store_true",
+        help="boolean if you want to run init without prompts")
 
     version_parser = subparsers.add_parser("version", help="datmo version")
 
     status_parser = subparsers.add_parser("status", help="project status")
 
     cleanup_parser = subparsers.add_parser("cleanup", help="remove project")
+
+    dashboard_parser = subparsers.add_parser(
+        "dashboard", help="start dashboard")
 
     configure_parser = subparsers.add_parser(
         "configure", help="configure datmo")

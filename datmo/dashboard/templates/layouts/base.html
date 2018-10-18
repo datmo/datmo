@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+xmlns:fb="http://ogp.me/ns/fb#">
+
+<head>
+    {% block head %}{% endblock %}
+    <title>{% block title %}{% endblock %} - Datmo</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Content-Language" content="en-us">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1">
+    <meta property="og:title" content="Datmo - Data Science & AI in Production" />
+    <meta property="og:description" content="Datmo tools help power up your existing model workflow.
+    A new standard built by data scientists, for data scientists." />
+    <meta property="og:url" content="https://datmo.com" />
+
+    <meta property="og:image" content="https://s3-us-west-1.amazonaws.com/datmo-public-scripts/site-header-wide.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Datmo logo" />
+
+    <meta property="og:image" content="https://s3-us-west-1.amazonaws.com/datmo-public-scripts/site-header.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="1200" />
+    <meta property="og:image:alt" content="Datmo logo" />
+
+    <link rel="icon" type="image/png" href='{{ url_for("static", filename="./favicon.png") }}'>
+
+    <link rel="stylesheet" href='{{ url_for("static", filename="./css/flexboxgrid.css") }}'>
+    <link rel="stylesheet" href='{{ url_for("static", filename="./css/style.css") }}'>
+    <link rel="stylesheet" href='{{ url_for("static", filename="./css/base.css") }}'>
+    <link rel="stylesheet" href='{{ url_for("static", filename="./css/font-awesome.min.css") }}'>
+    <link rel="stylesheet" href='{{ url_for("static", filename="./css/overrides.css") }}'>
+
+    <script src='{{ url_for("static", filename="./js/jquery.min.js") }}'></script>
+    <script src='{{ url_for("static", filename="./js/custom.js") }}'></script>
+</head>
+
+</html>
+<body>
+<div class="site-wrapper">
+    <header class="navbar-fixed-top">
+        <div class="container">
+            <div class="header-content">
+                <div class="row">
+                    <div class="col-xs-5 col-sm-2 col-md-2">
+                        <a href="/">
+
+                            <div class="logo"><img src='{{ url_for("static", filename="./img/logo.svg") }}'></div>
+                        </a>
+                    </div>
+                    <div class="col-xs-12 col-sm-3 col-md-4 col-lg-3 nav-search">
+                    </div>
+                    <div class="col-xs-12 col-sm-7 col-md-6 col-lg-7">
+                        <div id="myTopnav" class="topnav">
+                            <ul class="nav-item" >
+                                <a href="https://docs.datmo.com/">
+                                    <li>Documentation</li>
+                                </a>
+                                  <span class="header-user-profile">
+                                    <img src='{{ url_for("static", filename="./img/profile-placeholder.jpg") }}' />
+                                    <div class="tip side-nav hidden">
+                                      <ul>
+                                        <a href="/">my user</a>
+                                        <div class="list-divider"></div>
+                                      </ul>
+                                    </div>
+                                  </span>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <script src='{{ url_for("static", filename="./js/header.menu.js") }}'></script>
+
+    {% block body %}{% endblock %}
+
+    <div class="container">
+        <footer>
+            <div class="row">
+                <div class="col-xs-12 col-sm-9 last-xs first-sm">
+                    <div class="logo"><img src='{{ url_for("static", filename="./img/logo.svg") }}' ></div>
+                    <p class="copyright">Copyright © 2018 Datmo, Inc.</p>
+                </div>
+                <div class="col-xs-12 col-sm-3">
+                    <div class="socialLinks">
+                        <ul>
+                            <a href="https://www.facebook.com/datmoai/" target="_blank">
+                                <li><img src='{{ url_for("static", filename="./img/icon-facebook.svg") }}'></li>
+                            </a>
+                            <a href="https://twitter.com/datmoai" target="_blank">
+                                <li><img src='{{ url_for("static", filename="./img/icon-twitter.svg") }}'></li>
+                            </a>
+                            <a href="https://www.linkedin.com/company-beta/10343480/?pathWildcard=10343480" target="_blank">
+                                <li><img src='{{ url_for("static", filename="./img/icon-linkedin.svg") }}'></li>
+                            </a>
+                            <a href="https://github.com/datmo" target="_blank">
+                                <li><img src='{{ url_for("static", filename="./img/icon-github.svg") }}'></li>
+                            </a>
+                        </ul>
+                    </div>
+                </div>
+        </footer>
+        <script src='{{ url_for("static", filename="./js/general.js") }}'></script>
+    </div>
+
+</div>
+
+</body>

@@ -50,6 +50,23 @@ from datmo.core.util.exceptions import (
     TooManyArgumentsFound)
 
 
+def bytes2human(n):
+    # http://code.activestate.com/recipes/578019
+    # >>> bytes2human(10000)
+    # '9.8K'
+    # >>> bytes2human(100001221)
+    # '95.4M'
+    symbols = ('K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y')
+    prefix = {}
+    for i, s in enumerate(symbols):
+        prefix[s] = 1 << (i + 1) * 10
+    for s in reversed(symbols):
+        if n >= prefix[s]:
+            value = float(n) / prefix[s]
+            return '%.1f%s' % (value, s)
+    return "%sB" % n
+
+
 def grep(pattern, fileObj):
     r = []
     linenumber = 0
@@ -64,7 +81,8 @@ def printable_dict(input_dictionary):
     printable_output = ""
     if input_dictionary:
         for key, value in input_dictionary.items():
-            printable_output = printable_output + str(key) + ": " + str(value) + "\n"
+            printable_output = printable_output + str(key) + ": " + str(
+                value) + "\n"
     return printable_output
 
 
@@ -381,8 +399,10 @@ def parse_paths(default_src_prefix, paths, dest_prefix):
 
 
 def get_headers(access_key):
-    return {'Authorization':str(access_key),
-            'Content-type': 'application/json'}
+    return {
+        'Authorization': str(access_key),
+        'Content-type': 'application/json'
+    }
 
 
 def authenticated_get_call(url, access_key=None, stream=False):
@@ -391,7 +411,10 @@ def authenticated_get_call(url, access_key=None, stream=False):
     return res
 
 
-def authenticated_post_call(url, data, access_key=None, content_type="application/json"):
+def authenticated_post_call(url,
+                            data,
+                            access_key=None,
+                            content_type="application/json"):
     headers = get_headers(access_key)
     res = requests.post(url, data=data, headers=headers)
     return res
@@ -422,7 +445,6 @@ class bcolors:
 
 
 class Commands(object):
-
     def __init__(self):
         from datmo.core.util.logger import DatmoLogger
         from datmo.config import Config
@@ -430,7 +452,6 @@ class Commands(object):
         self.docker_cli = self.config.docker_cli
         self.log = DatmoLogger.get_logger(__name__)
         self.log.info("handling command %s", self.config.home)
-
 
     def run_cmd(self, shell_cmd):
         try:
@@ -440,11 +461,14 @@ class Commands(object):
                 self.log.info("")
                 if e:
                     self.log.info(e)
-                    self.log.info(bcolors.FAIL + "error while running the command %s" %(shell_cmd))
+                    self.log.info(
+                        bcolors.FAIL + "error while running the command %s" %
+                        (shell_cmd))
                 else:
                     return {'output': out, 'status': True}
             else:
-                process_returncode = subprocess.Popen(shell_cmd, shell=True).wait()
+                process_returncode = subprocess.Popen(
+                    shell_cmd, shell=True).wait()
                 self.log.info("")
                 if process_returncode == 0:
                     return {'status': True}
@@ -452,12 +476,15 @@ class Commands(object):
                     return {'status': False}
         except Exception as e:
             self.log.info(e)
-            self.log.info(bcolors.FAIL + "error while running the command %s" %(shell_cmd))
+            self.log.info(bcolors.FAIL + "error while running the command %s" %
+                          (shell_cmd))
             return {'status': False}
 
     def docker_build(self, dockerfile_path=None, project_name=None):
         if dockerfile_path:
-            shell_cmd = '%s build -t %s -f %s .' % (self.docker_cli, project_name, dockerfile_path)
+            shell_cmd = '%s build -t %s -f %s .' % (self.docker_cli,
+                                                    project_name,
+                                                    dockerfile_path)
         else:
             shell_cmd = '%s build -t %s .' % (self.docker_cli, project_name)
 
@@ -466,7 +493,8 @@ class Commands(object):
     def docker_tag(self, project_name, old_image_tag, new_image_tag):
         old_image_name_tag = project_name + ':' + old_image_tag
         new_image_name_tag = project_name + ':' + new_image_tag
-        shell_cmd = '%s tag %s  %s' % (self.docker_cli, old_image_name_tag, new_image_name_tag)
+        shell_cmd = '%s tag %s  %s' % (self.docker_cli, old_image_name_tag,
+                                       new_image_name_tag)
         self.run_cmd(shell_cmd)
 
     def zip_folder(self, folder_path, output_path):
@@ -504,17 +532,22 @@ class Commands(object):
         finally:
             zip_file.close()
 
-    def create_datmo_dockerfile(self, dockerfile='Dockerfile', filepath=os.getcwd()):
+    def create_datmo_dockerfile(self,
+                                dockerfile='Dockerfile',
+                                filepath=os.getcwd()):
         """
         in order to create intermediate dockerfile to run
         """
 
-        file_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'src_files')
+        file_dir = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)), 'src_files')
 
         # Combine dockerfiles
         destination = open(os.path.join(filepath, 'datmoDockerfile'), 'wb')
-        shutil.copyfileobj(open(os.path.join(filepath, dockerfile), 'rb'), destination)
-        shutil.copyfileobj(open(os.path.join(file_dir, 'stubDockerfile'), 'rb'), destination)
+        shutil.copyfileobj(
+            open(os.path.join(filepath, dockerfile), 'rb'), destination)
+        shutil.copyfileobj(
+            open(os.path.join(file_dir, 'stubDockerfile'), 'rb'), destination)
         destination.close()
 
     def copy(self, src, dst, symlinks=False, ignore=None):

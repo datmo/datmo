@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="51px" height="93px" viewBox="0 0 51 93" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 50.2 (55047) - http://www.bohemiancoding.com/sketch -->
+    <title>Artboard</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Artboard" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <polygon id="Fill-65" fill="#CCEFFF" points="26 8 36 31 31 73 26 73"></polygon>
+        <polygon id="Fill-89" fill="#FFFFFF" points="30 36.5 26 39 22 36.5 22 31.5 26 29 30 31.5"></polygon>
+        <polygon id="Stroke-90" stroke="#3196EC" stroke-width="2" stroke-linejoin="round" points="30 36.5 26 39 22 36.5 22 31.5 26 29 30 31.5"></polygon>
+        <polygon id="Stroke-91" stroke="#3196EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="21 73 16 31 26 8 36 31 31 73"></polygon>
+        <polygon id="Fill-92" fill="#FFFFFF" points="15 83 10 89 5 83 10 61"></polygon>
+        <polygon id="Stroke-93" stroke="#3196EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 83 10 89 5 83 10 61"></polygon>
+        <polygon id="Fill-94" fill="#FFFFFF" points="31 83 26 89 21 83 26 61"></polygon>
+        <polygon id="Stroke-95" stroke="#3196EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="31 83 26 89 21 83 26 61"></polygon>
+        <polygon id="Fill-96" fill="#FFFFFF" points="47 83 42 89 37 83 42 61"></polygon>
+        <polygon id="Stroke-97" stroke="#3196EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="47 83 42 89 37 83 42 61"></polygon>
+        <path d="M12,69 L19,55" id="Stroke-98" stroke="#3196EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M14,79 L21,73" id="Stroke-99" stroke="#3196EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M40,69 L33,55" id="Stroke-100" stroke="#3196EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M38,79 L31,73" id="Stroke-101" stroke="#3196EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M26,8 L26,3" id="Stroke-102" stroke="#3196EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M5,83 L15,83" id="Stroke-103" stroke="#3196EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M21,83 L31,83" id="Stroke-104" stroke="#3196EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        <path d="M37,83 L47,83" id="Stroke-105" stroke="#3196EC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+    </g>
+</svg>

@@ -43,6 +43,9 @@ def main():
         elif command_name == "cleanup":
             command_name = "project"
             sys.argv[1] = "cleanup"
+        elif command_name == "dashboard":
+            command_name = "project"
+            sys.argv[1] = "dashboard"
         elif command_name == "configure":
             command_name = "project"
             sys.argv[1] = "configure"

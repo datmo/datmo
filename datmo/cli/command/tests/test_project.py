@@ -27,6 +27,7 @@ except TypeError:
 import os
 import tempfile
 import platform
+import timeout_decorator
 
 from datmo.config import Config
 from datmo import __version__
@@ -80,8 +81,7 @@ class TestProjectCommand():
             definition_filepath, "r").read()
 
     def test_init_create_success_force(self):
-        self.project_command.parse(
-            ["init", "--force"])
+        self.project_command.parse(["init", "--force"])
 
         result = self.project_command.execute()
         assert result
@@ -160,8 +160,7 @@ class TestProjectCommand():
 
         result_1 = dummy(self)
 
-        self.project_command.parse([
-            "init", "--force"])
+        self.project_command.parse(["init", "--force"])
 
         result_2 = self.project_command.execute()
         # test for desired side effects
@@ -550,3 +549,21 @@ class TestProjectCommand():
         except UnrecognizedCLIArgument:
             exception_thrown = True
         assert exception_thrown
+
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_dashboard(self):
+        # test dashboard command
+        self.project_command.parse(["dashboard"])
+
+        @timeout_decorator.timeout(10, use_signals=False)
+        def timed_run(timed_run_result):
+            if self.project_command.execute():
+                return timed_run_result
+
+        timed_run_result = False
+        try:
+            timed_run_result = timed_run(timed_run_result)
+        except timeout_decorator.timeout_decorator.TimeoutError:
+            timed_run_result = True
+
+        assert timed_run_result

@@ -26,9 +26,10 @@ except TypeError:
     to_bytes("test")
 
 from datmo.core.util.misc_functions import (
-    create_unique_hash, mutually_exclusive, is_project_dir, find_project_dir,
-    grep, prettify_datetime, format_table, parse_cli_key_value, convert_keys_to_string,
-    get_datmo_temp_path, parse_path, parse_paths, list_all_filepaths)
+    bytes2human, create_unique_hash, mutually_exclusive, is_project_dir,
+    find_project_dir, grep, prettify_datetime, format_table,
+    parse_cli_key_value, convert_keys_to_string, get_datmo_temp_path,
+    parse_path, parse_paths, list_all_filepaths)
 
 from datmo.core.util.exceptions import MutuallyExclusiveArguments, RequiredArgumentMissing, InvalidDestinationName, PathDoesNotExist, TooManyArgumentsFound
 
@@ -106,6 +107,14 @@ class TestMiscFunctions():
     def test_is_project_dir(self):
         os.makedirs(os.path.join(self.temp_dir, ".datmo"))
         assert is_project_dir(self.temp_dir)
+
+    def test_bytes2human(self):
+        # test the bytes2human method
+        result = bytes2human(10000)
+        assert result == '9.8K'
+
+        result = bytes2human(100001221)
+        assert result == '95.4M'
 
     def test_grep(self):
         # open current file and try to find this method in it
@@ -293,13 +302,28 @@ class TestMiscFunctions():
                               "new_dirname")]
 
     def test_convert_keys_to_string(self):
-        test_data = { u'spam': u'eggs', u'foo': frozenset([u'Gah!']), u'bar': { u'baz': 97 },
-         u'list': [u'list', (True, u'Maybe'), set([u'and', u'a', u'set', 1])]}
+        test_data = {
+            u'spam':
+                u'eggs',
+            u'foo':
+                frozenset([u'Gah!']),
+            u'bar': {
+                u'baz': 97
+            },
+            u'list': [
+                u'list', (True, u'Maybe'),
+                set([u'and', u'a', u'set', 1])
+            ]
+        }
 
         converted_data = convert_keys_to_string(test_data)
 
-        assert converted_data == {'bar': {'baz': 97},
-                                  'foo': frozenset(['Gah!']),
-                                  'list': ['list', (True, 'Maybe'),
-                                           set(['and', 'a', 'set', 1])],
-                                  'spam': 'eggs'}
+        assert converted_data == {
+            'bar': {
+                'baz': 97
+            },
+            'foo': frozenset(['Gah!']),
+            'list': ['list', (True, 'Maybe'),
+                     set(['and', 'a', 'set', 1])],
+            'spam': 'eggs'
+        }

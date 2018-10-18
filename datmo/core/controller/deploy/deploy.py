@@ -4,7 +4,7 @@ import shutil
 
 from datmo.core.controller.base import BaseController
 from datmo.core.util.misc_functions import Commands
-from datmo.core.controller.deploy.driver.microservice import MicroserviceDeployDriver
+from datmo.core.controller.deploy.driver.datmo_microservice import DatmoMicroserviceDeployDriver
 from datmo.config import Config
 
 
@@ -46,7 +46,7 @@ class DeployController(BaseController):
         self.config = Config()
         self.master_server_ip, self.datmo_api_key, self.datmo_end_point = self.config.remote_credentials
         self.service_container_management = service_container_management
-        self.driver = MicroserviceDeployDriver(
+        self.driver = DatmoMicroserviceDeployDriver(
             end_point=self.datmo_end_point, api_key=self.datmo_api_key)
 
     def cluster_deploy(self, cluster_name=None, server_type=None, size=None):

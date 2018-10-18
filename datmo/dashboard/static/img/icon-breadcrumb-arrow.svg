@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="6px" height="10px" viewBox="0 0 6 10" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 43.2 (39069) - http://www.bohemiancoding.com/sketch -->
+    <title>Shape</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="dashboard-hifi" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" opacity="0.5">
+        <g id="9)-Model-Snapshot---Session-1--Training-Task---Summary" transform="translate(-262.000000, -255.000000)" stroke="#979797" fill-rule="nonzero" stroke-width="0.5" fill="#979797">
+            <g id="content-box" transform="translate(151.000000, 234.000000)">
+                <g id="arrow-icon" transform="translate(111.500000, 21.500000)">
+                    <g id="Layer_1">
+                        <path d="M0.18759375,8.62471875 C0.13959375,8.62471875 0.09159375,8.60634375 0.05484375,8.56996875 C-0.01828125,8.49684375 -0.01828125,8.37796875 0.05484375,8.30484375 L4.04746875,4.31221875 L0.05484375,0.31996875 C-0.01828125,0.24684375 -0.01828125,0.12796875 0.05484375,0.05484375 C0.12796875,-0.01828125 0.24684375,-0.01828125 0.31996875,0.05484375 L4.44496875,4.17984375 C4.51809375,4.25296875 4.51809375,4.37184375 4.44496875,4.44496875 L0.31996875,8.56996875 C0.28359375,8.60634375 0.23559375,8.62471875 0.18759375,8.62471875 Z" id="Shape"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

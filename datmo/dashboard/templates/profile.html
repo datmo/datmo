@@ -1,0 +1,115 @@
+{% extends "layouts/base.html" %}
+{% block title %}Profile{% endblock %}
+{% block body %}
+    <section class="profile">
+        <div class="container">
+            <div class="row">
+                <div class="col-xs-12 col-sm-4 col-md-3">
+                    <div class="user-profile row">
+                        <div class="profile-image col-xs-4 col-sm-12">
+                            <img src='{{ url_for("static", filename="./img/profile-placeholder.jpg") }}' alt="profile-image">
+                        </div>
+                        <div class="col-xs-8 col-sm-12">
+                            {% if user.name %}
+                                <h3 class="">{{ user.name }}</h3>
+                                <h4>{{ user.username }}</h4>
+                            {% else %}
+                                <h3 class="">{{ user.username }}</h3>
+                            {% endif %}
+                            <div class="user-contact">
+                                <ul>
+                                    <li class="email">
+                                        <div class="contact-icon">
+                                        <img src='{{ url_for("static", filename="./img/icon-email.svg") }}' alt="icon-mail"></div>
+                                        <a href="#">{{ user.email }}</a>
+                                    </li>
+                                    <li class="website">
+                                        <div class="contact-icon">
+                                        <img src='{{ url_for("static", filename="./img/icon-link.svg") }}' alt="icon-link"></div>
+                                        <a href="#">API KEY</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="col-xs-12 col-sm-8 col-md-9">
+                    <div class="user-profile-content">
+                        <div class="section-tab-mobile">
+                            <ul>
+                                <a href="#">
+                                    <li>Models</li>
+                                </a>
+                            </ul>
+                        </div>
+                        <div class="section-tab">
+                            <ul>
+                                <a class="color-model active"
+                                    href="/search?e=model&user={{ user.username }}">
+                                    <li>Models</li>
+                                </a>
+                        </div>
+                        <div class="multi-item-content-wrap">
+                            {% for model in models %}
+                            <div class="multi-item-content-row">
+                                <div class="multi-item-content-header">
+                                    <div class="row">
+                                        <div class="col-xs-12 col-sm-7 model-title">
+                                            <h3>
+                                                <span class="title">
+                                                    <a href="/{{ model.id }}">{{ model.name }}</a>
+                                                </span>
+                                                <span class="divider-vertical"></span>
+                                                <span class="tag privacy">Private</span>
+                                            </h3>
+                                        </div>
+                                    </div>
+                                    <div class="row forked-from">
+
+                                    </div>
+                                </div>
+                                <div class="model-source row">
+                                    <div class="col-xs-7 text-right">
+                                        {% if model.categories %}
+                                        {% for tag in model.categories.split(',') %}
+                                        <span class="tag {{ tag }}">{{ tag }}</span>
+                                        {% endfor %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="multi-item-content-footer">
+                                    <p>
+                                        <span class="indicator {{ model.repo_language | d('python') }}">•</span>
+                                        <span class="program-langage">{{ model.repo_language | d('python')  }}</span>
+                                        <span class="experiment">Experiments: 0</span>
+                                        <span class="snapshot">Snapshots: 0</span>
+                                        <span class="deployment">Deployments: 0</span>
+                                    </p>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="multi-item-content-row">
+                                <div class="text-center">
+                                <h1>Welcome to Datmo!<h1>
+                                <p class="large">
+                                        We're excited to show you why your fellow Datmo-ers already love tracking their work with Datmo!
+                                </p>
+                                <p class="large">
+                                        In just a few steps, we will teach you to clone your first Models
+                                        and build your first Snapshot, all while learning the basics of Datmo. Click below to get started.
+                                </p>
+                                <!--<p class="large">-->
+                                <!--<a class="btn blue fixed_width_button_120" href="/get-started#download">Get Started</a>-->
+                                <!--</p>-->
+
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

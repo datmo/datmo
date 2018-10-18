@@ -1,0 +1,47 @@
+{% extends "layouts/base.html" %}
+{% block title %}Model {% block subtitle %}{% endblock %}{% endblock %}
+{% block body %}
+<div class="top-margin-fixed-navbar">
+
+<section class="model-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="row">
+                    <div class="col-xs-12 col-sm-8 page-title">
+                        <h2>
+
+                            <a href="/datmo" class="model-owner-avatar">
+                                <img src="//www.gravatar.com/avatar/e66b0800b5130b3d240c76e47658e4b7?size=220&amp;default=identicon" alt="profile">
+                            </a>
+
+                            <span class="model-name">
+                                <a href="/">{{ user.username }}</a></span>/<span class="model-name">{{ model.name }}</span>
+                            <p class="last-updated">
+                                Updated Sun, March 11th - 08:26 AM GMT
+                            </p>
+                        </h2>
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<section class="model-content">
+    <div class="container">
+        <div class="content-wrapper">
+
+{% block modelbody %}{% endblock %}
+
+        </div>
+    </div>
+</section>
+
+    </div>
+{% endblock %}
