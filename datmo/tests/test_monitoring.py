@@ -47,9 +47,9 @@ class TestMonitoringModule():
             input=self.input_dict, prediction=self.prediction_dict)
         assert data_id != self.test_data_id
 
-    def test_track_actual(self):
-        result = self.monitoring.track_actual(
-            id=self.test_data_id, actual=self.feedback_dict)
+    def test_track_feedback(self):
+        result = self.monitoring.track_feedback(
+            id=self.test_data_id, feedback=self.feedback_dict)
         assert isinstance(result, bool)
         assert result == True
 
