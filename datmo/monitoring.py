@@ -187,9 +187,9 @@ class Monitoring():
 
         return response['body']['id']
 
-    def track_actual(self, id, actual):
+    def track_feedback(self, id, feedback):
         """
-        Track actual value (y_hat) for the prediction
+        Track feedback value (y) and other metrics after the prediction(y_hat)
 
         Parameters
         ----------
@@ -203,10 +203,10 @@ class Monitoring():
         bool
             True if successful update
         """
-        if not isinstance(actual, dict):
+        if not isinstance(feedback, dict):
             return False
         updated_at = int(round(time.time() * 1000))
-        update_dict = {'updated_at': updated_at, 'actual': json.dumps(actual)}
+        update_dict = {'updated_at': updated_at, 'feedback': json.dumps(feedback)}
         response = self.remote_api.update_actual(id, update_dict)
         if response['body']['updated'] > 0:
             return True
@@ -256,14 +256,14 @@ class Monitoring():
         for meta_data in body:
             input = meta_data.get('input')
             prediction = meta_data.get('prediction')
-            actual = meta_data.get('actual')
+            feedback = meta_data.get('feedback')
             updated_at = meta_data.get('updated_at')
             meta_data['input'] = json.loads(
                 input) if input is not None else None
             meta_data['prediction'] = json.loads(
                 prediction) if prediction is not None else None
-            meta_data['actual'] = json.loads(
-                actual) if actual is not None else None
+            meta_data['feedback'] = json.loads(
+                feedback) if feedback is not None else None
             meta_data['updated_at'] = int(
                 updated_at) if updated_at is not None else None
             meta_data_list.append(meta_data)
