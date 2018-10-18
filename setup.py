@@ -21,7 +21,7 @@ if sys.version_info[0] < 3:  # python 2
         "werkzeug>=0.9.6", "beautifulsoup4>=4.3.2", "gunicorn>=19.1.1",
         "itsdangerous>=0.24", "six>=1.8.0", "wsgiref>=0.1.2", "urllib3==1.23",
         "chardet==3.0.2", "requests==2.19.1", "plotly==3.3.0",
-        "jsonschema>=2.6.0"
+        "jsonschema==2.6.0"
     ]
 else:  # python 3
     prerequisites = [
@@ -36,7 +36,7 @@ else:  # python 3
         "werkzeug>=0.9.6", "beautifulsoup4>=4.3.2", "gunicorn>=19.1.1",
         "itsdangerous>=0.24", "six>=1.8.0", "urllib3==1.23", "chardet==3.0.2",
         "prettytable>=0.7.2", "requests==2.19.1", "plotly==3.3.0",
-        "jsonschema>=2.6.0"
+        "jsonschema==2.6.0"
     ]
 
 setup(
