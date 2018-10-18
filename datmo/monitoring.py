@@ -206,7 +206,10 @@ class Monitoring():
         if not isinstance(feedback, dict):
             return False
         updated_at = int(round(time.time() * 1000))
-        update_dict = {'updated_at': updated_at, 'feedback': json.dumps(feedback)}
+        update_dict = {
+            'updated_at': updated_at,
+            'feedback': json.dumps(feedback)
+        }
         response = self.remote_api.update_actual(id, update_dict)
         if response['body']['updated'] > 0:
             return True
@@ -221,11 +224,11 @@ class Monitoring():
             dictionary to filter search results
 
             model_id : str, optional
-                model id tracked for monitoring
+                model id tracked for monitoring. default to self._model_id if present
             model_version_id : str, optional
-                model version id tracked for monitoring
+                model version id tracked for monitoring. default to self._model_version_id if present
             deployment_version_id : str, optional
-                deployment version id tracked for monitoring
+                deployment version id tracked for monitoring. default to self._deployment_version_id if present
             id  : str, optional
                 tracked prediction id
             start : int, optional
@@ -250,6 +253,14 @@ class Monitoring():
                 "start", "count", "sort_created_at"
         ] for key in filter.keys()):
             raise InputError
+        filter['model_id'] = filter.get('model_id', self._model_id)
+        if filter['model_id']: del filter['model_id']
+        filter['model_version_id'] = filter.get('model_version_id',
+                                                self._model_version_id)
+        if filter['model_version_id']: del filter['model_version_id']
+        filter['deployment_version_id'] = filter.get(
+            'deployment_version_id', self._deployment_version_id)
+        if filter['deployment_version_id']: del filter['deployment_version_id']
         response = self.remote_api.get_data(filter)
         body = response['body']
         meta_data_list = []
@@ -318,6 +329,10 @@ class Monitoring():
             type of deployment (e.g. "datmo", "sagemaker", etc)
         deployment_version_id : str, optional
             deployment version id for the deployment to get info
+        model_version_Id : str, optional
+            model version id for the deployment
+        model_id : str, optional
+            model id for the deployment
 
         Returns
         -------

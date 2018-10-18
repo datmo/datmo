@@ -7,7 +7,7 @@
                 <div class="col-xs-12 col-sm-4 col-md-3">
                     <div class="user-profile row">
                         <div class="profile-image col-xs-4 col-sm-12">
-                            <img src='{{ url_for("static", filename="./img/profile-placeholder.jpg") }}' alt="profile-image">
+                            <img src='{{ user.gravatar_url }}' alt="profile-image">
                         </div>
                         <div class="col-xs-8 col-sm-12">
                             {% if user.name %}
