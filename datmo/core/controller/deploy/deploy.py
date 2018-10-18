@@ -6,6 +6,7 @@ from datmo.core.controller.base import BaseController
 from datmo.core.util.misc_functions import Commands
 from datmo.core.controller.deploy.driver.datmo_microservice import DatmoMicroserviceDeployDriver
 from datmo.config import Config
+from datmo.core.util.spinner import Spinner
 
 
 class DeployController(BaseController):
@@ -48,13 +49,16 @@ class DeployController(BaseController):
         self.service_container_management = service_container_management
         self.driver = DatmoMicroserviceDeployDriver(
             end_point=self.datmo_end_point, api_key=self.datmo_api_key)
+        self.spinner = Spinner()
 
     def cluster_deploy(self, cluster_name=None, server_type=None, size=None):
         """
         Deploy the Servers in the cluster with the defined setup
         """
+        self.spinner.start()
         response = self.driver.create_cluster(
             cluster_name, server_type, count=size)
+        self.spinner.stop()
         return response
 
     def cluster_update(self, cluster_name, size):
@@ -68,8 +72,10 @@ class DeployController(BaseController):
         size : str
             Number of servers
         """
+        self.spinner.start()
         response = self.driver.update_cluster(
             count=size, cluster_name=cluster_name)
+        self.spinner.stop()
         return response
 
     def cluster_stop(self, cluster_name):
@@ -81,8 +87,10 @@ class DeployController(BaseController):
         cluster_name : str
             name of the cluster
         """
+        self.spinner.start()
         response = self.driver.update_cluster(
             count=0, cluster_name=cluster_name)
+        self.spinner.stop()
         return response
 
     def cluster_ls(self, cluster_name='*'):
@@ -94,7 +102,9 @@ class DeployController(BaseController):
         cluster_name : str
             name of the cluster
         """
+        self.spinner.start()
         response = self.driver.get_cluster_info(cluster_name)
+        self.spinner.stop()
         return response
 
     def system_info(self):
@@ -141,10 +151,12 @@ class DeployController(BaseController):
             print(e)
 
         model_zipfile_path = os.path.join(tmp_dirpath, 'datmo_model.zip')
+        self.spinner.start()
         self.commands.zip_folder(tmp_dirpath, model_zipfile_path)
         response = self.driver.model_deploy(cluster_name, model_zipfile_path)
         # remove the temp directory
         shutil.rmtree(tmp_dirpath)
+        self.spinner.stop()
         return response
 
     def service_iologs(self, service_path, date):
