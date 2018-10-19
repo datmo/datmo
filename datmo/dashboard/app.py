@@ -10,7 +10,7 @@ from datmo.monitoring import Monitoring
 
 app = Flask(__name__)
 # TODO: pull api_key from global config
-datmo_monitoring = Monitoring(api_key="d41d8cd98f00b204e9800998ecf8427e")
+datmo_monitoring = Monitoring(api_key="6a3a3cd900eaf7b406a41d68f8ca7969")
 
 
 @app.route("/")

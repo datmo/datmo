@@ -44,8 +44,13 @@ class Deploy():
         self._start_time, self._end_time, self._model_id, \
         self._model_version_id, self._deployment_version_id = None, None, None, None, None
 
-    def method(self):
+    def method(self, func):
         """
         Wrapper for the celery decorator
         """
-        return self._celery_app.task(bind=True, soft_time_limit=1000)
+
+        @self._celery_app.task(bind=True, soft_time_limit=1000)
+        def inner(*args, **kwargs):
+            func(args, kwargs)
+
+        return inner
