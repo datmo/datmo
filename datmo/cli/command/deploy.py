@@ -155,7 +155,8 @@ class DeployCommand(ProjectCommand):
         if response.status:
             self.cli_helper.echo(response.message)
             sys.exit(response.status)
-        self.cli_helper.echo(__("info", "cli.deploy.update.success"))
+        self.cli_helper.echo(
+            __("info", "cli.deploy.update.success", cluster_name))
 
     @Helper.notify_no_project_found
     def ls(self, **kwargs):

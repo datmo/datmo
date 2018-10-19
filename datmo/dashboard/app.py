@@ -172,6 +172,7 @@ def model_deployment_data(model_id, deployment_version_id):
     # here we want to get the value of user (i.e. ?start=0)
     start = request.args.get('start', 0)
     count = request.args.get('count', 10)
+    num_features = request.args.get('num_features', 0)
     filter = {
         "model_id": model_id,
         "deployment_version_id": deployment_version_id,
@@ -198,6 +199,8 @@ def model_deployment_data(model_id, deployment_version_id):
         prediction_features = datum['prediction'].keys()
         feedback_features = datum['feedback'].keys() if datum[
             'feedback'] else []
+        num_feedback_features = int(num_features) - len(input_features) - len(
+            prediction_features)
 
         # Loop through input and predictions to populate the graphs
         new_time_data = [datum['created_at'] for datum in new_data]
@@ -245,6 +248,22 @@ def model_deployment_data(model_id, deployment_version_id):
                 float(t) / 1000).strftime('%Y-%m-%d %H:%M:%S')
             for t in new_time_data_update if t
         ]
+
+        # If feedback not present, add in dummy graph data to add
+        if not feedback_features:
+            for i in range(num_feedback_features):
+                time_series_graphs_extension.append({
+                    "new_data": {
+                        "x": [[]],
+                        "y": [[]],
+                    }
+                })
+                histogram_graphs_update.append({
+                    "cumulative_data": {
+                        "x": [[]],
+                        "y": [[]]
+                    }
+                })
 
         for feedback_feature in feedback_features:
             # time series data chart (if not None)
@@ -382,7 +401,11 @@ def model_deployments(model_id):
         #     "deployment_version_id": deployment_version_ids[0]
         # }
         data = datmo_monitoring.search_metadata(filter)
-        datum = data[0]
+        max_index = 0
+        for ind, datum in enumerate(data):
+            if datum['feedback'] is not None:
+                max_index = ind
+        datum = data[max_index]
 
         def __plotly_graphs(variable_name, time_name="created at"):
             color_choices = [
@@ -440,7 +463,6 @@ def model_deployments(model_id):
             })
 
         # prediction
-
         graph_keys = list(datum['prediction'].keys())
 
         # feedback
@@ -482,6 +504,7 @@ def model_deployments(model_id):
         deployments=deployments,
         model_version_id=filter['model_version_id'],
         deployment_version_id=filter['deployment_version_id'],
+        num_features=len(time_series_graphs),
         time_series_ids=time_series_ids,
         histogram_ids=histogram_ids,
         time_series_graphsJSON=time_series_graphsJSON,

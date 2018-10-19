@@ -130,7 +130,8 @@
                             url: "/data/{{ model.id }}/{{ deployment_version_id }}",
                             type: "GET",
                             data: {
-                                start: startCounter
+                                start: startCounter,
+                                num_features: {{ num_features }}
                             },
                             async: true,
                             success: function(data) {
