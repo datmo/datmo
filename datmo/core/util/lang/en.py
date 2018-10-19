@@ -501,7 +501,12 @@ and large files.
             """
 Run snapshot create any time you want to save the results of your 
 experiments. You can then view all snapshots with the `snapshot ls` command.
-        """
+        """,
+        "cli.deploy.description":
+            """
+Datmo deploy allows you to deploy a version of your model by using the 
+datmo_deploy.yml and running `datmo deploy service`
+            """
     }
 }
 

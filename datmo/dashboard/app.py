@@ -369,17 +369,18 @@ def model_deployments(model_id):
     time_series_graphs = []
     histogram_graphs = []
 
+    filter = {
+        "model_id": model_id,
+        "model_version_id": "model_a",
+        "deployment_version_id": "microservice"
+    }
+
     if model_version_ids and deployment_version_ids:
         # filter = {
         #     "model_id": model_id,
         #     "model_version_id": model_version_ids[0],
         #     "deployment_version_id": deployment_version_ids[0]
         # }
-        filter = {
-            "model_id": model_id,
-            "model_version_id": "model_a",
-            "deployment_version_id": "microservice"
-        }
         data = datmo_monitoring.search_metadata(filter)
         datum = data[0]
 

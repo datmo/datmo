@@ -6,7 +6,6 @@ from datetime import datetime
 from datmo.core.util.exceptions import InputError
 from datmo.core.util.misc_functions import bytes2human
 from datmo.core.util.remote_api import RemoteAPI
-from datmo.core.controller.base import BaseController
 
 
 class Monitoring():
@@ -52,12 +51,11 @@ class Monitoring():
     >>> response = predict(x)
     ...
     >>> # For feedback
-    >>> datmo_client.track_actual(id=response['datmo_id'], actual=y_actual)
+    >>> datmo_client.track_feedback(id=response['datmo_id'], actual=y_actual)
     """
 
     def __init__(self, api_key, home=None):
         self._api_key = api_key
-        self._base_controller = BaseController(home=home)
         self.remote_api = RemoteAPI(self._api_key)
         self._start_time, self._end_time, self._model_id, \
         self._model_version_id, self._deployment_version_id = None, None, None, None, None

@@ -1,3 +1,5 @@
+import os
+
 from datmo.core.util.validation import validate
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
@@ -7,6 +9,7 @@ from datmo.core.controller.file.file_collection import FileCollectionController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.entity.model import Model
 from datmo.core.entity.session import Session
+from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import (
     ProjectNotInitialized, EnvironmentInitFailed, FileIOError, UnstagedChanges)
 
@@ -125,6 +128,9 @@ class ProjectController(BaseController):
                             "id": default_session_obj.id,
                             "current": True
                         })
+            # If successfully initialized project then create config
+            self.config_store = JSONStore(
+                os.path.join(self.home, ".datmo", ".config"))
             return True
         except Exception:
             # if any error occurred with new model, ensure no initialize occurs and raise previous error

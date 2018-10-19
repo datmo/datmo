@@ -22,6 +22,10 @@ class DeployCommand(ProjectCommand):
         super(DeployCommand, self).__init__(cli_helper)
         self.deploy_controller = DeployController()
 
+    def deploy(self):
+        self.parse(["deploy", "--help"])
+        return True
+
     @Helper.notify_no_project_found
     def service(self, **kwargs):
         """
