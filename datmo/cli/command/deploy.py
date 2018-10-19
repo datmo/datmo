@@ -174,8 +174,7 @@ class DeployCommand(ProjectCommand):
             sys.exit(response.status)
         current_cluster_information = response.result
         header_list = [
-            'cluster name', 'server type', 'count', 'service path',
-            'service url'
+            'name', 'server type', 'count', 'service path', 'service url'
         ]
         table_header_list = []
         for i in header_list:
@@ -194,7 +193,7 @@ class DeployCommand(ProjectCommand):
                         cluster_server_count, '', ''
                     ])
                     deploy_item = {
-                        "cluster name": cluster_name,
+                        "name": cluster_name,
                         "server type": cluster_server_type,
                         "count": cluster_server_count,
                         "service path": "",
@@ -211,7 +210,7 @@ class DeployCommand(ProjectCommand):
                         ])
                         displayed_cluster_names.append(cluster_name)
                         deploy_item = {
-                            "cluster name": cluster_name,
+                            "name": cluster_name,
                             "server type": cluster_server_type,
                             "count": cluster_server_count,
                             "service path": service_route,
@@ -220,7 +219,7 @@ class DeployCommand(ProjectCommand):
                     else:
                         t.add_row(['', '', '', service_route, service_url])
                         deploy_item = {
-                            "cluster name": "",
+                            "name": "",
                             "server type": "",
                             "count": "",
                             "service path": service_route,
