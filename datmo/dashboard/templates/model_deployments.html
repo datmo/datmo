@@ -127,7 +127,7 @@
                 function getMoreData() {
                     setTimeout(function(){
                         $.ajax({
-                            url: "/data/{{ model.id }}/restful",
+                            url: "/data/{{ model.id }}/{{ deployment_version_id }}",
                             type: "GET",
                             data: {
                                 start: startCounter

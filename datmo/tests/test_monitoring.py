@@ -23,7 +23,7 @@ class TestMonitoringModule():
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         # TODO: move API key to environment variable
         self.monitoring = Monitoring(
-            api_key="d41d8cd98f00b204e9800998ecf8427e")
+            api_key="6a3a3cd900eaf7b406a41d68f8ca7969")
         self.monitoring.set_model_id("model_id")
         self.monitoring.set_model_version_id("v3")
         self.monitoring.set_deployment_version_id("microservice")
@@ -54,8 +54,8 @@ class TestMonitoringModule():
         assert result == True
 
     def test_search_metadata(self):
-        filter = {"model_id": "model_id"}
-        result = self.monitoring.search_metadata(filter)
+        filter_data = {"model_id": "model_id"}
+        result = self.monitoring.search_metadata(filter=filter_data)
         assert isinstance(result, list)
         assert len(result) >= 2
 
@@ -87,8 +87,9 @@ class TestMonitoringModule():
         result = self.monitoring.search_metadata(filter)
         assert isinstance(result, list)
         assert len(result) == 1
+        assert isinstance(result[0]["feedback"], dict)
         assert result[0]["updated_at"] > result[0]["created_at"]
-        assert result[0]['id'] == self.test_data_id
+        assert result[0]["id"] == self.test_data_id
 
         filter = {"model_id": "model_id", "start": 0, "count": 1}
         result = self.monitoring.search_metadata(filter)

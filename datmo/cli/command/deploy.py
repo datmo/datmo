@@ -22,20 +22,23 @@ class DeployCommand(ProjectCommand):
         super(DeployCommand, self).__init__(cli_helper)
         self.deploy_controller = DeployController()
 
+    def deploy(self):
+        self.parse(["deploy", "--help"])
+        return True
+
     @Helper.notify_no_project_found
     def service(self, **kwargs):
         """
-        Creates the service with the specified server type in a cluster
+        Creates the FaaS service with the specified server type in a cluster
         """
         self.cli_helper.echo(__("info", "cli.deploy.service"))
         cluster_name = kwargs.get("cluster_name", None)
         server_type = kwargs.get("server_type", None)
         size = kwargs.get("size", None)
-        path = kwargs.get("path", None)
 
         while not cluster_name:
             cluster_name = self.cli_helper.prompt(
-                __("prompt", "cli.project.deploy.service.cluster_name"))
+                __("prompt", "cli.project.deploy.service.name"))
 
         # Get all cluster name, server type and count
         response = self.deploy_controller.cluster_ls()
@@ -53,24 +56,16 @@ class DeployCommand(ProjectCommand):
         if cluster_name in cluster_names:
             cluster_server_type = cluster_server_types[cluster_names.index(
                 cluster_name)]
+            self.cli_helper.echo(
+                __("warn", "cli.deploy.service.deployment_exists",
+                   cluster_server_type))
             if server_type and server_type != cluster_server_type:
                 self.cli_helper.echo(
-                    bcolors.OKBLUE +
-                    "---> Cluster already exists with server type: %s" %
-                    (cluster_server_type) + bcolors.ENDC)
-                self.cli_helper.echo(
-                    bcolors.FAIL +
-                    "Please remove the cluster to start a cluster %s with server"
-                    " type: %s" % (cluster_name, server_type) + bcolors.ENDC)
+                    __("info", "cli.deploy.service.update_server",
+                       (cluster_name, server_type)))
             else:
                 self.cli_helper.echo(
-                    bcolors.WARNING +
-                    "---> Cluster exists with server type: %s" %
-                    (cluster_server_type) + bcolors.ENDC)
-                self.cli_helper.echo(
-                    bcolors.WARNING +
-                    "---> Use the update command to re-deploy new code or to scale the size of already"
-                    " deployed services" + bcolors.ENDC)
+                    __("info", "cli.deploy.service.update_deploy"))
             return
 
         while not server_type:
@@ -95,9 +90,8 @@ class DeployCommand(ProjectCommand):
         if response.status:
             self.cli_helper.echo(response.message)
             sys.exit(response.status)
-        self.cli_helper.echo(bcolors.OKGREEN + u'\u2713' +
-                             " Successfully deployed on the cluster: %s" %
-                             cluster_name + bcolors.ENDC)
+        self.cli_helper.echo(
+            __("info", "cli.deploy.service.success", cluster_name))
 
     @Helper.notify_no_project_found
     def update(self, **kwargs):
@@ -111,7 +105,7 @@ class DeployCommand(ProjectCommand):
 
         while not cluster_name:
             cluster_name = self.cli_helper.prompt(
-                __("prompt", "cli.project.deploy.update.cluster_name"))
+                __("prompt", "cli.project.deploy.update.name"))
 
         # Get all cluster name, server type and count
         response = self.deploy_controller.cluster_ls()
@@ -134,11 +128,11 @@ class DeployCommand(ProjectCommand):
             cluster_server_count = cluster_server_counts[cluster_names.index(
                 cluster_name)]
             self.cli_helper.echo(
-                bcolors.OKBLUE + "---> Cluster exists with server type: %s" %
-                (cluster_server_type) + bcolors.ENDC)
+                __("warn", "cli.deploy.update.deployment_exists",
+                   cluster_server_type))
             while not size:
                 size = self.cli_helper.prompt(
-                    __("prompt", "cli.project.deploy.service.size"))
+                    __("prompt", "cli.project.deploy.update.size"))
                 size = 1 if size is None else int(size)
 
             if size and size != cluster_server_count:
@@ -150,11 +144,9 @@ class DeployCommand(ProjectCommand):
                     sys.exit(response.status)
         else:
             self.cli_helper.echo(
-                bcolors.WARNING + "---> No cluster exist with this name %s" %
-                cluster_name + bcolors.ENDC)
+                __("error", "cli.deploy.update.deployment_dne", cluster_name))
             self.cli_helper.echo(
-                bcolors.WARNING +
-                "---> Create cluster using the service command" + bcolors.ENDC)
+                __("info", "cli.deploy.update.create_deployment"))
             return
 
         # deploy the model code onto the cluster
@@ -163,9 +155,7 @@ class DeployCommand(ProjectCommand):
         if response.status:
             self.cli_helper.echo(response.message)
             sys.exit(response.status)
-        self.cli_helper.echo(bcolors.OKGREEN + u'\u2713' +
-                             " Successfully deployed on the cluster: %s" %
-                             cluster_name + bcolors.ENDC)
+        self.cli_helper.echo(__("info", "cli.deploy.update.success"))
 
     @Helper.notify_no_project_found
     def ls(self, **kwargs):
@@ -266,9 +256,7 @@ class DeployCommand(ProjectCommand):
 
         try:
             self.cli_helper.echo(
-                bcolors.BOLD +
-                "Downloading compressed io logs for service route %s for date %s..."
-                % (service_path, date) + bcolors.ENDC)
+                __("info", "cli.deploy.logs.download", (service_path, date)))
             response = self.deploy_controller.service_iologs(
                 service_path, date)
             if response.status:
@@ -276,8 +264,7 @@ class DeployCommand(ProjectCommand):
                 sys.exit(response.status)
         except Exception as e:
             self.cli_helper.echo(
-                bcolors.FAIL + "error: while extracting logs."
-                " error due to following,\n %s" % e + bcolors.ENDC)
+                __("error", "cli.deploy.logs.download_error", e))
 
     @Helper.notify_no_project_found
     def rm(self, **kwargs):
@@ -289,14 +276,9 @@ class DeployCommand(ProjectCommand):
             cluster_name = self.cli_helper.prompt(
                 __("prompt", "cli.project.deploy.rm.service_name"))
 
-        self.cli_helper.echo(
-            bcolors.BOLD +
-            "     Removing all the services and servers in the cluster" +
-            bcolors.ENDC)
+        self.cli_helper.echo(__("info", "cli.deploy.rm.removing"))
         response = self.deploy_controller.cluster_stop(cluster_name)
         if response.status:
             self.cli_helper.echo(response.message)
             sys.exit(response.status)
-        self.cli_helper.echo(
-            bcolors.OKGREEN + u'\u2713' +
-            " Successfully removed Cluster: %s" % cluster_name + bcolors.ENDC)
+        self.cli_helper.echo(__("info", "cli.deploy.rm.success", cluster_name))

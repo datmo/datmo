@@ -1,3 +1,4 @@
+import uuid
 import json
 import random
 from flask import Flask
@@ -14,10 +15,20 @@ datmo_monitoring = Monitoring(api_key="d41d8cd98f00b204e9800998ecf8427e")
 
 @app.route("/")
 def home():
-    user = {"name": "test", "username": "test_username", "email": "test_email"}
+    user = {
+        "name":
+            "Shabaz Patel",
+        "username":
+            "shabazp",
+        "email":
+            "shabaz@datmo.com",
+        "gravatar_url":
+            "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
+            "?s=220&d=identicon&r=PG"
+    }
     models = [{
-        "id": "anand_test",
-        "name": "anand_test",
+        "id": "credit_fraud",
+        "name": "Credit Fraud",
         "categories": "cool, default",
         "repo_language": "python"
     }]
@@ -26,7 +37,17 @@ def home():
 
 @app.route("/<model_id>")
 def model_summary(model_id):
-    user = {"name": "test", "username": "test_username", "email": "test_email"}
+    user = {
+        "name":
+            "Shabaz Patel",
+        "username":
+            "shabazp",
+        "email":
+            "shabaz@datmo.com",
+        "gravatar_url":
+            "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
+            "?s=220&d=identicon&r=PG"
+    }
     snapshots = [
         {
             "id": "alfwokd",
@@ -44,7 +65,7 @@ def model_summary(model_id):
     stats_keys = ["accuracy"]
     model = {
         "id": model_id,
-        "name": "anand_test",
+        "name": "Credit Fraud",
         "categories": "cool, default",
         "repo_language": "python",
         "snapshots": snapshots
@@ -60,7 +81,17 @@ def model_summary(model_id):
 
 @app.route("/<model_id>/experiments")
 def model_experiments(model_id):
-    user = {"name": "test", "username": "test_username", "email": "test_email"}
+    user = {
+        "name":
+            "Shabaz Patel",
+        "username":
+            "shabazp",
+        "email":
+            "shabaz@datmo.com",
+        "gravatar_url":
+            "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
+            "?s=220&d=identicon&r=PG"
+    }
     snapshots = [
         {
             "id": "alfwokd",
@@ -78,7 +109,7 @@ def model_experiments(model_id):
     stats_keys = ["accuracy"]
     model = {
         "id": model_id,
-        "name": "anand_test",
+        "name": "Credit Fraud",
         "categories": "cool, default",
         "repo_language": "python",
         "snapshots": snapshots
@@ -94,7 +125,17 @@ def model_experiments(model_id):
 
 @app.route("/<model_id>/snapshots")
 def model_snapshots(model_id):
-    user = {"name": "test", "username": "test_username", "email": "test_email"}
+    user = {
+        "name":
+            "Shabaz Patel",
+        "username":
+            "shabazp",
+        "email":
+            "shabaz@datmo.com",
+        "gravatar_url":
+            "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
+            "?s=220&d=identicon&r=PG"
+    }
     snapshots = [
         {
             "id": "alfwokd",
@@ -112,7 +153,7 @@ def model_snapshots(model_id):
     stats_keys = ["accuracy"]
     model = {
         "id": model_id,
-        "name": "anand_test",
+        "name": "Credit Fraud",
         "categories": "cool, default",
         "repo_language": "python",
         "snapshots": snapshots
@@ -155,7 +196,8 @@ def model_deployment_data(model_id, deployment_version_id):
         datum = new_data[0]
         input_features = datum['input'].keys()
         prediction_features = datum['prediction'].keys()
-        actual_features = datum['actual'].keys() if datum['actual'] else []
+        feedback_features = datum['feedback'].keys() if datum[
+            'feedback'] else []
 
         # Loop through input and predictions to populate the graphs
         new_time_data = [datum['created_at'] for datum in new_data]
@@ -181,6 +223,46 @@ def model_deployment_data(model_id, deployment_version_id):
             cumulative_feature_data = [
                 datum['prediction'][prediction_feature]
                 for datum in cumulative_data
+            ]
+            import numpy as np
+            counts, binedges = np.histogram(cumulative_feature_data)
+            binsize = binedges[1] - binedges[0]
+            bin_names = [
+                str(round(binedge, 2)) + " : " +
+                str(round(binedge + binsize, 2)) for binedge in binedges
+            ]
+            histogram_graphs_update.append({
+                "cumulative_data": {
+                    "x": [bin_names],
+                    "y": [counts]
+                }
+            })
+
+        # add updated_at time if not None
+        new_time_data_update = [datum['updated_at'] for datum in new_data]
+        new_time_data_update_datetime = [
+            datetime.fromtimestamp(
+                float(t) / 1000).strftime('%Y-%m-%d %H:%M:%S')
+            for t in new_time_data_update if t
+        ]
+
+        for feedback_feature in feedback_features:
+            # time series data chart (if not None)
+            new_feature_data = [
+                datum['feedback'][feedback_feature] for datum in new_data
+                if datum['feedback']
+            ]
+            time_series_graphs_extension.append({
+                "new_data": {
+                    "x": [new_time_data_update_datetime],
+                    "y": [new_feature_data],
+                }
+            })
+
+            # histogram data chart (if not None)
+            cumulative_feature_data = [
+                datum['feedback'][feedback_feature]
+                for datum in cumulative_data if datum['feedback']
             ]
             import numpy as np
             counts, binedges = np.histogram(cumulative_feature_data)
@@ -242,10 +324,20 @@ def model_deployment_data(model_id, deployment_version_id):
 
 @app.route("/<model_id>/deployments")
 def model_deployments(model_id):
-    user = {"name": "test", "username": "test_username", "email": "test_email"}
+    user = {
+        "name":
+            "Shabaz Patel",
+        "username":
+            "shabazp",
+        "email":
+            "shabaz@datmo.com",
+        "gravatar_url":
+            "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
+            "?s=220&d=identicon&r=PG"
+    }
     model = {
         "id": model_id,
-        "name": "anand_test",
+        "name": "Credit Fraud",
         "categories": "cool, default",
         "repo_language": "python"
     }
@@ -254,20 +346,19 @@ def model_deployments(model_id):
     filter = {"model_id": model_id}
 
     all_data = datmo_monitoring.search_metadata(filter)
-    model_version_ids = list(
-        set(data['model_version_id'] for data in all_data))
-    deployment_version_ids = list(
-        set(data['deployment_version_id'] for data in all_data))
+    model_version_ids = set(data['model_version_id'] for data in all_data)
+    deployment_version_ids = set(
+        data['deployment_version_id'] for data in all_data)
 
     # Get deployment information for each of the deployments
     deployments = []
-    for deployment_version_id, model_version_id in zip(deployment_version_ids,
-                                                       model_version_ids):
-        deployment_info = datmo_monitoring.get_deployment_info(
-            deployment_version_id=deployment_version_id)
-        deployment_info['deployment_version_id'] = deployment_version_id
-        deployment_info['model_version_id'] = model_version_id
-        deployments.append(deployment_info)
+    for deployment_version_id in deployment_version_ids:
+        for model_version_id in model_version_ids:
+            deployment_info = datmo_monitoring.get_deployment_info(
+                deployment_version_id=deployment_version_id)
+            deployment_info['deployment_version_id'] = deployment_version_id
+            deployment_info['model_version_id'] = model_version_id
+            deployments.append(deployment_info)
 
     # Get the data here (hard coded)
     # TODO: generalize
@@ -278,16 +369,22 @@ def model_deployments(model_id):
     time_series_graphs = []
     histogram_graphs = []
 
+    filter = {
+        "model_id": model_id,
+        "model_version_id": "model_a",
+        "deployment_version_id": "microservice"
+    }
+
     if model_version_ids and deployment_version_ids:
-        filter = {
-            "model_id": model_id,
-            "model_version_id": model_version_ids[0],
-            "deployment_version_id": deployment_version_ids[0]
-        }
+        # filter = {
+        #     "model_id": model_id,
+        #     "model_version_id": model_version_ids[0],
+        #     "deployment_version_id": deployment_version_ids[0]
+        # }
         data = datmo_monitoring.search_metadata(filter)
         datum = data[0]
 
-        def __plotly_graphs(variable_name):
+        def __plotly_graphs(variable_name, time_name="created at"):
             color_choices = [
                 "rgb(40,165,187)", "rgb(124,159,57)", "rgb(238,93,134)",
                 "rgb(93,147,228)"
@@ -311,7 +408,7 @@ def model_deployments(model_id):
                 "layout": {
                     "title": "time series for " + variable_name,
                     "xaxis": {
-                        "title": "time"
+                        "title": "time (" + time_name + ")"
                     },
                     "yaxis": {
                         "title": variable_name
@@ -343,20 +440,21 @@ def model_deployments(model_id):
             })
 
         # prediction
-        for key in datum['prediction'].keys():
-            time_series_graphs.append(__plotly_graphs(key)[0])
-            histogram_graphs.append(__plotly_graphs(key)[1])
+
+        graph_keys = list(datum['prediction'].keys())
+
+        # feedback
+        if datum['feedback'] is not None:
+            graph_keys.extend(list(datum['feedback'].keys()))
 
         # input
-        for key in datum['input'].keys():
-            time_series_graphs.append(__plotly_graphs(key)[0])
-            histogram_graphs.append(__plotly_graphs(key)[1])
+        graph_keys.extend(list(datum['input'].keys()))
 
-        # actual
-        if datum['actual']:
-            for key in datum['actual'].keys():
-                time_series_graphs.append(__plotly_graphs(key)[0])
-                histogram_graphs.append(__plotly_graphs(key)[1])
+        # add all graphs to the appropriate lists
+        for key in graph_keys:
+            ts, hist = __plotly_graphs(key)
+            time_series_graphs.append(ts)
+            histogram_graphs.append(hist)
 
     # Add "ids" to each of the graphs to pass up to the client
     # for templating
@@ -379,13 +477,16 @@ def model_deployments(model_id):
 
     return render_template(
         "model_deployments.html",
+        user=user,
+        model=model,
+        deployments=deployments,
+        model_version_id=filter['model_version_id'],
+        deployment_version_id=filter['deployment_version_id'],
         time_series_ids=time_series_ids,
         histogram_ids=histogram_ids,
         time_series_graphsJSON=time_series_graphsJSON,
         histogram_graphsJSON=histogram_graphsJSON,
-        user=user,
-        model=model,
-        deployments=deployments)
+    )
 
 
 if __name__ == "__main__":

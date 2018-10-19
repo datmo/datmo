@@ -1,4 +1,5 @@
 import os
+import yaml
 import tempfile
 import shutil
 
@@ -6,6 +7,7 @@ from datmo.core.controller.base import BaseController
 from datmo.core.util.misc_functions import Commands
 from datmo.core.controller.deploy.driver.datmo_microservice import DatmoMicroserviceDeployDriver
 from datmo.config import Config
+from datmo.core.util.spinner import Spinner
 
 
 class DeployController(BaseController):
@@ -48,13 +50,16 @@ class DeployController(BaseController):
         self.service_container_management = service_container_management
         self.driver = DatmoMicroserviceDeployDriver(
             end_point=self.datmo_end_point, api_key=self.datmo_api_key)
+        self.spinner = Spinner()
 
     def cluster_deploy(self, cluster_name=None, server_type=None, size=None):
         """
         Deploy the Servers in the cluster with the defined setup
         """
+        self.spinner.start()
         response = self.driver.create_cluster(
             cluster_name, server_type, count=size)
+        self.spinner.stop()
         return response
 
     def cluster_update(self, cluster_name, size):
@@ -68,8 +73,10 @@ class DeployController(BaseController):
         size : str
             Number of servers
         """
+        self.spinner.start()
         response = self.driver.update_cluster(
             count=size, cluster_name=cluster_name)
+        self.spinner.stop()
         return response
 
     def cluster_stop(self, cluster_name):
@@ -81,8 +88,10 @@ class DeployController(BaseController):
         cluster_name : str
             name of the cluster
         """
+        self.spinner.start()
         response = self.driver.update_cluster(
             count=0, cluster_name=cluster_name)
+        self.spinner.stop()
         return response
 
     def cluster_ls(self, cluster_name='*'):
@@ -94,7 +103,9 @@ class DeployController(BaseController):
         cluster_name : str
             name of the cluster
         """
+        self.spinner.start()
         response = self.driver.get_cluster_info(cluster_name)
+        self.spinner.stop()
         return response
 
     def system_info(self):
@@ -127,24 +138,57 @@ class DeployController(BaseController):
             self.commands.copy(self.home, tmp_dirpath)
             environment_dirpath = os.path.join(tmp_dirpath,
                                                'datmo_environment')
+            files_dirpath = os.path.join(tmp_dirpath, 'datmo_files')
             if os.path.exists(environment_dirpath):
                 shutil.rmtree(os.path.join(tmp_dirpath, '.datmo'))
                 self.commands.copy(environment_dirpath, tmp_dirpath)
                 shutil.rmtree(os.path.join(tmp_dirpath, 'datmo_environment'))
-                shutil.rmtree(os.path.join(tmp_dirpath, 'datmo_files'))
-                list_dir = os.listdir(tmp_dirpath)
 
-                for item in list_dir:
-                    if item.endswith(".zip") or item.endswith(".csv"):
-                        os.remove(os.path.join(tmp_dirpath, item))
+            if os.path.exists(files_dirpath):
+                shutil.rmtree(os.path.join(files_dirpath))
+
+            # Exclude any files based on datmo deploy config file
+            if os.path.exists(os.path.join(tmp_dirpath, 'datmo-deploy.yml')):
+                datmo_deploy_config_path = os.path.join(
+                    tmp_dirpath, 'datmo-deploy.yml')
+            elif os.path.exists(
+                    os.path.join(tmp_dirpath, 'datmo-deploy.yaml')):
+                datmo_deploy_config_path = os.path.join(
+                    tmp_dirpath, 'datmo-deploy.yaml')
+            else:
+                datmo_deploy_config_path = None
+            list_dir = os.listdir(tmp_dirpath)
+            if datmo_deploy_config_path:
+                with open(datmo_deploy_config_path, 'r') as stream:
+                    try:
+                        datmo_deploy = yaml.load(stream)
+                        if datmo_deploy is not None:
+                            files_exclude = datmo_deploy['deploy'][
+                                'files_exclude']
+                            for item in list_dir:
+                                if item in files_exclude and \
+                                        os.path.exists(os.path.join(tmp_dirpath, item)):
+                                    os.remove(os.path.join(tmp_dirpath, item))
+
+                                if item.startswith('.') and \
+                                        os.path.isdir(os.path.join(tmp_dirpath, item)):
+                                    shutil.rmtree(
+                                        os.path.join(tmp_dirpath, item))
+                                elif item.startswith('.') and \
+                                    os.path.isfile(os.path.join(tmp_dirpath, item)):
+                                    os.remove(os.path.join(tmp_dirpath, item))
+
+                    except yaml.YAMLError as exc:
+                        print(exc)
         except Exception as e:
             print(e)
-
         model_zipfile_path = os.path.join(tmp_dirpath, 'datmo_model.zip')
+        self.spinner.start()
         self.commands.zip_folder(tmp_dirpath, model_zipfile_path)
         response = self.driver.model_deploy(cluster_name, model_zipfile_path)
         # remove the temp directory
         shutil.rmtree(tmp_dirpath)
+        self.spinner.stop()
         return response
 
     def service_iologs(self, service_path, date):

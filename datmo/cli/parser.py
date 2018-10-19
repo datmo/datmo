@@ -308,18 +308,21 @@ def get_datmo_parser():
     rerun_parser.add_argument("id", help="run id to be rerun")
 
     # Deploy
-    deploy_parser = subparsers.add_parser("deploy", help="deploy module")
+    deploy_parser = subparsers.add_parser(
+        "deploy",
+        description=__("argparser", "cli.deploy.description"),
+        help="deploy module")
     deploy_subcommand_parsers = deploy_parser.add_subparsers(
         title="subcommands", dest="subcommand")
 
     deploy_service_parser = deploy_subcommand_parsers.add_parser(
         "service", help="deploy service module")
     deploy_service_parser.add_argument(
-        "--cluster-name",
+        "--name",
         dest="cluster_name",
         default=None,
         type=str,
-        help="Pass in the name of the cluster")
+        help="Pass in the name of the service")
     deploy_service_parser.add_argument(
         "--server-type",
         dest="server_type",
@@ -332,33 +335,21 @@ def get_datmo_parser():
         default=None,
         type=int,
         help="The number of servers required for the cluster")
-    deploy_service_parser.add_argument(
-        "--path",
-        dest="path",
-        default=os.getcwd(),
-        type=str,
-        help="Path for the project to be deployed")
 
     deploy_update_parser = deploy_subcommand_parsers.add_parser(
         "update", help="deploy update module")
     deploy_update_parser.add_argument(
-        "--cluster-name",
+        "--name",
         dest="cluster_name",
         default=None,
         type=str,
-        help="Pass in the name of the cluster")
+        help="Pass in the name of the service")
     deploy_update_parser.add_argument(
         "--size",
         dest="size",
         default=None,
         type=int,
-        help="The number of servers required for the cluster")
-    deploy_update_parser.add_argument(
-        "--path",
-        dest="path",
-        default=os.getcwd(),
-        type=str,
-        help="Path for the project to be deployed")
+        help="The number of servers to setup for the service")
 
     deploy_ls_parser = deploy_subcommand_parsers.add_parser(
         "ls", help="list module")
@@ -400,11 +391,11 @@ def get_datmo_parser():
     deploy_rm_parser = deploy_subcommand_parsers.add_parser(
         "rm", help="deploy rm module")
     deploy_rm_parser.add_argument(
-        "--cluster-name",
+        "--name",
         dest="cluster_name",
         default=None,
         type=str,
-        help="Pass in the name of the cluster")
+        help="Pass in the name of the service")
 
     # Session
     session_parser = subparsers.add_parser("session", help="session module")
