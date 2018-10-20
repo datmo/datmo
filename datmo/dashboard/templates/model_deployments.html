@@ -74,8 +74,8 @@
                 <tbody>
                 {% for deployment in deployments %}
                 <tr data-id="{{ deployment.deployment_version_id }}"  class="snapshot-hover-menu">
-                    <td><a href="#">{{ deployment.deployment_version_id }}</a></td>
-                    <td><a href="#">{{ deployment.model_version_id }}</a></td>
+                    <td><a href="/{{ model.id }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}/output">{{ deployment.deployment_version_id }}</a></td>
+                    <td><a href="/{{ model.id }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}/output">{{ deployment.model_version_id }}</a></td>
                     <td>{{ deployment.created_at }}</td>
                     <td>{{ deployment.type }}</td>
                     <td>{% for endpoint in deployment.endpoints %} <a href="{{ endpoint }}">{{ endpoint }}</a><br><br>{% endfor %}</td>
@@ -88,80 +88,6 @@
             </table>
             <script src='{{ url_for("static", filename="./js/snapshot.js") }}'></script>
             </div>
-
-            {% for time_series_id in time_series_ids %}
-                <div class="container">
-                    <div class="row">
-                        <div class="col-md-5" id="{{ time_series_id }}"></div>
-                        <div class="col-md-5" id="{{ histogram_ids[loop.index0] }}"></div>
-                    </div>
-                </div>
-            {% endfor %}
-
-            <!-- D3.js -->
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
-            <!-- jQuery -->
-            <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-            <!-- Plotly.js -->
-            <script src="https://d14fo0winaifog.cloudfront.net/plotly-basic.js"></script>
-
-            <script type="text/javascript">
-                var timeSeriesGraphs = {{ time_series_graphsJSON | safe }};
-                var histogramGraphs = {{ histogram_graphsJSON | safe }};
-                var timeSeriesIds = {{ time_series_ids | safe }};
-                var histogramIds = {{ histogram_ids | safe }};
-
-                // Initially create plotly graphs
-                for(var i in timeSeriesGraphs) {
-                    Plotly.plot(timeSeriesIds[i], // the ID of the div, created above
-                                timeSeriesGraphs[i].data,
-                                timeSeriesGraphs[i].layout || {});
-                    Plotly.plot(histogramIds[i], // the ID of the div, created above
-                                histogramGraphs[i].data,
-                                histogramGraphs[i].layout || {});
-                }
-
-                // Extend traces with new data (if present)
-                var startCounter = 0;
-
-                function getMoreData() {
-                    setTimeout(function(){
-                        $.ajax({
-                            url: "/data/{{ model.id }}/{{ deployment_version_id }}",
-                            type: "GET",
-                            data: {
-                                start: startCounter,
-                                num_features: {{ num_features }}
-                            },
-                            async: true,
-                            success: function(data) {
-                                // Do something once you have the data
-                                var timeSeriesGraphsExtension = JSON.parse(data.time_series_graphs_extension_json_str);
-                                var histogramGraphsUpdate = JSON.parse(data.histogram_graphs_update_json_str);
-                                console.log(timeSeriesGraphsExtension);
-                                console.log(histogramGraphsUpdate);
-                                var numNewResults = data.num_new_results;
-                                console.log(numNewResults);
-                                // Loop through all time series and histogram graphs to update data
-                                for(var i in timeSeriesGraphsExtension) {
-                                    // Time series graph updates with extension
-                                    Plotly.extendTraces(timeSeriesIds[i],
-                                        timeSeriesGraphsExtension[i].new_data, [0]);
-                                    // Histogram graph updates with update
-                                    Plotly.restyle(histogramIds[i],
-                                        histogramGraphsUpdate[i].cumulative_data, [0]);
-                                }
-                                // append number of results to the startCounter
-                                startCounter = startCounter + numNewResults;
-                                // fetch new data and update graphs
-                                getMoreData();
-                            },
-                            dataType: "json"
-                        });
-                    }, 2000);
-                }
-                getMoreData();
-            </script>
         </div>
     </div>
 </div>

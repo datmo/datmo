@@ -1,0 +1,133 @@
+{% extends "layouts/base_model.html" %}
+{% block subtitle %}Deployment Detail{% endblock %}
+{% block modelbody %}
+<div class="section-tab-mobile">
+    <ul>
+        <a href="/{{ model.id }}">
+            <li>Summary</li>
+        </a>
+        <a href="/{{ model.id }}/experiments">
+            <li>Experiments</li>
+        </a>
+        <a href="/{{ model.id }}/snapshots">
+            <li>Snapshots</li>
+        </a>
+        <a href="/{{ model.id }}/deployments">
+            <li>Deployments</li>
+        </a>
+    </ul>
+</div>
+<div class="section-tab">
+    <div class="row">
+        <div class="col-xs-12">
+            <ul>
+                <a href="/{{ model.id }}" class="">
+                    <li>Summary</li>
+                </a>
+                <a href="/{{ model.id }}/experiments" class="">
+                    <li>Experiments</li>
+                </a>
+                <a href="/{{ model.id }}/snapshots" class="">
+                    <li>Snapshots</li>
+                </a>
+                <a href="/{{ model.id }}/deployments" class="active">
+                    <li>Deployments</li>
+                </a>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="model-section-content-wrapper">
+
+    <div class="content-box multi-item">
+        <div class="multi-item-content-wrap">
+
+            <div class="multi-item-content-row snapshot-filters">
+                <span> <a href="/{{ model.id }}/deployments">deployments</a></span>
+                <span> > <a href="#">{{ deployment_version_id }}</a></span>
+                <span> > <a href="#">{{ model_version_id }}</a></span>
+                <span> > output </span>
+            </div>
+            <div class="multi-item-content-row overflow-scroll" >
+                <a href="/{{ model.id }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}/input">
+                    <button>Input</button>
+                </a>
+            </div>
+
+            {% for time_series_id in time_series_ids %}
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-5" id="{{ time_series_id }}"></div>
+                        <div class="col-md-5" id="{{ histogram_ids[loop.index0] }}"></div>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <!-- D3.js -->
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+            <!-- jQuery -->
+            <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+            <!-- Plotly.js -->
+            <script src="https://d14fo0winaifog.cloudfront.net/plotly-basic.js"></script>
+
+            <script type="text/javascript">
+                var timeSeriesGraphs = {{ time_series_graphsJSON | safe }};
+                var histogramGraphs = {{ histogram_graphsJSON | safe }};
+                var timeSeriesIds = {{ time_series_ids | safe }};
+                var histogramIds = {{ histogram_ids | safe }};
+
+                // Initially create plotly graphs
+                for(var i in timeSeriesGraphs) {
+                    Plotly.plot(timeSeriesIds[i], // the ID of the div, created above
+                                timeSeriesGraphs[i].data,
+                                timeSeriesGraphs[i].layout || {});
+                    Plotly.plot(histogramIds[i], // the ID of the div, created above
+                                histogramGraphs[i].data,
+                                histogramGraphs[i].layout || {});
+                }
+
+                // Extend traces with new data (if present)
+                var startCounter = 0;
+
+                function getMoreData() {
+                    setTimeout(function(){
+                        $.ajax({
+                            url: "/data/{{ model.id }}/{{ deployment_version_id }}/{{ model_version_id }}",
+                            type: "GET",
+                            data: {
+                                start: startCounter,
+                                num_features: {{ num_features }}
+                            },
+                            async: true,
+                            success: function(data) {
+                                // Do something once you have the data
+                                var timeSeriesGraphsExtension = JSON.parse(data.time_series_graphs_extension_json_str);
+                                var histogramGraphsUpdate = JSON.parse(data.histogram_graphs_update_json_str);
+                                console.log(timeSeriesGraphsExtension);
+                                console.log(histogramGraphsUpdate);
+                                var numNewResults = data.num_new_results;
+                                console.log(numNewResults);
+                                // Loop through all time series and histogram graphs to update data
+                                for(var i in timeSeriesGraphsExtension) {
+                                    // Time series graph updates with extension
+                                    Plotly.extendTraces(timeSeriesIds[i],
+                                        timeSeriesGraphsExtension[i].new_data, [0]);
+                                    // Histogram graph updates with update
+                                    Plotly.restyle(histogramIds[i],
+                                        histogramGraphsUpdate[i].cumulative_data, [0]);
+                                }
+                                // append number of results to the startCounter
+                                startCounter = startCounter + numNewResults;
+                                // fetch new data and update graphs
+                                getMoreData();
+                            },
+                            dataType: "json"
+                        });
+                    }, 2000);
+                }
+                getMoreData();
+            </script>
+        </div>
+    </div>
+</div>
+{% endblock %}
