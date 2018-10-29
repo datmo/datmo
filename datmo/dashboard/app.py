@@ -172,9 +172,14 @@ def model_deployment_data(model_id, deployment_version_id, model_version_id):
     # here we want to get the value of user (i.e. ?start=0)
     start = request.args.get('start', 0)
     count = request.args.get('count', 100)
-    num_features = request.args.get('num_features', 0)
-    input = request.args.get('input', False)
-    if input == "true": input = True
+    data_type = request.args.get('data_type', None)
+    name = request.args.get('name', None)
+    graph_type = request.args.get('graph_type', None)
+
+    if not data_type and not name and not graph_type:
+        return "error", 400
+
+    # Get new data to add to the graphs
     filter = {
         "model_id": model_id,
         "deployment_version_id": deployment_version_id,
@@ -182,176 +187,79 @@ def model_deployment_data(model_id, deployment_version_id, model_version_id):
         "start": int(start),
         "count": int(count)
     }
-    num_new_results = 0
     new_data = datmo_monitoring.search_metadata(filter)
 
-    filter = {
-        "model_id": model_id,
-        "deployment_version_id": deployment_version_id,
-        "model_version_id": model_version_id,
-        "count": int(start) + int(count)
-    }
-    cumulative_data = datmo_monitoring.search_metadata(filter)
+    # update the number of new results
+    num_new_results = len(new_data)
 
-    time_series_graphs_extension = []
-    histogram_graphs_update = []
-    if new_data:
-        num_new_results = len(new_data)
-        # Extract all inputs, predictions, and actual keys
-        datum = new_data[0]
-        input_features = datum['input'].keys()
-        prediction_features = datum['prediction'].keys()
-        feedback_features = datum['feedback'].keys() if datum[
-            'feedback'] else []
-        num_feedback_features = int(num_features) - len(input_features) - len(
-            prediction_features)
+    # return error if data_type is not correct
+    if data_type not in ["input", "prediction", "feedback"]:
+        return "error", 400
 
-        # Loop through input and predictions to populate the graphs
-        new_time_data = [datum['created_at'] for datum in new_data]
+    # populate the data into the correct construct based on graph type
+    if graph_type == "timeseries":
+        new_time_data = [
+            datum['updated_at'] if datum['updated_at'] else datum['created_at']
+            for datum in new_data
+        ]
         new_time_data_datetime = [
             datetime.fromtimestamp(
                 float(t) / 1000).strftime('%Y-%m-%d %H:%M:%S')
             for t in new_time_data
         ]
+        new_feature_data = [
+            datum[data_type][name] if datum[data_type] else None
+            for datum in new_data
+        ]
+        graph_data_output = {
+            "new_data": {
+                "x": [new_time_data_datetime],
+                "y": [new_feature_data],
+            }
+        }
 
-        if input:
-            for input_feature in input_features:
-                # time series data chart
-                new_feature_data = [
-                    datum['input'][input_feature] for datum in new_data
-                ]
-                time_series_graphs_extension.append({
-                    "new_data": {
-                        "x": [new_time_data_datetime],
-                        "y": [new_feature_data],
-                    }
-                })
-
-                # histogram data chart
-                cumulative_feature_data = [
-                    datum['input'][input_feature] for datum in cumulative_data
-                ]
-                import numpy as np
-                counts, binedges = np.histogram(cumulative_feature_data)
-                binsize = binedges[1] - binedges[0]
-                bin_names = [
-                    str(round(binedge, 2)) + " : " +
-                    str(round(binedge + binsize, 2)) for binedge in binedges
-                ]
-                histogram_graphs_update.append({
-                    "cumulative_data": {
-                        "x": [bin_names],
-                        "y": [counts]
-                    }
-                })
-        else:
-            for prediction_feature in prediction_features:
-                # time series data chart
-                new_feature_data = [
-                    datum['prediction'][prediction_feature]
-                    for datum in new_data
-                ]
-                time_series_graphs_extension.append({
-                    "new_data": {
-                        "x": [new_time_data_datetime],
-                        "y": [new_feature_data],
-                    }
-                })
-
-                # histogram data chart
-                cumulative_feature_data = [
-                    datum['prediction'][prediction_feature]
-                    for datum in cumulative_data
-                ]
-                import numpy as np
-                counts, binedges = np.histogram(cumulative_feature_data)
-                binsize = binedges[1] - binedges[0]
-                bin_names = [
-                    str(round(binedge, 2)) + " : " +
-                    str(round(binedge + binsize, 2)) for binedge in binedges
-                ]
-                histogram_graphs_update.append({
-                    "cumulative_data": {
-                        "x": [bin_names],
-                        "y": [counts]
-                    }
-                })
-
-            # add updated_at time if not None
-            new_time_data_update = [datum['updated_at'] for datum in new_data]
-            new_time_data_update_datetime = [
-                datetime.fromtimestamp(
-                    float(t) / 1000).strftime('%Y-%m-%d %H:%M:%S')
-                for t in new_time_data_update if t
-            ]
-
-            # If feedback not present, add in dummy graph data to add
-            if not feedback_features:
-                for i in range(num_feedback_features):
-                    time_series_graphs_extension.append({
-                        "new_data": {
-                            "x": [[]],
-                            "y": [[]],
-                        }
-                    })
-                    histogram_graphs_update.append({
-                        "cumulative_data": {
-                            "x": [[]],
-                            "y": [[]]
-                        }
-                    })
-
-            for feedback_feature in feedback_features:
-                # time series data chart (if not None)
-                new_feature_data = [
-                    datum['feedback'][feedback_feature] for datum in new_data
-                    if datum['feedback']
-                ]
-                time_series_graphs_extension.append({
-                    "new_data": {
-                        "x": [new_time_data_update_datetime],
-                        "y": [new_feature_data],
-                    }
-                })
-
-                # histogram data chart (if not None)
-                cumulative_feature_data = [
-                    datum['feedback'][feedback_feature]
-                    for datum in cumulative_data if datum['feedback']
-                ]
-                import numpy as np
-                counts, binedges = np.histogram(cumulative_feature_data)
-                binsize = binedges[1] - binedges[0]
-                bin_names = [
-                    str(round(binedge, 2)) + " : " +
-                    str(round(binedge + binsize, 2)) for binedge in binedges
-                ]
-                histogram_graphs_update.append({
-                    "cumulative_data": {
-                        "x": [bin_names],
-                        "y": [counts]
-                    }
-                })
+    elif graph_type == "histogram":
+        filter = {
+            "model_id": model_id,
+            "deployment_version_id": deployment_version_id,
+            "model_version_id": model_version_id,
+            "count": int(start) + int(count)
+        }
+        cumulative_data = datmo_monitoring.search_metadata(filter)
+        cumulative_feature_data = [
+            datum[data_type][name] for datum in cumulative_data
+            if datum[data_type]
+        ]
+        import numpy as np
+        counts, binedges = np.histogram(cumulative_feature_data)
+        binsize = binedges[1] - binedges[0]
+        bin_names = [
+            str(round(binedge, 2)) + " : " + str(round(binedge + binsize, 2))
+            for binedge in binedges
+        ]
+        graph_data_output = {
+            "cumulative_data": {
+                "x": [bin_names],
+                "y": [counts]
+            }
+        }
+    else:
+        return "error", 400
 
     # Convert the figures to JSON
     # PlotlyJSONEncoder appropriately converts pandas, datetime, etc
     # objects to their JSON equivalents
-    time_series_graphs_extensionJSON = json.dumps(
-        time_series_graphs_extension, cls=plotly.utils.PlotlyJSONEncoder)
-    histogram_graphs_updateJSON = json.dumps(
-        histogram_graphs_update, cls=plotly.utils.PlotlyJSONEncoder)
+    graph_data_outputJSON = json.dumps(
+        graph_data_output, cls=plotly.utils.PlotlyJSONEncoder)
 
     return jsonify(
-        time_series_graphs_extension_json_str=time_series_graphs_extensionJSON,
-        histogram_graphs_update_json_str=histogram_graphs_updateJSON,
+        graph_data_output_json_str=graph_data_outputJSON,
         num_new_results=num_new_results)
 
 
 @app.route(
-    "/<model_id>/deployments/<deployment_version_id>/<model_version_id>/output"
-)
-def model_deployment_detail_output(model_id, deployment_version_id,
-                                   model_version_id):
+    "/<model_id>/deployments/<deployment_version_id>/<model_version_id>")
+def model_deployment_detail(model_id, deployment_version_id, model_version_id):
     user = {
         "name":
             "Shabaz Patel",
@@ -370,14 +278,12 @@ def model_deployment_detail_output(model_id, deployment_version_id,
         "repo_language": "python"
     }
 
-    time_series_graphs = []
-    histogram_graphs = []
-
     filter = {
         "model_id": model_id,
         "model_version_id": model_version_id,
         "deployment_version_id": deployment_version_id
     }
+    input_keys, prediction_keys, feedback_keys = [], [], []
     data = datmo_monitoring.search_metadata(filter)
 
     if data:
@@ -386,242 +292,20 @@ def model_deployment_detail_output(model_id, deployment_version_id,
             if datum['feedback'] is not None:
                 max_index = ind
         datum = data[max_index]
-
-        def __plotly_graphs(variable_name, time_name="created at"):
-            color_choices = [
-                "rgb(40,165,187)", "rgb(124,159,57)", "rgb(238,93,134)",
-                "rgb(93,147,228)"
-            ]
-            rand_ind = random.randint(0, 3)
-            return ({
-                "data": [{
-                    "x": [],
-                    "y": [],
-                    "type": "scatter",
-                    "mode": "lines+markers",
-                    "marker": {
-                        "size": 10,
-                        "color": color_choices[rand_ind],
-                        "line": {
-                            "width": 2,
-                            "color": "rgb(80,80,80)"
-                        }
-                    }
-                }],
-                "layout": {
-                    "title": "time series for " + variable_name,
-                    "xaxis": {
-                        "title": "time (" + time_name + ")"
-                    },
-                    "yaxis": {
-                        "title": variable_name
-                    }
-                }
-            }, {
-                "data": [{
-                    "x": [],
-                    "y": [],
-                    "type": "bar",
-                    "marker": {
-                        "size": 10,
-                        "color": color_choices[rand_ind],
-                        "line": {
-                            "width": 1.5,
-                            "color": "rgb(80,80,80)"
-                        }
-                    }
-                }],
-                "layout": {
-                    "title": "histogram for " + variable_name,
-                    "xaxis": {
-                        "title": "buckets"
-                    },
-                    "yaxis": {
-                        "title": "counts"
-                    }
-                }
-            })
-
-        # prediction
-        graph_keys = list(datum['prediction'].keys())
-
-        # feedback
-        if datum['feedback'] is not None:
-            graph_keys.extend(list(datum['feedback'].keys()))
-
-        # add all graphs to the appropriate lists
-        for key in graph_keys:
-            ts, hist = __plotly_graphs(key)
-            time_series_graphs.append(ts)
-            histogram_graphs.append(hist)
-
-    # Add "ids" to each of the graphs to pass up to the client
-    # for templating
-    time_series_ids = [
-        'time-series-graph-{}'.format(i)
-        for i, _ in enumerate(time_series_graphs)
-    ]
-    histogram_ids = [
-        'histogram-graph-{}'.format(i) for i, _ in enumerate(histogram_graphs)
-    ]
-
-    # Convert the figures to JSON
-    # PlotlyJSONEncoder appropriately converts pandas, datetime, etc
-    # objects to their JSON equivalents
-
-    time_series_graphsJSON = json.dumps(
-        time_series_graphs, cls=plotly.utils.PlotlyJSONEncoder)
-    histogram_graphsJSON = json.dumps(
-        histogram_graphs, cls=plotly.utils.PlotlyJSONEncoder)
+        input_keys = list(datum['input'].keys())
+        prediction_keys = list(datum['prediction'].keys())
+        feedback_keys = list(
+            datum['feedback'].keys()) if datum['feedback'] is not None else []
 
     return render_template(
-        "model_deployment_detail_output.html",
+        "model_deployment_detail.html",
         user=user,
         model=model,
         model_version_id=model_version_id,
         deployment_version_id=deployment_version_id,
-        num_features=len(time_series_graphs),
-        time_series_ids=time_series_ids,
-        histogram_ids=histogram_ids,
-        time_series_graphsJSON=time_series_graphsJSON,
-        histogram_graphsJSON=histogram_graphsJSON,
-    )
-
-
-@app.route(
-    "/<model_id>/deployments/<deployment_version_id>/<model_version_id>/input")
-def model_deployment_detail_input(model_id, deployment_version_id,
-                                  model_version_id):
-    user = {
-        "name":
-            "Shabaz Patel",
-        "username":
-            "shabazp",
-        "email":
-            "shabaz@datmo.com",
-        "gravatar_url":
-            "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
-            "?s=220&d=identicon&r=PG"
-    }
-    model = {
-        "id": model_id,
-        "name": "Credit Fraud",
-        "categories": "",
-        "repo_language": "python"
-    }
-
-    time_series_graphs = []
-    histogram_graphs = []
-
-    filter = {
-        "model_id": model_id,
-        "model_version_id": model_version_id,
-        "deployment_version_id": deployment_version_id
-    }
-    data = datmo_monitoring.search_metadata(filter)
-
-    if data:
-        max_index = 0
-        for ind, datum in enumerate(data):
-            if datum['feedback'] is not None:
-                max_index = ind
-        datum = data[max_index]
-
-        def __plotly_graphs(variable_name, time_name="created at"):
-            color_choices = [
-                "rgb(40,165,187)", "rgb(124,159,57)", "rgb(238,93,134)",
-                "rgb(93,147,228)"
-            ]
-            rand_ind = random.randint(0, 3)
-            return ({
-                "data": [{
-                    "x": [],
-                    "y": [],
-                    "type": "scatter",
-                    "mode": "lines+markers",
-                    "marker": {
-                        "size": 10,
-                        "color": color_choices[rand_ind],
-                        "line": {
-                            "width": 2,
-                            "color": "rgb(80,80,80)"
-                        }
-                    }
-                }],
-                "layout": {
-                    "title": "time series for " + variable_name,
-                    "xaxis": {
-                        "title": "time (" + time_name + ")"
-                    },
-                    "yaxis": {
-                        "title": variable_name
-                    }
-                }
-            }, {
-                "data": [{
-                    "x": [],
-                    "y": [],
-                    "type": "bar",
-                    "marker": {
-                        "size": 10,
-                        "color": color_choices[rand_ind],
-                        "line": {
-                            "width": 1.5,
-                            "color": "rgb(80,80,80)"
-                        }
-                    }
-                }],
-                "layout": {
-                    "title": "histogram for " + variable_name,
-                    "xaxis": {
-                        "title": "buckets"
-                    },
-                    "yaxis": {
-                        "title": "counts"
-                    }
-                }
-            })
-
-        # input
-        graph_keys = list(datum['input'].keys())
-
-        # add all graphs to the appropriate lists
-        for key in graph_keys:
-            ts, hist = __plotly_graphs(key)
-            time_series_graphs.append(ts)
-            histogram_graphs.append(hist)
-
-    # Add "ids" to each of the graphs to pass up to the client
-    # for templating
-    time_series_ids = [
-        'time-series-graph-{}'.format(i)
-        for i, _ in enumerate(time_series_graphs)
-    ]
-    histogram_ids = [
-        'histogram-graph-{}'.format(i) for i, _ in enumerate(histogram_graphs)
-    ]
-
-    # Convert the figures to JSON
-    # PlotlyJSONEncoder appropriately converts pandas, datetime, etc
-    # objects to their JSON equivalents
-
-    time_series_graphsJSON = json.dumps(
-        time_series_graphs, cls=plotly.utils.PlotlyJSONEncoder)
-    histogram_graphsJSON = json.dumps(
-        histogram_graphs, cls=plotly.utils.PlotlyJSONEncoder)
-
-    return render_template(
-        "model_deployment_detail_input.html",
-        user=user,
-        model=model,
-        model_version_id=model_version_id,
-        deployment_version_id=deployment_version_id,
-        num_features=len(time_series_graphs),
-        time_series_ids=time_series_ids,
-        histogram_ids=histogram_ids,
-        time_series_graphsJSON=time_series_graphsJSON,
-        histogram_graphsJSON=histogram_graphsJSON,
-    )
+        input_keys=input_keys,
+        prediction_keys=prediction_keys,
+        feedback_keys=feedback_keys)
 
 
 @app.route("/<model_id>/deployments")

@@ -74,8 +74,8 @@
                 <tbody>
                 {% for deployment in deployments %}
                 <tr data-id="{{ deployment.deployment_version_id }}"  class="snapshot-hover-menu">
-                    <td><a href="/{{ model.id }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}/output">{{ deployment.deployment_version_id }}</a></td>
-                    <td><a href="/{{ model.id }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}/output">{{ deployment.model_version_id }}</a></td>
+                    <td><a href="/{{ model.id }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}">{{ deployment.deployment_version_id }}</a></td>
+                    <td><a href="/{{ model.id }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}">{{ deployment.model_version_id }}</a></td>
                     <td>{{ deployment.created_at }}</td>
                     <td>{{ deployment.type }}</td>
                     <td>{% for endpoint in deployment.endpoints %} <a href="{{ endpoint }}">{{ endpoint }}</a><br><br>{% endfor %}</td>
