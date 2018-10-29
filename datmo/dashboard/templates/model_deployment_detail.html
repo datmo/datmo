@@ -90,13 +90,61 @@
                     </div>
                     <div class="row">
                         <div class="col-md-10">
-                             <pre><code class="python">
-    import cool
-    def new_func(var):
-        return "hello"
-                    </code></pre>
+                             <div id="editor" style="height: 500px;">import os
+import time
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+from sklearn.decomposition import PCA
+from datmo.monitoring import Monitoring
+
+# Set save location
+save_directory = os.path.dirname(os.path.realpath(__file__))
+
+# Set datmo client
+datmo_client = Monitoring(api_key="6a3a3cd900eaf7b406a41d68f8ca7969")
+
+filter_schema = {"model_id": "{{ model.id }}",
+                 "deployment_version_id": "{{ deployment_version_id }}",
+                 "model_version_id": "{{ model_version_id }}"}
+
+# Get data during inference from datmo
+rows = datmo_client.search_metadata(filter_schema)
+
+# Form pandas dataframe for the prediction data
+inputs = []
+predictions = []
+for row in rows:
+    prediction = {'Class': row['prediction']['prediction']}
+    input_dict = row['input']
+    inputs.append(input_dict)
+    predictions.append(prediction)
+# Transform and predict using model
+X = pd.DataFrame(inputs)
+y = pd.DataFrame(predictions)
+X.sort_index(axis=1,inplace=True)
+
+# Perform PCA over the input features during the prediction
+t0 = time.time()
+X_reduced_pca = PCA(n_components=2, random_state=42).fit_transform(X.values)
+t1 = time.time()
+
+# Plot the graph and save them
+plt.suptitle('Clusters using Dimensionality Reduction', fontsize=14)
+blue_patch = mpatches.Patch(color='#0A0AFF', label='No Fraud')
+red_patch = mpatches.Patch(color='#AF0000', label='Fraud')
+
+new_y = y.values.ravel()
+plt.scatter(X_reduced_pca[:,0], X_reduced_pca[:,1], c=(new_y == 0), cmap='coolwarm', label='No Fraud', linewidths=2)
+plt.scatter(X_reduced_pca[:,0], X_reduced_pca[:,1], c=(new_y == 1), cmap='coolwarm', label='Fraud', linewidths=2)
+plt.legend(handles=[blue_patch, red_patch])
+plt.grid(True)
+plt.savefig(os.path.join(save_directory, 'image.jpg'))
+                             </div>
                         </div>
                     </div>
+                    <button class="cta" onclick="addCustomGraph()">add</button>
                 </div>
                 <div class="container inner">
                     <h2>Add or remove graphs with the controls above and drag graphs around to rearrange</h2>
@@ -110,12 +158,53 @@
             <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
             <!-- jQuery -->
             <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
-            <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+            <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
-            <!-- highlight.js -->
-            <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/styles/default.min.css">
-            <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.13.1/highlight.min.js"></script>
-            <script>hljs.initHighlightingOnLoad();</script>
+            <!-- ace.js -->
+            <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.1/ace.js" type="text/javascript" charset="utf-8"></script>
+            <!-- filesaver.js -->
+            <script>
+                var editor = ace.edit("editor", {
+                    mode: "ace/mode/python",
+                    theme: "ace/theme/monokai"
+                });
+
+                function addCustomGraph() {
+                    saveCustomCode("custom.py");
+                    setInterval(runPythonScript, 2000, "custom.py");
+                }
+
+                function saveCustomCode(filepath){
+                    $.ajax({
+                        url: "/{{ model.id }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}/script/create",
+                        type: "GET",
+                        data: {
+                            content: editor.getValue(),
+                            filepath: filepath
+                        },
+                        async: true,
+                        success: function(data) {
+                            console.log("file has been saved at " + filepath);
+                        },
+                        dataType: "json"
+                    });
+                }
+
+                function runPythonScript(filepath) {
+                    $.ajax({
+                        url: "/{{ model.id }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}/script/run",
+                        type: "GET",
+                        data: {
+                            filepath: filepath
+                        },
+                        async: true,
+                        success: function(data) {
+                            console.log("file with path " + filepath + "has been run");
+                        },
+                        dataType: "json"
+                    });
+                }
+            </script>
 
             <!-- Plotly.js -->
             <script src="//d14fo0winaifog.cloudfront.net/plotly-basic.js"></script>
@@ -171,7 +260,7 @@
                                 }
                             }],
                             layout: {
-                                title: "time series for " + dataType + " with name " + name,
+                                title: graphType + ", " + dataType + ": " + name,
                                 xaxis: {
                                     title: "created at"
                                 },
@@ -197,7 +286,7 @@
                                 }
                             }],
                             layout: {
-                                title: "histogram for " + dataType + " with name " + name,
+                                title: graphType + ", " + dataType + ": " + name,
                                 xaxis: {
                                     title: "buckets"
                                 },
@@ -213,7 +302,7 @@
                     var startCounter = 0; // start a counter to pull latest data
                     setInterval(function() {
                         $.ajax({
-                            url: "/data/{{ model.id }}/{{ deployment_version_id }}/{{ model_version_id }}",
+                            url: "/data/{{ model.id }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}",
                             type: "GET",
                             data: {
                                 start: startCounter,

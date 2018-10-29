@@ -1,6 +1,6 @@
+import os
 import uuid
 import json
-import random
 from flask import Flask
 from flask import render_template, request, jsonify
 import plotly
@@ -167,7 +167,8 @@ def model_snapshots(model_id):
         stats_keys=stats_keys)
 
 
-@app.route("/data/<model_id>/<deployment_version_id>/<model_version_id>")
+@app.route(
+    "/data/<model_id>/deployments/<deployment_version_id>/<model_version_id>")
 def model_deployment_data(model_id, deployment_version_id, model_version_id):
     # here we want to get the value of user (i.e. ?start=0)
     start = request.args.get('start', 0)
@@ -371,6 +372,30 @@ def model_deployments(model_id):
         model=model,
         deployments=deployments,
     )
+
+
+@app.route(
+    "/<model_id>/deployments/<deployment_version_id>/<model_version_id>/script/create"
+)
+def model_deployment_script_create(model_id, deployment_version_id,
+                                   model_version_id):
+    content = request.args.get('content')
+    # TODO: Create a default location to save for the specific deployment
+    filepath = request.args.get('filepath')
+    with open(filepath, "w") as f:
+        f.write(content)
+    return "complete", 200
+
+
+@app.route(
+    "/<model_id>/deployments/<deployment_version_id>/<model_version_id>/script/run"
+)
+def model_deployment_script_run(model_id, deployment_version_id,
+                                model_version_id):
+    # TODO: Create a default location to save for the specific deployment
+    filepath = request.args.get('filepath')
+    os.system("python " + filepath)
+    return "complete", 200
 
 
 if __name__ == "__main__":
