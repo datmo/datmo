@@ -1,10 +1,11 @@
+import os
 import time
 import json
 import psutil
 from datetime import datetime
 
 from datmo.core.util.exceptions import InputError
-from datmo.core.util.misc_functions import bytes2human
+from datmo.core.util.misc_functions import bytes2human, slack_message
 from datmo.core.util.remote_api import RemoteAPI
 
 
@@ -44,6 +45,7 @@ class Monitoring():
     >>>     datmo_client.set_start_time()
     >>>     y_predict = model_predict(x) # using a machine learning model for inference
     >>>     datmo_model.set_end_time()
+    >>>     # x and y_predict are dictionaries
     >>>     datmo_id = datmo_client.track(input=x, prediction=y_predict) # Track predictions
     >>>     response = {'y': y, 'datmo_id': datmo_id}
     >>>     return response
@@ -52,6 +54,12 @@ class Monitoring():
     ...
     >>> # For feedback
     >>> datmo_client.track_feedback(id=response['datmo_id'], actual=y_actual)
+    ...
+    >>> # For trigger
+    >>> input = {"f1": 2, "f2": 3}
+    >>> prediction = {"prediction": 1}
+    >>> notes = "this is a note for trigger"
+    >>> datmo_client.trigger(medium="slack", input=input, prediction=prediction, notes=notes)
     """
 
     def __init__(self, api_key, home=None):
@@ -59,9 +67,6 @@ class Monitoring():
         self.remote_api = RemoteAPI(self._api_key)
         self._start_time, self._end_time, self._model_id, \
         self._model_version_id, self._deployment_version_id = None, None, None, None, None
-
-    def __eq__(self, other):
-        return self.id == other.id if other else False
 
     def __str__(self):
         pass
@@ -210,9 +215,51 @@ class Monitoring():
         }
         response = self.remote_api.update_actual(id, update_dict)
         body = response.get('body')
-        updated_at = body.get('updated') if body else 0
-        if updated_at > 0:
+        updated = body.get('updated') if body else 0
+        if updated > 0:
             return True
+        else:
+            return False
+
+    def trigger(self, medium, input, prediction, notes, priority=None):
+        """
+        Trigger information through the medium of communication
+
+        Parameters
+        ----------
+        medium : str
+            medium being used to communicate (e.g. slack or twilio)
+        input : dict
+            dictionary for inputs
+        prediction : dict
+            dictionary for predictions
+        notes : str
+            string with notes for the trigger
+        priority : str, optional
+            string with priority for the trigger
+        Returns
+        -------
+        bool
+            True if successful trigger
+        """
+        if not isinstance(input, dict) or\
+                not isinstance(prediction, dict) \
+                or not isinstance(notes, str):
+            return False
+
+        options = {}
+        if medium == "slack":
+            webhook_url = os.environ.get("SLACK_WEBHOOK_URL")
+            options['author_name'] = "mode id:" + self._model_id + ">>" \
+                                     + "deployment id:" + self._deployment_version_id \
+                                     + ">>" + "version id:" + self._model_version_id
+            options['title'] = "Notes | Input | Prediction"
+            options['text'] = "Notes: " + notes + " \n" \
+                              + "Input: " + json.dumps(input, indent=4, sort_keys=True) + " \n" \
+                              + "Output: " + json.dumps(prediction, indent=4, sort_keys=True)
+            options['priority'] = priority
+            options['timestamp'] = int(round(time.time()))
+            return slack_message(webhook_url, options)
         else:
             return False
 
