@@ -1,15 +1,18 @@
 import os
+import shutil
 import uuid
 import json
-from flask import Flask
+from flask import Flask, url_for
 from flask import render_template, request, jsonify
 import plotly
 from datetime import datetime
 
+from datmo.core.controller.base import BaseController
 from datmo.monitoring import Monitoring
 
 app = Flask(__name__)
 # TODO: pull api_key from global config
+base_controller = BaseController()
 datmo_monitoring = Monitoring(api_key="6a3a3cd900eaf7b406a41d68f8ca7969")
 
 
@@ -172,12 +175,12 @@ def model_snapshots(model_id):
 def model_deployment_data(model_id, deployment_version_id, model_version_id):
     # here we want to get the value of user (i.e. ?start=0)
     start = request.args.get('start', 0)
-    count = request.args.get('count', 100)
+    count = request.args.get('count', None)
     data_type = request.args.get('data_type', None)
-    name = request.args.get('name', None)
+    key_name = request.args.get('key_name', None)
     graph_type = request.args.get('graph_type', None)
 
-    if not data_type and not name and not graph_type:
+    if not data_type and not key_name and not graph_type:
         return "error", 400
 
     # Get new data to add to the graphs
@@ -185,9 +188,9 @@ def model_deployment_data(model_id, deployment_version_id, model_version_id):
         "model_id": model_id,
         "deployment_version_id": deployment_version_id,
         "model_version_id": model_version_id,
-        "start": int(start),
-        "count": int(count)
+        "start": int(start)
     }
+    if count: filter["count"] = int(count)
     new_data = datmo_monitoring.search_metadata(filter)
 
     # update the number of new results
@@ -209,7 +212,7 @@ def model_deployment_data(model_id, deployment_version_id, model_version_id):
             for t in new_time_data
         ]
         new_feature_data = [
-            datum[data_type][name] if datum[data_type] else None
+            datum[data_type][key_name] if datum[data_type] else None
             for datum in new_data
         ]
         graph_data_output = {
@@ -224,11 +227,10 @@ def model_deployment_data(model_id, deployment_version_id, model_version_id):
             "model_id": model_id,
             "deployment_version_id": deployment_version_id,
             "model_version_id": model_version_id,
-            "count": int(start) + int(count)
         }
         cumulative_data = datmo_monitoring.search_metadata(filter)
         cumulative_feature_data = [
-            datum[data_type][name] for datum in cumulative_data
+            datum[data_type][key_name] for datum in cumulative_data
             if datum[data_type]
         ]
         import numpy as np
@@ -298,12 +300,19 @@ def model_deployment_detail(model_id, deployment_version_id, model_version_id):
         feedback_keys = list(
             datum['feedback'].keys()) if datum['feedback'] is not None else []
 
+    # Determine the graph directory path and create if not present
+    graph_dirpath = os.path.join(base_controller.home, ".datmo", "deployments",
+                                 deployment_version_id, model_version_id,
+                                 "graphs")
+    if not os.path.exists(graph_dirpath): os.makedirs(graph_dirpath)
+
     return render_template(
         "model_deployment_detail.html",
         user=user,
         model=model,
         model_version_id=model_version_id,
         deployment_version_id=deployment_version_id,
+        graph_dirpath=graph_dirpath,
         input_keys=input_keys,
         prediction_keys=prediction_keys,
         feedback_keys=feedback_keys)
@@ -360,12 +369,6 @@ def model_deployments(model_id):
             deployment_info['model_version_id'] = model_version_id
             deployments.append(deployment_info)
 
-    # Get the data here (hard coded)
-    # TODO: generalize
-
-    # based on the model_version_id and deployment_version_id the user selects
-    # show various graphs
-
     return render_template(
         "model_deployments.html",
         user=user,
@@ -375,27 +378,54 @@ def model_deployments(model_id):
 
 
 @app.route(
-    "/<model_id>/deployments/<deployment_version_id>/<model_version_id>/script/create"
+    "/<model_id>/deployments/<deployment_version_id>/<model_version_id>/custom/create"
 )
 def model_deployment_script_create(model_id, deployment_version_id,
                                    model_version_id):
     content = request.args.get('content')
-    # TODO: Create a default location to save for the specific deployment
     filepath = request.args.get('filepath')
+    dirpath, _ = os.path.split(filepath)
+    # ensure the containing directory exists
+    if not os.path.exists(dirpath): os.makedirs(dirpath)
     with open(filepath, "w") as f:
         f.write(content)
     return "complete", 200
 
 
 @app.route(
-    "/<model_id>/deployments/<deployment_version_id>/<model_version_id>/script/run"
+    "/<model_id>/deployments/<deployment_version_id>/<model_version_id>/custom/run"
 )
 def model_deployment_script_run(model_id, deployment_version_id,
                                 model_version_id):
-    # TODO: Create a default location to save for the specific deployment
     filepath = request.args.get('filepath')
+    # ensure that the filepath is a valid path
+    if not os.path.isfile(filepath):
+        return "error", 400
     os.system("python " + filepath)
     return "complete", 200
+
+
+@app.route("/hash/generate")
+def generate_hash():
+    string_to_hash = request.args.get('string_to_hash')
+    hash = str(uuid.uuid3(uuid.NAMESPACE_DNS, string_to_hash))
+    return jsonify({"result": hash})
+
+
+@app.route("/alias/create")
+def create_alias():
+    filepath = request.args.get('filepath')
+    graph_id = request.args.get('graph_id')
+
+    available_filepath = os.path.join(app.root_path, "static", "img",
+                                      graph_id + ".jpg")
+    print(filepath)
+    if os.path.exists(available_filepath):
+        os.remove(available_filepath)
+    shutil.copy(src=filepath, dst=available_filepath)
+    print(available_filepath)
+    webpath = url_for("static", filename="./img/" + graph_id + ".jpg")
+    return jsonify({"webpath": webpath})
 
 
 if __name__ == "__main__":

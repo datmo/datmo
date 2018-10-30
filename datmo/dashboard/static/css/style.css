@@ -1067,6 +1067,12 @@ select {
 	border:1px solid #c9c9c9;
 	vertical-align:middle
 }
+
+select:disabled {
+	color: graytext;
+	cursor: not-allowed;
+}
+
 select.checkout-table {
 	background:url("{{ url_for("static", filename="./img/icon-arrow-down.svg") }}") no-repeat 58px center;
 	background-size:7px;
@@ -2235,10 +2241,18 @@ section.kit-content .popup-wrapper {
 	cursor: move;
 }
 
-.container.inner {
+.inner {
 	padding: 20px;
 }
 
 .cta {
-	padding: 20px;
+    padding: 20px;
+    font-size: 20px;
+    width: 50%;
+    align-items: center;
+    background-color: #1894e9;
+    border-radius: 12px;
+    color: #fff;
+    font-family: geomanist;
+    cursor: pointer;
 }
