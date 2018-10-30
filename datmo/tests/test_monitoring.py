@@ -54,10 +54,10 @@ class TestMonitoringModule():
         assert result == True
 
     def test_trigger(self):
-        options = {}
-        options["input"] = {"f1": 2, "f2": 3}
-        options["output"] = {"prediction": 1}
-        result = self.monitoring.trigger(medium="slack", options=options)
+        input = {"f1": 2, "f2": 3}
+        prediction = {"prediction": 1}
+        notes = "this is epic!"
+        result = self.monitoring.trigger(medium="slack", input=input, prediction=prediction, notes=notes)
         assert result == True
 
     def test_search_metadata(self):

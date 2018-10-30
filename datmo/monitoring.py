@@ -217,7 +217,7 @@ class Monitoring():
         else:
             return False
 
-    def trigger(self, medium, options):
+    def trigger(self, medium, input, prediction, notes):
         """
         Trigger information through the medium of communication
 
@@ -225,24 +225,33 @@ class Monitoring():
         ----------
         medium : str
             medium being used to communicate (e.g. slack or twilio)
-        options : dict
-            dictionary with options required to communicate for the medium
+        input : dict
+            dictionary for inputs
+        prediction : dict
+            dictionary for predictions
+        notes : str
+            string with notes for the trigger
 
         Returns
         -------
         bool
             True if successful trigger
         """
-        if not isinstance(options, dict):
+        if not isinstance(input, dict) and\
+                not isinstance(prediction, dict) \
+                and not isinstance(notes, str):
             return False
 
+        options = {}
         if medium == "slack":
             webhook_url = os.environ.get("SLACK_WEBHOOK_URL")
-            options['author_name'] = "mode id:"+ self._model_id + ">>" \
+            options['author_name'] = "mode id:" + self._model_id + ">>" \
                                      + "deployment id:" + self._deployment_version_id \
                                      + ">>" + "version id:" + self._model_version_id
-            options['title'] = "Input | Output"
-            options['text'] = json.dumps(options["input"]) + " | " + json.dumps(options['output'])
+            options['title'] = "Notes | Input | Prediction"
+            options['text'] = "Notes: " + notes + " \n" \
+                              + "Input: " + json.dumps(input, indent=4, sort_keys=True) + " \n" \
+                              + "Output: " + json.dumps(prediction, indent=4, sort_keys=True)
             options['timestamp'] = int(round(time.time()))
             return slack_message(webhook_url, options)
         else:
