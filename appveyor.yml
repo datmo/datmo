@@ -7,7 +7,7 @@ environment:
     # See: http://stackoverflow.com/a/13751649/163740
     CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\appveyor\\run_with_env.cmd"
   LOGGING_LEVEL: DEBUG
-  SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/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"
+  SLACK_WEBHOOK_URL: https://hooks.slack.com/services/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
 
   matrix:
     - PYTHON: "C:\\Python27"
