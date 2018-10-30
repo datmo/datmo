@@ -53,6 +53,12 @@ class Monitoring():
     ...
     >>> # For feedback
     >>> datmo_client.track_feedback(id=response['datmo_id'], actual=y_actual)
+    ...
+    >>> # For trigger
+    >>> input = {"f1": 2, "f2": 3}
+    >>> prediction = {"prediction": 1}
+    >>> notes = "this is a note for trigger"
+    >>> datmo_client.trigger(medium="slack", input=input, prediction=prediction, notes=notes)
     """
 
     def __init__(self, api_key, home=None):
@@ -217,7 +223,7 @@ class Monitoring():
         else:
             return False
 
-    def trigger(self, medium, input, prediction, notes):
+    def trigger(self, medium, input, prediction, notes, priority=None):
         """
         Trigger information through the medium of communication
 
@@ -231,7 +237,8 @@ class Monitoring():
             dictionary for predictions
         notes : str
             string with notes for the trigger
-
+        priority : str, optional
+            string with priority for the trigger
         Returns
         -------
         bool
@@ -252,6 +259,7 @@ class Monitoring():
             options['text'] = "Notes: " + notes + " \n" \
                               + "Input: " + json.dumps(input, indent=4, sort_keys=True) + " \n" \
                               + "Output: " + json.dumps(prediction, indent=4, sort_keys=True)
+            options['priority'] = priority
             options['timestamp'] = int(round(time.time()))
             return slack_message(webhook_url, options)
         else:

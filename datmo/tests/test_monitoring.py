@@ -3,6 +3,7 @@
 Tests for monitoring module
 """
 import os
+import time
 import tempfile
 import platform
 try:
@@ -48,8 +49,12 @@ class TestMonitoringModule():
         assert data_id != self.test_data_id
 
     def test_track_feedback(self):
-        result = self.monitoring.track_feedback(
-            id=self.test_data_id, feedback=self.feedback_dict)
+        result = False
+        while not result:
+            time.sleep(4)
+            result = self.monitoring.track_feedback(
+                id=self.test_data_id, feedback=self.feedback_dict)
+
         assert isinstance(result, bool)
         assert result == True
 
@@ -57,7 +62,9 @@ class TestMonitoringModule():
         input = {"f1": 2, "f2": 3}
         prediction = {"prediction": 1}
         notes = "this is epic!"
-        result = self.monitoring.trigger(medium="slack", input=input, prediction=prediction, notes=notes)
+        priority = "Super Critical!"
+        result = self.monitoring.trigger(medium="slack", input=input, prediction=prediction,
+                                         notes=notes, priority=priority)
         assert result == True
 
     def test_search_metadata(self):

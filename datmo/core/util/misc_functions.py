@@ -84,8 +84,8 @@ def slack_message(webhook_url, options):
                             "fields": [
                                 {
                                     "title": "Priority",
-                                    "value": options.get("value")
-                                    if options.get("value") is not None else "High",
+                                    "value": options.get("priority")
+                                    if options.get("priority") is not None else "High",
                                     "short": False
                                 }
                             ],
