@@ -3,6 +3,7 @@
 Tests for misc_functions.py
 """
 import os
+import time
 import tempfile
 import platform
 import datetime
@@ -26,7 +27,7 @@ except TypeError:
     to_bytes("test")
 
 from datmo.core.util.misc_functions import (
-    bytes2human, create_unique_hash, mutually_exclusive, is_project_dir,
+    bytes2human, slack_message, create_unique_hash, mutually_exclusive, is_project_dir,
     find_project_dir, grep, prettify_datetime, format_table,
     parse_cli_key_value, convert_keys_to_string, get_datmo_temp_path,
     parse_path, parse_paths, list_all_filepaths)
@@ -115,6 +116,24 @@ class TestMiscFunctions():
 
         result = bytes2human(100001221)
         assert result == '95.4M'
+
+    def test_slack_message(self):
+        # Setting up the options for slack message
+        options = {"author_name": "testing misc functions", "title": "Test title", "text": "Test text",
+                   "priority": "just chill!", "timestamp": int(round(time.time()))}
+
+        webhook_url = os.environ.get("SLACK_WEBHOOK_URL")
+        result = slack_message(webhook_url, options)
+        assert result == True
+
+        webhook_url = os.environ.get("SLACK_WEBHOOK_URL")[:-1]
+        result = slack_message(webhook_url, options)
+        assert result == False
+
+        webhook_url = None
+        result = slack_message(webhook_url, options)
+        assert result == False
+
 
     def test_grep(self):
         # open current file and try to find this method in it
