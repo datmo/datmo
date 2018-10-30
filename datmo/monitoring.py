@@ -45,6 +45,7 @@ class Monitoring():
     >>>     datmo_client.set_start_time()
     >>>     y_predict = model_predict(x) # using a machine learning model for inference
     >>>     datmo_model.set_end_time()
+    >>>     # x and y_predict are dictionaries
     >>>     datmo_id = datmo_client.track(input=x, prediction=y_predict) # Track predictions
     >>>     response = {'y': y, 'datmo_id': datmo_id}
     >>>     return response
@@ -66,9 +67,6 @@ class Monitoring():
         self.remote_api = RemoteAPI(self._api_key)
         self._start_time, self._end_time, self._model_id, \
         self._model_version_id, self._deployment_version_id = None, None, None, None, None
-
-    def __eq__(self, other):
-        return self.id == other.id if other else False
 
     def __str__(self):
         pass
@@ -217,8 +215,8 @@ class Monitoring():
         }
         response = self.remote_api.update_actual(id, update_dict)
         body = response.get('body')
-        updated_at = body.get('updated') if body else 0
-        if updated_at > 0:
+        updated = body.get('updated') if body else 0
+        if updated > 0:
             return True
         else:
             return False
@@ -244,9 +242,9 @@ class Monitoring():
         bool
             True if successful trigger
         """
-        if not isinstance(input, dict) and\
+        if not isinstance(input, dict) or\
                 not isinstance(prediction, dict) \
-                and not isinstance(notes, str):
+                or not isinstance(notes, str):
             return False
 
         options = {}
