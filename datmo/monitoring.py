@@ -1,7 +1,6 @@
 import os
 import time
 import json
-import requests
 import psutil
 from datetime import datetime
 
