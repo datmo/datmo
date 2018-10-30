@@ -53,6 +53,13 @@ class TestMonitoringModule():
         assert isinstance(result, bool)
         assert result == True
 
+    def test_trigger(self):
+        options = {}
+        options["input"] = {"f1": 2, "f2": 3}
+        options["output"] = {"prediction": 1}
+        result = self.monitoring.trigger(medium="slack", options=options)
+        assert result == True
+
     def test_search_metadata(self):
         filter_data = {"model_id": "model_id"}
         result = self.monitoring.search_metadata(filter=filter_data)

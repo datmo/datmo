@@ -1,10 +1,12 @@
+import os
 import time
 import json
+import requests
 import psutil
 from datetime import datetime
 
 from datmo.core.util.exceptions import InputError
-from datmo.core.util.misc_functions import bytes2human
+from datmo.core.util.misc_functions import bytes2human, slack_message
 from datmo.core.util.remote_api import RemoteAPI
 
 
@@ -213,6 +215,37 @@ class Monitoring():
         updated_at = body.get('updated') if body else 0
         if updated_at > 0:
             return True
+        else:
+            return False
+
+    def trigger(self, medium, options):
+        """
+        Trigger information through the medium of communication
+
+        Parameters
+        ----------
+        medium : str
+            medium being used to communicate (e.g. slack or twilio)
+        options : dict
+            dictionary with options required to communicate for the medium
+
+        Returns
+        -------
+        bool
+            True if successful trigger
+        """
+        if not isinstance(options, dict):
+            return False
+
+        if medium == "slack":
+            webhook_url = os.environ.get("SLACK_WEBHOOK_URL")
+            options['author_name'] = "mode id:"+ self._model_id + ">>" \
+                                     + "deployment id:" + self._deployment_version_id \
+                                     + ">>" + "version id:" + self._model_version_id
+            options['title'] = "Input | Output"
+            options['text'] = json.dumps(options["input"]) + " | " + json.dumps(options['output'])
+            options['timestamp'] = int(round(time.time()))
+            return slack_message(webhook_url, options)
         else:
             return False
 

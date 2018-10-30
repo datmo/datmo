@@ -166,9 +166,12 @@ class DeployController(BaseController):
                             files_exclude = datmo_deploy['deploy'][
                                 'files_exclude']
                             for item in list_dir:
-                                if item in files_exclude and \
-                                        os.path.exists(os.path.join(tmp_dirpath, item)):
-                                    os.remove(os.path.join(tmp_dirpath, item))
+                                if item in files_exclude:
+                                    if os.path.isfile(os.path.join(tmp_dirpath, item)):
+                                        os.remove(os.path.join(tmp_dirpath, item))
+                                    elif os.path.isdir(os.path.join(tmp_dirpath, item)):
+                                        shutil.rmtree(
+                                            os.path.join(tmp_dirpath, item))
 
                                 if item.startswith('.') and \
                                         os.path.isdir(os.path.join(tmp_dirpath, item)):

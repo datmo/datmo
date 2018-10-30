@@ -7,6 +7,7 @@ import hashlib
 import textwrap
 import datetime
 import pytz
+import json
 import tzlocal
 import pytest
 import collections
@@ -65,6 +66,41 @@ def bytes2human(n):
             value = float(n) / prefix[s]
             return '%.1f%s' % (value, s)
     return "%sB" % n
+
+
+def slack_message(webhook_url, options):
+    if webhook_url is None:
+        return False
+
+    slack_data = {
+                    "attachments": [
+                        {
+                            "fallback": "Trigger from Datmo",
+                            "color": "warning",
+                            "pretext": "Trigger from Datmo during inference",
+                            "author_name": options.get("author_name"),
+                            "title": options.get("title"),
+                            "text": options.get("text"),
+                            "fields": [
+                                {
+                                    "title": "Priority",
+                                    "value": options.get("value")
+                                    if options.get("value") is not None else "High",
+                                    "short": False
+                                }
+                            ],
+                            "ts": options.get("timestamp")
+                        }
+                    ]
+                }
+
+    response = requests.post(webhook_url,
+                             data=json.dumps(slack_data),
+                             headers={'Content-Type': 'application/json'})
+    if response.status_code != 200:
+        return False
+
+    return True
 
 
 def grep(pattern, fileObj):
