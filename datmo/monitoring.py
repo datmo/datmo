@@ -1,6 +1,6 @@
 import os
 import time
-import yaml
+import ast
 import json
 import psutil
 from datetime import datetime
@@ -320,13 +320,13 @@ class Monitoring():
             prediction = meta_data.get('prediction')
             feedback = meta_data.get('feedback')
             updated_at = meta_data.get('updated_at')
-            meta_data['input'] = yaml.safe_load(
+            meta_data['input'] = ast.literal_eval(
                 input) if input is not None else None
-            meta_data['prediction'] = yaml.safe_load(
+            meta_data['prediction'] = ast.literal_eval(
                 prediction) if prediction is not None else None
-            meta_data['feedback'] = yaml.safe_load(
+            meta_data['feedback'] = ast.literal_eval(
                 feedback) if feedback is not None else None
-            meta_data['updated_at'] = int(
+            meta_data['updated_at'] = ast.literal_eval(
                 updated_at) if updated_at is not None else None
             meta_data_list.append(meta_data)
         return meta_data_list
