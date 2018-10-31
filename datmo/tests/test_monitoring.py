@@ -74,19 +74,30 @@ class TestMonitoringModule():
         prediction = {"prediction": 1}
         notes = "this is epic!"
         priority = "Super Critical!"
-        result = self.monitoring.trigger(medium="slack", input=input, prediction=prediction,
-                                         notes=notes, priority=priority)
+        result = self.monitoring.trigger(
+            medium="slack",
+            input=input,
+            prediction=prediction,
+            notes=notes,
+            priority=priority)
         assert result == True
 
         # Failure case when the data is improper
-        result = self.monitoring.trigger(medium="slack", input="improper input",
-                                         prediction="improper prediction format",
-                                         notes=notes, priority=priority)
+        result = self.monitoring.trigger(
+            medium="slack",
+            input="improper input",
+            prediction="improper prediction format",
+            notes=notes,
+            priority=priority)
         assert result == False
 
         # Failure case when medium is different
-        result = self.monitoring.trigger(medium="wrong_medium", input=input, prediction=prediction,
-                                         notes=notes, priority=priority)
+        result = self.monitoring.trigger(
+            medium="wrong_medium",
+            input=input,
+            prediction=prediction,
+            notes=notes,
+            priority=priority)
         assert result == False
 
     def test_search_metadata(self):
@@ -123,10 +134,7 @@ class TestMonitoringModule():
         # Raised error if key doesn't exist in filter
         result = False
         try:
-            filter = {
-                "model_id": "model_id",
-                "wrong_key": "microservice"
-            }
+            filter = {"model_id": "model_id", "wrong_key": "microservice"}
             self.monitoring.search_metadata(filter)
         except InputError:
             result = True
@@ -161,10 +169,7 @@ class TestMonitoringModule():
         # Raised error if key doesn't exist in filter
         result = False
         try:
-            filter = {
-                "model_id": "model_id",
-                "wrong_key": "microservice"
-            }
+            filter = {"model_id": "model_id", "wrong_key": "microservice"}
             self.monitoring.delete_metadata(filter)
         except InputError:
             result = True

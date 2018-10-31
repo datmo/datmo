@@ -1,0 +1,522 @@
+{% extends "layouts/base_model.html" %}
+{% block subtitle %}Deployment Detail{% endblock %}
+{% block modelbody %}
+<div class="section-tab-mobile">
+    <ul>
+        <a href="/{{ model.id }}">
+            <li>Summary</li>
+        </a>
+        <a href="/{{ model.id }}/experiments">
+            <li>Experiments</li>
+        </a>
+        <a href="/{{ model.id }}/snapshots">
+            <li>Snapshots</li>
+        </a>
+        <a href="/{{ model.id }}/deployments">
+            <li>Deployments</li>
+        </a>
+    </ul>
+</div>
+<div class="section-tab">
+    <div class="row">
+        <div class="col-xs-12">
+            <ul>
+                <a href="/{{ model.id }}" class="">
+                    <li>Summary</li>
+                </a>
+                <a href="/{{ model.id }}/experiments" class="">
+                    <li>Experiments</li>
+                </a>
+                <a href="/{{ model.id }}/snapshots" class="">
+                    <li>Snapshots</li>
+                </a>
+                <a href="/{{ model.id }}/deployments" class="active">
+                    <li>Deployments</li>
+                </a>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="model-section-content-wrapper">
+
+    <div class="content-box multi-item">
+        <div class="multi-item-content-wrap">
+
+            <div class="multi-item-content-row snapshot-filters">
+                <span> <a href="/{{ model.id }}/deployments">deployments</a></span>
+                <span> > <a href="#">{{ deployment_version_id }}</a></span>
+                <span> > <a href="#">{{ model_version_id }}</a></span>
+            </div>
+
+            <div class="inner">
+                <div class="inner">
+                    <h2>Select Graphs to Add</h2>
+                    <div class="inner">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="dropdown">
+                                    <h4>Graph Type</h4>
+                                    <select name="graphType" onchange="graphSelector('graphType')">
+                                        <option disabled selected value="default"> -- select an option -- </option>
+                                        <option value="timeseries">timeseries</option>
+                                        <option value="histogram">histogram</option>
+                                        <option value="custom">custom</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                             <div class="col-md-4">
+                                <div class="dropdown">
+                                    <h4>Data Type</h4>
+                                    <select name="dataType" onchange="graphSelector('dataType')" disabled>
+                                        <option disabled selected value="default"> -- select an option -- </option>
+                                        <option value="input">input</option>
+                                        <option value="prediction">prediction</option>
+                                        <option value="feedback">feedback</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="dropdown">
+                                    <h4>Key Name</h4>
+                                    <select name="keyName" disabled>
+                                        <option disabled selected value="default"> -- select an option -- </option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="inner" style="display:none" id="custom-graph-editor">
+                    <div class="row">
+                        <div class="col-md-10">
+                            <h2>Use the template code to create visualizations for your running model</h2>
+                            <p>Before clicking "Add" below, try running this script in your terminal to ensure it creates an "image.jpg"
+                                file in the same directory as the python script</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-10">
+                             <div id="editor" style="height: 500px;"># Template for creating your own graph
+
+import os
+from datmo.monitoring import Monitoring
+
+# Set save location
+save_directory = os.path.dirname(os.path.realpath(__file__))
+# if running in a notebook you can uncomment the code below
+# save_directory = os.path.dirname(os.path.realpath('__file__'))
+
+# Set datmo client with API Key
+datmo_client = Monitoring(api_key="6a3a3cd900eaf7b406a41d68f8ca7969")
+
+# Set the schema for datmo filter
+filter_schema = {"model_id": "{{ model.id }}",
+                 "deployment_version_id": "{{ deployment_version_id }}",
+                 "model_version_id": "{{ model_version_id }}"}
+
+# Get inference data from datmo
+rows = datmo_client.search_metadata(filter_schema)
+
+# Transform inference data for the plots
+
+
+# Perform analysis over the input features from the inference data
+
+
+# Plot the graph and save a single image as "image.jpg" after analysis
+                             </div>
+                        </div>
+                    </div>
+                </div>
+                    <div class="inner">
+                        <div class="row">
+                            <div class="col-md-offset-4 col-md-8">
+                                <button class="cta" onclick="addGraph()">Add</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="inner">
+                    <h2>Graph Playground</h2>
+                    <h3>Drag the graphs around or remove them as needed</h3>
+                    <div class="graph-display">
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- jQuery -->
+            <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
+            <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+            <link rel="stylesheet" type="text/css" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.7.1/themes/base/jquery-ui.css"/>
+
+            <!-- ace.js -->
+            <script src="//cdnjs.cloudflare.com/ajax/libs/ace/1.4.1/ace.js" type="text/javascript" charset="utf-8"></script>
+
+            <!-- Plotly.js -->
+            <script src="//d14fo0winaifog.cloudfront.net/plotly-basic.js"></script>
+
+            <!-- Custom JS -->
+            <script type="text/javascript">
+                /* GENERAL HELPER FUNCTIONS */
+
+                function generateGraphId(graphType, dataType, keyName, code) {
+                    var strToHash;
+                    if(graphType === "custom") {
+                        strToHash = graphType + code;
+                    } else {
+                        strToHash = graphType + dataType + keyName;
+                    }
+                    var hash = null;
+                    $.ajax({
+                        url: "/hash/generate",
+                        type: "GET",
+                        async: false,
+                        data: {
+                            string_to_hash: strToHash,
+                        },
+                        success: function(data) {
+                            // Parse the the output data for the hash
+                            hash = data.result;
+                        },
+                        dataType: "json"
+                    });
+                    return hash;
+                }
+
+                /* CUSTOM GRAPH HELPER FUNCTIONS */
+
+                var editor = ace.edit("editor", {
+                    mode: "ace/mode/python",
+                    theme: "ace/theme/monokai"
+                });
+
+                function saveCustomCode(filepath){
+                    $.ajax({
+                        url: "/{{ model.id }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}/custom/create",
+                        type: "GET",
+                        data: {
+                            content: editor.getValue(),
+                            filepath: filepath
+                        },
+                        async: false,
+                        success: function(data) {
+                            console.log("file has been saved at " + filepath);
+                        },
+                        dataType: "json"
+                    });
+                }
+
+                function runPythonScript(filepath) {
+                    $.ajax({
+                        url: "/{{ model.id }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}/custom/run",
+                        type: "GET",
+                        data: {
+                            filepath: filepath
+                        },
+                        async: false,
+                        success: function(data) {
+                            console.log("file with path " + filepath + "has been run");
+                        },
+                        dataType: "json"
+                    });
+                }
+
+                /* GENERAL ACTION FUNCTIONS  */
+
+                var graphIntervals = {};
+
+                function graphSelector(selectorType) {
+                    console.log("running graphSelector");
+                    var selector = $('select[name=' + selectorType + ']');
+                    var value = selector.val();
+
+                    // Take the appropriate action based on the selectorType
+                    if(selectorType === "graphType") {
+                        if(value === "timeseries" || value == "histogram") {
+                            $('#custom-graph-editor').hide();
+                            $('select[name=dataType]').prop("disabled", false);
+                        } else {
+                            $('#custom-graph-editor').show();
+                            $('select[name=dataType]').val("default");
+                            console.log($('select[name=dataType]').val());
+                            $('select[name=dataType]').prop("disabled", true);
+                            $('select[name=keyName]').val("default");
+                            console.log($('select[name=keyName]').val());
+                            $('select[name=keyName]').prop("disabled", true);
+                        }
+                    } else if(selectorType === "dataType") {
+                        if(value === "input") {
+                            var myKeys = {{ input_keys | safe }};
+                        } else if(value === "prediction") {
+                            var myKeys = {{ prediction_keys | safe }};
+                        } else {
+                            var myKeys = {{ feedback_keys | safe }};
+                        }
+                        var keySelector = $('select[name=keyName]');
+                        // Clear all existing options
+                        keySelector.empty();
+                        keySelector.append("<option disabled selected value='default'> -- select an option -- </option>");
+                        // Add options to the keyName selector
+                        for(var i=0;i<myKeys.length;i++){
+                            keySelector.prop("disabled", false);
+                            keySelector.append("<option value=\"" + myKeys[i] + "\">" + myKeys[i] + "</option>");
+                        }
+                    }
+
+                    // Change the value to the one specified
+                    selector.val(value)
+                }
+
+                function addGraph() {
+                    graphType = $('select[name=graphType]').val();
+                    dataType = $('select[name=dataType]').val();
+                    keyName = $('select[name=keyName]').val();
+                    code = editor.getValue();
+
+                    var graphId = generateGraphId(graphType, dataType, keyName, code);
+
+                    // add in the graph to the "graph-display" div
+                    $(".graph-display").append("<div class=\"card container-" + graphId + "\" id=\"moveable-" + graphId + "\">\n" +
+                        "                           <button class=\"btn delete-button\" onclick=\"removeGraph('" + graphId + "')\"><i class=\"fa fa-trash\"></i></button>\n" +
+                        "                           <div id=\"" + graphId + "\"></div>\n" +
+                        "                        </div>");
+
+                    // add a bare graph in the div based on graph_type
+                    if(graphType === "timeseries") {
+                        var newGraphData = {
+                            data: [{
+                                x: [],
+                                y: [],
+                                type: "scatter",
+                                mode: "markers",
+                                marker: {
+                                    size: 10,
+                                    color: "rgb(40,165,187)",
+                                    line: {
+                                        width: 2,
+                                        color: "rgb(80,80,80)"
+                                    }
+                                }
+                            }],
+                            layout: {
+                                title: graphType + ", " + dataType + ": " + keyName,
+                                xaxis: {
+                                    title: "created at"
+                                },
+                                yaxis: {
+                                    title: keyName
+                                }
+                            }
+                        }
+                        Plotly.plot(graphId, newGraphData.data, newGraphData.layout);
+                        // acknowledge that the graph has been correctly created
+                        console.log("added " + graphType + " graph for " + dataType + "with variable " + keyName);
+                        // make the container for the graph draggable and resizable
+                        $("#moveable-" + graphId).resizable({
+                            resize: function( event, ui ) {
+                                console.log("triggered resize event");
+                                Plotly.relayout(graphId, {
+                                    width: ui.size.width /* new width */,
+                                    height: ui.size.height - 50 /* new height */
+                                })
+                            }
+                        }).draggable();
+                    } else if(graphType === "histogram") {
+                        var newGraphData = {
+                            data: [{
+                                x: [],
+                                y: [],
+                                type: "bar",
+                                marker: {
+                                    size: 10,
+                                    color: "rgb(40,165,187)",
+                                    line: {
+                                        width: 1.5,
+                                        color: "rgb(80,80,80)"
+                                    }
+                                }
+                            }],
+                            layout: {
+                                title: graphType + ", " + dataType + ": " + keyName,
+                                xaxis: {
+                                    title: "buckets"
+                                },
+                                yaxis: {
+                                    title: "counts"
+                                }
+                            }
+                        }
+                        Plotly.plot(graphId, newGraphData.data, newGraphData.layout);
+                        // acknowledge that the graph has been correctly created
+                        console.log("added " + graphType + " graph for " + dataType + "with variable " + keyName);
+                        // make the container for the graph draggable and resizable
+                        $("#moveable-" + graphId).resizable({
+                            resize: function( event, ui ) {
+                                console.log("triggered resize event");
+                                Plotly.relayout(graphId, {
+                                    width: ui.size.width /* new width */,
+                                    height: ui.size.height - 50 /* new height */
+                                })
+                            }
+                        }).draggable();
+                    } else if(graphType === "custom") {
+                        // define relevant filepaths for custom graph
+                        var dirPath = "{{ graph_dirpath }}" + "/" + graphId;
+                        var pythonFilepath = dirPath + "/custom.py";
+                        var outputImageWebpath = null
+
+                        // save the user input to a file
+                        saveCustomCode(pythonFilepath);
+                        // run the user file once to generate an output
+                        runPythonScript(pythonFilepath);
+
+                        // create an alias for the image
+                        $.ajax({
+                            url: "/alias/create",
+                            type: "GET",
+                            async: false,
+                            data: {
+                                filepath: dirPath + "/image.jpg",
+                                graph_id: graphId
+                            },
+                            success: function(data) {
+                                // Parse the the output data for the webpath
+                                outputImageWebpath = data.webpath;
+                            },
+                            dataType: "json"
+                        });
+                        // add in the output image to the graph div
+                        $('#' + graphId).append("<img src='" + outputImageWebpath + "' style='max-height: 100%; max-width: 100%;'></img>")
+
+                        // acknowledge that the graph has been correctly created
+                        console.log("added " + graphType + " graph");
+                        // make the container for the graph draggable and resizable
+                        $("#moveable-" + graphId).resizable().draggable();
+                    }
+
+                    // add graph update functions to keep graph up to date
+                    graphUpdate(graphId, graphType, dataType, keyName);
+
+                    // reset all graph inputs to their default values
+                    console.log("resetting all inputs to defaults");
+                    $('select[name=graphType]').val("default");
+                    $('select[name=dataType]').val("default");
+                    $('select[name=dataType]').prop("disabled", true);
+                    $('select[name=keyName]').val("default");
+                    $('select[name=keyName]').prop("disabled", true);
+                    $('#custom-graph-editor').hide();
+                    editor.setValue("# Template for creating your own graph\n" +
+                        "\n" +
+                        "import os\n" +
+                        "from datmo.monitoring import Monitoring\n" +
+                        "\n" +
+                        "# Set save location\n" +
+                        "save_directory = os.path.dirname(os.path.realpath(__file__))\n" +
+                        "# if running in a notebook you can uncomment the code below\n" +
+                        "# save_directory = os.path.dirname(os.path.realpath('__file__'))\n" +
+                        "\n" +
+                        "# Set datmo client with API Key\n" +
+                        "datmo_client = Monitoring(api_key=\"6a3a3cd900eaf7b406a41d68f8ca7969\")\n" +
+                        "\n" +
+                        "# Set the schema for datmo filter\n" +
+                        "filter_schema = {\"model_id\": \"{{ model.id }}\",\n" +
+                        "                 \"deployment_version_id\": \"{{ deployment_version_id }}\",\n" +
+                        "                 \"model_version_id\": \"{{ model_version_id }}\"}\n" +
+                        "\n" +
+                        "# Get inference data from datmo\n" +
+                        "rows = datmo_client.search_metadata(filter_schema)\n" +
+                        "\n" +
+                        "# Transform inference data for the plots\n" +
+                        "\n" +
+                        "\n" +
+                        "# Perform analysis over the input features from the inference data\n" +
+                        "\n" +
+                        "\n" +
+                        "# Plot the graph and save a single image as \"image.jpg\" after analysis");
+                }
+
+                function removeGraph(graphId) {
+                    // remove the graph from the "graph-display" div
+                    $(".container-" + graphId).remove();
+                    clearInterval(graphIntervals[graphId]); // stop the interval
+                    console.log("removed graph with id " + graphId);
+                }
+
+                function graphUpdate(graphId, graphType, dataType, keyName) {
+                    var intervalTime = 15000; // interval timing to use between each
+
+                    if(graphType === "custom") {
+                        // define relevant filepaths for custom graph
+                        var dirPath = "{{ graph_dirpath }}" + "/" + graphId;
+                        var pythonFilepath = dirPath + "/custom.py";
+                        var outputImageWebpath = null
+
+                        graphIntervals[graphId] = setInterval(function(filepath){
+                            // run the code
+                            runPythonScript(filepath);
+                            // create an alias for the image file
+                            $.ajax({
+                                url: "/alias/create",
+                                type: "GET",
+                                async: false,
+                                data: {
+                                    filepath: dirPath + "/image.jpg",
+                                    graph_id: graphId
+                                },
+                                success: function(data) {
+                                    // Parse the the output data for the webpath
+                                    outputImageWebpath = data.webpath;
+                                },
+                                dataType: "json"
+                            });
+                            // update the graph
+                            $('#' + graphId).empty();
+                            $('#' + graphId).append("<img src='" + outputImageWebpath + "' style='max-height: 100%; max-width: 100%;'></img>")
+                        }, intervalTime, pythonFilepath);
+                    } else {
+                        // start a timer to pull data for this graph and update the graph
+                        var startCounter = 0; // start a counter to pull latest data
+
+                        graphIntervals[graphId] = setInterval(function() {
+                            $.ajax({
+                                url: "/data/{{ model.id }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}",
+                                type: "GET",
+                                data: {
+                                    start: startCounter,
+                                    data_type: dataType,
+                                    key_name: keyName,
+                                    graph_type: graphType,
+                                },
+                                async: true,
+                                success: function(data) {
+                                    // Parse the data to be passed to plotly from the endpoint data
+                                    var graphData = JSON.parse(data.graph_data_output_json_str);
+                                    console.log(graphData);
+                                    var numNewResults = data.num_new_results;
+                                    console.log(numNewResults);
+
+                                    // Extend the graph as per the type of graph
+                                    if(graphType === "timeseries") {
+                                        Plotly.extendTraces(graphId, graphData.new_data, [0]);
+                                    } else if(graphType === "histogram") {
+                                        Plotly.restyle(graphId, graphData.cumulative_data, [0]);
+                                    }
+
+                                    // Update the startCounter to get the new data
+                                    startCounter = startCounter + numNewResults;
+
+                                },
+                                dataType: "json"
+                            });
+                        }, intervalTime);
+                    }
+                }
+            </script>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -73,30 +73,37 @@ def slack_message(webhook_url, options):
         return False
 
     slack_data = {
-                    "attachments": [
-                        {
-                            "fallback": "Trigger from Datmo",
-                            "color": "warning",
-                            "pretext": "Trigger from Datmo during inference",
-                            "author_name": options.get("author_name"),
-                            "title": options.get("title"),
-                            "text": options.get("text"),
-                            "fields": [
-                                {
-                                    "title": "Priority",
-                                    "value": options.get("priority")
-                                    if options.get("priority") is not None else "High",
-                                    "short": False
-                                }
-                            ],
-                            "ts": options.get("timestamp")
-                        }
-                    ]
-                }
+        "attachments": [{
+            "fallback":
+                "Trigger from Datmo",
+            "color":
+                "warning",
+            "pretext":
+                "Trigger from Datmo during inference",
+            "author_name":
+                options.get("author_name"),
+            "title":
+                options.get("title"),
+            "text":
+                options.get("text"),
+            "fields": [{
+                "title":
+                    "Priority",
+                "value":
+                    options.get("priority")
+                    if options.get("priority") is not None else "High",
+                "short":
+                    False
+            }],
+            "ts":
+                options.get("timestamp")
+        }]
+    }
 
-    response = requests.post(webhook_url,
-                             data=json.dumps(slack_data),
-                             headers={'Content-Type': 'application/json'})
+    response = requests.post(
+        webhook_url,
+        data=json.dumps(slack_data),
+        headers={'Content-Type': 'application/json'})
     if response.status_code != 200:
         return False
 
