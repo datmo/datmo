@@ -231,7 +231,7 @@ def model_deployment_data(model_id, deployment_version_id, model_version_id):
         cumulative_data = datmo_monitoring.search_metadata(filter)
         cumulative_feature_data = [
             datum[data_type][key_name] for datum in cumulative_data
-            if datum[data_type]
+            if datum[data_type] and key_name in datum[data_type].keys()
         ]
         import numpy as np
         counts, binedges = np.histogram(cumulative_feature_data)

@@ -926,8 +926,17 @@ code {
 	border:1px solid #c9c9c9;
 	line-height:25px;
 	background:#fff;
-	background:linear-gradient(#fff,#f8f8f8)
+	background:linear-gradient(#505050,#f8f8f8)
 }
+
+.btn.delete-button {
+	background: linear-gradient(#ff0000,#E50000);
+}
+
+.btn.delete-button:hover, .btn.delete-button:focus {
+	background: #ff0000;
+}
+
 .btn img {
 	vertical-align:middle;
 	margin-right:3px
@@ -2232,7 +2241,7 @@ section.kit-content .popup-wrapper {
     /* Add shadows to create the "card" effect */
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
     transition: 0.3s;
-	padding: 2px 16px;
+	padding: 10px 16px;
 }
 
 /* On mouse-over, add a deeper shadow */

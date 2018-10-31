@@ -91,61 +91,40 @@
                     <div class="row">
                         <div class="col-md-10">
                             <h2>Use the template code to create visualizations for your running model</h2>
+                            <p>Before clicking "Add" below, try running this script in your terminal to ensure it creates an "image.jpg"
+                                file in the same directory as the python script</p>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-10">
-                             <div id="editor" style="height: 500px;">import os
-import time
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
-from sklearn.decomposition import PCA
+                             <div id="editor" style="height: 500px;"># Template for creating your own graph
+
+import os
 from datmo.monitoring import Monitoring
 
 # Set save location
 save_directory = os.path.dirname(os.path.realpath(__file__))
+# if running in a notebook you can uncomment the code below
+# save_directory = os.path.dirname(os.path.realpath('__file__'))
 
-# Set datmo client
+# Set datmo client with API Key
 datmo_client = Monitoring(api_key="6a3a3cd900eaf7b406a41d68f8ca7969")
 
+# Set the schema for datmo filter
 filter_schema = {"model_id": "{{ model.id }}",
                  "deployment_version_id": "{{ deployment_version_id }}",
                  "model_version_id": "{{ model_version_id }}"}
 
-# Get data during inference from datmo
+# Get inference data from datmo
 rows = datmo_client.search_metadata(filter_schema)
 
-# Form pandas dataframe for the prediction data
-inputs = []
-predictions = []
-for row in rows:
-    prediction = {'Class': row['prediction']['prediction']}
-    input_dict = row['input']
-    inputs.append(input_dict)
-    predictions.append(prediction)
-# Transform and predict using model
-X = pd.DataFrame(inputs)
-y = pd.DataFrame(predictions)
-X.sort_index(axis=1,inplace=True)
+# Transform inference data for the plots
 
-# Perform PCA over the input features during the prediction
-t0 = time.time()
-X_reduced_pca = PCA(n_components=2, random_state=42).fit_transform(X.values)
-t1 = time.time()
 
-# Plot the graph and save them
-plt.suptitle('Clusters using Dimensionality Reduction', fontsize=14)
-blue_patch = mpatches.Patch(color='#0A0AFF', label='No Fraud')
-red_patch = mpatches.Patch(color='#AF0000', label='Fraud')
+# Perform analysis over the input features from the inference data
 
-new_y = y.values.ravel()
-plt.scatter(X_reduced_pca[:,0], X_reduced_pca[:,1], c=(new_y == 0), cmap='coolwarm', label='No Fraud', linewidths=2)
-plt.scatter(X_reduced_pca[:,0], X_reduced_pca[:,1], c=(new_y == 1), cmap='coolwarm', label='Fraud', linewidths=2)
-plt.legend(handles=[blue_patch, red_patch])
-plt.grid(True)
-plt.savefig(os.path.join(save_directory, 'image.jpg'))
+
+# Plot the graph and save a single image as "image.jpg" after analysis
                              </div>
                         </div>
                     </div>
@@ -153,7 +132,7 @@ plt.savefig(os.path.join(save_directory, 'image.jpg'))
                     <div class="inner">
                         <div class="row">
                             <div class="col-md-offset-4 col-md-8">
-                                <button class="cta" onclick="addGraph()">add</button>
+                                <button class="cta" onclick="addGraph()">Add</button>
                             </div>
                         </div>
                     </div>
@@ -168,8 +147,6 @@ plt.savefig(os.path.join(save_directory, 'image.jpg'))
                 </div>
             </div>
 
-            <!-- D3.js -->
-            <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
             <!-- jQuery -->
             <script src="//code.jquery.com/jquery-2.1.4.min.js"></script>
             <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -224,7 +201,7 @@ plt.savefig(os.path.join(save_directory, 'image.jpg'))
                             content: editor.getValue(),
                             filepath: filepath
                         },
-                        async: true,
+                        async: false,
                         success: function(data) {
                             console.log("file has been saved at " + filepath);
                         },
@@ -239,7 +216,7 @@ plt.savefig(os.path.join(save_directory, 'image.jpg'))
                         data: {
                             filepath: filepath
                         },
-                        async: true,
+                        async: false,
                         success: function(data) {
                             console.log("file with path " + filepath + "has been run");
                         },
@@ -303,10 +280,7 @@ plt.savefig(os.path.join(save_directory, 'image.jpg'))
 
                     // add in the graph to the "graph-display" div
                     $(".graph-display").append("<div class=\"card container-" + graphId + "\" id=\"moveable-" + graphId + "\">\n" +
-                        "                           <button class=\"cta\" onclick=\"removeGraph('" + graphId + "')\">" +
-                        "                               <span class=\"ui-icon ui-icon-trash\"></span>\n" +
-                        "                               <span class=\"ui-button-text\">Delete</span>" +
-                        "                           </button>" +
+                        "                           <button class=\"btn delete-button\" onclick=\"removeGraph('" + graphId + "')\"><i class=\"fa fa-trash\"></i></button>\n" +
                         "                           <div id=\"" + graphId + "\"></div>\n" +
                         "                        </div>");
 
@@ -317,7 +291,7 @@ plt.savefig(os.path.join(save_directory, 'image.jpg'))
                                 x: [],
                                 y: [],
                                 type: "scatter",
-                                mode: "lines+markers",
+                                mode: "markers",
                                 marker: {
                                     size: 10,
                                     color: "rgb(40,165,187)",
@@ -340,6 +314,16 @@ plt.savefig(os.path.join(save_directory, 'image.jpg'))
                         Plotly.plot(graphId, newGraphData.data, newGraphData.layout);
                         // acknowledge that the graph has been correctly created
                         console.log("added " + graphType + " graph for " + dataType + "with variable " + keyName);
+                        // make the container for the graph draggable and resizable
+                        $("#moveable-" + graphId).resizable({
+                            resize: function( event, ui ) {
+                                console.log("triggered resize event");
+                                Plotly.relayout(graphId, {
+                                    width: ui.size.width /* new width */,
+                                    height: ui.size.height - 50 /* new height */
+                                })
+                            }
+                        }).draggable();
                     } else if(graphType === "histogram") {
                         var newGraphData = {
                             data: [{
@@ -368,11 +352,28 @@ plt.savefig(os.path.join(save_directory, 'image.jpg'))
                         Plotly.plot(graphId, newGraphData.data, newGraphData.layout);
                         // acknowledge that the graph has been correctly created
                         console.log("added " + graphType + " graph for " + dataType + "with variable " + keyName);
+                        // make the container for the graph draggable and resizable
+                        $("#moveable-" + graphId).resizable({
+                            resize: function( event, ui ) {
+                                console.log("triggered resize event");
+                                Plotly.relayout(graphId, {
+                                    width: ui.size.width /* new width */,
+                                    height: ui.size.height - 50 /* new height */
+                                })
+                            }
+                        }).draggable();
                     } else if(graphType === "custom") {
                         // define relevant filepaths for custom graph
                         var dirPath = "{{ graph_dirpath }}" + "/" + graphId;
                         var pythonFilepath = dirPath + "/custom.py";
                         var outputImageWebpath = null
+
+                        // save the user input to a file
+                        saveCustomCode(pythonFilepath);
+                        // run the user file once to generate an output
+                        runPythonScript(pythonFilepath);
+
+                        // create an alias for the image
                         $.ajax({
                             url: "/alias/create",
                             type: "GET",
@@ -387,32 +388,17 @@ plt.savefig(os.path.join(save_directory, 'image.jpg'))
                             },
                             dataType: "json"
                         });
-
-                        // save the user input to a file
-                        saveCustomCode(pythonFilepath);
-                        // run the user file once to generate an output
-                        runPythonScript(pythonFilepath);
-
                         // add in the output image to the graph div
                         $('#' + graphId).append("<img src='" + outputImageWebpath + "' style='max-height: 100%; max-width: 100%;'></img>")
 
                         // acknowledge that the graph has been correctly created
                         console.log("added " + graphType + " graph");
+                        // make the container for the graph draggable and resizable
+                        $("#moveable-" + graphId).resizable().draggable();
                     }
 
                     // add graph update functions to keep graph up to date
                     graphUpdate(graphId, graphType, dataType, keyName);
-
-                    // make the container for the graph draggable and resizable
-                    $("#moveable-" + graphId).resizable({
-                        resize: function( event, ui ) {
-                            console.log("triggered resize event");
-                            Plotly.relayout(graphId, {
-                                width: ui.width /* new width */,
-                                height: ui.height /* new height */
-                            })
-                        }
-                    }).draggable();
 
                     // reset all graph inputs to their default values
                     console.log("resetting all inputs to defaults");
@@ -422,6 +408,34 @@ plt.savefig(os.path.join(save_directory, 'image.jpg'))
                     $('select[name=keyName]').val("default");
                     $('select[name=keyName]').prop("disabled", true);
                     $('#custom-graph-editor').hide();
+                    editor.setValue("# Template for creating your own graph\n" +
+                        "\n" +
+                        "import os\n" +
+                        "from datmo.monitoring import Monitoring\n" +
+                        "\n" +
+                        "# Set save location\n" +
+                        "save_directory = os.path.dirname(os.path.realpath(__file__))\n" +
+                        "# if running in a notebook you can uncomment the code below\n" +
+                        "# save_directory = os.path.dirname(os.path.realpath('__file__'))\n" +
+                        "\n" +
+                        "# Set datmo client with API Key\n" +
+                        "datmo_client = Monitoring(api_key=\"6a3a3cd900eaf7b406a41d68f8ca7969\")\n" +
+                        "\n" +
+                        "# Set the schema for datmo filter\n" +
+                        "filter_schema = {\"model_id\": \"{{ model.id }}\",\n" +
+                        "                 \"deployment_version_id\": \"{{ deployment_version_id }}\",\n" +
+                        "                 \"model_version_id\": \"{{ model_version_id }}\"}\n" +
+                        "\n" +
+                        "# Get inference data from datmo\n" +
+                        "rows = datmo_client.search_metadata(filter_schema)\n" +
+                        "\n" +
+                        "# Transform inference data for the plots\n" +
+                        "\n" +
+                        "\n" +
+                        "# Perform analysis over the input features from the inference data\n" +
+                        "\n" +
+                        "\n" +
+                        "# Plot the graph and save a single image as \"image.jpg\" after analysis");
                 }
 
                 function removeGraph(graphId) {
@@ -432,31 +446,32 @@ plt.savefig(os.path.join(save_directory, 'image.jpg'))
                 }
 
                 function graphUpdate(graphId, graphType, dataType, keyName) {
-                    var intervalTime = 5000; // interval timing to use between each
+                    var intervalTime = 15000; // interval timing to use between each
 
                     if(graphType === "custom") {
                         // define relevant filepaths for custom graph
                         var dirPath = "{{ graph_dirpath }}" + "/" + graphId;
                         var pythonFilepath = dirPath + "/custom.py";
                         var outputImageWebpath = null
-                        $.ajax({
-                            url: "/alias/create",
-                            type: "GET",
-                            async: false,
-                            data: {
-                                filepath: dirPath + "/image.jpg",
-                                graph_id: graphId
-                            },
-                            success: function(data) {
-                                // Parse the the output data for the webpath
-                                outputImageWebpath = data.webpath;
-                            },
-                            dataType: "json"
-                        });
 
                         graphIntervals[graphId] = setInterval(function(filepath){
                             // run the code
                             runPythonScript(filepath);
+                            // create an alias for the image file
+                            $.ajax({
+                                url: "/alias/create",
+                                type: "GET",
+                                async: false,
+                                data: {
+                                    filepath: dirPath + "/image.jpg",
+                                    graph_id: graphId
+                                },
+                                success: function(data) {
+                                    // Parse the the output data for the webpath
+                                    outputImageWebpath = data.webpath;
+                                },
+                                dataType: "json"
+                            });
                             // update the graph
                             $('#' + graphId).empty();
                             $('#' + graphId).append("<img src='" + outputImageWebpath + "' style='max-height: 100%; max-width: 100%;'></img>")
