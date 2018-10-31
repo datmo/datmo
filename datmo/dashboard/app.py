@@ -407,7 +407,7 @@ def model_deployment_script_run(model_id, deployment_version_id,
 
 @app.route("/hash/generate")
 def generate_hash():
-    string_to_hash = request.args.get('string_to_hash')
+    string_to_hash = str(request.args.get('string_to_hash'))
     hash = str(uuid.uuid3(uuid.NAMESPACE_DNS, string_to_hash))
     return jsonify({"result": hash})
 
