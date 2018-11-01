@@ -322,7 +322,8 @@ def prettify_datetime(datetime_obj, tz=None):
 
 
 def format_table(data, padding=2):
-    num_col = max(len(row) for row in data)
+    data_rows = [len(row) for row in data]
+    num_col = max(data_rows) if data_rows else 0
     col_widths = []
     for i in range(num_col):
         col_width = max(len(row[i]) for row in data) + padding

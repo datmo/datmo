@@ -21,14 +21,6 @@ class Snapshot():
         the id of the entity
     model_id : str
         the parent model id for the entity
-    session_id : str
-        id of session associated with task
-    id : str
-        the id of the entity
-    model_id : str
-        the parent model id for the entity
-    session_id : str
-        session id within which snapshot is created
     message : str
         long description of snapshot
     code_id : str
@@ -60,7 +52,6 @@ class Snapshot():
 
         self.id = self._core_snapshot.id
         self.model_id = self._core_snapshot.model_id
-        self.session_id = self._core_snapshot.session_id
         self.message = self._core_snapshot.message
 
         self.code_id = self._core_snapshot.code_id
@@ -120,8 +111,6 @@ class Snapshot():
         final_str = final_str + "Date: " + prettify_datetime(
             self.created_at) + os.linesep
         table_data = []
-        if self.session_id:
-            table_data.append(["Session", "-> " + self.session_id])
         if self.task_id:
             table_data.append(["Task", "-> " + self.task_id])
         # Components
@@ -269,7 +258,7 @@ def create(message,
         return client_snapshot_obj
 
 
-def ls(session_id=None, filter=None):
+def ls(filter=None):
     """List snapshots within a project
 
     The project must be created before this is implemented. You can do that by using
@@ -280,9 +269,6 @@ def ls(session_id=None, filter=None):
 
     Parameters
     ----------
-    session_id : str, optional
-        session id to filter output snapshots
-        (default is None, which means no session filter is given)
     filter : str, optional
         a string to use to filter from message and label
         (default is to give all snapshots, unless provided a specific string. eg: best)
@@ -303,14 +289,9 @@ def ls(session_id=None, filter=None):
     snapshot_controller = SnapshotController()
 
     # add arguments if they are not None
-    if not session_id:
-        session_id = snapshot_controller.current_session.id
 
     core_snapshot_objs = snapshot_controller.list(
-        session_id,
-        visible=True,
-        sort_key='created_at',
-        sort_order='descending')
+        visible=True, sort_key='created_at', sort_order='descending')
 
     # Filtering Snapshots
     # TODO: move to list function in SnapshotController

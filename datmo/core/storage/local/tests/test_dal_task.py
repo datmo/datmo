@@ -13,7 +13,6 @@ from datetime import datetime
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.entity.model import Model
-from datmo.core.entity.session import Session
 from datmo.core.entity.task import Task
 from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
 
@@ -31,16 +30,9 @@ class TestLocalDAL():
         self.dal = LocalDAL(self.datadriver)
         model_name = "model_1"
         model = self.dal.model.create(Model({"name": model_name}))
-        session_name = "session_1"
-        session = self.dal.session.create(
-            Session({
-                "name": session_name,
-                "model_id": model.id
-            }))
 
         self.task_input_dict = {
             "model_id": model.id,
-            "session_id": session.id,
             "command": "task_1",
             "start_time": datetime.utcnow(),
             "end_time": datetime.utcnow(),
@@ -86,7 +78,6 @@ class TestLocalDAL():
         result = self.dal.task.get_by_id(task.id)
         assert task.id == result.id
         assert task.model_id == result.model_id
-        assert task.session_id == result.session_id
         assert task.command == result.command
         assert task.start_time == result.start_time
         assert task.end_time == result.end_time
@@ -97,7 +88,6 @@ class TestLocalDAL():
         result = self.dal.task.get_by_shortened_id(task.id[:10])
         assert task.id == result.id
         assert task.model_id == result.model_id
-        assert task.session_id == result.session_id
         assert task.command == result.command
         assert task.start_time == result.start_time
         assert task.end_time == result.end_time

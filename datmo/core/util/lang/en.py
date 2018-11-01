@@ -98,14 +98,6 @@ MESSAGES = {
             "Deleting a run: %s",
         "cli.run.delete.success":
             "Deleted run: %s",
-        "cli.session.create":
-            "Created session '%s'",
-        "cli.session.select":
-            "Selecting new session '%s'",
-        "cli.session.update":
-            "Updated session '%s'",
-        "cli.session.delete":
-            "Removed session '%s'",
         "cli.deploy.service.update_server":
             "Deployments can only have 1 server type, currently deployment %s is deployed with server type %s. "
             "If you want to change the server type, delete the deployment using `datmo deploy rm` and re-deploy",
@@ -179,14 +171,6 @@ MESSAGES = {
             "Error while running the terminal with id: %s",
         "cli.workspace.rstudio":
             "Error while running the rstudio with id: %s",
-        "cli.session.update.dne":
-            "No session found with given id: %s",
-        "cli.session.delete.dne":
-            "No session found with given name or id: %s",
-        "cli.session.delete.default":
-            "Cannot delete default session",
-        "cli.session.select.dne":
-            "No session found with given name or id: %s",
         "cli.run.run":
             "Error while running the script: %s",
         "cli.run.run.data.files.limit_exceeded":
@@ -391,8 +375,6 @@ MESSAGES = {
             "FileCollection id does NOT exist",
         "controller.base.__init__":
             "Project path does not exist: %s",
-        "controller.base.current_session":
-            "Model object does not exist within project",
         "controller.project.init.arg":
             "Required argument %s not present in input",
         "controller.project.status":
@@ -407,8 +389,6 @@ MESSAGES = {
             "Stats file does not exist",
         "controller.snapshot.create_from_task":
             "Task specified by id %s has not been completed",
-        "controller.snapshot.list":
-            "Session does not exist for id: %s",
         "controller.snapshot.delete.arg":
             "Delete argument %s not present in input",
         "controller.task.__init__":
@@ -425,16 +405,8 @@ MESSAGES = {
             "Stop argument %s not present in input",
         "controller.task.stop.arg.missing":
             "Stop argument %s unable to stop environment. please use -a to stop all running tasks",
-        "controller.task.list":
-            "Session does not exist for id: %s",
         "controller.task.delete.arg":
             "Delete argument %s not present in input",
-        "controller.session.__init__":
-            "Project has not been initialized",
-        "controller.session.update.default":
-            "Cannot update default session",
-        "controller.session.delete.default":
-            "Cannot delete default session",
         "storage.local.dal.update":
             "Entity id not provided in the input for update",
     },

@@ -25,7 +25,6 @@ class BaseController(object):
         this is the set of configurations used to create a project
     dal : datmo.core.storage.DAL
     model : datmo.core.entity.model.Model
-    current_session : datmo.core.entity.session.Session
     code_driver : datmo.core.controller.code.driver.CodeDriver
     file_driver : datmo.core.controller.file.driver.FileDriver
     environment_driver : datmo.core.controller.environment.driver.EnvironmentDriver
@@ -52,7 +51,6 @@ class BaseController(object):
         # property caches and initial values
         self._dal = None
         self._model = None
-        self._current_session = None
         self._code_driver = None
         self._file_driver = None
         self._environment_driver = None
@@ -77,16 +75,6 @@ class BaseController(object):
             models = self.dal.model.query({})
             self._model = models[0] if models else None
         return self._model
-
-    @property
-    def current_session(self):
-        if not self.model:
-            raise DatmoModelNotInitialized(
-                __("error", "controller.base.current_session"))
-        if self._current_session == None:
-            sessions = self.dal.session.query({"current": True})
-            self._current_session = sessions[0] if sessions else None
-        return self._current_session
 
     @property
     def code_driver(self):

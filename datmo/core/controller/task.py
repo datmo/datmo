@@ -15,7 +15,7 @@ from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     TaskRunError, RequiredArgumentMissing, ProjectNotInitialized,
     PathDoesNotExist, TaskInteractiveDetachError, TooManyArgumentsFound,
-    EntityNotFound, DoesNotExist, SessionDoesNotExist, TaskNoCommandGiven)
+    EntityNotFound, DoesNotExist, TaskNoCommandGiven)
 
 
 class TaskController(BaseController):
@@ -37,7 +37,7 @@ class TaskController(BaseController):
         helper for run to start environment and run with the appropriate parameters
     run(self, id, dictionary=None)
         runs the task and tracks the run, logs, inputs and outputs
-    list(session_id=None)
+    list(sort_key=None, sort_order=None)
         lists all tasks within the project given filters
     delete(id)
         deletes the specified task from the project
@@ -65,7 +65,6 @@ class TaskController(BaseController):
         # Validate Inputs
         create_dict = {
             "model_id": self.model.id,
-            "session_id": self.current_session.id
         }
 
         try:
@@ -479,15 +478,8 @@ class TaskController(BaseController):
                 update_task_dict["run_id"] = run_id
             return self.dal.task.update(update_task_dict)
 
-    def list(self, session_id=None, sort_key=None, sort_order=None):
+    def list(self, sort_key=None, sort_order=None):
         query = {}
-        if session_id:
-            try:
-                self.dal.session.get_by_id(session_id)
-            except EntityNotFound:
-                raise SessionDoesNotExist(
-                    __("error", "controller.task.list", session_id))
-            query['session_id'] = session_id
         return self.dal.task.query(query, sort_key, sort_order)
 
     def get(self, task_id):

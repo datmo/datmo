@@ -3,7 +3,6 @@ from datetime import datetime
 
 from datmo.core.util.i18n import get as __
 from datmo.core.entity.model import Model
-from datmo.core.entity.session import Session
 from datmo.core.entity.code import Code
 from datmo.core.entity.environment import Environment
 from datmo.core.entity.file_collection import FileCollection
@@ -32,7 +31,6 @@ class LocalDAL():
     code : EntityMethodsCRUD
     environment : EntityMethodsCRUD
     file_collection : EntityMethodsCRUD
-    session : EntityMethodsCRUD
     task : EntityMethodsCRUD
     snapshot : EntityMethodsCRUD
     user : EntityMethodsCRUD
@@ -85,18 +83,6 @@ class LocalDAL():
             Specific set of CRUD functions for file collection
         """
         return FileCollectionMethods(self.driver)
-
-    @property
-    def session(self):
-        """Session CRUD methods
-
-        Returns
-        -------
-        SessionMethods
-            Specific set of CRUD functions for session
-
-        """
-        return SessionMethods(self.driver)
 
     @cache
     @property
@@ -237,11 +223,6 @@ class FileCollectionMethods(EntityMethodsCRUD):
     def __init__(self, driver):
         super(FileCollectionMethods, self).__init__('file_collection',
                                                     FileCollection, driver)
-
-
-class SessionMethods(EntityMethodsCRUD):
-    def __init__(self, driver):
-        super(SessionMethods, self).__init__('session', Session, driver)
 
 
 class TaskMethods(EntityMethodsCRUD):

@@ -14,7 +14,6 @@ from datmo.core.controller.code.driver.file import FileCodeDriver
 from datmo.core.controller.file.driver.local import LocalFileDriver
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.core.entity.model import Model
-from datmo.core.entity.session import Session
 from datmo.core.util.exceptions import  \
     DatmoModelNotInitialized, InvalidProjectPath
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
@@ -64,35 +63,6 @@ class TestBaseController():
         assert model.id
         assert model.name == "test"
         assert model.description == "test"
-
-    def test_current_session(self):
-        # Test failure case
-        failed = False
-        try:
-            _ = self.base_controller.current_session
-        except DatmoModelNotInitialized:
-            failed = True
-        assert failed
-
-        # Test success case
-        self.base_controller.dal.model.create(
-            Model({
-                "name": "test",
-                "description": "test"
-            }))
-        _ = self.base_controller.model
-        self.base_controller.dal.session.create(
-            Session({
-                "name": "test",
-                "model_id": "test",
-                "current": True
-            }))
-        session = self.base_controller.current_session
-
-        assert session.id
-        assert session.name == "test"
-        assert session.model_id == "test"
-        assert session.current == True
 
     def test_default_code_driver(self):
         assert self.base_controller.code_driver != None

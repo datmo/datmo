@@ -104,9 +104,6 @@ class TestProjectController():
         assert self.project_controller.model.description == "test description"
         assert result and self.project_controller.is_initialized
 
-        # Changeable by user, not tested in is_initialized
-        assert self.project_controller.current_session.name == "default"
-
     # TODO: Test lower level functions (DAL, JSONStore, etc for interruptions)
     # def test_init_with_interruption(self):
     #     # Reinitializing after timed interruption during init
@@ -131,8 +128,6 @@ class TestProjectController():
     #     assert self.project_controller.model.description == "test description"
     #     assert result and self.project_controller.is_initialized
     #
-    #     # Changeable by user, not tested in is_initialized
-    #     assert self.project_controller.current_session.name == "default"
 
     def test_init_reinit_failure_empty_str(self):
         _ = self.project_controller.init("test1", "test description")

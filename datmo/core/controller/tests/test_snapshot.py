@@ -29,9 +29,9 @@ from datmo.core.controller.task import TaskController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.util.exceptions import (
-    EntityNotFound, SessionDoesNotExist, RequiredArgumentMissing,
-    TaskNotComplete, InvalidArgumentType, ProjectNotInitialized,
-    InvalidProjectPath, DoesNotExist, UnstagedChanges)
+    EntityNotFound, RequiredArgumentMissing, TaskNotComplete,
+    InvalidArgumentType, ProjectNotInitialized, InvalidProjectPath,
+    DoesNotExist, UnstagedChanges)
 from datmo.core.util.misc_functions import check_docker_inactive, pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -668,14 +668,6 @@ class TestSnapshotController():
 
     def test_list(self):
         self.__setup()
-        # Check for error if incorrect session given
-        failed = False
-        try:
-            self.snapshot_controller.list(session_id="does_not_exist")
-        except SessionDoesNotExist:
-            failed = True
-        assert failed
-
         # Create file to add to snapshot
         test_filepath_1 = os.path.join(self.snapshot_controller.home,
                                        "test.txt")
@@ -744,14 +736,6 @@ class TestSnapshotController():
         expected_ids = [item.id for item in expected_result]
         ids = [item.id for item in result]
         assert set(expected_ids) == set(ids)
-
-        # List all snapshots with session filter
-        result = self.snapshot_controller.list(
-            session_id=self.project_controller.current_session.id)
-
-        assert len(result) == 2 and \
-               snapshot_obj_1 in result and \
-               snapshot_obj_2 in result
 
         # List snapshots with visible filter
         result = self.snapshot_controller.list(visible=False)

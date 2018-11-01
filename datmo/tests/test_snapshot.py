@@ -29,9 +29,9 @@ from datmo.snapshot import Snapshot
 from datmo.core.entity.snapshot import Snapshot as CoreSnapshot
 from datmo.core.controller.project import ProjectController
 from datmo.core.controller.task import TaskController
-from datmo.core.util.exceptions import (
-    CommitFailed, InvalidProjectPath, SessionDoesNotExist,
-    SnapshotCreateFromTaskArgs, EntityNotFound, DoesNotExist)
+from datmo.core.util.exceptions import (InvalidProjectPath,
+                                        SnapshotCreateFromTaskArgs,
+                                        EntityNotFound, DoesNotExist)
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -47,7 +47,6 @@ class TestSnapshotModule():
         self.input_dict = {
             "id": "test",
             "model_id": "my_model",
-            "session_id": "my_session",
             "message": "my message",
             "code_id": "my_code_id",
             "environment_id": "my_environment_id",
@@ -238,14 +237,8 @@ class TestSnapshotModule():
             failed = True
         assert failed
 
-        # check session does not exist if wrong session
+        # Reset to the correct home dir
         Config().set_home(self.temp_dir)
-        failed = False
-        try:
-            ls(session_id="does_not_exist")
-        except SessionDoesNotExist:
-            failed = True
-        assert failed
 
         # create with default params and files to commit
         test_filepath = os.path.join(self.temp_dir, "script.py")

@@ -194,15 +194,15 @@ class TestTaskController():
         environment_run_option = {
             "command": ["python", "script.py"],
             "volumes": {
-                    os.path.join(self.temp_dir, "/temp_task"): {
-                        'bind': '/task/',
-                        'mode': 'rw'
-                    },
-                    self.temp_dir: {
-                        'bind': '/home/',
-                        'mode': 'rw'
-                    }
+                os.path.join(self.temp_dir, "/temp_task"): {
+                    'bind': '/task/',
+                    'mode': 'rw'
+                },
+                self.temp_dir: {
+                    'bind': '/home/',
+                    'mode': 'rw'
                 }
+            }
         }
         # create data file
         data_dirpath = os.path.join(self.temp_dir, "data")
@@ -216,23 +216,30 @@ class TestTaskController():
         data_file_path_map = [(data_filepath, "data_file.txt")]
         data_directory_path_map = [(data_dirpath, "data_directory")]
 
-        environment_run_option = self.task_controller._update_environment_run_options(environment_run_option,
-                                                                                      data_file_path_map,
-                                                                                      data_directory_path_map)
+        environment_run_option = self.task_controller._update_environment_run_options(
+            environment_run_option, data_file_path_map,
+            data_directory_path_map)
 
-        assert environment_run_option["volumes"][data_file_dirpath] == {'bind': '/data/', 'mode': 'rw'}
-        assert environment_run_option["volumes"][data_dirpath] == {'bind': '/data/data_directory', 'mode': 'rw'}
+        assert environment_run_option["volumes"][data_file_dirpath] == {
+            'bind': '/data/',
+            'mode': 'rw'
+        }
+        assert environment_run_option["volumes"][data_dirpath] == {
+            'bind': '/data/data_directory',
+            'mode': 'rw'
+        }
 
         # Error by passing directory which does not exist
         data_dirpath = os.path.join(self.temp_dir, "data_dne")
-        data_filepath = os.path.join(self.temp_dir, "data_dne", "data_file.txt")
+        data_filepath = os.path.join(self.temp_dir, "data_dne",
+                                     "data_file.txt")
         data_file_path_map = [(data_filepath, "data_file.txt")]
         data_directory_path_map = [(data_dirpath, "data_directory")]
         failed = False
         try:
-            self.task_controller._update_environment_run_options(environment_run_option,
-                                                                 data_file_path_map,
-                                                                 data_directory_path_map)
+            self.task_controller._update_environment_run_options(
+                environment_run_option, data_file_path_map,
+                data_directory_path_map)
         except TaskRunError:
             failed = True
 
@@ -473,8 +480,11 @@ class TestTaskController():
 
         # 6) Test Option 6
         self.project_controller.file_driver.create("dirpath1", directory=True)
-        self.project_controller.file_driver.create(os.path.join("dirpath1", "file.txt"))
-        with open(os.path.join(self.project_controller.home, "dirpath1", "file.txt"), "wb") as f:
+        self.project_controller.file_driver.create(
+            os.path.join("dirpath1", "file.txt"))
+        with open(
+                os.path.join(self.project_controller.home, "dirpath1",
+                             "file.txt"), "wb") as f:
             f.write(to_bytes('my initial line\n'))
         test_filename = "script.py"
         test_filepath = os.path.join(self.temp_dir, test_filename)
@@ -494,9 +504,13 @@ class TestTaskController():
 
         # Create task_dict
         task_command = ["python", test_filename]
-        task_dict = {"command_list": task_command, "data_file_path_map": [(os.path.join(self.project_controller.home,
-                                                                                        "dirpath1", "file.txt"),
-                                                                           'file.txt')]}
+        task_dict = {
+            "command_list":
+                task_command,
+            "data_file_path_map": [(os.path.join(self.project_controller.home,
+                                                 "dirpath1", "file.txt"),
+                                    'file.txt')]
+        }
 
         # Create environment definition
         env_def_path = os.path.join(self.project_controller.home, "Dockerfile")
@@ -537,17 +551,22 @@ class TestTaskController():
                                            file_collection_obj.path)
 
         assert os.path.isfile(os.path.join(files_absolute_path, "task.log"))
-        assert os.path.isfile(os.path.join(self.project_controller.home,
-                                           "dirpath1", "file.txt"))
-        assert "my initial line" in open(os.path.join(self.project_controller.home,
-                                                   "dirpath1", "file.txt"), "r").read()
-        assert "my test file" in open(os.path.join(self.project_controller.home,
-                                           "dirpath1", "file.txt"), "r").read()
+        assert os.path.isfile(
+            os.path.join(self.project_controller.home, "dirpath1", "file.txt"))
+        assert "my initial line" in open(
+            os.path.join(self.project_controller.home, "dirpath1", "file.txt"),
+            "r").read()
+        assert "my test file" in open(
+            os.path.join(self.project_controller.home, "dirpath1", "file.txt"),
+            "r").read()
 
         # 7) Test Option 7
         self.project_controller.file_driver.create("dirpath1", directory=True)
-        self.project_controller.file_driver.create(os.path.join("dirpath1", "file.txt"))
-        with open(os.path.join(self.project_controller.home, "dirpath1", "file.txt"), "wb") as f:
+        self.project_controller.file_driver.create(
+            os.path.join("dirpath1", "file.txt"))
+        with open(
+                os.path.join(self.project_controller.home, "dirpath1",
+                             "file.txt"), "wb") as f:
             f.write(to_bytes('my initial line\n'))
         test_filename = "script.py"
         test_filepath = os.path.join(self.temp_dir, test_filename)
@@ -567,8 +586,12 @@ class TestTaskController():
 
         # Create task_dict
         task_command = ["python", test_filename]
-        task_dict = {"command_list": task_command, "data_directory_path_map": [(os.path.join(self.project_controller.home,
-                                                                                        "dirpath1"), 'dirpath1')]}
+        task_dict = {
+            "command_list":
+                task_command,
+            "data_directory_path_map": [(os.path.join(
+                self.project_controller.home, "dirpath1"), 'dirpath1')]
+        }
 
         # Create environment definition
         env_def_path = os.path.join(self.project_controller.home, "Dockerfile")
@@ -609,12 +632,14 @@ class TestTaskController():
                                            file_collection_obj.path)
 
         assert os.path.isfile(os.path.join(files_absolute_path, "task.log"))
-        assert os.path.isfile(os.path.join(self.project_controller.home,
-                                           "dirpath1", "file.txt"))
-        assert "my initial line" in open(os.path.join(self.project_controller.home,
-                                                      "dirpath1", "file.txt"), "r").read()
-        assert "my test file" in open(os.path.join(self.project_controller.home,
-                                                   "dirpath1", "file.txt"), "r").read()
+        assert os.path.isfile(
+            os.path.join(self.project_controller.home, "dirpath1", "file.txt"))
+        assert "my initial line" in open(
+            os.path.join(self.project_controller.home, "dirpath1", "file.txt"),
+            "r").read()
+        assert "my test file" in open(
+            os.path.join(self.project_controller.home, "dirpath1", "file.txt"),
+            "r").read()
 
     def test_list(self):
         self.__setup()
@@ -673,9 +698,8 @@ class TestTaskController():
         ids = [item.id for item in result]
         assert set(expected_ids) == set(ids)
 
-        # List all tasks and filter by session
-        result = self.task_controller.list(
-            session_id=self.project_controller.current_session.id)
+        # List all tasks
+        result = self.task_controller.list()
 
         assert len(result) == 2 and \
                task_obj_1 in result and \
@@ -792,25 +816,23 @@ class TestTaskController():
         # Test 2: When meta data for workspace is passed
         test_workspace = "notebook"
         test_command = "python script.py"
-        updated_task_obj = self.task_controller.update(task_obj.id,
-                                                       workspace=test_workspace,
-                                                       command=test_command)
+        updated_task_obj = self.task_controller.update(
+            task_obj.id, workspace=test_workspace, command=test_command)
         assert updated_task_obj.workspace == test_workspace
         assert updated_task_obj.command == test_command
         assert updated_task_obj.command_list == ["python", "script.py"]
 
         # Test 3: When meta data for workspace is passed
         test_interactive = True
-        updated_task_obj = self.task_controller.update(task_obj.id,
-                                                       interactive=test_interactive)
+        updated_task_obj = self.task_controller.update(
+            task_obj.id, interactive=test_interactive)
         assert updated_task_obj.interactive == test_interactive
 
         # Test 4: When meta data for workspace is passed
         test_command_list = ["python", "script.py"]
-        updated_task_obj = self.task_controller.update(task_obj.id,
-                                                       command_list=test_command_list)
+        updated_task_obj = self.task_controller.update(
+            task_obj.id, command_list=test_command_list)
         assert updated_task_obj.command_list == ["python", "script.py"]
-
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_delete(self):
