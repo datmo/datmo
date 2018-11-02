@@ -6,6 +6,7 @@ machine:
   environment:
     LOGGING_LEVEL: DEBUG
     SLACK_WEBHOOK_URL: "https://hooks.slack.com/services/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"
+    DATMO_API_KEY: "6a3a3cd900eaf7b406a41d68f8ca7969"
     TEST_PACKAGE: python -m pytest -s -v
 
   pre:

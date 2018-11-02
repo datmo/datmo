@@ -24,8 +24,7 @@ class TestMonitoringModule():
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         # TODO: move API key to environment variable
-        self.monitoring = Monitoring(
-            api_key="6a3a3cd900eaf7b406a41d68f8ca7969")
+        self.monitoring = Monitoring()
         self.monitoring.__str__()
         self.monitoring.__repr__()
         self.monitoring.set_model_id("model_id")

@@ -5,6 +5,7 @@ import json
 import psutil
 from datetime import datetime
 
+from datmo.config import Config
 from datmo.core.util.exceptions import InputError
 from datmo.core.util.misc_functions import bytes2human, slack_message
 from datmo.core.util.remote_api import RemoteAPI
@@ -63,8 +64,12 @@ class Monitoring():
     >>> datmo_client.trigger(medium="slack", input=input, prediction=prediction, notes=notes)
     """
 
-    def __init__(self, api_key, home=None):
-        self._api_key = api_key
+    def __init__(self, api_key=None):
+        if api_key is None:
+            config = Config()
+            _, self._api_key, _ = config.remote_credentials
+        else:
+            self._api_key = api_key
         self.remote_api = RemoteAPI(self._api_key)
         self._start_time, self._end_time, self._model_id, \
         self._model_version_id, self._deployment_version_id = None, None, None, None, None
