@@ -166,7 +166,7 @@ class ProjectCommand(BaseCommand):
 
             while not datmo_api_key:
                 datmo_api_key = self.cli_helper.prompt(
-                    "---> Enter API key for Datmo Deployment")
+                    "Enter API key for datmo")
 
             # Initialize remote API to get master ip address
             remote_api = RemoteAPI(datmo_api_key)
@@ -174,10 +174,6 @@ class ProjectCommand(BaseCommand):
             master_system_info = response['body']['master_system_info']
             master_server_ip = str(master_system_info.get('datmo_master_ip')) if isinstance(master_system_info, dict)\
                 else None
-
-            while not master_server_ip:
-                master_server_ip = self.cli_helper.prompt(
-                    "---> Enter master server IP address for Datmo Deployment")
 
             # Create a config file
             self.datmo_config = JSONStore(
@@ -190,8 +186,7 @@ class ProjectCommand(BaseCommand):
                 self.datmo_config.to_file(config)
             else:
                 self.cli_helper.echo(
-                    "Remote credentials could not be saved because they weren't input correctly. Please try again"
-                )
+                    "Datmo API key could not be saved. Please try again")
 
         # Setup project specific things
         if self.project_controller.model:
