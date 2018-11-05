@@ -52,22 +52,20 @@ class Config(object):
             END_POINT : str
                 return if present else None
             """
-            # 1) loading the datmo config if present
+            # 1) Load from the environment if datmo config not already saved globally
+            MASTER_SERVER_IP = os.environ.get('MASTER_SERVER_IP', None)
+            DATMO_API_KEY = os.environ.get('DATMO_API_KEY', None)
+
+            # 2) loading the datmo config if present
             datmo_config_filepath = os.path.join(
                 os.path.expanduser("~"), ".datmo", "config")
             if os.path.isfile(datmo_config_filepath):
                 datmo_config = JSONStore(datmo_config_filepath)
                 config_dict = datmo_config.to_dict()
-                MASTER_SERVER_IP = config_dict.get('MASTER_SERVER_IP', None)
-                DATMO_API_KEY = config_dict.get('DATMO_API_KEY', None)
-            else:
-                MASTER_SERVER_IP, DATMO_API_KEY = None, None
-
-            # 2) Load from the environment if datmo config not already saved globally
-            if not MASTER_SERVER_IP:
-                MASTER_SERVER_IP = os.environ.get('MASTER_SERVER_IP', None)
-            if not DATMO_API_KEY:
-                DATMO_API_KEY = os.environ.get('DATMO_API_KEY', None)
+                if MASTER_SERVER_IP is None:
+                    MASTER_SERVER_IP = config_dict.get('MASTER_SERVER_IP', None)
+                if DATMO_API_KEY is None:
+                    DATMO_API_KEY = config_dict.get('DATMO_API_KEY', None)
 
             if MASTER_SERVER_IP:
                 END_POINT = 'http://' + MASTER_SERVER_IP + ':2083/api/v1'
