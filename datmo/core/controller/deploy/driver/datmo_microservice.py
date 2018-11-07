@@ -46,7 +46,7 @@ class DatmoMicroserviceDeployDriver(object):
         if datmo_deploy_config_path:
             with open(datmo_deploy_config_path, 'r') as stream:
                 try:
-                    datmo_deploy = yaml.load(stream)
+                    datmo_deploy = yaml.safe_load(stream)
                     if datmo_deploy is not None:
                         worker_path = datmo_deploy['deploy']['celery_services']['worker_path']
                         config_method_names = datmo_deploy['deploy']['celery_services']['methods']

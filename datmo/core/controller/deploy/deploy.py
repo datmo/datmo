@@ -177,7 +177,7 @@ class DeployController(BaseController):
             if datmo_deploy_config_path:
                 with open(datmo_deploy_config_path, 'r') as stream:
                     try:
-                        datmo_deploy = yaml.load(stream)
+                        datmo_deploy = yaml.safe_load(stream)
                         if datmo_deploy is not None:
                             files_exclude = datmo_deploy['deploy'][
                                 'files_exclude']
