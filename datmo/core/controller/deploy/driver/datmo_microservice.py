@@ -1,3 +1,7 @@
+import os
+import ast
+import yaml
+
 from datmo.core.util.misc_functions import Commands, \
     bcolors, authenticated_get_call, Response, Status
 
@@ -13,12 +17,69 @@ class DatmoMicroserviceDeployDriver(object):
         self.commands = Commands()
         self.status = Status
 
+    def validate_deploy(self, home):
+        """
+        Validate deployment before packaging the project to push
+        """
+        response = Response()
+        bool_environment, bool_config_exists, bool_methods_exists, message = False, False, False, ""
+        # 1. Check for environment file
+        if os.path.exists(os.path.join(home, "datmo_environment", "Dockerfile")) or \
+                os.path.exists(os.path.join(home,  "Dockerfile")):
+            bool_environment = True
+        else:
+            message = "No Dockerfile exists in the project."
+        # 2. Check for existance of datmo deploy config file
+        if os.path.exists(os.path.join(home, 'datmo-deploy.yml')):
+            datmo_deploy_config_path = os.path.join(
+                home, 'datmo-deploy.yml')
+            bool_config_exists = True
+        elif os.path.exists(
+                os.path.join(home, 'datmo-deploy.yaml')):
+            datmo_deploy_config_path = os.path.join(
+                home, 'datmo-deploy.yaml')
+            bool_config_exists = True
+        else:
+            message += " No config file exist in the project."
+            datmo_deploy_config_path = None
+
+        if datmo_deploy_config_path:
+            with open(datmo_deploy_config_path, 'r') as stream:
+                try:
+                    datmo_deploy = yaml.load(stream)
+                    if datmo_deploy is not None:
+                        worker_path = datmo_deploy['deploy']['celery_services']['worker_path']
+                        config_method_names = datmo_deploy['deploy']['celery_services']['methods']
+                        # 3. Check for methods declared in config and what exists in worker file
+                        if os.path.exists(os.path.join(home, worker_path)):
+                            filepath = os.path.join(home, worker_path)
+                            with open(filepath, "rt") as file:
+                                parse_ast = ast.parse(file.read(), filename=worker_path)
+                            body = parse_ast.body
+                            method_names = []
+                            for f in body:
+                                if isinstance(f, ast.FunctionDef):
+                                    method_names.append(f.name)
+                            if len(set(config_method_names) & set(method_names)) == len(config_method_names):
+                                bool_methods_exists = True
+                            else:
+                                message += " Methods mentioned in the config file does not exist in worker file."
+                except yaml.YAMLError as exc:
+                        print(exc)
+
+        response.message = bcolors.FAIL + message + bcolors.ENDC
+        bool_validate = (bool_environment and bool_config_exists and bool_methods_exists)
+        if not bool_validate:
+            response.status = self.status.FAILURE
+
+        return bool_validate, response
+
     def check_setup(self, response):
         # in case of no proper setup
         if self.end_point is not None:
             return True, response
         response.message = bcolors.FAIL + "Setup for remote datmo isn't done. " \
-                                          "Run `datmo setup` and setup your remote credentials " + bcolors.ENDC
+                                          "Run `datmo configure` and configure your remote credentials " + bcolors.ENDC
         response.status = self.status.FAILURE
         return False, response
 
