@@ -69,8 +69,6 @@ class TestDockerEnv():
         with open(self.dockerfile_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine" + os.linesep))
             f.write(to_bytes(str("RUN echo " + self.random_text)))
-        # connect to daemon
-        self.docker_environment_driver.connect()
 
     def teardown_method(self):
         # TODO: abstract the datmo_directory_name

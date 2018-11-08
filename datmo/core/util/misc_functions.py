@@ -47,8 +47,8 @@ from datmo.core.controller.environment.driver.dockerenv import DockerEnvironment
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     PathDoesNotExist, MutuallyExclusiveArguments, RequiredArgumentMissing,
-    EnvironmentInitFailed, EnvironmentExecutionError, InvalidDestinationName,
-    TooManyArgumentsFound)
+    EnvironmentConnectFailed, EnvironmentExecutionError,
+    InvalidDestinationName, TooManyArgumentsFound)
 
 
 def bytes2human(n):
@@ -276,6 +276,7 @@ def check_docker_inactive(filepath, datmo_directory_name):
     try:
         test = DockerEnvironmentDriver(
             root=filepath, datmo_directory_name=datmo_directory_name)
+        test.connect()
         definition_path = os.path.join(filepath, "Dockerfile")
         if platform.system() == "Windows":
             with open(definition_path, "wb") as f:
@@ -283,7 +284,7 @@ def check_docker_inactive(filepath, datmo_directory_name):
                 f.write(to_bytes(str("RUN echo hello")))
             test.build("docker-test", definition_path)
         return False
-    except (EnvironmentInitFailed, EnvironmentExecutionError):
+    except (EnvironmentConnectFailed, EnvironmentExecutionError):
         return True
 
 
