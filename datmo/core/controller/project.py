@@ -9,8 +9,9 @@ from datmo.core.controller.file.file_collection import FileCollectionController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.entity.model import Model
 from datmo.core.util.json_store import JSONStore
-from datmo.core.util.exceptions import (
-    ProjectNotInitialized, EnvironmentInitFailed, FileIOError, UnstagedChanges)
+from datmo.core.util.exceptions import (ProjectNotInitialized,
+                                        EnvironmentConnectFailed, FileIOError,
+                                        UnstagedChanges)
 
 
 class ProjectController(BaseController):
@@ -81,11 +82,15 @@ class ProjectController(BaseController):
                 self.file_driver.init()
 
             # Initialize Environment Driver if needed
+            if not self.environment_driver.is_initialized:
+                self.environment_driver.init()
+
+            # Connect Environment Driver if needed
             # (not required but will warn if not present)
             try:
-                if not self.environment_driver.is_initialized:
-                    self.environment_driver.init()
-            except EnvironmentInitFailed:
+                if not self.environment_driver.is_connected:
+                    self.environment_driver.connect()
+            except EnvironmentConnectFailed:
                 self.logger.warning(
                     __("warn", "controller.general.environment.failed"))
 
@@ -146,8 +151,6 @@ class ProjectController(BaseController):
         try:
             # Remove Hidden Datmo file structure, give warning if error
             self.file_driver.delete_hidden_datmo_file_structure()
-            # Remove Visible Datmo file structure, give warning if error
-            self.file_driver.delete_visible_datmo_structure()
         except FileIOError:
             self.logger.warning(__("warn", "controller.project.cleanup.files"))
 

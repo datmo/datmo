@@ -181,6 +181,14 @@ class EnvironmentInitFailed(EnvironmentExecutionError):
     pass
 
 
+class EnvironmentConnectFailed(EnvironmentExecutionError):
+    pass
+
+
+class EnvironmentNotConnected(EnvironmentExecutionError):
+    pass
+
+
 class EnvironmentNotInitialized(EnvironmentExecutionError):
     pass
 

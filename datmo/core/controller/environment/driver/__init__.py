@@ -7,6 +7,16 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
 
     Methods
     -------
+    init()
+        Initialize the environment driver
+    connect()
+        Connect to the environment daemon and start running
+    get_environment_types()
+        Get the environment types
+    get_supported_frameworks(environment_type)
+        Get all the supported frameworks
+    get_supported_languages(environment_type, environment_framework)
+        Get all the supported environment languages
     setup(output_path)
         create environment definition
     create(path, output_path)
@@ -37,6 +47,20 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         Raises
         ------
         EnvironmentInitFailed
+        """
+
+    @abstractmethod
+    def connect(self):
+        """Connect to the environment daemon and start running
+
+        Returns
+        -------
+        bool
+            returns True if success else False
+
+        Raises
+        ------
+        EnvironmentConnectFailed
         """
 
     @abstractmethod

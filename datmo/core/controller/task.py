@@ -636,12 +636,13 @@ class TaskController(BaseController):
                 # TODO: remove...for now database may not be in sync. no task that has run can have NO before_snapshot_id
                 time.sleep(1)
                 task_obj = self.get(task_id)
-            if after_snapshot_id:
-                after_snapshot_obj = self.snapshot.get(after_snapshot_id)
-                kwargs['environment_id'] = after_snapshot_obj.environment_id
-            if not after_snapshot_id and before_snapshot_id:
-                before_snapshot_obj = self.snapshot.get(before_snapshot_id)
-                kwargs['environment_id'] = before_snapshot_obj.environment_id
+            # TODO: fix stop function to handle stopping containers run from specific environment_ids
+            # if after_snapshot_id:
+            #     after_snapshot_obj = self.snapshot.get(after_snapshot_id)
+            #     kwargs['environment_id'] = after_snapshot_obj.environment_id
+            # if not after_snapshot_id and before_snapshot_id:
+            #     before_snapshot_obj = self.snapshot.get(before_snapshot_id)
+            #     kwargs['environment_id'] = before_snapshot_obj.environment_id
             return_code = self.environment.stop(**kwargs)
         if all:
             return_code = self.environment.stop(all=True)

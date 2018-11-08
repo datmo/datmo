@@ -4,8 +4,7 @@ from datmo.core.util.i18n import get as __
 from datmo.core.util.logger import DatmoLogger
 from datmo.core.util import get_class_contructor
 from datmo.core.util.json_store import JSONStore
-from datmo.core.util.exceptions import (InvalidProjectPath,
-                                        DatmoModelNotInitialized)
+from datmo.core.util.exceptions import (InvalidProjectPath)
 from datmo.config import Config
 
 
@@ -106,6 +105,7 @@ class BaseController(object):
         if not self._is_initialized:
             if self.code_driver.is_initialized and \
                 self.file_driver.is_initialized and \
+                 self.environment_driver.is_initialized and \
                  self.model:
                 self._is_initialized = True
         return self._is_initialized
@@ -133,21 +133,24 @@ class BaseController(object):
                 "class_constructor":
                     "datmo.core.controller.code.driver.file.FileCodeDriver",
                 "options": {
-                    "filepath": self.home
+                    "root": self.home,
+                    "datmo_directory_name": Config().datmo_directory_name
                 }
             },
             "controller.file.driver": {
                 "class_constructor":
                     "datmo.core.controller.file.driver.local.LocalFileDriver",
                 "options": {
-                    "root": self.home
+                    "root": self.home,
+                    "datmo_directory_name": Config().datmo_directory_name
                 }
             },
             "controller.environment.driver": {
                 "class_constructor":
                     "datmo.core.controller.environment.driver.dockerenv.DockerEnvironmentDriver",
                 "options": {
-                    "filepath": self.home,
+                    "root": self.home,
+                    "datmo_directory_name": Config().datmo_directory_name,
                     "docker_execpath": "docker"
                 }
             },
@@ -164,7 +167,8 @@ class BaseController(object):
                     "driver_type":
                         "file",
                     "connection_string":
-                        os.path.join(self.home, ".datmo/database")
+                        os.path.join(self.home,
+                                     Config().datmo_directory_name, "database")
                 }
             },
         }

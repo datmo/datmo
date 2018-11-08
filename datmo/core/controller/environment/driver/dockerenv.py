@@ -1,5 +1,6 @@
 import ast
 import os
+import shutil
 import re
 import time
 import json
@@ -27,10 +28,11 @@ from docker import errors
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
-    PathDoesNotExist, EnvironmentInitFailed, EnvironmentExecutionError,
-    FileAlreadyExistsError, EnvironmentRequirementsCreateError,
-    EnvironmentImageNotFound, EnvironmentContainerNotFound,
-    GPUSupportNotEnabled, EnvironmentDoesNotExist)
+    PathDoesNotExist, EnvironmentInitFailed, EnvironmentConnectFailed,
+    EnvironmentExecutionError, FileAlreadyExistsError,
+    EnvironmentRequirementsCreateError, EnvironmentImageNotFound,
+    EnvironmentContainerNotFound, GPUSupportNotEnabled,
+    EnvironmentDoesNotExist, FileStructureError)
 from datmo.core.controller.environment.driver import EnvironmentDriver
 
 docker_config_filepath = os.path.join(
@@ -43,7 +45,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
     Parameters
     ----------
-    filepath : str, optional
+    root : str, optional
         home filepath for project
         (default is empty)
     docker_execpath : str, optional
@@ -55,11 +57,13 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
     Attributes
     ----------
-    filepath : str
+    root : str
         home filepath for project
-    docker_execpath : str
+    datmo_directory_name : str
+        datmo directory name for project
+    docker_execpath : str, optional
         docker execution path for the system
-    docker_socket : str
+    docker_socket : str, optional
         specific socket for docker
         (default is None, which means system default is used by docker)
     client : DockerClient
@@ -75,20 +79,26 @@ class DockerEnvironmentDriver(EnvironmentDriver):
     """
 
     def __init__(self,
-                 filepath="",
+                 root,
+                 datmo_directory_name,
                  docker_execpath="docker",
                  docker_socket=None):
         super(DockerEnvironmentDriver, self).__init__()
         if not docker_socket:
             if platform.system() != "Windows":
                 docker_socket = "unix:///var/run/docker.sock"
-        self.filepath = filepath
+        self.root = root
         # Check if filepath exists
-        if not os.path.exists(self.filepath):
+        if not os.path.exists(self.root):
             raise PathDoesNotExist(
                 __("error",
-                   "controller.environment.driver.docker.__init__.dne",
-                   filepath))
+                   "controller.environment.driver.docker.__init__.dne", root))
+        self._datmo_directory_name = datmo_directory_name
+        self._datmo_directory_path = os.path.join(self.root,
+                                                  self._datmo_directory_name)
+        self.environment_directory_name = "environment"
+        self.environment_directory_path = os.path.join(
+            self._datmo_directory_path, self.environment_directory_name)
         self.docker_execpath = docker_execpath
         self.docker_socket = docker_socket
         if self.docker_socket:
@@ -97,7 +107,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         else:
             self.client = DockerClient()
             self.prefix = [self.docker_execpath]
-        self.is_connected = False
+        self._is_connected = False
         self._is_initialized = self.is_initialized
         self.type = "docker"
         with open(docker_config_filepath) as f:
@@ -105,15 +115,28 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
     @property
     def is_initialized(self):
-        # TODO: Check if Docker is up and running
-        if self.is_connected:
+        if self.exists_environment_dir():
             self._is_initialized = True
             return self._is_initialized
         self._is_initialized = False
         return self._is_initialized
 
-    # running daemon needed
+    @property
+    def is_connected(self):
+        # TODO: Check if Docker is up and running
+        return self._is_connected
+
     def init(self):
+        try:
+            # Ensure the environment files structure exists
+            self.ensure_environment_dir()
+        except Exception as e:
+            raise EnvironmentInitFailed(
+                __("error", "controller.environment.driver.docker.init",
+                   str(e)))
+        return True
+
+    def connect(self):
         # TODO: Fill in to start up Docker
         # Startup Docker
         try:
@@ -125,13 +148,44 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         # Initiate Docker execution
         try:
             self.info = self.client.info()
-            self.is_connected = True if self.info["Images"] != None else False
+            self._is_connected = True if self.info["Images"] != None else False
         except Exception:
-            raise EnvironmentInitFailed(
+            raise EnvironmentConnectFailed(
                 __("error", "controller.environment.driver.docker.__init__",
                    platform.system()))
         return True
 
+    # Environment directory
+    def create_environment_dir(self):
+        if not os.path.isdir(self._datmo_directory_path):
+            raise FileStructureError(
+                __("error",
+                   "controller.file.driver.local.create_collections_dir"))
+        if not os.path.isdir(self.environment_directory_path):
+            os.makedirs(self.environment_directory_path)
+        return True
+
+    def exists_environment_dir(self):
+        return os.path.isdir(self.environment_directory_path)
+
+    def ensure_environment_dir(self):
+        if not self.exists_environment_dir():
+            self.create_environment_dir()
+        return True
+
+    def delete_environment_dir(self):
+        shutil.rmtree(self.environment_directory_path)
+        return True
+
+    def list_environment_files(self):
+        if not self.is_initialized:
+            raise FileStructureError(
+                __("error",
+                   "controller.file.driver.local.list_file_collections"))
+        environment_files_list = os.listdir(self.environment_directory_path)
+        return environment_files_list
+
+    # Other functions
     def get_environment_types(self):
         # To get the current environment type
         return list(self.docker_config["environment_types"])
@@ -199,7 +253,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
 
     def create(self, path=None, output_path=None, workspace=None):
         if not path:
-            path = os.path.join(self.filepath, "Dockerfile")
+            path = os.path.join(self.root, "Dockerfile")
         if not output_path:
             directory, filename = os.path.split(path)
             output_path = os.path.join(directory, "datmo" + filename)
@@ -260,6 +314,7 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         return stop_and_remove_containers_result and \
                remove_image_result
 
+    # running daemon needed
     def gpu_enabled(self):
         # test if this images works
         # docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi
@@ -473,7 +528,8 @@ class DockerEnvironmentDriver(EnvironmentDriver):
                 if process.returncode > 0:
                     time.sleep(1)
                     timeout_count += 1
-                result = re.search("(?P<url>https?://[^\s]+)", stdout.decode('utf-8')) if stdout else None
+                result = re.search("(?P<url>https?://[^\s]+)",
+                                   stdout.decode('utf-8')) if stdout else None
                 workspace_url = result.group("url") if result else None
             return workspace_url
         elif workspace == 'rstudio':
@@ -857,12 +913,12 @@ class DockerEnvironmentDriver(EnvironmentDriver):
         """
         if package_manager == "pip":
             try:
-                requirements_filepath = os.path.join(self.filepath,
+                requirements_filepath = os.path.join(self.root,
                                                      "datmorequirements.txt")
                 outfile_requirements = open(requirements_filepath, "wb")
                 process = subprocess.Popen(
                     ["pip", "freeze"],
-                    cwd=self.filepath,
+                    cwd=self.root,
                     stdout=outfile_requirements,
                     stderr=subprocess.PIPE)
                 stdout, stderr = process.communicate()

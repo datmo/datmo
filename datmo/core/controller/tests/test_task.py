@@ -44,7 +44,8 @@ class TestTaskController():
         self.environment_ids = []
 
     def teardown_method(self):
-        if not check_docker_inactive(test_datmo_dir):
+        if not check_docker_inactive(test_datmo_dir,
+                                     Config().datmo_directory_name):
             self.__setup()
             self.environment_controller = EnvironmentController()
             for env_id in list(set(self.environment_ids)):

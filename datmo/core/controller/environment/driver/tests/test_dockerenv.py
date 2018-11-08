@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
+import shutil
 import tempfile
 import platform
 import threading
@@ -37,7 +38,7 @@ except TypeError:
 
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.core.util.exceptions import (
-    EnvironmentInitFailed, FileAlreadyExistsError,
+    EnvironmentInitFailed, EnvironmentConnectFailed, FileAlreadyExistsError,
     EnvironmentRequirementsCreateError, EnvironmentImageNotFound,
     EnvironmentContainerNotFound, PathDoesNotExist, EnvironmentDoesNotExist,
     EnvironmentExecutionError)
@@ -56,18 +57,24 @@ class TestDockerEnv():
 
     def setup_method(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
+        # Ensure the ".datmo" directory is there (this is ensured by higher level functions
+        # in practice
+        os.makedirs(os.path.join(self.temp_dir, ".datmo"))
         # Test the default parameters
         self.docker_environment_driver = \
-            DockerEnvironmentDriver(self.temp_dir)
+            DockerEnvironmentDriver(self.temp_dir, ".datmo")
         self.image_name = str(uuid.uuid1())
         self.random_text = str(uuid.uuid1())
         self.dockerfile_path = os.path.join(self.temp_dir, "Dockerfile")
         with open(self.dockerfile_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine" + os.linesep))
             f.write(to_bytes(str("RUN echo " + self.random_text)))
+        # connect to daemon
+        self.docker_environment_driver.connect()
 
     def teardown_method(self):
-        if not check_docker_inactive(test_datmo_dir):
+        # TODO: abstract the datmo_directory_name
+        if not check_docker_inactive(test_datmo_dir, ".datmo"):
             self.docker_environment_driver.remove(self.image_name, force=True)
 
     def test_instantiation(self):
@@ -78,22 +85,67 @@ class TestDockerEnv():
         assert self.docker_environment_driver.prefix
         assert self.docker_environment_driver.type
 
-    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_init_success(self):
-        init_result = self.docker_environment_driver.init()
-        assert init_result and \
+        result = self.docker_environment_driver.init()
+        assert result and \
                self.docker_environment_driver.is_initialized == True
 
     def test_init_failed(self):
         thrown = False
+        shutil.rmtree(os.path.join(self.temp_dir, ".datmo"))
         try:
-            test = DockerEnvironmentDriver(
-                self.temp_dir, docker_socket="unix:///var/run/fooo")
-            test.init()
+            self.docker_environment_driver.init()
         except EnvironmentInitFailed:
             thrown = True
         assert thrown
 
+    @pytest_docker_environment_failed_instantiation(test_datmo_dir)
+    def test_connect_success(self):
+        result = self.docker_environment_driver.connect()
+        assert result and \
+            self.docker_environment_driver.is_connected
+
+    def test_connect_failed(self):
+        thrown = False
+        try:
+            test = DockerEnvironmentDriver(
+                self.temp_dir, ".datmo", docker_socket="unix:///var/run/fooo")
+            test.connect()
+        except EnvironmentConnectFailed:
+            thrown = True
+        assert thrown
+
+    # Test environment directory functions
+    def test_create_environment_dir(self):
+        assert not os.path.isdir(
+            self.docker_environment_driver.environment_directory_path)
+        result = self.docker_environment_driver.create_environment_dir()
+        assert result == True and \
+               os.path.isdir(self.docker_environment_driver.environment_directory_path)
+
+    def test_exists_environment_dir(self):
+        result = self.docker_environment_driver.exists_environment_dir()
+        assert result == False and \
+               not os.path.isdir(self.docker_environment_driver.environment_directory_path)
+        self.docker_environment_driver.init()
+        self.docker_environment_driver.create_environment_dir()
+        result = self.docker_environment_driver.exists_environment_dir()
+        assert result == True and \
+               os.path.isdir(self.docker_environment_driver.environment_directory_path)
+
+    def test_ensure_environment_dir(self):
+        result = self.docker_environment_driver.ensure_environment_dir()
+        assert result == True and \
+               os.path.isdir(self.docker_environment_driver.environment_directory_path)
+
+    def test_delete_environment_dir(self):
+        self.docker_environment_driver.init()
+        self.docker_environment_driver.create_environment_dir()
+        result = self.docker_environment_driver.delete_environment_dir()
+        assert result == True and \
+               not os.path.isdir(self.docker_environment_driver.environment_directory_path)
+
+    # Other tests
     def test_get_current_type(self):
         result = self.docker_environment_driver.get_environment_types()
         assert result
@@ -113,7 +165,7 @@ class TestDockerEnv():
 
     def test_setup(self):
         save_definition_path = os.path.join(
-            self.docker_environment_driver.filepath, "test")
+            self.docker_environment_driver.root, "test")
 
         # Test setup failure if name it not present
         failed = False
@@ -161,9 +213,9 @@ class TestDockerEnv():
 
     def test_create(self):
         input_dockerfile_path = os.path.join(
-            self.docker_environment_driver.filepath, "Dockerfile")
+            self.docker_environment_driver.root, "Dockerfile")
         output_dockerfile_path = os.path.join(
-            self.docker_environment_driver.filepath, "datmoDockerfile")
+            self.docker_environment_driver.root, "datmoDockerfile")
         # Test both default values
         success, path, output_path = \
             self.docker_environment_driver.create()
@@ -216,6 +268,7 @@ class TestDockerEnv():
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_build(self):
+        # connect to daemon
         result = self.docker_environment_driver.build(self.image_name,
                                                       self.dockerfile_path)
         assert result == True
@@ -227,7 +280,7 @@ class TestDockerEnv():
         # TODO: add more options for run w/ volumes etc
         # Keeping stdin_open and tty as either (True, True) or (False, False).
         # other combination are not used
-        log_filepath = os.path.join(self.docker_environment_driver.filepath,
+        log_filepath = os.path.join(self.docker_environment_driver.root,
                                     "test.log")
         self.docker_environment_driver.build(self.image_name,
                                              self.dockerfile_path)
@@ -237,7 +290,7 @@ class TestDockerEnv():
             "ports": ["8888:9999", "5000:5001"],
             "name": str(uuid.uuid1()),
             "volumes": {
-                self.docker_environment_driver.filepath: {
+                self.docker_environment_driver.root: {
                     'bind': '/home/',
                     'mode': 'rw'
                 }
@@ -273,7 +326,7 @@ class TestDockerEnv():
     # @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     # def test_interactive_run(self):
     #     # keeping stdin_open, tty as True
-    #     log_filepath = os.path.join(self.docker_environment_driver.filepath,
+    #     log_filepath = os.path.join(self.docker_environment_driver.root,
     #                                 "test.log")
     #     self.docker_environment_driver.build(self.image_name,
     #                                          self.dockerfile_path)
@@ -285,7 +338,7 @@ class TestDockerEnv():
     #             "ports": ["8888:9999", "5000:5001"],
     #             "name": container_name,
     #             "volumes": {
-    #                 self.docker_environment_driver.filepath: {
+    #                 self.docker_environment_driver.root: {
     #                     'bind': '/home/',
     #                     'mode': 'rw'
     #                 }
@@ -312,13 +365,13 @@ class TestDockerEnv():
     #     # teardown
     #     self.docker_environment_driver.remove(self.image_name, force=True)
     #     # remove datmoDockerfile
-    #     output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+    #     output_dockerfile_path = os.path.join(self.docker_environment_driver.root,
     #                                           "datmoDockerfile")
     #     os.remove(output_dockerfile_path)
     #
     #     # new jupyter dockerfile
     #     new_docker_filepath = os.path.join(
-    #         self.docker_environment_driver.filepath, "Dockerfile")
+    #         self.docker_environment_driver.root, "Dockerfile")
     #     random_text = str(uuid.uuid1())
     #     with open(new_docker_filepath, "wb") as f:
     #         f.write(to_bytes("FROM nbgallery/jupyter-alpine:latest\n"))
@@ -333,7 +386,7 @@ class TestDockerEnv():
     #             "ports": ["8888:8888"],
     #             "name": container_name,
     #             "volumes": {
-    #                 self.docker_environment_driver.filepath: {
+    #                 self.docker_environment_driver.root: {
     #                     'bind': '/home/',
     #                     'mode': 'rw'
     #                 }
@@ -351,13 +404,13 @@ class TestDockerEnv():
     #     # teardown
     #     self.docker_environment_driver.remove(self.image_name, force=True)
     #     # remove datmoDockerfile
-    #     output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+    #     output_dockerfile_path = os.path.join(self.docker_environment_driver.root,
     #                                           "datmoDockerfile")
     #     os.remove(output_dockerfile_path)
     #
     #     # new dockerfile
     #     new_docker_filepath = os.path.join(
-    #         self.docker_environment_driver.filepath, "Dockerfile")
+    #         self.docker_environment_driver.root, "Dockerfile")
     #     random_text = str(uuid.uuid1())
     #     with open(new_docker_filepath, "wb") as f:
     #         f.write(to_bytes("FROM datmo/python-base:cpu-py27" + os.linesep))
@@ -373,7 +426,7 @@ class TestDockerEnv():
     #             "ports": ["8888:8888"],
     #             "name": container_name,
     #             "volumes": {
-    #                 self.docker_environment_driver.filepath: {
+    #                 self.docker_environment_driver.root: {
     #                     'bind': '/home/',
     #                     'mode': 'rw'
     #                 }
@@ -400,13 +453,13 @@ class TestDockerEnv():
     #     self.docker_environment_driver.stop(container_name, force=True)
     #
     #     # remove datmoDockerfile
-    #     output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+    #     output_dockerfile_path = os.path.join(self.docker_environment_driver.root,
     #                                           "datmoDockerfile")
     #     os.remove(output_dockerfile_path)
     #
     #     # new dockerfile
     #     new_docker_filepath = os.path.join(
-    #         self.docker_environment_driver.filepath, "Dockerfile")
+    #         self.docker_environment_driver.root, "Dockerfile")
     #     random_text = str(uuid.uuid1())
     #     with open(new_docker_filepath, "wb") as f:
     #         f.write(to_bytes("FROM datmo/python-base:cpu-py27" + os.linesep))
@@ -422,7 +475,7 @@ class TestDockerEnv():
     #             "ports": ["8888:8888"],
     #             "name": container_name,
     #             "volumes": {
-    #                 self.docker_environment_driver.filepath: {
+    #                 self.docker_environment_driver.root: {
     #                     'bind': '/home/',
     #                     'mode': 'rw'
     #                 }
@@ -449,13 +502,13 @@ class TestDockerEnv():
     #     self.docker_environment_driver.stop(container_name, force=True)
     #
     #     # remove datmoDockerfile
-    #     output_dockerfile_path = os.path.join(self.docker_environment_driver.filepath,
+    #     output_dockerfile_path = os.path.join(self.docker_environment_driver.root,
     #                                           "datmoDockerfile")
     #     os.remove(output_dockerfile_path)
     #
     #     # new dockerfile
     #     new_docker_filepath = os.path.join(
-    #         self.docker_environment_driver.filepath, "Dockerfile")
+    #         self.docker_environment_driver.root, "Dockerfile")
     #     random_text = str(uuid.uuid1())
     #     with open(new_docker_filepath, "wb") as f:
     #         f.write(to_bytes("FROM datmo/python-base:cpu-py27" + os.linesep))
@@ -471,7 +524,7 @@ class TestDockerEnv():
     #             "ports": ["8888:8888"],
     #             "name": container_name,
     #             "volumes": {
-    #                 self.docker_environment_driver.filepath: {
+    #                 self.docker_environment_driver.root: {
     #                     'bind': '/home/',
     #                     'mode': 'rw'
     #                 }
@@ -496,7 +549,7 @@ class TestDockerEnv():
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_stop(self):
-        log_filepath = os.path.join(self.docker_environment_driver.filepath,
+        log_filepath = os.path.join(self.docker_environment_driver.root,
                                     "test.log")
         self.docker_environment_driver.build(self.image_name,
                                              self.dockerfile_path)
@@ -529,7 +582,7 @@ class TestDockerEnv():
         assert result == True
         # remove datmoDockerfile
         output_dockerfile_path = os.path.join(
-            self.docker_environment_driver.filepath, "datmoDockerfile")
+            self.docker_environment_driver.root, "datmoDockerfile")
         os.remove(output_dockerfile_path)
 
         # With force
@@ -616,7 +669,7 @@ class TestDockerEnv():
         assert result == True
         # remove datmoDockerfile
         output_dockerfile_path = os.path.join(
-            self.docker_environment_driver.filepath, "datmoDockerfile")
+            self.docker_environment_driver.root, "datmoDockerfile")
         os.remove(output_dockerfile_path)
         # With force
         self.docker_environment_driver.build_image(self.image_name,
@@ -626,7 +679,7 @@ class TestDockerEnv():
         assert result == True
         # remove datmoDockerfile
         output_dockerfile_path = os.path.join(
-            self.docker_environment_driver.filepath, "datmoDockerfile")
+            self.docker_environment_driver.root, "datmoDockerfile")
         os.remove(output_dockerfile_path)
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
@@ -640,7 +693,7 @@ class TestDockerEnv():
         assert result == True
         # remove datmoDockerfile
         output_dockerfile_path = os.path.join(
-            self.docker_environment_driver.filepath, "datmoDockerfile")
+            self.docker_environment_driver.root, "datmoDockerfile")
         os.remove(output_dockerfile_path)
         # With force
         self.docker_environment_driver.build_image(self.image_name,
@@ -674,7 +727,9 @@ class TestDockerEnv():
     def test_extract_workspace_url(self):
         # TODO: test with all variables provided
         with open(self.dockerfile_path, "wb") as f:
-            f.write(to_bytes("FROM datmo/python-base:cpu-py27-notebook" + os.linesep))
+            f.write(
+                to_bytes(
+                    "FROM datmo/python-base:cpu-py27-notebook" + os.linesep))
             f.write(to_bytes(str("RUN echo " + self.random_text)))
         self.docker_environment_driver.build_image(self.image_name,
                                                    self.dockerfile_path)
@@ -683,7 +738,8 @@ class TestDockerEnv():
         my_queue = queue.Queue()
 
         def dummy(self, name, workspace, out_queue):
-            workspace_url = self.docker_environment_driver.extract_workspace_url(name, workspace)
+            workspace_url = self.docker_environment_driver.extract_workspace_url(
+                name, workspace)
             out_queue.put(workspace_url)
 
         @timeout_decorator.timeout(20, use_signals=False)
@@ -694,8 +750,9 @@ class TestDockerEnv():
                                                              command=['jupyter', 'notebook', '--allow-root'])
             return return_code, container_id
 
-        thread = threading.Thread(target=dummy, args=(self, random_container_id,
-                                                      "notebook", my_queue))
+        thread = threading.Thread(
+            target=dummy,
+            args=(self, random_container_id, "notebook", my_queue))
         thread.daemon = True  # Daemonize thread
         thread.start()  # Start the execution
 
@@ -707,16 +764,16 @@ class TestDockerEnv():
         thread.join()
         assert timed_run_result
         # asserting the workspace url to be passed
-        workspace_url = my_queue.get() # get the workspace url
+        workspace_url = my_queue.get()  # get the workspace url
         assert 'http' in workspace_url
 
         # Test when there is no container being run
-        workspace_url = self.docker_environment_driver.extract_workspace_url(self.image_name, "notebook")
+        workspace_url = self.docker_environment_driver.extract_workspace_url(
+            self.image_name, "notebook")
         assert workspace_url == None
 
         # teardown container
         self.docker_environment_driver.stop(random_container_id, force=True)
-
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
     def test_get_container(self):
@@ -792,7 +849,7 @@ class TestDockerEnv():
     def test_log_container(self):
         # TODO: Do a more comprehensive test, test out optional variables
         # TODO: Test out more commands at the system level
-        log_filepath = os.path.join(self.docker_environment_driver.filepath,
+        log_filepath = os.path.join(self.docker_environment_driver.root,
                                     "test.log")
         self.docker_environment_driver.build_image(self.image_name,
                                                    self.dockerfile_path)
@@ -852,7 +909,7 @@ class TestDockerEnv():
         # 2) Test option 2
         # Since it uses pip as package manager, it doesn't extract any other package than what
         # has already been installed in local
-        script_path = os.path.join(self.docker_environment_driver.filepath,
+        script_path = os.path.join(self.docker_environment_driver.root,
                                    "script.py")
         with open(script_path, "wb") as f:
             f.write(to_bytes("import numpy\n"))
@@ -877,14 +934,14 @@ class TestDockerEnv():
         # 1) Create default dockerfile for default script present
 
         # 1) Test option 1
-        script_path = os.path.join(self.docker_environment_driver.filepath,
+        script_path = os.path.join(self.docker_environment_driver.root,
                                    "script.py")
         with open(script_path, "wb") as f:
             f.write(to_bytes("import numpy\n"))
             f.write(to_bytes("import sklearn\n"))
 
         result = self.docker_environment_driver.\
-            create_default_definition(directory=self.docker_environment_driver.filepath)
+            create_default_definition(directory=self.docker_environment_driver.root)
 
         assert result
         assert os.path.isfile(result)
@@ -895,9 +952,9 @@ class TestDockerEnv():
     def test_create_datmo_definition(self):
         # Test 1
         input_dockerfile_path = os.path.join(
-            self.docker_environment_driver.filepath, "Dockerfile")
+            self.docker_environment_driver.root, "Dockerfile")
         output_dockerfile_path = os.path.join(
-            self.docker_environment_driver.filepath, "datmoDockerfile")
+            self.docker_environment_driver.root, "datmoDockerfile")
         result = self.docker_environment_driver.create_datmo_definition(
             input_dockerfile_path, output_dockerfile_path)
         assert result
@@ -943,8 +1000,8 @@ class TestDockerEnv():
         if not self.docker_environment_driver.gpu_enabled():
             print("GPU not available")
         else:
-            log_filepath = os.path.join(
-                self.docker_environment_driver.filepath, "test.log")
+            log_filepath = os.path.join(self.docker_environment_driver.root,
+                                        "test.log")
             return_code, run_id, logs = self.docker_environment_driver.run(
                 "nvidia/cuda", {
                     "command": ["nvidia-smi"],

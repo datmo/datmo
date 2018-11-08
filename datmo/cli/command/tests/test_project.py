@@ -74,8 +74,8 @@ class TestProjectCommand():
         assert result.description == None
         # Ensure environment is correct
         definition_filepath = os.path.join(
-            self.temp_dir, self.project_command.project_controller.file_driver.
-            environment_directory, "Dockerfile")
+            self.project_command.project_controller.environment_driver.
+            environment_directory_path, "Dockerfile")
         assert os.path.isfile(definition_filepath)
         assert "FROM datmo/python-base:cpu-py27" in open(
             definition_filepath, "r").read()
@@ -101,8 +101,8 @@ class TestProjectCommand():
         result = dummy(self)
 
         definition_filepath = os.path.join(
-            self.temp_dir, self.project_command.project_controller.file_driver.
-            environment_directory, "Dockerfile")
+            self.project_command.project_controller.environment_driver.
+            environment_directory_path, "Dockerfile")
 
         assert result
         assert not os.path.isfile(definition_filepath)
@@ -123,8 +123,8 @@ class TestProjectCommand():
         result = dummy(self)
 
         definition_filepath = os.path.join(
-            self.temp_dir, self.project_command.project_controller.file_driver.
-            environment_directory, "Dockerfile")
+            self.project_command.project_controller.environment_driver.
+            environment_directory_path, "Dockerfile")
 
         assert result
         assert os.path.isfile(definition_filepath)

@@ -13,8 +13,10 @@ class Config(object):
 
     Parameters
     ----------
-    home : string
+    home : str
         project home directory
+    damto_directory_name : str
+        datmo directory name
     remote_credentials : tuple
 
     Returns
@@ -28,6 +30,7 @@ class Config(object):
     class __InternalConfig:
         def __init__(self):
             self._home = None
+            self.datmo_directory_name = ".datmo"
             self.logging_level = logging.DEBUG
             DatmoLogger.get_logger(__name__).info("initializing")
             self.data_cache = JSONStore(

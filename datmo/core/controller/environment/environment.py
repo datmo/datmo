@@ -113,11 +113,12 @@ class EnvironmentController(BaseController):
         except UnstagedChanges:
             raise UnstagedChanges(
                 __("error", "controller.environment.setup.unstaged",
-                   self.file_driver.environment_directory))
+                   self.environment_driver.environment_directory_path))
         try:
             _ = self.environment_driver.setup(
                 options,
-                definition_path=self.file_driver.environment_directory)
+                definition_path=self.environment_driver.
+                environment_directory_path)
         except Exception:
             raise
         name = options.get('name', None)
@@ -202,11 +203,13 @@ class EnvironmentController(BaseController):
             paths.extend(dictionary['paths'])
 
         # b. if there exists project environment directory AND no paths exist, add in absolute paths
-        if not paths and os.path.isdir(self.file_driver.environment_directory):
+        if not paths and os.path.isdir(
+                self.environment_driver.environment_directory_path):
             paths.extend([
-                os.path.join(self.file_driver.environment_directory,
-                             filepath) for filepath in list_all_filepaths(
-                                 self.file_driver.environment_directory)
+                os.path.join(
+                    self.environment_driver.environment_directory_path,
+                    filepath) for filepath in list_all_filepaths(
+                        self.environment_driver.environment_directory_path)
             ])
 
         # c. add in default environment definition filepath as specified by the environment driver
@@ -419,11 +422,7 @@ class EnvironmentController(BaseController):
         return file_collection_deleted and environment_artifacts_removed and \
                delete_success
 
-    def stop(self,
-             run_id=None,
-             match_string=None,
-             environment_id=None,
-             all=False):
+    def stop(self, run_id=None, match_string=None, all=False):
         """Stop the trace of running environment
 
         Parameters
@@ -434,8 +433,6 @@ class EnvironmentController(BaseController):
         match_string : str, optional
             stop environment with a string to match the environment name
             (default is None, which means it is not used)
-        environment_id : str
-            environment object id to remove the artifacts
         all : bool, optional
             stop all environments
 
@@ -515,11 +512,11 @@ class EnvironmentController(BaseController):
         Raises
         ------
         EnvironmentNotInitialized
-            error if not initialized (must initialize first)
+            if the environment driver is not initialized properly, will fail
         UnstagedChanges
             error if not there exists unstaged changes in environment
         """
-        if not self.is_initialized:
+        if not self.environment_driver.is_initialized:
             raise EnvironmentNotInitialized()
 
         # Check if unstaged changes exist
@@ -568,9 +565,10 @@ class EnvironmentController(BaseController):
         if self._calculate_project_environment_hash() == environment_hash:
             return True
         # Remove all content from project environment directory
-        for file in os.listdir(self.file_driver.environment_directory):
-            file_path = os.path.join(self.file_driver.environment_directory,
-                                     file)
+        for file in os.listdir(
+                self.environment_driver.environment_directory_path):
+            file_path = os.path.join(
+                self.environment_driver.environment_directory_path, file)
             try:
                 if os.path.isfile(file_path):
                     os.remove(file_path)
@@ -590,8 +588,8 @@ class EnvironmentController(BaseController):
         ):
             os.remove(os.path.join(_temp_env_dir, filename))
         # Copy from temp folder to project environment directory
-        self.file_driver.copytree(_temp_env_dir,
-                                  self.file_driver.environment_directory)
+        self.file_driver.copytree(
+            _temp_env_dir, self.environment_driver.environment_directory_path)
         shutil.rmtree(_temp_env_dir)
         return True
 
@@ -642,7 +640,8 @@ class EnvironmentController(BaseController):
         return paths
 
     def _calculate_project_environment_hash(self, save_hardware_file=True):
-        """Return the environment hash from contents in project environment directory
+        """Return the environment hash from contents in project environment directory.
+        If environment_directory not present then will assume it is empty
 
         Parameters
         ----------
@@ -656,11 +655,12 @@ class EnvironmentController(BaseController):
         """
         # Populate paths from the project environment directory
         paths = []
-        if os.path.isdir(self.file_driver.environment_directory):
+        if os.path.isdir(self.environment_driver.environment_directory_path):
             paths.extend([
-                os.path.join(self.file_driver.environment_directory,
-                             filepath) for filepath in list_all_filepaths(
-                                 self.file_driver.environment_directory)
+                os.path.join(
+                    self.environment_driver.environment_directory_path,
+                    filepath) for filepath in list_all_filepaths(
+                        self.environment_driver.environment_directory_path)
             ])
 
         # Create a temp dir to save any additional files necessary
@@ -694,7 +694,7 @@ class EnvironmentController(BaseController):
         env_hash_no_hardware = self._calculate_project_environment_hash(
             save_hardware_file=False)
         environment_files = list_all_filepaths(
-            self.file_driver.environment_directory)
+            self.environment_driver.environment_directory_path)
         if self.exists(environment_unique_hash=env_hash) or self.exists(
                 environment_unique_hash=env_hash_no_hardware
         ) or not environment_files:

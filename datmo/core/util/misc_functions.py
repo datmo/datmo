@@ -271,10 +271,11 @@ def is_project_dir(path):
         os.path.join(path, ".datmo"))
 
 
-def check_docker_inactive(filepath):
+# TODO: add test
+def check_docker_inactive(filepath, datmo_directory_name):
     try:
-        test = DockerEnvironmentDriver(filepath=filepath)
-        test.init()
+        test = DockerEnvironmentDriver(
+            root=filepath, datmo_directory_name=datmo_directory_name)
         definition_path = os.path.join(filepath, "Dockerfile")
         if platform.system() == "Windows":
             with open(definition_path, "wb") as f:
@@ -286,9 +287,11 @@ def check_docker_inactive(filepath):
         return True
 
 
+# TODO: add test
 def pytest_docker_environment_failed_instantiation(filepath):
     return pytest.mark.skipif(
-        check_docker_inactive(filepath),
+        # TODO: abstract the "datmo_directory_name"
+        check_docker_inactive(filepath, ".datmo"),
         reason="a running environment could not be instantiated")
 
 

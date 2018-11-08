@@ -122,7 +122,7 @@ MESSAGES = {
         "cli.general.git":
             "git isn't setup. please install git",
         "controller.general.environment.failed":
-            "Environment driver not initialized",
+            "Environment driver not connected",
         "controller.project.cleanup.not_init":
             "No valid datmo project was detected",
         "controller.project.cleanup.environment":

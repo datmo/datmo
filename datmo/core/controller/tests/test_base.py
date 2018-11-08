@@ -67,6 +67,7 @@ class TestBaseController():
     def test_default_code_driver(self):
         assert self.base_controller.code_driver != None
         assert self.base_controller.code_driver.type == "file"
+        assert self.base_controller.code_driver.root == self.base_controller.home
 
     def test_default_file_driver(self):
         assert self.base_controller.file_driver != None
@@ -77,12 +78,14 @@ class TestBaseController():
     def test_default_environment_driver(self):
         assert self.base_controller.environment_driver != None
         assert self.base_controller.environment_driver.type == "docker"
-        assert self.base_controller.environment_driver.filepath == self.base_controller.home
+        assert self.base_controller.environment_driver.root == self.base_controller.home
 
     def test_is_initialized(self):
         assert self.base_controller.is_initialized == \
                (self.base_controller.code_driver.is_initialized and \
-               self.base_controller.file_driver.is_initialized and self.base_controller.model)
+               self.base_controller.file_driver.is_initialized and \
+                self.base_controller.environment_driver.is_initialized and \
+                self.base_controller.model)
 
     def test_dal(self):
         assert self.base_controller.dal != None
