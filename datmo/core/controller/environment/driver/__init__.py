@@ -119,7 +119,7 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         definition_path : str, optional
             absolute output path for environment definition file
             (default is None, which sets up the file in the project environment directory,
-            e.g. `Dockerfile` in `datmo_environment` folder)
+            e.g. `Dockerfile` in environment directory)
 
 
         Returns

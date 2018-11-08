@@ -56,7 +56,7 @@ class FileCodeDriver(CodeDriver):
         """Return list of tracked files relative to the root directory
 
         This will look through all of the files and will exclude any datmo directories
-        (.datmo, datmo_environment/, datmo_files/) and any paths included in .datmoignore
+        (.datmo) and any paths included in .datmoignore
         TODO: add general list of directories to ignore here (should be passed in by higher level code)
 
         Returns

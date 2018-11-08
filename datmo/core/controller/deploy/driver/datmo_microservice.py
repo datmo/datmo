@@ -17,14 +17,14 @@ class DatmoMicroserviceDeployDriver(object):
         self.commands = Commands()
         self.status = Status
 
-    def validate_deploy(self, home):
+    def validate_deploy(self, home, environment_directory_path):
         """
         Validate deployment before packaging the project to push
         """
         response = Response()
         bool_environment, bool_config_exists, bool_methods_exists, message = False, False, False, ""
         # 1. Check for environment file
-        if os.path.exists(os.path.join(home, "datmo_environment", "Dockerfile")) or \
+        if os.path.exists(os.path.join(environment_directory_path, "Dockerfile")) or \
                 os.path.exists(os.path.join(home,  "Dockerfile")):
             bool_environment = True
         else:
