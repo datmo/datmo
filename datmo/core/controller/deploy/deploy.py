@@ -56,6 +56,11 @@ class DeployController(BaseController):
         """
         Deploy the Servers in the cluster with the defined setup
         """
+        # Validate deployment
+        bool_deploy_validate, response = self.driver.validate_deploy(self.home)
+        if not bool_deploy_validate:
+            return response
+
         self.spinner.start()
         response = self.driver.create_cluster(
             cluster_name, server_type, count=size)
@@ -73,6 +78,11 @@ class DeployController(BaseController):
         size : str
             Number of servers
         """
+        # Validate deployment
+        bool_deploy_validate, response = self.driver.validate_deploy(self.home)
+        if not bool_deploy_validate:
+            return response
+
         self.spinner.start()
         response = self.driver.update_cluster(
             count=size, cluster_name=cluster_name)
@@ -131,6 +141,12 @@ class DeployController(BaseController):
         cluster_name : str
             Name of the cluster
         """
+
+        # Validate deployment
+        bool_deploy_validate, response = self.driver.validate_deploy(self.home)
+        if not bool_deploy_validate:
+            return response
+
         # Specific for datmo service logic
         tmp_dirpath = tempfile.mkdtemp()
         # copy the content for project directory to tmp folder and the environment to root location in tmp folder
@@ -161,7 +177,7 @@ class DeployController(BaseController):
             if datmo_deploy_config_path:
                 with open(datmo_deploy_config_path, 'r') as stream:
                     try:
-                        datmo_deploy = yaml.load(stream)
+                        datmo_deploy = yaml.safe_load(stream)
                         if datmo_deploy is not None:
                             files_exclude = datmo_deploy['deploy'][
                                 'files_exclude']

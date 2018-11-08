@@ -13,7 +13,7 @@ from datmo.monitoring import Monitoring
 app = Flask(__name__)
 # TODO: pull api_key from global config
 base_controller = BaseController()
-datmo_monitoring = Monitoring(api_key="6a3a3cd900eaf7b406a41d68f8ca7969")
+datmo_monitoring = Monitoring()
 
 
 @app.route("/")
@@ -407,7 +407,7 @@ def model_deployment_script_run(model_id, deployment_version_id,
 
 @app.route("/hash/generate")
 def generate_hash():
-    string_to_hash = request.args.get('string_to_hash')
+    string_to_hash = str(request.args.get('string_to_hash'))
     hash = str(uuid.uuid3(uuid.NAMESPACE_DNS, string_to_hash))
     return jsonify({"result": hash})
 

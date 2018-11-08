@@ -1,10 +1,11 @@
 import os
 import time
-import yaml
+import ast
 import json
 import psutil
 from datetime import datetime
 
+from datmo.config import Config
 from datmo.core.util.exceptions import InputError
 from datmo.core.util.misc_functions import bytes2human, slack_message
 from datmo.core.util.remote_api import RemoteAPI
@@ -63,8 +64,12 @@ class Monitoring():
     >>> datmo_client.trigger(medium="slack", input=input, prediction=prediction, notes=notes)
     """
 
-    def __init__(self, api_key, home=None):
-        self._api_key = api_key
+    def __init__(self, api_key=None):
+        if api_key is None:
+            config = Config()
+            _, self._api_key, _ = config.remote_credentials
+        else:
+            self._api_key = api_key
         self.remote_api = RemoteAPI(self._api_key)
         self._start_time, self._end_time, self._model_id, \
         self._model_version_id, self._deployment_version_id = None, None, None, None, None
@@ -320,13 +325,13 @@ class Monitoring():
             prediction = meta_data.get('prediction')
             feedback = meta_data.get('feedback')
             updated_at = meta_data.get('updated_at')
-            meta_data['input'] = yaml.safe_load(
+            meta_data['input'] = ast.literal_eval(
                 input) if input is not None else None
-            meta_data['prediction'] = yaml.safe_load(
+            meta_data['prediction'] = ast.literal_eval(
                 prediction) if prediction is not None else None
-            meta_data['feedback'] = yaml.safe_load(
+            meta_data['feedback'] = ast.literal_eval(
                 feedback) if feedback is not None else None
-            meta_data['updated_at'] = int(
+            meta_data['updated_at'] = ast.literal_eval(
                 updated_at) if updated_at is not None else None
             meta_data_list.append(meta_data)
         return meta_data_list
