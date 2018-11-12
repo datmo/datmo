@@ -560,6 +560,26 @@ class TestProjectCommand():
             if self.project_command.execute():
                 return timed_run_result
 
+        # Failure case not initialized
+        timed_run_result = False
+        try:
+            timed_run_result = timed_run(timed_run_result)
+        except timeout_decorator.timeout_decorator.TimeoutError:
+            timed_run_result = True
+
+        assert not timed_run_result
+
+        # Success case after initialization
+        self.project_command.parse(
+            ["init", "--name", "foobar", "--description", "test model"])
+
+        @self.project_command.cli_helper.input("\n")
+        def dummy(self):
+            return self.project_command.execute()
+
+        _ = dummy(self)
+
+        self.project_command.parse(["dashboard"])
         timed_run_result = False
         try:
             timed_run_result = timed_run(timed_run_result)
