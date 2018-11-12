@@ -157,6 +157,14 @@ class FileNotInitialized(FileExecutionError):
     pass
 
 
+class DALException(Exception):
+    pass
+
+
+class DALNotInitialized(DALException):
+    pass
+
+
 class EnvironmentException(Exception):
     pass
 

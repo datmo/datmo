@@ -1,5 +1,6 @@
 import os
 
+from datmo.config import Config
 from datmo.core.util.validation import validate
 from datmo.core.util.i18n import get as __
 from datmo.core.controller.base import BaseController
@@ -11,7 +12,7 @@ from datmo.core.entity.model import Model
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import (ProjectNotInitialized,
                                         EnvironmentConnectFailed, FileIOError,
-                                        UnstagedChanges)
+                                        UnstagedChanges, PathDoesNotExist)
 
 
 class ProjectController(BaseController):
@@ -46,7 +47,6 @@ class ProjectController(BaseController):
         -------
         bool
         """
-        # Create the Model, is it new or update?
         is_new_model = False
         old_model = self.model
         if not self.model:
@@ -58,6 +58,27 @@ class ProjectController(BaseController):
                 "name": name,
                 "description": description
             })
+
+            # Initialize File Driver if needed
+            if not self.file_driver.is_initialized:
+                self.file_driver.init()
+
+            # Initialize the dal
+            if not self.dal.is_initialized:
+                self.dal.init()
+
+            # Initialize Code Driver if needed
+            if not self.code_driver.is_initialized:
+                self.code_driver.init()
+
+            # Initialize Environment Driver if needed
+            if not self.environment_driver.is_initialized:
+                self.environment_driver.init()
+
+            # Initialize the config JSON store
+            self.config_store = JSONStore(
+                os.path.join(self.home,
+                             Config().datmo_directory_name, ".config"))
 
             # Create model if new else update
             if is_new_model:
@@ -73,18 +94,6 @@ class ProjectController(BaseController):
                     "description": description
                 })
 
-            # Initialize Code Driver if needed
-            if not self.code_driver.is_initialized:
-                self.code_driver.init()
-
-            # Initialize File Driver if needed
-            if not self.file_driver.is_initialized:
-                self.file_driver.init()
-
-            # Initialize Environment Driver if needed
-            if not self.environment_driver.is_initialized:
-                self.environment_driver.init()
-
             # Connect Environment Driver if needed
             # (not required but will warn if not present)
             try:
@@ -97,10 +106,6 @@ class ProjectController(BaseController):
             # Build the initial default Environment (NOT NECESSARY)
             # self.environment_driver.build_image(tag="datmo-" + \
             #                                  self.model.name)
-
-            # If successfully initialized project then create config
-            self.config_store = JSONStore(
-                os.path.join(self.home, ".datmo", ".config"))
             return True
         except Exception:
             # if any error occurred with new model, ensure no initialize occurs and raise previous error
@@ -151,7 +156,7 @@ class ProjectController(BaseController):
         try:
             # Remove Hidden Datmo file structure, give warning if error
             self.file_driver.delete_hidden_datmo_file_structure()
-        except FileIOError:
+        except (FileIOError, PathDoesNotExist):
             self.logger.warning(__("warn", "controller.project.cleanup.files"))
 
         try:

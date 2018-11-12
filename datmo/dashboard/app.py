@@ -11,7 +11,6 @@ from datmo.core.controller.base import BaseController
 from datmo.monitoring import Monitoring
 
 app = Flask(__name__)
-# TODO: pull api_key from global config
 base_controller = BaseController()
 datmo_monitoring = Monitoring()
 
@@ -29,12 +28,7 @@ def home():
             "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
             "?s=220&d=identicon&r=PG"
     }
-    models = [{
-        "id": "credit_fraud",
-        "name": "Credit Fraud",
-        "categories": "",
-        "repo_language": "python"
-    }]
+    models = [base_controller.model.__dict__]
     return render_template("profile.html", user=user, models=models)
 
 

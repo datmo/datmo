@@ -375,6 +375,8 @@ MESSAGES = {
             "FileCollection id does NOT exist",
         "controller.base.__init__":
             "Project path does not exist: %s",
+        "controller.base.model":
+            "DAL does not exist yet",
         "controller.project.init.arg":
             "Required argument %s not present in input",
         "controller.project.status":
@@ -429,7 +431,7 @@ MESSAGES = {
         "cli.general.confirm":
             "Is it okay?",
         "cli.project.cleanup.confirm":
-            "Are you sure you want to delete all datmo project information along with files and environment directory? "
+            "Are you sure you want to delete all datmo project information? "
             "If none found, no changes will be made [yN]",
         "cli.project.environment.setup":
             "Would you like to setup the environment? [yN]",

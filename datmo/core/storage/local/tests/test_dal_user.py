@@ -24,9 +24,12 @@ class TestLocalDAL():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.datadriver = BlitzDBDALDriver("file", self.temp_dir)
-
-        self.dal = LocalDAL(self.datadriver)
+        self.driver_type = "blitzdb"
+        self.driver_options = {
+            "driver_type": "file",
+            "connection_string": self.temp_dir
+        }
+        self.dal = LocalDAL(self.driver_type, self.driver_options)
         self.user_input_dict = {
             "name": "user_1",
             "email": "test@test.com",
@@ -67,11 +70,12 @@ class TestLocalDAL():
 
         # create new dal with new driver instance (fails)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
-        new_dal_instance = LocalDAL(new_driver_instance)
+        new_dal_instance = LocalDAL(
+            self.driver_type, self.driver_options, driver=new_driver_instance)
         new_user_1 = new_dal_instance.user.get_by_id(user.id)
         assert new_user_1.id == user.id
         # create new dal instance with same driver (success)
-        new_dal_instance = LocalDAL(self.datadriver)
+        new_dal_instance = LocalDAL(self.driver_type, self.driver_options)
         new_user_2 = new_dal_instance.user.get_by_id(user.id)
         assert new_user_2.id == user.id
 

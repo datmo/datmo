@@ -48,40 +48,12 @@ class BaseController(object):
                 __("error", "controller.base.__init__", self.home))
         self.logger = DatmoLogger.get_logger(__name__)
         # property caches and initial values
+        self._is_initialized = False
         self._dal = None
         self._model = None
         self._code_driver = None
         self._file_driver = None
         self._environment_driver = None
-        self._is_initialized = False
-        # load the config JSON store if the model is initialized
-        if self.is_initialized:
-            self.config_store = JSONStore(
-                os.path.join(self.home, ".datmo", ".config"))
-
-    @property
-    # Controller objects are only in sync if the data drivers are the same between objects
-    # Currently pass dal_driver down from controller to controller to ensure syncing dals
-    # TODO: To fix dal from different controllers so they sync within one session; they do NOT currently
-    def dal(self):
-        if self._dal == None:
-            self._dal = self.dal_instantiate()
-        return self._dal
-
-    @property
-    def model(self):
-        if self._model == None:
-            models = self.dal.model.query({})
-            self._model = models[0] if models else None
-        return self._model
-
-    @property
-    def code_driver(self):
-        if self._code_driver == None:
-            module_details = self.config_loader("controller.code.driver")
-            self._code_driver = module_details["constructor"](
-                **module_details["options"])
-        return self._code_driver
 
     @property
     def file_driver(self):
@@ -90,6 +62,24 @@ class BaseController(object):
             self._file_driver = module_details["constructor"](
                 **module_details["options"])
         return self._file_driver
+
+    @property
+    # Controller objects are only in sync if the data drivers are the same between objects
+    # Currently pass dal_driver down from controller to controller to ensure syncing dals
+    # TODO: To fix dal from different controllers so they sync within one session; they do NOT currently
+    def dal(self):
+        if self._dal == None:
+            dal_dict = self.config_loader("storage.local")
+            self._dal = dal_dict["constructor"](**dal_dict["options"])
+        return self._dal
+
+    @property
+    def code_driver(self):
+        if self._code_driver == None:
+            module_details = self.config_loader("controller.code.driver")
+            self._code_driver = module_details["constructor"](
+                **module_details["options"])
+        return self._code_driver
 
     @property
     def environment_driver(self):
@@ -103,22 +93,22 @@ class BaseController(object):
     @property
     def is_initialized(self):
         if not self._is_initialized:
-            if self.code_driver.is_initialized and \
-                self.file_driver.is_initialized and \
-                 self.environment_driver.is_initialized and \
-                 self.model:
+            if self.file_driver.is_initialized and \
+                self.dal.is_initialized and \
+                self.code_driver.is_initialized and \
+                self.environment_driver.is_initialized and \
+                self.model:
                 self._is_initialized = True
         return self._is_initialized
 
-    def dal_instantiate(self):
-        # first load driver, then create DAL using driver
-        dal_driver_dict = self.config_loader("storage.driver")
-        dal_driver = dal_driver_dict["constructor"](
-            **dal_driver_dict["options"])
-        # Get DAL, set driver,
-        dal_dict = self.config_loader("storage.local")
-        dal_dict["options"]["driver"] = dal_driver
-        return dal_dict["constructor"](**dal_dict["options"])
+    @property
+    def model(self):
+        if not self.dal.is_initialized:
+            self._model = None
+        else:
+            models = self.dal.model.query({})
+            self._model = models[0] if models else None
+        return self._model
 
     def config_loader(self, key):
         defaults = self.get_config_defaults()
@@ -157,18 +147,15 @@ class BaseController(object):
             "storage.local": {
                 "class_constructor": "datmo.core.storage.local.dal.LocalDAL",
                 "options": {
-                    "driver": "storage.driver"
-                }
-            },
-            "storage.driver": {
-                "class_constructor":
-                    "datmo.core.storage.driver.blitzdb_dal_driver.BlitzDBDALDriver",
-                "options": {
-                    "driver_type":
-                        "file",
-                    "connection_string":
-                        os.path.join(self.home,
-                                     Config().datmo_directory_name, "database")
+                    "driver_type": "blitzdb",
+                    "driver_options": {
+                        "driver_type":
+                            "file",
+                        "connection_string":
+                            os.path.join(self.home,
+                                         Config().datmo_directory_name,
+                                         "database")
+                    }
                 }
             },
         }

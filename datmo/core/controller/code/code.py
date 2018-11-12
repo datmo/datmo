@@ -135,6 +135,8 @@ class CodeController(BaseController):
         bool
             True if exists else False
         """
+        if not self.is_initialized:
+            return False
         if code_id:
             code_objs = self.dal.code.query({"id": code_id})
         elif code_commit_id:

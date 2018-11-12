@@ -255,32 +255,34 @@ class ProjectCommand(BaseCommand):
 
         # Cleanup datmo project if user specifies
         if response:
+            name = self.project_controller.model.name if self.project_controller.model.name else ""
+            path = self.project_controller.home if self.project_controller.home else ""
             self.cli_helper.echo(
-                __(
-                    "info", "cli.project.cleanup", {
-                        "name": self.project_controller.model.name,
-                        "path": self.project_controller.home
-                    }))
+                __("info", "cli.project.cleanup", {
+                    "name": name,
+                    "path": path
+                }))
             try:
                 success = self.project_controller.cleanup()
                 if success:
                     self.cli_helper.echo(
-                        __(
-                            "info", "cli.project.cleanup.success", {
-                                "name": self.project_controller.model.name,
-                                "path": self.project_controller.home
-                            }))
+                        __("info", "cli.project.cleanup.success", {
+                            "name": name,
+                            "path": path
+                        }))
                 return success
             except Exception:
                 self.cli_helper.echo(
-                    __(
-                        "info", "cli.project.cleanup.failure", {
-                            "name": self.project_controller.model.name,
-                            "path": self.project_controller.home
-                        }))
+                    __("info", "cli.project.cleanup.failure", {
+                        "name": name,
+                        "path": path
+                    }))
         return False
 
     def dashboard(self):
+        if not self.project_controller.is_initialized:
+            self.cli_helper.echo(
+                "Please initialize datmo before using this command")
         dir_path = os.path.dirname(os.path.abspath(__file__))
         os.chdir(os.path.join(dir_path, "../../dashboard"))
         app.run(host='0.0.0.0')
