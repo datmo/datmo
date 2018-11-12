@@ -3,16 +3,16 @@
 {% block modelbody %}
 <div class="section-tab-mobile">
     <ul>
-        <a href="/{{ model.id }}">
+        <a href="/{{ model.name }}">
             <li>Summary</li>
         </a>
-        <a href="/{{ model.id }}/experiments">
+        <a href="/{{ model.name }}/experiments">
             <li>Experiments</li>
         </a>
-        <a href="/{{ model.id }}/snapshots">
+        <a href="/{{ model.name }}/snapshots">
             <li>Snapshots</li>
         </a>
-        <a href="/{{ model.id }}/deployments">
+        <a href="/{{ model.name }}/deployments">
             <li>Deployments</li>
         </a>
     </ul>
@@ -21,16 +21,16 @@
     <div class="row">
         <div class="col-xs-12">
             <ul>
-                <a href="/{{ model.id }}" class="">
+                <a href="/{{ model.name }}" class="">
                     <li>Summary</li>
                 </a>
-                <a href="/{{ model.id }}/experiments" class="">
+                <a href="/{{ model.name }}/experiments" class="">
                     <li>Experiments</li>
                 </a>
-                <a href="/{{ model.id }}/snapshots" class="">
+                <a href="/{{ model.name }}/snapshots" class="">
                     <li>Snapshots</li>
                 </a>
-                <a href="/{{ model.id }}/deployments" class="active">
+                <a href="/{{ model.name }}/deployments" class="active">
                     <li>Deployments</li>
                 </a>
             </ul>
@@ -44,7 +44,7 @@
 
             <div class="multi-item-content-row snapshot-filters">
                 <div class="input-group pull-right">
-                    <a href="/model/{{ model.id }}/deployments/.csv" target="_blank"><span class="btn blue"><i class="fa fa-download"></i></span></a>
+                    <a href="/model/{{ model.name }}/deployments/.csv" target="_blank"><span class="btn blue"><i class="fa fa-download"></i></span></a>
                 </div>
                 <div class="">
                     <p>
@@ -61,21 +61,21 @@
             <table class="sortable snapshot-grid" data-giturl="datmo/hello-world">
                 <thead>
                     <tr>
-                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>deployment_version_id</span></th>
-                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>model_version_id</span></th>
-                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>created_at(yyyy-mm-dd HH:MM:SS)</span></th>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>deployment version id</span></th>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>model version id</span></th>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>created at(yyyy-mm-dd HH:MM:SS)</span></th>
                         <th class="grid-header-sort"><span class="icon-arrow"></span><span>type</span></th>
                         <th class="grid-header-sort"><span class="icon-arrow"></span><span>endpoints</span></th>
-                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>service_paths</span></th>
-                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>system_monitoring</span></th>
-                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>log_monitoring</span></th>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>service paths</span></th>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>system monitoring</span></th>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>log monitoring</span></th>
                     </tr>
                 </thead>
                 <tbody>
                 {% for deployment in deployments %}
                 <tr data-id="{{ deployment.deployment_version_id }}"  class="snapshot-hover-menu">
-                    <td><a href="/{{ model.id }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}">{{ deployment.deployment_version_id }}</a></td>
-                    <td><a href="/{{ model.id }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}">{{ deployment.model_version_id }}</a></td>
+                    <td><a href="/{{ model.name }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}">{{ deployment.deployment_version_id }}</a></td>
+                    <td><a href="/{{ model.name }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}">{{ deployment.model_version_id }}</a></td>
                     <td>{{ deployment.created_at }}</td>
                     <td>{{ deployment.type }}</td>
                     <td>{% for endpoint in deployment.endpoints %} <a href="{{ endpoint }}">{{ endpoint }}</a><br><br>{% endfor %}</td>

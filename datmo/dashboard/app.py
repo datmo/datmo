@@ -32,8 +32,8 @@ def home():
     return render_template("profile.html", user=user, models=models)
 
 
-@app.route("/<model_id>")
-def model_summary(model_id):
+@app.route("/<model_name>")
+def model_summary(model_name):
     user = {
         "name":
             "Shabaz Patel",
@@ -70,8 +70,8 @@ def model_summary(model_id):
         stats_keys=stats_keys)
 
 
-@app.route("/<model_id>/experiments")
-def model_experiments(model_id):
+@app.route("/<model_name>/experiments")
+def model_experiments(model_name):
     user = {
         "name":
             "Shabaz Patel",
@@ -84,7 +84,10 @@ def model_experiments(model_id):
             "?s=220&d=identicon&r=PG"
     }
     model = base_controller.model.__dict__
-    experiments = base_controller.dal.task.query({"model_id": model_id})
+    if model_name == model['name']:
+        experiments = base_controller.dal.task.query({"model_id": model['id']})
+    else:
+        experiments = []
     return render_template(
         "model_experiments.html",
         user=user,
@@ -92,8 +95,8 @@ def model_experiments(model_id):
         experiments=experiments)
 
 
-@app.route("/<model_id>/snapshots")
-def model_snapshots(model_id):
+@app.route("/<model_name>/snapshots")
+def model_snapshots(model_name):
     user = {
         "name":
             "Shabaz Patel",
@@ -106,7 +109,12 @@ def model_snapshots(model_id):
             "?s=220&d=identicon&r=PG"
     }
     model = base_controller.model.__dict__
-    snapshots = base_controller.dal.snapshot.query({"model_id": model_id})
+    if model_name == model['name']:
+        snapshots = base_controller.dal.snapshot.query({
+            "model_id": model['id']
+        })
+    else:
+        snapshots = []
     config_keys = set(
         item for sublist in
         [snapshot.__dict__["config"].keys() for snapshot in snapshots]
@@ -125,8 +133,9 @@ def model_snapshots(model_id):
 
 
 @app.route(
-    "/data/<model_id>/deployments/<deployment_version_id>/<model_version_id>")
-def model_deployment_data(model_id, deployment_version_id, model_version_id):
+    "/data/<model_name>/deployments/<deployment_version_id>/<model_version_id>"
+)
+def model_deployment_data(model_name, deployment_version_id, model_version_id):
     # here we want to get the value of user (i.e. ?start=0)
     start = request.args.get('start', 0)
     count = request.args.get('count', None)
@@ -139,7 +148,7 @@ def model_deployment_data(model_id, deployment_version_id, model_version_id):
 
     # Get new data to add to the graphs
     filter = {
-        "model_id": model_id,
+        "model_id": model_name,
         "deployment_version_id": deployment_version_id,
         "model_version_id": model_version_id,
         "start": int(start)
@@ -178,7 +187,7 @@ def model_deployment_data(model_id, deployment_version_id, model_version_id):
 
     elif graph_type == "histogram":
         filter = {
-            "model_id": model_id,
+            "model_id": model_name,
             "deployment_version_id": deployment_version_id,
             "model_version_id": model_version_id,
         }
@@ -215,8 +224,9 @@ def model_deployment_data(model_id, deployment_version_id, model_version_id):
 
 
 @app.route(
-    "/<model_id>/deployments/<deployment_version_id>/<model_version_id>")
-def model_deployment_detail(model_id, deployment_version_id, model_version_id):
+    "/<model_name>/deployments/<deployment_version_id>/<model_version_id>")
+def model_deployment_detail(model_name, deployment_version_id,
+                            model_version_id):
     user = {
         "name":
             "Shabaz Patel",
@@ -228,15 +238,10 @@ def model_deployment_detail(model_id, deployment_version_id, model_version_id):
             "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
             "?s=220&d=identicon&r=PG"
     }
-    model = {
-        "id": model_id,
-        "name": "Credit Fraud",
-        "categories": "",
-        "repo_language": "python"
-    }
+    model = base_controller.model.__dict__
 
     filter = {
-        "model_id": model_id,
+        "model_id": model_name,
         "model_version_id": model_version_id,
         "deployment_version_id": deployment_version_id
     }
@@ -272,8 +277,8 @@ def model_deployment_detail(model_id, deployment_version_id, model_version_id):
         feedback_keys=feedback_keys)
 
 
-@app.route("/<model_id>/deployments")
-def model_deployments(model_id):
+@app.route("/<model_name>/deployments")
+def model_deployments(model_name):
     user = {
         "name":
             "Shabaz Patel",
@@ -288,8 +293,7 @@ def model_deployments(model_id):
     model = base_controller.model.__dict__
 
     # get all data and extract unique model_version_id and deployment_version_id
-    filter = {"model_id": model_id}
-
+    filter = {"model_id": model_name}
     all_data = datmo_monitoring.search_metadata(filter)
     model_version_ids = set(data['model_version_id'] for data in all_data)
     deployment_version_ids = set(
@@ -327,9 +331,9 @@ def model_deployments(model_id):
 
 
 @app.route(
-    "/<model_id>/deployments/<deployment_version_id>/<model_version_id>/custom/create"
+    "/<model_name>/deployments/<deployment_version_id>/<model_version_id>/custom/create"
 )
-def model_deployment_script_create(model_id, deployment_version_id,
+def model_deployment_script_create(model_name, deployment_version_id,
                                    model_version_id):
     content = request.args.get('content')
     filepath = request.args.get('filepath')
@@ -342,9 +346,9 @@ def model_deployment_script_create(model_id, deployment_version_id,
 
 
 @app.route(
-    "/<model_id>/deployments/<deployment_version_id>/<model_version_id>/custom/run"
+    "/<model_name>/deployments/<deployment_version_id>/<model_version_id>/custom/run"
 )
-def model_deployment_script_run(model_id, deployment_version_id,
+def model_deployment_script_run(model_name, deployment_version_id,
                                 model_version_id):
     filepath = request.args.get('filepath')
     # ensure that the filepath is a valid path
