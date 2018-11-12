@@ -47,7 +47,7 @@
 
                         <div class="multi-item-content-row snapshot-filters">
                             <div class="input-group pull-right">
-                                <a href="/model/{{ model.id }}/snapshots/.csv" target="_blank"><span class="btn"><i class="fa fa-download"></i></span></a>
+                                <a href="/model/{{ model.id }}/experiments/.csv" target="_blank"><span class="btn blue"><i class="fa fa-download"></i></span></a>
                             </div>
                             <div class="">
                                 <p>
@@ -66,56 +66,36 @@
     <table class="sortable snapshot-grid" data-giturl="datmo/hello-world">
         <thead>
             <tr>
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span class="no-wrap">diff</span></th>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>id</span></th>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>user</span></th>
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span>timestamp</span></th>
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span>label</span></th>
-                {% for key in config_keys %}
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span>{{ key }}</span></th>
-                {% endfor %}
-                {% for key in stats_keys %}
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span>{{ key }}</span></th>
-                {% endfor %}
+                <th class="grid-header-sort"><span class="icon-arrow"></span><span>status</span></th>
+                <th class="grid-header-sort"><span class="icon-arrow"></span><span>start time</span></th>
+                <th class="grid-header-sort"><span class="icon-arrow"></span><span>end time</span></th>
+                <th class="grid-header-sort"><span class="icon-arrow"></span><span>duration (s)</span></th>
+                <th class="grid-header-sort"><span class="icon-arrow"></span><span>before snapshot id</span></th>
+                <th class="grid-header-sort"><span class="icon-arrow"></span><span>after snapshot id</span></th>
+                <th class="grid-header-sort"><span class="icon-arrow"></span><span>results</span></th>
             </tr>
         </thead>
         <tbody>
-        {% for snapshot in snapshots %}
-        <tr data-id="{{ snapshot.id }}"  class="snapshot-hover-menu">
+        {% for experiment in experiments %}
+        <tr data-id="{{ experiment.id }}"  class="snapshot-hover-menu">
 
-            <td class="snapshot-diff">
-                <input class="snapshot-diff-selected" type="checkbox" name="diff" data-snapshotid="{{ snapshot.id }}" >
-            </td>
-
-            <td><a href="#">{{ snapshot.id }}</a></td>
+            <td><a href="#">{{ experiment.id }}</a></td>
 
             <td>
                 <a href="/" class="snapshot-owner-avatar">
-                    <img src="" alt="profile">
+                    <img src="{{ user.gravatar_url }}" alt="profile">
                     {{ user.name }}
                 </a>
             </td>
-
-            <td>{{ snapshot.created_at }}</td>
-
-            {% if snapshot.labels %}
-                <td class="label">
-                    {% for l in snapshot.labels %}
-                    <span class="snapshot-label tag">{{ l }}</span>
-                    {% endfor %}
-                </td>
-            {% else %}
-                <td class="label">None</td>
-            {% endif %}
-
-            {% for k in config_keys %}
-                <td>{{ snapshot.config[k] }}</td>
-            {% endfor %}
-
-            {% for k in stats_keys %}
-                <td>{{ snapshot.stats[k] }}</td>
-            {% endfor %}
-
+            <td>{{ experiment.status }}</td>
+            <td>{{ experiment.start_time }}</td>
+            <td>{{ experiment.end_time }}</td>
+            <td>{{ experiment.duration }}</td>
+            <td>{{ experiment.before_snapshot_id }}</td>
+            <td>{{ experiment.after_snapshot_id }}</td>
+            <td>{{ experiment.results }}</td>
         </tr>
         {% endfor %}
         </tbody>

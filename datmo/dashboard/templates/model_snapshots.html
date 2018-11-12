@@ -47,7 +47,7 @@
 
                         <div class="multi-item-content-row snapshot-filters">
                             <div class="input-group pull-right">
-                                <a href="/model/{{ model.id }}/snapshots/.csv" target="_blank"><span class="btn"><i class="fa fa-download"></i></span></a>
+                                <a href="/model/{{ model.id }}/snapshots/.csv" target="_blank"><span class="btn blue"><i class="fa fa-download"></i></span></a>
                             </div>
                             <div class="">
                                 <p>
@@ -70,6 +70,7 @@
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>id</span></th>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>user</span></th>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>timestamp</span></th>
+                <th class="grid-header-sort"><span class="icon-arrow"></span><span>message</span></th>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>label</span></th>
                 {% for key in config_keys %}
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>{{ key }}</span></th>
@@ -91,12 +92,13 @@
 
             <td>
                 <a href="/" class="snapshot-owner-avatar">
-                    <img src="" alt="profile">
+                    <img src="{{ user.gravatar_url }}" alt="profile">
                     {{ user.name }}
                 </a>
             </td>
 
             <td>{{ snapshot.created_at }}</td>
+            <td>{{ snapshot.message }}</td>
 
             {% if snapshot.labels %}
                 <td class="label">

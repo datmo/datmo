@@ -28,7 +28,7 @@ def home():
             "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
             "?s=220&d=identicon&r=PG"
     }
-    models = [base_controller.model.__dict__]
+    models = [base_controller.model.__dict__] if base_controller.model else []
     return render_template("profile.html", user=user, models=models)
 
 
@@ -45,6 +45,7 @@ def model_summary(model_id):
             "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
             "?s=220&d=identicon&r=PG"
     }
+    model = base_controller.model.__dict__
     snapshots = [
         {
             "id": "alfwokd",
@@ -60,13 +61,6 @@ def model_summary(model_id):
     ]
     config_keys = ["algorithm"]
     stats_keys = ["accuracy"]
-    model = {
-        "id": model_id,
-        "name": "Credit Fraud",
-        "categories": "",
-        "repo_language": "python",
-        "snapshots": snapshots
-    }
     return render_template(
         "model_summary.html",
         user=user,
@@ -89,35 +83,13 @@ def model_experiments(model_id):
             "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
             "?s=220&d=identicon&r=PG"
     }
-    snapshots = [
-        {
-            "id": "alfwokd",
-            "created_at": "Sun March 3rd, 2018",
-            "labels": ["cool", "default"],
-            "config": {
-                "algorithm": "random forest"
-            },
-            "stats": {
-                "accuracy": 0.98
-            }
-        },
-    ]
-    config_keys = ["algorithm"]
-    stats_keys = ["accuracy"]
-    model = {
-        "id": model_id,
-        "name": "Credit Fraud",
-        "categories": "",
-        "repo_language": "python",
-        "snapshots": snapshots
-    }
+    model = base_controller.model.__dict__
+    experiments = base_controller.dal.task.query({"model_id": model_id})
     return render_template(
         "model_experiments.html",
         user=user,
         model=model,
-        snapshots=snapshots,
-        config_keys=config_keys,
-        stats_keys=stats_keys)
+        experiments=experiments)
 
 
 @app.route("/<model_id>/snapshots")
@@ -133,28 +105,16 @@ def model_snapshots(model_id):
             "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
             "?s=220&d=identicon&r=PG"
     }
-    snapshots = [
-        {
-            "id": "alfwokd",
-            "created_at": "Sun March 3rd, 2018",
-            "labels": ["cool", "default"],
-            "config": {
-                "algorithm": "random forest"
-            },
-            "stats": {
-                "accuracy": 0.98
-            }
-        },
-    ]
-    config_keys = ["algorithm"]
-    stats_keys = ["accuracy"]
-    model = {
-        "id": model_id,
-        "name": "Credit Fraud",
-        "categories": "",
-        "repo_language": "python",
-        "snapshots": snapshots
-    }
+    model = base_controller.model.__dict__
+    snapshots = base_controller.dal.snapshot.query({"model_id": model_id})
+    config_keys = set(
+        item for sublist in
+        [snapshot.__dict__["config"].keys() for snapshot in snapshots]
+        for item in sublist)
+    stats_keys = set(
+        item for sublist in
+        [snapshot.__dict__["stats"].keys() for snapshot in snapshots]
+        for item in sublist)
     return render_template(
         "model_snapshots.html",
         user=user,
@@ -325,12 +285,7 @@ def model_deployments(model_id):
             "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
             "?s=220&d=identicon&r=PG"
     }
-    model = {
-        "id": model_id,
-        "name": "Credit Fraud",
-        "categories": "",
-        "repo_language": "python"
-    }
+    model = base_controller.model.__dict__
 
     # get all data and extract unique model_version_id and deployment_version_id
     filter = {"model_id": model_id}

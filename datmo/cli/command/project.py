@@ -283,6 +283,7 @@ class ProjectCommand(BaseCommand):
         if not self.project_controller.is_initialized:
             self.cli_helper.echo(
                 "Please initialize datmo before using this command")
+            return False
         dir_path = os.path.dirname(os.path.abspath(__file__))
         os.chdir(os.path.join(dir_path, "../../dashboard"))
         app.run(host='0.0.0.0')
