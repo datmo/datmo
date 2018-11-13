@@ -7,11 +7,14 @@ from datmo.core.entity.task import Task
 class TestTask():
     def setup_class(self):
         self.input_dict = {
-            "model_id": "my_model",
-            "session_id": "my_session",
-            "command": "python test.py",
-            "data_file_path_map": [("/absolute/path/to/data_file", "data_file")],
-            "data_directory_path_map": [("/absolute/path/to/data_directory", "data_directory")]
+            "model_id":
+                "my_model",
+            "command":
+                "python test.py",
+            "data_file_path_map": [("/absolute/path/to/data_file",
+                                    "data_file")],
+            "data_directory_path_map": [("/absolute/path/to/data_directory",
+                                         "data_directory")]
         }
 
     def test_init_no_id(self):
@@ -73,7 +76,9 @@ class TestTask():
     def test_str(self):
         task_entity = Task(self.input_dict)
         for k, v in self.input_dict.items():
-            if k not in ["model_id", "data_file_path_map", "data_directory_path_map"]:
+            if k not in [
+                    "model_id", "data_file_path_map", "data_directory_path_map"
+            ]:
                 assert str(v) in str(task_entity)
 
     def test_to_dictionary(self):

@@ -22,26 +22,18 @@ class FileCodeDriver(CodeDriver):
     """File-based Code Driver handles source control management for the project with files
     """
 
-    def __init__(self, filepath):
+    def __init__(self, root, datmo_directory_name):
         super(FileCodeDriver, self).__init__()
-        self.filepath = filepath
+        self.root = root
         # Check if filepath exists
-        if not os.path.exists(self.filepath):
+        if not os.path.exists(self.root):
             raise PathDoesNotExist(
-                __("error", "controller.code.driver.git.__init__.dne",
-                   filepath))
-        self._datmo_directory_name = ".datmo"
-        self._datmo_directory_path = os.path.join(self.filepath,
+                __("error", "controller.code.driver.git.__init__.dne", root))
+        self._datmo_directory_name = datmo_directory_name
+        self._datmo_directory_path = os.path.join(self.root,
                                                   self._datmo_directory_name)
-        self._environment_directory_name = "datmo_environment"
-        self._environment_directory_path = os.path.join(
-            self.filepath, self._environment_directory_name)
-        self._files_directory_name = "datmo_files"
-        self._files_directory_path = os.path.join(self.filepath,
-                                                  self._files_directory_name)
         self._code_filepath = os.path.join(self._datmo_directory_path, "code")
-        self._datmo_ignore_filepath = os.path.join(self.filepath,
-                                                   ".datmoignore")
+        self._datmo_ignore_filepath = os.path.join(self.root, ".datmoignore")
         self._is_initialized = self.is_initialized
         self.type = "file"
 
@@ -64,7 +56,7 @@ class FileCodeDriver(CodeDriver):
         """Return list of tracked files relative to the root directory
 
         This will look through all of the files and will exclude any datmo directories
-        (.datmo, datmo_environment/, datmo_files/) and any paths included in .datmoignore
+        (.datmo) and any paths included in .datmoignore
         TODO: add general list of directories to ignore here (should be passed in by higher level code)
 
         Returns
@@ -72,49 +64,25 @@ class FileCodeDriver(CodeDriver):
         list
             list of filepaths relative to the the root of the repo
         """
-        all_files = set(list_all_filepaths(self.filepath))
+        all_files = set(list_all_filepaths(self.root))
 
         # Ignore the .datmo/ folder and all contents within it
         spec = pathspec.PathSpec.from_lines('gitwildmatch',
                                             [self._datmo_directory_name])
-        dot_datmo_files = set(spec.match_tree(self.filepath))
+        dot_datmo_files = set(spec.match_tree(self.root))
 
         # Ignore the .git/ folder and all contents within it
         spec = pathspec.PathSpec.from_lines('gitwildmatch', [".git"])
-        dot_git_files = set(spec.match_tree(self.filepath))
+        dot_git_files = set(spec.match_tree(self.root))
 
-        # Ignore the datmo_environment/ folder and all contents within it
-        spec = pathspec.PathSpec.from_lines('gitwildmatch',
-                                            [self._environment_directory_name])
-        datmo_environment_files = set(spec.match_tree(self.filepath))
-
-        # Ignore the datmo_files/ folder and all contents within it
-        spec = pathspec.PathSpec.from_lines('gitwildmatch',
-                                            [self._files_directory_name])
-        datmo_files_files = set(spec.match_tree(self.filepath))
-
-        # TODO: REMOVE THIS CODE
-        # Ignore the datmo_environments/ folder and all contents within it
-        spec = pathspec.PathSpec.from_lines('gitwildmatch',
-                                            ["datmo_environments"])
-        datmo_snapshots_files = set(spec.match_tree(self.filepath))
-
-        # Ignore the datmo_files/ folder and all contents within it
-        spec = pathspec.PathSpec.from_lines('gitwildmatch', ["datmo_files"])
-        datmo_tasks_files = set(spec.match_tree(self.filepath))
-
-        # TODO: REMOVE THE ABOVE
-
-        # Load ignored files from .datmoignore file if exists
+        # Load ignored files from .datmoignore file if exi
         datmoignore_files = {".datmoignore"}
-        if os.path.isfile(os.path.join(self.filepath, ".datmoignore")):
+        if os.path.isfile(os.path.join(self.root, ".datmoignore")):
             with open(self._datmo_ignore_filepath, "r") as f:
                 spec = pathspec.PathSpec.from_lines('gitignore', f)
-                datmoignore_files.update(set(spec.match_tree(self.filepath)))
+                datmoignore_files.update(set(spec.match_tree(self.root)))
         return list(
-            all_files - dot_datmo_files - dot_git_files -
-            datmo_environment_files - datmo_files_files -
-            datmo_snapshots_files - datmo_tasks_files - datmoignore_files)
+            all_files - dot_datmo_files - dot_git_files - datmoignore_files)
 
     def _calculate_commit_hash(self, tracked_files):
         """Return the commit hash of the repository"""
@@ -131,7 +99,7 @@ class FileCodeDriver(CodeDriver):
                 if not os.path.isdir(new_dirpath):
                     os.makedirs(new_dirpath)
                 # Move individual file from old_filepath to new_filepath
-                old_filepath = os.path.join(self.filepath, rel_filepath)
+                old_filepath = os.path.join(self.root, rel_filepath)
                 new_filepath = os.path.join(new_dirpath, filename)
                 shutil.copy2(old_filepath, new_filepath)
             return self._get_dirhash(temp_dir)
@@ -225,8 +193,7 @@ class FileCodeDriver(CodeDriver):
         with open(commit_filepath, "a+") as f:
             # Loop through the tracked files
             for tracked_filepath in tracked_filepaths:
-                absolute_filepath = os.path.join(self.filepath,
-                                                 tracked_filepath)
+                absolute_filepath = os.path.join(self.root, tracked_filepath)
                 absolute_dirpath = os.path.join(self._code_filepath,
                                                 tracked_filepath)
                 # 1) create dir for file (use path name from tracked files list) -- if already exists skip
@@ -391,7 +358,7 @@ class FileCodeDriver(CodeDriver):
             return True
         # Remove all tracked files from repository
         for tracked_filepath in self._get_tracked_files():
-            absolute_filepath = os.path.join(self.filepath, tracked_filepath)
+            absolute_filepath = os.path.join(self.root, tracked_filepath)
             os.remove(absolute_filepath)
         # Add in files from the commit
         commit_filepath = os.path.join(self._code_filepath, commit_id)
@@ -401,7 +368,7 @@ class FileCodeDriver(CodeDriver):
                 source_absolute_filepath = os.path.join(
                     self._code_filepath, tracked_filepath, filehash)
                 destination_absolute_filepath = os.path.join(
-                    self.filepath, tracked_filepath)
+                    self.root, tracked_filepath)
                 shutil.copy2(source_absolute_filepath,
                              destination_absolute_filepath)
         return True

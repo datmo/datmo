@@ -21,8 +21,6 @@ class Task():
             (default is None; storage driver has not assigned an id yet)
         model_id : str
             the parent model id for the entity
-        session_id : str
-            id of session associated with task
         before_snapshot_id : str, optional
             snapshot created before the task is run
             (default is None, which means it isn't set yet)
@@ -91,8 +89,6 @@ class Task():
         the id of the entity
     model_id : str
         the parent model id for the entity
-    session_id : str
-        id of session associated with task
     before_snapshot_id : str or None
         snapshot created before the task is run
     command : str or None
@@ -139,7 +135,6 @@ class Task():
     def __init__(self, dictionary):
         self.id = dictionary.get('id', None)
         self.model_id = dictionary['model_id']
-        self.session_id = dictionary['session_id']
 
         # Pre-Execution
         self.before_snapshot_id = dictionary.get('before_snapshot_id', None)
@@ -153,7 +148,8 @@ class Task():
         self.ports = dictionary.get('ports', None)
         self.task_dirpath = dictionary.get('task_dirpath', None)
         self.data_file_path_map = dictionary.get('data_file_path_map', None)
-        self.data_directory_path_map = dictionary.get('data_directory_path_map', None)
+        self.data_directory_path_map = dictionary.get(
+            'data_directory_path_map', None)
         self.task_dirpath = dictionary.get('task_dirpath', None)
         self.log_filepath = dictionary.get('log_filepath', None)
         self.start_time = dictionary.get('start_time', None)
@@ -176,8 +172,6 @@ class Task():
     def __str__(self):
         final_str = '\033[94m' + "task " + self.id + os.linesep + '\033[0m'
         table_data = []
-        if self.session_id:
-            table_data.append(["Session", "-> " + self.session_id])
         if self.status:
             table_data.append(["Status", "-> " + self.status])
         if self.start_time:

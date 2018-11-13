@@ -68,8 +68,9 @@ class TestEnvironmentCommand():
     def test_environment_setup_parameter(self):
         self.__set_variables()
         # Setup the environement by passing name
-        definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
-                                           "Dockerfile")
+        definition_filepath = os.path.join(
+            self.project_command.project_controller.environment_driver.
+            environment_directory_path, "Dockerfile")
         # Test pass with correct input
         test_framework = "data-analytics"
         test_type = "cpu"
@@ -122,8 +123,9 @@ class TestEnvironmentCommand():
     def test_environment_setup_prompt(self):
         self.__set_variables()
         # Setup the environement by passing name
-        definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
-                                           "Dockerfile")
+        definition_filepath = os.path.join(
+            self.project_command.project_controller.environment_driver.
+            environment_directory_path, "Dockerfile")
 
         # Test success with correct prompt input using numbers
         self.environment_command.parse(["environment", "setup"])
@@ -142,15 +144,14 @@ class TestEnvironmentCommand():
         # Test success with correct prompt input using numbers
         self.environment_command.parse(["environment", "setup"])
 
-        @self.environment_command.cli_helper.input(
-            "cpu\ncaffe2\n")
+        @self.environment_command.cli_helper.input("cpu\ncaffe2\n")
         def dummy(self):
             return self.environment_command.execute()
+
         result = dummy(self)
         assert result
         assert os.path.isfile(definition_filepath)
-        assert "FROM datmo/caffe2:cpu" in open(
-            definition_filepath, "r").read()
+        assert "FROM datmo/caffe2:cpu" in open(definition_filepath, "r").read()
 
         # Test success with correct prompt input using string
         self.environment_command.parse(["environment", "setup"])
@@ -223,8 +224,9 @@ class TestEnvironmentCommand():
         self.__set_variables()
         # Test option 1
         # Create environment definition in project environment directory
-        definition_filepath = os.path.join(self.temp_dir, "datmo_environment",
-                                           "Dockerfile")
+        definition_filepath = os.path.join(
+            self.project_command.project_controller.environment_driver.
+            environment_directory_path, "Dockerfile")
         random_text = str(uuid.uuid1())
         with open(definition_filepath, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine" + "\n"))
@@ -240,8 +242,9 @@ class TestEnvironmentCommand():
         assert result.name == "test"
         assert result.description == "test description"
 
-        # remove datmo_environment directory
-        shutil.rmtree(os.path.join(self.temp_dir, "datmo_environment"))
+        # remove environment directory path
+        shutil.rmtree(self.project_command.project_controller.
+                      environment_driver.environment_directory_path)
 
         # Test option 2
         self.__set_variables()
@@ -366,8 +369,7 @@ class TestEnvironmentCommand():
         environment_objs = self.environment_command.execute()
         assert created_environment_obj in environment_objs
         test_wildcard = os.path.join(
-            self.environment_command.environment_controller.home,
-            "environment_ls_*")
+            self.project_command.project_controller.home, "environment_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()
@@ -395,8 +397,7 @@ class TestEnvironmentCommand():
         environment_objs = self.environment_command.execute()
         assert created_environment_obj in environment_objs
         test_wildcard = os.path.join(
-            self.environment_command.environment_controller.home,
-            "environment_ls_*")
+            self.project_command.project_controller.home, "environment_ls_*")
         paths = [n for n in glob.glob(test_wildcard) if os.path.isfile(n)]
         assert paths
         assert open(paths[0], "r").read()

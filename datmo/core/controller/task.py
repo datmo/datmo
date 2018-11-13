@@ -15,7 +15,7 @@ from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     TaskRunError, RequiredArgumentMissing, ProjectNotInitialized,
     PathDoesNotExist, TaskInteractiveDetachError, TooManyArgumentsFound,
-    EntityNotFound, DoesNotExist, SessionDoesNotExist, TaskNoCommandGiven)
+    EntityNotFound, DoesNotExist, TaskNoCommandGiven)
 
 
 class TaskController(BaseController):
@@ -37,7 +37,7 @@ class TaskController(BaseController):
         helper for run to start environment and run with the appropriate parameters
     run(self, id, dictionary=None)
         runs the task and tracks the run, logs, inputs and outputs
-    list(session_id=None)
+    list(sort_key=None, sort_order=None)
         lists all tasks within the project given filters
     delete(id)
         deletes the specified task from the project
@@ -65,7 +65,6 @@ class TaskController(BaseController):
         # Validate Inputs
         create_dict = {
             "model_id": self.model.id,
-            "session_id": self.current_session.id
         }
 
         try:
@@ -479,15 +478,8 @@ class TaskController(BaseController):
                 update_task_dict["run_id"] = run_id
             return self.dal.task.update(update_task_dict)
 
-    def list(self, session_id=None, sort_key=None, sort_order=None):
+    def list(self, sort_key=None, sort_order=None):
         query = {}
-        if session_id:
-            try:
-                self.dal.session.get_by_id(session_id)
-            except EntityNotFound:
-                raise SessionDoesNotExist(
-                    __("error", "controller.task.list", session_id))
-            query['session_id'] = session_id
         return self.dal.task.query(query, sort_key, sort_order)
 
     def get(self, task_id):
@@ -644,12 +636,13 @@ class TaskController(BaseController):
                 # TODO: remove...for now database may not be in sync. no task that has run can have NO before_snapshot_id
                 time.sleep(1)
                 task_obj = self.get(task_id)
-            if after_snapshot_id:
-                after_snapshot_obj = self.snapshot.get(after_snapshot_id)
-                kwargs['environment_id'] = after_snapshot_obj.environment_id
-            if not after_snapshot_id and before_snapshot_id:
-                before_snapshot_obj = self.snapshot.get(before_snapshot_id)
-                kwargs['environment_id'] = before_snapshot_obj.environment_id
+            # TODO: fix stop function to handle stopping containers run from specific environment_ids
+            # if after_snapshot_id:
+            #     after_snapshot_obj = self.snapshot.get(after_snapshot_id)
+            #     kwargs['environment_id'] = after_snapshot_obj.environment_id
+            # if not after_snapshot_id and before_snapshot_id:
+            #     before_snapshot_obj = self.snapshot.get(before_snapshot_id)
+            #     kwargs['environment_id'] = before_snapshot_obj.environment_id
             return_code = self.environment.stop(**kwargs)
         if all:
             return_code = self.environment.stop(all=True)

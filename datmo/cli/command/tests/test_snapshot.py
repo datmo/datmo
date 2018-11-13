@@ -137,7 +137,6 @@ class TestSnapshotCommand():
         self.__set_variables()
         test_message = "this is a test message"
         test_label = "test label"
-        test_session_id = "test_session_id"
         test_run_id = "test_run_id"
         test_environment_definition_filepath = self.env_def_path
         test_config_filepath = self.config_filepath
@@ -162,8 +161,6 @@ class TestSnapshotCommand():
             test_message,
             "--label",
             test_label,
-            "--session-id",
-            test_session_id,
             "--environment-paths",
             test_environment_definition_filepath,
             "--config-filepath",
@@ -177,7 +174,6 @@ class TestSnapshotCommand():
         # test for desired side effects
         assert self.snapshot_command.args.message == test_message
         assert self.snapshot_command.args.label == test_label
-        assert self.snapshot_command.args.session_id == test_session_id
         assert self.snapshot_command.args.environment_paths == [
             test_environment_definition_filepath
         ]
@@ -188,7 +184,7 @@ class TestSnapshotCommand():
         # test multiple paths
         self.snapshot_command.parse([
             "snapshot", "create", "--message", test_message, "--label",
-            test_label, "--session-id", test_session_id, "--environment-paths",
+            test_label, "--environment-paths",
             test_environment_definition_filepath, "--config-filepath",
             test_config_filepath, "--stats-filepath", test_stats_filepath,
             "--paths", test_paths[0], "--paths", test_paths[1]
@@ -197,7 +193,6 @@ class TestSnapshotCommand():
         # test for desired side effects
         assert self.snapshot_command.args.message == test_message
         assert self.snapshot_command.args.label == test_label
-        assert self.snapshot_command.args.session_id == test_session_id
         assert self.snapshot_command.args.environment_paths == [
             test_environment_definition_filepath
         ]
@@ -384,7 +379,6 @@ class TestSnapshotCommand():
         self.__set_variables()
         test_message = "this is a test message"
         test_label = "test label"
-        test_session_id = "test_session_id"
         test_environment_id = "test_environment_id"
         test_environment_definition_filepath = self.env_def_path
         test_config_filename = "config.json"
@@ -402,8 +396,6 @@ class TestSnapshotCommand():
                 test_message,
                 "--label",
                 test_label,
-                "--session-id",
-                test_session_id,
                 "--environment-id",
                 test_environment_id,
                 "--environment-paths",
@@ -424,8 +416,6 @@ class TestSnapshotCommand():
                 test_message,
                 "--label",
                 test_label,
-                "--session-id",
-                test_session_id,
                 "--config-filename",
                 test_config_filename,
                 "--config-filepath",
@@ -446,8 +436,6 @@ class TestSnapshotCommand():
                 test_message,
                 "--label",
                 test_label,
-                "--session-id",
-                test_session_id,
                 "--stats-filename",
                 test_stats_filename,
                 "--stats-filepath",

@@ -3,6 +3,7 @@ import os
 from datmo import __version__
 from datmo.core.util.i18n import get as __
 from datmo.core.util.json_store import JSONStore
+from datmo.core.util.remote_api import RemoteAPI
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.base import BaseCommand
 from datmo.core.controller.project import ProjectController
@@ -162,15 +163,17 @@ class ProjectCommand(BaseCommand):
 
         if setup_remote_bool:
             datmo_api_key = None
-            master_server_ip = None
 
             while not datmo_api_key:
                 datmo_api_key = self.cli_helper.prompt(
-                    "---> Enter API key for Datmo Deployment")
+                    "Enter API key for datmo")
 
-            while not master_server_ip:
-                master_server_ip = self.cli_helper.prompt(
-                    "---> Enter master server IP address for Datmo Deployment")
+            # Initialize remote API to get master ip address
+            remote_api = RemoteAPI(datmo_api_key)
+            response = remote_api.get_deployment_info()
+            master_system_info = response['body']['master_system_info']
+            master_server_ip = str(master_system_info.get('datmo_master_ip')) if isinstance(master_system_info, dict)\
+                else None
 
             # Create a config file
             self.datmo_config = JSONStore(
@@ -183,8 +186,7 @@ class ProjectCommand(BaseCommand):
                 self.datmo_config.to_file(config)
             else:
                 self.cli_helper.echo(
-                    "Remote credentials could not be saved because they weren't input correctly. Please try again"
-                )
+                    "Datmo API key could not be saved. Please try again")
 
         # Setup project specific things
         if self.project_controller.model:
@@ -253,32 +255,35 @@ class ProjectCommand(BaseCommand):
 
         # Cleanup datmo project if user specifies
         if response:
+            name = self.project_controller.model.name if self.project_controller.model.name else ""
+            path = self.project_controller.home if self.project_controller.home else ""
             self.cli_helper.echo(
-                __(
-                    "info", "cli.project.cleanup", {
-                        "name": self.project_controller.model.name,
-                        "path": self.project_controller.home
-                    }))
+                __("info", "cli.project.cleanup", {
+                    "name": name,
+                    "path": path
+                }))
             try:
                 success = self.project_controller.cleanup()
                 if success:
                     self.cli_helper.echo(
-                        __(
-                            "info", "cli.project.cleanup.success", {
-                                "name": self.project_controller.model.name,
-                                "path": self.project_controller.home
-                            }))
+                        __("info", "cli.project.cleanup.success", {
+                            "name": name,
+                            "path": path
+                        }))
                 return success
             except Exception:
                 self.cli_helper.echo(
-                    __(
-                        "info", "cli.project.cleanup.failure", {
-                            "name": self.project_controller.model.name,
-                            "path": self.project_controller.home
-                        }))
+                    __("info", "cli.project.cleanup.failure", {
+                        "name": name,
+                        "path": path
+                    }))
         return False
 
     def dashboard(self):
+        if not self.project_controller.is_initialized:
+            self.cli_helper.echo(
+                "Please initialize datmo before using this command")
+            return False
         dir_path = os.path.dirname(os.path.abspath(__file__))
         os.chdir(os.path.join(dir_path, "../../dashboard"))
         app.run(host='0.0.0.0')

@@ -13,7 +13,6 @@ from datetime import datetime
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.entity.model import Model
-from datmo.core.entity.session import Session
 from datmo.core.entity.task import Task
 from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
 
@@ -26,21 +25,17 @@ class TestLocalDAL():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.datadriver = BlitzDBDALDriver("file", self.temp_dir)
-
-        self.dal = LocalDAL(self.datadriver)
+        self.driver_type = "blitzdb"
+        self.driver_options = {
+            "driver_type": "file",
+            "connection_string": self.temp_dir
+        }
+        self.dal = LocalDAL(self.driver_type, self.driver_options)
         model_name = "model_1"
         model = self.dal.model.create(Model({"name": model_name}))
-        session_name = "session_1"
-        session = self.dal.session.create(
-            Session({
-                "name": session_name,
-                "model_id": model.id
-            }))
 
         self.task_input_dict = {
             "model_id": model.id,
-            "session_id": session.id,
             "command": "task_1",
             "start_time": datetime.utcnow(),
             "end_time": datetime.utcnow(),
@@ -86,7 +81,6 @@ class TestLocalDAL():
         result = self.dal.task.get_by_id(task.id)
         assert task.id == result.id
         assert task.model_id == result.model_id
-        assert task.session_id == result.session_id
         assert task.command == result.command
         assert task.start_time == result.start_time
         assert task.end_time == result.end_time
@@ -97,7 +91,6 @@ class TestLocalDAL():
         result = self.dal.task.get_by_shortened_id(task.id[:10])
         assert task.id == result.id
         assert task.model_id == result.model_id
-        assert task.session_id == result.session_id
         assert task.command == result.command
         assert task.start_time == result.start_time
         assert task.end_time == result.end_time
@@ -108,11 +101,12 @@ class TestLocalDAL():
 
         # create new dal with new driver instance (success)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
-        new_dal_instance = LocalDAL(new_driver_instance)
+        new_dal_instance = LocalDAL(
+            self.driver_type, self.driver_options, driver=new_driver_instance)
         new_task_1 = new_dal_instance.task.get_by_id(task.id)
         assert new_task_1.id == task.id
         # create new dal instance with same driver (success)
-        new_dal_instance = LocalDAL(self.datadriver)
+        new_dal_instance = LocalDAL(self.driver_type, self.driver_options)
         new_task_2 = new_dal_instance.task.get_by_id(task.id)
         assert new_task_2.id == task.id
 

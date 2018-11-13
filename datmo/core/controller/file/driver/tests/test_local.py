@@ -26,7 +26,6 @@ except TypeError:
 from datmo.core.util.misc_functions import get_datmo_temp_path
 from datmo.core.controller.file.driver.local import LocalFileDriver
 from datmo.core.util.exceptions import PathDoesNotExist
-from datmo.core.controller.project import ProjectController
 from datmo.config import Config
 
 
@@ -44,7 +43,8 @@ class TestLocalFileDriver():
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         Config().set_home(self.temp_dir)
-        self.local_file_driver = LocalFileDriver(root=self.temp_dir)
+        self.local_file_driver = LocalFileDriver(
+            root=self.temp_dir, datmo_directory_name=".datmo")
 
     def teardown_method(self):
         pass
@@ -114,7 +114,6 @@ class TestLocalFileDriver():
         assert self.local_file_driver.is_initialized == True
 
     # Instance Method Tests
-
     def test_init(self):
         result = self.local_file_driver.init()
         assert result and \
@@ -178,6 +177,7 @@ class TestLocalFileDriver():
         self.local_file_driver.delete(temp_relative_filepath)
         assert os.path.exists(filepath) == False
 
+    # Hidden .datmo directory tests
     def test_create_hidden_datmo_dir(self):
         result = self.local_file_driver.create_hidden_datmo_dir()
         assert result == True and \
@@ -195,75 +195,61 @@ class TestLocalFileDriver():
         assert result == True and \
                os.path.isdir(self.local_file_driver.datmo_directory)
 
-    def test_ensure_datmo_environment_dir(self):
-        result = self.local_file_driver.ensure_datmo_environment_dir()
-        assert result == True and \
-               os.path.isdir(self.local_file_driver.environment_directory)
-
-    def test_ensure_datmo_files_dir(self):
-        result = self.local_file_driver.ensure_datmo_files_dir()
-        assert result == True and \
-               os.path.isdir(self.local_file_driver.files_directory)
-
-    def test_delete_datmo_environment_dir(self):
-        self.local_file_driver.ensure_datmo_environment_dir()
-        result = self.local_file_driver.delete_datmo_environment_dir()
-        assert result == True and \
-               not os.path.isdir(self.local_file_driver.environment_directory)
-
-    def test_delete_datmo_files_dir(self):
-        self.local_file_driver.ensure_datmo_files_dir()
-        result = self.local_file_driver.delete_datmo_files_dir()
-        assert result == True and \
-               not os.path.isdir(self.local_file_driver.files_directory)
-
     def test_delete_hidden_datmo_dir(self):
         self.local_file_driver.create_hidden_datmo_dir()
         result = self.local_file_driver.delete_hidden_datmo_dir()
         assert result == True and \
                not os.path.isdir(self.local_file_driver.datmo_directory)
 
-    def test_create_hidden_datmo_file_structure(self):
-        result = self.local_file_driver.create_hidden_datmo_file_structure()
-        assert result == True and \
-               os.path.isdir(self.local_file_driver.datmo_directory)
-
-    def test_exists_hidden_datmo_file_structure(self):
-        result = self.local_file_driver.exists_hidden_datmo_file_structure()
-        assert result == False
-        self.local_file_driver.ensure_hidden_datmo_file_structure()
-        result = self.local_file_driver.exists_hidden_datmo_file_structure()
-        assert result == True
-
-    def test_ensure_hidden_datmo_file_structure(self):
-        result = self.local_file_driver.ensure_hidden_datmo_file_structure()
-        assert result == True and \
-               os.path.isdir(self.local_file_driver.datmo_directory)
-
-    def test_delete_hidden_datmo_file_structure(self):
-        self.local_file_driver.create_hidden_datmo_file_structure()
-        result = self.local_file_driver.delete_hidden_datmo_file_structure()
-        assert result == True and \
-            not os.path.isdir(self.local_file_driver.datmo_directory)
-
-    def test_ensure_visible_datmo_dir(self):
-        result = self.local_file_driver.ensure_visible_datmo_structure()
-        assert result == True and \
-               os.path.isdir(self.local_file_driver.files_directory) and \
-               os.path.isdir(self.local_file_driver.environment_directory)
-
-    def test_delete_visible_datmo_structure(self):
-        self.local_file_driver.ensure_visible_datmo_structure()
-        result = self.local_file_driver.delete_visible_datmo_structure()
-        assert result == True and \
-               not os.path.isdir(self.local_file_driver.files_directory) and \
-               not os.path.isdir(self.local_file_driver.environment_directory)
-
     # Template tests
 
     # TODO : Add tests for code that handles various project templates
 
-    # Collection Tests
+    # Files directory tests
+    def test_create_files_dir(self):
+        files_path = os.path.join(self.local_file_driver.datmo_directory,
+                                  "files")
+        thrown = False
+        try:
+            self.local_file_driver.create_files_dir()
+        except Exception:
+            thrown = True
+        assert thrown == True and \
+            not os.path.isdir(files_path)
+        self.local_file_driver.init()
+        result = self.local_file_driver.create_files_dir()
+        assert result == True and \
+            os.path.isdir(files_path)
+
+    def test_exists_files_dir(self):
+        files_path = os.path.join(self.local_file_driver.datmo_directory,
+                                  "files")
+        result = self.local_file_driver.exists_files_dir()
+        assert result == False and \
+            not os.path.isdir(files_path)
+        self.local_file_driver.init()
+        self.local_file_driver.create_files_dir()
+        result = self.local_file_driver.exists_files_dir()
+        assert result == True and \
+            os.path.isdir(files_path)
+
+    def test_ensure_files_dir(self):
+        files_path = os.path.join(self.local_file_driver.datmo_directory,
+                                  "files")
+        result = self.local_file_driver.ensure_files_dir()
+        assert result == True and \
+            os.path.isdir(files_path)
+
+    def test_delete_files_dir(self):
+        files_path = os.path.join(self.local_file_driver.datmo_directory,
+                                  "files")
+        self.local_file_driver.init()
+        self.local_file_driver.create_files_dir()
+        result = self.local_file_driver.delete_files_dir()
+        assert result == True and \
+            not os.path.isdir(files_path)
+
+    # Collection directory tests
     def test_create_collections_dir(self):
         collections_path = os.path.join(self.local_file_driver.datmo_directory,
                                         "collections")
@@ -307,6 +293,31 @@ class TestLocalFileDriver():
         assert result == True and \
             not os.path.isdir(collections_path)
 
+    # .datmo directory structure tests
+    def test_create_hidden_datmo_file_structure(self):
+        result = self.local_file_driver.create_hidden_datmo_file_structure()
+        assert result == True and \
+               os.path.isdir(self.local_file_driver.datmo_directory)
+
+    def test_exists_hidden_datmo_file_structure(self):
+        result = self.local_file_driver.exists_hidden_datmo_file_structure()
+        assert result == False
+        self.local_file_driver.ensure_hidden_datmo_file_structure()
+        result = self.local_file_driver.exists_hidden_datmo_file_structure()
+        assert result == True
+
+    def test_ensure_hidden_datmo_file_structure(self):
+        result = self.local_file_driver.ensure_hidden_datmo_file_structure()
+        assert result == True and \
+               os.path.isdir(self.local_file_driver.datmo_directory)
+
+    def test_delete_hidden_datmo_file_structure(self):
+        self.local_file_driver.create_hidden_datmo_file_structure()
+        result = self.local_file_driver.delete_hidden_datmo_file_structure()
+        assert result == True and \
+            not os.path.isdir(self.local_file_driver.datmo_directory)
+
+    # Other functions for collections
     def test_create_collection(self):
         self.local_file_driver.init()
         collections_path = os.path.join(self.local_file_driver.datmo_directory,
@@ -579,7 +590,8 @@ class TestLocalFileDriver():
         filehash_1, _, _ = self.local_file_driver.create_collection([])
         self.local_file_driver.create("filepath1")
         filepath1 = os.path.join(self.local_file_driver.root, "filepath1")
-        filehash_2, _, _ = self.local_file_driver.create_collection([filepath1])
+        filehash_2, _, _ = self.local_file_driver.create_collection(
+            [filepath1])
         collection_list = self.local_file_driver.list_file_collections()
         assert filehash_1 in collection_list and \
                filehash_2 in collection_list

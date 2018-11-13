@@ -8,7 +8,6 @@ class TestSnapshot():
     def setup_class(self):
         self.input_dict = {
             "model_id": "my_model",
-            "session_id": "my_session",
             "message": "my message",
             "code_id": "code_id",
             "environment_id": "environment_id",

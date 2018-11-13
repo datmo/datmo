@@ -8,12 +8,10 @@ from __future__ import unicode_literals
 import os
 import tempfile
 import platform
-from datetime import datetime
 
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.entity.model import Model
-from datmo.core.entity.session import Session
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
 
@@ -26,21 +24,17 @@ class TestLocalDAL():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.datadriver = BlitzDBDALDriver("file", self.temp_dir)
-
-        self.dal = LocalDAL(self.datadriver)
+        self.driver_type = "blitzdb"
+        self.driver_options = {
+            "driver_type": "file",
+            "connection_string": self.temp_dir
+        }
+        self.dal = LocalDAL(self.driver_type, self.driver_options)
         model_name = "model_1"
         model = self.dal.model.create(Model({"name": model_name}))
-        session_name = "session_1"
-        session = self.dal.session.create(
-            Session({
-                "name": session_name,
-                "model_id": model.id
-            }))
 
         self.snapshot_input_dict = {
             "model_id": model.id,
-            "session_id": session.id,
             "message": "my message",
             "code_id": "code_id",
             "environment_id": "environment_id",
@@ -60,7 +54,6 @@ class TestLocalDAL():
         snapshot = self.dal.snapshot.create(Snapshot(self.snapshot_input_dict))
         assert snapshot.id
         assert snapshot.model_id == self.snapshot_input_dict['model_id']
-        assert snapshot.session_id == self.snapshot_input_dict['session_id']
         assert snapshot.message == self.snapshot_input_dict['message']
         assert snapshot.code_id == self.snapshot_input_dict['code_id']
         assert snapshot.environment_id == self.snapshot_input_dict[
@@ -101,11 +94,12 @@ class TestLocalDAL():
 
         # create new dal with new driver instance (fails)
         new_driver_instance = BlitzDBDALDriver("file", self.temp_dir)
-        new_dal_instance = LocalDAL(new_driver_instance)
+        new_dal_instance = LocalDAL(
+            self.driver_type, self.driver_options, driver=new_driver_instance)
         new_snapshot_1 = new_dal_instance.snapshot.get_by_id(snapshot.id)
         assert new_snapshot_1.id == snapshot.id
         # create new dal instance with same driver (success)
-        new_dal_instance = LocalDAL(self.datadriver)
+        new_dal_instance = LocalDAL(self.driver_type, self.driver_options)
         new_snapshot_2 = new_dal_instance.snapshot.get_by_id(snapshot.id)
         assert new_snapshot_2.id == snapshot.id
 

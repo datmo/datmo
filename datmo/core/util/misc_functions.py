@@ -47,8 +47,8 @@ from datmo.core.controller.environment.driver.dockerenv import DockerEnvironment
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import (
     PathDoesNotExist, MutuallyExclusiveArguments, RequiredArgumentMissing,
-    EnvironmentInitFailed, EnvironmentExecutionError, InvalidDestinationName,
-    TooManyArgumentsFound)
+    EnvironmentConnectFailed, EnvironmentExecutionError,
+    InvalidDestinationName, TooManyArgumentsFound)
 
 
 def bytes2human(n):
@@ -271,10 +271,12 @@ def is_project_dir(path):
         os.path.join(path, ".datmo"))
 
 
-def check_docker_inactive(filepath):
+# TODO: add test
+def check_docker_inactive(filepath, datmo_directory_name):
     try:
-        test = DockerEnvironmentDriver(filepath=filepath)
-        test.init()
+        test = DockerEnvironmentDriver(
+            root=filepath, datmo_directory_name=datmo_directory_name)
+        test.connect()
         definition_path = os.path.join(filepath, "Dockerfile")
         if platform.system() == "Windows":
             with open(definition_path, "wb") as f:
@@ -282,13 +284,15 @@ def check_docker_inactive(filepath):
                 f.write(to_bytes(str("RUN echo hello")))
             test.build("docker-test", definition_path)
         return False
-    except (EnvironmentInitFailed, EnvironmentExecutionError):
+    except (EnvironmentConnectFailed, EnvironmentExecutionError):
         return True
 
 
+# TODO: add test
 def pytest_docker_environment_failed_instantiation(filepath):
     return pytest.mark.skipif(
-        check_docker_inactive(filepath),
+        # TODO: abstract the "datmo_directory_name"
+        check_docker_inactive(filepath, ".datmo"),
         reason="a running environment could not be instantiated")
 
 
@@ -322,7 +326,8 @@ def prettify_datetime(datetime_obj, tz=None):
 
 
 def format_table(data, padding=2):
-    num_col = max(len(row) for row in data)
+    data_rows = [len(row) for row in data]
+    num_col = max(data_rows) if data_rows else 0
     col_widths = []
     for i in range(num_col):
         col_width = max(len(row[i]) for row in data) + padding

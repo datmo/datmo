@@ -118,10 +118,6 @@ class DoesNotExist(Exception):
     pass
 
 
-class SessionDoesNotExist(DoesNotExist):
-    pass
-
-
 class CodeDoesNotExist(DoesNotExist):
     pass
 
@@ -135,7 +131,6 @@ class SnapshotDoesNotExist(DoesNotExist):
 
 
 class PathDoesNotExist(FileExecutionError):
-
     def __init__(self, file_path=None):
         self.file_path = file_path
 
@@ -162,6 +157,14 @@ class FileNotInitialized(FileExecutionError):
     pass
 
 
+class DALException(Exception):
+    pass
+
+
+class DALNotInitialized(DALException):
+    pass
+
+
 class EnvironmentException(Exception):
     pass
 
@@ -183,6 +186,14 @@ class EnvironmentRequirementsCreateError(EnvironmentException):
 
 
 class EnvironmentInitFailed(EnvironmentExecutionError):
+    pass
+
+
+class EnvironmentConnectFailed(EnvironmentExecutionError):
+    pass
+
+
+class EnvironmentNotConnected(EnvironmentExecutionError):
     pass
 
 
@@ -241,7 +252,7 @@ class DatmoFolderInWorkTree(CodeException):
 
 class UnstagedChanges(Exception):
     def __str__(self):
-      return "Unstaged changes exists. Create a snapshot to remove any unstaged changes"
+        return "Unstaged changes exists. Create a snapshot to remove any unstaged changes"
 
 
 class NothingToStage(Exception):

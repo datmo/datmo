@@ -5,6 +5,7 @@ import json
 import psutil
 from datetime import datetime
 
+from datmo.config import Config
 from datmo.core.util.exceptions import InputError
 from datmo.core.util.misc_functions import bytes2human, slack_message
 from datmo.core.util.remote_api import RemoteAPI
@@ -63,8 +64,12 @@ class Monitoring():
     >>> datmo_client.trigger(medium="slack", input=input, prediction=prediction, notes=notes)
     """
 
-    def __init__(self, api_key, home=None):
-        self._api_key = api_key
+    def __init__(self, api_key=None):
+        if api_key is None:
+            config = Config()
+            _, self._api_key, _ = config.remote_credentials
+        else:
+            self._api_key = api_key
         self.remote_api = RemoteAPI(self._api_key)
         self._start_time, self._end_time, self._model_id, \
         self._model_version_id, self._deployment_version_id = None, None, None, None, None
@@ -153,7 +158,6 @@ class Monitoring():
         """
         if not (isinstance(input, dict) and isinstance(prediction, dict)):
             return None
-
         if self._start_time and self._end_time:
             latency = self._end_time - self._start_time
         elif self._start_time and not self._end_time:
@@ -171,22 +175,23 @@ class Monitoring():
             if name != "percent":
                 value = bytes2human(value)
             memory_dict[name] = value
+        system_metrics = dict()
+        system_metrics["cpu_percent"] = cpu_percent
+        system_metrics["memory_percent"] = memory_dict["percent"]
 
         input_data = {
-            "cpu_percent": cpu_percent,
-            "memory_dict": memory_dict,
+            "system_metrics": system_metrics,
             "input": json.dumps(input),
             "prediction": json.dumps(prediction),
             "model_id": self._model_id,
             "created_at": created_at
         }
         if latency is not None:
-            input_data['latency'] = latency
+            input_data['system_metrics']['latency_ms'] = latency
         if self._model_version_id is not None:
             input_data['model_version_id'] = self._model_version_id
         if self._deployment_version_id is not None:
             input_data['deployment_version_id'] = self._deployment_version_id
-
         response = self.remote_api.post_data(input_data)
 
         return response['body']['id']

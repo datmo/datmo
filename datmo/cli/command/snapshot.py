@@ -98,7 +98,7 @@ class SnapshotCommand(ProjectCommand):
                     stats.update(item_parsed_dict)
                 snapshot_dict["stats"] = stats
 
-            optional_args = ["session_id", "message", "label"]
+            optional_args = ["message", "label"]
 
             for arg in optional_args:
                 if arg in kwargs and kwargs[arg] is not None:
@@ -171,8 +171,6 @@ class SnapshotCommand(ProjectCommand):
     @Helper.notify_no_project_found
     def ls(self, **kwargs):
         self.snapshot_controller = SnapshotController()
-        session_id = kwargs.get('session_id',
-                                self.snapshot_controller.current_session.id)
         detailed_info = kwargs.get('details', None)
         show_all = kwargs.get('show_all', None)
         print_format = kwargs.get('format', "table")
@@ -182,15 +180,10 @@ class SnapshotCommand(ProjectCommand):
         current_snapshot_id = current_snapshot_obj.id if current_snapshot_obj else None
         if show_all:
             snapshot_objs = self.snapshot_controller.list(
-                session_id=session_id,
-                sort_key="created_at",
-                sort_order="descending")
+                sort_key="created_at", sort_order="descending")
         else:
             snapshot_objs = self.snapshot_controller.list(
-                session_id=session_id,
-                visible=True,
-                sort_key="created_at",
-                sort_order="descending")
+                visible=True, sort_key="created_at", sort_order="descending")
         item_dict_list = []
         if detailed_info:
             header_list = [

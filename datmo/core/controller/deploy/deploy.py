@@ -56,6 +56,12 @@ class DeployController(BaseController):
         """
         Deploy the Servers in the cluster with the defined setup
         """
+        # Validate deployment
+        bool_deploy_validate, response = self.driver.validate_deploy(
+            self.home, self.environment_driver.environment_directory_path)
+        if not bool_deploy_validate:
+            return response
+
         self.spinner.start()
         response = self.driver.create_cluster(
             cluster_name, server_type, count=size)
@@ -73,6 +79,12 @@ class DeployController(BaseController):
         size : str
             Number of servers
         """
+        # Validate deployment
+        bool_deploy_validate, response = self.driver.validate_deploy(
+            self.home, self.environment_driver.environment_directory_path)
+        if not bool_deploy_validate:
+            return response
+
         self.spinner.start()
         response = self.driver.update_cluster(
             count=size, cluster_name=cluster_name)
@@ -131,21 +143,31 @@ class DeployController(BaseController):
         cluster_name : str
             Name of the cluster
         """
+
+        # Validate deployment
+        bool_deploy_validate, response = self.driver.validate_deploy(
+            self.home, self.environment_driver.environment_directory_path)
+        if not bool_deploy_validate:
+            return response
+
         # Specific for datmo service logic
         tmp_dirpath = tempfile.mkdtemp()
         # copy the content for project directory to tmp folder and the environment to root location in tmp folder
         try:
             self.commands.copy(self.home, tmp_dirpath)
-            environment_dirpath = os.path.join(tmp_dirpath,
-                                               'datmo_environment')
-            files_dirpath = os.path.join(tmp_dirpath, 'datmo_files')
-            if os.path.exists(environment_dirpath):
-                shutil.rmtree(os.path.join(tmp_dirpath, '.datmo'))
-                self.commands.copy(environment_dirpath, tmp_dirpath)
-                shutil.rmtree(os.path.join(tmp_dirpath, 'datmo_environment'))
 
-            if os.path.exists(files_dirpath):
-                shutil.rmtree(os.path.join(files_dirpath))
+            # Copy environment state to the root of the project
+            environment_dirpath = os.path.join(
+                tmp_dirpath,
+                Config().datmo_directory_name,
+                self.environment_driver.environment_directory_name)
+            if os.path.exists(environment_dirpath):
+                self.commands.copy(environment_dirpath, tmp_dirpath)
+
+            # Remove state and history information
+            shutil.rmtree(
+                os.path.join(tmp_dirpath,
+                             Config().datmo_directory_name))
 
             # Exclude any files based on datmo deploy config file
             if os.path.exists(os.path.join(tmp_dirpath, 'datmo-deploy.yml')):
@@ -161,7 +183,7 @@ class DeployController(BaseController):
             if datmo_deploy_config_path:
                 with open(datmo_deploy_config_path, 'r') as stream:
                     try:
-                        datmo_deploy = yaml.load(stream)
+                        datmo_deploy = yaml.safe_load(stream)
                         if datmo_deploy is not None:
                             files_exclude = datmo_deploy['deploy'][
                                 'files_exclude']

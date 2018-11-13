@@ -24,4 +24,3 @@ after_success:
 env:
   global:
     - LOGGING_LEVEL=DEBUG
-    - SLACK_WEBHOOK_URL=https://hooks.slack.com/services/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

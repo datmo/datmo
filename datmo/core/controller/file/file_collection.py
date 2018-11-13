@@ -168,7 +168,8 @@ class FileCollectionController(BaseController):
         return file_collection_exists
 
     def _calculate_project_files_hash(self):
-        """Return the file hash of the file collections filepaths for project files directory
+        """Return the file hash of the file collections filepaths for project files directory.
+        If files_directory not present then will assume it is empty
 
         Returns
         -------
@@ -205,7 +206,8 @@ class FileCollectionController(BaseController):
         return True
 
     def check_unstaged_changes(self):
-        """Checks if there exists any unstaged changes for the file collection in `datmo_file` folder
+        """Checks if there exists any unstaged changes for the file collection in the files directory
+        If the folder does not exist, then there are no unstaged changes.
 
         Returns
         -------
@@ -215,11 +217,11 @@ class FileCollectionController(BaseController):
         Raises
         ------
         FileNotInitialized
-            error if not initialized (must initialize first)
+            error if file driver is not initialized, otherwise cannot check unstaged changes
         UnstagedChanges
             error if not there exists unstaged changes in files
         """
-        if not self.is_initialized:
+        if not self.file_driver.is_initialized:
             raise FileNotInitialized()
 
         # Check if unstaged changes exist

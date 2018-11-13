@@ -34,7 +34,6 @@ from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.core.controller.task import TaskController
 from datmo.core.entity.snapshot import Snapshot
-from datmo.core.entity.task import Task
 from datmo.core.util.exceptions import ValidationFailed
 from datmo.core.util.misc_functions import check_docker_inactive, pytest_docker_environment_failed_instantiation
 
@@ -51,7 +50,8 @@ class TestProjectController():
         self.environment_ids = []
 
     def teardown_method(self):
-        if not check_docker_inactive(test_datmo_dir):
+        if not check_docker_inactive(test_datmo_dir,
+                                     Config().datmo_directory_name):
             self.project_controller = ProjectController()
             if self.project_controller.is_initialized:
                 self.environment_controller = EnvironmentController()
@@ -78,6 +78,7 @@ class TestProjectController():
         assert failed
         assert not self.project_controller.code_driver.is_initialized
         assert not self.project_controller.file_driver.is_initialized
+        assert not self.project_controller.environment_driver.is_initialized
 
     def test_init_failure_git_code_driver(self):
         # Create a HEAD.lock file in .git to make GitCodeDriver.init() fail
@@ -104,9 +105,6 @@ class TestProjectController():
         assert self.project_controller.model.description == "test description"
         assert result and self.project_controller.is_initialized
 
-        # Changeable by user, not tested in is_initialized
-        assert self.project_controller.current_session.name == "default"
-
     # TODO: Test lower level functions (DAL, JSONStore, etc for interruptions)
     # def test_init_with_interruption(self):
     #     # Reinitializing after timed interruption during init
@@ -131,8 +129,6 @@ class TestProjectController():
     #     assert self.project_controller.model.description == "test description"
     #     assert result and self.project_controller.is_initialized
     #
-    #     # Changeable by user, not tested in is_initialized
-    #     assert self.project_controller.current_session.name == "default"
 
     def test_init_reinit_failure_empty_str(self):
         _ = self.project_controller.init("test1", "test description")

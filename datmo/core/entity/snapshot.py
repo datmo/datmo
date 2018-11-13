@@ -30,8 +30,6 @@ class Snapshot():
             (default is None; storage driver has not assigned an id yet)
         model_id : str
             the parent model id for the entity
-        session_id : str
-            session id within which snapshot is created
         message : str
             long description of snapshot
         code_id : str
@@ -64,8 +62,6 @@ class Snapshot():
         the id of the entity
     model_id : str
         the parent model id for the entity
-    session_id : str
-        session id within which snapshot is created
     message : str
         long description of snapshot
     code_id : str
@@ -91,7 +87,6 @@ class Snapshot():
     def __init__(self, dictionary):
         self.id = dictionary.get('id', None)
         self.model_id = dictionary['model_id']
-        self.session_id = dictionary['session_id']
         self.message = dictionary['message']
 
         self.code_id = dictionary['code_id']
@@ -121,8 +116,6 @@ class Snapshot():
         final_str = final_str + "Date: " + prettify_datetime(
             self.created_at) + os.linesep
         table_data = []
-        if self.session_id:
-            table_data.append(["Session", "-> " + self.session_id])
         if self.task_id:
             table_data.append(["Task", "-> " + self.task_id])
         table_data.append(["Visible", "-> " + str(self.visible)])

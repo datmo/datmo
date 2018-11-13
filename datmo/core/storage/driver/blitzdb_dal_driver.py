@@ -39,10 +39,6 @@ class BlitzDBDALDriver(DALDriver):
         class Meta(Document.Meta):
             collection = 'file_collection'
 
-    class SessionDocument(Document):
-        class Meta(Document.Meta):
-            collection = 'session'
-
     class TaskDocument(Document):
         class Meta(Document.Meta):
             collection = 'task'
@@ -104,8 +100,6 @@ class BlitzDBDALDriver(DALDriver):
             item = self.EnvironmentDocument(compatible_obj)
         elif collection == 'file_collection':
             item = self.FileCollectionDocument(compatible_obj)
-        elif collection == 'session':
-            item = self.SessionDocument(compatible_obj)
         elif collection == 'task':
             item = self.TaskDocument(compatible_obj)
         elif collection == 'snapshot':

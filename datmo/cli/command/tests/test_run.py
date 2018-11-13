@@ -43,8 +43,8 @@ from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.run import RunObject
 from datmo.cli.command.run import RunCommand
 from datmo.core.entity.task import Task as CoreTask
-from datmo.core.util.exceptions import SessionDoesNotExist, DoesNotExist, \
-    MutuallyExclusiveArguments, RequiredArgumentMissing, PathDoesNotExist
+from datmo.core.util.exceptions import DoesNotExist, \
+    MutuallyExclusiveArguments, RequiredArgumentMissing
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -60,7 +60,6 @@ class TestRunCommand():
         self.snapshot_dict = {
             "id": "test",
             "model_id": "my_model",
-            "session_id": "my_session",
             "message": "my message",
             "code_id": "my_code_id",
             "environment_id": "my_environment_id",
@@ -75,7 +74,6 @@ class TestRunCommand():
         self.task_dict = {
             "id": "test",
             "model_id": "my_model",
-            "session_id": "my_session",
             "command": "python test.py"
         }
 

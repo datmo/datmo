@@ -170,15 +170,15 @@
 	border-radius:2.5px
 }
 .message.success {
-	background:#9aca41 url("{{ url_for("static", filename="./img/icon-close.svg") }}") right 20px center no-repeat;
+	background:#9aca41 url("../img/icon-close.svg") right 20px center no-repeat;
 	background-size:15px
 }
 .message.error {
-	background:#dd4b39 url("{{ url_for("static", filename="./img/icon-close.svg") }}") right 20px center no-repeat;
+	background:#dd4b39 url("../img/icon-close.svg") right 20px center no-repeat;
 	background-size:15px
 }
 .message.warning {
-	background:#ffbb42 url("{{ url_for("static", filename="./img/icon-close.svg") }}") right 20px center no-repeat;
+	background:#ffbb42 url("../img/icon-close.svg") right 20px center no-repeat;
 	background-size:15px
 }
 .tag {
@@ -430,8 +430,7 @@
 	border-bottom:1px solid #ccc;
 	line-height:25px;
 	background:#f9f9f9;
-	background:url("{{ url_for("static", filename="./img/icon-arrow-down.svg") }}");
-	background:url("{{ url_for("static", filename="./img/icon-arrow-down.svg") }}") right 20px top 20px,linear-gradient(#fff,#f8f8f8);
+	background:url("../img/icon-arrow-down.svg") right 20px top 20px,linear-gradient(#fff,#f8f8f8);
 	background-repeat:no-repeat;
 	height:45px;
 	overflow:hidden;
@@ -461,8 +460,7 @@
 }
 .section-tab-mobile.open {
 	height:auto;
-	background:url("{{ url_for("static", filename="./img/icon-arrow-up.svg") }}");
-	background:url("{{ url_for("static", filename="./img/icon-arrow-up.svg") }}") right 20px top 20px,linear-gradient(#fff,#f8f8f8);
+	background:url("../img/icon-arrow-up.svg") right 20px top 20px,linear-gradient(#fff,#f8f8f8);
 	background-repeat:no-repeat
 }
 @media screen and (max-width:48em) {
@@ -491,7 +489,7 @@
 .side-nav ul a.active {
 	margin-left:-20px;
 	padding-left:20px;
-	background:url("{{ url_for("static", filename="./img/icon-sidebar-highlight.svg") }}") no-repeat -1px center
+	background:url("../img/icon-sidebar-highlight.svg") no-repeat -1px center
 }
 .side-nav ul a.active li {
 	color:#1894e9
@@ -1006,7 +1004,7 @@ input[type="text"] {
 	font-family:'geomanist'
 }
 input[type="text"].search {
-	background:url("{{ url_for("static", filename="./img/icon-search.svg") }}") #fff 15px center no-repeat;
+	background:url("../img/icon-search.svg") #fff 15px center no-repeat;
 	padding-left:50px
 }
 input.hero {
@@ -1070,8 +1068,7 @@ select {
 	-moz-appearance:none;
 	appearance:none;
 	background:#fff;
-	background:url("{{ url_for("static", filename="./img/icon-arrow-down.svg") }}");
-	background:url("{{ url_for("static", filename="./img/icon-arrow-down.svg") }}") right 12px center,linear-gradient(#fff,#f8f8f8);
+	background:url("../img/icon-arrow-down.svg") right 12px center,linear-gradient(#fff,#f8f8f8);
 	background-repeat:no-repeat;
 	border:1px solid #c9c9c9;
 	vertical-align:middle
@@ -1083,20 +1080,15 @@ select:disabled {
 }
 
 select.checkout-table {
-	background:url("{{ url_for("static", filename="./img/icon-arrow-down.svg") }}") no-repeat 58px center;
+	background:url("../img/icon-arrow-down.svg") no-repeat 58px center;
 	background-size:7px;
 	border:2px solid #e1e1e1
 }
 @media screen and (max-width:48em) {
 	select.checkout-table {
-		background:url("{{ url_for("static", filename="./img/icon-arrow-down.svg") }}") no-repeat 92% center;
+		background:url("../img/icon-arrow-down.svg") no-repeat 92% center;
 		background-size:7px
 	}
-}
-select.form {
-	margin-top:0;
-	background:url("{{ url_for("static", filename="./img/icon-select-arrow.svg") }}") no-repeat 250px center;
-	background-size:7px
 }
 textarea {
 	border:1px solid #e1e1e1;
@@ -1658,7 +1650,7 @@ section.model-content .content-wrapper {
 .snapshots-detail {
 	height:25px;
 	overflow:hidden;
-	background:url("{{ url_for("static", filename="./img/icon-arrow-down.svg") }}") no-repeat right 10px;
+	background:url("../img/icon-arrow-down.svg") no-repeat right 10px;
 	cursor:pointer
 }
 .snapshots-detail .snapshots-detail-item {
@@ -1676,7 +1668,7 @@ section.model-content .content-wrapper {
 }
 .snapshots-detail.open {
 	height:inherit;
-	background:url("{{ url_for("static", filename="./img/icon-arrow-up.svg") }}") no-repeat right 10px
+	background:url("../img/icon-arrow-up.svg") no-repeat right 10px
 }
 .snapshots-detail.open .snapshots-detail-item-wrapper {
 	position:relative
@@ -1717,7 +1709,7 @@ section.model-content .content-wrapper {
 .breadcrumb ul li {
 	display:inline;
 	color:#7c7c7c;
-	background:url("{{ url_for("static", filename="./img/icon-breadcrumb-arrow.svg") }}") no-repeat right center;
+	background:url("../img/icon-breadcrumb-arrow.svg") no-repeat right center;
 	padding-right:20px;
 	margin-right:10px
 }
@@ -1809,7 +1801,7 @@ section.model-content .content-wrapper {
 }
 .file-directory ul ul.nested-list li {
 	padding-left:30px;
-	background:url("{{ url_for("static", filename="./img/icon-nested.svg") }}") no-repeat left center
+	background:url("../img/icon-nested.svg") no-repeat left center
 }
 .file-directory ul ul.nested-list li:first-child {
 	border-top:1px solid #e1e1e1
@@ -2031,7 +2023,7 @@ section.build-new .content-box-header .btn {
 	font-weight:bold;
 	font-size:11px;
 	color:#fff;
-	background:url("{{ url_for("static", filename="./img/icon-close.svg") }}") center no-repeat;
+	background:url("../img/icon-close.svg") center no-repeat;
 	background-size:100%;
 	z-index:100000000000000000
 }

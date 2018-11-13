@@ -36,8 +36,6 @@ class RunObject():
         the id of task associated with run
     model_id : str
         the parent model id for the entity
-    session_id : str
-        id of session associated with run
     before_snapshot_id : str
         id of snapshot associated before the run
     after_snapshot_id : str
@@ -81,7 +79,6 @@ class RunObject():
 
         self.id = self._core_task.id
         self.model_id = self._core_task.model_id
-        self.session_id = self._core_task.session_id
         self.created_at = self._core_task.created_at
         self.before_snapshot_id = task_entity.before_snapshot_id
         self.after_snapshot_id = task_entity.after_snapshot_id
@@ -243,8 +240,6 @@ class RunObject():
     def __str__(self):
         final_str = '\033[94m' + "run " + self.id + os.linesep + '\033[0m'
         table_data = []
-        if self.session_id:
-            table_data.append(["Session", "-> " + self.session_id])
         if self.status:
             table_data.append(["Status", "-> " + self.status])
         if self.start_time:
@@ -324,9 +319,8 @@ class RunCommand(ProjectCommand):
         download_path = kwargs.get('download_path', None)
         # Get all task meta information
         self.task_controller = TaskController()
-        session_id = self.task_controller.current_session.id
         task_objs = self.task_controller.list(
-            session_id, sort_key="created_at", sort_order="descending")
+            sort_key="created_at", sort_order="descending")
         header_list = [
             "id", "command", "type", "status", "config", "results",
             "created at"

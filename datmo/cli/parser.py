@@ -397,62 +397,6 @@ def get_datmo_parser():
         type=str,
         help="Pass in the name of the service")
 
-    # Session
-    session_parser = subparsers.add_parser("session", help="session module")
-    session_subcommand_parsers = session_parser.add_subparsers(
-        title="subcommands", dest="subcommand")
-
-    session_create = session_subcommand_parsers.add_parser(
-        "create", help="create session")
-    session_create.add_argument(
-        "--name", "-m", dest="name", default="", help="session name")
-    session_create.add_argument(
-        "--current",
-        dest="current",
-        action="store_false",
-        help="boolean if you want to switch to this session")
-
-    session_update = session_subcommand_parsers.add_parser(
-        "update", help="update a session")
-    session_update.add_argument("id", help="id of session to update")
-    session_update.add_argument(
-        "--name",
-        dest="name",
-        default=None,
-        help="updated name of the session")
-
-    session_delete = session_subcommand_parsers.add_parser(
-        "delete", help="delete a session by name or id")
-    session_delete.add_argument(
-        "name_or_id", help="name or id of session to delete")
-
-    session_ls = session_subcommand_parsers.add_parser(
-        "ls", help="list sessions")
-    session_ls.add_argument(
-        "--format",
-        dest="format",
-        default="table",
-        help="output format ['table', 'csv']")
-    session_ls.add_argument(
-        "--download",
-        dest="download",
-        action="store_true",
-        help=
-        "boolean is true if user would like to download. use --download-path to specify a path"
-    )
-    session_ls.add_argument(
-        "--download-path",
-        dest="download_path",
-        default=None,
-        help=
-        "checked only if download is specified. saves output to location specified"
-    )
-
-    session_select = session_subcommand_parsers.add_parser(
-        "select", help="select a session")
-    session_select.add_argument(
-        "name_or_id", help="name or id of session to select")
-
     # Environment
     environment_parser = subparsers.add_parser(
         "environment", help="environment module")

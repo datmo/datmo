@@ -22,18 +22,22 @@ class TestLocalDAL():
         test_datmo_dir = os.environ.get('TEST_DATMO_DIR',
                                         tempfile.gettempdir())
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
-        self.datadriver = BlitzDBDALDriver("file", self.temp_dir)
+        self.driver_type = "blitzdb"
+        self.driver_options = {
+            "driver_type": "file",
+            "connection_string": self.temp_dir
+        }
 
     def teardown_class(self):
         pass
 
     def test_init(self):
-        dal = LocalDAL(self.datadriver)
+        dal = LocalDAL(self.driver_type, self.driver_options)
         assert dal != None
 
     def test_get_by_id_unknown_entity(self):
         exp_thrown = False
-        dal = LocalDAL(self.datadriver)
+        dal = LocalDAL(self.driver_type, self.driver_options)
         try:
             dal.model.get_by_id("not_found")
         except EntityNotFound:

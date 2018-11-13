@@ -10,8 +10,7 @@ from datmo.core.util.validation import validate
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import (
     FileIOError, RequiredArgumentMissing, ProjectNotInitialized,
-    SessionDoesNotExist, EntityNotFound, TaskNotComplete, DoesNotExist,
-    UnstagedChanges)
+    EntityNotFound, TaskNotComplete, DoesNotExist, UnstagedChanges)
 
 
 class SnapshotController(BaseController):
@@ -29,7 +28,7 @@ class SnapshotController(BaseController):
         Create a snapshot within the project
     checkout(id)
         Checkout to a specific snapshot within the project
-    list(session_id=None)
+    list(visible=None, sort_key=None, sort_order=None)
         List all snapshots present within the project based on given filters
     delete(id)
         Delete the snapshot specified from the project
@@ -156,9 +155,6 @@ class SnapshotController(BaseController):
 
                 message : str
                     long description of snapshot
-                session_id : str, optional
-                    session id within which snapshot is created,
-                    will overwrite default if given
                 task_id : str, optional
                     task id associated with snapshot
                 label : str, optional
@@ -181,7 +177,6 @@ class SnapshotController(BaseController):
         # Validate Inputs
         create_dict = {
             "model_id": self.model.id,
-            "session_id": self.current_session.id,
         }
 
         validate("create_snapshot", dictionary)
@@ -357,19 +352,8 @@ class SnapshotController(BaseController):
         return (code_checkout_success and environment_checkout_success
                 and file_checkout_success)
 
-    def list(self,
-             session_id=None,
-             visible=None,
-             sort_key=None,
-             sort_order=None):
+    def list(self, visible=None, sort_key=None, sort_order=None):
         query = {}
-        if session_id:
-            try:
-                self.dal.session.get_by_id(session_id)
-            except EntityNotFound:
-                raise SessionDoesNotExist(
-                    __("error", "controller.snapshot.list", session_id))
-            query['session_id'] = session_id
         if visible is not None and isinstance(visible, bool):
             query['visible'] = visible
 

@@ -1,17 +1,18 @@
+import os
 from kids.cache import cache
 from datetime import datetime
 
 from datmo.core.util.i18n import get as __
 from datmo.core.entity.model import Model
-from datmo.core.entity.session import Session
 from datmo.core.entity.code import Code
 from datmo.core.entity.environment import Environment
 from datmo.core.entity.file_collection import FileCollection
 from datmo.core.entity.task import Task
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.entity.user import User
-from datmo.core.util.exceptions import InputError, EntityNotFound, MoreThanOneEntityFound, InvalidArgumentType
+from datmo.core.util.exceptions import InputError, EntityNotFound, MoreThanOneEntityFound, DALNotInitialized
 from datmo.core.util.misc_functions import create_unique_hash
+from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 
 
 class LocalDAL():
@@ -21,26 +22,52 @@ class LocalDAL():
 
     Parameters
     ----------
-    driver : datmo.core.storage.driver.DALDriver
-        backend driver to use to store entities
+    driver_type : str
+        type of driver to pull from
+    driver_options : dict
+        options for the DALdriver class
+    driver : datmo.core.storage.driver.DALDriver, optional
+        Instantiated DAL driver used for backend storage for entities
 
     Attributes
     ----------
+    driver_type : str
+    driver_options : dict
     driver : datmo.core.storage.driver.DALDriver
-        DAL driver which determines the backend used for entity storage
-    model : datmo.core.entity.model.Model
-    code : EntityMethodsCRUD
-    environment : EntityMethodsCRUD
-    file_collection : EntityMethodsCRUD
-    session : EntityMethodsCRUD
-    task : EntityMethodsCRUD
-    snapshot : EntityMethodsCRUD
-    user : EntityMethodsCRUD
+        Instantiated DAL driver used for backend storage for entities
+    is_initialized : bool
+    model : ModelMethods
+    code : CodeMethods
+    environment : EnvironmentMethods
+    file_collection : FileCollectionMethods
+    task : TaskMethods
+    snapshot : SnapshotMethods
+    user : UserMethods
+
+    Methods
+    -------
+    init()
+        initialize the dal
 
     """
 
-    def __init__(self, driver):
+    def __init__(self, driver_type, driver_options, driver=None):
+        self.driver_type = driver_type
+        self.driver_options = driver_options
         self.driver = driver
+        self._is_initialized = self.is_initialized
+
+    @property
+    def is_initialized(self):
+        if os.path.isdir(self.driver_options['connection_string']):
+            self._is_initialized = True
+            # set the driver so it is available
+            if not self.driver:
+                if self.driver_type == "blitzdb":
+                    self.driver = BlitzDBDALDriver(**self.driver_options)
+            return self._is_initialized
+        self._is_initialized = False
+        return self._is_initialized
 
     @property
     def model(self):
@@ -50,7 +77,13 @@ class LocalDAL():
         -------
         ModelMethods
             Specific set of CRUD functions for model
+
+        Raises
+        ------
+        DALNotInitialized
         """
+        if not self.is_initialized:
+            raise DALNotInitialized()
         return ModelMethods(self.driver)
 
     @property
@@ -61,7 +94,13 @@ class LocalDAL():
         -------
         CodeMethods
             Specific set of CRUD functions for code
+
+        Raises
+        ------
+        DALNotInitialized
         """
+        if not self.is_initialized:
+            raise DALNotInitialized()
         return CodeMethods(self.driver)
 
     @property
@@ -72,7 +111,13 @@ class LocalDAL():
         -------
         EnvironmentMethods
             Specific set of CRUD functions for environment
+
+        Raises
+        ------
+        DALNotInitialized
         """
+        if not self.is_initialized:
+            raise DALNotInitialized()
         return EnvironmentMethods(self.driver)
 
     @property
@@ -83,20 +128,14 @@ class LocalDAL():
         -------
         FileCollectionMethods
             Specific set of CRUD functions for file collection
+
+        Raises
+        ------
+        DALNotInitialized
         """
+        if not self.is_initialized:
+            raise DALNotInitialized()
         return FileCollectionMethods(self.driver)
-
-    @property
-    def session(self):
-        """Session CRUD methods
-
-        Returns
-        -------
-        SessionMethods
-            Specific set of CRUD functions for session
-
-        """
-        return SessionMethods(self.driver)
 
     @cache
     @property
@@ -107,7 +146,13 @@ class LocalDAL():
         -------
         TaskMethods
             Specific set of CRUD functions for task
+
+        Raises
+        ------
+        DALNotInitialized
         """
+        if not self.is_initialized:
+            raise DALNotInitialized()
         return TaskMethods(self.driver)
 
     @cache
@@ -119,7 +164,13 @@ class LocalDAL():
         -------
         SnapshotMethods
             Specific set of CRUD functions for snapshot
+
+        Raises
+        ------
+        DALNotInitialized
         """
+        if not self.is_initialized:
+            raise DALNotInitialized()
         return SnapshotMethods(self.driver)
 
     @cache
@@ -131,8 +182,19 @@ class LocalDAL():
         -------
         UserMethods
             Specific set of CRUD functions for user
+
+        Raises
+        ------
+        DALNotInitialized
         """
+        if not self.is_initialized:
+            raise DALNotInitialized()
         return UserMethods(self.driver)
+
+    def init(self):
+        if not self.driver:
+            if self.driver_type == "blitzdb":
+                self.driver = BlitzDBDALDriver(**self.driver_options)
 
 
 class EntityMethodsCRUD(object):
@@ -237,11 +299,6 @@ class FileCollectionMethods(EntityMethodsCRUD):
     def __init__(self, driver):
         super(FileCollectionMethods, self).__init__('file_collection',
                                                     FileCollection, driver)
-
-
-class SessionMethods(EntityMethodsCRUD):
-    def __init__(self, driver):
-        super(SessionMethods, self).__init__('session', Session, driver)
 
 
 class TaskMethods(EntityMethodsCRUD):

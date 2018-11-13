@@ -10,13 +10,13 @@ import platform
 
 from datmo.config import Config
 from datmo.core.controller.base import BaseController
+from datmo.core.controller.project import ProjectController
 from datmo.core.controller.code.driver.file import FileCodeDriver
 from datmo.core.controller.file.driver.local import LocalFileDriver
 from datmo.core.controller.environment.driver.dockerenv import DockerEnvironmentDriver
 from datmo.core.entity.model import Model
-from datmo.core.entity.session import Session
 from datmo.core.util.exceptions import  \
-    DatmoModelNotInitialized, InvalidProjectPath
+    InvalidProjectPath, DALNotInitialized
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
 
 # provide mountable tmp directory for docker
@@ -29,6 +29,7 @@ class TestBaseController():
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)
         Config().set_home(self.temp_dir)
         self.base_controller = BaseController()
+        self.project_controller = ProjectController()
 
     def teardown_method(self):
         pass
@@ -54,69 +55,49 @@ class TestBaseController():
         assert self.base_controller.model == None
 
         # Test success case
-        self.base_controller.dal.model.create(
-            Model({
-                "name": "test",
-                "description": "test"
-            }))
+        self.project_controller.init(name="test", description="test")
         model = self.base_controller.model
 
         assert model.id
         assert model.name == "test"
         assert model.description == "test"
 
-    def test_current_session(self):
-        # Test failure case
-        failed = False
-        try:
-            _ = self.base_controller.current_session
-        except DatmoModelNotInitialized:
-            failed = True
-        assert failed
-
-        # Test success case
-        self.base_controller.dal.model.create(
-            Model({
-                "name": "test",
-                "description": "test"
-            }))
-        _ = self.base_controller.model
-        self.base_controller.dal.session.create(
-            Session({
-                "name": "test",
-                "model_id": "test",
-                "current": True
-            }))
-        session = self.base_controller.current_session
-
-        assert session.id
-        assert session.name == "test"
-        assert session.model_id == "test"
-        assert session.current == True
-
-    def test_default_code_driver(self):
+    def test_default_code_driver_not_initialized(self):
         assert self.base_controller.code_driver != None
         assert self.base_controller.code_driver.type == "file"
+        assert self.base_controller.code_driver.root == self.base_controller.home
 
-    def test_default_file_driver(self):
+    def test_default_file_driver_not_initialized(self):
         assert self.base_controller.file_driver != None
         assert self.base_controller.file_driver.type == "local"
         assert self.base_controller.file_driver.root == self.base_controller.home
 
     @pytest_docker_environment_failed_instantiation(test_datmo_dir)
-    def test_default_environment_driver(self):
+    def test_default_environment_driver_not_initialized(self):
         assert self.base_controller.environment_driver != None
         assert self.base_controller.environment_driver.type == "docker"
-        assert self.base_controller.environment_driver.filepath == self.base_controller.home
+        assert self.base_controller.environment_driver.root == self.base_controller.home
 
     def test_is_initialized(self):
         assert self.base_controller.is_initialized == \
                (self.base_controller.code_driver.is_initialized and \
-               self.base_controller.file_driver.is_initialized and self.base_controller.model)
+               self.base_controller.file_driver.is_initialized and \
+                self.base_controller.environment_driver.is_initialized and \
+                self.base_controller.model)
 
-    def test_dal(self):
+    def test_dal_not_initialized(self):
         assert self.base_controller.dal != None
-        assert self.base_controller.dal.model != None
+        thrown = False
+        try:
+            self.base_controller.dal.model == None
+        except DALNotInitialized:
+            thrown = True
+        assert thrown
+
+    def test_dal_initialized(self):
+        self.project_controller.init(name="test", description="test")
+        assert self.base_controller.dal != None
+        assert self.base_controller.model != None
 
     def test_default_config_loader(self):
         # TODO: Test all Datmo default settings
@@ -128,7 +109,8 @@ class TestBaseController():
                DockerEnvironmentDriver
 
     def test_sanity_check_for_dal(self):
-        model = self.base_controller.dal.model.create(Model({"name": "test"}))
+        self.project_controller.init(name="test", description="test")
+        model = self.base_controller.model
         model2 = self.base_controller.dal.model.get_by_id(model.id)
         assert model and model2
         assert model.id == model2.id

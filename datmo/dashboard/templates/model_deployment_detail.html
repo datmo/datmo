@@ -3,16 +3,16 @@
 {% block modelbody %}
 <div class="section-tab-mobile">
     <ul>
-        <a href="/{{ model.id }}">
+        <a href="/{{ model.name }}">
             <li>Summary</li>
         </a>
-        <a href="/{{ model.id }}/experiments">
+        <a href="/{{ model.name }}/experiments">
             <li>Experiments</li>
         </a>
-        <a href="/{{ model.id }}/snapshots">
+        <a href="/{{ model.name }}/snapshots">
             <li>Snapshots</li>
         </a>
-        <a href="/{{ model.id }}/deployments">
+        <a href="/{{ model.name }}/deployments">
             <li>Deployments</li>
         </a>
     </ul>
@@ -21,16 +21,16 @@
     <div class="row">
         <div class="col-xs-12">
             <ul>
-                <a href="/{{ model.id }}" class="">
+                <a href="/{{ model.name }}" class="">
                     <li>Summary</li>
                 </a>
-                <a href="/{{ model.id }}/experiments" class="">
+                <a href="/{{ model.name }}/experiments" class="">
                     <li>Experiments</li>
                 </a>
-                <a href="/{{ model.id }}/snapshots" class="">
+                <a href="/{{ model.name }}/snapshots" class="">
                     <li>Snapshots</li>
                 </a>
-                <a href="/{{ model.id }}/deployments" class="active">
+                <a href="/{{ model.name }}/deployments" class="active">
                     <li>Deployments</li>
                 </a>
             </ul>
@@ -43,7 +43,7 @@
         <div class="multi-item-content-wrap">
 
             <div class="multi-item-content-row snapshot-filters">
-                <span> <a href="/{{ model.id }}/deployments">deployments</a></span>
+                <span> <a href="/{{ model.name }}/deployments">deployments</a></span>
                 <span> > <a href="#">{{ deployment_version_id }}</a></span>
                 <span> > <a href="#">{{ model_version_id }}</a></span>
             </div>
@@ -111,7 +111,7 @@ save_directory = os.path.dirname(os.path.realpath(__file__))
 datmo_client = Monitoring(api_key="6a3a3cd900eaf7b406a41d68f8ca7969")
 
 # Set the schema for datmo filter
-filter_schema = {"model_id": "{{ model.id }}",
+filter_schema = {"model_id": "{{ model.name }}",
                  "deployment_version_id": "{{ deployment_version_id }}",
                  "model_version_id": "{{ model_version_id }}"}
 
@@ -195,7 +195,7 @@ rows = datmo_client.search_metadata(filter_schema)
 
                 function saveCustomCode(filepath){
                     $.ajax({
-                        url: "/{{ model.id }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}/custom/create",
+                        url: "/{{ model.name }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}/custom/create",
                         type: "GET",
                         data: {
                             content: editor.getValue(),
@@ -211,7 +211,7 @@ rows = datmo_client.search_metadata(filter_schema)
 
                 function runPythonScript(filepath) {
                     $.ajax({
-                        url: "/{{ model.id }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}/custom/run",
+                        url: "/{{ model.name }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}/custom/run",
                         type: "GET",
                         data: {
                             filepath: filepath
@@ -422,7 +422,7 @@ rows = datmo_client.search_metadata(filter_schema)
                         "datmo_client = Monitoring(api_key=\"6a3a3cd900eaf7b406a41d68f8ca7969\")\n" +
                         "\n" +
                         "# Set the schema for datmo filter\n" +
-                        "filter_schema = {\"model_id\": \"{{ model.id }}\",\n" +
+                        "filter_schema = {\"model_id\": \"{{ model.name }}\",\n" +
                         "                 \"deployment_version_id\": \"{{ deployment_version_id }}\",\n" +
                         "                 \"model_version_id\": \"{{ model_version_id }}\"}\n" +
                         "\n" +
@@ -482,7 +482,7 @@ rows = datmo_client.search_metadata(filter_schema)
 
                         graphIntervals[graphId] = setInterval(function() {
                             $.ajax({
-                                url: "/data/{{ model.id }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}",
+                                url: "/data/{{ model.name }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}",
                                 type: "GET",
                                 data: {
                                     start: startCounter,
