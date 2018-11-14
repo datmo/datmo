@@ -40,9 +40,8 @@ except TypeError:
 from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.project import ProjectCommand
-from datmo.cli.command.run import RunObject
 from datmo.cli.command.run import RunCommand
-from datmo.core.entity.task import Task as CoreTask
+from datmo.core.entity.run import Run
 from datmo.core.util.exceptions import DoesNotExist, \
     MutuallyExclusiveArguments, RequiredArgumentMissing
 from datmo.core.util.misc_functions import pytest_docker_environment_failed_instantiation
@@ -98,12 +97,6 @@ class TestRunCommand():
         with open(self.env_def_path, "wb") as f:
             f.write(to_bytes("FROM python:3.5-alpine"))
 
-    def test_run_object_instantiate(self):
-        task_obj = CoreTask(self.task_dict)
-        result = RunObject(task_obj)
-        assert result
-        assert isinstance(result, RunObject)
-
     def test_run_should_fail1(self):
         self.__set_variables()
         # Test failure case
@@ -152,7 +145,7 @@ class TestRunCommand():
         result = self.run_command.execute()
         time.sleep(1)
         assert result
-        assert isinstance(result, RunObject)
+        assert isinstance(result, Run)
         assert result.logs
         assert "accuracy" in result.logs
         assert result.results
@@ -219,7 +212,7 @@ class TestRunCommand():
         result = self.run_command.execute()
         time.sleep(1)
         assert result
-        assert isinstance(result, RunObject)
+        assert isinstance(result, Run)
         assert result.logs
         assert result.status == "SUCCESS"
         assert result.start_time
@@ -274,7 +267,7 @@ class TestRunCommand():
         # test proper execution of run command
         result = self.run_command.execute()
         assert result
-        assert isinstance(result, RunObject)
+        assert isinstance(result, Run)
         assert result.logs
         assert "accuracy" in result.logs
         assert result.results
@@ -373,7 +366,7 @@ class TestRunCommand():
         # test proper execution of run command
         result = self.run_command.execute()
         assert result
-        assert isinstance(result, RunObject)
+        assert isinstance(result, Run)
         assert result.logs
         assert "Currently running servers" in result.logs
         assert result.status == "SUCCESS"
@@ -625,7 +618,7 @@ class TestRunCommand():
         self.run_command.parse(["rerun", run_id])
         result_run_obj = self.run_command.execute()
         assert result_run_obj
-        assert isinstance(result_run_obj, RunObject)
+        assert isinstance(result_run_obj, Run)
         assert result_run_obj.command == run_obj.command
         assert result_run_obj.status == "SUCCESS"
         assert result_run_obj.logs

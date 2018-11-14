@@ -67,12 +67,14 @@
         <thead>
             <tr>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>id</span></th>
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span>user</span></th>
+                <th class="grid-header-sort"><span class="icon-arrow"></span><span>command</span></th>
+                <th class="grid-header-sort"><span class="icon-arrow"></span><span>type</span></th>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>status</span></th>
+                <th class="grid-header-sort"><span class="icon-arrow"></span><span>config</span></th>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>start time</span></th>
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span>end time</span></th>
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span>duration (s)</span></th>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>before snapshot id</span></th>
+                <th class="grid-header-sort"><span class="icon-arrow"></span><span>end time</span></th>
+                <th class="grid-header-sort"><span class="icon-arrow"></span><span>duration(s)</span></th>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>after snapshot id</span></th>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>results</span></th>
             </tr>
@@ -82,20 +84,24 @@
         <tr data-id="{{ experiment.id }}"  class="snapshot-hover-menu">
 
             <td><a href="#">{{ experiment.id }}</a></td>
-
-            <td>
-                <a href="/" class="snapshot-owner-avatar">
-                    <img src="{{ user.gravatar_url }}" alt="profile">
-                    {{ user.name }}
-                </a>
-            </td>
+            <td>{{ experiment.command }}</td>
+            <td>{{ experiment.type }}</td>
             <td>{{ experiment.status }}</td>
-            <td>{{ experiment.start_time }}</td>
-            <td>{{ experiment.end_time }}</td>
-            <td>{{ experiment.duration }}</td>
+            {% if experiment.config_printable %}
+            <td>{{ experiment.config_printable }}</td>
+            {% else %}
+            <td>None</td>
+            {% endif %}
+            <td>{{ experiment.start_time_prettified }}</td>
             <td>{{ experiment.before_snapshot_id }}</td>
+            <td>{{ experiment.end_time_prettified }}</td>
+            <td>{{ experiment.duration }}</td>
             <td>{{ experiment.after_snapshot_id }}</td>
-            <td>{{ experiment.results }}</td>
+            {% if experiment.results_printable %}
+            <td>{{ experiment.results_printable }}</td>
+            {% else %}
+            <td>None</td>
+            {% endif %}
         </tr>
         {% endfor %}
         </tbody>

@@ -63,10 +63,9 @@
                     <tr>
                         <th class="grid-header-sort"><span class="icon-arrow"></span><span>deployment version id</span></th>
                         <th class="grid-header-sort"><span class="icon-arrow"></span><span>model version id</span></th>
-                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>created at(yyyy-mm-dd HH:MM:SS)</span></th>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>created at</span></th>
                         <th class="grid-header-sort"><span class="icon-arrow"></span><span>type</span></th>
-                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>endpoints</span></th>
-                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>service paths</span></th>
+                        <th class="grid-header-sort"><span class="icon-arrow"></span><span>endpoint</span></th>
                         <th class="grid-header-sort"><span class="icon-arrow"></span><span>system monitoring</span></th>
                         <th class="grid-header-sort"><span class="icon-arrow"></span><span>log monitoring</span></th>
                     </tr>
@@ -79,7 +78,6 @@
                     <td>{{ deployment.created_at }}</td>
                     <td>{{ deployment.type }}</td>
                     <td>{% for endpoint in deployment.endpoints %} <a href="{{ endpoint }}">{{ endpoint }}</a><br><br>{% endfor %}</td>
-                    <td>{% for service_path in deployment.service_paths %}{{ service_path }}<br><br>{% endfor %}</td>
                     <td><a href="{{ deployment.system_monitoring.endpoint }}" target="_blank">system dashboard<br><br>username: {{ deployment.system_monitoring.username }}<br>password: {{ deployment.system_monitoring.password }} </a></td>
                     <td><a href="{{ deployment.log_monitoring }}" target="_blank">log dashboard</a></td>
                 </tr>

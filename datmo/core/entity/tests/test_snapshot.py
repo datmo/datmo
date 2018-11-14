@@ -62,3 +62,15 @@ class TestSnapshot():
 
         for k, v in output_dict.items():
             assert v == getattr(snapshot_entity, k)
+
+        # Test stringify
+        output_dict = snapshot_entity.to_dictionary(stringify=True)
+
+        for k, v in output_dict.items():
+            if k in [
+                    "config", "stats", "message", "label", "created_at",
+                    "updated_at"
+            ]:
+                assert isinstance(k, str)
+            else:
+                assert v == getattr(snapshot_entity, k)

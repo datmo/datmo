@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 
 from datmo.core.util.json_store import JSONStore
-from datmo.core.util.misc_functions import prettify_datetime, format_table
+from datmo.core.util.misc_functions import prettify_datetime, printable_object, format_table
 
 
 class Snapshot():
@@ -140,11 +140,17 @@ class Snapshot():
         JSONStore(os.path.join(filepath, 'stats.json'), self.stats)
         return
 
-    def to_dictionary(self):
+    def to_dictionary(self, stringify=False):
         attr_dict = self.__dict__
         pruned_attr_dict = {
             attr: val
             for attr, val in attr_dict.items()
             if not callable(getattr(self, attr)) and not attr.startswith("__")
         }
+        if stringify:
+            for key in ["config", "stats", "message", "label"]:
+                pruned_attr_dict[key] = printable_object(pruned_attr_dict[key])
+            for key in ["created_at", "updated_at"]:
+                pruned_attr_dict[key] = prettify_datetime(
+                    pruned_attr_dict[key])
         return pruned_attr_dict

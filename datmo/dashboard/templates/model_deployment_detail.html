@@ -44,13 +44,66 @@
 
             <div class="multi-item-content-row snapshot-filters">
                 <span> <a href="/{{ model.name }}/deployments">deployments</a></span>
-                <span> > <a href="#">{{ deployment_version_id }}</a></span>
-                <span> > <a href="#">{{ model_version_id }}</a></span>
+                <span> > <a href="#">{{ deployment.deployment_version_id }}</a></span>
+                <span> > <a href="#">{{ deployment.model_version_id }}</a></span>
+            </div>
+
+            <div class="multi-item-content-row overflow-scroll" >
+            <table class="sortable snapshot-grid" data-giturl="datmo/hello-world">
+                <thead>
+                    <tr>
+                        <th class="grid-header-sort"><span>deployment version id</span></th>
+                        <th class="grid-header-sort"><span>model version id</span></th>
+                        <th class="grid-header-sort"><span>created at</span></th>
+                        <th class="grid-header-sort"><span>type</span></th>
+                        <th class="grid-header-sort"><span>endpoints</span></th>
+                        <th class="grid-header-sort"><span>system monitoring</span></th>
+                        <th class="grid-header-sort"><span>log monitoring</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr data-id="{{ deployment.deployment_version_id }}"  class="snapshot-hover-menu">
+                    <td><a href="/{{ model.name }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}">{{ deployment.deployment_version_id }}</a></td>
+                    <td><a href="/{{ model.name }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}">{{ deployment.model_version_id }}</a></td>
+                    <td>{{ deployment.created_at }}</td>
+                    <td>{{ deployment.type }}</td>
+                    <td>{% for endpoint in deployment.endpoints %} <a href="{{ endpoint }}">{{ endpoint }}</a><br><br>{% endfor %}</td>
+                    <td><a href="{{ deployment.system_monitoring.endpoint }}" target="_blank">system dashboard<br><br>username: {{ deployment.system_monitoring.username }}<br>password: {{ deployment.system_monitoring.password }} </a></td>
+                    <td><a href="{{ deployment.log_monitoring }}" target="_blank">log dashboard</a></td>
+                </tr>
+                </tbody>
+            </table>
+            <script src='{{ url_for("static", filename="./js/snapshot.js") }}'></script>
             </div>
 
             <div class="inner">
                 <div class="inner">
-                    <h2>Select Graphs to Add</h2>
+                    <h2>Current System Metrics</h2>
+                    <p>Metrics below are averaged within the polling period</p>
+                    <div class="inner">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h3>CPU Utilization</h3>
+                                <canvas id="cpu-percent"></canvas><span id="cpu-percent-value"></span>%
+                            </div>
+                            <div class="col-md-4">
+                                <h3>Memory Utilization</h3>
+                                <canvas id="memory-percent"></canvas><span id="memory-percent-value"></span>%
+                            </div>
+                            <div class="col-md-4">
+                                <h3>Average Latency</h3>
+                                <canvas id="latency-ms"></canvas><span id="latency-ms-value"></span>ms
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="inner">
+                <div class="inner">
+                    <h2>Model Metrics</h2>
+                    <h3>Select Graphs to Add</h3>
                     <div class="inner">
                         <div class="row">
                             <div class="col-md-4">
@@ -112,8 +165,8 @@ datmo_client = Monitoring(api_key="6a3a3cd900eaf7b406a41d68f8ca7969")
 
 # Set the schema for datmo filter
 filter_schema = {"model_id": "{{ model.name }}",
-                 "deployment_version_id": "{{ deployment_version_id }}",
-                 "model_version_id": "{{ model_version_id }}"}
+                 "deployment_version_id": "{{ deployment.deployment_version_id }}",
+                 "model_version_id": "{{ deployment.model_version_id }}"}
 
 # Get inference data from datmo
 rows = datmo_client.search_metadata(filter_schema)
@@ -158,8 +211,90 @@ rows = datmo_client.search_metadata(filter_schema)
             <!-- Plotly.js -->
             <script src="//d14fo0winaifog.cloudfront.net/plotly-basic.js"></script>
 
+            <!-- Gauge.js -->
+            <script src="//bernii.github.io/gauge.js/dist/gauge.min.js"></script>
+
             <!-- Custom JS -->
             <script type="text/javascript">
+                /* SUMMARY METRICS */
+                var staticGaugeNames = ['cpu-percent', 'memory-percent', 'latency-ms'];
+                var keyNames = ['cpu_percent', 'memory_percent', 'latency_ms'];
+                var staticGauges = [];
+                for(var i=0;i<staticGaugeNames.length;i++){
+                    var opts = {
+                        angle: 0.15, // The span of the gauge arc
+                        lineWidth: 0.44, // The line thickness
+                        radiusScale: 1, // Relative radius
+                        pointer: {
+                            length: 0.6, // // Relative to gauge radius
+                            strokeWidth: 0.035, // The thickness
+                            color: '#000000' // Fill color
+                        },
+                        limitMax: false,     // If false, max value increases automatically if value > maxValue
+                        limitMin: false,     // If true, the min value of the gauge will be fixed
+                        colorStart: '#6FADCF',   // Colors
+                        colorStop: '#8FC0DA',    // just experiment with them
+                        strokeColor: '#E0E0E0',  // to see which ones work best for you
+                        generateGradient: true,
+                        highDpiSupport: true,     // High resolution support
+                        renderTicks: {
+                            divisions: 5,
+                            divWidth: 1.1,
+                            divLength: 0.7,
+                            divColor: '#333333',
+                            subDivisions: 3,
+                            subLength: 0.5,
+                            subWidth: 0.6,
+                            subColor: '#666666'
+                        }
+                    };
+                    var target = document.getElementById(staticGaugeNames[i]); // your canvas element
+                    var gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
+                    gauge.setTextField(document.getElementById(staticGaugeNames[i] + '-value')); // add a label
+                    gauge.maxValue = 100; // set max gauge value
+                    gauge.setMinValue(0);  // Prefer setter over gauge.minValue = 0
+                    gauge.animationSpeed = 32; // set animation speed (32 is default value)
+                    gauge.set(0); // set actual value
+                    // Add gauge to the list
+                    staticGauges.push(gauge);
+                    updateGauge(gauge, keyNames[i]);
+                }
+
+                function updateGauge(staticGauge, keyName) {
+                    // Set interval polling for each key
+                    var startCounter = 0;
+                    setInterval(function() {
+                        $.ajax({
+                            url: "/data/{{ model.name }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}",
+                            type: "GET",
+                            data: {
+                                start: startCounter,
+                                data_type: 'system_metrics',
+                                key_name: keyName,
+                                graph_type: 'gauge'
+                            },
+                            async: false,
+                            success: function(data) {
+                                // Parse the data to be passed to plotly from the endpoint data
+                                var graphData = JSON.parse(data.graph_data_output_json_str);
+                                console.log(graphData);
+                                console.log(staticGauge);
+                                if(graphData.average != null) {
+                                    console.log("updated the gauge for " + keyName);
+                                    staticGauge.set(graphData.average);
+                                }
+                                var numNewResults = data.num_new_results;
+                                console.log(numNewResults);
+
+                                // Update the startCounter to get the new data
+                                startCounter = startCounter + numNewResults;
+                            },
+                            dataType: "json"
+                        });
+                    }, 10000);
+                }
+
+
                 /* GENERAL HELPER FUNCTIONS */
 
                 function generateGraphId(graphType, dataType, keyName, code) {
@@ -195,7 +330,7 @@ rows = datmo_client.search_metadata(filter_schema)
 
                 function saveCustomCode(filepath){
                     $.ajax({
-                        url: "/{{ model.name }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}/custom/create",
+                        url: "/{{ model.name }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}/custom/create",
                         type: "GET",
                         data: {
                             content: editor.getValue(),
@@ -211,7 +346,7 @@ rows = datmo_client.search_metadata(filter_schema)
 
                 function runPythonScript(filepath) {
                     $.ajax({
-                        url: "/{{ model.name }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}/custom/run",
+                        url: "/{{ model.name }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}/custom/run",
                         type: "GET",
                         data: {
                             filepath: filepath
@@ -294,7 +429,7 @@ rows = datmo_client.search_metadata(filter_schema)
                                 mode: "markers",
                                 marker: {
                                     size: 10,
-                                    color: "rgb(40,165,187)",
+                                    color: "rgb(111,173,207)",
                                     line: {
                                         width: 2,
                                         color: "rgb(80,80,80)"
@@ -332,7 +467,7 @@ rows = datmo_client.search_metadata(filter_schema)
                                 type: "bar",
                                 marker: {
                                     size: 10,
-                                    color: "rgb(40,165,187)",
+                                    color: "rgb(111,173,207)",
                                     line: {
                                         width: 1.5,
                                         color: "rgb(80,80,80)"
@@ -423,8 +558,8 @@ rows = datmo_client.search_metadata(filter_schema)
                         "\n" +
                         "# Set the schema for datmo filter\n" +
                         "filter_schema = {\"model_id\": \"{{ model.name }}\",\n" +
-                        "                 \"deployment_version_id\": \"{{ deployment_version_id }}\",\n" +
-                        "                 \"model_version_id\": \"{{ model_version_id }}\"}\n" +
+                        "                 \"deployment_version_id\": \"{{ deployment.deployment_version_id }}\",\n" +
+                        "                 \"model_version_id\": \"{{ deployment.model_version_id }}\"}\n" +
                         "\n" +
                         "# Get inference data from datmo\n" +
                         "rows = datmo_client.search_metadata(filter_schema)\n" +
@@ -482,7 +617,7 @@ rows = datmo_client.search_metadata(filter_schema)
 
                         graphIntervals[graphId] = setInterval(function() {
                             $.ajax({
-                                url: "/data/{{ model.name }}/deployments/{{ deployment_version_id }}/{{ model_version_id }}",
+                                url: "/data/{{ model.name }}/deployments/{{ deployment.deployment_version_id }}/{{ deployment.model_version_id }}",
                                 type: "GET",
                                 data: {
                                     start: startCounter,

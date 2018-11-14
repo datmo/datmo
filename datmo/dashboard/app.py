@@ -1,4 +1,5 @@
 import os
+import math
 import shutil
 import uuid
 import json
@@ -7,44 +8,37 @@ from flask import render_template, request, jsonify
 import plotly
 from datetime import datetime
 
+from datmo.config import Config
+from datmo.core.entity.run import Run
 from datmo.core.controller.base import BaseController
+from datmo.core.util.misc_functions import prettify_datetime, printable_object
 from datmo.monitoring import Monitoring
 
 app = Flask(__name__)
 base_controller = BaseController()
 datmo_monitoring = Monitoring()
 
+user = {
+    "name":
+        "Shabaz Patel",
+    "username":
+        "shabazp",
+    "email":
+        "shabaz@datmo.com",
+    "gravatar_url":
+        "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
+        "?s=220&d=identicon&r=PG"
+}
+
 
 @app.route("/")
 def home():
-    user = {
-        "name":
-            "Shabaz Patel",
-        "username":
-            "shabazp",
-        "email":
-            "shabaz@datmo.com",
-        "gravatar_url":
-            "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
-            "?s=220&d=identicon&r=PG"
-    }
     models = [base_controller.model.__dict__] if base_controller.model else []
     return render_template("profile.html", user=user, models=models)
 
 
 @app.route("/<model_name>")
 def model_summary(model_name):
-    user = {
-        "name":
-            "Shabaz Patel",
-        "username":
-            "shabazp",
-        "email":
-            "shabaz@datmo.com",
-        "gravatar_url":
-            "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
-            "?s=220&d=identicon&r=PG"
-    }
     model = base_controller.model.__dict__
     snapshots = [
         {
@@ -72,20 +66,17 @@ def model_summary(model_name):
 
 @app.route("/<model_name>/experiments")
 def model_experiments(model_name):
-    user = {
-        "name":
-            "Shabaz Patel",
-        "username":
-            "shabazp",
-        "email":
-            "shabaz@datmo.com",
-        "gravatar_url":
-            "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
-            "?s=220&d=identicon&r=PG"
-    }
     model = base_controller.model.__dict__
     if model_name == model['name']:
-        experiments = base_controller.dal.task.query({"model_id": model['id']})
+        tasks = base_controller.dal.task.query({"model_id": model['id']})
+        experiments = [Run(task) for task in tasks]
+        for experiment in experiments:
+            experiment.config_printable = printable_object(experiment.config)
+            experiment.start_time_prettified = prettify_datetime(
+                experiment.start_time)
+            experiment.end_time_prettified = prettify_datetime(
+                experiment.end_time)
+            experiment.results_printable = printable_object(experiment.results)
     else:
         experiments = []
     return render_template(
@@ -97,31 +88,22 @@ def model_experiments(model_name):
 
 @app.route("/<model_name>/snapshots")
 def model_snapshots(model_name):
-    user = {
-        "name":
-            "Shabaz Patel",
-        "username":
-            "shabazp",
-        "email":
-            "shabaz@datmo.com",
-        "gravatar_url":
-            "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
-            "?s=220&d=identicon&r=PG"
-    }
     model = base_controller.model.__dict__
     if model_name == model['name']:
         snapshots = base_controller.dal.snapshot.query({
             "model_id": model['id']
         })
+        snapshots = [(snapshot, snapshot.to_dictionary(stringify=True))
+                     for snapshot in snapshots]
     else:
         snapshots = []
     config_keys = set(
         item for sublist in
-        [snapshot.__dict__["config"].keys() for snapshot in snapshots]
+        [snapshot[0].__dict__["config"].keys() for snapshot in snapshots]
         for item in sublist)
     stats_keys = set(
         item for sublist in
-        [snapshot.__dict__["stats"].keys() for snapshot in snapshots]
+        [snapshot[0].__dict__["stats"].keys() for snapshot in snapshots]
         for item in sublist)
     return render_template(
         "model_snapshots.html",
@@ -160,7 +142,7 @@ def model_deployment_data(model_name, deployment_version_id, model_version_id):
     num_new_results = len(new_data)
 
     # return error if data_type is not correct
-    if data_type not in ["input", "prediction", "feedback"]:
+    if data_type not in ["input", "prediction", "feedback", "system_metrics"]:
         return "error", 400
 
     # populate the data into the correct construct based on graph type
@@ -209,6 +191,16 @@ def model_deployment_data(model_name, deployment_version_id, model_version_id):
                 "y": [counts]
             }
         }
+    elif graph_type == "gauge":
+        new_feature_data = [
+            datum[data_type][key_name] if datum[data_type] else None
+            for datum in new_data
+        ]
+        if len(new_feature_data) > 0:
+            average = sum(new_feature_data) / float(len(new_feature_data))
+        else:
+            average = None
+        graph_data_output = {"average": average}
     else:
         return "error", 400
 
@@ -227,17 +219,6 @@ def model_deployment_data(model_name, deployment_version_id, model_version_id):
     "/<model_name>/deployments/<deployment_version_id>/<model_version_id>")
 def model_deployment_detail(model_name, deployment_version_id,
                             model_version_id):
-    user = {
-        "name":
-            "Shabaz Patel",
-        "username":
-            "shabazp",
-        "email":
-            "shabaz@datmo.com",
-        "gravatar_url":
-            "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
-            "?s=220&d=identicon&r=PG"
-    }
     model = base_controller.model.__dict__
 
     filter = {
@@ -260,36 +241,45 @@ def model_deployment_detail(model_name, deployment_version_id,
             datum['feedback'].keys()) if datum['feedback'] is not None else []
 
     # Determine the graph directory path and create if not present
-    graph_dirpath = os.path.join(base_controller.home, ".datmo", "deployments",
+    graph_dirpath = os.path.join(base_controller.home,
+                                 Config().datmo_directory_name, "deployments",
                                  deployment_version_id, model_version_id,
                                  "graphs")
     if not os.path.exists(graph_dirpath): os.makedirs(graph_dirpath)
+
+    # Include deployment info
+    deployment_info = datmo_monitoring.get_deployment_info(
+        deployment_version_id=deployment_version_id)
+    # Prettify dates
+    deployment_info['created_at'] = prettify_datetime(
+        deployment_info['created_at'])
+    # TODO: replace with proper handling
+    deployment_info['endpoints'] = [
+        endpoint for endpoint in deployment_info['endpoints']
+        if "".join(model_version_id.split("_")) in endpoint
+    ]
+    deployment_info['service_paths'] = [
+        path for path in deployment_info['service_paths']
+        if "".join(model_version_id.split("_")) in path
+    ]
+    # TODO: END
+    deployment_info['deployment_version_id'] = deployment_version_id
+    deployment_info['model_version_id'] = model_version_id
 
     return render_template(
         "model_deployment_detail.html",
         user=user,
         model=model,
-        model_version_id=model_version_id,
-        deployment_version_id=deployment_version_id,
+        deployment=deployment_info,
         graph_dirpath=graph_dirpath,
         input_keys=input_keys,
         prediction_keys=prediction_keys,
-        feedback_keys=feedback_keys)
+        feedback_keys=feedback_keys,
+    )
 
 
 @app.route("/<model_name>/deployments")
 def model_deployments(model_name):
-    user = {
-        "name":
-            "Shabaz Patel",
-        "username":
-            "shabazp",
-        "email":
-            "shabaz@datmo.com",
-        "gravatar_url":
-            "https://www.gravatar.com/avatar/" + str(uuid.uuid1()) +
-            "?s=220&d=identicon&r=PG"
-    }
     model = base_controller.model.__dict__
 
     # get all data and extract unique model_version_id and deployment_version_id
@@ -308,6 +298,9 @@ def model_deployments(model_name):
                     deployment_version_id=deployment_version_id)
             except:
                 break
+            # Prettify dates
+            deployment_info['created_at'] = prettify_datetime(
+                deployment_info['created_at'])
             # TODO: replace with proper handling
             deployment_info['endpoints'] = [
                 endpoint for endpoint in deployment_info['endpoints']

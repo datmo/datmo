@@ -68,7 +68,6 @@
             <tr>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span class="no-wrap">diff</span></th>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>id</span></th>
-                <th class="grid-header-sort"><span class="icon-arrow"></span><span>user</span></th>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>timestamp</span></th>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>message</span></th>
                 <th class="grid-header-sort"><span class="icon-arrow"></span><span>label</span></th>
@@ -82,27 +81,20 @@
         </thead>
         <tbody>
         {% for snapshot in snapshots %}
-        <tr data-id="{{ snapshot.id }}"  class="snapshot-hover-menu">
+        <tr data-id="{{ snapshot.0.id }}"  class="snapshot-hover-menu">
 
             <td class="snapshot-diff">
-                <input class="snapshot-diff-selected" type="checkbox" name="diff" data-snapshotid="{{ snapshot.id }}" >
+                <input class="snapshot-diff-selected" type="checkbox" name="diff" data-snapshotid="{{ snapshot.0.id }}" >
             </td>
 
-            <td><a href="#">{{ snapshot.id }}</a></td>
+            <td><a href="#">{{ snapshot.1.id }}</a></td>
 
-            <td>
-                <a href="/" class="snapshot-owner-avatar">
-                    <img src="{{ user.gravatar_url }}" alt="profile">
-                    {{ user.name }}
-                </a>
-            </td>
+            <td>{{ snapshot.1.created_at }}</td>
+            <td>{{ snapshot.1.message }}</td>
 
-            <td>{{ snapshot.created_at }}</td>
-            <td>{{ snapshot.message }}</td>
-
-            {% if snapshot.labels %}
+            {% if snapshot.0.labels %}
                 <td class="label">
-                    {% for l in snapshot.labels %}
+                    {% for l in snapshot.0.labels %}
                     <span class="snapshot-label tag">{{ l }}</span>
                     {% endfor %}
                 </td>
@@ -111,11 +103,11 @@
             {% endif %}
 
             {% for k in config_keys %}
-                <td>{{ snapshot.config[k] }}</td>
+                <td>{{ snapshot.0.config[k] }}</td>
             {% endfor %}
 
             {% for k in stats_keys %}
-                <td>{{ snapshot.stats[k] }}</td>
+                <td>{{ snapshot.0.stats[k] }}</td>
             {% endfor %}
 
         </tr>

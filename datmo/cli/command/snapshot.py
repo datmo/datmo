@@ -191,21 +191,18 @@ class SnapshotCommand(ProjectCommand):
                 "code id", "environment id", "file collection id"
             ]
             for snapshot_obj in snapshot_objs:
-                snapshot_config_printable = printable_object(
-                    snapshot_obj.config)
-                snapshot_stats_printable = printable_object(snapshot_obj.stats)
-                snapshot_message = printable_object(snapshot_obj.message)
-                snapshot_label = printable_object(snapshot_obj.label)
-                printable_snapshot_id = snapshot_obj.id if current_snapshot_id is not None and \
-                                                           snapshot_obj.id != current_snapshot_id\
-                    else "(current) " + snapshot_obj.id
+                snapshot_dict_printable = snapshot_obj.to_dictionary(
+                    stringify=True)
+                printable_snapshot_id = snapshot_dict_printable['id'] if current_snapshot_id is not None and \
+                                                                         snapshot_dict_printable['id'] != current_snapshot_id \
+                    else "(current) " + snapshot_dict_printable['id']
                 item_dict_list.append({
                     "id": printable_snapshot_id,
-                    "created at": prettify_datetime(snapshot_obj.created_at),
-                    "config": snapshot_config_printable,
-                    "stats": snapshot_stats_printable,
-                    "message": snapshot_message,
-                    "label": snapshot_label,
+                    "created at": snapshot_dict_printable['created_at'],
+                    "config": snapshot_dict_printable['config'],
+                    "stats": snapshot_dict_printable['stats'],
+                    "message": snapshot_dict_printable['message'],
+                    "label": snapshot_dict_printable['label'],
                     "code id": snapshot_obj.code_id,
                     "environment id": snapshot_obj.environment_id,
                     "file collection id": snapshot_obj.file_collection_id
@@ -215,21 +212,18 @@ class SnapshotCommand(ProjectCommand):
                 "id", "created at", "config", "stats", "message", "label"
             ]
             for snapshot_obj in snapshot_objs:
-                snapshot_config_printable = printable_object(
-                    snapshot_obj.config)
-                snapshot_stats_printable = printable_object(snapshot_obj.stats)
-                snapshot_message = printable_object(snapshot_obj.message)
-                snapshot_label = printable_object(snapshot_obj.label)
-                printable_snapshot_id = snapshot_obj.id if current_snapshot_id is not None and \
-                                                           snapshot_obj.id != current_snapshot_id \
-                    else "(current) " + snapshot_obj.id
+                snapshot_dict_printable = snapshot_obj.to_dictionary(
+                    stringify=True)
+                printable_snapshot_id = snapshot_dict_printable['id'] if current_snapshot_id is not None and \
+                                                           snapshot_dict_printable['id'] != current_snapshot_id \
+                    else "(current) " + snapshot_dict_printable['id']
                 item_dict_list.append({
                     "id": printable_snapshot_id,
-                    "created at": prettify_datetime(snapshot_obj.created_at),
-                    "config": snapshot_config_printable,
-                    "stats": snapshot_stats_printable,
-                    "message": snapshot_message,
-                    "label": snapshot_label,
+                    "created at": snapshot_dict_printable['created_at'],
+                    "config": snapshot_dict_printable['config'],
+                    "stats": snapshot_dict_printable['stats'],
+                    "message": snapshot_dict_printable['message'],
+                    "label": snapshot_dict_printable['label'],
                 })
         if download:
             if not download_path:
