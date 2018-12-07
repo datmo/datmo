@@ -10,7 +10,7 @@ with open(os.path.join(project_root, 'datmo', 'VERSION')) as file:
 
 if sys.version_info[0] < 3:  # python 2
     prerequisites = [
-        "future>=0.16.0", "enum34>=1.1.6", "glob2>=0.5", "docker>=2.2.1",
+        "future>=0.16.0", "enum34>=1.1.6", "glob2>=0.5", "docker==3.6.0",
         "pyyaml>=3.12", "pytz>=2017.3", "tzlocal>=1.5.1", "prettytable>=0.7.2",
         "rsfile>=2.1", "humanfriendly>=3.6.1", "python-slugify>=1.2.4",
         "giturlparse.py>=0.0.5", "blitzdb>=0.2.12", "kids.cache>=0.0.7",
@@ -25,7 +25,7 @@ if sys.version_info[0] < 3:  # python 2
     ]
 else:  # python 3
     prerequisites = [
-        "future>=0.16.0", "enum34>=1.1.6", "glob2>=0.5", "docker>=2.2.1",
+        "future>=0.16.0", "enum34>=1.1.6", "glob2>=0.5", "docker==3.6.0",
         "pyyaml>=3.12", "pytz>=2017.3", "tzlocal>=1.5.1", "rsfile>=2.1",
         "humanfriendly>=3.6.1", "python-slugify>=1.2.4",
         "giturlparse.py>=0.0.5", "blitzdb>=0.2.12", "kids.cache>=0.0.7",
