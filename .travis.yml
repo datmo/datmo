@@ -7,7 +7,7 @@ python:
 sudo: required
 install:
 - pip install pip==9.0.3
-- pip install pytest pytest-cov
+- pip install pytest==3.0.4 pytest-cov==2.5.1
 - pip install yapf==0.20.0
 - pip install coveralls
 - pip install urllib3==1.23

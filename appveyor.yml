@@ -47,7 +47,7 @@ install:
   - "%PYTHON%/python.exe -m pip install urllib3==1.23"
   - "%PYTHON%/python.exe -m pip install chardet==3.0.2"
   - "%PYTHON%/python.exe -m pip install requests==2.19.1"
-  - "%PYTHON%/Scripts/pip.exe install pytest"
+  - "%PYTHON%/Scripts/pip.exe install pytest==3.0.4"
   - "%PYTHON%/Scripts/pip.exe install pypiwin32"
   - "%PYTHON%/python.exe setup.py install"
 test_script:
