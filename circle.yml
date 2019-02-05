@@ -5,7 +5,7 @@ machine:
 
   environment:
     LOGGING_LEVEL: DEBUG
-    TEST_PACKAGE: python -m pytest==3.0.4 -s -v
+    TEST_PACKAGE: python -m pytest -s -v
 
   pre:
     - echo "Creating python environments"
@@ -16,7 +16,7 @@ machine:
       for version in 2.7.10 3.5.1 3.6.1
       do
         export PATH="$HOME/miniconda/bin:$PATH"  && conda create --yes -n datmo_env$version python=$version pip;
-        export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env$version && pip install pytest --user && source deactivate datmo_env$version
+        export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env$version && pip install pytest==3.0.4 --user && source deactivate datmo_env$version
       done
 dependencies:
 
