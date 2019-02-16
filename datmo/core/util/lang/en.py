@@ -80,8 +80,6 @@ MESSAGES = {
             "Running a script",
         "cli.run.rerun":
             "Rerunning run with id: %s",
-        "cli.deploy.service":
-            "Deploying a service...",
         "cli.run.run.stop":
             "Stopping the run...",
         "cli.run.run.complete":
@@ -98,23 +96,6 @@ MESSAGES = {
             "Deleting a run: %s",
         "cli.run.delete.success":
             "Deleted run: %s",
-        "cli.deploy.service.update_server":
-            "Deployments can only have 1 server type, currently deployment %s is deployed with server type %s. "
-            "If you want to change the server type, delete the deployment using `datmo deploy rm` and re-deploy",
-        "cli.deploy.service.update_deploy":
-            "Use the update command to re-deploy new code or to scale the size of your deployment",
-        "cli.deploy.service.success":
-            "Successfully deployed as %s",
-        "cli.deploy.update.create_deployment":
-            "Create deployment using the `datmo deploy` command",
-        "cli.deploy.update.success":
-            "Successfully deployed as %s",
-        "cli.deploy.logs.download":
-            "Downloading compressed io logs for service route %s for date %s...",
-        "cli.deploy.rm.removing":
-            "Removing all the services and servers in your deployment",
-        "cli.deploy.rm.success":
-            "Successfully removed deployment: %s"
     },
     "warn": {
         "cli.general.internet":
@@ -143,10 +124,6 @@ MESSAGES = {
             "No user input detected for environment framework, defaulting to option: python-base",
         "cli.environment.setup.argument.language":
             "No user input detected for environment language, defaulting to option: py27",
-        "cli.deploy.service.deployment_exists":
-            "Deployment already exists with server type: %s",
-        "cli.deploy.update.deployment_exists":
-            "Deployment already exists with server type: %s",
     },
     "error": {
         "exception.validationfailed":
@@ -193,12 +170,6 @@ MESSAGES = {
             "Error due to passing excluded args while creating snapshot from run: %s",
         "cli.snapshot.checkout.failure":
             "Error while checking out to a snapshot due to unstaged changes",
-        "cli.deploy.subcommand":
-            "Error in usage of the command. Select amongst setup, service, update, ls, rm, logs for deploy command",
-        "cli.deploy.update.deployment_dne":
-            "No deployment exists with this name %s",
-        "cli.deploy.logs.download_error":
-            "error: while extracting logs. error due to following,\n %s",
         "util.misc_functions.get_filehash":
             "Filepath does not point to a valid file: %s",
         "util.misc_functions.mutually_exclusive":
@@ -435,20 +406,6 @@ MESSAGES = {
             "If none found, no changes will be made [yN]",
         "cli.project.environment.setup":
             "Would you like to setup the environment? [yN]",
-        "cli.project.deploy.service.name":
-            "Enter name for your deployment",
-        "cli.project.deploy.update.name":
-            "Enter name for the deployment you want to update (use `datmo deploy ls` to see a list)",
-        "cli.project.deploy.service.server_type":
-            "Enter the type of AWS EC2 server to be used for your deployment (e.g. t2.small, etc)",
-        "cli.project.deploy.service.size":
-            "Enter the number of AWS EC2 servers for your deployment (e.g. 1, 2, etc)",
-        "cli.project.deploy.update.size":
-            "Enter the updated number of AWS EC2 servers for your deployment (e.g. 1, 2, etc)",
-        "cli.project.deploy.logs.service_path":
-            "Enter the service path to get the logs for the deployed datmo service",
-        "cli.project.deploy.rm.service_name":
-            "Enter name for the deployment to be removed"
     },
     "argparser": {
         "cli.datmo.usage":
@@ -475,12 +432,7 @@ and large files.
             """
 Run snapshot create any time you want to save the results of your 
 experiments. You can then view all snapshots with the `snapshot ls` command.
-        """,
-        "cli.deploy.description":
-            """
-Datmo deploy allows you to deploy a version of your model by using the 
-datmo_deploy.yml and running `datmo deploy service`
-            """
+        """
     }
 }
 

@@ -153,7 +153,7 @@ class Helper():
             "init", "version", "--version", "-v", "status", "cleanup",
             "configure", "dashboard", "snapshot", "notebook", "jupyterlab",
             "terminal", "rstudio", "environment", "run", "rerun", "stop",
-            "delete", "ls", "deploy"
+            "delete", "ls"
         ]
 
     def prompt_available_options(self, available_options, option_type):

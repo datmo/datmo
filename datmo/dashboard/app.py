@@ -1,5 +1,4 @@
 import os
-import math
 import shutil
 import uuid
 import json
@@ -12,11 +11,9 @@ from datmo.config import Config
 from datmo.core.entity.run import Run
 from datmo.core.controller.base import BaseController
 from datmo.core.util.misc_functions import prettify_datetime, printable_object
-from datmo.monitoring import Monitoring
 
 app = Flask(__name__)
 base_controller = BaseController()
-datmo_monitoring = Monitoring()
 
 user = {
     "name":

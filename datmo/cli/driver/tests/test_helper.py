@@ -309,5 +309,5 @@ class TestHelper():
             "init", "version", "--version", "-v", "status", "cleanup",
             "configure", "dashboard", "snapshot", "notebook", "jupyterlab",
             "terminal", "rstudio", "environment", "run", "rerun", "stop",
-            "delete", "ls", "deploy"
+            "delete", "ls"
         ]
