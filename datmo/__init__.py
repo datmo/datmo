@@ -26,4 +26,3 @@ log.info("handling command %s", config.home)
 import datmo.snapshot
 import datmo.logger
 import datmo.config
-import datmo.monitoring
