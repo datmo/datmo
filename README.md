@@ -263,3 +263,8 @@ $ git pull origin +refs/datmo/*:refs/datmo/*  # pull datmo refs from remote
 $ datmo init  # This enables datmo in the new location. If you enter blanks, no project information will be updated
 ```
 If you are interested in sharing using the datmo protocol, you can visit [Datmo's website](https://datmo.com/product)
+
+# FAQs
+
+Q: What  do I do if the `datmo stop --all` doesn't work and I cannot start a new container due to port reallocation?  
+A: This could be caused by a ghost container running from another datmo project or another container.  Either you can create a docker image with a specific port allocation (other than 8888),  find the docker image, stop it, and remove it using `docker ps --all` and `docker conntainer stop <ID>` and `docker container rm <ID>`. Or you can stop and remove all images running on the machine [NOTE: This may  affect other docker processes on  your machine so PROCEED WITH CAUTION] `docker container stop $(docker ps  -a -q)` and `docker container rm $(docker ps  -a -q)`
