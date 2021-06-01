@@ -19,7 +19,7 @@ if sys.version_info[0] < 3:  # python 2
         "cerberus>=1.2", "pytest==3.0.4", "pathspec>=0.5.6", "psutil>=4.4.2",
         "flask>=0.10.1", "jinja2>=2.7.3", "markupsafe>=0.23",
         "werkzeug>=0.9.6", "beautifulsoup4>=4.3.2", "gunicorn>=19.1.1",
-        "itsdangerous>=0.24", "six>=1.8.0", "wsgiref>=0.1.2", "urllib3==1.24.2",
+        "itsdangerous>=0.24", "six>=1.8.0", "wsgiref>=0.1.2", "urllib3==1.26.5",
         "chardet==3.0.2", "requests>=2.20.0", "plotly==3.3.0",
         "jsonschema==2.6.0", "celery==4.2.1", "numpy==1.15.4"
     ]
@@ -34,7 +34,7 @@ else:  # python 3
         "cerberus>=1.2", "pytest==3.0.4", "pathspec>=0.5.6", "psutil>=4.4.2",
         "flask>=0.10.1", "jinja2>=2.7.3", "markupsafe>=0.23",
         "werkzeug>=0.9.6", "beautifulsoup4>=4.3.2", "gunicorn>=19.1.1",
-        "itsdangerous>=0.24", "six>=1.8.0", "urllib3==1.24.2", "chardet==3.0.2",
+        "itsdangerous>=0.24", "six>=1.8.0", "urllib3==1.26.5", "chardet==3.0.2",
         "prettytable>=0.7.2", "requests>=2.20.0", "plotly==3.3.0",
         "jsonschema==2.6.0", "celery==4.2.1", "numpy==1.15.4"
     ]
