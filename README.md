@@ -3,7 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/datmo/datmo/badge.svg?branch=master)](https://coveralls.io/github/datmo/datmo?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/datmo/badge/?version=latest)](http://datmo.readthedocs.io/en/latest/?badge=latest)
 
-# Datmo Alpha Release
+# Datmo 
 
 **Datmo** is an open source production model management tool for data scientists. Use `datmo init` to turn any repository into a trackable experiment record. Sync using your own cloud.
 
