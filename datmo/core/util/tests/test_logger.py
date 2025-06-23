@@ -9,7 +9,6 @@ import platform
 from time import sleep
 from datmo.core.util.logger import DatmoLogger
 
-
 class TestLogger():
     def setup_class(self):
         # provide mountable tmp directory for docker

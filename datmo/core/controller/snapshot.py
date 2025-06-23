@@ -12,7 +12,6 @@ from datmo.core.util.exceptions import (
     FileIOError, RequiredArgumentMissing, ProjectNotInitialized,
     EntityNotFound, TaskNotComplete, DoesNotExist, UnstagedChanges)
 
-
 class SnapshotController(BaseController):
     """SnapshotController inherits from BaseController and manages business logic related to snapshots
 

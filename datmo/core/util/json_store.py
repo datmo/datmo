@@ -3,7 +3,7 @@ import json
 import yaml
 from io import open
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 try:
@@ -20,7 +20,6 @@ except TypeError:
     to_bytes("test")
 
 from datmo.core.util.exceptions import (SaveSettingError, FileIOError)
-
 
 class JSONStore():
     # TODO:  add file locking

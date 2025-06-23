@@ -3,7 +3,6 @@ Tests for FileCollection
 """
 from datmo.core.entity.file_collection import FileCollection
 
-
 class TestFileCollection():
     def setup_class(self):
         self.input_dict = {

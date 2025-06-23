@@ -1,9 +1,6 @@
 """
 Tests for Project Commands
 """
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 # TODO: include builtin libraries for the appropriate Python
 # try:
@@ -19,7 +16,6 @@ import platform
 from datmo.config import Config
 from datmo.cli.driver.helper import Helper
 from datmo.cli.command.datmo_command import DatmoCommand
-
 
 class TestDatmo():
     def setup_class(self):

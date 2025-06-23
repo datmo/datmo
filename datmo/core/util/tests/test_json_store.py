@@ -1,16 +1,13 @@
 """
 Tests for file_storage.py
 """
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import tempfile
 import platform
 import os
 from io import open
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 try:
@@ -28,7 +25,6 @@ except TypeError:
 
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import FileIOError
-
 
 class TestJSONStore():
     def setup_class(self):

@@ -1,9 +1,6 @@
 """
 Tests for SnapshotCommand
 """
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 # TODO: include builtin libraries for the appropriate Python
 # try:
@@ -20,7 +17,7 @@ import platform
 from io import open
 from argparse import ArgumentError
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 try:
@@ -50,7 +47,6 @@ from datmo.core.util.misc_functions import pytest_docker_environment_failed_inst
 # provide mountable tmp directory for docker
 tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
 test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
-
 
 class TestSnapshotCommand():
     def setup_method(self):

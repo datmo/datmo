@@ -1,13 +1,12 @@
 #!/usr/bin/python
 
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 from datmo.core.util.lang import get_lang
 
 MESSAGES = get_lang()
-
 
 def get(message_type, key, values=None):
     if isinstance(values, dict) and len(values) > 0:

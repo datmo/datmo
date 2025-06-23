@@ -9,7 +9,10 @@ import datetime
 import pytz
 import tzlocal
 import pytest
-import collections
+try:
+    from collections.abc import Mapping, Iterable
+except ImportError:
+    from collections import Mapping, Iterable
 import platform
 import tempfile
 import subprocess
@@ -20,7 +23,7 @@ import requests
 from enum import Enum
 from io import open
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 try:
@@ -36,9 +39,9 @@ except TypeError:
 
     to_bytes("test")
 try:
-    basestring
+    str
 except NameError:
-    basestring = str
+    str = str
 
 from glob import glob
 
@@ -48,7 +51,6 @@ from datmo.core.util.exceptions import (
     PathDoesNotExist, MutuallyExclusiveArguments, RequiredArgumentMissing,
     EnvironmentConnectFailed, EnvironmentExecutionError,
     InvalidDestinationName, TooManyArgumentsFound)
-
 
 def bytes2human(n):
     # http://code.activestate.com/recipes/578019
@@ -66,7 +68,6 @@ def bytes2human(n):
             return '%.1f%s' % (value, s)
     return "%sB" % n
 
-
 def grep(pattern, fileObj):
     r = []
     linenumber = 0
@@ -76,7 +77,6 @@ def grep(pattern, fileObj):
             r.append((linenumber, line))
     return r
 
-
 def printable_dict(input_dictionary):
     printable_output = ""
     if input_dictionary:
@@ -85,17 +85,15 @@ def printable_dict(input_dictionary):
                 value) + "\n"
     return printable_output
 
-
 def convert_keys_to_string(data):
-    if isinstance(data, basestring):
+    if isinstance(data, str):
         return str(data)
-    elif isinstance(data, collections.Mapping):
+    elif isinstance(data, Mapping):
         return dict(map(convert_keys_to_string, data.items()))
-    elif isinstance(data, collections.Iterable):
+    elif isinstance(data, Iterable):
         return type(data)(map(convert_keys_to_string, data))
     else:
         return data
-
 
 def printable_object(object, max_width=40):
     if not object:
@@ -107,7 +105,6 @@ def printable_object(object, max_width=40):
     else:
         printable_str = str(object)
     return '\n'.join(textwrap.wrap(printable_str, max_width))
-
 
 def which(program):
     def is_exe(fpath):
@@ -125,14 +122,12 @@ def which(program):
                 return exe_file
     return None
 
-
 def get_nvidia_devices():
     nvidia_devices = glob('/dev/nvidia*')
     devices = []
     for device in nvidia_devices:
         devices.append(device + ':' + device + ':rwm')
     return devices
-
 
 def create_unique_hash(base_hash=None, salt=None):
     if not salt:
@@ -148,7 +143,6 @@ def create_unique_hash(base_hash=None, salt=None):
     ).total_seconds() * 100000
     sha1.update(salt + str(timestamp_microsec).encode('utf-8'))
     return sha1.hexdigest()
-
 
 def mutually_exclusive(mutually_exclusive_args, input_dictionary,
                        output_dictionary):
@@ -185,7 +179,6 @@ def mutually_exclusive(mutually_exclusive_args, input_dictionary,
                ' '.join(mutually_exclusive_args)))
     return
 
-
 def find_project_dir(starting_path=os.getcwd()):
     if starting_path == "/":
         raise Exception("project not found")
@@ -200,7 +193,6 @@ def find_project_dir(starting_path=os.getcwd()):
         # os.path.split creates a tuple of the basepath and last directory
         # take the first part
         return find_project_dir(os.path.split(starting_path)[0])
-
 
 def parameterized(dec):
     """Lifted from https://stackoverflow.com/questions/5929107/decorators-with-parameters
@@ -222,11 +214,9 @@ def parameterized(dec):
 
     return layer
 
-
 def is_project_dir(path):
     return ".datmo" in os.listdir(path) and os.path.isdir(
         os.path.join(path, ".datmo"))
-
 
 # TODO: add test
 def check_docker_inactive(filepath, datmo_directory_name):
@@ -244,14 +234,12 @@ def check_docker_inactive(filepath, datmo_directory_name):
     except (EnvironmentConnectFailed, EnvironmentExecutionError):
         return True
 
-
 # TODO: add test
 def pytest_docker_environment_failed_instantiation(filepath):
     return pytest.mark.skipif(
         # TODO: abstract the "datmo_directory_name"
         check_docker_inactive(filepath, ".datmo"),
         reason="a running environment could not be instantiated")
-
 
 def parse_cli_key_value(cli_string, default_key):
     dictionary = {}
@@ -273,14 +261,12 @@ def parse_cli_key_value(cli_string, default_key):
 
     return dictionary
 
-
 def prettify_datetime(datetime_obj, tz=None):
     if not tz:
         tz = tzlocal.get_localzone()
     return str(
         datetime_obj.replace(tzinfo=pytz.utc).astimezone(tz=tz)
         .strftime("%a %b %d %H:%M:%S %Y %z"))
-
 
 def format_table(data, padding=2):
     data_rows = [len(row) for row in data]
@@ -295,7 +281,6 @@ def format_table(data, padding=2):
             word.ljust(col_widths[idx]) for idx, word in enumerate(row)) + "\n"
     return table_str
 
-
 def list_all_filepaths(absolute_dirpath):
     """Returns all filepaths within dir relative to dir root"""
     return [
@@ -304,14 +289,12 @@ def list_all_filepaths(absolute_dirpath):
         for file in filenames
     ]
 
-
 def get_datmo_temp_path(filepath):
     # Create temp directory within .datmo/tmp
     datmo_temp_path = os.path.join(filepath, ".datmo", "tmp")
     if not os.path.exists(datmo_temp_path):
         os.makedirs(datmo_temp_path)
     return tempfile.mkdtemp(dir=datmo_temp_path)
-
 
 def parse_path(path):
     """Parse user given path
@@ -348,7 +331,6 @@ def parse_path(path):
     if os.path.isabs(dest_name):
         raise InvalidDestinationName()
     return src_path, dest_name
-
 
 def parse_paths(default_src_prefix, paths, dest_prefix):
     """Parse user given paths. Checks only source paths and destination are valid
@@ -402,19 +384,16 @@ def parse_paths(default_src_prefix, paths, dest_prefix):
             raise PathDoesNotExist(src_abs_path)
     return files, directories, files_rel, directories_rel
 
-
 def get_headers(access_key):
     return {
         'Authorization': str(access_key),
         'Content-type': 'application/json'
     }
 
-
 def authenticated_get_call(url, access_key=None, stream=False):
     headers = get_headers(access_key)
     res = requests.get(url, headers=headers, stream=stream)
     return res
-
 
 def authenticated_post_call(url,
                             data,
@@ -424,18 +403,15 @@ def authenticated_post_call(url,
     res = requests.post(url, data=data, headers=headers)
     return res
 
-
 def authenticated_put_call(url, data, access_key=None):
     headers = get_headers(access_key)
     res = requests.put(url, data=data, headers=headers)
     return res
 
-
 def authenticated_delete_call(url, access_key=None):
     headers = get_headers(access_key)
     res = requests.delete(url, headers=headers)
     return res
-
 
 # class for colors
 class bcolors:
@@ -447,7 +423,6 @@ class bcolors:
     ENDC = '\033[0m'
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
-
 
 class Commands(object):
     def __init__(self):
@@ -564,11 +539,9 @@ class Commands(object):
             else:
                 shutil.copy2(s, d)
 
-
 class Status(Enum):
     SUCCESS = 0
     FAILURE = 1
-
 
 class Response(object):
     # success by default

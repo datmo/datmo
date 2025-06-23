@@ -162,7 +162,6 @@ class BaseCommand(object):
 
         return updated_task_obj
 
-
 @parameterized
 def usage_docs(description):
     # TODO: create an attribute so we can show custom usage notes before

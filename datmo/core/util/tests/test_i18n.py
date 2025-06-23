@@ -1,12 +1,8 @@
 """
 Tests for i18n
 """
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 from datmo.core.util.i18n import get
-
 
 class Testi18n():
     def test_get(self):

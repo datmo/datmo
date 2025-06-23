@@ -1,7 +1,6 @@
 import json
 import requests
 
-
 class RemoteAPI():
     """API for Accessing Datmo Services
 
@@ -12,7 +11,6 @@ class RemoteAPI():
 
     Attributes
     ----------
-
 
     Methods
     -------

@@ -1,7 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from future.utils import with_metaclass
 
-
 class EnvironmentDriver(with_metaclass(ABCMeta, object)):
     """EnvironmentDriver is the parent of all environment drivers. Any child must implement the methods below
 
@@ -121,7 +120,6 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
             (default is None, which sets up the file in the project environment directory,
             e.g. `Dockerfile` in environment directory)
 
-
         Returns
         -------
         bool
@@ -172,7 +170,6 @@ class EnvironmentDriver(with_metaclass(ABCMeta, object)):
         path : str
             absolute path to the definition file
         workspace : str
-
 
         Returns
         -------

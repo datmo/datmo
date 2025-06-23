@@ -1,9 +1,6 @@
 """
 Tests for blitzdb_dal_driver.py
 """
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import os
 import tempfile
@@ -14,7 +11,6 @@ from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType, \
     RequiredArgumentMissing
 from datmo.core.util.misc_functions import create_unique_hash
-
 
 class TestBlitzDBDALDriverInit():
     """
@@ -41,7 +37,6 @@ class TestBlitzDBDALDriverInit():
         # Make mongo db connection required for testing?
         database = BlitzDBDALDriver("service", mongo_connection)
         assert database != None
-
 
 class TestBlitzDBDALDriver():
     """

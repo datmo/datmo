@@ -1,9 +1,6 @@
 """
 Tests for LocalDAL
 """
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import os
 import tempfile
@@ -12,7 +9,6 @@ import platform
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.util.exceptions import EntityNotFound, EntityCollectionNotFound
-
 
 class TestLocalDAL():
     def setup_class(self):

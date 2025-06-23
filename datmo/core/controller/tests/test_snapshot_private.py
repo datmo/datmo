@@ -22,7 +22,6 @@ from datmo.core.controller.project import ProjectController
 from datmo.core.controller.snapshot import SnapshotController
 from datmo.core.util.exceptions import CommitDoesNotExist
 
-
 class TestSnapshotController():
     def setup_method(self):
         # provide mountable tmp directory for docker

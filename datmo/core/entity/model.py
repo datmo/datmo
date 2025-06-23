@@ -1,6 +1,5 @@
 from datetime import datetime
 
-
 class Model():
     """Model is an entity object that encapsulates other entities
 

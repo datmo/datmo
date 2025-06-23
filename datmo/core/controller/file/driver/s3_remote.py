@@ -2,10 +2,9 @@ import os
 import requests
 from io import open
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
-
 
 class S3RemoteFileDriver(object):
     def __init__(self):

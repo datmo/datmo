@@ -10,7 +10,6 @@ from datmo.core.util.i18n import get as __
 from datmo.core.util.logger import DatmoLogger
 from datmo.config import Config
 
-
 def main():
     cli_helper = Helper()
     # Config is required to run first so it can

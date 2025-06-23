@@ -7,7 +7,7 @@ import tempfile
 import platform
 from io import open
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 try:
@@ -28,7 +28,6 @@ from datmo.core.controller.project import ProjectController
 from datmo.core.controller.file.file_collection import \
     FileCollectionController
 from datmo.core.util.exceptions import EntityNotFound, UnstagedChanges
-
 
 class TestFileCollectionController():
     def setup_method(self):

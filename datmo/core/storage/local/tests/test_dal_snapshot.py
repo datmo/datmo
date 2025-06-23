@@ -1,9 +1,6 @@
 """
 Tests for LocalDAL
 """
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import os
 import tempfile
@@ -14,7 +11,6 @@ from datmo.core.storage.local.dal import LocalDAL
 from datmo.core.entity.model import Model
 from datmo.core.entity.snapshot import Snapshot
 from datmo.core.util.exceptions import EntityNotFound, InvalidArgumentType
-
 
 class TestLocalDAL():
     def setup_method(self):

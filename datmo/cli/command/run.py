@@ -1,4 +1,3 @@
-from __future__ import print_function
 
 import os
 import sys
@@ -7,9 +6,9 @@ import platform
 from datetime import datetime
 # https://stackoverflow.com/questions/11301138/how-to-check-if-variable-is-string-with-python-2-and-3-compatibility/11301392?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
 try:
-    basestring
+    str
 except NameError:
-    basestring = str
+    str = str
 
 from datmo.core.util.i18n import get as __
 from datmo.core.util.misc_functions import mutually_exclusive, printable_object
@@ -20,7 +19,6 @@ from datmo.cli.driver.helper import Helper
 from datmo.core.entity.run import Run
 from datmo.core.util.exceptions import RequiredArgumentMissing
 from datmo.core.util.misc_functions import prettify_datetime
-
 
 class RunCommand(ProjectCommand):
     def __init__(self, cli_helper):
@@ -45,7 +43,7 @@ class RunCommand(ProjectCommand):
         if not isinstance(kwargs['cmd'], list):
             if platform.system() == "Windows":
                 task_dict['command'] = kwargs['cmd']
-            elif isinstance(kwargs['cmd'], basestring):
+            elif isinstance(kwargs['cmd'], str):
                 task_dict['command_list'] = shlex.split(kwargs['cmd'])
         else:
             task_dict['command_list'] = kwargs['cmd']

@@ -6,7 +6,6 @@ from datmo.core.util.exceptions import (
     InvalidArgumentType, RequiredArgumentMissing, MoreThanOneEntityFound)
 from datmo.core.storage.driver import DALDriver
 
-
 class BlitzDBDALDriver(DALDriver):
     def __init__(self, driver_type, connection_string):
         super(BlitzDBDALDriver, self).__init__()
@@ -160,7 +159,6 @@ class BlitzDBDALDriver(DALDriver):
         self.backend.commit()
         return True
 
-
 def normalize_entity(in_dict):
     """Converts BlitzDB Document to standard dictionary
 
@@ -193,7 +191,6 @@ def normalize_entity(in_dict):
         out_dict['updated_at'] = datetime.strptime(in_dict['updated_at'],
                                                    '%Y-%m-%dT%H:%M:%S.%fZ')
     return out_dict
-
 
 def denormalize_entity(in_dict):
     """Converts standard dictionary to BlitzDB Document-compatible dictionary

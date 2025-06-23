@@ -10,7 +10,6 @@ schema_yaml = open(os.path.join(os.path.split(__file__)[0], "schemas.yml"))
 
 schemas = yaml.safe_load(schema_yaml)
 
-
 def validate(schema_name, values):
     try:
         v = Validator(schemas.get(schema_name))

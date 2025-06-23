@@ -1,8 +1,6 @@
 """
 Tests for git.py
 """
-from __future__ import division
-from __future__ import unicode_literals
 
 import os
 import time
@@ -11,7 +9,7 @@ import tempfile
 import platform
 from io import open
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 try:
@@ -32,7 +30,6 @@ from datmo.core.controller.code.driver.git import (GitCodeDriver,
 from datmo.core.util.exceptions import (CommitFailed, CommitDoesNotExist,
                                         PathDoesNotExist, GitExecutionError,
                                         DatmoFolderInWorkTree, UnstagedChanges)
-
 
 class TestGitCodeDriver():
     """
@@ -605,7 +602,6 @@ class TestGitCodeDriver():
                 os.path.join(self.git_code_manager.filepath,
                              ".git/refs/datmo")
             )
-
 
 class TestGitHostDriver():
     """

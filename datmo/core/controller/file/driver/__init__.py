@@ -1,7 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from future.utils import with_metaclass
 
-
 class FileDriver(with_metaclass(ABCMeta, object)):
     """FileDriver is the parent of all file drivers. Any child must implement the methods below
 

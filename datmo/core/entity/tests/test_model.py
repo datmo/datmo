@@ -3,7 +3,6 @@ Tests for Model
 """
 from datmo.core.entity.model import Model
 
-
 class TestModel():
     def setup_class(self):
         self.input_dict = {"name": "test"}

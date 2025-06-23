@@ -2,7 +2,6 @@ import time
 
 from datmo.core.util.spinner import Spinner
 
-
 def test_spinner():
     s = Spinner()
     spinner_start = s.start()

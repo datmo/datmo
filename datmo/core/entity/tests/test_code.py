@@ -3,7 +3,6 @@ Tests for Code
 """
 from datmo.core.entity.code import Code
 
-
 class TestCode():
     def setup_class(self):
         self.input_dict = {

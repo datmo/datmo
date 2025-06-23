@@ -3,7 +3,6 @@ from datetime import datetime
 from datmo.core.util.i18n import get as __
 from datmo.cli.driver.parser import Parser
 
-
 def get_datmo_parser():
     parser = Parser(prog="datmo")
 

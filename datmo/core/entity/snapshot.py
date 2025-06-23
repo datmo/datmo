@@ -4,7 +4,6 @@ from datetime import datetime
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.misc_functions import prettify_datetime, printable_object, format_table
 
-
 class Snapshot():
     """Snapshot is an entity object to represent a version of the model. These snapshots
     are the building blocks upon which models can be shared and reproduced.

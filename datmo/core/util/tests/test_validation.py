@@ -1,17 +1,13 @@
 """
 Tests for file_storage.py
 """
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 
 from datmo.core.util.validation import validate
 from datmo.core.util.exceptions import ValidationFailed, ValidationSchemaMissing
-
 
 class TestJSONStore():
     def test_validate_success(self):

@@ -14,7 +14,6 @@ from datmo.core.util.exceptions import InputError, EntityNotFound, MoreThanOneEn
 from datmo.core.util.misc_functions import create_unique_hash
 from datmo.core.storage.driver.blitzdb_dal_driver import BlitzDBDALDriver
 
-
 class LocalDAL():
     """
     LocalDAL is a local DAL object that stores info locally. DAL stands for 'data access layer' and serves as a storage for
@@ -196,7 +195,6 @@ class LocalDAL():
             if self.driver_type == "blitzdb":
                 self.driver = BlitzDBDALDriver(**self.driver_options)
 
-
 class EntityMethodsCRUD(object):
     def __init__(self, collection, entity_class, driver):
         self.collection = collection
@@ -270,11 +268,9 @@ class EntityMethodsCRUD(object):
 
         return results[0]
 
-
 #
 # https://stackoverflow.com/questions/1713038/super-fails-with-error-typeerror-argument-1-must-be-type-not-classobj
 #
-
 
 #
 # Datmo Entity methods
@@ -283,33 +279,27 @@ class ModelMethods(EntityMethodsCRUD):
     def __init__(self, driver):
         super(ModelMethods, self).__init__('model', Model, driver)
 
-
 class CodeMethods(EntityMethodsCRUD):
     def __init__(self, driver):
         super(CodeMethods, self).__init__('code', Code, driver)
-
 
 class EnvironmentMethods(EntityMethodsCRUD):
     def __init__(self, driver):
         super(EnvironmentMethods, self).__init__('environment', Environment,
                                                  driver)
 
-
 class FileCollectionMethods(EntityMethodsCRUD):
     def __init__(self, driver):
         super(FileCollectionMethods, self).__init__('file_collection',
                                                     FileCollection, driver)
 
-
 class TaskMethods(EntityMethodsCRUD):
     def __init__(self, driver):
         super(TaskMethods, self).__init__('task', Task, driver)
 
-
 class SnapshotMethods(EntityMethodsCRUD):
     def __init__(self, driver):
         super(SnapshotMethods, self).__init__('snapshot', Snapshot, driver)
-
 
 class UserMethods(EntityMethodsCRUD):
     def __init__(self, driver):

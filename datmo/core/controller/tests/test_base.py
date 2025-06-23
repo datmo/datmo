@@ -1,8 +1,6 @@
 """
 Tests for BaseController
 """
-from __future__ import division
-from __future__ import unicode_literals
 
 import os
 import tempfile
@@ -22,7 +20,6 @@ from datmo.core.util.misc_functions import pytest_docker_environment_failed_inst
 # provide mountable tmp directory for docker
 tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
 test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
-
 
 class TestBaseController():
     def setup_method(self):

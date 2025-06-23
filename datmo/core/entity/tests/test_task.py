@@ -3,7 +3,6 @@ Tests for Task
 """
 from datmo.core.entity.task import Task
 
-
 class TestTask():
     def setup_class(self):
         self.input_dict = {

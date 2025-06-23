@@ -8,7 +8,6 @@ import tempfile
 import time
 from datmo.core.util.misc_functions import grep
 
-
 class DatmoLogger(object):
     """ Datmo Logging singleton
 
@@ -56,11 +55,17 @@ class DatmoLogger(object):
 
     @staticmethod
     def get_logfiles():
-        return map(lambda f: os.path.join(DatmoLogger().logging_path, f),
-                   os.listdir(DatmoLogger().logging_path))
+        return list(map(lambda f: os.path.join(DatmoLogger().logging_path, f),
+                       os.listdir(DatmoLogger().logging_path)))
 
     @staticmethod
     def find_text_in_logs(text_str):
+        # Flush all loggers before searching
+        for logger_hash, logger in DatmoLogger().loggers.items():
+            if logger:
+                for handler in logger.handlers:
+                    handler.flush()
+        
         results = []
         for logfile in DatmoLogger.get_logfiles():
             with open(logfile, "r") as f:

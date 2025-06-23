@@ -1,9 +1,6 @@
 """
 Tests for Datmo CLI Helper
 """
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 from future import standard_library
 standard_library.install_aliases()
 from builtins import input
@@ -14,7 +11,7 @@ import pytest
 import tempfile
 import platform
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 
@@ -30,7 +27,6 @@ from datmo.core.util.exceptions import ArgumentError
 from datmo.cli.command.project import ProjectCommand
 from datmo.cli.command.snapshot import SnapshotCommand
 from datmo.cli.command.environment import EnvironmentCommand
-
 
 class TestHelper():
     # https://stackoverflow.com/questions/35851323/pytest-how-to-test-a-function-with-input-call/36377194

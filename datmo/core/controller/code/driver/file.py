@@ -6,7 +6,7 @@ import tempfile
 import hashlib
 import checksumdir
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 
@@ -16,7 +16,6 @@ from datmo.core.util.exceptions import (PathDoesNotExist, FileIOError,
                                         UnstagedChanges, CodeNotInitialized,
                                         CommitDoesNotExist)
 from datmo.core.controller.code.driver import CodeDriver
-
 
 class FileCodeDriver(CodeDriver):
     """File-based Code Driver handles source control management for the project with files

@@ -6,7 +6,7 @@ import tempfile
 import platform
 from io import open, TextIOWrapper
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 try:
@@ -37,7 +37,6 @@ from datmo.core.util.misc_functions import pytest_docker_environment_failed_inst
 # provide mountable tmp directory for docker
 tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
 test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
-
 
 class TestSnapshotModule():
     def setup_method(self):

@@ -3,7 +3,6 @@ import time
 import itertools
 import threading
 
-
 class Spinner:
     def __init__(self, delay=0.1):
         self.spinner_generator = itertools.cycle(['-', '/', '|', '\\'])

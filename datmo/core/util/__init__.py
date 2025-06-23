@@ -3,7 +3,6 @@
 """
 import importlib
 
-
 def get_class_contructor(class_location):
     mod_path = class_location[:class_location.rfind('.')]
     class_name = class_location[class_location.rfind('.') + 1:]

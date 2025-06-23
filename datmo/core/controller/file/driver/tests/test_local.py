@@ -1,9 +1,6 @@
 """
 Tests for local.py
 """
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
 
 import os
 import shutil
@@ -27,7 +24,6 @@ from datmo.core.util.misc_functions import get_datmo_temp_path
 from datmo.core.controller.file.driver.local import LocalFileDriver
 from datmo.core.util.exceptions import PathDoesNotExist
 from datmo.config import Config
-
 
 class TestLocalFileDriver():
     # TODO: Add more cases for each test

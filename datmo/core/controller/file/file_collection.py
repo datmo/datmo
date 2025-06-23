@@ -7,7 +7,6 @@ from datmo.core.util.misc_functions import list_all_filepaths, get_datmo_temp_pa
 from datmo.core.entity.file_collection import FileCollection
 from datmo.core.util.exceptions import PathDoesNotExist, EnvironmentInitFailed, FileNotInitialized, UnstagedChanges
 
-
 class FileCollectionController(BaseController):
     """FileCollectionController inherits from BaseController and manages business logic related to the
     file system.

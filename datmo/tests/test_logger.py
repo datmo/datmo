@@ -6,12 +6,11 @@ import os
 import tempfile
 import platform
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 
 from datmo.logger import Logger
-
 
 class TestLoggerModule():
     def setup_method(self):
@@ -34,7 +33,6 @@ class TestLoggerModule():
         config = {'b': 2}
         saved_config = self.logger.log_config(config)
         assert saved_config == {'a': 1, 'b': 2}
-
 
     def test_log_results(self):
         result = {'a': 1}

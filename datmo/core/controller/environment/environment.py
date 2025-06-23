@@ -12,7 +12,6 @@ from datmo.core.util.misc_functions import get_datmo_temp_path, list_all_filepat
 from datmo.core.util.exceptions import PathDoesNotExist, RequiredArgumentMissing, TooManyArgumentsFound,\
     EnvironmentNotInitialized, UnstagedChanges, ArgumentError, EnvironmentDoesNotExist, ProjectNotInitialized
 
-
 class EnvironmentController(BaseController):
     """EnvironmentController inherits from BaseController and manages business logic related to the
     environment.

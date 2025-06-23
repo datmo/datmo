@@ -9,7 +9,7 @@ import platform
 import timeout_decorator
 from io import open
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 try:
@@ -39,7 +39,6 @@ from datmo.core.util.misc_functions import check_docker_inactive, pytest_docker_
 # provide mountable tmp directory for docker
 tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
 test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
-
 
 class TestEnvironmentController():
     def setup_method(self):

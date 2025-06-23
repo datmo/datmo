@@ -22,7 +22,6 @@ from datmo.core.util.misc_functions import pytest_docker_environment_failed_inst
 tempfile.tempdir = "/tmp" if not platform.system() == "Windows" else None
 test_datmo_dir = os.environ.get('TEST_DATMO_DIR', tempfile.gettempdir())
 
-
 class TestMain():
     def setup_class(self):
         self.temp_dir = tempfile.mkdtemp(dir=test_datmo_dir)

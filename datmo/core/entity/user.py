@@ -1,6 +1,5 @@
 from datetime import datetime
 
-
 class User():
     """User is an entity object to represent a given user
 

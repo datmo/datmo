@@ -1,6 +1,5 @@
 from datetime import datetime
 
-
 class FileCollection():
     """FileCollection is an entity object to represent a collection of files
 

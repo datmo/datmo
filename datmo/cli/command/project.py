@@ -10,7 +10,6 @@ from datmo.core.controller.project import ProjectController
 from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.dashboard.app import app
 
-
 class ProjectCommand(BaseCommand):
     def __init__(self, cli_helper):
         super(ProjectCommand, self).__init__(cli_helper)

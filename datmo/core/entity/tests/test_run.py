@@ -4,7 +4,6 @@ Tests for Run
 from datmo.core.entity.task import Task as CoreTask
 from datmo.core.entity.run import Run
 
-
 class TestRun():
     def setup_class(self):
         self.task_dict = {

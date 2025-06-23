@@ -6,12 +6,11 @@ import os
 import tempfile
 import platform
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 
 from datmo.config import Config
-
 
 class TestConfigModule():
     def setup_method(self):

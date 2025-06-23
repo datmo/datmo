@@ -3,7 +3,6 @@ Tests for Environment
 """
 from datmo.core.entity.environment import Environment
 
-
 class TestEnvironment():
     def setup_method(self):
         self.input_dict = {

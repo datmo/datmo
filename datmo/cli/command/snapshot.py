@@ -1,4 +1,3 @@
-from __future__ import print_function
 
 import os
 from datetime import datetime
@@ -9,7 +8,6 @@ from datmo.core.util.misc_functions import mutually_exclusive, printable_object,
 from datmo.core.util.exceptions import (SnapshotCreateFromTaskArgs)
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.controller.snapshot import SnapshotController
-
 
 class SnapshotCommand(ProjectCommand):
     def __init__(self, cli_helper):

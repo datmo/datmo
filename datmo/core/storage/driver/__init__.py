@@ -1,7 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from future.utils import with_metaclass
 
-
 class DALDriver(with_metaclass(ABCMeta, object)):
     """DALDriver is the parent of all dal drivers. Any child must implement the methods below
 

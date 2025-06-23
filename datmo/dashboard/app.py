@@ -27,12 +27,10 @@ user = {
         "?s=220&d=identicon&r=PG"
 }
 
-
 @app.route("/")
 def home():
     models = [base_controller.model.__dict__] if base_controller.model else []
     return render_template("profile.html", user=user, models=models)
-
 
 @app.route("/<model_name>")
 def model_summary(model_name):
@@ -60,7 +58,6 @@ def model_summary(model_name):
         config_keys=config_keys,
         stats_keys=stats_keys)
 
-
 @app.route("/<model_name>/experiments")
 def model_experiments(model_name):
     model = base_controller.model.__dict__
@@ -81,7 +78,6 @@ def model_experiments(model_name):
         user=user,
         model=model,
         experiments=experiments)
-
 
 @app.route("/<model_name>/snapshots")
 def model_snapshots(model_name):
@@ -109,7 +105,6 @@ def model_snapshots(model_name):
         snapshots=snapshots,
         config_keys=config_keys,
         stats_keys=stats_keys)
-
 
 @app.route(
     "/data/<model_name>/deployments/<deployment_version_id>/<model_version_id>"
@@ -211,7 +206,6 @@ def model_deployment_data(model_name, deployment_version_id, model_version_id):
         graph_data_output_json_str=graph_data_outputJSON,
         num_new_results=num_new_results)
 
-
 @app.route(
     "/<model_name>/deployments/<deployment_version_id>/<model_version_id>")
 def model_deployment_detail(model_name, deployment_version_id,
@@ -274,7 +268,6 @@ def model_deployment_detail(model_name, deployment_version_id,
         feedback_keys=feedback_keys,
     )
 
-
 @app.route("/<model_name>/deployments")
 def model_deployments(model_name):
     model = base_controller.model.__dict__
@@ -319,7 +312,6 @@ def model_deployments(model_name):
         deployments=deployments,
     )
 
-
 @app.route(
     "/<model_name>/deployments/<deployment_version_id>/<model_version_id>/custom/create"
 )
@@ -334,7 +326,6 @@ def model_deployment_script_create(model_name, deployment_version_id,
         f.write(content)
     return "complete", 200
 
-
 @app.route(
     "/<model_name>/deployments/<deployment_version_id>/<model_version_id>/custom/run"
 )
@@ -347,13 +338,11 @@ def model_deployment_script_run(model_name, deployment_version_id,
     os.system("python " + filepath)
     return "complete", 200
 
-
 @app.route("/hash/generate")
 def generate_hash():
     string_to_hash = str(request.args.get('string_to_hash'))
     hash = str(uuid.uuid3(uuid.NAMESPACE_DNS, string_to_hash))
     return jsonify({"result": hash})
-
 
 @app.route("/alias/create")
 def create_alias():
@@ -369,7 +358,6 @@ def create_alias():
     print(available_filepath)
     webpath = url_for("static", filename="./img/" + graph_id + ".jpg")
     return jsonify({"webpath": webpath})
-
 
 if __name__ == "__main__":
     app.run(debug=True)

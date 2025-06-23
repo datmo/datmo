@@ -1,7 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from future.utils import with_metaclass
 
-
 class CodeDriver(with_metaclass(ABCMeta, object)):
     """CodeDriver is the parent of all code drivers. Any child must implement the methods below
 

@@ -8,7 +8,7 @@ import subprocess
 import platform
 from io import open
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 try:
@@ -37,7 +37,6 @@ from datmo.core.controller.environment.driver import EnvironmentDriver
 
 docker_config_filepath = os.path.join(
     os.path.split(__file__)[0], "config", "docker.json")
-
 
 class DockerEnvironmentDriver(EnvironmentDriver):
     """

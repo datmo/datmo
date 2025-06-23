@@ -6,7 +6,7 @@ import tempfile
 import platform
 from io import open
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 try:
@@ -27,7 +27,6 @@ from datmo.core.controller.project import ProjectController
 from datmo.core.controller.code.code import CodeController
 from datmo.core.util.exceptions import (EntityNotFound, CommitDoesNotExist,
                                         CodeDoesNotExist, UnstagedChanges)
-
 
 class TestCodeController():
     def setup_method(self):

@@ -3,7 +3,6 @@ from datmo.core.controller.base import BaseController
 from datmo.core.entity.code import Code
 from datmo.core.util.exceptions import PathDoesNotExist, EnvironmentInitFailed, ArgumentError, CodeDoesNotExist
 
-
 class CodeController(BaseController):
     """CodeController inherits from BaseController and manages business logic related to the
     code.

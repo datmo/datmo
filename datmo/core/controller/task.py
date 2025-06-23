@@ -17,7 +17,6 @@ from datmo.core.util.exceptions import (
     PathDoesNotExist, TaskInteractiveDetachError, TooManyArgumentsFound,
     EntityNotFound, DoesNotExist, TaskNoCommandGiven)
 
-
 class TaskController(BaseController):
     """TaskController inherits from BaseController and manages business logic associated with tasks
     within the project.

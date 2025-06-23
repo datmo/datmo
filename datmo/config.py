@@ -7,7 +7,6 @@ from datmo.core.util.logger import DatmoLogger
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.misc_functions import parameterized
 
-
 class Config(object):
     """Datmo Config properties
 

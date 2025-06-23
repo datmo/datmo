@@ -1,8 +1,6 @@
 """
 Tests for file.py
 """
-from __future__ import division
-from __future__ import unicode_literals
 
 import os
 import time
@@ -11,7 +9,7 @@ import tempfile
 import platform
 from io import open
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 try:
@@ -29,7 +27,6 @@ except TypeError:
 
 from datmo.core.controller.code.driver.file import FileCodeDriver
 from datmo.core.util.exceptions import PathDoesNotExist, FileIOError, CodeNotInitialized, UnstagedChanges, CommitDoesNotExist
-
 
 class TestFileCodeDriver():
     """

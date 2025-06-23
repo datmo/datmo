@@ -1,4 +1,3 @@
-from __future__ import print_function
 
 import os
 from datetime import datetime
@@ -9,7 +8,6 @@ from datmo.core.controller.environment.environment import EnvironmentController
 from datmo.cli.command.project import ProjectCommand
 from datmo.core.util.exceptions import EnvironmentDoesNotExist
 from datmo.core.util.misc_functions import printable_object, prettify_datetime
-
 
 class EnvironmentCommand(ProjectCommand):
     def __init__(self, cli_helper):

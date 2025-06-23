@@ -6,7 +6,7 @@ import hashlib
 import checksumdir
 from io import open
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 
@@ -16,7 +16,6 @@ from datmo.core.util.exceptions import (
     DirAlreadyExistsError)
 from datmo.core.controller.file.driver import FileDriver
 from datmo.core.util.misc_functions import get_datmo_temp_path, parse_paths
-
 
 class LocalFileDriver(FileDriver):
     """

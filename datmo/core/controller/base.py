@@ -7,7 +7,6 @@ from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import (InvalidProjectPath)
 from datmo.config import Config
 
-
 class BaseController(object):
     """BaseController is used to setup the repository. It serves as the basis for all other Controller objects
 

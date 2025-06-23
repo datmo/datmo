@@ -4,7 +4,6 @@ from datmo.core.util.misc_functions import mutually_exclusive
 from datmo.cli.driver.helper import Helper
 from datmo.core.controller.task import TaskController
 
-
 class WorkspaceCommand(ProjectCommand):
     def __init__(self, cli_helper):
         super(WorkspaceCommand, self).__init__(cli_helper)
@@ -60,7 +59,6 @@ class WorkspaceCommand(ProjectCommand):
         return self.task_run_helper(task_dict, snapshot_dict,
                                     "cli.workspace.jupyterlab",
                                     data_paths=data_paths)
-
 
     @Helper.notify_environment_active(TaskController)
     @Helper.notify_no_project_found

@@ -4,7 +4,7 @@ import subprocess
 import semver
 from io import open
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 try:
@@ -27,7 +27,6 @@ from datmo.core.util.exceptions import (
     CommitDoesNotExist, CommitFailed, DatmoFolderInWorkTree, UnstagedChanges)
 from datmo.core.controller.code.driver import CodeDriver
 from datmo.config import Config
-
 
 class GitCodeDriver(CodeDriver):
     """
@@ -837,7 +836,6 @@ class GitCodeDriver(CodeDriver):
                 __("error", "controller.code.driver.git.delete_code_refs_dir",
                    str(e)))
         return True
-
 
 class GitHostDriver(object):
     def __init__(self, home=os.path.expanduser("~"), host="github"):

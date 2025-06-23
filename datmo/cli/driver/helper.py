@@ -1,4 +1,3 @@
-from __future__ import print_function
 from future import standard_library
 standard_library.install_aliases()
 from builtins import input
@@ -10,7 +9,7 @@ import inspect
 import prettytable
 from io import open
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 try:
@@ -29,7 +28,6 @@ except TypeError:
 from datmo.core.util.i18n import get as __
 from datmo.core.util.exceptions import ArgumentError, ProjectNotInitialized
 from datmo.core.util.misc_functions import check_docker_inactive
-
 
 class Helper():
     def __init__(self):

@@ -14,7 +14,6 @@ from datmo.core.util.exceptions import (ProjectNotInitialized,
                                         EnvironmentConnectFailed, FileIOError,
                                         UnstagedChanges, PathDoesNotExist)
 
-
 class ProjectController(BaseController):
     """ProjectController inherits from BaseController and manages business logic related to the
     project. One model is associated with each project currently.

@@ -6,7 +6,6 @@ from datmo.core.util.exceptions import InvalidArgumentType, \
     SnapshotCreateFromTaskArgs
 from datmo.core.util.misc_functions import prettify_datetime, format_table
 
-
 class Snapshot():
     """Snapshot is an entity object to enable user access to properties
 
@@ -132,7 +131,6 @@ class Snapshot():
     def __repr__(self):
         return self.__str__()
 
-
 def create(message,
            label=None,
            run_id=None,
@@ -147,7 +145,6 @@ def create(message,
     the following command::
 
         $ datmo init
-
 
     Parameters
     ----------
@@ -257,7 +254,6 @@ def create(message,
 
         return client_snapshot_obj
 
-
 def ls(filter=None):
     """List snapshots within a project
 
@@ -265,7 +261,6 @@ def ls(filter=None):
     the following command::
 
         $ datmo init
-
 
     Parameters
     ----------
@@ -314,7 +309,6 @@ def ls(filter=None):
         for filtered_core_snapshot_obj in filtered_core_snapshot_objs
     ]
 
-
 def update(snapshot_id=None, config=None, stats=None, message=None,
            label=None):
     """Update a snapshot within a project
@@ -323,7 +317,6 @@ def update(snapshot_id=None, config=None, stats=None, message=None,
     the following command::
 
         $ datmo init
-
 
     Parameters
     ----------
@@ -364,7 +357,6 @@ def update(snapshot_id=None, config=None, stats=None, message=None,
         message=message,
         label=label)
 
-
 def delete(snapshot_id=None):
     """Delete a snapshot within a project
 
@@ -372,7 +364,6 @@ def delete(snapshot_id=None):
     the following command::
 
         $ datmo init
-
 
     Parameters
     ----------

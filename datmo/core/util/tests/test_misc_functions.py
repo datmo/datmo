@@ -10,7 +10,7 @@ import datetime
 from pytz import timezone
 from io import open
 try:
-    to_unicode = unicode
+    to_unicode = str
 except NameError:
     to_unicode = str
 try:
@@ -33,7 +33,6 @@ from datmo.core.util.misc_functions import (
     parse_path, parse_paths, list_all_filepaths)
 
 from datmo.core.util.exceptions import MutuallyExclusiveArguments, RequiredArgumentMissing, InvalidDestinationName, PathDoesNotExist, TooManyArgumentsFound
-
 
 class TestMiscFunctions():
     # TODO: Add more cases for each test

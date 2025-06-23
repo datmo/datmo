@@ -1,14 +1,12 @@
-from __future__ import print_function
 
 import os
 try:
-    basestring
+    str
 except NameError:
-    basestring = str
+    str = str
 
 from datmo.core.util.json_store import JSONStore
 from datmo.core.util.exceptions import InvalidArgumentType
-
 
 class Logger():
     """Logger is a class to enable user to store properties

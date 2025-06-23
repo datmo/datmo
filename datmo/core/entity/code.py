@@ -1,6 +1,5 @@
 from datetime import datetime
 
-
 class Code():
     """Code is an entity object to represent a version of source code
 

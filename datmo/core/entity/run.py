@@ -5,7 +5,6 @@ from datmo.core.entity.task import Task as CoreTask
 from datmo.core.util.exceptions import InvalidArgumentType
 from datmo.core.util.misc_functions import printable_object, prettify_datetime, format_table
 
-
 class Run():
     """Run is an object to enable user access to properties
 

@@ -3,7 +3,6 @@ import argparse
 
 from datmo.core.util.exceptions import UnrecognizedCLIArgument
 
-
 class Parser(argparse.ArgumentParser):
     """
     Overwrite the original ArgumentParser
