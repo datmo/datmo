@@ -2,7 +2,6 @@
 [![PyPI version](https://badge.fury.io/py/datmo.svg)](https://badge.fury.io/py/datmo)
 [![Coverage Status](https://coveralls.io/repos/github/datmo/datmo/badge.svg?branch=master)](https://coveralls.io/github/datmo/datmo?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/datmo/badge/?version=latest)](http://datmo.readthedocs.io/en/latest/?badge=latest)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/853b3d01b4424ac9aa72f9d5fead83b3)](https://www.codacy.com/app/datmo/datmo)
 
 | OS | CI testing on `master` |
 |----|--------------------|
