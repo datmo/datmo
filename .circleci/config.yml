@@ -1,72 +1,72 @@
-version: 2
+version: 2.1
 jobs:
-  build-and-test-2.7.10:
+  build-and-test-3.7:
     macos:
-      xcode: "9.0"
-
+      xcode: "14.2.0"
+    resource_class: macos.x86.medium.gen2
     environment:
       LOGGING_LEVEL: DEBUG
       TEST_PACKAGE: python -m pytest -s -v
 
     steps:
       - checkout
-      - run: echo "Creating python environments"
+      - run: echo "Creating python environment"
       - run: curl -o mconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
       - run: chmod +x mconda.sh
       - run: ./mconda.sh -b -p $HOME/miniconda
-      - run: export PATH="$HOME/miniconda/bin:$PATH"  && conda create --yes -n datmo_env2.7.10 python=2.7.10 pip;
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env2.7.10 && pip install pytest==3.0.4 --user && source deactivate datmo_env2.7.10
-      - run: echo "Installing datmo to each environment"
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env2.7.10 && python setup.py install && source deactivate datmo_env2.7.10
-      - run: echo "Running Test with 2.7.10"
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env2.7.10 && $TEST_PACKAGE  && source deactivate datmo_env2.7.10
+      - run: export PATH="$HOME/miniconda/bin:$PATH" && conda create --yes -n datmo_env3.7 python=3.7 pip
+      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.7 && pip install pytest pytest-cov --user
+      - run: echo "Installing datmo"
+      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.7 && pip install -e .
+      - run: echo "Running Tests with Python 3.7"
+      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.7 && $TEST_PACKAGE
 
-  build-and-test-3.5.1:
+  build-and-test-3.9:
     macos:
-      xcode: "9.0"
-
+      xcode: "14.2.0"
+    resource_class: macos.x86.medium.gen2
     environment:
       LOGGING_LEVEL: DEBUG
       TEST_PACKAGE: python -m pytest -s -v
 
     steps:
       - checkout
-      - run: echo "Creating python environments"
+      - run: echo "Creating python environment"
       - run: curl -o mconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
       - run: chmod +x mconda.sh
       - run: ./mconda.sh -b -p $HOME/miniconda
-      - run: export PATH="$HOME/miniconda/bin:$PATH"  && conda create --yes -n datmo_env3.5.1 python=3.5.1 pip;
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.5.1 && pip install pytest==3.0.4 --user && source deactivate datmo_env3.5.1
-      - run: echo "Installing datmo to each environment"
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.5.1 && python setup.py install && source deactivate datmo_env3.5.1
-      - run: echo "Running Test with 3.5.1"
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.5.1 && $TEST_PACKAGE  && source deactivate datmo_env3.5.1
+      - run: export PATH="$HOME/miniconda/bin:$PATH" && conda create --yes -n datmo_env3.9 python=3.9 pip
+      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.9 && pip install pytest pytest-cov --user
+      - run: echo "Installing datmo"
+      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.9 && pip install -e .
+      - run: echo "Running Tests with Python 3.9"
+      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.9 && $TEST_PACKAGE
 
-  build-and-test-3.6.1:
+  build-and-test-3.11:
     macos:
-      xcode: "9.0"
-
+      xcode: "14.2.0"
+    resource_class: macos.x86.medium.gen2
     environment:
       LOGGING_LEVEL: DEBUG
       TEST_PACKAGE: python -m pytest -s -v
 
     steps:
       - checkout
-      - run: echo "Creating python environments"
+      - run: echo "Creating python environment"
       - run: curl -o mconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
       - run: chmod +x mconda.sh
       - run: ./mconda.sh -b -p $HOME/miniconda
-      - run: export PATH="$HOME/miniconda/bin:$PATH"  && conda create --yes -n datmo_env3.6.1 python=3.6.1 pip;
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.6.1 && pip install pytest==3.0.4 --user && source deactivate datmo_env3.6.1
-      - run: echo "Installing datmo to each environment"
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.6.1 && python setup.py install && source deactivate datmo_env3.6.1
-      - run: echo "Running Test with 3.6.1"
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.6.1 && $TEST_PACKAGE  && source deactivate datmo_env3.6.1
+      - run: export PATH="$HOME/miniconda/bin:$PATH" && conda create --yes -n datmo_env3.11 python=3.11 pip
+      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.11 && pip install pytest pytest-cov --user
+      - run: echo "Installing datmo"
+      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.11 && pip install -e .
+      - run: echo "Running Tests with Python 3.11"
+      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.11 && $TEST_PACKAGE
 
 workflows:
   version: 2
   build-and-test:
     jobs:
-      - build-and-test-2.7.10
-      - build-and-test-3.5.1
-      - build-and-test-3.6.1
+      - build-and-test-3.7
+      - build-and-test-3.9
+      - build-and-test-3.11

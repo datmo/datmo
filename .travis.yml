@@ -1,19 +1,15 @@
 language: python
 python:
-- '2.7'
-- '3.4'
-- '3.5'
-- '3.6'
+- '3.7'
+- '3.9'
+- '3.11'
+dist: focal
 sudo: required
 install:
-- pip install pip==9.0.3
-- pip install pytest==3.0.4 pytest-cov==2.5.1
-- pip install yapf==0.20.0
-- pip install coveralls
-- pip install urllib3==1.23
-- pip install chardet==3.0.2
-- pip install requests==2.19.1
-- python setup.py install
+- pip install --upgrade pip
+- pip install pytest pytest-cov coveralls
+- pip install yapf
+- pip install -e .
 script:
 - pytest --cov-config .coveragerc --cov=datmo -s -v
 - echo $TRAVIS_COMMIT_RANGE
