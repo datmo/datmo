@@ -60,21 +60,53 @@ class DatmoLogger(object):
 
     @staticmethod
     def find_text_in_logs(text_str):
-        # Flush all loggers before searching
-        for logger_hash, logger in DatmoLogger().loggers.items():
+        # Make sure all handlers are flushed
+        logging.shutdown()
+        
+        # Re-initialize loggers after shutdown
+        for logger_hash, logger in list(DatmoLogger().loggers.items()):
             if logger:
-                for handler in logger.handlers:
-                    handler.flush()
+                # Remove existing handlers
+                for handler in logger.handlers[:]:  # Use a copy of the list
+                    logger.removeHandler(handler)
+                
+                # Re-add handlers if needed
+                if logger_hash.startswith('timeit'):
+                    # Special case for timeit logger
+                    logfile_path = os.path.join(DatmoLogger().logging_path, "timers.log")
+                else:
+                    logfile_path = os.path.join(DatmoLogger().logging_path, "log.txt")
+                    
+                # Create a new handler
+                handler = logging.FileHandler(logfile_path, mode='a')
+                handler.setLevel(DatmoLogger().logging_level)
+                handler.setFormatter(
+                    logging.Formatter(
+                        '%(asctime)s - [%(name)s@%(module)s.%(funcName)s] [%(levelname)s] - %(message)s'))
+                logger.addHandler(handler)
+        
+        # Give a small delay to ensure file operations are complete
+        time.sleep(0.2)
         
         results = []
         for logfile in DatmoLogger.get_logfiles():
-            with open(logfile, "r") as f:
-                for r in grep(text_str, f):
-                    results.append({
-                        "file": logfile,
-                        "line_number": r[0],
-                        "line": r[1]
-                    })
+            try:
+                if os.path.exists(logfile) and os.path.getsize(logfile) > 0:
+                    with open(logfile, "r") as f:
+                        content = f.read()
+                        # If the text is in the file content, do a more detailed search
+                        if text_str in content:
+                            # Reset file pointer to beginning
+                            f.seek(0)
+                            for r in grep(text_str, f):
+                                results.append({
+                                    "file": logfile,
+                                    "line_number": r[0],
+                                    "line": r[1]
+                                })
+            except Exception as e:
+                print(f"Error searching in {logfile}: {str(e)}")
+        
         return results
 
     @staticmethod

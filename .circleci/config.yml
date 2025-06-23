@@ -1,67 +1,52 @@
 version: 2.1
 jobs:
   build-and-test-3.7:
-    macos:
-      xcode: "14.2.0"
-    resource_class: macos.x86.medium.gen2
+    docker:
+      - image: cimg/python:3.7
+    resource_class: medium
     environment:
       LOGGING_LEVEL: DEBUG
       TEST_PACKAGE: python -m pytest -s -v
 
     steps:
       - checkout
-      - run: echo "Creating python environment"
-      - run: curl -o mconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
-      - run: chmod +x mconda.sh
-      - run: ./mconda.sh -b -p $HOME/miniconda
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && conda create --yes -n datmo_env3.7 python=3.7 pip
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.7 && pip install pytest pytest-cov --user
-      - run: echo "Installing datmo"
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.7 && pip install -e .
+      - run: pip install --upgrade pip
+      - run: pip install pytest pytest-cov
+      - run: pip install -e .
       - run: echo "Running Tests with Python 3.7"
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.7 && $TEST_PACKAGE
+      - run: $TEST_PACKAGE
 
   build-and-test-3.9:
-    macos:
-      xcode: "14.2.0"
-    resource_class: macos.x86.medium.gen2
+    docker:
+      - image: cimg/python:3.9
+    resource_class: medium
     environment:
       LOGGING_LEVEL: DEBUG
       TEST_PACKAGE: python -m pytest -s -v
 
     steps:
       - checkout
-      - run: echo "Creating python environment"
-      - run: curl -o mconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
-      - run: chmod +x mconda.sh
-      - run: ./mconda.sh -b -p $HOME/miniconda
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && conda create --yes -n datmo_env3.9 python=3.9 pip
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.9 && pip install pytest pytest-cov --user
-      - run: echo "Installing datmo"
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.9 && pip install -e .
+      - run: pip install --upgrade pip
+      - run: pip install pytest pytest-cov
+      - run: pip install -e .
       - run: echo "Running Tests with Python 3.9"
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.9 && $TEST_PACKAGE
+      - run: $TEST_PACKAGE
 
   build-and-test-3.11:
-    macos:
-      xcode: "14.2.0"
-    resource_class: macos.x86.medium.gen2
+    docker:
+      - image: cimg/python:3.11
+    resource_class: medium
     environment:
       LOGGING_LEVEL: DEBUG
       TEST_PACKAGE: python -m pytest -s -v
 
     steps:
       - checkout
-      - run: echo "Creating python environment"
-      - run: curl -o mconda.sh https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh
-      - run: chmod +x mconda.sh
-      - run: ./mconda.sh -b -p $HOME/miniconda
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && conda create --yes -n datmo_env3.11 python=3.11 pip
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.11 && pip install pytest pytest-cov --user
-      - run: echo "Installing datmo"
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.11 && pip install -e .
+      - run: pip install --upgrade pip
+      - run: pip install pytest pytest-cov
+      - run: pip install -e .
       - run: echo "Running Tests with Python 3.11"
-      - run: export PATH="$HOME/miniconda/bin:$PATH" && source activate datmo_env3.11 && $TEST_PACKAGE
+      - run: $TEST_PACKAGE
 
 workflows:
   version: 2

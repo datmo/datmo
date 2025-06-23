@@ -75,7 +75,13 @@ class TestDockerEnv():
         assert self.docker_environment_driver != None
         assert self.docker_environment_driver.docker_socket == None or "unix:///var/run/docker.sock"
         assert self.docker_environment_driver.docker_execpath == "docker"
-        assert self.docker_environment_driver.client
+        
+        # Check if Docker tests are skipped
+        skip_docker_tests = os.environ.get("DATMO_SKIP_DOCKER_TESTS", "0").lower() in ["1", "true", "yes"]
+        
+        if not skip_docker_tests:
+            assert self.docker_environment_driver.client is not None
+        
         assert self.docker_environment_driver.prefix
         assert self.docker_environment_driver.type
 

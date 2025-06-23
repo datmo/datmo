@@ -262,6 +262,24 @@ $ datmo init  # This enables datmo in the new location. If you enter blanks, no 
 ```
 If you are interested in sharing using the datmo protocol, you can visit [Datmo's website](https://datmo.com/product)
 
+## Running Tests
+
+Datmo uses pytest for testing. To run the full test suite:
+
+```
+$ python -m pytest
+```
+
+### Running Tests Without Docker
+
+Some tests require a running Docker daemon. If you don't have Docker installed or running, you can skip these tests by setting the `DATMO_SKIP_DOCKER_TESTS` environment variable:
+
+```
+$ DATMO_SKIP_DOCKER_TESTS=1 python -m pytest
+```
+
+This will skip all tests that depend on Docker, allowing the test suite to run successfully without a Docker environment.
+
 # FAQs
 
 Q: What  do I do if the `datmo stop --all` doesn't work and I cannot start a new container due to port reallocation?  

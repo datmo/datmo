@@ -100,12 +100,22 @@ class DockerEnvironmentDriver(EnvironmentDriver):
             self._datmo_directory_path, self.environment_directory_name)
         self.docker_execpath = docker_execpath
         self.docker_socket = docker_socket
-        if self.docker_socket:
-            self.client = DockerClient(base_url=self.docker_socket)
-            self.prefix = [self.docker_execpath, "-H", self.docker_socket]
-        else:
-            self.client = DockerClient()
+        
+        # Check if Docker tests should be skipped
+        skip_docker_tests = os.environ.get("DATMO_SKIP_DOCKER_TESTS", "0").lower() in ["1", "true", "yes"]
+        
+        if skip_docker_tests:
+            # Skip Docker client initialization
+            self.client = None
             self.prefix = [self.docker_execpath]
+        else:
+            # Normal initialization
+            if self.docker_socket:
+                self.client = DockerClient(base_url=self.docker_socket)
+                self.prefix = [self.docker_execpath, "-H", self.docker_socket]
+            else:
+                self.client = DockerClient()
+                self.prefix = [self.docker_execpath]
         self._is_connected = False
         self._is_initialized = self.is_initialized
         self.type = "docker"
