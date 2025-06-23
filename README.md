@@ -3,10 +3,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/datmo/datmo/badge.svg?branch=master)](https://coveralls.io/github/datmo/datmo?branch=master)
 [![Documentation Status](https://readthedocs.org/projects/datmo/badge/?version=latest)](http://datmo.readthedocs.io/en/latest/?badge=latest)
 
-| OS | CI testing on `master` |
-|----|--------------------|
-| <img height="20" src="http://icons.iconarchive.com/icons/dakirby309/simply-styled/256/OS-Linux-icon.png"> | [![Linux](https://travis-ci.org/datmo/datmo.svg?branch=master)](https://travis-ci.org/datmo/datmo) |master?svg=true)](https://ci.appveyor.com/project/asampat3090/datmo/branch/master) |
-
 # Datmo Alpha Release
 
 **Datmo** is an open source production model management tool for data scientists. Use `datmo init` to turn any repository into a trackable experiment record. Sync using your own cloud.
